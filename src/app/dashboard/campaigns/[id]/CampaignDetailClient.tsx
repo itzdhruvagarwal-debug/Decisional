@@ -1,0 +1,742 @@
+﻿"use client";
+
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+
+interface CampaignDetail {
+  id: string;
+  title: string;
+  description: string;
+  requirements: string;
+  guidelines: string | null;
+  status: string;
+  totalBudget: number;
+  perInfluencerBudget: number | null;
+  minFollowers: number;
+  maxFollowers: number | null;
+  targetCategories: string[];
+  targetCities: string[];
+  targetLanguages: string[];
+  applicationDeadline: string | null;
+  contentDeadline: string;
+  postingDeadline: string;
+  totalApplications: number;
+  selectedInfluencers: number;
+  deliverables: Array<{ type: string; count: number; specs?: string }>;
+  brand: {
+    userId: string;
+    companyName: string;
+    logo: string | null;
+    averageRating: number;
+    isGstVerified: boolean;
+  } | null;
+  _count?: {
+    applications?: number;
+    deals?: number;
+  };
+}
+
+interface CampaignApplication {
+  id: string;
+  status: string;
+  proposal: string;
+  proposedRate: number;
+  estimatedDelivery: string | null;
+  createdAt: string;
+  influencer: {
+    id: string;
+    displayName: string;
+    avatar: string | null;
+    instagramFollowers: number | null;
+    instagramEngagementRate: number | null;
+    categories: string;
+    averageRating: number;
+    completedDeals: number;
+    user?: { trustScore?: number | null };
+  };
+}
+
+function normalizeStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => String(item || "").trim())
+      .filter(Boolean);
+  }
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function normalizeDeliverables(value: unknown): CampaignDetail["deliverables"] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .map((item) => {
+      const parsed = item as { type?: unknown; count?: unknown; specs?: unknown };
+      return {
+        type: String(parsed?.type || "").trim(),
+        count: Math.max(1, Number(parsed?.count || 1)),
+        ...(parsed?.specs ? { specs: String(parsed.specs) } : {}),
+      };
+    })
+    .filter((item) => Boolean(item.type));
+}
+
+function formatCurrency(paise?: number | null): string {
+  const value = Number(paise || 0);
+  return `Rs ${(value / 100).toLocaleString("en-IN")}`;
+}
+
+function formatDate(date?: string | null): string {
+  if (!date) return "Not specified";
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return "Not specified";
+  return parsed.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function normalizeCampaign(raw: any): CampaignDetail {
+  return {
+    id: raw.id,
+    title: raw.title || "Untitled Campaign",
+    description: raw.description || "",
+    requirements: raw.requirements || "",
+    guidelines: raw.guidelines || null,
+    status: raw.status || "DRAFT",
+    totalBudget: Number(raw.totalBudget || 0),
+    perInfluencerBudget:
+      raw.perInfluencerBudget === null || raw.perInfluencerBudget === undefined
+        ? null
+        : Number(raw.perInfluencerBudget),
+    minFollowers: Number(raw.minFollowers || 0),
+    maxFollowers:
+      raw.maxFollowers === null || raw.maxFollowers === undefined
+        ? null
+        : Number(raw.maxFollowers),
+    targetCategories: normalizeStringArray(raw.targetCategories),
+    targetCities: normalizeStringArray(raw.targetCities),
+    targetLanguages: normalizeStringArray(raw.targetLanguages),
+    applicationDeadline: raw.applicationDeadline || null,
+    contentDeadline: raw.contentDeadline,
+    postingDeadline: raw.postingDeadline,
+    totalApplications: Number(raw.totalApplications || raw?._count?.applications || 0),
+    selectedInfluencers: Number(raw.selectedInfluencers || 0),
+    deliverables: normalizeDeliverables(raw.deliverables),
+    brand: raw.brand
+      ? {
+          userId: raw.brand.userId,
+          companyName: raw.brand.companyName || "Unknown Brand",
+          logo: raw.brand.logo || null,
+          averageRating: Number(raw.brand.averageRating || 0) / 100,
+          isGstVerified: Boolean(raw.brand.isGstVerified),
+        }
+      : null,
+    _count: {
+      applications: Number(raw?._count?.applications || 0),
+      deals: Number(raw?._count?.deals || 0),
+    },
+  };
+}
+
+export default function CampaignDetailClient({ user }: { user: any }) {
+  const params = useParams();
+  const router = useRouter();
+
+  const campaignId = useMemo(() => {
+    const id = params?.id;
+    return Array.isArray(id) ? id[0] : id;
+  }, [params]);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [campaign, setCampaign] = useState<CampaignDetail | null>(null);
+
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [proposal, setProposal] = useState("");
+  const [proposedRate, setProposedRate] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [applications, setApplications] = useState<CampaignApplication[]>([]);
+  const [applicationsLoading, setApplicationsLoading] = useState(false);
+  const [applicationActionId, setApplicationActionId] = useState<string | null>(null);
+  const [notice, setNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  useEffect(() => {
+    if (!campaignId) return;
+
+    const controller = new AbortController();
+
+    fetch(`/api/campaigns/${encodeURIComponent(campaignId)}`, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then((res) => res.json())
+      .then((payload) => {
+        const rawCampaign =
+          payload?.data?.campaign || payload?.campaign || payload?.data || null;
+
+        if (!rawCampaign) {
+          setError(payload?.message || "Campaign not found");
+          setLoading(false);
+          return;
+        }
+
+        const normalized = normalizeCampaign(rawCampaign);
+        setCampaign(normalized);
+        setProposedRate(Math.round((normalized.perInfluencerBudget || 0) / 100));
+        setLoading(false);
+      })
+      .catch((loadError) => {
+        if (loadError?.name === "AbortError") return;
+        setError("Failed to load campaign");
+        setLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [campaignId]);
+
+  const isOwner = Boolean(campaign?.brand?.userId && campaign?.brand?.userId === user?.id);
+  const canApply = user?.userType === "INFLUENCER" && campaign?.status === "ACTIVE";
+
+  const fetchApplications = async () => {
+    if (!campaignId || !isOwner) return;
+    setApplicationsLoading(true);
+    try {
+      const response = await fetch(`/api/applications?campaignId=${encodeURIComponent(campaignId)}`, {
+        cache: "no-store",
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.message || "Failed to load applications");
+      }
+      setApplications(payload?.data?.applications || []);
+    } catch (appError: any) {
+      setNotice({
+        type: "error",
+        message: appError?.message || "Failed to load applications",
+      });
+    } finally {
+      setApplicationsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchApplications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campaignId, isOwner]);
+
+  const handleApplicationAction = async (
+    applicationId: string,
+    action: "accept" | "reject",
+  ) => {
+    setApplicationActionId(applicationId);
+    setNotice(null);
+    try {
+      const requestInit: RequestInit = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      };
+
+      if (action === "reject") {
+        requestInit.body = JSON.stringify({
+          reason: "Application rejected by brand.",
+        });
+      }
+
+      const response = await fetch(`/api/applications/${applicationId}/${action}`, requestInit);
+      const payload = await response.json();
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.message || `Failed to ${action} application`);
+      }
+
+      setNotice({
+        type: "success",
+        message:
+          action === "accept"
+            ? "Application accepted. Deal has been initiated."
+            : "Application rejected.",
+      });
+      await fetchApplications();
+      router.refresh();
+    } catch (actionError: any) {
+      setNotice({
+        type: "error",
+        message: actionError?.message || `Failed to ${action} application`,
+      });
+    } finally {
+      setApplicationActionId(null);
+    }
+  };
+
+  const handleApply = async () => {
+    if (!campaign) return;
+    if (proposal.trim().length < 50) {
+      alert("Please write at least 50 characters in proposal.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          campaignId: campaign.id,
+          proposal: proposal.trim(),
+          proposedRate: Math.max(1, Math.round(proposedRate * 100)),
+        }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.message || "Failed to submit application");
+      }
+
+      setShowApplyModal(false);
+      setNotice({ type: "success", message: "Application submitted successfully." });
+      router.push("/dashboard/deals");
+    } catch (applyError: any) {
+      setNotice({ type: "error", message: applyError?.message || "Failed to submit application" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCampaignAction = async (action: "ACTIVATE" | "CANCEL") => {
+    if (!campaignId) return;
+
+    const confirmText =
+      action === "ACTIVATE"
+        ? "Activate this campaign and hold funds from wallet?"
+        : "Cancel this campaign? This cannot be undone.";
+
+    if (!window.confirm(confirmText)) return;
+
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.message || "Campaign update failed");
+      }
+
+      setCampaign((prev) =>
+        prev
+          ? {
+              ...prev,
+              status:
+                payload?.data?.campaign?.status ||
+                (action === "ACTIVATE" ? "ACTIVE" : "CANCELLED"),
+            }
+          : prev,
+      );
+      setNotice({ type: "success", message: payload?.message || "Campaign updated successfully" });
+      router.refresh();
+    } catch (actionError: any) {
+      setNotice({ type: "error", message: actionError?.message || "Campaign update failed" });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", padding: "64px" }}>
+        <span className="loading" style={{ width: "40px", height: "40px" }} />
+      </div>
+    );
+  }
+
+  if (error || !campaign) {
+    return (
+      <div className="card" style={{ maxWidth: "760px", margin: "0 auto", textAlign: "center" }}>
+        <h2 style={{ marginBottom: "8px" }}>{error || "Campaign not found"}</h2>
+        <Link href="/dashboard/campaigns" className="btn btn-secondary">
+          Back to Campaigns
+        </Link>
+      </div>
+    );
+  }
+
+  const applicationsCount = Math.max(
+    campaign.totalApplications,
+    Number(campaign?._count?.applications || 0),
+  );
+
+  return (
+    <div style={{ maxWidth: "980px", margin: "0 auto", display: "grid", gap: "16px" }}>
+      <Link href="/dashboard/campaigns" style={{ fontSize: "14px", color: "var(--color-text-secondary)" }}>
+        Back to campaigns
+      </Link>
+
+      <section className="card" style={{ display: "grid", gap: "12px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
+          <div>
+            <h1 style={{ fontSize: "28px", fontWeight: 800 }}>{campaign.title}</h1>
+            <p style={{ color: "var(--color-text-secondary)", marginTop: "6px" }}>
+              {campaign.brand?.companyName || "Unknown Brand"}
+              {campaign.brand?.isGstVerified ? " · Verified" : ""}
+              {campaign.brand?.averageRating ? ` · ${campaign.brand.averageRating.toFixed(1)} rating` : ""}
+            </p>
+          </div>
+
+          <div style={{ display: "flex", gap: "8px", alignItems: "flex-start", flexWrap: "wrap" }}>
+            <span className="badge">Status: {campaign.status}</span>
+            {isOwner && campaign.status === "DRAFT" && (
+              <button className="btn btn-primary" onClick={() => handleCampaignAction("ACTIVATE")}>
+                Activate Campaign
+              </button>
+            )}
+            {isOwner && ["ACTIVE", "PAUSED"].includes(campaign.status) && (
+              <button className="btn btn-secondary" onClick={() => handleCampaignAction("CANCEL")}>
+                Cancel Campaign
+              </button>
+            )}
+            {canApply && (
+              <button className="btn btn-primary" onClick={() => setShowApplyModal(true)}>
+                Apply Now
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "12px" }}>
+          <div className="card" style={{ margin: 0 }}>
+            <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Per Influencer</div>
+            <div style={{ fontSize: "20px", fontWeight: 700 }}>
+              {formatCurrency(campaign.perInfluencerBudget || campaign.totalBudget)}
+            </div>
+          </div>
+          <div className="card" style={{ margin: 0 }}>
+            <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Applications</div>
+            <div style={{ fontSize: "20px", fontWeight: 700 }}>{applicationsCount}</div>
+          </div>
+          <div className="card" style={{ margin: 0 }}>
+            <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Selected</div>
+            <div style={{ fontSize: "20px", fontWeight: 700 }}>{campaign.selectedInfluencers}</div>
+          </div>
+          <div className="card" style={{ margin: 0 }}>
+            <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Followers Needed</div>
+            <div style={{ fontSize: "20px", fontWeight: 700 }}>
+              {campaign.maxFollowers
+                ? `${campaign.minFollowers.toLocaleString()} - ${campaign.maxFollowers.toLocaleString()}`
+                : `${campaign.minFollowers.toLocaleString()}+`}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {notice && (
+        <div
+          className="card"
+          style={{
+            padding: "12px 16px",
+            borderColor:
+              notice.type === "success"
+                ? "rgba(34, 197, 94, 0.35)"
+                : "rgba(239, 68, 68, 0.35)",
+            color:
+              notice.type === "success"
+                ? "var(--color-success)"
+                : "var(--color-error)",
+          }}
+        >
+          {notice.message}
+        </div>
+      )}
+
+      {isOwner && (
+        <section className="card">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "12px",
+              flexWrap: "wrap",
+              marginBottom: "16px",
+            }}
+          >
+            <div>
+              <h3 style={{ marginBottom: "4px" }}>Applications</h3>
+              <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+                Review applicants and start deals from this campaign.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={fetchApplications}
+              disabled={applicationsLoading}
+            >
+              {applicationsLoading ? "Refreshing..." : "Refresh"}
+            </button>
+          </div>
+
+          {applicationsLoading ? (
+            <div style={{ padding: "24px", textAlign: "center" }}>
+              <span className="loading" />
+            </div>
+          ) : applications.length === 0 ? (
+            <div
+              style={{
+                padding: "32px 16px",
+                textAlign: "center",
+                color: "var(--color-text-secondary)",
+                border: "1px dashed var(--color-border)",
+                borderRadius: "var(--radius-md)",
+              }}
+            >
+              No applications yet.
+            </div>
+          ) : (
+            <div style={{ display: "grid", gap: "12px" }}>
+              {applications.map((application) => {
+                const canAct = ["PENDING", "SHORTLISTED"].includes(application.status);
+                return (
+                  <article
+                    key={application.id}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "minmax(0, 1fr) auto",
+                      gap: "16px",
+                      padding: "16px",
+                      background: "var(--color-bg-tertiary)",
+                      borderRadius: "var(--radius-md)",
+                      border: "1px solid var(--color-border)",
+                    }}
+                  >
+                    <div style={{ minWidth: 0 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                          flexWrap: "wrap",
+                          marginBottom: "8px",
+                        }}
+                      >
+                        <strong>{application.influencer.displayName}</strong>
+                        <span className="badge">{application.status}</span>
+                        <span className="badge">
+                          Trust {application.influencer.user?.trustScore ?? 0}
+                        </span>
+                        <span className="badge">
+                          {formatCurrency(application.proposedRate)}
+                        </span>
+                      </div>
+                      <p
+                        style={{
+                          color: "var(--color-text-secondary)",
+                          fontSize: "14px",
+                          lineHeight: 1.5,
+                          marginBottom: "10px",
+                        }}
+                      >
+                        {application.proposal}
+                      </p>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "10px",
+                          flexWrap: "wrap",
+                          color: "var(--color-text-muted)",
+                          fontSize: "12px",
+                        }}
+                      >
+                        <span>
+                          Followers:{" "}
+                          {(application.influencer.instagramFollowers || 0).toLocaleString("en-IN")}
+                        </span>
+                        <span>
+                          Deals: {application.influencer.completedDeals || 0}
+                        </span>
+                        <span>
+                          Category: {application.influencer.categories?.split(",")[0] || "Other"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: "8px",
+                        flexWrap: "wrap",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <Link
+                        href={`/dashboard/influencers/${application.influencer.id}`}
+                        className="btn btn-secondary btn-sm"
+                      >
+                        Profile
+                      </Link>
+                      {canAct && (
+                        <>
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            disabled={applicationActionId === application.id}
+                            onClick={() => handleApplicationAction(application.id, "accept")}
+                          >
+                            Accept
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-danger btn-sm"
+                            disabled={applicationActionId === application.id}
+                            onClick={() => handleApplicationAction(application.id, "reject")}
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      )}
+
+      <section className="card">
+        <h3 style={{ marginBottom: "8px" }}>Description</h3>
+        <p style={{ color: "var(--color-text-secondary)", whiteSpace: "pre-line" }}>
+          {campaign.description || "No description provided."}
+        </p>
+      </section>
+
+      <section className="card">
+        <h3 style={{ marginBottom: "8px" }}>Requirements</h3>
+        <p style={{ color: "var(--color-text-secondary)", whiteSpace: "pre-line" }}>
+          {campaign.requirements || "No requirements provided."}
+        </p>
+      </section>
+
+      {campaign.guidelines && (
+        <section className="card">
+          <h3 style={{ marginBottom: "8px" }}>Guidelines</h3>
+          <p style={{ color: "var(--color-text-secondary)", whiteSpace: "pre-line" }}>
+            {campaign.guidelines}
+          </p>
+        </section>
+      )}
+
+      <section className="card">
+        <h3 style={{ marginBottom: "8px" }}>Deliverables</h3>
+        {campaign.deliverables.length === 0 ? (
+          <p style={{ color: "var(--color-text-secondary)" }}>No deliverables specified.</p>
+        ) : (
+          <div style={{ display: "grid", gap: "8px" }}>
+            {campaign.deliverables.map((item, index) => (
+              <div key={`${item.type}-${index}`} className="badge" style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>{item.type}</span>
+                <span>x{item.count}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="card">
+        <h3 style={{ marginBottom: "8px" }}>Targeting</h3>
+        <div style={{ display: "grid", gap: "10px" }}>
+          <div>
+            <strong>Categories:</strong>{" "}
+            {campaign.targetCategories.length > 0
+              ? campaign.targetCategories.join(", ")
+              : "Any"}
+          </div>
+          <div>
+            <strong>Cities:</strong>{" "}
+            {campaign.targetCities.length > 0 ? campaign.targetCities.join(", ") : "Any"}
+          </div>
+          <div>
+            <strong>Languages:</strong>{" "}
+            {campaign.targetLanguages.length > 0
+              ? campaign.targetLanguages.join(", ")
+              : "Any"}
+          </div>
+        </div>
+      </section>
+
+      <section className="card">
+        <h3 style={{ marginBottom: "8px" }}>Timeline</h3>
+        <div style={{ display: "grid", gap: "6px", color: "var(--color-text-secondary)" }}>
+          <div>Apply by: {formatDate(campaign.applicationDeadline)}</div>
+          <div>Content due: {formatDate(campaign.contentDeadline)}</div>
+          <div>Posting due: {formatDate(campaign.postingDeadline)}</div>
+        </div>
+      </section>
+
+      {showApplyModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.75)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 60,
+            padding: "16px",
+          }}
+        >
+          <div className="card" style={{ width: "100%", maxWidth: "560px" }}>
+            <h3 style={{ marginBottom: "12px" }}>Apply for Campaign</h3>
+
+            <label className="label">Proposal (minimum 50 characters)</label>
+            <textarea
+              className="input"
+              rows={5}
+              value={proposal}
+              onChange={(e) => setProposal(e.target.value)}
+              placeholder="Tell the brand why you are a strong fit for this campaign"
+            />
+            <p style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+              {proposal.length}/1000
+            </p>
+
+            <label className="label" style={{ marginTop: "12px" }}>Your rate (Rs)</label>
+            <input
+              className="input"
+              type="number"
+              min={1}
+              value={proposedRate}
+              onChange={(e) => setProposedRate(Number(e.target.value) || 0)}
+            />
+
+            <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowApplyModal(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleApply}
+                disabled={isSubmitting || proposal.trim().length < 50}
+              >
+                {isSubmitting ? "Submitting..." : "Submit Application"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

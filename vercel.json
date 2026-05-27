@@ -1,0 +1,63 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["bom1"],
+  "functions": {
+    "src/app/api/cron/content-auto-approve/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/engagement/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/lift-suspensions/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/payment-capture-retries/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/post-monitor/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/social-proof/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/weekly-challenges/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/upload/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/payments/webhook/route.ts": {
+      "maxDuration": 60
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/payment-capture-retries",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/content-auto-approve",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/engagement",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/lift-suspensions",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/post-monitor",
+      "schedule": "30 2 * * *"
+    },
+    {
+      "path": "/api/cron/social-proof",
+      "schedule": "15 3 * * 1"
+    },
+    {
+      "path": "/api/cron/weekly-challenges",
+      "schedule": "0 0 * * 1"
+    }
+  ]
+}
