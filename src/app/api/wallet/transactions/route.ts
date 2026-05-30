@@ -88,6 +88,7 @@ export async function GET(request: Request) {
       parsed.data.page,
       parsed.data.limit,
       walletFilters,
+      session.user.userType,
     );
 
     return NextResponse.json(

@@ -407,6 +407,7 @@ export class DealService {
         data: { updatedAt: new Date() },
         include: {
           brand: { select: { userId: true } },
+          influencer: { select: { userId: true } },
           contentSubmissions: { orderBy: { version: "desc" }, take: 1 },
         },
       });
@@ -435,12 +436,31 @@ export class DealService {
 
       // Recalculate trust after the transaction to keep the row lock short.
 
-      return { success: true, ownerId };
+      return {
+        success: true,
+        ownerId,
+        influencerUserId: deal.influencer.userId,
+        requiresPostVerification: deal.requiresPostVerification,
+      };
     });
 
-    if (result.ownerId)
-      await updateTrustAndLevel(result.ownerId, "DEAL_COMPLETED");
+    if (result.influencerUserId)
+      await updateTrustAndLevel(result.influencerUserId, "DEAL_COMPLETED");
+
     await invalidateDealCache(dealId);
+
+    if (result.requiresPostVerification === false) {
+      try {
+        await PaymentService.processDealCompletion(dealId);
+        await invalidateDealCache(dealId);
+      } catch (error) {
+        logger.error("Failed to process deal payment immediately for no-verification deal", {
+          dealId,
+          error,
+        });
+      }
+    }
+
     return { success: true };
   }
 
@@ -455,6 +475,7 @@ export class DealService {
         id: true,
         submittedAt: true,
         reviewPeriodHours: true,
+        requiresPostVerification: true,
         campaign: { select: { title: true } },
         influencer: { select: { userId: true } },
         brand: { select: { userId: true } },
@@ -534,6 +555,18 @@ export class DealService {
         processed += 1;
         await invalidateDealCache(deal.id);
 
+        if (deal.requiresPostVerification === false) {
+          try {
+            await PaymentService.processDealCompletion(deal.id);
+            await invalidateDealCache(deal.id);
+          } catch (error) {
+            logger.error("Failed to process auto-approved deal payment immediately", {
+              dealId: deal.id,
+              error,
+            });
+          }
+        }
+
         // Dispatch emails asynchronously after transaction commits successfully to avoid blocking the DB pool
         (async () => {
           try {
@@ -556,7 +589,7 @@ export class DealService {
               await sendDealNotificationEmail(
                 brandUser.email,
                 deal.campaign.title,
-                `Content for "${deal.campaign.title}" was auto-approved because your 48-hour brand review window expired.`
+                `Content for "${deal.campaign.title}" was auto-approved because your ${deal.reviewPeriodHours || 48}-hour brand review window expired.`
               );
             }
           } catch (mailErr) {
@@ -608,33 +641,7 @@ export class DealService {
 
     const needsReview = verificationResult.action === "REVIEW";
 
-    if (needsReview) {
-      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-        // LOCK THE DEAL ROW to prevent race conditions during verification
-        const lockedDeal = await tx.deal.update({
-          where: { id: dealId },
-          data: { updatedAt: new Date() },
-        });
-
-        if (!["CONTENT_APPROVED", "POSTED"].includes(lockedDeal.status)) {
-          throw new Error("Deal must be in CONTENT_APPROVED or POSTED status.");
-        }
-
-        await tx.deal.update({
-          where: { id: dealId },
-          data: {
-            status: "VERIFICATION_PENDING",
-            postUrl,
-            postedAt: new Date(),
-          },
-        });
-      });
-
-      await invalidateDealCache(dealId);
-      return { success: true, status: "VERIFICATION_PENDING" };
-    }
-
-    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const resultStatus = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // LOCK THE DEAL ROW to prevent race conditions during verification
       const lockedDeal = await tx.deal.update({
         where: { id: dealId },
@@ -645,31 +652,37 @@ export class DealService {
         throw new Error("Deal must be in CONTENT_APPROVED or POSTED status. It might have already been verified.");
       }
 
+      const finalStatus = needsReview ? "VERIFICATION_PENDING" : "VERIFIED";
+
       await tx.deal.update({
         where: { id: dealId },
         data: {
-          status: "VERIFIED",
+          status: finalStatus,
           postUrl,
           postedAt: new Date(),
-          verifiedAt: new Date(),
+          ...(needsReview ? {} : { verifiedAt: new Date() }),
         },
       });
+
+      return finalStatus;
     });
 
     await invalidateDealCache(dealId);
 
-    // Process Payment (Capture & Credit)
-    try {
-      await PaymentService.processDealCompletion(dealId);
-      await invalidateDealCache(dealId);
-    } catch (error) {
-      logger.error("Failed to process deal payment immediately", {
-        dealId,
-        error,
-      });
-      // Don't fail the verification request; payment can be retried
+    if (resultStatus === "VERIFIED") {
+      // Process Payment (Capture & Credit)
+      try {
+        await PaymentService.processDealCompletion(dealId);
+        await invalidateDealCache(dealId);
+      } catch (error) {
+        logger.error("Failed to process deal payment immediately", {
+          dealId,
+          error,
+        });
+        // Don't fail the verification request; payment can be retried
+      }
     }
 
-    return { success: true, status: "VERIFIED" };
+    return { success: true, status: resultStatus };
   }
 }

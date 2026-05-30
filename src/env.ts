@@ -29,6 +29,7 @@ const envSchema = z.object({
   RAZORPAY_KEY_SECRET: z.string().min(1),
   RAZORPAY_WEBHOOK_SECRET: z.string().min(1),
   RAZORPAY_ACCOUNT_NUMBER: z.string().min(1).optional(),
+  RESEND_API_KEY: z.string().min(1).optional(),
 
   // Logging and monitoring
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
@@ -45,7 +46,21 @@ const envSchema = z.object({
   GATEWAY_FEE_PERCENTAGE: z.coerce.number().default(2),
   MIN_WITHDRAWAL_AMOUNT: z.coerce.number().default(50000),
   MAX_WALLET_BALANCE: z.coerce.number().default(1000000000),
-  ADMIN_EMAILS: z.string().min(1).optional(),
+  ADMIN_EMAILS: z
+    .string()
+    .min(1)
+    .optional()
+    .refine(
+      (val) => {
+        if (!val) return true;
+        const emails = val.split(",").map((email) => email.trim());
+        return emails.every((email) => z.string().email().safeParse(email).success);
+      },
+      {
+        message: "All values in ADMIN_EMAILS must be valid emails separated by commas.",
+      }
+    ),
+  E2E_MAGIC_OTP: z.string().optional(),
 
   // Storage
   STORAGE_PROVIDER: z
@@ -68,6 +83,22 @@ const envSchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ["CRON_SECRET"],
       message: "CRON_SECRET is required in production for Vercel Cron routes.",
+    });
+  }
+
+  if (!env.RESEND_API_KEY) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["RESEND_API_KEY"],
+      message: "RESEND_API_KEY is required in production for sending emails.",
+    });
+  }
+
+  if (env.E2E_MAGIC_OTP === "true") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["E2E_MAGIC_OTP"],
+      message: "E2E_MAGIC_OTP must not be enabled in production environment.",
     });
   }
 

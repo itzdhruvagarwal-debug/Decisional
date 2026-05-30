@@ -15,6 +15,7 @@ export class WalletService {
     page: number = 1,
     limit: number = 20,
     filters?: WalletTransactionFilters,
+    userType?: string,
   ) {
     try {
       const safePage = Math.max(1, page);
@@ -78,24 +79,26 @@ export class WalletService {
       ]);
 
       let totalHeld = 0;
-      const brandProfile = await prisma.brandProfile.findUnique({
-        where: { userId },
-        select: { id: true },
-      });
-
-      if (brandProfile?.id) {
-        const holds = await prisma.paymentHold.aggregate({
-          where: {
-            status: "HELD",
-            deal: {
-              brandId: brandProfile.id,
-            },
-          },
-          _sum: {
-            amount: true,
-          },
+      if (userType === undefined || userType === "BRAND") {
+        const brandProfile = await prisma.brandProfile.findUnique({
+          where: { userId },
+          select: { id: true },
         });
-        totalHeld = holds._sum.amount || 0;
+
+        if (brandProfile?.id) {
+          const holds = await prisma.paymentHold.aggregate({
+            where: {
+              status: "HELD",
+              deal: {
+                brandId: brandProfile.id,
+              },
+            },
+            _sum: {
+              amount: true,
+            },
+          });
+          totalHeld = holds._sum.amount || 0;
+        }
       }
 
       logger.info("Wallet fetched successfully", {

@@ -506,6 +506,7 @@ model Deal {
   postedAt DateTime?
 
   // Verification
+  requiresPostVerification Boolean   @default(true)
   verifiedAt             DateTime?
   verificationScreenshot String?
   verificationHash       String?
@@ -541,6 +542,7 @@ model Deal {
   @@index([influencerId])
   @@index([brandId])
   @@index([createdAt])
+  @@index([status, updatedAt])
 }
 
 model ContentSubmission {

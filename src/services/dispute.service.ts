@@ -1,5 +1,5 @@
 import prisma from "@/lib/db";
-import { Prisma } from "@prisma/client";
+import { Prisma, DisputeType } from "@prisma/client";
 import {
   analyzeDispute,
   applyResolution,
@@ -58,7 +58,7 @@ export class DisputeService {
     userId: string,
     data: {
       dealId: string;
-      type: any; // Enum
+      type: DisputeType;
       description: string;
     },
   ) {

@@ -29,36 +29,6 @@ function normalizeStringArray(value: unknown): string[] {
   return [];
 }
 
-function collectDeliverableText(value: unknown, depth = 0): string[] {
-  if (depth > 5 || value === null || value === undefined) return [];
-
-  if (typeof value === "string" || typeof value === "number") {
-    return [String(value)];
-  }
-
-  if (Array.isArray(value)) {
-    return value.flatMap((item) => collectDeliverableText(item, depth + 1));
-  }
-
-  if (typeof value === "object") {
-    return Object.values(value as Record<string, unknown>).flatMap((item) =>
-      collectDeliverableText(item, depth + 1),
-    );
-  }
-
-  return [];
-}
-
-function campaignSupportsPlatforms(
-  deliverables: unknown,
-  platforms: string[],
-): boolean {
-  const text = collectDeliverableText(deliverables)
-    .join(" ")
-    .toUpperCase();
-
-  return platforms.some((platform) => text.includes(platform));
-}
 
 export class CampaignService {
   static async listCampaigns(
@@ -193,15 +163,15 @@ export class CampaignService {
             if (platforms.length === 0) {
               andConditions.push({ id: { in: ["no_connected_platform"] } });
             } else {
-              const candidateCampaigns = await prisma.campaign.findMany({
-                where: { status: statusFilter, deletedAt: null },
-                select: { id: true, deliverables: true },
-              });
-
-              const matches = candidateCampaigns.filter(
-                (campaign: { id: string; deliverables: unknown }) =>
-                  campaignSupportsPlatforms(campaign.deliverables, platforms),
-              );
+              const matches = await prisma.$queryRaw<Array<{ id: string }>>`
+                SELECT id FROM "Campaign"
+                WHERE status = ${statusFilter}::"CampaignStatus"
+                  AND "deletedAt" IS NULL
+                  AND (${Prisma.join(
+                    platforms.map((p) => Prisma.sql`deliverables::text ILIKE ${`%${p}%`}`),
+                    " OR "
+                  )})
+              `;
 
               andConditions.push({
                 id: {

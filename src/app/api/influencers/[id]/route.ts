@@ -38,7 +38,13 @@ export const GET = apiWrapper(async (req, { params }) => {
   // Include the viewer's wallet info so the frontend knows if they can afford the minRate
   let walletInfo = null;
   try {
-    walletInfo = await WalletService.getWallet(userId, 1, 1);
+    walletInfo = await WalletService.getWallet(
+      userId,
+      1,
+      1,
+      undefined,
+      session.user.userType,
+    );
   } catch (_e) {
     // Fallback or ignore
   }

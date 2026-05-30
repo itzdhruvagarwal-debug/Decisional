@@ -14,7 +14,13 @@ export async function GET() {
       );
     }
 
-    const result = await WalletService.getWallet(session.user.id);
+    const result = await WalletService.getWallet(
+      session.user.id,
+      1,
+      20,
+      undefined,
+      session.user.userType,
+    );
 
     if (!result?.wallet) {
       return NextResponse.json(

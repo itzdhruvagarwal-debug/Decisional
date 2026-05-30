@@ -85,7 +85,7 @@ export class PaymentService {
     }
 
     const hasLockedPaymentSnapshot =
-      deal.totalAmount > 0 && deal.platformFee >= 0 && deal.gatewayFee >= 0;
+      deal.totalAmount > 0 && deal.platformFee > 0 && deal.gatewayFee >= 0;
     const feeSnapshot = hasLockedPaymentSnapshot
       ? null
       : await resolveBrandPlatformFee(userId);
@@ -160,7 +160,13 @@ export class PaymentService {
     } catch (error: any) {
       if (error.code === "P2002") {
         const existingHold = await prisma.paymentHold.findUnique({ where: { dealId: deal.id } });
-        if (existingHold) return { exists: true, orderId: existingHold.razorpayOrderId, amount: existingHold.amount };
+        if (existingHold)
+          return {
+            exists: true,
+            orderId: existingHold.razorpayOrderId,
+            amount: existingHold.amount,
+            currency: "INR",
+          };
       }
       throw error;
     }
@@ -386,31 +392,31 @@ export class PaymentService {
   }
 
   static async initiateWithdrawal(userId: string, data: { amount: number; bankAccountName: string; bankAccountNumber: string; ifscCode: string; upiId?: string }, idempotencyKey: string) {
-    const existing = await prisma.transaction.findUnique({
-      where: { razorpayPaymentId: idempotencyKey },
-      include: { wallet: { select: { userId: true } } },
-    });
-    if (existing) {
-      if (existing.wallet.userId !== userId) {
-        logger.warn("Withdrawal idempotency owner mismatch", {
-          userId,
-          transactionId: existing.id,
-        });
-        throw new Error("IDEMPOTENCY_KEY_OWNER_MISMATCH");
-      }
-
-      if (existing.status === "FAILED") {
-        // Free up the unique constraint slot while preserving the failed transaction audit trail
-        await prisma.transaction.update({
-          where: { id: existing.id },
-          data: { razorpayPaymentId: `failed:${existing.id}:${idempotencyKey}` },
-        });
-      } else {
-        return { success: true, alreadyProcessed: true };
-      }
-    }
-
     const withdrawal = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      const existing = await tx.transaction.findUnique({
+        where: { razorpayPaymentId: idempotencyKey },
+        include: { wallet: { select: { userId: true } } },
+      });
+      if (existing) {
+        if (existing.wallet.userId !== userId) {
+          logger.warn("Withdrawal idempotency owner mismatch", {
+            userId,
+            transactionId: existing.id,
+          });
+          throw new Error("IDEMPOTENCY_KEY_OWNER_MISMATCH");
+        }
+
+        if (existing.status === "FAILED") {
+          // Free up the unique constraint slot while preserving the failed transaction audit trail
+          await tx.transaction.update({
+            where: { id: existing.id },
+            data: { razorpayPaymentId: `failed:${existing.id}:${idempotencyKey}` },
+          });
+        } else {
+          return { alreadyProcessed: true };
+        }
+      }
+
       const updateResult = await tx.wallet.updateMany({
         where: { userId, balance: { gte: data.amount }, isFrozen: false },
         data: { balance: { decrement: data.amount } }
@@ -446,7 +452,13 @@ export class PaymentService {
       });
 
       return { w, t };
+    }, {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
     });
+
+    if ("alreadyProcessed" in withdrawal) {
+      return { success: true, alreadyProcessed: true };
+    }
 
     try {
       const payout = await createPayout({

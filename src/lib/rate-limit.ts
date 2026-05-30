@@ -6,6 +6,7 @@ interface RateLimitConfig {
   uniqueToken: string;
   limit: number;
   window: number; // in seconds
+  securityCritical?: boolean | undefined;
 }
 
 interface RateLimitResult {
@@ -79,6 +80,16 @@ export async function rateLimit(
       reset: Math.floor((now + window * 1000) / 1000),
     };
   } catch (error) {
+    if (config.securityCritical) {
+      logger.error("Rate limit Redis error — failing closed on security critical limit", error);
+      return {
+        success: false,
+        limit,
+        remaining: 0,
+        reset: Math.floor((now + window * 1000) / 1000),
+      };
+    }
+
     logger.error("Rate limit Redis error — failing open", error);
     // Fail open strategy: If Redis fails, allow the request to proceed to avoid downtime.
     return {
@@ -93,21 +104,21 @@ export async function rateLimit(
 export const RATE_LIMIT_CONFIGS = {
   CAMPAIGNS: { limit: 10, window: 3600 },
   APPLICATIONS: { limit: 20, window: 3600 },
-  AUTH: { limit: 5, window: 60 },
-  LOGIN_IP: { limit: 5, window: 900 }, // 5 attempts per 15 minutes per IP
-  LOGIN_EMAIL: { limit: 5, window: 900 }, // 5 attempts per 15 minutes per email
-  REGISTER: { limit: 3, window: 3600 }, // 3 registrations per hour per IP
+  AUTH: { limit: 5, window: 60, securityCritical: true },
+  LOGIN_IP: { limit: 5, window: 900, securityCritical: true }, // 5 attempts per 15 minutes per IP
+  LOGIN_EMAIL: { limit: 5, window: 900, securityCritical: true }, // 5 attempts per 15 minutes per email
+  REGISTER: { limit: 3, window: 3600, securityCritical: true }, // 3 registrations per hour per IP
   MESSAGES: { limit: 100, window: 3600 },
   MESSAGES_MIN: { limit: 20, window: 60 },
   MESSAGES_DAY: { limit: 500, window: 86400 },
   DEAL_UPDATES: { limit: 50, window: 3600 },
   API_DEFAULT: { limit: 120, window: 60 }, // 120 req/min per user
   REVIEWS: { limit: 10, window: 3600 },
-  WITHDRAWAL: { limit: 3, window: 86400 }, // 3 withdrawals per day (anti-fraud)
+  WITHDRAWAL: { limit: 3, window: 86400, securityCritical: true }, // 3 withdrawals per day (anti-fraud)
   UPLOAD: { limit: 10, window: 3600 }, // 10 uploads per hour
   DISPUTES: { limit: 5, window: 3600 }, // 5 dispute submissions per hour
   PROFILE_UPDATE: { limit: 10, window: 3600 }, // 10 profile updates per hour
-  PASSWORD_RESET: { limit: 3, window: 3600 }, // 3 requests per hour
+  PASSWORD_RESET: { limit: 3, window: 3600, securityCritical: true }, // 3 requests per hour
 };
 
 /**
@@ -146,6 +157,7 @@ export async function checkAdaptiveRateLimit(
     uniqueToken: `${type}:adaptive:${userId}`,
     limit: customLimit,
     window: config.window,
+    securityCritical: (config as { securityCritical?: boolean }).securityCritical,
   });
 }
 
@@ -174,5 +186,6 @@ export async function checkRateLimit(
     uniqueToken: `${type}:${key}`,
     limit: config.limit,
     window: config.window,
+    securityCritical: (config as { securityCritical?: boolean }).securityCritical,
   });
 }

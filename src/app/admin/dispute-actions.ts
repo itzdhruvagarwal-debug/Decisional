@@ -210,6 +210,14 @@ export async function resolveDispute(
               });
             }
 
+            await tx.influencerProfile.update({
+              where: { id: influencer.id },
+              data: {
+                completedDeals: { increment: 1 },
+                totalEarnings: { increment: dispute.deal.amount },
+              },
+            });
+
             await finalizeDealGamification(influencer.userId, dispute.deal.amount, tx);
           }
         }
@@ -245,6 +253,14 @@ export async function resolveDispute(
                     status: "COMPLETED",
                   },
                 },
+              },
+            });
+
+            await tx.influencerProfile.update({
+              where: { id: influencer.id },
+              data: {
+                completedDeals: { increment: 1 },
+                totalEarnings: { increment: dispute.deal.amount },
               },
             });
 

@@ -23,7 +23,11 @@ export class AuthService {
   /**
    * Register a new user with advanced validation and initial setup
    */
-  static async registerUser(data: RegisterInput, ip: string) {
+  static async registerUser(
+    data: RegisterInput,
+    ip: string,
+    options?: { emailVerified?: boolean; phoneVerified?: boolean },
+  ) {
     const limit = await checkRateLimit(ip, "REGISTER");
     if (!limit.success) {
       throw new Error(
@@ -82,11 +86,11 @@ export class AuthService {
               phone,
               passwordHash,
               userType,
-              verificationLevel: "BASIC",
+              verificationLevel: options?.emailVerified && options?.phoneVerified ? "BASIC" : "NONE",
               trustScore: 50,
-              status: "ACTIVE",
-              emailVerified: true,
-              phoneVerified: true,
+              status: options?.emailVerified && options?.phoneVerified ? "ACTIVE" : "PENDING_VERIFICATION",
+              emailVerified: options?.emailVerified ?? false,
+              phoneVerified: options?.phoneVerified ?? false,
               referralCode: generateReferralCode(referralSeed.slice(0, 6)),
               referredBy: referrerId,
             },

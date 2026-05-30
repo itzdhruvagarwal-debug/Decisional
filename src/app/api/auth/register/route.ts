@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { AuthService } from "@/services/auth.service";
 import { logger } from "@/lib/logger";
 import { registerSchema } from "@/lib/validations";
@@ -59,7 +59,10 @@ export async function POST(request: Request) {
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       "unknown";
 
-    const user = await AuthService.registerUser(parsed.data, ip);
+    const user = await AuthService.registerUser(parsed.data, ip, {
+      emailVerified: true,
+      phoneVerified: true,
+    });
     await Promise.all([redis.del(emailKey), redis.del(phoneKey)]);
 
     return NextResponse.json(

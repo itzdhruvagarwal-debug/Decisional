@@ -9,6 +9,7 @@ import { logger } from "@/lib/logger";
 import { sendEmail } from "@/lib/communication";
 import prisma from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { env } from "@/env";
 
 const OTP_TTL = 600; // 10 minutes
 
@@ -187,7 +188,7 @@ export async function POST(request: NextRequest) {
         const submittedBuffer = Buffer.from(submittedHash, "utf8");
 
         // Magic bypass for E2E tests in dev/test
-        const isMagicCode = otp === "123456" && process.env.NODE_ENV !== "production";
+        const isMagicCode = otp === "123456" && env.E2E_MAGIC_OTP === "true";
 
         let isMatch = false;
         if (storedBuffer.length === submittedBuffer.length) {
