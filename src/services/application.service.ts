@@ -10,7 +10,8 @@ import {
 import { logger } from "@/lib/logger";
 import { checkEnterpriseApplicationGate } from "@/lib/enterprise-trust-guard";
 import { generateContractTerms } from "@/lib/contract-engine";
-import { getPlatformFeePercentage } from "@/lib/drs-score";
+import { calculateTotalAmount } from "@/lib/razorpay";
+import { resolveBrandPlatformFee } from "@/lib/platform-fees";
 import { addUserXp } from "@/lib/gamification-engine";
 
 export class ApplicationService {
@@ -443,15 +444,11 @@ export class ApplicationService {
             );
           }
 
-          // Dynamic platform fee based on influencer's level
-          const influencerUser = await tx.user.findUnique({
-            where: { id: application.influencer.userId },
-            select: { level: true },
-          });
-          const feePercent = getPlatformFeePercentage(influencerUser?.level ?? 1);
-          const productFee = application.campaign.requiresProduct ? 10000 : 0;
-          const platformFee = Math.floor(dealAmount * (feePercent / 100)) + productFee;
-          const gatewayFee = Math.floor(dealAmount * 0.02);
+          const brandFee = await resolveBrandPlatformFee(userId);
+          const paymentAmounts = calculateTotalAmount(
+            dealAmount,
+            brandFee.effectivePlatformFee,
+          );
 
           const draftContractTerms = generateContractTerms(
             "pending",
@@ -464,7 +461,15 @@ export class ApplicationService {
               postingDeadline: application.campaign.postingDeadline,
               requiresProduct: application.campaign.requiresProduct,
             },
-            { rate: dealAmount, message: application.proposal },
+            {
+              rate: dealAmount,
+              message: application.proposal,
+              platformFee: paymentAmounts.platformFee,
+              gatewayFee: paymentAmounts.gatewayFee,
+              totalAmount: paymentAmounts.totalAmount,
+              platformFeePercent: paymentAmounts.platformFeePercent,
+              influencerPayout: paymentAmounts.influencerReceives,
+            },
           );
 
           const deal = await tx.deal.create({
@@ -473,9 +478,9 @@ export class ApplicationService {
               influencerId: application.influencerId,
               brandId: brandProfile.id,
               amount: dealAmount,
-              platformFee,
-              gatewayFee,
-              totalAmount: dealAmount + platformFee + gatewayFee,
+              platformFee: paymentAmounts.platformFee,
+              gatewayFee: paymentAmounts.gatewayFee,
+              totalAmount: paymentAmounts.totalAmount,
               submissionDeadline: application.campaign.contentDeadline,
               postingDeadline: application.campaign.postingDeadline,
               contractTerms:

@@ -8,6 +8,25 @@ import DashboardShell from "@/components/dashboard/DashboardShell";
 
 const formatCurrency = (amount: number) =>
   "INR " + (amount / 100).toLocaleString("en-IN");
+const formatPercent = (value: number | undefined) =>
+  typeof value === "number" && Number.isFinite(value)
+    ? `${value.toLocaleString("en-IN", { maximumFractionDigits: 2 })}%`
+    : "As shown";
+const formatContractDate = (value: unknown) => {
+  if (!value || typeof value !== "string") return "Not set";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : date.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+};
+const normalizeTextArray = (value: unknown): string[] =>
+  Array.isArray(value)
+    ? value.map((item) => String(item || "").trim()).filter(Boolean)
+    : [];
 const statusConfig: Record<string, { label: string; color: string }> = {
   PENDING_SIGNATURE: {
     label: "Pending Signature",
@@ -41,6 +60,23 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   COMPLETED: { label: "Completed", color: "var(--color-success)" },
   CANCELLED: { label: "Cancelled", color: "var(--color-error)" },
 };
+
+function PaymentRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        gap: "16px",
+        marginBottom: "8px",
+        fontSize: "14px",
+      }}
+    >
+      <span style={{ color: "var(--color-text-secondary)" }}>{label}</span>
+      <span style={{ fontWeight: 600, textAlign: "right" }}>{value}</span>
+    </div>
+  );
+}
 
 export default function DealDetailPage() {
   const params = useParams();
@@ -103,7 +139,26 @@ export default function DealDetailPage() {
   };
 
   const handleSignContract = async () => {
-    if (!confirm("Do you agree to the contract terms?")) return;
+    const terms = deal?.contractTerms as any;
+    const payout =
+      typeof terms?.influencerPayout === "number"
+        ? terms.influencerPayout
+        : deal?.amount || 0;
+    const fee = typeof terms?.platformFee === "number" ? terms.platformFee : deal?.platformFee || 0;
+    const gateway = typeof terms?.gatewayFee === "number" ? terms.gatewayFee : deal?.gatewayFee || 0;
+    const payable =
+      typeof terms?.totalAmount === "number" && terms.totalAmount > 0
+        ? terms.totalAmount
+        : (deal?.totalAmount || 0) || (deal?.amount || 0) + fee + gateway;
+    const signSummary = [
+      "You are signing this Decisional deal contract.",
+      `Creator payout: ${formatCurrency(payout)}`,
+      `Brand payable: ${formatCurrency(payable)}`,
+      `Submission deadline: ${formatContractDate(terms?.submissionDeadline)}`,
+      `Posting deadline: ${formatContractDate(terms?.postingDeadline || deal?.postingDeadline)}`,
+      "Only sign if deliverables, usage rights, revisions, and payment terms are correct.",
+    ].join("\n");
+    if (!confirm(signSummary)) return;
 
     setIsSubmitting(true);
     try {
@@ -181,11 +236,37 @@ export default function DealDetailPage() {
     : Array.isArray(contractTerms?.mandatoryTags)
       ? contractTerms.mandatoryTags
       : [];
+  const contractDeliverables = Array.isArray(contractTerms?.deliverables)
+    ? contractTerms.deliverables
+    : [];
+  const creatorPayout =
+    typeof contractTerms?.influencerPayout === "number"
+      ? contractTerms.influencerPayout
+      : deal.amount;
+  const platformFee =
+    typeof contractTerms?.platformFee === "number"
+      ? contractTerms.platformFee
+      : deal.platformFee || 0;
+  const gatewayFee =
+    typeof contractTerms?.gatewayFee === "number"
+      ? contractTerms.gatewayFee
+      : deal.gatewayFee || 0;
+  const brandPayable =
+    typeof contractTerms?.totalAmount === "number" && contractTerms.totalAmount > 0
+      ? contractTerms.totalAmount
+      : deal.totalAmount || deal.amount + platformFee + gatewayFee;
+  const contractSignature = deal.contractSignature as any;
+  const brandSigned = Boolean(contractSignature?.brandSignature);
+  const influencerSigned = Boolean(contractSignature?.influencerSignature);
+  const influencerObligations = normalizeTextArray(
+    contractTerms?.influencerObligations,
+  );
+  const brandObligations = normalizeTextArray(contractTerms?.brandObligations);
   return (
     <DashboardShell user={session.user}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", display: "grid", gap: "24px" }}>
+      <div className="deal-detail-page" style={{ maxWidth: "1280px", margin: "0 auto", display: "grid", gap: "24px" }}>
         <header
-          className="glass"
+          className="glass deal-detail-header"
           style={{
             position: "sticky",
             top: 0,
@@ -236,7 +317,7 @@ export default function DealDetailPage() {
                 {status.label}
               </div>
             </div>
-            <div style={{ display: "flex", gap: "12px" }}>
+            <div className="deal-detail-actions" style={{ display: "flex", gap: "12px" }}>
               {/* Actions based on status */}
               {deal.status === "PENDING_SIGNATURE" && (
                 <>
@@ -306,7 +387,7 @@ export default function DealDetailPage() {
           </div>
         </header>
 
-        <div style={{ padding: "24px" }}>
+        <div className="deal-detail-content" style={{ padding: "24px" }}>
           <div
             style={{
               display: "grid",
@@ -316,7 +397,7 @@ export default function DealDetailPage() {
           >
             <div>
               {/* Progress */}
-              <div className="card" style={{ marginBottom: "24px" }}>
+              <div className="card deal-progress-card" style={{ marginBottom: "24px" }}>
                 <h2
                   style={{
                     fontSize: "18px",
@@ -556,6 +637,81 @@ export default function DealDetailPage() {
                 </h2>
                 {contractTerms ? (
                   <>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                        gap: "12px",
+                        marginBottom: "18px",
+                      }}
+                    >
+                      {[
+                        ["Creator payout", formatCurrency(creatorPayout)],
+                        ["Brand payable", formatCurrency(brandPayable)],
+                        ["Platform fee", `${formatCurrency(platformFee)} (${formatPercent(contractTerms.platformFeePercent)})`],
+                        ["Gateway fee", formatCurrency(gatewayFee)],
+                      ].map(([label, value]) => (
+                        <div
+                          key={label}
+                          style={{
+                            padding: "12px",
+                            background: "var(--color-bg-tertiary)",
+                            borderRadius: "var(--radius-sm)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              color: "var(--color-text-muted)",
+                              marginBottom: "4px",
+                            }}
+                          >
+                            {label}
+                          </div>
+                          <div style={{ fontSize: "13px", fontWeight: 700 }}>
+                            {value}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {contractDeliverables.length > 0 && (
+                      <div style={{ marginBottom: "18px" }}>
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            color: "var(--color-text-muted)",
+                            marginBottom: "8px",
+                          }}
+                        >
+                          Deliverables
+                        </div>
+                        <div style={{ display: "grid", gap: "8px" }}>
+                          {contractDeliverables.map((item: any, index: number) => (
+                            <div
+                              key={`${item.type}-${index}`}
+                              style={{
+                                padding: "10px 12px",
+                                background: "var(--color-bg-tertiary)",
+                                borderRadius: "var(--radius-sm)",
+                                fontSize: "13px",
+                                lineHeight: 1.5,
+                              }}
+                            >
+                              <strong>
+                                {item.count || 1}x {item.type || "Deliverable"}
+                              </strong>
+                              <span style={{ color: "var(--color-text-secondary)" }}>
+                                {" "}
+                                on {item.platform || "selected platform"}
+                                {item.details ? ` - ${item.details}` : ""}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div style={{ marginBottom: "16px" }}>
                       <div
                         style={{
@@ -580,9 +736,13 @@ export default function DealDetailPage() {
                             </span>
                           ),
                         )}
+                        {mandatoryElements.length === 0 && (
+                          <span className="text-muted">No mandatory tags set.</span>
+                        )}
                       </div>
                     </div>
-                    <div>
+
+                    <div style={{ marginBottom: "16px" }}>
                       <div
                         style={{
                           fontSize: "13px",
@@ -590,11 +750,83 @@ export default function DealDetailPage() {
                           marginBottom: "8px",
                         }}
                       >
-                        Post Duration
+                        Timeline
                       </div>
-                      <div style={{ fontWeight: 600 }}>
-                        {contractTerms.postDuration || contractTerms.postingDeadline || "Until campaign deadline"}
+                      <div
+                        style={{
+                          display: "grid",
+                          gap: "6px",
+                          fontSize: "13px",
+                          color: "var(--color-text-secondary)",
+                        }}
+                      >
+                        <div>
+                          Submit by:{" "}
+                          <strong>{formatContractDate(contractTerms.submissionDeadline)}</strong>
+                        </div>
+                        <div>
+                          Post by:{" "}
+                          <strong>{formatContractDate(contractTerms.postingDeadline)}</strong>
+                        </div>
+                        <div>
+                          Brand review window:{" "}
+                          <strong>{contractTerms.reviewPeriodHours || 48} hours</strong>
+                        </div>
+                        <div>
+                          Included revisions:{" "}
+                          <strong>{contractTerms.includedRevisions ?? deal.maxRevisions ?? 2}</strong>
+                        </div>
                       </div>
+                    </div>
+
+                    {(influencerObligations.length > 0 || brandObligations.length > 0) && (
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                          gap: "14px",
+                          marginBottom: "16px",
+                        }}
+                      >
+                        {influencerObligations.length > 0 && (
+                          <div>
+                            <div style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "8px" }}>
+                              Influencer obligations
+                            </div>
+                            <ul style={{ paddingLeft: "18px", display: "grid", gap: "6px", color: "var(--color-text-secondary)", fontSize: "13px" }}>
+                              {influencerObligations.slice(0, 4).map((item) => (
+                                <li key={item}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {brandObligations.length > 0 && (
+                          <div>
+                            <div style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "8px" }}>
+                              Brand obligations
+                            </div>
+                            <ul style={{ paddingLeft: "18px", display: "grid", gap: "6px", color: "var(--color-text-secondary)", fontSize: "13px" }}>
+                              {brandObligations.slice(0, 4).map((item) => (
+                                <li key={item}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div
+                      style={{
+                        padding: "12px",
+                        background: "rgba(99, 102, 241, 0.08)",
+                        border: "1px solid rgba(99, 102, 241, 0.18)",
+                        borderRadius: "var(--radius-sm)",
+                        fontSize: "13px",
+                        color: "var(--color-text-secondary)",
+                      }}
+                    >
+                      Signatures: Brand {brandSigned ? "signed" : "pending"} /
+                      Influencer {influencerSigned ? "signed" : "pending"}
                     </div>
                   </>
                 ) : (
@@ -605,7 +837,7 @@ export default function DealDetailPage() {
 
             {/* Sidebar */}
             <div>
-              <div className="card" style={{ marginBottom: "24px" }}>
+              <div className="card deal-payment-card" style={{ marginBottom: "24px" }}>
                 <h3
                   style={{
                     fontSize: "16px",
@@ -615,51 +847,51 @@ export default function DealDetailPage() {
                 >
                   Payment Details
                 </h3>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "8px",
-                    fontSize: "14px",
-                  }}
-                >
-                  <span style={{ color: "var(--color-text-secondary)" }}>
-                    Deal Amount
-                  </span>
-                  <span style={{ fontWeight: 600 }}>
-                    {formatCurrency(deal.amount)}
-                  </span>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "8px",
-                    fontSize: "14px",
-                  }}
-                >
-                  <span style={{ color: "var(--color-text-secondary)" }}>
-                    Platform Fee (10%)
-                  </span>
-                  <span style={{ color: "var(--color-text-muted)" }}>
-                    -{formatCurrency(deal.platformFee)}
-                  </span>
-                </div>
-                <div
-                  style={{
-                    borderTop: "1px solid var(--color-border)",
-                    paddingTop: "8px",
-                    marginTop: "8px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: "16px",
-                  }}
-                >
-                  <span style={{ fontWeight: 600 }}>You Receive</span>
-                  <span style={{ fontWeight: 800 }} className="gradient-text">
-                    {formatCurrency(deal.amount - deal.platformFee)}
-                  </span>
-                </div>
+                {isClient ? (
+                  <>
+                    <PaymentRow label="Creator payout" value={formatCurrency(creatorPayout)} />
+                    <PaymentRow
+                      label={`Platform fee (${formatPercent(contractTerms?.platformFeePercent)})`}
+                      value={formatCurrency(platformFee)}
+                    />
+                    <PaymentRow label="Gateway fee" value={formatCurrency(gatewayFee)} />
+                    <div
+                      style={{
+                        borderTop: "1px solid var(--color-border)",
+                        paddingTop: "8px",
+                        marginTop: "8px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: "16px",
+                      }}
+                    >
+                      <span style={{ fontWeight: 600 }}>Brand payable</span>
+                      <span style={{ fontWeight: 800 }} className="gradient-text">
+                        {formatCurrency(brandPayable)}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <PaymentRow label="Deal amount" value={formatCurrency(deal.amount)} />
+                    <PaymentRow label="Platform fee" value="Paid by brand" />
+                    <div
+                      style={{
+                        borderTop: "1px solid var(--color-border)",
+                        paddingTop: "8px",
+                        marginTop: "8px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: "16px",
+                      }}
+                    >
+                      <span style={{ fontWeight: 600 }}>You receive</span>
+                      <span style={{ fontWeight: 800 }} className="gradient-text">
+                        {formatCurrency(creatorPayout)}
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="card" style={{ marginBottom: "24px" }}>

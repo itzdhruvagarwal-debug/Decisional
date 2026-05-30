@@ -1,26 +1,50 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import { motion } from "framer-motion";
+
+type PricingCardProps = {
+  title: string;
+  marker: string;
+  price: string;
+  subtitle: string;
+  description: string;
+  features: string[];
+  ctaText: string;
+  ctaLink: string;
+  color: string;
+  delay: number;
+  isPopular?: boolean;
+};
+
+type FAQItemProps = {
+  question: string;
+  answer: string;
+  delay: number;
+};
 
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] font-sans">
       <Navbar />
 
-      <main style={{ paddingTop: "120px", paddingBottom: "80px", overflow: "hidden", position: "relative" }}>
-        <div
-          style={{ maxWidth: "1000px", margin: "0 auto", padding: "0 20px" }}
-        >
-          {/* Hero Section - Matching Leaderboard Header */}
-          <div style={{ textAlign: "center", marginBottom: "60px" }}>
+      <main
+        style={{
+          paddingTop: "120px",
+          paddingBottom: "80px",
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
+        <div style={{ maxWidth: "1040px", margin: "0 auto", padding: "0 20px" }}>
+          <div style={{ textAlign: "center", marginBottom: "52px" }}>
             <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               style={{
-                fontSize: "48px",
+                fontSize: "clamp(34px, 7vw, 48px)",
                 fontWeight: 800,
                 background:
                   "linear-gradient(135deg, var(--color-primary), var(--color-accent-cyan))",
@@ -35,54 +59,58 @@ export default function PricingPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
-              style={{ color: "var(--color-text-secondary)", fontSize: "18px" }}
+              style={{
+                color: "var(--color-text-secondary)",
+                fontSize: "18px",
+                lineHeight: 1.7,
+                maxWidth: "720px",
+                margin: "0 auto",
+              }}
             >
-              No hidden fees. Pay only when you succeed.
+              Join for free. Decisional earns when a protected collaboration is
+              successfully completed, verified, and paid out.
             </motion.p>
           </div>
 
-          {/* Pricing Cards - Matching Leaderboard Card/Podium Styles */}
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-              gap: "32px",
-              marginBottom: "80px",
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              gap: "28px",
+              marginBottom: "72px",
             }}
           >
-            {/* Creator Plan */}
             <PricingCard
-              title="Creator"
-              icon="✨"
-              price="FREE"
-              subtitle="To Join & Apply"
-              description="Start your journey. Keep 90% of your earnings."
+              title="Influencer"
+              marker="IN"
+              price="Free"
+              subtitle="to join and apply"
+              description="Build a verified profile, apply to campaigns, submit content, and receive protected payouts."
               features={[
-                "Create unlimited profile",
-                "Apply to any campaign",
-                "10% platform fee on earnings",
-                "Fast secure payouts",
-                "Dispute protection",
+                "Verified creator profile and portfolio",
+                "Campaign discovery and deal workspace",
+                "Secure escrow-backed payouts",
+                "Referral levels, XP, and badge benefits",
+                "Platform fee visible before acceptance",
               ]}
-              ctaText="Join as Creator"
+              ctaText="Join as Influencer"
               ctaLink="/register?type=influencer"
               color="var(--color-primary)"
               delay={0.2}
             />
 
-            {/* Brand Plan */}
             <PricingCard
               title="Brand"
-              icon="💼"
+              marker="BR"
               price="10%"
-              subtitle="Service Fee"
-              description="Scale your marketing. Pay only for results."
+              subtitle="service fee on deals"
+              description="Launch campaigns, shortlist verified creators, approve deliverables, and release payments with audit trails."
               features={[
-                "Access verified influencers",
-                "Post unlimited campaigns",
-                "Escrow payment security",
-                "Content approval workflow",
-                "Dedicated support",
+                "Unlimited campaign drafts",
+                "Creator verification and risk signals",
+                "Contract, milestone, and approval workflow",
+                "Payment protection and dispute handling",
+                "GST-ready invoice metadata where applicable",
               ]}
               ctaText="Start Hiring"
               ctaLink="/register?type=brand"
@@ -92,41 +120,42 @@ export default function PricingPage() {
             />
           </div>
 
-          {/* FAQ Section - Matching Leaderboard List Style */}
-          <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: "40px" }}>
+          <section style={{ maxWidth: "820px", margin: "0 auto" }}>
+            <div style={{ textAlign: "center", marginBottom: "36px" }}>
               <h2 style={{ fontSize: "28px", fontWeight: 700 }}>
                 Frequently Asked Questions
               </h2>
             </div>
 
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "16px" }}
-            >
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               <FAQItem
                 question="Are there any subscription fees?"
-                answer="No! Both brands and influencers can join for free. We only charge a small platform fee when a successful deal is made."
+                answer="No. Brands and influencers can create an account without a subscription. Fees apply only when a collaboration uses Decisional's protected workflow."
                 delay={0.4}
               />
               <FAQItem
-                question="How does the 10% fee work?"
-                answer="For influencers, we deduct 10% from your earnings. For brands, we add a 10% service fee on top of the campaign budget. This covers payment processing, escrow security, and platform maintenance."
+                question="How does the brand service fee work?"
+                answer="The service fee is shown before payment and supports escrow handling, verification signals, approvals, dispute operations, and platform maintenance."
                 delay={0.5}
               />
               <FAQItem
-                question="Can influencers lower their fees?"
-                answer="Yes! By referring others through our 5-Tier Gamified Referral Engine, your platform fee can drop by up to 2%. At the Platinum and Diamond tiers, you also unlock a lifetime 1-2% GMV revenue share for your referrals!"
+                question="What do influencers pay?"
+                answer="Influencer platform fees are displayed before deal acceptance and can be affected by program benefits such as referral tiers or promotional waivers."
                 delay={0.6}
               />
               <FAQItem
-                question="Is my money safe?"
-                answer="Absolutely. We use an escrow system where funds are held securely until the work is completed and verified. This protects both parties."
+                question="Are taxes included?"
+                answer="Taxes, GST, TDS, and income-tax reporting can depend on the parties, invoices, place of supply, registration status, and current law. The platform stores required metadata, but users remain responsible for their own filings."
                 delay={0.7}
               />
+              <FAQItem
+                question="Is payment protected?"
+                answer="For eligible deals, brand funds are held through the payment workflow and released after agreed milestones, approval, or dispute resolution."
+                delay={0.8}
+              />
             </div>
-          </div>
+          </section>
 
-          {/* Bottom CTA */}
           <div
             style={{
               textAlign: "center",
@@ -140,17 +169,17 @@ export default function PricingPage() {
                 marginBottom: "16px",
               }}
             >
-              Still have questions?
+              Need a custom workflow, enterprise controls, or compliance review?
             </p>
             <Link
               href="/contact"
               style={{
                 color: "var(--color-primary)",
-                fontWeight: 600,
+                fontWeight: 700,
                 textDecoration: "none",
               }}
             >
-              Contact Support &rarr;
+              Contact support
             </Link>
           </div>
         </div>
@@ -163,7 +192,7 @@ export default function PricingPage() {
 
 function PricingCard({
   title,
-  icon,
+  marker,
   price,
   subtitle,
   description,
@@ -173,23 +202,22 @@ function PricingCard({
   color,
   delay,
   isPopular,
-}: any) {
+}: PricingCardProps) {
   return (
-    <motion.div
+    <motion.article
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
       style={{
-        background: `linear-gradient(135deg, ${color}11, ${color}05)`, // Very subtle gradient like leaderboard
+        background: `linear-gradient(135deg, ${color}11, ${color}05)`,
         border: `1px solid ${color}33`,
-        borderRadius: "24px",
-        padding: "40px",
+        borderRadius: "20px",
+        padding: "34px",
         position: "relative",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
         boxShadow: isPopular ? `0 10px 40px -10px ${color}33` : "none",
-        transform: isPopular ? "scale(1.02)" : "none",
       }}
     >
       {isPopular && (
@@ -199,13 +227,13 @@ function PricingCard({
             top: 0,
             right: 0,
             background: color,
-            color: "#000",
+            color: "#05030f",
             fontSize: "11px",
             fontWeight: 800,
             padding: "6px 16px",
-            borderRadius: "0 0 0 16px",
+            borderRadius: "0 0 0 14px",
             textTransform: "uppercase",
-            letterSpacing: "1px",
+            letterSpacing: 0,
           }}
         >
           Most Popular
@@ -214,32 +242,41 @@ function PricingCard({
 
       <div style={{ marginBottom: "24px" }}>
         <div
+          aria-hidden="true"
           style={{
-            width: "60px",
-            height: "60px",
-            borderRadius: "50%",
+            width: "58px",
+            height: "58px",
+            borderRadius: "18px",
             background: `linear-gradient(135deg, ${color}, ${color}88)`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: "28px",
+            fontSize: "18px",
+            fontWeight: 900,
             marginBottom: "20px",
+            color: "#05030f",
             boxShadow: `0 8px 20px ${color}44`,
           }}
         >
-          {icon}
+          {marker}
         </div>
         <h3 style={{ fontSize: "24px", fontWeight: 800, marginBottom: "8px" }}>
           {title}
         </h3>
-        <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+        <p
+          style={{
+            color: "var(--color-text-secondary)",
+            fontSize: "14px",
+            lineHeight: 1.7,
+          }}
+        >
           {description}
         </p>
       </div>
 
       <div
         style={{
-          marginBottom: "32px",
+          marginBottom: "30px",
           padding: "20px",
           background: "var(--color-bg-tertiary)",
           borderRadius: "16px",
@@ -249,7 +286,7 @@ function PricingCard({
       >
         <div
           style={{
-            fontSize: "42px",
+            fontSize: "clamp(34px, 8vw, 42px)",
             fontWeight: 900,
             color: "var(--color-text-primary)",
           }}
@@ -262,7 +299,7 @@ function PricingCard({
             fontWeight: 700,
             color: "var(--color-text-secondary)",
             textTransform: "uppercase",
-            letterSpacing: "1px",
+            letterSpacing: 0,
           }}
         >
           {subtitle}
@@ -272,24 +309,38 @@ function PricingCard({
       <ul
         style={{
           flex: 1,
-          marginBottom: "32px",
+          marginBottom: "30px",
           display: "flex",
           flexDirection: "column",
           gap: "12px",
+          listStyle: "none",
+          padding: 0,
         }}
       >
-        {features.map((f: string, i: number) => (
+        {features.map((feature) => (
           <li
-            key={i}
+            key={feature}
             style={{
               display: "flex",
-              alignItems: "center",
+              alignItems: "flex-start",
               gap: "12px",
               fontSize: "14px",
               color: "var(--color-text-secondary)",
+              lineHeight: 1.55,
             }}
           >
-            <span style={{ color: color, fontSize: "16px" }}>✓</span> {f}
+            <span
+              aria-hidden="true"
+              style={{
+                color,
+                fontSize: "12px",
+                fontWeight: 900,
+                marginTop: "3px",
+              }}
+            >
+              OK
+            </span>
+            {feature}
           </li>
         ))}
       </ul>
@@ -302,7 +353,7 @@ function PricingCard({
             background: isPopular
               ? `linear-gradient(135deg, ${color}, ${color}dd)`
               : "var(--color-bg-secondary)",
-            color: isPopular ? "#000" : "var(--color-text-primary)",
+            color: isPopular ? "#05030f" : "var(--color-text-primary)",
             border: isPopular ? "none" : `1px solid ${color}44`,
             padding: "16px",
             fontSize: "16px",
@@ -314,11 +365,11 @@ function PricingCard({
           {ctaText}
         </button>
       </Link>
-    </motion.div>
+    </motion.article>
   );
 }
 
-function FAQItem({ question, answer, delay }: any) {
+function FAQItem({ question, answer, delay }: FAQItemProps) {
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -329,7 +380,6 @@ function FAQItem({ question, answer, delay }: any) {
         borderRadius: "16px",
         border: "1px solid var(--color-border)",
         overflow: "hidden",
-        transition: "border-color 0.2s",
       }}
     >
       <details style={{ cursor: "pointer" }} className="group">
@@ -340,15 +390,17 @@ function FAQItem({ question, answer, delay }: any) {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            gap: "16px",
             listStyle: "none",
           }}
         >
           <span>{question}</span>
           <span
-            style={{ transition: "transform 0.3s" }}
+            aria-hidden="true"
+            style={{ transition: "transform 0.3s", fontSize: "12px" }}
             className="group-open:rotate-180"
           >
-            ▼
+            v
           </span>
         </summary>
         <div

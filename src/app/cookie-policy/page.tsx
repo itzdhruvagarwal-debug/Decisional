@@ -4,85 +4,74 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export default function CookiePage() {
-  const lastUpdated = "February 26, 2026";
+  const lastUpdated = "May 30, 2026";
 
   return (
-    <div
-      style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
-    >
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Navbar />
 
       <main style={{ flex: 1, paddingTop: "80px" }}>
         <section className="section">
-          <div className="container" style={{ maxWidth: "850px" }}>
+          <div className="container" style={{ maxWidth: "860px" }}>
             <h1 className="section-title gradient-text" style={{ fontSize: "40px", fontWeight: 900, marginBottom: "12px" }}>
               Cookie Policy
             </h1>
-            <p className="text-secondary" style={{ marginBottom: "48px", fontWeight: 600 }}>
-              Last Updated: {lastUpdated}
+            <p className="text-secondary" style={{ marginBottom: "40px", fontWeight: 600 }}>
+              Last updated: {lastUpdated}
             </p>
 
-            <div
-              className="space-y-10"
-              style={{ lineHeight: 1.8, color: "var(--color-text-secondary)", fontSize: "15px" }}
-            >
-              <div>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "16px" }}>
-                  1. How We Use Cookies
-                </h2>
+            <div style={{ lineHeight: 1.8, color: "var(--color-text-secondary)", fontSize: "15px", display: "grid", gap: "32px" }}>
+              <section>
+                <h2 style={headingStyle}>1. What cookies do</h2>
                 <p>
-                  To ensure Decisional remains secure, transparent, and high-performing, we use
-                  cookies to identify your session, remember your preferences, and protect
-                  your financial transactions.
+                  Cookies and similar technologies help Decisional keep users signed in, secure
+                  payments, remember preferences, detect abuse, measure reliability, and improve
+                  the PWA experience.
                 </p>
-              </div>
+              </section>
 
-              <div className="card" style={{ padding: "24px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)" }}>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "16px" }}>
-                  2. Essential Cookies (Strictly Necessary)
-                </h2>
-                <ul className="list-disc pl-6 space-y-4">
+              <section className="card" style={panelStyle}>
+                <h2 style={headingStyle}>2. Types we use</h2>
+                <ul className="list-disc pl-6 space-y-3">
                   <li>
-                    <strong>Authentication:</strong> These cookies keep you logged in as you navigate the platform and verify your identity during 2FA (Two-Factor Authentication) challenges.
+                    <strong>Essential cookies:</strong> authentication, CSRF protection, session
+                    continuity, role-based access, 2FA, OTP verification, and service worker state.
                   </li>
                   <li>
-                    <strong>Security & Anti-Fraud:</strong> Used to detect and prevent automated attacks (bots) and unauthorized access attempts.
+                    <strong>Security cookies:</strong> rate-limit, anti-fraud, device, IP, and
+                    login-risk signals.
                   </li>
                   <li>
-                    <strong>Payment Integrity (Razorpay):</strong> Essential cookies set by our payment partner, Razorpay, to ensure your transactions are executed securely and to prevent credit card fraud.
+                    <strong>Payment cookies:</strong> Razorpay and banking security checks needed
+                    to complete or verify transactions.
+                  </li>
+                  <li>
+                    <strong>Performance cookies:</strong> analytics, error diagnostics, and feature
+                    reliability metrics.
+                  </li>
+                  <li>
+                    <strong>Preference cookies:</strong> remembered settings, UI state, language,
+                    and notification choices.
                   </li>
                 </ul>
-              </div>
+              </section>
 
-              <div>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "16px" }}>
-                  3. Performance & Analytics
-                </h2>
+              <section>
+                <h2 style={headingStyle}>3. Your choices</h2>
                 <p>
-                  We use performance cookies to understand how Brands interact with campaign tools
-                  and how Influencers browse the marketplace. This helps us optimize the
-                  user experience and fix platform bugs.
+                  You can block or delete cookies in your browser. Essential cookies are required
+                  for login, payments, security, and dashboard access. If you block them, core
+                  platform features may stop working.
                 </p>
-              </div>
+              </section>
 
-              <div>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "16px" }}>
-                  4. Managing Your Preferences
-                </h2>
+              <section>
+                <h2 style={headingStyle}>4. Contact</h2>
                 <p>
-                  Most browsers allow you to refuse or delete cookies via their settings.
-                  Please note that disabling **Essential Cookies** will prevent you from
-                  logging in or completing payments on Decisional.
+                  For cookie or tracking questions, email{" "}
+                  <a href="mailto:privacy@decisional.in" style={linkStyle}>privacy@decisional.in</a>.
                 </p>
-              </div>
-
-              <div style={{ padding: "32px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-border)", textAlign: "center", marginTop: "48px" }}>
-                <p style={{ fontSize: "14px", color: "var(--color-text-muted)" }}>
-                  For more detailed information on specific tracking technologies, please contact:
-                  <br />
-                  <strong style={{ color: "var(--color-primary)" }}>support@decisional.in</strong>
-                </p>
-              </div>
+              </section>
             </div>
           </div>
         </section>
@@ -93,3 +82,21 @@ export default function CookiePage() {
   );
 }
 
+const headingStyle = {
+  fontSize: "20px",
+  fontWeight: 800,
+  color: "var(--color-text-primary)",
+  marginBottom: "14px",
+};
+
+const panelStyle = {
+  padding: "24px",
+  background: "rgba(255,255,255,0.02)",
+  border: "1px solid var(--color-border)",
+};
+
+const linkStyle = {
+  color: "var(--color-primary)",
+  fontWeight: 700,
+  textDecoration: "none",
+};

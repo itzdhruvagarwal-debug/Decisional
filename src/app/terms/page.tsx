@@ -4,125 +4,139 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export default function TermsPage() {
-  const lastUpdated = "February 26, 2026";
+  const lastUpdated = "May 30, 2026";
 
   return (
-    <div
-      style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
-    >
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Navbar />
 
       <main style={{ flex: 1, paddingTop: "80px" }}>
         <section className="section">
-          <div className="container" style={{ maxWidth: "900px" }}>
-            <h1 className="section-title gradient-text" style={{ fontSize: "40px", fontWeight: 900, marginBottom: "12px" }}>
+          <div className="container" style={{ maxWidth: "920px" }}>
+            <h1
+              className="section-title gradient-text"
+              style={{ fontSize: "40px", fontWeight: 900, marginBottom: "12px" }}
+            >
               Terms of Service
             </h1>
-            <p className="text-secondary" style={{ marginBottom: "48px", fontWeight: 600 }}>
-              Last Updated: {lastUpdated}
+            <p className="text-secondary" style={{ marginBottom: "40px", fontWeight: 600 }}>
+              Last updated: {lastUpdated}
             </p>
 
-            <div
-              className="space-y-10"
-              style={{ lineHeight: 1.8, color: "var(--color-text-secondary)", fontSize: "15px" }}
-            >
-              <div>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span>01.</span> Agreement to Terms
-                </h2>
+            <div style={{ lineHeight: 1.8, color: "var(--color-text-secondary)", fontSize: "15px", display: "grid", gap: "32px" }}>
+              <section>
+                <h2 style={headingStyle}>1. Agreement</h2>
                 <p>
-                  By accessing or using Decisional (the "Service"), you agree to be bound by
-                  these Terms. Decisional is a decentralized-style influencer marketplace that
-                  connects Brands and Influencers for marketing collaborations. If you disagree
-                  with any part of these terms, you must terminate your use of the Service immediately.
+                  These Terms govern your use of Decisional. By using the website, PWA,
+                  dashboard, APIs, messaging, payments, verification, campaign, or dispute
+                  tools, you agree to these Terms and our linked policies. If you do not agree,
+                  do not use the platform.
                 </p>
-              </div>
+              </section>
 
-              <div className="card" style={{ padding: "24px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)" }}>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span>02.</span> Tiered Verification & KYC
-                </h2>
-                <p style={{ marginBottom: "16px" }}>
-                  Decisional employs a **Tiered Verification System** to ensure platform integrity and trust.
-                </p>
-                <ul className="list-disc pl-6 space-y-3">
-                  <li><strong>Tier 1 (Basic):</strong> Requires email and phone verification. Limited deal capacity.</li>
-                  <li><strong>Tier 2 (Verified):</strong> Requires government-issued ID (Aadhar/PAN/Passport) and social media ownership proof. Unlocks secure escrow payments.</li>
-                  <li><strong>Tier 3 (Elite):</strong> Requires a history of successful deals and a high Digital Reputation Score (DRS).</li>
-                </ul>
-                <p style={{ marginTop: "16px", fontSize: "14px", color: "var(--color-accent-rose)", fontWeight: 600 }}>
-                  Submitting fraudulent documents will lead to an immediate and permanent ban.
-                </p>
-              </div>
-
-              <div>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span>03.</span> Marketplace Dynamics
-                </h2>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginTop: "16px" }}>
-                  <div style={{ padding: "16px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}>
-                    <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--color-primary-light)", marginBottom: "8px" }}>For Brands</h3>
-                    <p style={{ fontSize: "13px" }}>You are responsible for providing clear campaign briefs and processing payments into the Decisional escrow before work commences.</p>
+              <section className="card" style={panelStyle}>
+                <h2 style={headingStyle}>2. Roles and eligibility</h2>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px" }}>
+                  <div style={miniPanelStyle}>
+                    <h3 style={subheadingStyle}>Brands</h3>
+                    <p>Brands create briefs, fund campaign budgets, review work, approve content, and follow applicable advertising, tax, and platform rules.</p>
                   </div>
-                  <div style={{ padding: "16px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}>
-                    <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--color-secondary-light)", marginBottom: "8px" }}>For Influencers</h3>
-                    <p style={{ fontSize: "13px" }}>You agree to deliver high-quality, original content within the agreed deadlines. Using fake engagement bots is strictly prohibited.</p>
+                  <div style={miniPanelStyle}>
+                    <h3 style={subheadingStyle}>Influencers</h3>
+                    <p>Influencers apply to campaigns, deliver original content, disclose sponsored work, maintain linked social accounts, and meet agreed deadlines.</p>
+                  </div>
+                  <div style={miniPanelStyle}>
+                    <h3 style={subheadingStyle}>Admins</h3>
+                    <p>Admins review verification, disputes, payouts, safety signals, and platform compliance. Admin access is granted only through secure sessions.</p>
                   </div>
                 </div>
-              </div>
-
-              <div>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span>04.</span> Payments & Escrow Security
-                </h2>
-                <p>
-                  We use **Razorpay** and a secure internal ledger system to manage funds.
+                <p style={{ marginTop: "16px" }}>
+                  You must be at least 18 years old and legally able to enter commercial
+                  agreements. You are responsible for keeping your account secure and accurate.
                 </p>
-                <ul className="list-disc pl-6 mt-4 space-y-2">
-                  <li><strong>Escrow Protection:</strong> Funds for a deal are "locked" once a deal is accepted. Influencers are paid only after the Brand confirms content delivery or the 48-hour auto-approval window passes.</li>
-                  <li><strong>Platform Fees:</strong> Decisional charges a 10% transaction fee for providing matching, escrow, and dispute services.</li>
-                  <li><strong>Withdrawals:</strong> Influencers can withdraw earnings once work is "Verified" and the cooldown period (if any) ends.</li>
+              </section>
+
+              <section>
+                <h2 style={headingStyle}>3. Verification, KYC, and trust systems</h2>
+                <p>
+                  Decisional may require email, phone, PAN, Aadhaar-related verification, bank,
+                  GSTIN, CIN, ITR, social account, business, or content ownership checks before
+                  allowing higher-value campaigns, withdrawals, payouts, or admin-sensitive
+                  actions. We may limit, pause, or reject activity when verification is missing,
+                  inconsistent, expired, fraudulent, or risky.
+                </p>
+              </section>
+
+              <section>
+                <h2 style={headingStyle}>4. Campaigns, contracts, and deliverables</h2>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li>Campaign briefs must be lawful, clear, complete, and not misleading.</li>
+                  <li>Creators must submit original content that matches agreed deliverables, deadlines, mandatory tags, and disclosure requirements.</li>
+                  <li>Contracts may be generated and signed electronically. A deal becomes active only when required parties complete signing and payment checks.</li>
+                  <li>Brands must review submitted content within the platform review window or the system may auto-approve eligible submissions.</li>
                 </ul>
-              </div>
+              </section>
 
-              <div className="card" style={{ padding: "24px", background: "rgba(99, 102, 241, 0.05)", border: "1px solid rgba(99, 102, 241, 0.2)" }}>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span>05.</span> Gamification & Gamified Trust
-                </h2>
+              <section>
+                <h2 style={headingStyle}>5. Payments, escrow, fees, tax, and payouts</h2>
                 <p>
-                  The **Decisional XP and Badge System** is a measure of platform prestige.
+                  Campaign funds may be collected upfront and held through Razorpay and our
+                  internal ledger until release, refund, dispute resolution, or expiry. Platform
+                  fees, gateway fees, taxes, TDS, GST, withholding, invoices, and bank charges
+                  may apply based on role, transaction type, location, verification status, and
+                  applicable law. Users are responsible for their own tax filings and declarations.
                 </p>
-                <ul className="list-disc pl-6 mt-2 space-y-2">
-                  <li><strong>XP (Experience Points):</strong> Earned via successful deal completions, timely responses, and verified content.</li>
-                  <li><strong>Badges:</strong> awarded for milestones (e.g., "Top Performer 2026"). Badges can be revoked if you violate our anti-fraud policies.</li>
-                  <li><strong>Strike System:</strong> Users who violate terms (e.g., missed deadlines, offensive communication) will receive strikes. 3 strikes result in permanent suspension.</li>
+              </section>
+
+              <section>
+                <h2 style={headingStyle}>6. Prohibited conduct</h2>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li>Fake followers, engagement pods, bot traffic, fake screenshots, fake invoices, or manipulated post analytics.</li>
+                  <li>Bypassing platform payments, sharing private contact details to avoid fees, or soliciting off-platform settlements.</li>
+                  <li>Fraudulent KYC, impersonation, unauthorized brand use, misleading health or financial claims, or unlawful promotional content.</li>
+                  <li>Harassment, hate, explicit abuse, spam, malware, scraping, account resale, or attempts to access another user's account.</li>
                 </ul>
-              </div>
+              </section>
 
-              <div>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span>06.</span> Intellectual Property
-                </h2>
+              <section>
+                <h2 style={headingStyle}>7. Content rights</h2>
                 <p>
-                  Unless otherwise specified in the deal brief, once a Brand marks a deal as "Completed" and funds are released, the **exclusive usage rights** to the content transfer from the Influencer to the Brand. Decisional reserves the right to use snippets of content for platform promotional purposes.
+                  Unless a deal states otherwise, creators keep ownership of their underlying
+                  content, while brands receive the usage rights described in the approved brief,
+                  contract, or deal terms after payment release. Decisional may use limited
+                  platform metadata, screenshots, or excerpts for safety, audit, support, dispute,
+                  and product improvement purposes.
                 </p>
-              </div>
+              </section>
 
-              <div>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span>07.</span> Dispute Resolution
-                </h2>
+              <section>
+                <h2 style={headingStyle}>8. Disputes and enforcement</h2>
                 <p>
-                  In the event of a disagreement, Decisional's **Dispute Center** provides an impartial review. Both parties agree to provide evidence (screenshots, links, chat logs). Decisional's final decision on fund distribution in a dispute is binding.
+                  Disputes must be raised before final approval or payout release unless the issue
+                  relates to fraud, post deletion, or a continuing obligation. We may review
+                  briefs, chat logs, submissions, live post URLs, payment records, and verification
+                  evidence. We may issue refunds, partial releases, clawbacks, warnings, strikes,
+                  suspensions, or account bans where required.
                 </p>
-              </div>
+              </section>
 
-              <div style={{ padding: "32px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-lg)", textAlign: "center", marginTop: "64px", border: "1px solid var(--color-border)" }}>
-                <p style={{ fontSize: "14px", color: "var(--color-text-muted)" }}>
-                  Questions regarding these Terms? Contact our compliance team at
-                  <a href="mailto:legal@decisional.in" style={{ color: "var(--color-primary)", marginLeft: "5px", textDecoration: "none", fontWeight: 700 }}>legal@decisional.in</a>
+              <section>
+                <h2 style={headingStyle}>9. Service availability and liability</h2>
+                <p>
+                  We work to keep Decisional reliable, but we do not guarantee uninterrupted
+                  access, campaign outcomes, social platform API availability, creator performance,
+                  or brand sales results. To the maximum extent allowed by law, Decisional is not
+                  liable for indirect, consequential, speculative, or lost-profit damages.
                 </p>
-              </div>
+              </section>
+
+              <section style={{ padding: "28px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-border)" }}>
+                <h2 style={headingStyle}>10. Contact</h2>
+                <p>
+                  For Terms questions, legal notices, or compliance escalation, email{" "}
+                  <a href="mailto:legal@decisional.in" style={linkStyle}>legal@decisional.in</a>.
+                </p>
+              </section>
             </div>
           </div>
         </section>
@@ -133,3 +147,35 @@ export default function TermsPage() {
   );
 }
 
+const headingStyle = {
+  fontSize: "20px",
+  fontWeight: 800,
+  color: "var(--color-text-primary)",
+  marginBottom: "14px",
+};
+
+const subheadingStyle = {
+  fontSize: "16px",
+  fontWeight: 800,
+  color: "var(--color-text-primary)",
+  marginBottom: "8px",
+};
+
+const panelStyle = {
+  padding: "24px",
+  background: "rgba(255,255,255,0.02)",
+  border: "1px solid var(--color-border)",
+};
+
+const miniPanelStyle = {
+  padding: "16px",
+  background: "var(--color-bg-tertiary)",
+  borderRadius: "var(--radius-md)",
+  border: "1px solid var(--color-border)",
+};
+
+const linkStyle = {
+  color: "var(--color-primary)",
+  fontWeight: 700,
+  textDecoration: "none",
+};

@@ -130,6 +130,13 @@ export class MessageService {
     const access = await getConversationAccess(userId, params);
 
     if (params.dealId) {
+      if (access.participantIds.includes(userId)) {
+        await prisma.message.updateMany({
+          where: { dealId: params.dealId, receiverId: userId, isRead: false },
+          data: { isRead: true, readAt: new Date() },
+        });
+      }
+
       const rawMessages = await prisma.message.findMany({
         where: { dealId: params.dealId },
         include: {
@@ -150,13 +157,6 @@ export class MessageService {
         take: params.limit,
       });
 
-      if (access.participantIds.includes(userId)) {
-        await prisma.message.updateMany({
-          where: { dealId: params.dealId, receiverId: userId, isRead: false },
-          data: { isRead: true, readAt: new Date() },
-        });
-      }
-
       const presence = await getTypingPresence(access, userId);
       return {
         messages: rawMessages.map((message: any) =>
@@ -166,6 +166,11 @@ export class MessageService {
         presence,
       };
     }
+
+    await prisma.message.updateMany({
+      where: { senderId: params.with, receiverId: userId, isRead: false },
+      data: { isRead: true, readAt: new Date() },
+    });
 
     const rawMessages = await prisma.message.findMany({
       where: {
@@ -189,11 +194,6 @@ export class MessageService {
       orderBy: { createdAt: "asc" },
       skip: (params.page - 1) * params.limit,
       take: params.limit,
-    });
-
-    await prisma.message.updateMany({
-      where: { senderId: params.with, receiverId: userId, isRead: false },
-      data: { isRead: true, readAt: new Date() },
     });
 
     const presence = await getTypingPresence(access, userId);

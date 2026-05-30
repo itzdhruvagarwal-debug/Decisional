@@ -66,17 +66,25 @@ export interface RefundParams {
 }
 
 /**
- * Calculate total amount with fees
- * Uses env vars PLATFORM_FEE_PERCENTAGE and GATEWAY_FEE_PERCENTAGE
+ * Calculate total amount with fees.
+ * @param dealAmount - Deal amount in paise
+ * @param customPlatformFeePercent - Optional override for the platform fee %.
+ *   When provided (e.g. from level-based or referral-based discounts),
+ *   this value is used instead of the PLATFORM_FEE_PERCENTAGE env var.
  */
-export function calculateTotalAmount(dealAmount: number): {
+export function calculateTotalAmount(
+  dealAmount: number,
+  customPlatformFeePercent?: number,
+): {
   dealAmount: number;
   platformFee: number;
   gatewayFee: number;
   totalAmount: number;
   influencerReceives: number;
+  platformFeePercent: number;
 } {
-  const platformFeePercent = Number(process.env.PLATFORM_FEE_PERCENTAGE) || 10;
+  const platformFeePercent =
+    customPlatformFeePercent ?? (Number(process.env.PLATFORM_FEE_PERCENTAGE) || 10);
   const gatewayFeePercent = Number(process.env.GATEWAY_FEE_PERCENTAGE) || 2;
 
   const platformFee = Math.round((dealAmount * platformFeePercent) / 100);
@@ -92,6 +100,7 @@ export function calculateTotalAmount(dealAmount: number): {
     gatewayFee,
     totalAmount,
     influencerReceives,
+    platformFeePercent,
   };
 }
 

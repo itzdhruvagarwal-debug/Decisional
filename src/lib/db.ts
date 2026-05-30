@@ -115,7 +115,21 @@ function createPrismaClient() {
           const startTime = performance.now();
 
           // --- 1. Soft Delete Implementation (Security & Compliance) ---
-          if (model === "User") {
+          const MODELS_WITH_SOFT_DELETE = [
+            "User",
+            "Campaign",
+            "Application",
+            "Deal",
+            "BankAccount",
+            "Transaction",
+            "Dispute",
+            "DisputeEvidence",
+            "Review",
+            "Message",
+          ];
+          const isSoftDeleteModel = MODELS_WITH_SOFT_DELETE.includes(model || "");
+
+          if (isSoftDeleteModel) {
             // Prevent hard deletes for compliance
             if (operation === "delete") {
               operation = "update" as any;
@@ -131,7 +145,7 @@ function createPrismaClient() {
               } as any;
             }
 
-            // Prevent reading soft-deleted users implicitly
+            // Prevent reading soft-deleted rows implicitly
             if (
               [
                 "findFirst",
@@ -166,15 +180,15 @@ function createPrismaClient() {
           // --- Execute Query ---
           let result = await query(args);
 
-          // --- Prevent Soft-deleted user reads via findUnique ---
+          // --- Prevent Soft-deleted reads via findUnique ---
           if (
-            model === "User" &&
+            isSoftDeleteModel &&
             (operation === "findUnique" || operation === "findUniqueOrThrow") &&
             result
           ) {
             if ((result as any).deletedAt) {
               if (operation === "findUniqueOrThrow") {
-                throw new Error("User not found (soft deleted)");
+                throw new Error(`${model} not found (soft deleted)`);
               }
               result = null;
             }

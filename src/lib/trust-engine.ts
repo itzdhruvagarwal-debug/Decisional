@@ -287,25 +287,26 @@ async function recalculateInfluencerDRSInternal(
   ); // Total revisions driven by rejections
 
   // 4. Fetch Disputes
-  // Count resolved disputes — use resolution field for reliable matching
-  // (previous JSON string matching on influencerOutcome was fragile)
+  // Count resolved disputes — parse influencerOutcome JSON for reliable matching
   const resolvedDisputes = await prisma.dispute.findMany({
     where: {
       deal: { influencer: { userId } },
       status: "RESOLVED",
     },
-    select: { resolution: true },
+    select: { resolution: true, influencerOutcome: true },
   });
 
-  // Disputes "lost" = resolution contains INFLUENCER_FAULT or penalty keywords
+  // Disputes "lost" = influencerOutcome JSON shows trust score penalty
   const disputesLost = resolvedDisputes.filter((d: any) => {
-    const res =
-      typeof d.resolution === "string"
-        ? d.resolution
-        : JSON.stringify(d.resolution || "");
-    return (
-      res.includes("INFLUENCER_FAULT") || res.includes("influencer_penalized")
-    );
+    try {
+      if (!d.influencerOutcome) return false;
+      const outcome = typeof d.influencerOutcome === "string"
+        ? JSON.parse(d.influencerOutcome)
+        : d.influencerOutcome;
+      return typeof outcome === "object" && outcome !== null && outcome.trust_score_change < 0;
+    } catch {
+      return false;
+    }
   }).length;
 
   const disputesWon = resolvedDisputes.length - disputesLost;
@@ -392,15 +393,19 @@ async function recalculateBrandDRSInternal(userId: string): Promise<DRSResult> {
       ...disputeWhere,
       status: "RESOLVED",
     },
-    select: { resolution: true },
+    select: { resolution: true, brandOutcome: true },
   });
 
   const disputesLost = resolvedDisputes.filter((d: any) => {
-    const res =
-      typeof d.resolution === "string"
-        ? d.resolution
-        : JSON.stringify(d.resolution || "");
-    return res.includes("BRAND_FAULT") || res.includes("brand_penalized");
+    try {
+      if (!d.brandOutcome) return false;
+      const outcome = typeof d.brandOutcome === "string"
+        ? JSON.parse(d.brandOutcome)
+        : d.brandOutcome;
+      return typeof outcome === "object" && outcome !== null && outcome.trust_score_change < 0;
+    } catch {
+      return false;
+    }
   }).length;
 
   // Spec: Fair reviews from influencers (count reviews where influencer reviewed the brand)
@@ -437,11 +442,15 @@ async function recalculateBrandDRSInternal(userId: string): Promise<DRSResult> {
 
   // Spec: Unfair rejections — deals rejected by brand then overturned
   const unfairRejections = resolvedDisputes.filter((d: any) => {
-    const res =
-      typeof d.resolution === "string"
-        ? d.resolution
-        : JSON.stringify(d.resolution || "");
-    return res.includes("UNFAIR_REJECTION") || res.includes("brand_penalized");
+    try {
+      if (!d.brandOutcome) return false;
+      const outcome = typeof d.brandOutcome === "string"
+        ? JSON.parse(d.brandOutcome)
+        : d.brandOutcome;
+      return typeof outcome === "object" && outcome !== null && outcome.trust_score_change < 0 && outcome.refund_percentage < 100;
+    } catch {
+      return false;
+    }
   }).length;
 
   // Spec: Influencer complaints — open/resolved disputes raised by influencers against this brand

@@ -39,44 +39,58 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
   const { overview, spendHistory, recentCampaigns = [] } = data;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-      {/* Stats Grid */}
-      <div className="grid-4 stagger-children">
-        <StatCard
-          icon="SP"
-          label="Total Spent"
-          value={`Rs ${(overview.totalSpent / 100).toLocaleString()}`}
-          gradient="linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(99, 102, 241, 0.04))"
-          accentColor="var(--color-primary-light)"
-        />
-        <StatCard
-          icon="CP"
-          label="Active Campaigns"
-          value={overview.activeCampaigns}
-          subvalue={`${overview.totalCampaigns} total`}
-          gradient="linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(139, 92, 246, 0.04))"
-          accentColor="#a78bfa"
-        />
-        <StatCard
-          icon="DL"
-          label="Active Deals"
-          value={overview.activeDeals}
-          subvalue="In progress"
-          gradient="linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.04))"
-          accentColor="var(--color-accent-emerald)"
-        />
-        <StatCard
-          icon="DR"
-          label="Reputation (DRS)"
-          value={overview.trustScore ? `${overview.trustScore}/100` : "N/A"}
-          gradient={`linear-gradient(135deg, ${overview.trustScore > 70 ? "rgba(16, 185, 129, 0.12)" : "rgba(107, 107, 128, 0.12)"}, transparent)`}
-          accentColor={
-            overview.trustScore > 70
-              ? "var(--color-accent-emerald)"
-              : "var(--color-text-muted)"
-          }
-        />
-      </div>
+    <div className="dashboard-home-stack">
+      <section className="dashboard-welcome-card">
+        <div>
+          <p className="dashboard-welcome-kicker">Brand workspace</p>
+          <h2>Campaign command center</h2>
+          <p>Manage creator selection, campaign spend, secure holds, and approvals.</p>
+        </div>
+        <div className="dashboard-welcome-score" aria-label={`Trust score ${Math.min(overview.trustScore || 0, 100)}`}>
+          <span>Trust</span>
+          <strong>{overview.trustScore ? Math.min(overview.trustScore, 100) : "--"}</strong>
+          <small>Brand</small>
+        </div>
+      </section>
+
+      <section className="dashboard-overview-panel">
+        <div className="dashboard-section-row">
+          <h3>Overview</h3>
+          <span>{overview.totalCampaigns} campaigns</span>
+        </div>
+        <div className="grid-4 stagger-children dashboard-overview-grid">
+          <StatCard
+            icon="SP"
+            label="Spent"
+            value={`Rs ${(overview.totalSpent / 100).toLocaleString()}`}
+            gradient="transparent"
+            accentColor="#ffffff"
+          />
+          <StatCard
+            icon="CP"
+            label="Campaigns"
+            value={overview.activeCampaigns}
+            subvalue={`${overview.totalCampaigns} total`}
+            gradient="transparent"
+            accentColor="#ffffff"
+          />
+          <StatCard
+            icon="DL"
+            label="Active Deals"
+            value={overview.activeDeals}
+            subvalue="In progress"
+            gradient="transparent"
+            accentColor="#ffffff"
+          />
+          <StatCard
+            icon="DR"
+            label="Trust Score"
+            value={overview.trustScore ? `${overview.trustScore}/100` : "N/A"}
+            gradient="transparent"
+            accentColor="#ffffff"
+          />
+        </div>
+      </section>
 
       {/* Spend Chart */}
       <div className="card">

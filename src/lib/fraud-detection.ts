@@ -179,31 +179,38 @@ export async function checkApplicationFraud(
   }
 
   // Rule 2: Copy-paste proposal detection
-  const recentProposals = influencerProfile
-    ? await prisma.application.findMany({
-      where: {
-        influencerId: influencerProfile.id,
-        createdAt: {
-          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+  // GUARD: Only run Jaccard similarity on substantive proposals (>50 chars).
+  // Short generic messages like "Hi, I'm interested" trivially produce
+  // high similarity scores because the word-set is tiny.
+  const trimmedProposal = params.proposalContent.trim();
+
+  if (trimmedProposal.length > 50) {
+    const recentProposals = influencerProfile
+      ? await prisma.application.findMany({
+        where: {
+          influencerId: influencerProfile.id,
+          createdAt: {
+            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+          },
         },
-      },
-      select: { proposal: true },
-      take: 10,
-    })
-    : [];
+        select: { proposal: true },
+        take: 10,
+      })
+      : [];
 
-  const similarProposals = recentProposals.filter(
-    (p: { proposal: string }) =>
-      calculateSimilarity(p.proposal, params.proposalContent) > 0.9,
-  );
+    const similarProposals = recentProposals.filter(
+      (p: { proposal: string }) =>
+        calculateSimilarity(p.proposal, trimmedProposal) > 0.9,
+    );
 
-  if (similarProposals.length >= 3) {
-    flags.push({
-      rule: "COPY_PASTE_PROPOSALS",
-      severity: "MEDIUM",
-      description: `${similarProposals.length} similar proposals detected`,
-    });
-    riskScore += 30;
+    if (similarProposals.length >= 3) {
+      flags.push({
+        rule: "COPY_PASTE_PROPOSALS",
+        severity: "MEDIUM",
+        description: `${similarProposals.length} similar proposals detected`,
+      });
+      riskScore += 30;
+    }
   }
 
   // Rule 3: Suspiciously low rate (potential fake deal farming)

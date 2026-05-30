@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { sendOTP } from "@/lib/sms";
+import { normalizeIndianPhone, sendOTP } from "@/lib/sms";
 import { sendVerificationEmail } from "@/lib/email";
 import { generateOTP } from "@/lib/utils";
 import prisma from "@/lib/db";
@@ -65,8 +65,17 @@ export async function POST(req: Request) {
         const { type, contact } = parsed.data;
 
         if (type === "phone") {
-            // 1. Send SMS OTP via MSG91
-            const result = await sendOTP(contact);
+            const normalizedPhone = normalizeIndianPhone(contact);
+            if (!normalizedPhone) {
+                return NextResponse.json(
+                    { error: "Invalid Indian phone number format" },
+                    { status: 400 },
+                );
+            }
+
+            const result = await sendOTP(normalizedPhone, {
+                purpose: "phone_verification",
+            });
             if (!result.success) {
                 // Do NOT expose internal error details to client
                 logger.warn("OTP send failed for phone", {
@@ -74,20 +83,35 @@ export async function POST(req: Request) {
                     error: result.error,
                 });
                 return NextResponse.json(
-                    { error: "Failed to send OTP. Please try again." },
-                    { status: 500 },
+                    {
+                        error: result.retryAfterSeconds
+                            ? result.error
+                            : "Failed to send OTP. Please try again.",
+                        ...(result.retryAfterSeconds
+                            ? { retryAfterSeconds: result.retryAfterSeconds }
+                            : {}),
+                    },
+                    { status: result.retryAfterSeconds ? 429 : 500 },
                 );
             }
 
             // Update user with the phone number only after OTP is successfully sent
             await prisma.user.update({
                 where: { id: session.user.id },
-                data: { phone: contact },
+                data: { phone: normalizedPhone },
             });
 
             return NextResponse.json({
                 success: true,
-                message: "OTP sent to phone",
+                message:
+                    result.channel === "whatsapp"
+                        ? "OTP sent on WhatsApp"
+                        : "OTP sent by SMS",
+                channel: result.channel,
+                fallbackUsed: result.fallbackUsed,
+                ...(process.env.NODE_ENV !== "production" && result.otp
+                    ? { otp: result.otp }
+                    : {}),
             });
         } else if (type === "email") {
             // 2. Send Email OTP

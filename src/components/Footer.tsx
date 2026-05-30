@@ -3,6 +3,32 @@
 import Link from "next/link";
 import Logo from "./Logo";
 
+const platformLinks = [
+  { label: "For Influencers", href: "/register?type=influencer" },
+  { label: "For Brands", href: "/register?type=brand" },
+  { label: "Pricing", href: "/pricing" },
+];
+
+const companyLinks = [
+  { label: "About", href: "/about" },
+  { label: "Blog", href: "/blog" },
+  { label: "Contact", href: "/contact" },
+];
+
+const legalLinks = [
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms and Conditions", href: "/terms" },
+  { label: "Refund Policy", href: "/refund" },
+  { label: "Cookie Policy", href: "/cookie-policy" },
+];
+
+const socialLinks = [
+  { label: "X", href: "https://twitter.com" },
+  { label: "IG", href: "https://instagram.com" },
+  { label: "YT", href: "https://youtube.com" },
+  { label: "IN", href: "https://linkedin.com" },
+];
+
 export default function Footer() {
   return (
     <footer
@@ -21,7 +47,6 @@ export default function Footer() {
             marginBottom: "48px",
           }}
         >
-          {/* Brand Column */}
           <div style={{ gridColumn: "span 1" }}>
             <Logo />
             <p
@@ -32,10 +57,10 @@ export default function Footer() {
                 maxWidth: "280px",
               }}
             >
-              Turning signals into decisions. India&apos;s most trusted
-              influencer marketplace. Secure, transparent, and data-driven.
+              Decisional helps Indian brands and influencers run trusted
+              collaborations with verified profiles, protected payments, and
+              clearer delivery workflows.
             </p>
-            {/* Social Icons */}
             <div
               style={{
                 display: "flex",
@@ -43,22 +68,9 @@ export default function Footer() {
                 marginTop: "20px",
               }}
             >
-              {[
-                {
-                  icon: "𝕏",
-                  href: "https://twitter.com",
-                  label: "X (Twitter)",
-                },
-                {
-                  icon: "📸",
-                  href: "https://instagram.com",
-                  label: "Instagram",
-                },
-                { icon: "▶", href: "https://youtube.com", label: "YouTube" },
-                { icon: "💼", href: "https://linkedin.com", label: "LinkedIn" },
-              ].map((social, i) => (
+              {socialLinks.map((social) => (
                 <a
-                  key={i}
+                  key={social.label}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -72,118 +84,23 @@ export default function Footer() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "14px",
+                    fontSize: "12px",
+                    fontWeight: 800,
                     cursor: "pointer",
                     transition: "all var(--transition-fast)",
                     color: "inherit",
                     textDecoration: "none",
                   }}
                 >
-                  {social.icon}
+                  {social.label}
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Platform */}
-          <div>
-            <h4
-              style={{
-                fontWeight: 700,
-                marginBottom: "16px",
-                fontSize: "15px",
-              }}
-            >
-              Platform
-            </h4>
-            <ul style={{ listStyle: "none" }}>
-              {[
-                { label: "For Influencers", href: "/register?type=influencer" },
-                { label: "For Brands", href: "/register?type=brand" },
-                { label: "Pricing", href: "/pricing" },
-              ].map((item) => (
-                <li key={item.label} style={{ marginBottom: "10px" }}>
-                  <Link
-                    href={item.href}
-                    style={{
-                      color: "var(--color-text-secondary)",
-                      fontSize: "14px",
-                      transition: "color var(--transition-fast)",
-                    }}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h4
-              style={{
-                fontWeight: 700,
-                marginBottom: "16px",
-                fontSize: "15px",
-              }}
-            >
-              Company
-            </h4>
-            <ul style={{ listStyle: "none" }}>
-              {[
-                { label: "About Us", href: "/about" },
-                { label: "Blog", href: "/blog" },
-                { label: "Contact", href: "/contact" },
-              ].map((item) => (
-                <li key={item.label} style={{ marginBottom: "10px" }}>
-                  <Link
-                    href={item.href}
-                    style={{
-                      color: "var(--color-text-secondary)",
-                      fontSize: "14px",
-                      transition: "color var(--transition-fast)",
-                    }}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h4
-              style={{
-                fontWeight: 700,
-                marginBottom: "16px",
-                fontSize: "15px",
-              }}
-            >
-              Legal
-            </h4>
-            <ul style={{ listStyle: "none" }}>
-              {[
-                { label: "Privacy Policy", href: "/privacy" },
-                { label: "Terms of Service", href: "/terms" },
-                { label: "Refund Policy", href: "/refund" },
-                { label: "Cookie Policy", href: "/cookie-policy" },
-              ].map((item) => (
-                <li key={item.label} style={{ marginBottom: "10px" }}>
-                  <Link
-                    href={item.href}
-                    style={{
-                      color: "var(--color-text-secondary)",
-                      fontSize: "14px",
-                      transition: "color var(--transition-fast)",
-                    }}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <FooterColumn title="Platform" links={platformLinks} />
+          <FooterColumn title="Company" links={companyLinks} />
+          <FooterColumn title="Legal" links={legalLinks} />
         </div>
 
         <div className="divider" />
@@ -203,7 +120,7 @@ export default function Footer() {
               fontSize: "13px",
             }}
           >
-            © 2026 Decisional. All rights reserved.
+            (c) 2026 Decisional. All rights reserved.
           </p>
           <p
             style={{
@@ -211,10 +128,48 @@ export default function Footer() {
               fontSize: "13px",
             }}
           >
-            Made with ❤️ in India
+            Built in India for trusted collaborations.
           </p>
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterColumn({
+  title,
+  links,
+}: {
+  title: string;
+  links: Array<{ label: string; href: string }>;
+}) {
+  return (
+    <div>
+      <h4
+        style={{
+          fontWeight: 700,
+          marginBottom: "16px",
+          fontSize: "15px",
+        }}
+      >
+        {title}
+      </h4>
+      <ul style={{ listStyle: "none", padding: 0 }}>
+        {links.map((item) => (
+          <li key={item.label} style={{ marginBottom: "10px" }}>
+            <Link
+              href={item.href}
+              style={{
+                color: "var(--color-text-secondary)",
+                fontSize: "14px",
+                transition: "color var(--transition-fast)",
+              }}
+            >
+              {item.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

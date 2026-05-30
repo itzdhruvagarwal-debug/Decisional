@@ -115,7 +115,7 @@ function wrapInBrandedTemplate(bodyHtml: string, preheaderText?: string): string
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 28px 32px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 0;">
                 ◆ ${APP_NAME}
               </h1>
               <p style="margin: 4px 0 0; color: rgba(255,255,255,0.8); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;">

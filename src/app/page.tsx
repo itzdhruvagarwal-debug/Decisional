@@ -5,139 +5,13 @@ import Link from "next/link";
 import { useState, useEffect, useRef, ReactNode } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-// Stats that animate
-const stats = [
-  { value: 50000, suffix: "+", label: "Influencers" },
-  { value: 2500, suffix: "+", label: "Brands" },
-  { value: 10, suffix: "Cr+", label: "Paid Out" },
-  { value: 2, suffix: "h", label: "Payment Time" },
-];
-
-// Features
-const features = [
-  {
-    icon: "💰",
-    title: "Guaranteed Payments",
-    description:
-      "Money is pre-authorized before work begins. Auto-released within 2 hours of verified posting.",
-  },
-  {
-    icon: "🛡️",
-    title: "Fraud Protection",
-    description:
-      "Multi-layer verification, fake follower detection, and trust scores protect everyone.",
-  },
-  {
-    icon: "📝",
-    title: "Smart Contracts",
-    description:
-      "Clear deliverables, timelines, and revision policies. No room for disputes.",
-  },
-  {
-    icon: "⚡",
-    title: "Instant Matching",
-    description:
-      "Our algorithm matches brands with perfect influencers based on niche, reach, and engagement.",
-  },
-  {
-    icon: "🏆",
-    title: "Gamified Experience",
-    description:
-      "Earn XP, unlock badges, climb leaderboards. The more you work, the more perks you get.",
-  },
-  {
-    icon: "🔍",
-    title: "Post Verification",
-    description:
-      "Automated verification confirms posts are live, properly tagged, and meet requirements.",
-  },
-];
-
-// How it works steps
-const steps = [
-  {
-    forInfluencer: {
-      step: 1,
-      title: "Create Profile",
-      description: "Connect your social accounts and build your portfolio",
-    },
-    forBrand: {
-      step: 1,
-      title: "Launch Campaign",
-      description: "Define your goals, budget, and target audience",
-    },
-  },
-  {
-    forInfluencer: {
-      step: 2,
-      title: "Apply to Campaigns",
-      description: "Browse opportunities and submit compelling proposals",
-    },
-    forBrand: {
-      step: 2,
-      title: "Select Creators",
-      description: "Review applications and choose the perfect fit",
-    },
-  },
-  {
-    forInfluencer: {
-      step: 3,
-      title: "Create & Post",
-      description: "Deliver amazing content and post when approved",
-    },
-    forBrand: {
-      step: 3,
-      title: "Approve Content",
-      description: "Review submissions and request revisions if needed",
-    },
-  },
-  {
-    forInfluencer: {
-      step: 4,
-      title: "Get Paid Fast",
-      description: "Money auto-releases to your wallet in 2 hours",
-    },
-    forBrand: {
-      step: 4,
-      title: "Track Results",
-      description: "Monitor engagement and measure campaign ROI",
-    },
-  },
-];
-
-// Testimonials
-const testimonials = [
-  {
-    name: "Priya Sharma",
-    role: "Fashion Influencer",
-    followers: "120K",
-    avatar:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=128&auto=format&fit=crop",
-    quote:
-      "Finally a platform where I get paid on time! The 2-hour payment release is a game-changer.",
-    rating: 5,
-  },
-  {
-    name: "Arjun Mehta",
-    role: "Tech Brand Manager",
-    avatar:
-      "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=128&auto=format&fit=crop",
-    quote:
-      "We've run 15 campaigns with zero fraud. The verification system is incredible.",
-    rating: 5,
-  },
-  {
-    name: "Rahul Verma",
-    role: "Food Creator",
-    followers: "85K",
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=128&auto=format&fit=crop",
-    quote:
-      "The Gamified referral system keeps me motivated. I hit Platinum and now I get a solid 2% fee discount plus lifetime GMV shares!",
-    rating: 5,
-  },
-];
+import PWAInstallButton from "@/components/pwa/PWAInstallButton";
+import {
+  homeFeatures,
+  homeStats,
+  homeSteps,
+  homeTestimonials,
+} from "@/lib/home-content";
 
 /* ============ Scroll-triggered animation hook ============ */
 function useInView(threshold = 0.15) {
@@ -271,33 +145,6 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Animated Orbs (Subtle on top of image) */}
-        <div
-          className="bg-orb animate-blob"
-          style={{
-            top: "20%",
-            left: "10%",
-            width: "500px",
-            height: "500px",
-            background:
-              "radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)",
-            zIndex: 0,
-          }}
-        />
-        <div
-          className="bg-orb animate-blob"
-          style={{
-            bottom: "10%",
-            right: "10%",
-            width: "450px",
-            height: "450px",
-            background:
-              "radial-gradient(circle, rgba(236, 72, 153, 0.12) 0%, transparent 70%)",
-            animationDelay: "2s",
-            zIndex: 0,
-          }}
-        />
-
         <div className="container" style={{ position: "relative", zIndex: 1 }}>
           <div
             style={{ textAlign: "center", maxWidth: "900px", margin: "0 auto" }}
@@ -306,7 +153,7 @@ export default function HomePage() {
               className="badge badge-primary animate-fade-in"
               style={{ marginBottom: "24px", animationDelay: "0.2s" }}
             >
-              🎉 Now Live in India
+              India-first creator collaboration workspace
             </div>
 
             <h1
@@ -316,7 +163,7 @@ export default function HomePage() {
                 fontWeight: 900,
                 lineHeight: 1.08,
                 marginBottom: "24px",
-                letterSpacing: "-0.03em",
+                letterSpacing: 0,
                 animationDelay: "0.3s",
               }}
             >
@@ -345,9 +192,9 @@ export default function HomePage() {
                 animationDelay: "0.5s",
               }}
             >
-              A system that turns reach, data, and actions into clear
-              decisions. Secure pre-authorized payments, verified creators, and
-              2-hour payment release guarantee.
+              Run influencer campaigns with verified profiles, signed
+              deliverables, payment protection, content approvals, and dispute
+              records in one mobile-ready workspace.
             </p>
 
             <div
@@ -374,6 +221,28 @@ export default function HomePage() {
               </Link>
             </div>
 
+            <div
+              className="animate-fade-in"
+              style={{
+                display: "flex",
+                gap: "12px",
+                justifyContent: "center",
+                flexWrap: "wrap",
+                marginTop: "18px",
+                animationDelay: "0.8s",
+              }}
+            >
+              <PWAInstallButton
+                platform="ios"
+                variant="store"
+                label="Download for iOS"
+              />
+              <PWAInstallButton
+                platform="android"
+                variant="store"
+                label="Download for Android"
+              />
+            </div>
 
             <p
               className="animate-fade-in"
@@ -388,9 +257,9 @@ export default function HomePage() {
                 animationDelay: "0.9s",
               }}
             >
-              <span>🔒 100% Secure</span>
-              <span>💳 Pre-authorized Payments</span>
-              <span>⚡ 2h Payment Release</span>
+              <span>Secure sessions</span>
+              <span>Protected payments</span>
+              <span>Installable PWA</span>
             </p>
           </div>
         </div>
@@ -408,7 +277,7 @@ export default function HomePage() {
             fontSize: "24px",
           }}
         >
-          ↓
+          v
         </div>
       </section>
 
@@ -424,7 +293,7 @@ export default function HomePage() {
       >
         <div className="container">
           <div className="grid-4">
-            {stats.map((stat, index) => (
+            {homeStats.map((stat, index) => (
               <RevealOnScroll key={index} delay={index * 0.08}>
                 <div className="stat-card">
                   <div className="stat-value gradient-text">
@@ -458,7 +327,7 @@ export default function HomePage() {
           </RevealOnScroll>
 
           <div className="grid-3">
-            {features.map((feature, index) => (
+            {homeFeatures.map((feature, index) => (
               <RevealOnScroll key={index} delay={index * 0.08}>
                 <div className="card hover-lift" style={{ height: "100%" }}>
                   <div className="feature-icon">{feature.icon}</div>
@@ -585,7 +454,7 @@ export default function HomePage() {
               margin: "0 auto",
             }}
           >
-            {steps.map((step, index) => {
+            {homeSteps.map((step, index) => {
               const currentStep =
                 activeTab === "influencer" ? step.forInfluencer : step.forBrand;
               return (
@@ -662,7 +531,7 @@ export default function HomePage() {
           </RevealOnScroll>
 
           <div className="grid-3">
-            {testimonials.map((testimonial, index) => (
+            {homeTestimonials.map((testimonial, index) => (
               <RevealOnScroll key={index} delay={index * 0.1}>
                 <div
                   className="card hover-lift"
@@ -700,11 +569,10 @@ export default function HomePage() {
                   >
                     {testimonial.role}
                     {testimonial.followers &&
-                      ` • ${testimonial.followers} followers`}
+                      ` - ${testimonial.followers} followers`}
                   </p>
-                  {/* Stars */}
                   <div style={{ marginBottom: "16px", fontSize: "14px" }}>
-                    {"⭐".repeat(testimonial.rating)}
+                    {`${testimonial.rating}/5 rating`}
                   </div>
                   <p
                     style={{
@@ -787,11 +655,11 @@ export default function HomePage() {
                   }}
                 >
                   {[
-                    "✓ Create unlimited profile",
-                    "✓ Apply to any campaign",
-                    "✓ 10% fee on earnings",
-                    "✓ Lower fees as you level up",
-                    "✓ 2-hour payment guarantee",
+                    "Profile, portfolio, and verification",
+                    "Campaign discovery and applications",
+                    "Clear payout before deal signing",
+                    "Levels, badges, and referral benefits",
+                    "Protected settlement after approval",
                   ].map((item, i) => (
                     <li
                       key={i}
@@ -828,7 +696,7 @@ export default function HomePage() {
                   className="badge badge-primary"
                   style={{ marginBottom: "16px" }}
                 >
-                  ⭐ Most Popular
+                  Popular for teams
                 </div>
                 <h3
                   style={{
@@ -865,11 +733,11 @@ export default function HomePage() {
                   }}
                 >
                   {[
-                    "✓ Verified influencer pool",
-                    "✓ Pre-authorized payments",
-                    "✓ Content approval flow",
-                    "✓ Post verification system",
-                    "✓ Dispute resolution included",
+                    "Verified creator discovery",
+                    "Protected payment workflow",
+                    "Contract and approval flow",
+                    "Post verification system",
+                    "Dispute resolution included",
                   ].map((item, i) => (
                     <li
                       key={i}
@@ -927,7 +795,7 @@ export default function HomePage() {
                 fontSize: "clamp(28px, 4vw, 40px)",
                 fontWeight: 900,
                 marginBottom: "16px",
-                letterSpacing: "-0.02em",
+                letterSpacing: 0,
               }}
             >
               Ready to Get Started?
@@ -942,8 +810,8 @@ export default function HomePage() {
                 lineHeight: 1.7,
               }}
             >
-              Join thousands of influencers and brands already growing together
-              on Decisional.
+              Create a free account, install the PWA, and manage campaigns from
+              web, iOS home screen, or Android home screen.
             </p>
             <Link
               href="/register"
@@ -955,7 +823,7 @@ export default function HomePage() {
                 boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
               }}
             >
-              Create Free Account →
+              Create Free Account
             </Link>
           </div>
         </section>

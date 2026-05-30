@@ -5,6 +5,9 @@ import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import IndiaTaxCompliancePanel from "@/components/dashboard/settings/IndiaTaxCompliancePanel";
+import NotificationPreferencesPanel, {
+    type NotificationPreferences,
+} from "@/components/dashboard/settings/NotificationPreferencesPanel";
 
 interface Profile {
     displayName: string;
@@ -28,19 +31,6 @@ interface Profile {
     youtubeEngagementRate?: number;
     categories: string[];
     languages: string[];
-}
-
-interface NotificationPreferences {
-    email: {
-        marketing: boolean;
-        updates: boolean;
-        security: boolean;
-    };
-    push: {
-        marketing: boolean;
-        updates: boolean;
-        security: boolean;
-    };
 }
 
 interface User {
@@ -2468,235 +2458,13 @@ export default function SettingsPage() {
 
                 {activeTab === "tax" && <IndiaTaxCompliancePanel />}
 
-                {/* Placeholder for other tabs */}
                 {activeTab === "notifications" && (
-                    <div className="card" style={{ maxWidth: "800px" }}>
-                        <h3
-                            style={{
-                                fontSize: "20px",
-                                fontWeight: 700,
-                                marginBottom: "24px",
-                            }}
-                        >
-                            Notification Preferences
-                        </h3>
-
-                        <div style={{ marginBottom: "32px" }}>
-                            <h4
-                                style={{
-                                    fontSize: "16px",
-                                    fontWeight: 600,
-                                    marginBottom: "16px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "8px",
-                                }}
-                            >
-                                📧 Email Notifications
-                            </h4>
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: "16px",
-                                }}
-                            >
-                                {Object.entries(notificationPreferences.email).map(
-                                    ([key, value]) => (
-                                        <div
-                                            key={key}
-                                            style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "space-between",
-                                                padding: "12px",
-                                                background: "var(--color-bg-tertiary)",
-                                                borderRadius: "var(--radius-sm)",
-                                            }}
-                                        >
-                                            <div>
-                                                <div
-                                                    style={{
-                                                        fontWeight: 500,
-                                                        textTransform: "capitalize",
-                                                    }}
-                                                >
-                                                    {key}
-                                                </div>
-                                                <div
-                                                    style={{
-                                                        fontSize: "13px",
-                                                        color: "var(--color-text-secondary)",
-                                                    }}
-                                                >
-                                                    Receive {key} related emails
-                                                </div>
-                                            </div>
-                                            <label
-                                                style={{
-                                                    position: "relative",
-                                                    display: "inline-block",
-                                                    width: "44px",
-                                                    height: "24px",
-                                                }}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={value}
-                                                    onChange={() =>
-                                                        handleNotificationToggle("email", key as any)
-                                                    }
-                                                    style={{ opacity: 0, width: 0, height: 0 }}
-                                                />
-                                                <span
-                                                    style={{
-                                                        position: "absolute",
-                                                        cursor: "pointer",
-                                                        top: 0,
-                                                        left: 0,
-                                                        right: 0,
-                                                        bottom: 0,
-                                                        backgroundColor: value
-                                                            ? "var(--color-primary)"
-                                                            : "#2f2f46",
-                                                        transition: ".4s",
-                                                        borderRadius: "34px",
-                                                    }}
-                                                ></span>
-                                                <span
-                                                    style={{
-                                                        position: "absolute",
-                                                        height: "18px",
-                                                        width: "18px",
-                                                        left: value ? "23px" : "3px",
-                                                        bottom: "3px",
-                                                        backgroundColor: "white",
-                                                        transition: ".4s",
-                                                        borderRadius: "50%",
-                                                    }}
-                                                ></span>
-                                            </label>
-                                        </div>
-                                    ),
-                                )}
-                            </div>
-                        </div>
-
-                        <div style={{ marginBottom: "32px" }}>
-                            <h4
-                                style={{
-                                    fontSize: "16px",
-                                    fontWeight: 600,
-                                    marginBottom: "16px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "8px",
-                                }}
-                            >
-                                🔔 Push Notifications
-                            </h4>
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: "16px",
-                                }}
-                            >
-                                {Object.entries(notificationPreferences.push).map(
-                                    ([key, value]) => (
-                                        <div
-                                            key={key}
-                                            style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "space-between",
-                                                padding: "12px",
-                                                background: "var(--color-bg-tertiary)",
-                                                borderRadius: "var(--radius-sm)",
-                                            }}
-                                        >
-                                            <div>
-                                                <div
-                                                    style={{
-                                                        fontWeight: 500,
-                                                        textTransform: "capitalize",
-                                                    }}
-                                                >
-                                                    {key}
-                                                </div>
-                                                <div
-                                                    style={{
-                                                        fontSize: "13px",
-                                                        color: "var(--color-text-secondary)",
-                                                    }}
-                                                >
-                                                    Receive {key} related push notifications
-                                                </div>
-                                            </div>
-                                            <label
-                                                style={{
-                                                    position: "relative",
-                                                    display: "inline-block",
-                                                    width: "44px",
-                                                    height: "24px",
-                                                }}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={value}
-                                                    onChange={() =>
-                                                        handleNotificationToggle("push", key as any)
-                                                    }
-                                                    style={{ opacity: 0, width: 0, height: 0 }}
-                                                />
-                                                <span
-                                                    style={{
-                                                        position: "absolute",
-                                                        cursor: "pointer",
-                                                        top: 0,
-                                                        left: 0,
-                                                        right: 0,
-                                                        bottom: 0,
-                                                        backgroundColor: value
-                                                            ? "var(--color-primary)"
-                                                            : "#2f2f46",
-                                                        transition: ".4s",
-                                                        borderRadius: "34px",
-                                                    }}
-                                                ></span>
-                                                <span
-                                                    style={{
-                                                        position: "absolute",
-                                                        height: "18px",
-                                                        width: "18px",
-                                                        left: value ? "23px" : "3px",
-                                                        bottom: "3px",
-                                                        backgroundColor: "white",
-                                                        transition: ".4s",
-                                                        borderRadius: "50%",
-                                                    }}
-                                                ></span>
-                                            </label>
-                                        </div>
-                                    ),
-                                )}
-                            </div>
-                        </div>
-
-                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                            <button
-                                onClick={saveNotificationPreferences}
-                                disabled={isSaving}
-                                className="btn btn-primary"
-                                style={{
-                                    opacity: isSaving ? 0.7 : 1,
-                                    cursor: isSaving ? "not-allowed" : "pointer",
-                                }}
-                            >
-                                {isSaving ? "Saving..." : "Save Preferences"}
-                            </button>
-                        </div>
-                    </div>
+                    <NotificationPreferencesPanel
+                        preferences={notificationPreferences}
+                        isSaving={isSaving}
+                        onToggle={handleNotificationToggle}
+                        onSave={saveNotificationPreferences}
+                    />
                 )}
 
                 {/* Security Tab - Password Change */}

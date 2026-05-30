@@ -7,6 +7,28 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 type UserType = "INFLUENCER" | "BRAND";
 
+function parseUserType(value: string | null): UserType | null {
+  const normalized = value?.toUpperCase();
+  return normalized === "INFLUENCER" || normalized === "BRAND"
+    ? normalized
+    : null;
+}
+
+function getPasswordIssue(password: string): string | null {
+  if (password.length < 8) return "Password must be at least 8 characters";
+  if (!/[A-Z]/.test(password)) return "Password must include one uppercase letter";
+  if (!/[a-z]/.test(password)) return "Password must include one lowercase letter";
+  if (!/[0-9]/.test(password)) return "Password must include one number";
+  if (!/[^A-Za-z0-9]/.test(password)) return "Password must include one special character";
+  return null;
+}
+
+function formatOtpChannel(channel: "whatsapp" | "sms" | "dev" | null) {
+  if (channel === "sms") return "by SMS";
+  if (channel === "dev") return "in development mode";
+  return "on WhatsApp";
+}
+
 const userTypeInfo = {
   INFLUENCER: {
     title: "Influencer",
@@ -15,7 +37,7 @@ const userTypeInfo = {
       "Create content, grow your audience, and earn money from brand collaborations.",
     benefits: [
       "Apply to unlimited campaigns",
-      "Get paid in 2 hours",
+      "Clear payout terms before signing",
       "Build your portfolio",
     ],
   },
@@ -60,9 +82,7 @@ function RegisterContent() {
   const initialError = urlError === "OAuthAccountNotRegistered"
     ? "Please create an account before signing in with Google."
     : "";
-  const initialType = searchParams
-    .get("type")
-    ?.toUpperCase() as UserType | null;
+  const initialType = parseUserType(searchParams.get("type"));
   const initialReferralCode = searchParams.get("ref")?.trim().toUpperCase() || "";
 
   const [step, setStep] = useState(initialType ? 2 : 1);
@@ -94,6 +114,7 @@ function RegisterContent() {
   const [phoneOtp, setPhoneOtp] = useState("");
   const [phoneOtpLoading, setPhoneOtpLoading] = useState(false);
   const [phoneOtpError, setPhoneOtpError] = useState("");
+  const [phoneOtpChannel, setPhoneOtpChannel] = useState<"whatsapp" | "sms" | "dev" | null>(null);
   const [phoneCooldown, setPhoneCooldown] = useState(0);
 
   // Cooldown timer
@@ -131,6 +152,9 @@ function RegisterContent() {
       if (!res.ok) {
         setEmailOtpError(data.error || "Failed to send OTP");
         return;
+      }
+      if (data.otp && process.env.NODE_ENV !== "production") {
+        setEmailOtp(data.otp);
       }
       setEmailOtpSent(true);
       startCooldown(setEmailCooldown, 60);
@@ -190,6 +214,10 @@ function RegisterContent() {
       if (!res.ok) {
         setPhoneOtpError(data.error || "Failed to send OTP");
         return;
+      }
+      setPhoneOtpChannel(data.channel || null);
+      if (data.otp && process.env.NODE_ENV !== "production") {
+        setPhoneOtp(data.otp);
       }
       setPhoneOtpSent(true);
       startCooldown(setPhoneCooldown, 60);
@@ -256,8 +284,9 @@ function RegisterContent() {
       return;
     }
 
-    if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters");
+    const passwordIssue = getPasswordIssue(formData.password);
+    if (passwordIssue) {
+      setError(passwordIssue);
       return;
     }
 
@@ -268,6 +297,12 @@ function RegisterContent() {
 
     if (!formData.agreeToTerms) {
       setError("Please agree to the terms and conditions");
+      return;
+    }
+
+    if (!userType) {
+      setError("Please choose whether you are joining as a brand or influencer");
+      setStep(1);
       return;
     }
 
@@ -348,7 +383,7 @@ function RegisterContent() {
         justifyContent: "center",
         padding: "clamp(16px, 5vw, 24px)",
         position: "relative",
-        overflow: "hidden",
+        overflowX: "hidden",
       }}
     >
       {/* Realistic Abstract Background */}
@@ -603,7 +638,7 @@ function RegisterContent() {
                 <label className="label" htmlFor="email">
                   Email Address *
                 </label>
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div className="auth-otp-row" style={{ display: "flex", gap: "8px" }}>
                   <input
                     id="email"
                     type="email"
@@ -621,7 +656,7 @@ function RegisterContent() {
                     }}
                     required
                     disabled={emailOtpVerified}
-                    style={{ flex: 1, opacity: emailOtpVerified ? 0.7 : 1 }}
+                    style={{ flex: "1 1 220px", minWidth: 0, opacity: emailOtpVerified ? 0.7 : 1 }}
                   />
                   {!emailOtpVerified && (
                     <button
@@ -659,7 +694,7 @@ function RegisterContent() {
                     >
                       OTP sent to {formData.email}
                     </p>
-                    <div style={{ display: "flex", gap: "8px" }}>
+                    <div className="auth-otp-row" style={{ display: "flex", gap: "8px" }}>
                       <input
                         id="email-otp-input"
                         type="text"
@@ -673,7 +708,8 @@ function RegisterContent() {
                         }
                         maxLength={6}
                         style={{
-                          flex: 1,
+                          flex: "1 1 180px",
+                          minWidth: 0,
                           letterSpacing: 0,
                           fontFamily: "'Courier New', monospace",
                           fontWeight: 700,
@@ -727,7 +763,7 @@ function RegisterContent() {
                 <label className="label" htmlFor="phone">
                   Phone Number *
                 </label>
-                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <div className="auth-otp-row auth-phone-row" style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                   <span
                     style={{
                       padding: "10px 12px",
@@ -759,7 +795,7 @@ function RegisterContent() {
                     required
                     disabled={phoneOtpVerified}
                     maxLength={10}
-                    style={{ flex: 1, opacity: phoneOtpVerified ? 0.7 : 1 }}
+                    style={{ flex: "1 1 160px", minWidth: 0, opacity: phoneOtpVerified ? 0.7 : 1 }}
                   />
                   {!phoneOtpVerified && (
                     <button
@@ -795,9 +831,9 @@ function RegisterContent() {
                         marginBottom: "8px",
                       }}
                     >
-                      OTP sent to +91-{formData.phone}
+                      OTP sent {formatOtpChannel(phoneOtpChannel)} to +91-{formData.phone}
                     </p>
-                    <div style={{ display: "flex", gap: "8px" }}>
+                    <div className="auth-otp-row" style={{ display: "flex", gap: "8px" }}>
                       <input
                         id="phone-otp-input"
                         type="text"
@@ -811,7 +847,8 @@ function RegisterContent() {
                         }
                         maxLength={6}
                         style={{
-                          flex: 1,
+                          flex: "1 1 180px",
+                          minWidth: 0,
                           letterSpacing: 0,
                           fontFamily: "'Courier New', monospace",
                           fontWeight: 700,

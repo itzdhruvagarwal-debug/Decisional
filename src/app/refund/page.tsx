@@ -5,86 +5,98 @@ import Footer from "@/components/Footer";
 import Link from "next/link";
 
 export default function RefundPage() {
-  const lastUpdated = "February 26, 2026";
+  const lastUpdated = "May 30, 2026";
 
   return (
-    <div
-      style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
-    >
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Navbar />
 
       <main style={{ flex: 1, paddingTop: "80px" }}>
         <section className="section">
-          <div className="container" style={{ maxWidth: "850px" }}>
+          <div className="container" style={{ maxWidth: "880px" }}>
             <h1 className="section-title gradient-text" style={{ fontSize: "40px", fontWeight: 900, marginBottom: "12px" }}>
-              Refund & Cancellation
+              Refund and Cancellation Policy
             </h1>
-            <p className="text-secondary" style={{ marginBottom: "48px", fontWeight: 600 }}>
-              Last Updated: {lastUpdated}
+            <p className="text-secondary" style={{ marginBottom: "40px", fontWeight: 600 }}>
+              Last updated: {lastUpdated}
             </p>
 
-            <div
-              className="space-y-10"
-              style={{ lineHeight: 1.8, color: "var(--color-text-secondary)", fontSize: "15px" }}
-            >
-              <div>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "16px" }}>
-                  1. Escrow Refund Logic
-                </h2>
+            <div style={{ lineHeight: 1.8, color: "var(--color-text-secondary)", fontSize: "15px", display: "grid", gap: "32px" }}>
+              <section>
+                <h2 style={headingStyle}>1. How protected payments work</h2>
                 <p>
-                  Decisional operates on a secure escrow model. Funds are collected upfront
-                  from Brands and held in a secure intermediary account until the
-                  collaboration is finalized or cancelled.
+                  Decisional uses funded campaign budgets, payment holds, wallet ledgers, and
+                  deal status checks to protect both brands and influencers. Refund eligibility
+                  depends on the deal stage, evidence, platform fees, tax treatment, and whether
+                  work has already been approved or auto-approved.
                 </p>
-              </div>
+              </section>
 
-              <div className="card" style={{ padding: "24px", background: "rgba(244, 63, 94, 0.03)", border: "1px solid rgba(244, 63, 94, 0.1)" }}>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-accent-rose)", marginBottom: "16px" }}>
-                  2. For Brands: Cancellation Rules
-                </h2>
-                <ul className="list-disc pl-6 space-y-4">
+              <section className="card" style={panelStyle}>
+                <h2 style={headingStyle}>2. Brand cancellations</h2>
+                <ul className="list-disc pl-6 space-y-3">
                   <li>
-                    <strong>Pre-Acceptance Cancellation:</strong> If you cancel a deal proposal before the Influencer has accepted it, 100% of the funds will be returned to your Decisional wallet immediately.
+                    <strong>Before influencer selection:</strong> Uncommitted campaign funds may
+                    be returned to the brand wallet or original payment method, subject to gateway
+                    and statutory adjustments.
                   </li>
                   <li>
-                    <strong>SLA Violations (Missed Deadlines):</strong> If an influencer fails to upload content or respond within the agreed timeframe, you may request a refund via the Deal Dashboard. Our system will automatically verify the delay and process a full refund.
+                    <strong>After selection but before work starts:</strong> Cancellation may
+                    require creator consent or admin review if the creator has already accepted
+                    the deal.
                   </li>
                   <li>
-                    <strong>Post-Acceptance (Work in Progress):</strong> Once an influencer accepts a deal, 50% of the funds are "committed". Cancellation at this stage requires a mutual agreement or a formal dispute.
+                    <strong>After content submission:</strong> Refunds are handled through the
+                    content review or dispute flow. Brands should request revisions or raise a
+                    dispute before approving content.
+                  </li>
+                  <li>
+                    <strong>After approval or auto-approval:</strong> Payments are generally final
+                    unless fraud, post deletion, contract breach, or a continuing obligation is
+                    proven.
                   </li>
                 </ul>
-              </div>
+              </section>
 
-              <div>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "16px" }}>
-                  3. Non-Refundable Items
-                </h2>
-                <ul className="list-disc pl-6 mt-4 space-y-2">
-                  <li><strong>Platform Service Fees:</strong> The 10% platform fee is non-refundable once a deal is marked as "Completed" or if a refund is processed due to manual brand changes.</li>
-                  <li><strong>Completed Work:</strong> Once content is approved by the Brand or the 48-hour auto-approval window closes, payments are final and no longer eligible for refund.</li>
-                </ul>
-              </div>
-
-              <div>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "16px" }}>
-                  4. Dispute-Based Refunds
-                </h2>
+              <section>
+                <h2 style={headingStyle}>3. Influencer cancellations</h2>
                 <p>
-                  If you are dissatisfied with content quality, you MUST raise a dispute
-                  **before** approving the content. Our admin team will review the
-                  campaign brief versus the delivered output. If a refund is decided:
+                  Influencers should decline unsuitable work before signing. After signing, missed
+                  deadlines, non-delivery, copied content, misleading metrics, or unapproved
+                  substitutions may result in cancellation, partial payment, refund, strikes, or
+                  account restrictions.
                 </p>
-                <ul className="list-disc pl-6 mt-2 space-y-2">
-                  <li>Funds will be credited back to your original payment method via Razorpay within 5-7 business days.</li>
-                </ul>
-              </div>
+              </section>
 
-              <div style={{ padding: "32px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-border)", textAlign: "center" }}>
+              <section>
+                <h2 style={headingStyle}>4. Non-refundable amounts</h2>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li>Gateway charges, bank charges, payout charges, or taxes already incurred.</li>
+                  <li>Platform service fees for completed or substantially performed work.</li>
+                  <li>Approved content, unless fraud or a material contract breach is established.</li>
+                  <li>Product samples, shipping, or third-party costs unless the deal terms state otherwise.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 style={headingStyle}>5. Refund timing</h2>
+                <p>
+                  Approved refunds are usually credited to the Decisional wallet first. If a
+                  refund to the original payment method is supported, Razorpay or the banking
+                  partner may take 5 to 10 business days after processing. Timelines can vary
+                  based on bank holidays, payment method, KYC status, disputes, and compliance
+                  review.
+                </p>
+              </section>
+
+              <section style={{ padding: "28px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-border)", textAlign: "center" }}>
                 <p style={{ fontSize: "14px", color: "var(--color-text-muted)" }}>
-                  Need to track a refund or open a dispute?
-                  <Link href="/dashboard/disputes" style={{ color: "var(--color-primary)", marginLeft: "5px", textDecoration: "none", fontWeight: 700 }}>Open Dispute Center</Link>
+                  Need a refund review or dispute?
+                  <Link href="/dashboard/disputes" style={{ color: "var(--color-primary)", marginLeft: "5px", textDecoration: "none", fontWeight: 700 }}>
+                    Open Dispute Center
+                  </Link>
                 </p>
-              </div>
+              </section>
             </div>
           </div>
         </section>
@@ -95,3 +107,15 @@ export default function RefundPage() {
   );
 }
 
+const headingStyle = {
+  fontSize: "20px",
+  fontWeight: 800,
+  color: "var(--color-text-primary)",
+  marginBottom: "14px",
+};
+
+const panelStyle = {
+  padding: "24px",
+  background: "rgba(244, 63, 94, 0.03)",
+  border: "1px solid rgba(244, 63, 94, 0.1)",
+};

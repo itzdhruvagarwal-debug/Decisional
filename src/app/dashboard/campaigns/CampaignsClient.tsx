@@ -270,6 +270,7 @@ export default function CampaignsClient({ user }: { user: any }) {
         </div>
       ) : (
         <div
+          className="campaign-card-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
@@ -277,21 +278,28 @@ export default function CampaignsClient({ user }: { user: any }) {
           }}
         >
           {filteredCampaigns.map((campaign) => (
-            <article key={campaign.id} className="card" style={{ padding: "18px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: "10px",
-                  gap: "8px",
-                }}
-              >
-                <h3 style={{ fontSize: "18px", fontWeight: 700 }}>{campaign.title}</h3>
-                <span className="badge">{formatCurrency(campaign.perInfluencerBudget)}</span>
+            <article key={campaign.id} className="card campaign-card" style={{ padding: "18px" }}>
+              <div className="campaign-card-brand-row">
+                <div className="campaign-card-logo" aria-hidden="true">
+                  {campaign.brand.logo ? (
+                    <img src={campaign.brand.logo} alt="" />
+                  ) : (
+                    campaign.brand.companyName.slice(0, 2).toUpperCase()
+                  )}
+                </div>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div className="campaign-card-brand-name">
+                    {campaign.brand.companyName}
+                  </div>
+                  <h3>{campaign.title}</h3>
+                </div>
+                <span className="badge badge-success campaign-card-rate">
+                  {formatCurrency(campaign.perInfluencerBudget)}
+                </span>
               </div>
 
               <p
+                className="campaign-card-description"
                 style={{
                   color: "var(--color-text-secondary)",
                   fontSize: "14px",
@@ -303,6 +311,7 @@ export default function CampaignsClient({ user }: { user: any }) {
               </p>
 
               <div
+                className="campaign-card-tags"
                 style={{
                   display: "flex",
                   flexWrap: "wrap",
@@ -323,6 +332,7 @@ export default function CampaignsClient({ user }: { user: any }) {
               </div>
 
               <div
+                className="campaign-card-metrics"
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(3, 1fr)",
@@ -357,6 +367,7 @@ export default function CampaignsClient({ user }: { user: any }) {
               </div>
 
               <div
+                className="campaign-card-footer"
                 style={{
                   display: "flex",
                   alignItems: "center",

@@ -59,46 +59,60 @@ export default function InfluencerDashboard({
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-      {/* Stats Grid */}
-      <div className="grid-4 stagger-children">
-        <StatCard
-          icon="ER"
-          label="Total Earnings"
-          value={`Rs ${(overview.totalEarnings / 100).toLocaleString()}`}
-          subvalue="Lifetime"
-          gradient="linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.04))"
-          accentColor="var(--color-accent-emerald)"
-        />
-        <StatCard
-          icon="DL"
-          label="Completed Deals"
-          value={overview.completedDeals}
-          subvalue={`${overview.activeDeals} active`}
-          gradient="linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(99, 102, 241, 0.04))"
-          accentColor="var(--color-primary-light)"
-        />
-        <StatCard
-          icon="DR"
-          label="Reputation (DRS)"
-          value={`${Math.min(overview.trustScore, 100)}/100`}
-          subvalue={`Level ${overview.level}`}
-          gradient={`linear-gradient(135deg, ${overview.trustScore > 70 ? "rgba(16, 185, 129, 0.12)" : "rgba(245, 158, 11, 0.12)"}, transparent)`}
-          accentColor={
-            overview.trustScore > 70
-              ? "var(--color-accent-emerald)"
-              : "var(--color-accent-amber)"
-          }
-        />
-        <StatCard
-          icon="OT"
-          label="Delivery Rate"
-          value={`${performance.deliveryRate}%`}
-          subvalue="On-time"
-          gradient="linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(139, 92, 246, 0.04))"
-          accentColor="#a78bfa"
-        />
-      </div>
+    <div className="dashboard-home-stack">
+      <section className="dashboard-welcome-card">
+        <div>
+          <p className="dashboard-welcome-kicker">Creator workspace</p>
+          <h2>Hello, collaborator</h2>
+          <p>Track active deals, content tasks, badges, referrals, and payouts.</p>
+        </div>
+        <div className="dashboard-welcome-score" aria-label={`Trust score ${Math.min(overview.trustScore, 100)}`}>
+          <span>Trust</span>
+          <strong>{Math.min(overview.trustScore, 100)}</strong>
+          <small>Trusted</small>
+        </div>
+      </section>
+
+      <section className="dashboard-overview-panel">
+        <div className="dashboard-section-row">
+          <h3>Overview</h3>
+          <span>Level {overview.level}</span>
+        </div>
+        <div className="grid-4 stagger-children dashboard-overview-grid">
+          <StatCard
+            icon="ER"
+            label="Earnings"
+            value={`Rs ${(overview.totalEarnings / 100).toLocaleString()}`}
+            subvalue="Lifetime"
+            gradient="transparent"
+            accentColor="#ffffff"
+          />
+          <StatCard
+            icon="DL"
+            label="Completed"
+            value={overview.completedDeals}
+            subvalue={`${overview.activeDeals} active`}
+            gradient="transparent"
+            accentColor="#ffffff"
+          />
+          <StatCard
+            icon="DR"
+            label="Trust Score"
+            value={Math.min(overview.trustScore, 100)}
+            subvalue={`Level ${overview.level}`}
+            gradient="transparent"
+            accentColor="#ffffff"
+          />
+          <StatCard
+            icon="OT"
+            label="On-time"
+            value={`${performance.deliveryRate}%`}
+            subvalue="Delivery"
+            gradient="transparent"
+            accentColor="#ffffff"
+          />
+        </div>
+      </section>
 
       {/* Charts Section */}
       <div className="grid-2">

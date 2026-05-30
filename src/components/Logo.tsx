@@ -47,7 +47,7 @@ export default function Logo() {
       >
         <span
           className="gradient-text"
-          style={{ fontSize: "24px", fontWeight: 800, letterSpacing: "-0.5px" }}
+          style={{ fontSize: "24px", fontWeight: 800, letterSpacing: 0 }}
         >
           Decisional
         </span>

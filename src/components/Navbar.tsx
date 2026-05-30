@@ -1,8 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import Logo from "./Logo";
-import { useState, useEffect } from "react";
+
+const primaryLinks = [
+  { label: "Features", href: "/#features" },
+  { label: "How it Works", href: "/#how-it-works" },
+  { label: "Pricing", href: "/pricing" },
+];
+
+const mobileLinks = [
+  ...primaryLinks,
+  { label: "About", href: "/about" },
+  { label: "Blog", href: "/blog" },
+  { label: "Contact", href: "/contact" },
+];
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -16,7 +29,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Lock body when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = isMobileMenuOpen ? "hidden" : "";
     return () => {
@@ -39,13 +51,8 @@ export default function Navbar() {
         >
           <Logo />
 
-          {/* Desktop Nav Links */}
           <div className="nav-links">
-            {[
-              { label: "Features", href: "/#features" },
-              { label: "How it Works", href: "/#how-it-works" },
-              { label: "Pricing", href: "/pricing" },
-            ].map((link) => (
+            {primaryLinks.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
@@ -57,7 +64,6 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Desktop Auth Buttons */}
           <div className="nav-auth-buttons">
             <Link href="/login" className="btn btn-secondary btn-sm">
               Login
@@ -67,11 +73,12 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Hamburger Button */}
           <button
             className={`hamburger ${isMobileMenuOpen ? "active" : ""}`}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
+            aria-expanded={isMobileMenuOpen}
+            type="button"
           >
             <span />
             <span />
@@ -80,32 +87,17 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Overlay */}
       <div
         className={`mobile-nav-overlay ${isMobileMenuOpen ? "active" : ""}`}
         onClick={closeMobile}
       />
 
-      {/* Mobile Slide-out Menu */}
       <div className={`mobile-nav ${isMobileMenuOpen ? "active" : ""}`}>
-        <Link href="/#features" onClick={closeMobile}>
-          ✨ Features
-        </Link>
-        <Link href="/#how-it-works" onClick={closeMobile}>
-          ⚙️ How it Works
-        </Link>
-        <Link href="/pricing" onClick={closeMobile}>
-          💎 Pricing
-        </Link>
-        <Link href="/about" onClick={closeMobile}>
-          📖 About Us
-        </Link>
-        <Link href="/blog" onClick={closeMobile}>
-          📝 Blog
-        </Link>
-        <Link href="/contact" onClick={closeMobile}>
-          📧 Contact
-        </Link>
+        {mobileLinks.map((link) => (
+          <Link key={link.href} href={link.href} onClick={closeMobile}>
+            {link.label}
+          </Link>
+        ))}
 
         <div className="mobile-auth">
           <Link

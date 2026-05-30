@@ -5,7 +5,11 @@ import { logger } from "@/lib/logger";
 import { redis } from "@/lib/redis";
 import { createHash, randomInt } from "crypto";
 import { sendVerificationEmail } from "@/lib/email";
-import { sendOTP, verifyOTP as verifySmsOTP } from "@/lib/sms";
+import {
+    normalizeIndianPhone,
+    sendOTP,
+    verifyOTP as verifyPhoneOTP,
+} from "@/lib/sms";
 import { z } from "zod";
 
 const changeContactSchema = z.object({
@@ -66,9 +70,20 @@ export async function POST(req: Request) {
                 await sendVerificationEmail(user.email, emailOtp);
             }
 
-            // Send Phone OTP via MSG91
             if (user.phone) {
-                await sendOTP(user.phone);
+                const result = await sendOTP(user.phone, {
+                    purpose: `contact_change:${userId}:current_phone`,
+                });
+                if (!result.success) {
+                    logger.warn("Current phone OTP send failed", {
+                        userId,
+                        error: result.error,
+                    });
+                    return NextResponse.json(
+                        { error: "Failed to send phone OTP. Please try again." },
+                        { status: result.retryAfterSeconds ? 429 : 500 },
+                    );
+                }
             }
 
             return NextResponse.json({ success: true, message: "OTPs sent to your current contact method(s)." });
@@ -104,8 +119,11 @@ export async function POST(req: Request) {
 
             let isValidPhone = true; // default to true if user has no phone
             if (user.phone) {
-                // Verify Phone OTP
-                const phoneVerifyResult = await verifySmsOTP(user.phone, currentPhoneOtp || "");
+                const phoneVerifyResult = await verifyPhoneOTP(
+                    user.phone,
+                    currentPhoneOtp || "",
+                    { purpose: `contact_change:${userId}:current_phone` },
+                );
                 isValidPhone = phoneVerifyResult.success;
             }
 
@@ -136,7 +154,26 @@ export async function POST(req: Request) {
                 await redis.setex(`contact_change_new_email_otp_${userId}`, 600, otpHash);
                 await sendVerificationEmail(newContact, otp);
             } else if (type === 'phone') {
-                await sendOTP(newContact);
+                const normalizedPhone = normalizeIndianPhone(newContact);
+                if (!normalizedPhone) {
+                    return NextResponse.json(
+                        { error: "Invalid Indian phone number format" },
+                        { status: 400 },
+                    );
+                }
+                const result = await sendOTP(normalizedPhone, {
+                    purpose: `contact_change:${userId}:new_phone`,
+                });
+                if (!result.success) {
+                    logger.warn("New phone OTP send failed", {
+                        userId,
+                        error: result.error,
+                    });
+                    return NextResponse.json(
+                        { error: "Failed to send OTP to new phone." },
+                        { status: result.retryAfterSeconds ? 429 : 500 },
+                    );
+                }
             }
 
             return NextResponse.json({ success: true, message: `OTP sent to new ${type}` });
@@ -163,7 +200,18 @@ export async function POST(req: Request) {
                     } catch { isValidNewOtp = false; }
                 }
             } else if (type === 'phone') {
-                const phoneVerifyResult = await verifySmsOTP(newContact, newOtp);
+                const normalizedPhone = normalizeIndianPhone(newContact);
+                if (!normalizedPhone) {
+                    return NextResponse.json(
+                        { error: "Invalid Indian phone number format" },
+                        { status: 400 },
+                    );
+                }
+                const phoneVerifyResult = await verifyPhoneOTP(
+                    normalizedPhone,
+                    newOtp,
+                    { purpose: `contact_change:${userId}:new_phone` },
+                );
                 isValidNewOtp = phoneVerifyResult.success;
             }
 
@@ -177,7 +225,14 @@ export async function POST(req: Request) {
                 updateData.email = newContact;
                 updateData.emailVerified = true;
             } else {
-                updateData.phone = newContact;
+                const normalizedPhone = normalizeIndianPhone(newContact);
+                if (!normalizedPhone) {
+                    return NextResponse.json(
+                        { error: "Invalid Indian phone number format" },
+                        { status: 400 },
+                    );
+                }
+                updateData.phone = normalizedPhone;
                 updateData.phoneVerified = true;
             }
 

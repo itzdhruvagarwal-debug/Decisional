@@ -90,7 +90,9 @@ export async function POST(req: Request) {
             updateData.resetPasswordExpiry = null;
         } else if (type === "phone") {
             const { verifyOTP } = await import("@/lib/sms");
-            const result = await verifyOTP(user.phone || "", code);
+            const result = await verifyOTP(user.phone || "", code, {
+                purpose: "phone_verification",
+            });
 
             if (!result.success) {
                 logger.warn("Invalid phone OTP verification attempt", {

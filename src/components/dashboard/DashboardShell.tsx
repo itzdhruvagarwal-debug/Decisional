@@ -2,9 +2,27 @@
 
 import Link from "next/link";
 import Logo from "../Logo";
+import PWAInstallButton from "@/components/pwa/PWAInstallButton";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+
+type AppIconName =
+  | "analytics"
+  | "badge"
+  | "bell"
+  | "campaigns"
+  | "chat"
+  | "deals"
+  | "disputes"
+  | "home"
+  | "leaderboard"
+  | "menu"
+  | "plus"
+  | "referrals"
+  | "search"
+  | "settings"
+  | "wallet";
 
 interface Notification {
   id: string;
@@ -14,6 +32,170 @@ interface Notification {
   isRead: boolean;
   createdAt: string;
   data?: any;
+}
+
+function AppIcon({
+  name,
+  size = 20,
+}: {
+  name: AppIconName;
+  size?: number;
+}) {
+  const common = {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  };
+
+  switch (name) {
+    case "analytics":
+      return (
+        <svg {...common}>
+          <path d="M4 19V9" />
+          <path d="M10 19V5" />
+          <path d="M16 19v-7" />
+          <path d="M22 19H2" />
+        </svg>
+      );
+    case "badge":
+      return (
+        <svg {...common}>
+          <path d="m12 3 2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 15.4 7.2 18l.9-5.4-3.9-3.8 5.4-.8L12 3Z" />
+        </svg>
+      );
+    case "bell":
+      return (
+        <svg {...common}>
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+          <path d="M10 21h4" />
+        </svg>
+      );
+    case "campaigns":
+      return (
+        <svg {...common}>
+          <path d="M4 6h16" />
+          <path d="M4 12h10" />
+          <path d="M4 18h7" />
+          <path d="m17 14 3 3-3 3" />
+        </svg>
+      );
+    case "chat":
+      return (
+        <svg {...common}>
+          <path d="M21 12a8 8 0 0 1-8 8H7l-4 2 1.4-4.2A8 8 0 1 1 21 12Z" />
+        </svg>
+      );
+    case "deals":
+      return (
+        <svg {...common}>
+          <path d="M8 11 4 15a3 3 0 0 0 4 4l2-2" />
+          <path d="m14 7 2-2a3 3 0 0 1 4 4l-4 4" />
+          <path d="m8 16 8-8" />
+          <path d="m12 12 2 2" />
+        </svg>
+      );
+    case "disputes":
+      return (
+        <svg {...common}>
+          <path d="M12 3 3 7v6c0 5 4 8 9 8s9-3 9-8V7l-9-4Z" />
+          <path d="M12 8v5" />
+          <path d="M12 17h.01" />
+        </svg>
+      );
+    case "home":
+      return (
+        <svg {...common}>
+          <path d="m3 11 9-8 9 8" />
+          <path d="M5 10v10h14V10" />
+          <path d="M10 20v-6h4v6" />
+        </svg>
+      );
+    case "leaderboard":
+      return (
+        <svg {...common}>
+          <path d="M7 20V9" />
+          <path d="M12 20V4" />
+          <path d="M17 20v-7" />
+          <path d="M4 20h16" />
+        </svg>
+      );
+    case "menu":
+      return (
+        <svg {...common}>
+          <path d="M4 7h16" />
+          <path d="M4 12h16" />
+          <path d="M4 17h16" />
+        </svg>
+      );
+    case "plus":
+      return (
+        <svg {...common}>
+          <path d="M12 5v14" />
+          <path d="M5 12h14" />
+        </svg>
+      );
+    case "referrals":
+      return (
+        <svg {...common}>
+          <path d="M16 11a4 4 0 1 0-8 0" />
+          <path d="M4 21a8 8 0 0 1 16 0" />
+          <path d="M19 8h3" />
+          <path d="M20.5 6.5v3" />
+        </svg>
+      );
+    case "search":
+      return (
+        <svg {...common}>
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+        </svg>
+      );
+    case "settings":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="8" r="3" />
+          <path d="M4 21a8 8 0 0 1 16 0" />
+          <path d="M20 4h2" />
+          <path d="M21 3v2" />
+        </svg>
+      );
+    case "wallet":
+      return (
+        <svg {...common}>
+          <path d="M4 7h15a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h13" />
+          <path d="M16 13h.01" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
+function getNavIcon(label: string): AppIconName {
+  const icons: Record<string, AppIconName> = {
+    Analytics: "analytics",
+    Dashboard: "home",
+    "Create Campaign": "plus",
+    Campaigns: "campaigns",
+    "My Campaigns": "campaigns",
+    "Find Influencers": "search",
+    "My Deals": "deals",
+    Wallet: "wallet",
+    Messages: "chat",
+    Disputes: "disputes",
+    Leaderboard: "leaderboard",
+    Badges: "badge",
+    Referrals: "referrals",
+    Settings: "settings",
+    "Admin Panel": "settings",
+  };
+  return icons[label] || "home";
 }
 
 export default function DashboardShell({
@@ -133,26 +315,6 @@ export default function DashboardShell({
 
   const userType = user?.userType;
   const isBrandOrIndividual = userType === "BRAND";
-  const navIconLabel = (label: string) => {
-    const labels: Record<string, string> = {
-      Dashboard: "DB",
-      Analytics: "AN",
-      "Create Campaign": "+",
-      Campaigns: "CP",
-      "My Campaigns": "CP",
-      "Find Influencers": "FI",
-      "My Deals": "DL",
-      Wallet: "WT",
-      Messages: "MS",
-      Disputes: "DS",
-      Leaderboard: "LB",
-      Badges: "BG",
-      Referrals: "RF",
-      Settings: "ST",
-      "Admin Panel": "AD",
-    };
-    return labels[label] || label.slice(0, 2).toUpperCase();
-  };
 
   const navItems = [
     { icon: "AN", label: "Analytics", href: "/dashboard/analytics" },
@@ -194,9 +356,36 @@ export default function DashboardShell({
       ? [{ icon: "AD", label: "Admin Panel", href: "/admin" }]
       : []),
   ];
+  const mobilePrimaryHref =
+    user?.userType === "ADMIN"
+      ? "/admin"
+      : isBrandOrIndividual
+        ? "/dashboard/campaigns/create"
+        : "/dashboard/campaigns";
+  const mobilePrimaryLabel =
+    user?.userType === "ADMIN"
+      ? "Admin"
+      : isBrandOrIndividual
+        ? "Create"
+        : "Apply";
+  const mobileNavItems = [
+    { icon: "home" as const, label: "Home", href: "/dashboard" },
+    { icon: "campaigns" as const, label: "Campaigns", href: "/dashboard/campaigns" },
+    {
+      icon: "plus" as const,
+      label: mobilePrimaryLabel,
+      href: mobilePrimaryHref,
+      primary: true,
+    },
+    { icon: "deals" as const, label: "Deals", href: "/dashboard/deals" },
+    { icon: "settings" as const, label: "Profile", href: "/dashboard/settings" },
+  ];
+  const isActivePath = (href: string) =>
+    pathname === href || (href !== "/dashboard" && pathname.startsWith(`${href}/`));
 
   return (
     <div
+      className="dashboard-app-shell"
       style={{
         display: "flex",
         minHeight: "100vh",
@@ -301,16 +490,8 @@ export default function DashboardShell({
                   justifyContent: sidebarOpen ? "flex-start" : "center",
                 }}
               >
-                <span
-                  style={{
-                    fontSize: "12px",
-                    fontWeight: 800,
-                    flexShrink: 0,
-                    minWidth: "22px",
-                    textAlign: "center",
-                  }}
-                >
-                  {navIconLabel(item.label)}
+                <span className="sidebar-link-icon">
+                  <AppIcon name={getNavIcon(item.label)} size={18} />
                 </span>
                 {(sidebarOpen || mobileSidebarOpen) && (
                   <span
@@ -342,8 +523,8 @@ export default function DashboardShell({
               marginTop: "8px",
             }}
           >
-            <span style={{ fontSize: "12px", fontWeight: 800, flexShrink: 0 }}>
-              LO
+            <span className="sidebar-link-icon">
+              <AppIcon name="settings" size={18} />
             </span>
             {(sidebarOpen || mobileSidebarOpen) && (
               <span
@@ -409,7 +590,7 @@ export default function DashboardShell({
       <main className={`dashboard-main ${!sidebarOpen ? "collapsed" : ""}`}>
         {/* Top Bar */}
         <header
-          className="glass"
+          className="dashboard-topbar glass"
           style={{
             position: "sticky",
             top: 0,
@@ -429,10 +610,14 @@ export default function DashboardShell({
               onClick={() => setMobileSidebarOpen(true)}
               aria-label="Open sidebar"
             >
-              Menu
+              <AppIcon name="menu" size={22} />
             </button>
+            <div className="dashboard-mobile-logo" aria-hidden="true">
+              <Logo />
+            </div>
             <div>
               <h1
+                className="dashboard-topbar-title"
                 style={{
                   fontSize: "clamp(18px, 2.2vw, 20px)",
                   fontWeight: 800,
@@ -442,7 +627,7 @@ export default function DashboardShell({
                 Dashboard
               </h1>
               <p
-                className="hide-mobile"
+                className="dashboard-topbar-subtitle hide-mobile"
                 style={{
                   color: "var(--color-text-secondary)",
                   fontSize: "13px",
@@ -454,25 +639,22 @@ export default function DashboardShell({
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <PWAInstallButton className="dashboard-icon-button" />
+            <div className="dashboard-trust-chip">
+              <span>Trust</span>
+              <strong>{Math.min(Number(user?.trustScore || 0), 100)}</strong>
+            </div>
             {/* Notifications */}
             <div style={{ position: "relative" }} ref={notificationRef}>
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                style={{
-                  background: "var(--color-bg-tertiary)",
-                  border: "1px solid var(--color-border)",
-                  borderRadius: "var(--radius-md)",
-                  padding: "8px 10px",
-                  cursor: "pointer",
-                  position: "relative",
-                  fontSize: "12px",
-                  fontWeight: 800,
-                  transition: "all var(--transition-fast)",
-                }}
+                className="dashboard-icon-button"
+                aria-label="Notifications"
               >
-                Alerts
+                <AppIcon name="bell" size={19} />
                 {unreadCount > 0 && (
                   <span
+                    aria-label={`${unreadCount} unread notifications`}
                     style={{
                       position: "absolute",
                       top: "-2px",
@@ -643,6 +825,24 @@ export default function DashboardShell({
 
         {/* Dashboard Page Content */}
         <div className="dashboard-content animate-fade-in">{children}</div>
+        <nav className="dashboard-mobile-tabbar" aria-label="Primary mobile navigation">
+          {mobileNavItems.map((item) => {
+            const active = isActivePath(item.href);
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`dashboard-mobile-tab ${active ? "is-active" : ""} ${item.primary ? "is-primary" : ""}`}
+                aria-current={active ? "page" : undefined}
+              >
+                <span className="dashboard-mobile-tab-icon">
+                  <AppIcon name={item.icon} size={item.primary ? 24 : 20} />
+                </span>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
       </main>
     </div>
   );

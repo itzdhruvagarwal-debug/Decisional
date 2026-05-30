@@ -11,6 +11,7 @@ import {
 } from "@/lib/razorpay";
 import { encrypt } from "@/lib/encryption";
 import { logger } from "@/lib/logger";
+import { resolveBrandPlatformFee } from "@/lib/platform-fees";
 
 export class PaymentService {
   static async createWalletTopUpOrder(userId: string, amountInPaise: number) {
@@ -72,11 +73,35 @@ export class PaymentService {
     if (ownerId !== userId) throw new Error("Unauthorized");
 
     if (deal.paymentHold && ["HELD", "PENDING"].includes(deal.paymentHold.status)) {
-      return { exists: true, orderId: deal.paymentHold.razorpayOrderId };
+      return {
+        exists: true,
+        orderId: deal.paymentHold.razorpayOrderId,
+        amount: deal.paymentHold.amount,
+        currency: "INR",
+      };
     }
 
-    // Amounts are already in paise (Integers)
-    const amounts = calculateTotalAmount(deal.amount);
+    const hasLockedPaymentSnapshot =
+      deal.totalAmount > 0 && deal.platformFee >= 0 && deal.gatewayFee >= 0;
+    const feeSnapshot = hasLockedPaymentSnapshot
+      ? null
+      : await resolveBrandPlatformFee(userId);
+    const amounts = hasLockedPaymentSnapshot
+      ? {
+          dealAmount: deal.amount,
+          platformFee: deal.platformFee,
+          gatewayFee: deal.gatewayFee,
+          totalAmount: deal.totalAmount,
+          influencerReceives: deal.amount,
+          platformFeePercent:
+            deal.amount > 0
+              ? Number(((deal.platformFee / deal.amount) * 100).toFixed(2))
+              : 0,
+        }
+      : calculateTotalAmount(
+          deal.amount,
+          feeSnapshot?.effectivePlatformFee,
+        );
 
     const order = await createPreAuthOrder({
       dealId: deal.id,
@@ -85,6 +110,13 @@ export class PaymentService {
         deal_amount: amounts.dealAmount.toString(),
         platform_fee: amounts.platformFee.toString(),
         gateway_fee: amounts.gatewayFee.toString(),
+        platform_fee_percent: amounts.platformFeePercent.toString(),
+        ...(feeSnapshot
+          ? {
+              level_discount: `Level ${feeSnapshot.userLevel} -> ${feeSnapshot.levelBasedFee}%`,
+              referral_discount: `${feeSnapshot.referralTier} -> ${feeSnapshot.referralFee}%`,
+            }
+          : { fee_snapshot: "locked_on_deal" }),
       },
     });
 
@@ -102,7 +134,12 @@ export class PaymentService {
 
         await tx.deal.update({
           where: { id: dealId },
-          data: { status: "PAYMENT_PENDING" },
+          data: {
+            status: "PAYMENT_PENDING",
+            platformFee: amounts.platformFee,
+            gatewayFee: amounts.gatewayFee,
+            totalAmount: amounts.totalAmount,
+          },
         });
 
         return hold;

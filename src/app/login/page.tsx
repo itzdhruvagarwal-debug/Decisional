@@ -9,6 +9,10 @@ import { getProviders, signIn } from "next-auth/react";
 function resolveSafeCallbackUrl(rawCallbackUrl: string | null | undefined): string {
   if (!rawCallbackUrl) return "/dashboard";
   if (rawCallbackUrl.startsWith("//")) return "/dashboard";
+  if (rawCallbackUrl.startsWith("/") && !rawCallbackUrl.startsWith("//")) {
+    return rawCallbackUrl;
+  }
+  if (typeof window === "undefined") return "/dashboard";
 
   try {
     const parsed = new URL(rawCallbackUrl, window.location.origin);
@@ -197,7 +201,7 @@ function LoginContent() {
         justifyContent: "center",
         padding: "clamp(16px, 5vw, 24px)",
         position: "relative",
-        overflow: "hidden",
+        overflowX: "hidden",
       }}
     >
       {/* Realistic Abstract Background */}

@@ -374,14 +374,21 @@ export default function CampaignDetailClient({ user }: { user: any }) {
   );
 
   return (
-    <div style={{ maxWidth: "980px", margin: "0 auto", display: "grid", gap: "16px" }}>
-      <Link href="/dashboard/campaigns" style={{ fontSize: "14px", color: "var(--color-text-secondary)" }}>
+    <div className="campaign-detail-page" style={{ maxWidth: "980px", margin: "0 auto", display: "grid", gap: "16px" }}>
+      <Link href="/dashboard/campaigns" className="campaign-detail-back" style={{ fontSize: "14px", color: "var(--color-text-secondary)" }}>
         Back to campaigns
       </Link>
 
-      <section className="card" style={{ display: "grid", gap: "12px" }}>
+      <section className="card campaign-detail-hero" style={{ display: "grid", gap: "12px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
-          <div>
+          <div className="campaign-detail-title-block">
+            <div className="campaign-card-logo campaign-detail-logo" aria-hidden="true">
+              {campaign.brand?.logo ? (
+                <img src={campaign.brand.logo} alt="" />
+              ) : (
+                (campaign.brand?.companyName || "DC").slice(0, 2).toUpperCase()
+              )}
+            </div>
             <h1 style={{ fontSize: "28px", fontWeight: 800 }}>{campaign.title}</h1>
             <p style={{ color: "var(--color-text-secondary)", marginTop: "6px" }}>
               {campaign.brand?.companyName || "Unknown Brand"}
@@ -390,7 +397,7 @@ export default function CampaignDetailClient({ user }: { user: any }) {
             </p>
           </div>
 
-          <div style={{ display: "flex", gap: "8px", alignItems: "flex-start", flexWrap: "wrap" }}>
+          <div className="campaign-detail-actions" style={{ display: "flex", gap: "8px", alignItems: "flex-start", flexWrap: "wrap" }}>
             <span className="badge">Status: {campaign.status}</span>
             {isOwner && campaign.status === "DRAFT" && (
               <button className="btn btn-primary" onClick={() => handleCampaignAction("ACTIVATE")}>
@@ -410,22 +417,22 @@ export default function CampaignDetailClient({ user }: { user: any }) {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "12px" }}>
-          <div className="card" style={{ margin: 0 }}>
+        <div className="campaign-detail-stats" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "12px" }}>
+          <div className="campaign-detail-stat" style={{ margin: 0 }}>
             <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Per Influencer</div>
             <div style={{ fontSize: "20px", fontWeight: 700 }}>
               {formatCurrency(campaign.perInfluencerBudget || campaign.totalBudget)}
             </div>
           </div>
-          <div className="card" style={{ margin: 0 }}>
+          <div className="campaign-detail-stat" style={{ margin: 0 }}>
             <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Applications</div>
             <div style={{ fontSize: "20px", fontWeight: 700 }}>{applicationsCount}</div>
           </div>
-          <div className="card" style={{ margin: 0 }}>
+          <div className="campaign-detail-stat" style={{ margin: 0 }}>
             <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Selected</div>
             <div style={{ fontSize: "20px", fontWeight: 700 }}>{campaign.selectedInfluencers}</div>
           </div>
-          <div className="card" style={{ margin: 0 }}>
+          <div className="campaign-detail-stat" style={{ margin: 0 }}>
             <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Followers Needed</div>
             <div style={{ fontSize: "20px", fontWeight: 700 }}>
               {campaign.maxFollowers

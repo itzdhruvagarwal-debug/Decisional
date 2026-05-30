@@ -7,8 +7,6 @@ import redis from "@/lib/redis";
 import { sendOTP, verifyOTP } from "@/lib/sms";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-const OTP_TTL = 600;
-
 const sendRegistrationOtpSchema = z.object({
   phone: z
     .string()
@@ -89,39 +87,32 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    const key = `phone-otp:${type}:${phone}`;
-    const ttl = await redis.ttl(key);
-    if (ttl > OTP_TTL - 60) {
-      const waitTime = ttl - (OTP_TTL - 60);
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Please wait ${waitTime} seconds before requesting a new OTP`,
-        },
-        { status: 429 },
-      );
-    }
-
-    const sendResult = await sendOTP(phone);
+    const sendResult = await sendOTP(phone, { purpose: type });
     if (!sendResult.success) {
+      const status = sendResult.retryAfterSeconds ? 429 : 500;
       return NextResponse.json(
         {
           success: false,
           error: sendResult.error || "Failed to send OTP",
+          ...(sendResult.retryAfterSeconds
+            ? { retryAfterSeconds: sendResult.retryAfterSeconds }
+            : {}),
         },
-        { status: 500 },
+        { status },
       );
     }
 
-    await redis.setex(
-      key,
-      OTP_TTL,
-      JSON.stringify({ createdAt: new Date().toISOString() }),
-    );
-
     return NextResponse.json({
       success: true,
-      message: "OTP sent successfully",
+      message:
+        sendResult.channel === "whatsapp"
+          ? "OTP sent on WhatsApp"
+          : "OTP sent by SMS",
+      channel: sendResult.channel,
+      fallbackUsed: sendResult.fallbackUsed,
+      ...(process.env.NODE_ENV !== "production" && sendResult.otp
+        ? { otp: sendResult.otp }
+        : {}),
     });
   } catch (error: any) {
     logger.error("Phone OTP send failed", { error: error.message });
@@ -199,7 +190,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const verifyResult = await verifyOTP(phone, otp);
+    const verifyResult = await verifyOTP(phone, otp, { purpose: type });
     if (!verifyResult.success) {
       return NextResponse.json(
         {

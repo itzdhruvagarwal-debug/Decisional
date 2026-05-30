@@ -9,22 +9,29 @@ import { addDays } from "date-fns";
 // ==================== TYPES ====================
 
 export interface ContractDeliverable {
-  type: "POST" | "REEL" | "STORY" | "VIDEO" | "SHORT";
+  type: string;
   count: number;
-  platform: "INSTAGRAM" | "YOUTUBE";
+  platform: "INSTAGRAM" | "YOUTUBE" | "OTHER";
   details: string;
+  duration?: string;
+  specs?: string;
 }
 
 export interface ContractTerms {
   dealId: string;
-  totalAmount: number; // in paise
+  dealAmount: number; // Creator fee in paise
+  totalAmount: number; // Brand payable in paise
   platformFee: number;
+  gatewayFee: number;
+  platformFeePercent: number;
   influencerPayout: number;
+  productHandlingFee: number;
 
   // Deliverables
   deliverables: ContractDeliverable[];
   mandatoryTags: string[]; // @brand, #ad
   mandatoryElements: string[]; // Backward-compatible alias used by legacy flows
+  disclosureRequirement: string;
 
   // Timeline
   submissionDeadline: string; // ISO Date
@@ -33,7 +40,7 @@ export interface ContractTerms {
 
   // Revisions
   includedRevisions: number; // Default 2
-  costPerExtraRevision: number; // Default 50000 (₹500)
+  costPerExtraRevision: number; // Default 50000 (INR 500)
 
   // Cancellation Policy
   cancellationFee: {
@@ -46,11 +53,113 @@ export interface ContractTerms {
   // Late Fees
   brandLateApprovalFee: number; // 5% flat fee if brand delays >48h
 
+  contentUsage: {
+    organicRepost: string;
+    paidAds: string;
+    whitelisting: string;
+  };
+  influencerObligations: string[];
+  brandObligations: string[];
+  taxNote: string;
+  proposalMessage?: string;
+
   createdAt: string;
   version: number;
 }
 
 // ==================== GENERATE CONTRACT ====================
+
+function collectContractText(value: unknown, depth = 0): string[] {
+  if (depth > 5 || value === null || value === undefined) return [];
+
+  if (typeof value === "string" || typeof value === "number") {
+    return [String(value)];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => collectContractText(item, depth + 1));
+  }
+
+  if (typeof value === "object") {
+    return Object.values(value as Record<string, unknown>).flatMap((item) =>
+      collectContractText(item, depth + 1),
+    );
+  }
+
+  return [];
+}
+
+function uniqueNonEmpty(values: string[]): string[] {
+  return Array.from(
+    new Set(values.map((item) => item.trim()).filter(Boolean)),
+  );
+}
+
+function inferPlatform(text: string): "INSTAGRAM" | "YOUTUBE" | "OTHER" {
+  const normalized = text.toUpperCase();
+  if (normalized.includes("YOUTUBE") || normalized.includes("SHORT")) {
+    return "YOUTUBE";
+  }
+  if (
+    normalized.includes("INSTAGRAM") ||
+    normalized.includes("REEL") ||
+    normalized.includes("STORY") ||
+    normalized.includes("POST")
+  ) {
+    return "INSTAGRAM";
+  }
+  return "OTHER";
+}
+
+function normalizeContractDeliverables(value: unknown): ContractDeliverable[] {
+  if (typeof value === "string") {
+    return [
+      {
+        type: "POST",
+        count: 1,
+        platform: inferPlatform(value),
+        details: value,
+      },
+    ];
+  }
+
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => {
+      if (typeof item === "string") {
+        return {
+          type: "POST",
+          count: 1,
+          platform: inferPlatform(item),
+          details: item,
+        };
+      }
+
+      if (!item || typeof item !== "object") return null;
+
+      const record = item as Record<string, unknown>;
+      const type = String(record.type || "POST").trim().toUpperCase();
+      const details = String(record.specs || record.details || type).trim();
+      const count = Math.max(1, Math.min(50, Number(record.count || 1)));
+      const platform = inferPlatform(`${type} ${details}`);
+
+      return {
+        type,
+        count,
+        platform,
+        details,
+        ...(record.duration ? { duration: String(record.duration).trim() } : {}),
+        ...(record.specs ? { specs: String(record.specs).trim() } : {}),
+      };
+    })
+    .filter((item): item is ContractDeliverable => Boolean(item));
+}
+
+function extractMandatoryElements(text: string): string[] {
+  const matches = text.match(/[#@][A-Za-z0-9_.-]{2,50}/g) || [];
+  return uniqueNonEmpty(["#ad", "#sponsored", ...matches]).slice(0, 24);
+}
 
 export function generateContractTerms(
   dealId: string,
@@ -66,43 +175,57 @@ export function generateContractTerms(
   proposal?: {
     rate?: number;
     message?: string;
+    platformFee?: number;
+    gatewayFee?: number;
+    totalAmount?: number;
+    platformFeePercent?: number;
+    influencerPayout?: number;
+    productHandlingFee?: number;
   },
 ): ContractTerms {
-  // Determine amount
   const dealAmount = proposal?.rate || campaign.perInfluencerBudget || 0;
   const platformFeePercent = Number(process.env.PLATFORM_FEE_PERCENTAGE) || 10;
+  const effectivePlatformFeePercent =
+    proposal?.platformFeePercent ?? platformFeePercent;
+  const productHandlingFee = proposal?.productHandlingFee ?? 0;
+  const platformFee =
+    proposal?.platformFee ??
+    Math.round((dealAmount * effectivePlatformFeePercent) / 100) +
+      productHandlingFee;
+  const gatewayFee =
+    proposal?.gatewayFee ??
+    Math.round(
+      ((dealAmount + platformFee) *
+        (Number(process.env.GATEWAY_FEE_PERCENTAGE) || 2)) /
+        100,
+    );
+  const totalAmount =
+    proposal?.totalAmount ?? dealAmount + platformFee + gatewayFee;
+  const influencerPayout = proposal?.influencerPayout ?? dealAmount;
 
-  let platformFee = Math.round((dealAmount * platformFeePercent) / 100);
-  if (campaign.requiresProduct) {
-    platformFee += 10000; // Rs. 100 flat processing fee/shipping fee
-  }
-
-  const influencerPayout = dealAmount; // Influencer gets full deal amount; brand pays fee on top
-
-  // Parse deliverables (assuming simple JSON or string for now)
-  const deliverables: ContractDeliverable[] = [];
-  if (typeof campaign.deliverables === "string") {
-    // Simple string case - default to 1 generic post
-    deliverables.push({
-      type: "POST",
-      count: 1,
-      platform: "INSTAGRAM", // Default
-      details: campaign.deliverables,
-    });
-  } else if (Array.isArray(campaign.deliverables)) {
-    // Structured case
-    deliverables.push(...campaign.deliverables);
-  }
+  const deliverables = normalizeContractDeliverables(campaign.deliverables);
+  const contractText = collectContractText([
+    campaign.requirements,
+    campaign.deliverables,
+    proposal?.message,
+  ]).join(" ");
+  const mandatoryElements = extractMandatoryElements(contractText);
 
   return {
     dealId,
-    totalAmount: dealAmount,
+    dealAmount,
+    totalAmount,
     platformFee,
+    gatewayFee,
+    platformFeePercent: effectivePlatformFeePercent,
     influencerPayout,
+    productHandlingFee,
 
     deliverables,
-    mandatoryTags: ["#ad", "#sponsored"], // Can extract from requirements if parsed
-    mandatoryElements: ["#ad", "#sponsored"],
+    mandatoryTags: mandatoryElements,
+    mandatoryElements,
+    disclosureRequirement:
+      "Creator must include required advertising disclosures and mandatory tags in approved content and live posts.",
 
     submissionDeadline: campaign.contentDeadline
       ? campaign.contentDeadline.toISOString()
@@ -113,7 +236,7 @@ export function generateContractTerms(
       : addDays(new Date(), 14).toISOString(),
 
     includedRevisions: 2,
-    costPerExtraRevision: 50000, // ₹500
+    costPerExtraRevision: 50000, // INR 500
 
     cancellationFee: {
       beforeApproval: 0,
@@ -124,8 +247,32 @@ export function generateContractTerms(
 
     brandLateApprovalFee: 5, // 5%
 
+    contentUsage: {
+      organicRepost:
+        "Brand may repost approved content organically with creator credit for the campaign unless the deal states otherwise.",
+      paidAds:
+        "Paid usage, boosting, dark posts, or whitelisting require explicit written approval in the deal chat or a separate addendum.",
+      whitelisting:
+        "Creator account access, whitelisting, or collaborator permissions are never implied by this contract.",
+    },
+    influencerObligations: [
+      "Submit original content by the submission deadline.",
+      "Keep approved live posts public until the posting obligation ends unless the brand agrees otherwise.",
+      "Do not share private contact details outside platform rules before the deal is active.",
+      "Do not use fake engagement, misleading analytics, copied content, or undisclosed AI/deepfake assets.",
+    ],
+    brandObligations: [
+      "Fund or authorize payment before requiring work beyond normal proposal review.",
+      "Review content within the review window with clear approval or revision feedback.",
+      "Do not request extra usage rights, deliverables, or deadlines outside the signed terms without mutual consent.",
+      "Provide product samples, shipping details, and brand assets on time when the campaign requires them.",
+    ],
+    taxNote:
+      "Each party is responsible for GST, TDS, ITR, invoice, and other tax obligations that apply to them under Indian law.",
+    ...(proposal?.message ? { proposalMessage: proposal.message } : {}),
+
     createdAt: new Date().toISOString(),
-    version: 1,
+    version: 2,
   };
 }
 
@@ -208,7 +355,7 @@ export function checkRevisionLimit(
   return {
     allowed: true, // Allowed but paid
     cost: contract.costPerExtraRevision,
-    message: `Free revisions used. This revision will cost ₹${(contract.costPerExtraRevision / 100).toFixed(2)}.`,
+    message: `Free revisions used. This revision will cost INR ${(contract.costPerExtraRevision / 100).toFixed(2)}.`,
   };
 }
 
@@ -292,7 +439,7 @@ export function generateContractHash(terms: ContractTerms): string {
 }
 
 /**
- * Sign a contract — creates an HMAC signature using the user's ID + contract hash.
+ * Sign a contract - creates an HMAC signature using the user's ID + contract hash.
  * This proves that this specific user agreed to these specific terms.
  */
 export function signContract(
@@ -545,7 +692,7 @@ export async function retryPaymentCapture(
   const actorUserId = deal.influencer.userId || deal.brand?.userId;
 
   if (currentAttempt > maxAttempts) {
-    // All retries exhausted — escalate to manual review
+    // All retries exhausted - escalate to manual review
     await prisma.$transaction(async (tx: any) => {
       await tx.deal.update({
         where: { id: dealId },
