@@ -5,7 +5,8 @@
  *
  * Signs a deal contract on behalf of the authenticated user.
  * Uses the contract engine's digital signature system (SHA-256 HMAC).
- * Auto-transitions deal to ACTIVE when both parties have signed.
+ * Auto-transitions deal to PAYMENT_PENDING when both parties have signed.
+ * Brand must then secure payment before the deal becomes workable.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -106,8 +107,8 @@ export async function POST(
             ? "Contract Fully Signed"
             : "Contract Signed",
           message: result.signed.isFullySigned
-            ? `Both parties have signed the contract for "${deal.campaign.title}". The deal is now active!`
-            : `${signerName || "The other party"} has signed the contract for "${deal.campaign.title}". Please sign to activate the deal.`,
+            ? `Both parties have signed the contract for "${deal.campaign.title}". Please secure payment to activate the deal.`
+            : `${signerName || "The other party"} has signed the contract for "${deal.campaign.title}". Please sign to proceed.`,
           data: { link: `/dashboard/deals/${dealId}` },
         },
       });

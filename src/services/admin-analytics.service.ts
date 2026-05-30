@@ -33,6 +33,8 @@ export class AdminAnalyticsService {
         where: {
           status: {
             in: [
+              "PAYMENT_PENDING",
+              "PAYMENT_HELD",
               "ACTIVE",
               "CONTENT_SUBMITTED",
               "CONTENT_APPROVED",

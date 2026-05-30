@@ -19,6 +19,7 @@ import { verify } from "otplib";
 
 import { checkRateLimit } from "./rate-limit";
 import { logActivity, ActivityAction } from "./audit";
+import { isVPNOrProxy, getDistanceBetweenIPs } from "./ipinfo";
 
 const ACCESS_TOKEN_EXPIRY = 15 * 60 * 1000; // 15 minutes
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -181,6 +182,78 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             throw new Error("INVALID_PASSWORD");
           }
 
+          // 1. Tor & Proxy / VPN blocking in production
+          try {
+            const isSuspiciousIP = await isVPNOrProxy(ip);
+            if (isSuspiciousIP && process.env.NODE_ENV === "production") {
+              logger.warn("Login attempt blocked — Suspicious IP detected (VPN/Proxy/Tor)", { email, ip });
+              await logActivity({
+                userId: user.id,
+                action: ActivityAction.SECURITY_ALERT,
+                entityType: "USER",
+                entityId: user.id,
+                metadata: { type: "SUSPICIOUS_IP", ip },
+                ipAddress: ip,
+              });
+              throw new Error("SUSPICIOUS_IP_BLOCK: Login blocked due to suspicious IP detection (VPN/Proxy/Tor). Please disable your VPN.");
+            }
+          } catch (ipErr: any) {
+            if (ipErr.message?.startsWith("SUSPICIOUS_IP_BLOCK")) throw ipErr;
+            logger.warn("IP info lookup failed — non-fatal", { error: ipErr, ip });
+          }
+
+          // 2. Impossible Travel (Geo-suspicious Logins / Account Sharing detection)
+          try {
+            const lastDevice = await prisma.deviceFingerprint.findFirst({
+              where: { userId: user.id },
+              orderBy: { lastSeenAt: "desc" },
+            });
+
+            if (lastDevice && lastDevice.lastIp !== ip) {
+              const distance = await getDistanceBetweenIPs(lastDevice.lastIp, ip);
+              const timeDiffHours = (Date.now() - new Date(lastDevice.lastSeenAt).getTime()) / (3600 * 1000);
+
+              // If distance is > 1000 km and time difference is less than 4 hours, flag impossible travel
+              if (distance > 1000 && timeDiffHours < 4) {
+                logger.warn("Geo-suspicious login detected (Impossible Travel)", {
+                  userId: user.id,
+                  ip,
+                  lastIp: lastDevice.lastIp,
+                  distance,
+                  timeDiffHours,
+                });
+
+                await logActivity({
+                  userId: user.id,
+                  action: ActivityAction.SECURITY_ALERT,
+                  entityType: "USER",
+                  entityId: user.id,
+                  metadata: {
+                    type: "IMPOSSIBLE_TRAVEL",
+                    ip,
+                    lastIp: lastDevice.lastIp,
+                    distance,
+                    timeDiffHours,
+                  },
+                  ipAddress: ip,
+                });
+
+                // Require 2FA or block the session
+                if (!user.isTwoFactorEnabled) {
+                  throw new Error("SUSPICIOUS_LOGIN_BLOCK: Geo-suspicious login detected (Impossible Travel). Account security review required.");
+                } else {
+                  const code = (credentials as any).twoFactorCode;
+                  if (!code) {
+                    throw new Error("2FA_REQUIRED");
+                  }
+                }
+              }
+            }
+          } catch (geoErr: any) {
+            if (geoErr.message?.startsWith("SUSPICIOUS_LOGIN_BLOCK") || geoErr.message === "2FA_REQUIRED") throw geoErr;
+            logger.warn("Impossible travel detection lookup failed — non-fatal", { error: geoErr, ip });
+          }
+
           // Check if user is banned/suspended
           if (user.status === "BANNED") {
             logger.warn("Login blocked — account banned", { email, ip });
@@ -290,13 +363,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             refreshToken: refreshTokenNode.token,
           };
         } catch (entireAuthorizeError: any) {
-          // Re-throw structured errors for 2FA and specific identity errors
+          // Re-throw structured errors for 2FA, suspicious IPs, and geo-suspicious login errors
           const msg = entireAuthorizeError?.message;
           if (
             msg === "2FA_REQUIRED" ||
             msg === "INVALID_2FA" ||
             msg && msg.includes("USER_NOT_REGISTERED_ERROR_CODE") ||
-            msg && msg.includes("INVALID_PASSWORD")
+            msg && msg.includes("INVALID_PASSWORD") ||
+            msg && msg.includes("SUSPICIOUS_IP_BLOCK") ||
+            msg && msg.includes("SUSPICIOUS_LOGIN_BLOCK")
           ) {
             throw entireAuthorizeError;
           }
@@ -458,6 +533,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (activeToken && activeToken !== token.refreshToken) {
             return { ...token, error: "SessionRevoked" };
           }
+
+          // Periodically check user status (every 60 seconds) to revoke banned/suspended accounts
+          const now = Date.now();
+          const lastChecked = (token.lastCheckedStatus as number) || 0;
+          if (now - lastChecked > 60 * 1000) {
+            const dbUser = await prisma.user.findUnique({
+              where: { id: token.id as string },
+              select: { status: true },
+            });
+            if (dbUser) {
+              if (dbUser.status === "BANNED" || dbUser.status === "SUSPENDED") {
+                return { ...token, status: dbUser.status, error: "AccountBlocked" };
+              }
+              token.status = dbUser.status;
+            } else {
+              return { ...token, error: "SessionRevoked" };
+            }
+            token.lastCheckedStatus = now;
+          }
         }
 
         // Explicit JTI Revocation
@@ -468,7 +562,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
         }
       } catch (_error) {
-        // Ignore redis errors to prevent locking out valid users if redis is down
+        // Ignore redis/db errors to prevent locking out valid users if services are temporarily down
       }
 
       // Return previous token if the access token has not expired yet

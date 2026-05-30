@@ -98,6 +98,8 @@ export const RATE_LIMIT_CONFIGS = {
   LOGIN_EMAIL: { limit: 5, window: 900 }, // 5 attempts per 15 minutes per email
   REGISTER: { limit: 3, window: 3600 }, // 3 registrations per hour per IP
   MESSAGES: { limit: 100, window: 3600 },
+  MESSAGES_MIN: { limit: 20, window: 60 },
+  MESSAGES_DAY: { limit: 500, window: 86400 },
   DEAL_UPDATES: { limit: 50, window: 3600 },
   API_DEFAULT: { limit: 120, window: 60 }, // 120 req/min per user
   REVIEWS: { limit: 10, window: 3600 },

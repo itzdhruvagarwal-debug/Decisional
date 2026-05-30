@@ -783,6 +783,26 @@ export async function applyResolution(
       });
       if (freshDispute?.status === "RESOLVED") return; // Idempotent exit
 
+      let actualDeduct = 0;
+      let debtPending = 0;
+
+      if (
+        analysis.verdict !== "ESCALATE" &&
+        analysis.verdict !== "DISMISSED" &&
+        hold &&
+        hold.status === "CAPTURED" &&
+        brandRefund > 0
+      ) {
+        const influencerWallet = await tx.wallet.findUnique({
+          where: { userId: influencerUserId },
+        });
+        if (!influencerWallet) {
+          throw new Error("Influencer wallet missing during clawback");
+        }
+        actualDeduct = Math.min(influencerWallet.balance, brandRefund);
+        debtPending = brandRefund - actualDeduct;
+      }
+
       // Update dispute status
       await tx.dispute.update({
         where: { id: disputeId },
@@ -795,6 +815,7 @@ export async function applyResolution(
           influencerOutcome: JSON.stringify({
             payment_percentage: analysis.influencerPayoutPercentage,
             trust_score_change: analysis.trustScoreChanges.influencer,
+            ...(debtPending > 0 ? { debtPending } : {}),
           }),
           brandOutcome: JSON.stringify({
             refund_percentage: analysis.refundPercentage,
@@ -852,12 +873,12 @@ export async function applyResolution(
         } else if (hold.status === "CAPTURED") {
           // Scenario B: Money was already paid to Influencer (Clawback needed)
           if (brandRefund > 0) {
-            // Debit Influencer (Enforce Debt)
+            // Debit Influencer (Enforce Debt) up to actualDeduct
             await tx.wallet.update({
               where: { userId: influencerUserId },
               data: {
-                balance: { decrement: brandRefund },
-                totalEarned: { decrement: brandRefund }, // Correct earnings history
+                balance: { decrement: actualDeduct },
+                totalEarned: { decrement: actualDeduct }, // Correct earnings history
               },
             });
 
@@ -884,9 +905,9 @@ export async function applyResolution(
                     walletId: influencerWallet.id,
                     dealId: deal.id,
                     type: "CLAWBACK",
-                    amount: brandRefund,
+                    amount: actualDeduct,
                     status: "COMPLETED",
-                    description: `Dispute clawback for brand refund (${analysis.refundPercentage}%)`,
+                    description: `Dispute clawback for brand refund (${analysis.refundPercentage}%)${debtPending > 0 ? ` (Pending debt: ${debtPending} Paise)` : ""}`,
                   },
                   {
                     walletId: brandWallet.id,
@@ -923,10 +944,12 @@ export async function applyResolution(
 
       // 3. If dismissed, re-open the deal
       if (analysis.verdict === "DISMISSED") {
-        // Restore deal to previous status (best guess: CONTENT_SUBMITTED or ACTIVE)
-        const previousStatus = deal.submittedContentUrl
-          ? "CONTENT_SUBMITTED"
-          : "ACTIVE";
+        let previousStatus = "PAYMENT_PENDING";
+        if (deal.submittedContentUrl) {
+          previousStatus = "CONTENT_SUBMITTED";
+        } else if (hold && hold.status === "HELD") {
+          previousStatus = "PAYMENT_HELD";
+        }
         await tx.deal.update({
           where: { id: deal.id },
           data: { status: previousStatus },

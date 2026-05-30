@@ -12,6 +12,9 @@ import {
 import { encrypt } from "@/lib/encryption";
 import { logger } from "@/lib/logger";
 import { resolveBrandPlatformFee } from "@/lib/platform-fees";
+import { processReferralReward } from "@/lib/referral-engine";
+import { addUserXp, checkAndAwardBadges } from "@/lib/gamification-engine";
+import { updateTrustAndLevel } from "@/lib/trust-engine";
 
 export class PaymentService {
   static async createWalletTopUpOrder(userId: string, amountInPaise: number) {
@@ -335,7 +338,32 @@ export class PaymentService {
             description: `Payout for deal: ${deal.id}`,
           },
         });
+
+        // 1. Increment completedDeals and totalEarnings in influencerProfile
+        await tx.influencerProfile.update({
+          where: { userId: deal.influencer.userId },
+          data: {
+            completedDeals: { increment: 1 },
+            totalEarnings: { increment: deal.amount },
+          },
+        });
+
+        // 2. Add User XP
+        await addUserXp(deal.influencer.userId, 100, "DEAL_VERIFIED", tx);
+
+        // 3. Process Referral Reward
+        try {
+          await processReferralReward(deal.influencer.userId, deal.amount, tx);
+        } catch (err) {
+          logger.warn("Referral reward failed", { error: err, userId: deal.influencer.userId });
+        }
+
+        // 4. Check and award badges
+        await checkAndAwardBadges(deal.influencer.userId, "DEAL_COMPLETED", tx);
       });
+
+      // 5. Recalculate Trust outside the transaction after successful commit
+      await updateTrustAndLevel(deal.influencer.userId, "DEAL_VERIFIED");
     } catch (error) {
       if (hasGatewayHold && deal.paymentHold) {
         await prisma.deal.updateMany({
@@ -477,7 +505,8 @@ export class PaymentService {
       logger.error("PAYOUT_FAILED: Payout creation failed", { userId, error });
 
       if (isTimeoutOrNetworkError) {
-        throw new Error("Payout request timed out or network error occurred. Please check transaction history status later.");
+        logger.warn("Payout request timed out or network error occurred. Keeping status as PROCESSING for background/webhook reconciliation.", { userId, withdrawalId: withdrawal.w.id });
+        return { success: true, status: "PROCESSING" };
       } else {
         await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
           await tx.wallet.update({ where: { userId }, data: { balance: { increment: data.amount } } });

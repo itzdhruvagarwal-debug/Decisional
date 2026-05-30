@@ -4,6 +4,7 @@ import {
   requireActiveAdmin,
   type AdminSessionUser,
 } from "@/lib/admin-auth";
+import { logActivity, ActivityAction } from "@/lib/audit";
 
 export class AdminService {
   static async checkAdminAccess(input: AdminSessionUser | null | undefined) {
@@ -239,7 +240,7 @@ export class AdminService {
       action: data.action,
     });
 
-    return await prisma.$transaction(async (tx: any) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       const updatedUser = await tx.user.update({
         where: { id: userId },
         data: updateData,
@@ -279,6 +280,46 @@ export class AdminService {
 
       return { success: true, message, user: updatedUser };
     });
+
+    // Asynchronously log the admin mutation to the audit trail
+    let auditAction = "";
+    switch (data.action) {
+      case "ban":
+        auditAction = ActivityAction.ACCOUNT_BANNED;
+        break;
+      case "suspend":
+        auditAction = ActivityAction.ACCOUNT_SUSPENDED;
+        break;
+      case "activate":
+        auditAction = "ACCOUNT_ACTIVATED";
+        break;
+      case "adjust_trust":
+        auditAction = "TRUST_ADJUSTED";
+        break;
+      case "set_verification":
+        auditAction = "VERIFICATION_UPDATED";
+        break;
+    }
+
+    if (auditAction) {
+      logActivity({
+        userId: admin.id,
+        action: auditAction,
+        entityType: "USER",
+        entityId: userId,
+        metadata: {
+          adminEmail: admin.email,
+          reason: data.reason,
+          trustScoreAdjustment: data.trustScoreAdjustment,
+          verificationLevel: data.verificationLevel,
+          suspensionDays: data.suspensionDays,
+          previousStatus: user.status,
+          previousTrustScore: user.trustScore,
+        },
+      });
+    }
+
+    return result;
   }
 
   private static async getDealStats(userId: string, userType: string) {
@@ -311,7 +352,14 @@ export class AdminService {
         where: {
           [field]: profileId,
           status: {
-            in: ["ACTIVE", "CONTENT_SUBMITTED", "CONTENT_APPROVED", "VERIFIED"],
+            in: [
+              "ACTIVE",
+              "PAYMENT_PENDING",
+              "PAYMENT_HELD",
+              "CONTENT_SUBMITTED",
+              "CONTENT_APPROVED",
+              "VERIFIED",
+            ],
           },
         },
       }),

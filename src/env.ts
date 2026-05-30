@@ -36,6 +36,7 @@ const envSchema = z.object({
 
   // Security
   CRON_SECRET: z.string().min(32).optional(),
+  CONTRACT_SIGNING_SECRET: z.string().min(32).optional(),
   ENCRYPTION_KEYS: z.string().min(32),
   ENCRYPTION_KEY: z.string().min(32).optional(),
 
@@ -67,6 +68,14 @@ const envSchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ["CRON_SECRET"],
       message: "CRON_SECRET is required in production for Vercel Cron routes.",
+    });
+  }
+
+  if (!env.CONTRACT_SIGNING_SECRET) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["CONTRACT_SIGNING_SECRET"],
+      message: "CONTRACT_SIGNING_SECRET is required in production for contract signing verification.",
     });
   }
 

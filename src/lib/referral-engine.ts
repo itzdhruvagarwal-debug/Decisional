@@ -149,7 +149,14 @@ export async function getReferralStats(userId: string) {
       referredBy: userId,
       OR: [
         { influencerProfile: { completedDeals: { gt: 0 } } },
-        { brandProfile: { totalCampaigns: { gt: 0 } } },
+        {
+          brandProfile: {
+            OR: [
+              { campaigns: { some: { status: "COMPLETED" } } },
+              { totalSpent: { gt: 0 } }
+            ]
+          }
+        },
       ],
     },
   });
@@ -283,7 +290,14 @@ export async function processReferralReward(
       referredBy: referrerId,
       OR: [
         { influencerProfile: { completedDeals: { gt: 0 } } },
-        { brandProfile: { totalCampaigns: { gt: 0 } } },
+        {
+          brandProfile: {
+            OR: [
+              { campaigns: { some: { status: "COMPLETED" } } },
+              { totalSpent: { gt: 0 } }
+            ]
+          }
+        },
       ],
     },
   });
@@ -423,7 +437,14 @@ export async function getEffectivePlatformFee(
       referredBy: userId,
       OR: [
         { influencerProfile: { completedDeals: { gt: 0 } } },
-        { brandProfile: { totalCampaigns: { gt: 0 } } },
+        {
+          brandProfile: {
+            OR: [
+              { campaigns: { some: { status: "COMPLETED" } } },
+              { totalSpent: { gt: 0 } }
+            ]
+          }
+        },
       ],
     },
   });

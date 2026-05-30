@@ -78,7 +78,7 @@ export const PUT = apiWrapper(async (req) => {
 
   return NextResponse.json({
     success: true,
-    message: "Payment authorized and held. Deal is now active!",
+    message: "Payment authorized and held. Influencer can now begin work!",
     status: "HELD",
   });
 });

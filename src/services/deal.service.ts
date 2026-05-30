@@ -3,11 +3,11 @@ import { Prisma, UserType } from "@prisma/client";
 import { checkRevisionLimit, ContractTerms } from "@/lib/contract-engine";
 import { checkPostVerification } from "@/lib/fraud-detection";
 import { updateTrustAndLevel } from "@/lib/trust-engine";
-import { processReferralReward } from "@/lib/referral-engine";
-import { addUserXp, checkAndAwardBadges } from "@/lib/gamification-engine";
+import { addUserXp } from "@/lib/gamification-engine";
 import { logger } from "@/lib/logger";
 import { PaymentService } from "@/services/payment.service";
 import { invalidate } from "@/lib/cache";
+import { sendDealNotificationEmail } from "@/lib/email";
 
 async function invalidateDealCache(dealId: string) {
   await invalidate(`deal:${dealId}`);
@@ -128,13 +128,15 @@ export class DealService {
           throw new Error("Unauthorized");
         }
 
-        // Validate status on the locked row
+        // PAYMENT GUARD: Only allow submission when brand's payment is secured
+        // in escrow (PAYMENT_HELD) or when a revision was requested.
+        // ACTIVE alone is NOT sufficient — it means contract signed but no payment yet.
         if (
-          !["ACTIVE", "PAYMENT_HELD", "REVISION_REQUESTED"].includes(
+          !["PAYMENT_HELD", "REVISION_REQUESTED"].includes(
             deal.status,
           )
         ) {
-          throw new Error("Invalid deal status for submission");
+          throw new Error("Payment must be secured before content submission");
         }
 
         const nextVersion = (deal.contentSubmissions[0]?.version || 0) + 1;
@@ -531,6 +533,36 @@ export class DealService {
       if (updated) {
         processed += 1;
         await invalidateDealCache(deal.id);
+
+        // Dispatch emails asynchronously after transaction commits successfully to avoid blocking the DB pool
+        (async () => {
+          try {
+            const [influencerUser, brandUser] = await Promise.all([
+              prisma.user.findUnique({ where: { id: deal.influencer.userId }, select: { email: true } }),
+              deal.brand?.userId
+                ? prisma.user.findUnique({ where: { id: deal.brand.userId }, select: { email: true } })
+                : null
+            ]);
+
+            if (influencerUser?.email) {
+              await sendDealNotificationEmail(
+                influencerUser.email,
+                deal.campaign.title,
+                `Your content for "${deal.campaign.title}" was auto-approved because the brand's review window expired.`
+              );
+            }
+
+            if (brandUser?.email) {
+              await sendDealNotificationEmail(
+                brandUser.email,
+                deal.campaign.title,
+                `Content for "${deal.campaign.title}" was auto-approved because your 48-hour brand review window expired.`
+              );
+            }
+          } catch (mailErr) {
+            logger.warn("Auto-approval email notification failed - non-fatal", { error: mailErr, dealId: deal.id });
+          }
+        })();
       } else {
         skipped.push(deal.id);
       }
@@ -622,28 +654,9 @@ export class DealService {
           verifiedAt: new Date(),
         },
       });
-
-      await tx.influencerProfile.update({
-        where: { userId },
-        data: {
-          completedDeals: { increment: 1 },
-          totalEarnings: { increment: deal.amount },
-        },
-      });
-
-      await addUserXp(userId, 100, "DEAL_VERIFIED", tx);
-
-      try {
-        await processReferralReward(userId, deal.amount, tx);
-      } catch (err) {
-        logger.warn("Referral reward failed", { error: err, userId });
-      }
-
-      await checkAndAwardBadges(userId, "DEAL_COMPLETED", tx);
     });
 
     await invalidateDealCache(dealId);
-    await updateTrustAndLevel(userId, "DEAL_VERIFIED");
 
     // Process Payment (Capture & Credit)
     try {

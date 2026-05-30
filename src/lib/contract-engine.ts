@@ -309,22 +309,26 @@ export async function calculateCancellation(dealId: string): Promise<{
 
   switch (deal.status) {
     case "PENDING_SIGNATURE":
+    case "PAYMENT_PENDING":
       payoutPercent = 0;
-      reason = "Cancelled before contract signed";
+      reason = "Cancelled before payment secured";
       break;
+    case "PAYMENT_HELD":
     case "ACTIVE":
       payoutPercent = 20;
-      reason = "Cancelled after selection (20% cancellation fee)";
+      reason = "Cancelled after payment secured (20% cancellation fee)";
       break;
     case "CONTENT_SUBMITTED":
     case "REVISION_REQUESTED":
+    case "DISPUTED":
       payoutPercent = 50;
-      reason = "Cancelled after content submission (50% payout)";
+      reason = "Cancelled after content submission or under dispute (50% payout)";
       break;
     case "CONTENT_APPROVED":
+    case "POSTED":
     case "VERIFIED":
       payoutPercent = 100;
-      reason = "Cancelled after content approved (100% payout)";
+      reason = "Cancelled after content approved or posted (100% payout)";
       break;
     default:
       payoutPercent = 0;
@@ -612,9 +616,10 @@ export async function signAndSaveDealContract(
         ...(role === "BRAND"
           ? { brandSignedAt: signedAt }
           : { influencerSignedAt: signedAt }),
-        // If fully signed, move deal from PENDING_SIGNATURE to ACTIVE
+        // If fully signed, move deal to PAYMENT_PENDING — brand must
+        // secure payment before the deal becomes ACTIVE.
         ...(updated.isFullySigned && deal.status === "PENDING_SIGNATURE"
-          ? { status: "ACTIVE" }
+          ? { status: "PAYMENT_PENDING" }
           : {}),
       },
     });
@@ -649,7 +654,7 @@ export async function signAndSaveDealContract(
     success: true,
     signed: result,
     message: result.isFullySigned
-      ? "Contract fully signed by both parties. Deal is now active!"
+      ? "Contract fully signed by both parties. Brand must secure payment to activate the deal."
       : `Contract signed by ${role.toLowerCase()}. Waiting for counterparty signature.`,
   };
 }

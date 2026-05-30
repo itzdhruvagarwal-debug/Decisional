@@ -1,6 +1,7 @@
 import prisma from "@/lib/db";
 import { checkMessageForContacts } from "@/lib/contact-filter";
 import { redis } from "@/lib/redis";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const TYPING_TTL_SECONDS = 7;
 const TYPING_REFRESH_SECONDS = 4;
@@ -329,22 +330,18 @@ export class MessageService {
   ) {
     if (data.receiverId === userId) throw new Error("Cannot message yourself");
 
-    const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
-    const [recentCount, dailyCount] = await Promise.all([
-      prisma.message.count({
-        where: { senderId: userId, createdAt: { gt: oneMinuteAgo } },
-      }),
-      prisma.message.count({
-        where: { senderId: userId, createdAt: { gt: oneDayAgo } },
-      }),
+    // Enterprise-grade Redis sliding-window check for high concurrency rate-limiting
+    const [minLimit, dayLimit] = await Promise.all([
+      checkRateLimit(userId, "MESSAGES_MIN"),
+      checkRateLimit(userId, "MESSAGES_DAY"),
     ]);
 
-    if (recentCount >= 20) {
+    if (!minLimit.success) {
       throw new Error("You are sending messages too fast. Please wait a moment.");
     }
-    if (dailyCount >= 500) throw new Error("Daily message limit reached.");
+    if (!dayLimit.success) {
+      throw new Error("Daily message limit reached.");
+    }
 
     const receiver = await prisma.user.findUnique({
       where: { id: data.receiverId },

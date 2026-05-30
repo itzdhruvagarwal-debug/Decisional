@@ -113,6 +113,8 @@ export async function verifyPostStatus(
       contractTerms: true,
       postingDeadline: true,
       completedAt: true,
+      verifiedAt: true,
+      postedAt: true,
       influencerId: true,
       influencer: { select: { userId: true } },
     },
@@ -157,10 +159,11 @@ export async function verifyPostStatus(
   );
   const isPrivate = checkResult.flags.some((f) => f.rule === "POST_IS_PRIVATE");
 
-  // Calculate monitoring day
-  const monitoringDay = deal.completedAt
+  // Calculate monitoring day — fallback: completedAt → verifiedAt → postedAt
+  const referenceDate = deal.completedAt ?? deal.verifiedAt ?? deal.postedAt;
+  const monitoringDay = referenceDate
     ? Math.floor(
-      (Date.now() - new Date(deal.completedAt).getTime()) / (86400 * 1000),
+      (Date.now() - new Date(referenceDate).getTime()) / (86400 * 1000),
     )
     : 0;
 
@@ -401,39 +404,42 @@ async function executeClawback(
       });
 
       if (influencerWallet) {
-        // Deduct full amount even if it drives balance negative (creates debt)
-        const deductAmount = clawbackAmountPaise;
+        // Clamp deduction to prevent negative balances
+        const deductAmount = Math.max(0, Math.min(influencerWallet.balance, clawbackAmountPaise));
+        const debtPending = clawbackAmountPaise - deductAmount;
 
-        await tx.wallet.update({
-          where: { userId: influencerUserId },
-          data: { balance: { decrement: deductAmount } },
-        });
+        if (deductAmount > 0) {
+          await tx.wallet.update({
+            where: { userId: influencerUserId },
+            data: { balance: { decrement: deductAmount } },
+          });
 
-        await tx.transaction.create({
-          data: {
-            walletId: influencerWallet.id,
-            amount: deductAmount,
-            type: "DEBIT",
-            dealId,
-            description: `Clawback (${clawbackPercentage}%) — Post ${reason} on day ${monitoringDay} of 30-day window`,
-            status: "COMPLETED",
-          },
-        });
+          await tx.transaction.create({
+            data: {
+              walletId: influencerWallet.id,
+              amount: deductAmount,
+              type: "DEBIT",
+              dealId,
+              description: `Clawback (${clawbackPercentage}%) — Post ${reason} on day ${monitoringDay} of 30-day window${debtPending > 0 ? ` (Pending debt: ${debtPending} Paise)` : ""}`,
+              status: "COMPLETED",
+            },
+          });
+        }
 
         // 2. Credit to brand wallet
-        if (brandUserId && deductAmount > 0) {
+        if (brandUserId && clawbackAmountPaise > 0) {
           const brandWallet = await tx.wallet.findUnique({
             where: { userId: brandUserId },
           });
           if (brandWallet) {
             await tx.wallet.update({
               where: { userId: brandUserId },
-              data: { balance: { increment: deductAmount } },
+              data: { balance: { increment: clawbackAmountPaise } },
             });
             await tx.transaction.create({
               data: {
                 walletId: brandWallet.id,
-                amount: deductAmount,
+                amount: clawbackAmountPaise,
                 type: "CREDIT",
                 dealId,
                 description: `Clawback refund — Influencer post ${reason} on day ${monitoringDay}`,
@@ -484,19 +490,27 @@ export async function runDailyPostMonitoring(): Promise<{
   clawbacksTriggered: number;
   skipped: number;
 }> {
-  // Find all deals that are completed, verified, or in monitoring states
+  const thirtyOneDaysAgo = new Date(Date.now() - 31 * 86400 * 1000);
+
+  // Find all deals that are completed, verified, or in monitoring states.
+  // Use OR across completedAt / verifiedAt / postedAt so deals that lack
+  // completedAt (e.g. VERIFIED, POSTED statuses) are not silently skipped.
   const deals = await prisma.deal.findMany({
     where: {
       status: { in: ["COMPLETED", "VERIFIED", "POSTED"] },
       isPostAlive: true,
       postUrl: { not: null },
-      completedAt: {
-        gte: new Date(Date.now() - 31 * 86400 * 1000), // Within 31 days
-      },
+      OR: [
+        { completedAt: { gte: thirtyOneDaysAgo } },
+        { verifiedAt: { gte: thirtyOneDaysAgo } },
+        { postedAt: { gte: thirtyOneDaysAgo } },
+      ],
     },
     select: {
       id: true,
       completedAt: true,
+      verifiedAt: true,
+      postedAt: true,
     },
   });
 
@@ -507,12 +521,20 @@ export async function runDailyPostMonitoring(): Promise<{
   let skipped = 0;
 
   for (const deal of deals) {
-    if (!deal.completedAt) {
+    // Fallback chain: completedAt → verifiedAt → postedAt
+    const referenceDate = deal.completedAt ?? deal.verifiedAt ?? deal.postedAt;
+
+    if (!referenceDate) {
+      // All three timestamps are null — shouldn't happen given the OR filter,
+      // but guard defensively.
+      logger.warn("Post monitor: deal has no usable reference date, skipping", {
+        dealId: deal.id,
+      });
       skipped++;
       continue;
     }
 
-    const { shouldCheck, day } = shouldCheckToday(deal.completedAt);
+    const { shouldCheck, day } = shouldCheckToday(referenceDate);
 
     if (!shouldCheck) {
       skipped++;

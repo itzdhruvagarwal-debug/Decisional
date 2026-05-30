@@ -13,6 +13,15 @@ import {
   maskIdentifier,
 } from "@/lib/india-compliance";
 import { logger } from "@/lib/logger";
+import { verifyPAN, verifyGST } from "@/lib/kyc";
+
+// Simple token-overlap check for name matching
+function namesMatch(registeredName: string, kycName: string): boolean {
+  const regTokens = registeredName.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(Boolean);
+  const kycTokens = kycName.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(Boolean);
+  
+  return regTokens.some(token => kycTokens.includes(token));
+}
 
 function isInvoiceProfileComplete(user: {
   brandProfile?: {
@@ -140,8 +149,10 @@ export async function PUT(request: Request) {
         id: true,
         userType: true,
         taxCompliance: true,
+        influencerProfile: { select: { displayName: true } },
         brandProfile: {
           select: {
+            companyName: true,
             address: true,
             state: true,
             pinCode: true,
@@ -204,6 +215,59 @@ export async function PUT(request: Request) {
         },
         { status: 400 },
       );
+    }
+
+    // Real-time PAN Verification & Name Match Guard
+    if (data.panNumber) {
+      const kycRes = await verifyPAN(data.panNumber);
+      if (!kycRes.success || kycRes.status === "REJECTED") {
+        return NextResponse.json(
+          { success: false, message: `PAN verification failed: ${kycRes.error || "Invalid PAN number"}` },
+          { status: 400 }
+        );
+      }
+
+      // Name overlap match guard
+      if (kycRes.status === "VERIFIED" && kycRes.data?.name) {
+        const registeredName = user.userType === "INFLUENCER"
+          ? user.influencerProfile?.displayName
+          : user.brandProfile?.companyName;
+
+        if (registeredName && !namesMatch(registeredName, kycRes.data.name)) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: `PAN holder name mismatch. PAN is registered under '${kycRes.data.name}', but your profile name is '${registeredName}'.`
+            },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
+    // Real-time GSTIN Verification & Business Name Match Guard
+    if (registeredForGst && data.gstin) {
+      const kycRes = await verifyGST(data.gstin);
+      if (!kycRes.success || kycRes.status === "REJECTED") {
+        return NextResponse.json(
+          { success: false, message: `GSTIN verification failed: ${kycRes.error || "Invalid GSTIN"}` },
+          { status: 400 }
+        );
+      }
+
+      // Business name overlap match guard
+      if (kycRes.status === "VERIFIED" && kycRes.data?.name) {
+        const registeredName = user.brandProfile?.companyName;
+        if (registeredName && !namesMatch(registeredName, kycRes.data.name)) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: `GST business name mismatch. GST is registered under '${kycRes.data.name}', but your company name is '${registeredName}'.`
+            },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     const nextPanPresent = Boolean(nextPanNumber || current?.panLast4);

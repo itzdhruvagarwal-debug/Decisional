@@ -89,14 +89,27 @@ export async function checkRegistrationFraud(
 
   // Rule 3: Disposable email domain
   const disposableDomains = [
-    "tempmail.com",
-    "guerrillamail.com",
-    "10minutemail.com",
-    "throwaway.email",
-    "mailinator.com",
-    "yopmail.com",
-    "trashmail.com",
-    "fakeinbox.com",
+    "tempmail.com", "guerrillamail.com", "10minutemail.com", "throwaway.email", "mailinator.com",
+    "yopmail.com", "trashmail.com", "fakeinbox.com", "dispostable.com", "getairmail.com",
+    "maildrop.cc", "mintemail.com", "sharklasers.com", "mailinator2.com", "sorennft.com",
+    "disposable.com", "temp-mail.org", "tempmailaddress.com", "temp-mail.ru", "temp-mail.com",
+    "generator.email", "yopmail.fr", "yopmail.net", "cool.fr.nf", "jetable.fr.nf",
+    "nospam.ze.tc", "nomail.xl.cx", "mega.zik.dj", "speed.1s.fr", "forget.me.uk",
+    "boun.cr", "inboxkitten.com", "anonbox.net", "tempr.email", "discard.email",
+    "spambox.us", "harakirimail.com", "mailnesia.com", "mailcatch.com", "odoo.me",
+    "mytrashmail.com", "mailtothis.com", "getnada.com", "nada.ltd", "m0akt.com",
+    "hqzme.com", "gimpmail.com", "inboxbear.com", "mohmal.com", "mohmal.in",
+    "temp-mail.to", "tempmail.net", "tempmail.org", "tempmail.dev", "tempmail.io",
+    "emailondeck.com", "tutanota.com", "guerrillamailblock.com", "guerrillamail.net", "guerrillamail.org",
+    "guerrillamail.biz", "grr.la", "sharklasers.com", "guerillamail.info", "pokemail.net",
+    "spam4.me", "mailinator.net", "wetatin.com", "superrito.com", "binkmail.com",
+    "bobmail.info", "sayalot.com", "zehnminutenmail.de", "10minutemail.co.uk", "10minutemail.net",
+    "10minutemail.info", "10minutemail.org", "10minutemail.be", "10minutemail.nl", "10minutemail.de",
+    "crazymailing.com", "zillamail.com", "spamex.com", "spamgourmet.com", "prevmail.com",
+    "tempail.com", "burnermail.io", "mailet.net", "temp-mail.id", "mymail.ly",
+    "temp-mail.live", "temp-mail.info", "tempmailfree.info", "duck.com", "icloud.com/hide-my-email",
+    "bypass.cf", "emailfake.com", "fakemailgenerator.com", "smartenvelope.com", "trbvm.com",
+    "fyii.de", "boximail.com", "get24.cf", "instantemail.app", "tempinbox.xyz"
   ];
   const emailDomain = params.email.split("@")[1]?.toLowerCase();
 

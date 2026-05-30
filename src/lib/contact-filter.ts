@@ -7,9 +7,10 @@ export const CONTACT_REGEX = {
   phone: /(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g,
   url: /(https?:\/\/[^\s]+)|(www\.[^\s]+)|([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/gi,
   socialHandle:
-    /@(gmail\.com|whatsapp|instagram|telegram|t\.me|linktr\.ee)\b|whatsapp|instagram|telegram|t\.me|linktr\.ee/gi,
+    /@(gmail\.com|whatsapp|instagram|telegram|t\.me|linktr\.ee)\b|whatsapp|instagram|telegram|t\.me|linktr\.ee|insta:|ig:|wp:|vpa:|upi:/gi,
   numberWords:
     /(zero|one|two|three|four|five|six|seven|eight|nine)[\s\p{P}]*(zero|one|two|three|four|five|six|seven|eight|nine)/giu,
+  upi: /[a-zA-Z0-9.\-_]+@(ybl|okaxis|okicici|paytm|upi|apl|axl|ibl|sib|federal|hsbc|hdfc|icici|barodampay|sbi|waaxis|wasbi|kmbl|oklahoma|okl|postbank)/gi,
 };
 
 export function checkMessageForContacts(content: string) {
@@ -47,11 +48,21 @@ export function checkMessageForContacts(content: string) {
 
   if (
     content.match(CONTACT_REGEX.socialHandle) ||
-    ["whatsapp", "instagram", "telegram", "linktree", "gmailcom"].some((kw) =>
+    ["whatsapp", "instagram", "telegram", "linktree", "gmailcom", "insta", "ig", "wp"].some((kw) =>
       normalizedContent.includes(kw),
     )
   ) {
     findings.push("social");
+  }
+
+  // Check UPI IDs (VPAs) for pre-contract payment bypass attempts
+  if (
+    content.match(CONTACT_REGEX.upi) ||
+    normalizedContent.includes("upiid") ||
+    normalizedContent.includes("vpa") ||
+    normalizedContent.includes("paytmme")
+  ) {
+    findings.push("upi");
   }
 
   // Check Number Words
