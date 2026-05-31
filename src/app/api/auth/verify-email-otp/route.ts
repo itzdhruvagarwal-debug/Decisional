@@ -51,7 +51,8 @@ export async function PUT(request: NextRequest) {
             );
         }
 
-        // If registration, check if email is already taken
+        // Avoid account enumeration: registration requests for existing emails
+        // receive the same outward response, but no OTP is sent.
         if (type === "registration") {
             const existing = await prisma.user.findUnique({
                 where: { email: email.toLowerCase().trim() },
@@ -59,8 +60,8 @@ export async function PUT(request: NextRequest) {
             });
             if (existing) {
                 return NextResponse.json(
-                    { error: "This email is already registered. Please sign in instead." },
-                    { status: 409 },
+                    { success: true, message: "If this email can be registered, an OTP has been sent." },
+                    { status: 200 },
                 );
             }
         }

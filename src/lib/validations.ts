@@ -320,6 +320,32 @@ export const postVerificationSchema = z.object({
     .max(500, "URL too long"),
 });
 
+export const shippingAddressSchema = z.object({
+  fullName: z.string().trim().min(2).max(100),
+  phone: phoneSchema,
+  line1: z.string().trim().min(5).max(200),
+  line2: z.string().trim().max(200).optional(),
+  city: z.string().trim().min(2).max(80),
+  state: z.string().trim().min(2).max(80),
+  pinCode: z.string().trim().regex(/^\d{6}$/, "Must be a valid 6-digit PIN code"),
+  country: z.string().trim().max(80).optional().default("India"),
+});
+
+export const productFulfillmentSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("submit_address"),
+    address: shippingAddressSchema,
+  }),
+  z.object({
+    action: z.literal("confirm_dispatch"),
+    trackingNumber: z.string().trim().min(1).max(120),
+    carrier: z.string().trim().max(80).optional(),
+  }),
+  z.object({
+    action: z.literal("confirm_received"),
+  }),
+]);
+
 // ==================== PAYMENT SCHEMAS ====================
 
 export const withdrawalSchema = z.object({
@@ -408,6 +434,7 @@ export type CampaignInput = z.infer<typeof campaignSchema>;
 export type ApplicationInput = z.infer<typeof applicationSchema>;
 export type ContractTermsInput = z.infer<typeof contractTermsSchema>;
 export type ContentSubmissionInput = z.infer<typeof contentSubmissionSchema>;
+export type ProductFulfillmentInput = z.infer<typeof productFulfillmentSchema>;
 export type WithdrawalInput = z.infer<typeof withdrawalSchema>;
 export type DisputeInput = z.infer<typeof disputeSchema>;
 export type ReviewInput = z.infer<typeof reviewSchema>;

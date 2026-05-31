@@ -17,6 +17,7 @@ import prisma from "./db";
 import { checkPostVerification } from "./fraud-detection";
 import { updateTrustAndLevel } from "./trust-engine";
 import { logger } from "./logger";
+import { applyProgressivePenalty } from "./penalty-system";
 
 // ==================== TYPES ====================
 
@@ -322,23 +323,14 @@ async function handlePostFailure(
       }
     }
 
-    // 8. Create violation record
+    // 8. Apply progressive strike handling so post deletion escalates.
     if (deal.influencer?.userId) {
-      await prisma.userViolation.create({
-        data: {
-          userId: deal.influencer.userId,
-          type: "CONTENT_POLICY",
-          severity: monitoringDay <= 7 ? "HIGH" : "MEDIUM",
-          description: `Post ${status.toLowerCase()} on day ${monitoringDay} of 30-day monitoring window`,
-          action: monitoringDay <= 3 ? "TEMP_SUSPENSION" : "WARNING",
-          metadata: {
-            dealId: deal.id,
-            postUrl: deal.postUrl,
-            monitoringDay,
-            clawbackTriggered: clawback?.triggered || false,
-          },
-        },
-      });
+      await applyProgressivePenalty(
+        deal.influencer.userId,
+        "POST_DELETION",
+        `Post ${status.toLowerCase()} on day ${monitoringDay} of 30-day monitoring window`,
+        deal.postUrl || undefined,
+      );
     }
   } catch (error) {
     logger.error("PostMonitor handlePostFailure error", error, {
@@ -370,6 +362,7 @@ async function executeClawback(
     where: { id: dealId },
     select: {
       amount: true,
+      status: true,
       influencer: {
         select: {
           userId: true,
@@ -380,13 +373,13 @@ async function executeClawback(
     },
   });
 
-  if (!deal) {
+  if (!deal || deal.status !== "COMPLETED") {
     return {
       dealId,
       triggered: false,
       clawbackPercentage: 0,
       clawbackAmountPaise: 0,
-      reason: "Deal not found",
+      reason: deal ? "Deal is not completed; clawback skipped" : "Deal not found",
     };
   }
 
@@ -426,23 +419,23 @@ async function executeClawback(
           });
         }
 
-        // 2. Credit to brand wallet
-        if (brandUserId && clawbackAmountPaise > 0) {
+        // 2. Credit brand only for funds actually recovered from influencer.
+        if (brandUserId && deductAmount > 0) {
           const brandWallet = await tx.wallet.findUnique({
             where: { userId: brandUserId },
           });
           if (brandWallet) {
             await tx.wallet.update({
               where: { userId: brandUserId },
-              data: { balance: { increment: clawbackAmountPaise } },
+              data: { balance: { increment: deductAmount } },
             });
             await tx.transaction.create({
               data: {
                 walletId: brandWallet.id,
-                amount: clawbackAmountPaise,
+                amount: deductAmount,
                 type: "CREDIT",
                 dealId,
-                description: `Clawback refund — Influencer post ${reason} on day ${monitoringDay}`,
+                description: `Clawback refund — Influencer post ${reason} on day ${monitoringDay}${debtPending > 0 ? ` (Unrecovered debt: ${debtPending} paise)` : ""}`,
                 status: "COMPLETED",
               },
             });
@@ -492,12 +485,10 @@ export async function runDailyPostMonitoring(): Promise<{
 }> {
   const thirtyOneDaysAgo = new Date(Date.now() - 31 * 86400 * 1000);
 
-  // Find all deals that are completed, verified, or in monitoring states.
-  // Use OR across completedAt / verifiedAt / postedAt so deals that lack
-  // completedAt (e.g. VERIFIED, POSTED statuses) are not silently skipped.
+  // Monitor only completed deals because clawback requires a settled payout.
   const deals = await prisma.deal.findMany({
     where: {
-      status: { in: ["COMPLETED", "VERIFIED", "POSTED"] },
+      status: "COMPLETED",
       isPostAlive: true,
       postUrl: { not: null },
       OR: [

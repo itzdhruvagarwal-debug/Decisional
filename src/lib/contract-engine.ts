@@ -26,6 +26,10 @@ export interface ContractTerms {
   platformFeePercent: number;
   influencerPayout: number;
   productHandlingFee: number;
+  requiresProduct: boolean;
+  productName?: string;
+  productValue?: number;
+  productDescription?: string;
 
   // Deliverables
   deliverables: ContractDeliverable[];
@@ -171,6 +175,9 @@ export function generateContractTerms(
     contentDeadline?: Date;
     postingDeadline?: Date;
     requiresProduct?: boolean;
+    productName?: string | null;
+    productValue?: number | null;
+    productDescription?: string | null;
   },
   proposal?: {
     rate?: number;
@@ -202,6 +209,8 @@ export function generateContractTerms(
   const totalAmount =
     proposal?.totalAmount ?? dealAmount + platformFee + gatewayFee;
   const influencerPayout = proposal?.influencerPayout ?? dealAmount;
+  const requiresProduct = Boolean(campaign.requiresProduct);
+  const productValue = Math.max(0, Number(campaign.productValue || 0));
 
   const deliverables = normalizeContractDeliverables(campaign.deliverables);
   const contractText = collectContractText([
@@ -220,6 +229,14 @@ export function generateContractTerms(
     platformFeePercent: effectivePlatformFeePercent,
     influencerPayout,
     productHandlingFee,
+    requiresProduct,
+    ...(requiresProduct && campaign.productName
+      ? { productName: campaign.productName }
+      : {}),
+    ...(requiresProduct ? { productValue } : {}),
+    ...(requiresProduct && campaign.productDescription
+      ? { productDescription: campaign.productDescription }
+      : {}),
 
     deliverables,
     mandatoryTags: mandatoryElements,
@@ -256,6 +273,12 @@ export function generateContractTerms(
         "Creator account access, whitelisting, or collaborator permissions are never implied by this contract.",
     },
     influencerObligations: [
+      ...(requiresProduct
+        ? [
+            "Provide a complete shipping address before the brand dispatches the product.",
+            "Confirm product receipt before submitting campaign content.",
+          ]
+        : []),
       "Submit original content by the submission deadline.",
       "Keep approved live posts public until the posting obligation ends unless the brand agrees otherwise.",
       "Do not share private contact details outside platform rules before the deal is active.",
@@ -265,7 +288,9 @@ export function generateContractTerms(
       "Fund or authorize payment before requiring work beyond normal proposal review.",
       "Review content within the review window with clear approval or revision feedback.",
       "Do not request extra usage rights, deliverables, or deadlines outside the signed terms without mutual consent.",
-      "Provide product samples, shipping details, and brand assets on time when the campaign requires them.",
+      requiresProduct
+        ? "Dispatch the product sample with tracking details before requiring content submission."
+        : "Provide brand assets on time when the campaign requires them.",
     ],
     taxNote:
       "Each party is responsible for GST, TDS, ITR, invoice, and other tax obligations that apply to them under Indian law.",
@@ -541,6 +566,7 @@ export async function signAndSaveDealContract(
         status: true,
         contractTerms: true,
         contractSignature: true,
+        reservedFromWallet: true,
         influencer: { select: { userId: true } },
         brand: { select: { userId: true } },
       },
@@ -563,6 +589,14 @@ export async function signAndSaveDealContract(
       throw new Error("User is not the influencer on this deal");
     if (role === "BRAND" && !isBrand)
       throw new Error("User is not the brand on this deal");
+
+    const actor = await tx.user.findUnique({
+      where: { id: userId },
+      select: { status: true },
+    });
+    if (actor?.status === "SUSPENDED" || actor?.status === "BANNED") {
+      throw new Error("Account suspended. Cannot perform this action.");
+    }
 
     // Generate signature
     const signature = signContract(terms, userId, ipAddress, userAgent);
@@ -616,10 +650,8 @@ export async function signAndSaveDealContract(
         ...(role === "BRAND"
           ? { brandSignedAt: signedAt }
           : { influencerSignedAt: signedAt }),
-        // If fully signed, move deal to PAYMENT_PENDING — brand must
-        // secure payment before the deal becomes ACTIVE.
         ...(updated.isFullySigned && deal.status === "PENDING_SIGNATURE"
-          ? { status: "PAYMENT_PENDING" }
+          ? { status: deal.reservedFromWallet ? "PAYMENT_HELD" : "PAYMENT_PENDING" }
           : {}),
       },
     });
@@ -654,7 +686,7 @@ export async function signAndSaveDealContract(
     success: true,
     signed: result,
     message: result.isFullySigned
-      ? "Contract fully signed by both parties. Brand must secure payment to activate the deal."
+      ? "Contract fully signed by both parties. Payment is secured and the deal can proceed."
       : `Contract signed by ${role.toLowerCase()}. Waiting for counterparty signature.`,
   };
 }
@@ -688,9 +720,14 @@ export async function retryPaymentCapture(
     },
   });
 
-  if (!deal) {
+  if (
+    !deal ||
+    ["COMPLETED", "CANCELLED", "DISPUTED", "PENDING_SIGNATURE", "PAYMENT_PENDING"].includes(
+      deal.status,
+    )
+  ) {
     logger.error("Deal not found during payment retry", { dealId, paymentId });
-    return { success: false, attempt: currentAttempt, error: "Deal not found" };
+    return { success: false, attempt: currentAttempt, error: "Deal not eligible for retry" };
   }
 
   const hold = deal.paymentHold;
@@ -792,7 +829,9 @@ export async function retryPaymentCapture(
         });
 
         if (brandWallet) {
-          const pendingRelease = Math.min(brandWallet.pendingBalance, deal.amount);
+          const pendingRelease = deal.reservedFromWallet
+            ? 0
+            : Math.min(brandWallet.pendingBalance, deal.amount);
           await tx.wallet.update({
             where: { id: brandWallet.id },
             data: {
@@ -812,16 +851,17 @@ export async function retryPaymentCapture(
         });
       }
 
+      const influencerPayout = deal.influencerPayout ?? deal.amount;
       const wallet = await tx.wallet.upsert({
         where: { userId: deal.influencer.userId },
         create: {
           userId: deal.influencer.userId,
-          balance: deal.amount,
-          totalEarned: deal.amount,
+          balance: influencerPayout,
+          totalEarned: influencerPayout,
         },
         update: {
-          balance: { increment: deal.amount },
-          totalEarned: { increment: deal.amount },
+          balance: { increment: influencerPayout },
+          totalEarned: { increment: influencerPayout },
         },
       });
 
@@ -830,7 +870,7 @@ export async function retryPaymentCapture(
           walletId: wallet.id,
           dealId: deal.id,
           type: "CREDIT",
-          amount: deal.amount,
+          amount: influencerPayout,
           status: "COMPLETED",
           description: `Payout for deal retry: ${deal.id}`,
         },

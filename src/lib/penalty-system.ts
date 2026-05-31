@@ -217,13 +217,24 @@ async function holdActivePayouts(userId: string) {
     const activeDeals = await prisma.deal.findMany({
       where: {
         influencer: { userId },
-        status: { in: ["CONTENT_APPROVED", "VERIFIED", "COMPLETED"] },
+        status: { in: ["PAYMENT_HELD", "CONTENT_SUBMITTED", "REVISION_REQUESTED", "CONTENT_APPROVED", "POSTED", "VERIFICATION_PENDING", "VERIFIED"] },
         paymentHold: { status: "HELD" },
       },
       select: { id: true },
     });
 
     for (const deal of activeDeals) {
+      await prisma.deal.updateMany({
+        where: {
+          id: deal.id,
+          status: { notIn: ["COMPLETED", "CANCELLED", "DISPUTED"] },
+        },
+        data: {
+          status: "DISPUTED",
+          rejectionReason: "Payout held due to account violation review.",
+        },
+      });
+
       await prisma.activityLog.create({
         data: {
           userId,

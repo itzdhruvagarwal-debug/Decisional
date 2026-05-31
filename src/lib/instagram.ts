@@ -126,9 +126,15 @@ export async function exchangeInstagramCode(
 async function getLongLivedToken(shortToken: string): Promise<string | null> {
   try {
     const appSecret = process.env.INSTAGRAM_APP_SECRET || "";
-    const res = await fetch(
-      `${GRAPH_API_BASE}/access_token?grant_type=ig_exchange_token&client_secret=${appSecret}&access_token=${shortToken}`,
-    );
+    const res = await fetch(`${GRAPH_API_BASE}/access_token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "ig_exchange_token",
+        client_secret: appSecret,
+        access_token: shortToken,
+      }),
+    });
     const data = await res.json();
     return data.access_token || null;
   } catch {

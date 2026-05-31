@@ -5,6 +5,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
+import { randomUUID } from "crypto";
 import prisma from "./db";
 import { loginSchema } from "./validations";
 import { logger } from "./logger";
@@ -20,6 +21,7 @@ import { verify } from "otplib";
 import { checkRateLimit } from "./rate-limit";
 import { logActivity, ActivityAction } from "./audit";
 import { isVPNOrProxy, getDistanceBetweenIPs } from "./ipinfo";
+import { decrypt } from "./encryption";
 
 const ACCESS_TOKEN_EXPIRY = 15 * 60 * 1000; // 15 minutes
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -273,7 +275,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
             const isValidToken = await verify({
               token: code,
-              secret: user.twoFactorSecret,
+              secret: (() => {
+                try {
+                  return decrypt(user.twoFactorSecret!);
+                } catch {
+                  return user.twoFactorSecret!;
+                }
+              })(),
             });
 
             if (!isValidToken) {
@@ -507,6 +515,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.name = user.name ?? token.name ?? null;
         }
         token.lastRefreshed = Date.now();
+        token.jti = token.jti || randomUUID();
 
         // Store IP and UA for session pinning (Enterprise Security)
         try {
@@ -561,8 +570,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return { ...token, error: "SessionRevoked" };
           }
         }
-      } catch (_error) {
-        // Ignore redis/db errors to prevent locking out valid users if services are temporarily down
+      } catch (error) {
+        logger.error(
+          "Session security check failed; revoking request",
+          error,
+          typeof token.id === "string" ? { userId: token.id } : {},
+        );
+        return { ...token, error: "SessionRevoked" };
       }
 
       // Return previous token if the access token has not expired yet

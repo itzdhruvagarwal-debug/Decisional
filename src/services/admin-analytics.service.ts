@@ -54,15 +54,15 @@ export class AdminAnalyticsService {
         totalAmount: true,
         platformFee: true,
         gatewayFee: true,
-        amount: true,
+        influencerPayout: true,
       },
-      where: { status: { in: ["COMPLETED", "VERIFIED"] } },
+      where: { status: "COMPLETED" },
     });
 
     const gmv = dealAggregations._sum.totalAmount || 0;
     const platformRevenue = dealAggregations._sum.platformFee || 0;
     const gatewayFees = dealAggregations._sum.gatewayFee || 0;
-    const influencerPayouts = dealAggregations._sum.amount || 0;
+    const influencerPayouts = dealAggregations._sum.influencerPayout || 0;
 
     // ─── Last 30 days GMV ───
     const recentDealAgg = await prisma.deal.aggregate({
@@ -71,7 +71,7 @@ export class AdminAnalyticsService {
         platformFee: true,
       },
       where: {
-        status: { in: ["COMPLETED", "VERIFIED"] },
+        status: "COMPLETED",
         completedAt: { gte: thirtyDaysAgo },
       },
     });

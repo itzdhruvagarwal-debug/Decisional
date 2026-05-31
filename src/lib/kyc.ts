@@ -58,9 +58,10 @@ export async function verifyAadhaar(
       "Running in manual mode — Aadhaar verification queued for admin review",
     );
     return {
-      success: true,
+      success: false,
       status: "PENDING",
       data: { documentNumber: maskDocument(aadhaarNumber, 4) },
+      error: "Manual KYC requires admin review",
     };
   }
 
@@ -104,9 +105,10 @@ export async function verifyPAN(panNumber: string): Promise<KYCVerifyResult> {
   if (KYC_PROVIDER === "manual" || !KYC_API_KEY) {
     logger.warn("Manual mode — PAN verification queued for admin");
     return {
-      success: true,
+      success: false,
       status: "PENDING",
       data: { documentNumber: maskDocument(panNumber, 4) },
+      error: "Manual KYC requires admin review",
     };
   }
 
@@ -171,9 +173,10 @@ export async function verifyGST(gstNumber: string): Promise<KYCVerifyResult> {
   if (KYC_PROVIDER === "manual" || !KYC_API_KEY) {
     logger.warn("Manual mode — GST verification queued for admin");
     return {
-      success: true,
+      success: false,
       status: "PENDING",
       data: { documentNumber: gstNumber },
+      error: "Manual KYC requires admin review",
     };
   }
 
@@ -241,10 +244,11 @@ export async function verifyBankAccount(params: {
   if (KYC_PROVIDER === "manual" || !KYC_API_KEY) {
     logger.warn("Manual mode — bank verification queued for admin");
     return {
-      success: true,
-      nameMatch: true, // Assumed in manual mode
-      accountExists: true,
+      success: false,
+      nameMatch: false,
+      accountExists: false,
       beneficiaryName: params.beneficiaryName,
+      error: "Manual bank verification requires admin review",
     };
   }
 

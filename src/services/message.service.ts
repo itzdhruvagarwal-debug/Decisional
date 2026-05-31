@@ -2,6 +2,7 @@ import prisma from "@/lib/db";
 import { checkMessageForContacts } from "@/lib/contact-filter";
 import { redis } from "@/lib/redis";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { stripHtml } from "@/lib/sanitize";
 
 const TYPING_TTL_SECONDS = 7;
 const TYPING_REFRESH_SECONDS = 4;
@@ -372,7 +373,8 @@ export class MessageService {
       await getConversationAccess(userId, { with: data.receiverId });
     }
 
-    const filterResult = checkMessageForContacts(data.content || "");
+    const sanitizedContent = stripHtml(data.content || "");
+    const filterResult = checkMessageForContacts(sanitizedContent);
     const isBlocked = filterResult.hasContactInfo;
     const hasWarning = filterResult.hasContactInfo;
 
@@ -381,7 +383,7 @@ export class MessageService {
         dealId: data.dealId,
         senderId: userId,
         receiverId: data.receiverId,
-        content: data.content,
+        content: sanitizedContent,
         messageType: data.messageType || "TEXT",
         fileUrl: data.fileUrl,
         isBlocked,

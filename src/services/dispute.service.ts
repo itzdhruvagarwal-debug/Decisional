@@ -79,6 +79,20 @@ export class DisputeService {
 
     if (!allowedUsers.includes(userId)) throw new Error("Unauthorized");
 
+    const allowedDealStatuses = [
+      "PAYMENT_HELD",
+      "CONTENT_SUBMITTED",
+      "REVISION_REQUESTED",
+      "CONTENT_APPROVED",
+      "POSTED",
+      "VERIFICATION_PENDING",
+      "VERIFIED",
+      "DISPUTED",
+    ];
+    if (!allowedDealStatuses.includes(deal.status)) {
+      throw new Error("Cannot raise dispute on a completed or cancelled deal");
+    }
+
     // Create dispute - starts at Tier 1 (Auto) with a lock on the deal
     const dispute = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 1. Lock the deal row to prevent concurrent dispute creations

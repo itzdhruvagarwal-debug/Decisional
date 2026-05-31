@@ -23,6 +23,12 @@ export async function GET(_req: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    if (session.user.userType !== "INFLUENCER") {
+      return NextResponse.json(
+        { error: "Only influencers can manage payout bank accounts" },
+        { status: 403 },
+      );
+    }
 
     const accounts = await prisma.bankAccount.findMany({
       where: { userId: session.user.id },
@@ -49,6 +55,12 @@ export async function POST(req: NextRequest) {
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (session.user.userType !== "INFLUENCER") {
+      return NextResponse.json(
+        { error: "Only influencers can manage payout bank accounts" },
+        { status: 403 },
+      );
     }
 
     const body = await req.json();
@@ -118,6 +130,12 @@ export async function DELETE(req: NextRequest) {
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (session.user.userType !== "INFLUENCER") {
+      return NextResponse.json(
+        { error: "Only influencers can manage payout bank accounts" },
+        { status: 403 },
+      );
     }
 
     const { searchParams } = new URL(req.url);

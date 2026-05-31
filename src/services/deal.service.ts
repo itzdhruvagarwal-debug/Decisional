@@ -33,6 +33,37 @@ function formatFraudFlags(flags: { description?: string; rule?: string }[]) {
     .join(", ");
 }
 
+function validateShippingAddress(value: unknown): Prisma.InputJsonValue {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("Shipping address is required");
+  }
+
+  const input = value as Record<string, unknown>;
+  const address = {
+    fullName: String(input.fullName || "").trim(),
+    phone: String(input.phone || "").trim(),
+    line1: String(input.line1 || "").trim(),
+    line2: input.line2 ? String(input.line2).trim() : null,
+    city: String(input.city || "").trim(),
+    state: String(input.state || "").trim(),
+    pinCode: String(input.pinCode || "").trim(),
+    country: String(input.country || "India").trim(),
+  };
+
+  if (
+    !address.fullName ||
+    !/^[6-9]\d{9}$/.test(address.phone) ||
+    !address.line1 ||
+    !address.city ||
+    !address.state ||
+    !/^\d{6}$/.test(address.pinCode)
+  ) {
+    throw new Error("Complete Indian shipping address with valid phone and PIN is required");
+  }
+
+  return address as Prisma.InputJsonValue;
+}
+
 export class DealService {
   static async listDeals(
     userId: string,
@@ -137,6 +168,14 @@ export class DealService {
           )
         ) {
           throw new Error("Payment must be secured before content submission");
+        }
+
+        if (
+          deal.requiresProduct &&
+          deal.productFulfillmentStatus !== "RECEIVED" &&
+          deal.status !== "REVISION_REQUESTED"
+        ) {
+          throw new Error("Product must be received before content submission");
         }
 
         const nextVersion = (deal.contentSubmissions[0]?.version || 0) + 1;
@@ -312,15 +351,38 @@ export class DealService {
         data: { selectedInfluencers: { decrement: 1 } },
       });
 
-      if (deal.campaign.isDirectInvite && deal.brand?.userId) {
+      if (deal.brand?.userId && deal.reservedFromWallet) {
+        const wallet = await tx.wallet.findUnique({
+          where: { userId: deal.brand.userId },
+          select: { id: true },
+        });
+
+        if (wallet && deal.amount > 0) {
+          await tx.wallet.update({
+            where: { id: wallet.id },
+            data: {
+              balance: { increment: deal.amount },
+            },
+          });
+
+          await tx.transaction.create({
+            data: {
+              walletId: wallet.id,
+              dealId: deal.id,
+              type: "REFUND",
+              amount: deal.amount,
+              status: "COMPLETED",
+              description: `Refund for rejected invite: ${deal.campaign.title}`,
+            },
+          });
+        }
+      } else if (deal.campaign.isDirectInvite && deal.brand?.userId) {
         const wallet = await tx.wallet.findUnique({
           where: { userId: deal.brand.userId },
           select: { id: true, pendingBalance: true },
         });
 
-        const refundableAmount = wallet
-          ? Math.min(wallet.pendingBalance, deal.campaign.totalBudget)
-          : 0;
+        const refundableAmount = wallet ? Math.min(wallet.pendingBalance, deal.amount) : 0;
 
         if (wallet && refundableAmount > 0) {
           await tx.wallet.update({
@@ -342,13 +404,12 @@ export class DealService {
             },
           });
         }
+      }
 
+      if (deal.campaign.isDirectInvite) {
         await tx.campaign.update({
           where: { id: deal.campaignId },
-          data: {
-            status: "CANCELLED",
-            deletedAt: new Date(),
-          },
+          data: { status: "CANCELLED", deletedAt: new Date() },
         });
 
         if (deal.campaign.brandId && deal.campaign.status === "ACTIVE") {
@@ -391,6 +452,157 @@ export class DealService {
       });
 
       return await tx.deal.findUniqueOrThrow({ where: { id: dealId } });
+    });
+
+    await invalidateDealCache(dealId);
+    return updatedDeal;
+  }
+
+  static async submitShippingAddress(
+    userId: string,
+    dealId: string,
+    address: unknown,
+  ) {
+    const shippingAddress = validateShippingAddress(address);
+
+    const updatedDeal = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      const deal = await tx.deal.update({
+        where: { id: dealId },
+        data: { updatedAt: new Date() },
+        include: {
+          influencer: { select: { userId: true, displayName: true } },
+          brand: { select: { userId: true } },
+          campaign: { select: { title: true } },
+        },
+      });
+
+      if (deal.influencer.userId !== userId) throw new Error("Unauthorized");
+      if (!deal.requiresProduct) throw new Error("This deal does not require product shipping");
+      if (!["ADDRESS_PENDING", "READY_TO_DISPATCH"].includes(deal.productFulfillmentStatus)) {
+        throw new Error("Shipping address cannot be changed after dispatch");
+      }
+
+      const updated = await tx.deal.update({
+        where: { id: dealId },
+        data: {
+          shippingAddress,
+          productFulfillmentStatus: "READY_TO_DISPATCH",
+        },
+      });
+
+      if (deal.brand?.userId) {
+        await tx.notification.create({
+          data: {
+            userId: deal.brand.userId,
+            type: "deal_update",
+            title: "Shipping address received",
+            message: `${deal.influencer.displayName || "Influencer"} added a shipping address for "${deal.campaign.title}".`,
+            data: { link: `/dashboard/deals/${dealId}` },
+          },
+        });
+      }
+
+      return updated;
+    });
+
+    await invalidateDealCache(dealId);
+    return updatedDeal;
+  }
+
+  static async confirmProductDispatch(
+    userId: string,
+    dealId: string,
+    data: { trackingNumber: string; carrier?: string },
+  ) {
+    const trackingNumber = data.trackingNumber.trim();
+    const carrier = data.carrier?.trim();
+    if (!trackingNumber || trackingNumber.length > 120) {
+      throw new Error("Tracking number is required");
+    }
+
+    const updatedDeal = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      const deal = await tx.deal.update({
+        where: { id: dealId },
+        data: { updatedAt: new Date() },
+        include: {
+          brand: { select: { userId: true, companyName: true } },
+          influencer: { select: { userId: true } },
+          campaign: { select: { title: true } },
+        },
+      });
+
+      if (deal.brand?.userId !== userId) throw new Error("Unauthorized");
+      if (!deal.requiresProduct) throw new Error("This deal does not require product shipping");
+      if (deal.productFulfillmentStatus !== "READY_TO_DISPATCH" || !deal.shippingAddress) {
+        throw new Error("Influencer shipping address is required before dispatch");
+      }
+
+      const updated = await tx.deal.update({
+        where: { id: dealId },
+        data: {
+          dispatchTrackingNumber: trackingNumber,
+          dispatchCarrier: carrier || null,
+          dispatchedAt: new Date(),
+          productFulfillmentStatus: "DISPATCHED",
+        },
+      });
+
+      await tx.notification.create({
+        data: {
+          userId: deal.influencer.userId,
+          type: "deal_update",
+          title: "Product dispatched",
+          message: `${deal.brand?.companyName || "Brand"} dispatched the product for "${deal.campaign.title}". Please confirm once received.`,
+          data: { link: `/dashboard/deals/${dealId}` },
+        },
+      });
+
+      return updated;
+    });
+
+    await invalidateDealCache(dealId);
+    return updatedDeal;
+  }
+
+  static async confirmProductReceived(userId: string, dealId: string) {
+    const updatedDeal = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      const deal = await tx.deal.update({
+        where: { id: dealId },
+        data: { updatedAt: new Date() },
+        include: {
+          influencer: { select: { userId: true, displayName: true } },
+          brand: { select: { userId: true } },
+          campaign: { select: { title: true } },
+        },
+      });
+
+      if (deal.influencer.userId !== userId) throw new Error("Unauthorized");
+      if (!deal.requiresProduct) throw new Error("This deal does not require product shipping");
+      if (deal.productFulfillmentStatus !== "DISPATCHED") {
+        throw new Error("Product must be dispatched before it can be marked received");
+      }
+
+      const updated = await tx.deal.update({
+        where: { id: dealId },
+        data: {
+          productFulfillmentStatus: "RECEIVED",
+          productReceivedAt: new Date(),
+        },
+      });
+
+      if (deal.brand?.userId) {
+        await tx.notification.create({
+          data: {
+            userId: deal.brand.userId,
+            type: "deal_update",
+            title: "Product received",
+            message: `${deal.influencer.displayName || "Influencer"} confirmed product receipt for "${deal.campaign.title}".`,
+            data: { link: `/dashboard/deals/${dealId}` },
+          },
+        });
+      }
+
+      return updated;
     });
 
     await invalidateDealCache(dealId);
@@ -654,7 +866,7 @@ export class DealService {
 
       const finalStatus = needsReview ? "VERIFICATION_PENDING" : "VERIFIED";
 
-      await tx.deal.update({
+      const updated = await tx.deal.update({
         where: { id: dealId },
         data: {
           status: finalStatus,
@@ -664,7 +876,7 @@ export class DealService {
         },
       });
 
-      return finalStatus;
+      return updated.status;
     });
 
     await invalidateDealCache(dealId);

@@ -1,5 +1,6 @@
 import prisma from "./db";
 import { logger } from "./logger";
+import { Prisma } from "@prisma/client";
 
 /**
  * Ledger Invariant Verification Engine (LIVE)
@@ -16,6 +17,8 @@ export interface VerificationAnomaly {
     calculatedBalance: number;
     storedBalance: number;
     drift: number;
+    storedPendingBalance?: number;
+    pendingDrift?: number;
 }
 
 /**
@@ -26,7 +29,7 @@ export async function verifyWalletBalance(userId: string): Promise<VerificationA
     const [wallet, _txSummary] = await Promise.all([
         prisma.wallet.findUnique({
             where: { userId },
-            select: { id: true, balance: true, userId: true }
+            select: { id: true, balance: true, pendingBalance: true, userId: true }
         }),
         prisma.transaction.aggregate({
             where: {
@@ -68,17 +71,22 @@ export async function verifyWalletBalance(userId: string): Promise<VerificationA
     const totalDebits = debits._sum.amount || 0;
     const calculatedBalance = totalCredits - totalDebits;
 
-    if (calculatedBalance !== wallet.balance) {
+    const pendingDrift = wallet.pendingBalance < 0 ? wallet.pendingBalance : 0;
+
+    if (calculatedBalance !== wallet.balance || pendingDrift !== 0) {
         const drift = wallet.balance - calculatedBalance;
         const anomaly = {
             walletId: wallet.id,
             userId: wallet.userId,
             calculatedBalance,
             storedBalance: wallet.balance,
-            drift
+            drift,
+            storedPendingBalance: wallet.pendingBalance,
+            pendingDrift,
         };
 
-        // Securely log the anomaly — NEVER auto-fix silently
+        // Securely log the anomaly. Auto-correction is gated by env so production
+        // teams can require manual review unless an incident runbook enables it.
         logger.error("CRITICAL LEDGER DRIFT DETECTED", anomaly);
 
         // CRITICAL: Await the audit log — ledger drift MUST be recorded
@@ -102,6 +110,28 @@ export async function verifyWalletBalance(userId: string): Promise<VerificationA
           });
         }
 
+        if (process.env.AUTO_CORRECT_LEDGER_DRIFT === "true") {
+          await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+            await tx.wallet.update({
+              where: { id: wallet.id },
+              data: { balance: calculatedBalance },
+            });
+
+            await tx.activityLog.create({
+              data: {
+                userId: wallet.userId,
+                action: "SECURITY_LEDGER_AUTO_CORRECTED",
+                entityType: "Wallet",
+                entityId: wallet.id,
+                metadata: {
+                  ...anomaly,
+                  correctedBalance: calculatedBalance,
+                },
+              },
+            });
+          });
+        }
+
         return anomaly;
     }
 
@@ -113,18 +143,27 @@ export async function verifyWalletBalance(userId: string): Promise<VerificationA
  * Runs periodically to guard system integrity.
  */
 export async function scanAllWalletsForDrift(limit: number = 100): Promise<VerificationAnomaly[]> {
-    const wallets = await prisma.wallet.findMany({
-        take: limit,
-        select: { userId: true }
-    });
+    const batchSize = Math.min(Math.max(limit, 1), 500);
+    let cursor: string | undefined;
 
     const anomalies: VerificationAnomaly[] = [];
-    for (const wallet of wallets) {
-        const anomaly = await verifyWalletBalance(wallet.userId);
-        if (anomaly) anomalies.push(anomaly);
+    while (true) {
+        const wallets = await prisma.wallet.findMany({
+            take: batchSize,
+            ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+            orderBy: { id: "asc" },
+            select: { id: true, userId: true }
+        });
 
-        // Wait briefly to avoid DB hammering
-        await new Promise(resolve => setTimeout(resolve, 10));
+        if (wallets.length === 0) break;
+
+        for (const wallet of wallets) {
+            const anomaly = await verifyWalletBalance(wallet.userId);
+            if (anomaly) anomalies.push(anomaly);
+        }
+
+        cursor = wallets[wallets.length - 1]?.id;
+        if (wallets.length < batchSize) break;
     }
 
     return anomalies;

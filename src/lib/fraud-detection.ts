@@ -107,7 +107,7 @@ export async function checkRegistrationFraud(
     "10minutemail.info", "10minutemail.org", "10minutemail.be", "10minutemail.nl", "10minutemail.de",
     "crazymailing.com", "zillamail.com", "spamex.com", "spamgourmet.com", "prevmail.com",
     "tempail.com", "burnermail.io", "mailet.net", "temp-mail.id", "mymail.ly",
-    "temp-mail.live", "temp-mail.info", "tempmailfree.info", "duck.com", "icloud.com/hide-my-email",
+    "temp-mail.live", "temp-mail.info", "tempmailfree.info", "duck.com", "privaterelay.appleid.com",
     "bypass.cf", "emailfake.com", "fakemailgenerator.com", "smartenvelope.com", "trbvm.com",
     "fyii.de", "boximail.com", "get24.cf", "instantemail.app", "tempinbox.xyz"
   ];

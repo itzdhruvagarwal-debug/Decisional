@@ -25,7 +25,9 @@ const envSchema = z.object({
   REDIS_URL: z.string().min(1).optional(),
 
   // Third-party APIs
-  RAZORPAY_KEY_ID: z.string().min(1),
+  RAZORPAY_KEY_ID: z
+    .string()
+    .regex(/^rzp_(test|live)_[A-Za-z0-9]+$/, "RAZORPAY_KEY_ID must be a public Razorpay key"),
   RAZORPAY_KEY_SECRET: z.string().min(1),
   RAZORPAY_WEBHOOK_SECRET: z.string().min(1),
   RAZORPAY_ACCOUNT_NUMBER: z.string().min(1).optional(),
@@ -38,8 +40,12 @@ const envSchema = z.object({
   // Security
   CRON_SECRET: z.string().min(32).optional(),
   CONTRACT_SIGNING_SECRET: z.string().min(32).optional(),
+  SIGNING_SECRET: z.string().min(32).optional(),
   ENCRYPTION_KEYS: z.string().min(32),
   ENCRYPTION_KEY: z.string().min(32).optional(),
+  KYC_PROVIDER: z.enum(["manual", "surepass"]).default("manual"),
+  KYC_API_KEY: z.string().min(1).optional(),
+  MSG91_TEMPLATE_ID: z.string().min(1).optional(),
 
   // Feature flags and limits
   PLATFORM_FEE_PERCENTAGE: z.coerce.number().default(10),
@@ -107,6 +113,38 @@ const envSchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ["CONTRACT_SIGNING_SECRET"],
       message: "CONTRACT_SIGNING_SECRET is required in production for contract signing verification.",
+    });
+  }
+
+  if (!env.SIGNING_SECRET) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["SIGNING_SECRET"],
+      message: "SIGNING_SECRET is required in production for signed webhook/internal payloads.",
+    });
+  }
+
+  if (env.KYC_PROVIDER === "manual") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["KYC_PROVIDER"],
+      message: "KYC_PROVIDER=manual is not allowed in production.",
+    });
+  }
+
+  if (env.KYC_PROVIDER !== "manual" && !env.KYC_API_KEY) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["KYC_API_KEY"],
+      message: "KYC_API_KEY is required when KYC_PROVIDER is not manual.",
+    });
+  }
+
+  if (!env.MSG91_TEMPLATE_ID) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["MSG91_TEMPLATE_ID"],
+      message: "MSG91_TEMPLATE_ID is required in production for DLT-compliant SMS.",
     });
   }
 

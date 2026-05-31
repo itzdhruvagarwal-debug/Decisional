@@ -43,7 +43,7 @@ export const POST = apiWrapper(async (req) => {
 
   const body = await req.json();
   const schema = z.object({
-    notificationIds: z.array(z.string()).optional(),
+    notificationIds: z.array(z.string()).max(100).optional(),
     markAll: z.boolean().optional(),
   });
 

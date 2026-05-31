@@ -23,7 +23,13 @@ const updateProfileSchema = z.object({
   // Brand & Individual
   companyName: z.string().optional().nullish(),
   description: z.string().max(2000).optional().nullish(),
-  website: z.string().optional().nullish(), // Allowed to not be a strict URL if they type something wrong
+  website: z
+    .string()
+    .trim()
+    .url("Website must be a valid URL")
+    .refine((value) => /^https?:\/\//i.test(value), "Website must use http or https")
+    .optional()
+    .nullish(),
   industry: z.string().optional().nullish(),
   profileImage: z.string().optional().nullish(),
 });

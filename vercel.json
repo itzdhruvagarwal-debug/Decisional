@@ -40,19 +40,19 @@
     },
     {
       "path": "/api/cron/content-auto-approve",
-      "schedule": "*/15 * * * *"
+      "schedule": "2,17,32,47 * * * *"
     },
     {
       "path": "/api/cron/engagement",
-      "schedule": "0 * * * *"
+      "schedule": "7 * * * *"
     },
     {
       "path": "/api/cron/lift-suspensions",
-      "schedule": "0 * * * *"
+      "schedule": "12 * * * *"
     },
     {
       "path": "/api/cron/ledger-scan",
-      "schedule": "0 2 * * *"
+      "schedule": "23 2 * * *"
     },
     {
       "path": "/api/cron/post-monitor",

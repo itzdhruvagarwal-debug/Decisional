@@ -75,6 +75,7 @@ export interface RefundParams {
 export function calculateTotalAmount(
   dealAmount: number,
   customPlatformFeePercent?: number,
+  productHandlingFee = 0,
 ): {
   dealAmount: number;
   platformFee: number;
@@ -87,7 +88,10 @@ export function calculateTotalAmount(
     customPlatformFeePercent ?? (Number(process.env.PLATFORM_FEE_PERCENTAGE) || 10);
   const gatewayFeePercent = Number(process.env.GATEWAY_FEE_PERCENTAGE) || 2;
 
-  const platformFee = Math.round((dealAmount * platformFeePercent) / 100);
+  const safeProductHandlingFee = Math.max(0, Math.round(productHandlingFee || 0));
+  const platformFee =
+    Math.round((dealAmount * platformFeePercent) / 100) +
+    safeProductHandlingFee;
   const gatewayFee = Math.round(
     ((dealAmount + platformFee) * gatewayFeePercent) / 100,
   );

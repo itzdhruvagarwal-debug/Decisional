@@ -6,6 +6,7 @@ import { decrypt } from "@/lib/encryption";
 import { PaymentService } from "@/services/payment.service";
 import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { checkPaymentFraud } from "@/lib/fraud-detection";
 
 const withdrawalSchema = z
   .object({
@@ -49,6 +50,12 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 },
+      );
+    }
+    if (session.user.userType !== "INFLUENCER") {
+      return NextResponse.json(
+        { success: false, message: "Only influencers can withdraw" },
+        { status: 403 },
       );
     }
 
@@ -107,6 +114,35 @@ export async function POST(request: Request) {
           status: 429,
           headers: { "Retry-After": retryAfterSeconds.toString() },
         },
+      );
+    }
+
+    const fraudCheck = await checkPaymentFraud({
+      userId: session.user.id,
+      amount: parsed.data.amount,
+      ...(parsed.data.bankAccountNumber
+        ? { bankAccount: parsed.data.bankAccountNumber }
+        : {}),
+      ...(parsed.data.upiId ? { upiId: parsed.data.upiId } : {}),
+    });
+
+    if (fraudCheck.action === "BLOCK" || fraudCheck.action === "REVIEW") {
+      logger.warn("Withdrawal blocked by fraud check", {
+        userId: session.user.id,
+        amount: parsed.data.amount,
+        action: fraudCheck.action,
+        flags: fraudCheck.flags.map((flag) => flag.rule),
+      });
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            fraudCheck.action === "REVIEW"
+              ? "Withdrawal requires manual review. Please contact support."
+              : "Withdrawal blocked by risk checks.",
+          code: `WITHDRAWAL_${fraudCheck.action}`,
+        },
+        { status: 403 },
       );
     }
 

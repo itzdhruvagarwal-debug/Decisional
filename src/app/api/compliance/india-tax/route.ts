@@ -15,12 +15,20 @@ import {
 import { logger } from "@/lib/logger";
 import { verifyPAN, verifyGST } from "@/lib/kyc";
 
-// Simple token-overlap check for name matching
 function namesMatch(registeredName: string, kycName: string): boolean {
-  const regTokens = registeredName.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(Boolean);
-  const kycTokens = kycName.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(Boolean);
-  
-  return regTokens.some(token => kycTokens.includes(token));
+  const normalize = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, "")
+      .split(/\s+/)
+      .filter((token) => token.length >= 3);
+  const regTokens = normalize(registeredName);
+  const kycTokens = normalize(kycName);
+  if (regTokens.length === 0 || kycTokens.length === 0) return false;
+
+  const matches = regTokens.filter((token) => kycTokens.includes(token));
+  const matchRatio = matches.length / Math.max(regTokens.length, kycTokens.length);
+  return matches.length >= 2 || matchRatio >= 0.6;
 }
 
 function isInvoiceProfileComplete(user: {

@@ -58,6 +58,9 @@ export const POST = apiWrapper(async (req) => {
   const action = body.action;
 
   if (action === "submit_content") {
+    if (session.user.userType !== "INFLUENCER") {
+      return NextResponse.json({ error: "Influencer access required" }, { status: 403 });
+    }
     const parsed = contentSubmissionSchema.parse(body);
     const result = await DealService.submitContent(
       session.user.id,
@@ -73,6 +76,9 @@ export const POST = apiWrapper(async (req) => {
   }
 
   if (action === "review_content") {
+    if (session.user.userType !== "BRAND") {
+      return NextResponse.json({ error: "Brand access required" }, { status: 403 });
+    }
     const parsed = contentApprovalSchema.parse(body);
     if (parsed.approved) {
       await DealService.approveContent(session.user.id, parsed.dealId);
@@ -92,6 +98,9 @@ export const POST = apiWrapper(async (req) => {
   }
 
   if (action === "verify_post") {
+    if (session.user.userType !== "INFLUENCER") {
+      return NextResponse.json({ error: "Influencer access required" }, { status: 403 });
+    }
     const parsed = postVerificationSchema.parse(body);
     await DealService.verifyPost(
       session.user.id,

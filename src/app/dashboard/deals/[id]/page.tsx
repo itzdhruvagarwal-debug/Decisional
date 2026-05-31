@@ -90,10 +90,26 @@ export default function DealDetailPage() {
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [showDispatchModal, setShowDispatchModal] = useState(false);
   const [contentForm, setContentForm] = useState({ contentUrl: "", notes: "" });
   const [postUrl, setPostUrl] = useState("");
   const [reviewFeedback, setReviewFeedback] = useState("");
   const [reviewApproved, setReviewApproved] = useState(true);
+  const [shippingAddress, setShippingAddress] = useState({
+    fullName: "",
+    phone: "",
+    line1: "",
+    line2: "",
+    city: "",
+    state: "",
+    pinCode: "",
+    country: "India",
+  });
+  const [dispatchForm, setDispatchForm] = useState({
+    trackingNumber: "",
+    carrier: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchDeal = useCallback(async () => {
@@ -129,6 +145,30 @@ export default function DealDetailPage() {
       setShowSubmitModal(false);
       setShowVerifyModal(false);
       fetchDeal(); // Refresh data
+      return true;
+    } catch (err: any) {
+      alert(err.message);
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleProductAction = async (payload: any) => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/deals/${id}/product`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Product update failed");
+
+      alert("Product status updated.");
+      setShowAddressModal(false);
+      setShowDispatchModal(false);
+      fetchDeal();
       return true;
     } catch (err: any) {
       alert(err.message);
@@ -255,6 +295,19 @@ export default function DealDetailPage() {
     typeof contractTerms?.totalAmount === "number" && contractTerms.totalAmount > 0
       ? contractTerms.totalAmount
       : deal.totalAmount || deal.amount + platformFee + gatewayFee;
+  const productValue =
+    typeof contractTerms?.productValue === "number"
+      ? contractTerms.productValue
+      : deal.productValue || 0;
+  const productHandlingFee =
+    typeof contractTerms?.productHandlingFee === "number"
+      ? contractTerms.productHandlingFee
+      : deal.productHandlingFee || 0;
+  const requiresProduct = Boolean(deal.requiresProduct || contractTerms?.requiresProduct);
+  const canSubmitContent =
+    !requiresProduct ||
+    deal.productFulfillmentStatus === "RECEIVED" ||
+    deal.status === "REVISION_REQUESTED";
   const contractSignature = deal.contractSignature as any;
   const brandSigned = Boolean(contractSignature?.brandSignature);
   const influencerSigned = Boolean(contractSignature?.influencerSignature);
@@ -346,6 +399,7 @@ export default function DealDetailPage() {
                   <button
                     className="btn btn-primary"
                     onClick={() => setShowSubmitModal(true)}
+                    disabled={!canSubmitContent}
                   >
                     Submit Content
                   </button>
@@ -850,6 +904,12 @@ export default function DealDetailPage() {
                 {isClient ? (
                   <>
                     <PaymentRow label="Creator payout" value={formatCurrency(creatorPayout)} />
+                    {productValue > 0 && (
+                      <PaymentRow label="Product value" value={formatCurrency(productValue)} />
+                    )}
+                    {productHandlingFee > 0 && (
+                      <PaymentRow label="Product handling" value={formatCurrency(productHandlingFee)} />
+                    )}
                     <PaymentRow
                       label={`Platform fee (${formatPercent(contractTerms?.platformFeePercent)})`}
                       value={formatCurrency(platformFee)}
@@ -893,6 +953,94 @@ export default function DealDetailPage() {
                   </>
                 )}
               </div>
+
+              {requiresProduct && (
+                <div className="card" style={{ marginBottom: "24px" }}>
+                  <h3
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: 700,
+                      marginBottom: "16px",
+                    }}
+                  >
+                    Product
+                  </h3>
+                  <PaymentRow
+                    label="Product"
+                    value={deal.productName || contractTerms?.productName || "Required"}
+                  />
+                  {productValue > 0 && (
+                    <PaymentRow label="Product value" value={formatCurrency(productValue)} />
+                  )}
+                  <PaymentRow
+                    label="Status"
+                    value={(deal.productFulfillmentStatus || "ADDRESS_PENDING").replaceAll("_", " ")}
+                  />
+                  {deal.dispatchTrackingNumber && (
+                    <PaymentRow
+                      label="Tracking"
+                      value={`${deal.dispatchCarrier ? `${deal.dispatchCarrier} ` : ""}${deal.dispatchTrackingNumber}`}
+                    />
+                  )}
+                  {isClient && deal.shippingAddress && (
+                    <div
+                      style={{
+                        marginTop: "12px",
+                        padding: "12px",
+                        background: "var(--color-bg-tertiary)",
+                        borderRadius: "var(--radius-md)",
+                        fontSize: "13px",
+                        color: "var(--color-text-secondary)",
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, color: "var(--color-text-primary)" }}>
+                        {deal.shippingAddress.fullName}
+                      </div>
+                      <div>{deal.shippingAddress.phone}</div>
+                      <div>{deal.shippingAddress.line1}</div>
+                      {deal.shippingAddress.line2 && <div>{deal.shippingAddress.line2}</div>}
+                      <div>
+                        {deal.shippingAddress.city}, {deal.shippingAddress.state} {deal.shippingAddress.pinCode}
+                      </div>
+                    </div>
+                  )}
+                  <div style={{ display: "grid", gap: "10px", marginTop: "14px" }}>
+                    {isInfluencer &&
+                      ["ADDRESS_PENDING", "READY_TO_DISPATCH"].includes(
+                        deal.productFulfillmentStatus,
+                      ) && (
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={() => setShowAddressModal(true)}
+                          disabled={isSubmitting}
+                        >
+                          Add Shipping Address
+                        </button>
+                      )}
+                    {isClient && deal.productFulfillmentStatus === "READY_TO_DISPATCH" && (
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => setShowDispatchModal(true)}
+                        disabled={isSubmitting}
+                      >
+                        Confirm Dispatch
+                      </button>
+                    )}
+                    {isInfluencer && deal.productFulfillmentStatus === "DISPATCHED" && (
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => handleProductAction({ action: "confirm_received" })}
+                        disabled={isSubmitting}
+                      >
+                        Product Received
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="card" style={{ marginBottom: "24px" }}>
                 <h3
@@ -998,6 +1146,125 @@ export default function DealDetailPage() {
           </div>
         </div>
       </div>
+
+      {showAddressModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100,
+            padding: "20px",
+          }}
+        >
+          <div className="card" style={{ width: "100%", maxWidth: "560px" }}>
+            <h2 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "20px" }}>
+              Shipping Address
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+              {([
+                ["fullName", "Full name"],
+                ["phone", "Phone"],
+                ["line1", "Address line 1"],
+                ["line2", "Address line 2"],
+                ["city", "City"],
+                ["state", "State"],
+                ["pinCode", "PIN code"],
+              ] as Array<[keyof typeof shippingAddress, string]>).map(([key, label]) => (
+                <input
+                  key={key}
+                  className="input"
+                  placeholder={label}
+                  value={(shippingAddress as any)[key]}
+                  onChange={(e) =>
+                    setShippingAddress({ ...shippingAddress, [key]: e.target.value })
+                  }
+                  style={{ gridColumn: key === "line1" || key === "line2" ? "1 / -1" : undefined }}
+                />
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button className="btn btn-secondary" onClick={() => setShowAddressModal(false)} style={{ flex: 1 }}>
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                disabled={isSubmitting}
+                onClick={() =>
+                  handleProductAction({
+                    action: "submit_address",
+                    address: shippingAddress,
+                  })
+                }
+                style={{ flex: 1 }}
+              >
+                {isSubmitting ? <span className="loading" /> : "Save Address"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDispatchModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100,
+            padding: "20px",
+          }}
+        >
+          <div className="card" style={{ width: "100%", maxWidth: "480px" }}>
+            <h2 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "20px" }}>
+              Dispatch Details
+            </h2>
+            <div style={{ display: "grid", gap: "12px", marginBottom: "16px" }}>
+              <input
+                className="input"
+                placeholder="Tracking number"
+                value={dispatchForm.trackingNumber}
+                onChange={(e) =>
+                  setDispatchForm({ ...dispatchForm, trackingNumber: e.target.value })
+                }
+              />
+              <input
+                className="input"
+                placeholder="Carrier"
+                value={dispatchForm.carrier}
+                onChange={(e) =>
+                  setDispatchForm({ ...dispatchForm, carrier: e.target.value })
+                }
+              />
+            </div>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button className="btn btn-secondary" onClick={() => setShowDispatchModal(false)} style={{ flex: 1 }}>
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                disabled={isSubmitting || !dispatchForm.trackingNumber.trim()}
+                onClick={() =>
+                  handleProductAction({
+                    action: "confirm_dispatch",
+                    trackingNumber: dispatchForm.trackingNumber,
+                    carrier: dispatchForm.carrier || undefined,
+                  })
+                }
+                style={{ flex: 1 }}
+              >
+                {isSubmitting ? <span className="loading" /> : "Save Tracking"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showReviewModal && (
         <div

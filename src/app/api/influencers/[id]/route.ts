@@ -25,7 +25,7 @@ export const GET = apiWrapper(async (req, { params }) => {
 
   const influencer = await prisma.influencerProfile.findUnique({
     where: { id: influencerId },
-    include: { user: true },
+    include: { user: { select: { trustScore: true } } },
   });
 
   if (!influencer) {

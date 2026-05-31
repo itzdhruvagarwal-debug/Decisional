@@ -462,6 +462,14 @@ enum DealStatus {
   CANCELLED
 }
 
+enum ProductFulfillmentStatus {
+  NOT_REQUIRED
+  ADDRESS_PENDING
+  READY_TO_DISPATCH
+  DISPATCHED
+  RECEIVED
+}
+
 model Deal {
   id           String  @id @default(cuid())
   campaignId   String
@@ -473,9 +481,23 @@ model Deal {
   platformFee Int @default(0)
   gatewayFee  Int @default(0)
   totalAmount Int @default(0)
+  influencerPayout Int?
+  reservedFromWallet Boolean @default(false)
 
   contractTerms     Json // Full contract details
   contractSignature Json? // Digital signatures from both parties
+
+  // Product Seeding Lifecycle
+  requiresProduct          Boolean                  @default(false)
+  productName              String?
+  productValue             Int?
+  productHandlingFee       Int                      @default(0)
+  productFulfillmentStatus ProductFulfillmentStatus @default(NOT_REQUIRED)
+  shippingAddress          Json?
+  dispatchTrackingNumber   String?
+  dispatchCarrier          String?
+  dispatchedAt             DateTime?
+  productReceivedAt        DateTime?
 
   // Timeline
   submissionDeadline DateTime
@@ -543,6 +565,7 @@ model Deal {
   @@index([brandId])
   @@index([createdAt])
   @@index([status, updatedAt])
+  @@index([productFulfillmentStatus])
 }
 
 model ContentSubmission {

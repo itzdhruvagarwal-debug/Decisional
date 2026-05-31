@@ -14,6 +14,17 @@ import { calculateTotalAmount } from "@/lib/razorpay";
 import { resolveBrandPlatformFee } from "@/lib/platform-fees";
 import { addUserXp } from "@/lib/gamification-engine";
 
+function assertAccountCanTransact(status: string | null | undefined) {
+  if (status === "SUSPENDED" || status === "BANNED") {
+    throw new Error("Account suspended. Cannot perform this action.");
+  }
+}
+
+function calculateProductHandlingFee(productValue: number | null, requiresProduct: boolean) {
+  if (!requiresProduct || !productValue) return 0;
+  return Math.max(0, Math.round(productValue * 0.02));
+}
+
 export class ApplicationService {
   static async listApplications(
     userId: string,
@@ -151,6 +162,7 @@ export class ApplicationService {
       });
 
       if (!user) throw new Error("User not found");
+      assertAccountCanTransact(user.status);
 
       const profile = user.influencerProfile;
       if (!profile)
@@ -324,6 +336,12 @@ export class ApplicationService {
     try {
       const result = await prisma.$transaction(
         async (tx: Prisma.TransactionClient) => {
+          const actingUser = await tx.user.findUnique({
+            where: { id: userId },
+            select: { status: true },
+          });
+          assertAccountCanTransact(actingUser?.status);
+
           const brandProfile = await tx.brandProfile.findUnique({
             where: { userId },
             select: { id: true, companyName: true },
@@ -348,6 +366,9 @@ export class ApplicationService {
                   contentDeadline: true,
                   postingDeadline: true,
                   requiresProduct: true,
+                  productName: true,
+                  productValue: true,
+                  productDescription: true,
                 },
               },
               influencer: {
@@ -444,10 +465,16 @@ export class ApplicationService {
             );
           }
 
+          const productHandlingFee = calculateProductHandlingFee(
+            application.campaign.productValue,
+            application.campaign.requiresProduct,
+          );
+
           const brandFee = await resolveBrandPlatformFee(userId);
           const paymentAmounts = calculateTotalAmount(
             dealAmount,
             brandFee.effectivePlatformFee,
+            productHandlingFee,
           );
 
           const draftContractTerms = generateContractTerms(
@@ -460,6 +487,9 @@ export class ApplicationService {
               contentDeadline: application.campaign.contentDeadline,
               postingDeadline: application.campaign.postingDeadline,
               requiresProduct: application.campaign.requiresProduct,
+              productName: application.campaign.productName,
+              productValue: application.campaign.productValue,
+              productDescription: application.campaign.productDescription,
             },
             {
               rate: dealAmount,
@@ -469,8 +499,18 @@ export class ApplicationService {
               totalAmount: paymentAmounts.totalAmount,
               platformFeePercent: paymentAmounts.platformFeePercent,
               influencerPayout: paymentAmounts.influencerReceives,
+              productHandlingFee,
             },
           );
+
+          const reserveResult = await tx.wallet.updateMany({
+            where: { userId, pendingBalance: { gte: dealAmount } },
+            data: { pendingBalance: { decrement: dealAmount } },
+          });
+
+          if (reserveResult.count === 0) {
+            throw new Error("Insufficient held campaign funds.");
+          }
 
           const deal = await tx.deal.create({
             data: {
@@ -481,6 +521,15 @@ export class ApplicationService {
               platformFee: paymentAmounts.platformFee,
               gatewayFee: paymentAmounts.gatewayFee,
               totalAmount: paymentAmounts.totalAmount,
+              influencerPayout: paymentAmounts.influencerReceives,
+              reservedFromWallet: true,
+              requiresProduct: application.campaign.requiresProduct,
+              productName: application.campaign.productName,
+              productValue: application.campaign.productValue,
+              productHandlingFee,
+              productFulfillmentStatus: application.campaign.requiresProduct
+                ? "ADDRESS_PENDING"
+                : "NOT_REQUIRED",
               submissionDeadline: application.campaign.contentDeadline,
               postingDeadline: application.campaign.postingDeadline,
               contractTerms:

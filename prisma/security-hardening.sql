@@ -2,39 +2,17 @@
 -- Target: PostgreSQL
 -- Purpose: Move security controls into the database engine (Defense-in-Depth)
 
--- 1. IMMUTABILITY: Prevent UPDATE/DELETE on Transaction Ledger
--- This ensures the financial history cannot be tampered with even by a compromised app, requiring a true double-entry system (Chargebacks/Reversals)
-CREATE OR REPLACE FUNCTION protect_ledger() RETURNS TRIGGER AS $$
-BEGIN
-    RAISE EXCEPTION 'TAMPER_DETECTION: Transaction ledger is immutable. Updates and Deletes are forbidden. Use offsetting transactions instead.';
-END;
-$$ LANGUAGE plpgsql;
-
--- Apply to Transaction table
-DO $$ 
-BEGIN
-    IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'Transaction') THEN
-        CREATE TRIGGER trg_immutable_transactions
-        BEFORE UPDATE OR DELETE ON "Transaction"
-        FOR EACH ROW EXECUTE FUNCTION protect_ledger();
-    END IF;
-END $$;
+-- 1. LEDGER POLICY
+-- Do not install an immutable Transaction trigger here. The application updates
+-- payment transactions from PENDING to COMPLETED/FAILED, so a blanket trigger
+-- would cause a production payment outage. Ledger integrity is enforced through
+-- append-only business flows and explicit status transitions in application code.
 
 
--- 2. ROW LEVEL SECURITY (RLS): Multi-Tenancy Protection & Enforcement
--- Prevents a user from accidentally (or maliciously) seeing another user's private data.
-ALTER TABLE "Wallet" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "Wallet" FORCE ROW LEVEL SECURITY;
-ALTER TABLE "BankAccount" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "BankAccount" FORCE ROW LEVEL SECURITY;
-ALTER TABLE "VerificationDocument" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "VerificationDocument" FORCE ROW LEVEL SECURITY;
-
--- Policy: Users can only see their own wallet
-CREATE POLICY wallet_access_policy ON "Wallet"
-    FOR ALL
-    TO PUBLIC
-    USING ( "userId" = current_setting('app.current_user_id', true) );
+-- 2. ROW LEVEL SECURITY (RLS)
+-- RLS is intentionally not enabled by this standalone script because Prisma
+-- requests do not set app.current_user_id. Enabling FORCE RLS without that
+-- middleware makes all wallet/document reads and writes disappear.
 
 -- 3. AUTOMATIC AUDIT: Capture Schema Changes
 -- Logs all DDL changes to a dedicated history table for compliance (SOC2 requirement).
@@ -81,14 +59,8 @@ ALTER TABLE "Withdrawal" ADD CONSTRAINT check_withdrawal_amount_positive CHECK (
 ALTER TABLE "Deal" ADD CONSTRAINT check_deal_amounts_positive CHECK (amount >= 0 AND "platformFee" >= 0 AND "gatewayFee" >= 0 AND "totalAmount" >= 0);
 
 -- 6. STRICT ISOLATION POLICIES (RLS)
-ALTER TABLE "Transaction" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "Transaction" FORCE ROW LEVEL SECURITY;
-CREATE POLICY transaction_isolation ON "Transaction"
-    FOR ALL
-    TO PUBLIC
-    USING (
-      "walletId" IN (SELECT id FROM "Wallet" WHERE "userId" = current_setting('app.current_user_id', true))
-    );
+-- See section 2. Keep tenancy enforcement in Prisma until a request-scoped
+-- session variable middleware exists and is covered by integration tests.
 
 -- 7. IDEMPOTENCY LOCKS
 -- Prevent duplicate processing of webhooks concurrently
@@ -141,27 +113,7 @@ BEGIN
 END $$;
 
 -- 10. DIRECT BALANCE UPDATE PROTECTION
--- Prevents blind manual updates. Forces Wallet changes to rely on our double-entry flow or explicit secure context
-CREATE OR REPLACE FUNCTION block_direct_wallet_updates() RETURNS TRIGGER AS $$
-BEGIN
-    -- Check if it's the balance changing
-    IF OLD.balance IS DISTINCT FROM NEW.balance THEN
-        -- Verify that a secure application context variable was set (so generic raw SQL fails)
-        IF current_setting('app.secure_finance_context', true) IS NULL OR current_setting('app.secure_finance_context', true) != 'true' THEN
-            RAISE EXCEPTION 'FINTECH SECURITY BREACH: Direct updates to Wallet balances are strictly forbidden without secure application context. Set app.secure_finance_context before transacting.';
-        END IF;
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-DO $$ 
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_block_direct_wallet_updates') THEN
-        CREATE TRIGGER trg_block_direct_wallet_updates
-        BEFORE UPDATE ON "Wallet"
-        FOR EACH ROW EXECUTE FUNCTION block_direct_wallet_updates();
-    END IF;
-END $$;
-
+-- Not installed until Prisma sets app.secure_finance_context inside every
+-- legitimate finance transaction. Installing it prematurely blocks all wallet
+-- updates from the application.
 

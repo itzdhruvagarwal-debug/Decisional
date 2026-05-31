@@ -131,7 +131,7 @@ export class PaymentService {
             razorpayOrderId: order.orderId,
             amount: amounts.totalAmount,
             status: "PENDING",
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            expiresAt: new Date(Date.now() + 4.5 * 24 * 60 * 60 * 1000),
           },
         });
 
@@ -235,7 +235,14 @@ export class PaymentService {
       include: { paymentHold: true, influencer: true, brand: true },
     });
 
-    if (!deal || deal.status === "COMPLETED") return;
+    if (
+      !deal ||
+      ["COMPLETED", "CANCELLED", "DISPUTED", "PENDING_SIGNATURE", "PAYMENT_PENDING"].includes(
+        deal.status,
+      )
+    ) {
+      return;
+    }
     const brandUserId = deal.brand?.userId;
     if (!brandUserId) {
       logger.critical("PAYOUT_FAILED: Missing brand owner", { dealId });
@@ -279,7 +286,11 @@ export class PaymentService {
           select: { id: true, pendingBalance: true },
         });
 
-        if (!hasGatewayHold && (!brandWallet || brandWallet.pendingBalance < deal.amount)) {
+        if (
+          !hasGatewayHold &&
+          !deal.reservedFromWallet &&
+          (!brandWallet || brandWallet.pendingBalance < deal.amount)
+        ) {
           throw new Error("NO_RESERVED_CAMPAIGN_FUNDS");
         }
 
@@ -302,7 +313,9 @@ export class PaymentService {
         if (dealUpdate.count === 0) return;
 
         if (brandWallet) {
-          const pendingRelease = Math.min(brandWallet.pendingBalance, deal.amount);
+          const pendingRelease = deal.reservedFromWallet
+            ? 0
+            : Math.min(brandWallet.pendingBalance, deal.amount);
           await tx.wallet.update({
             where: { id: brandWallet.id },
             data: {
@@ -321,16 +334,17 @@ export class PaymentService {
           });
         }
 
+        const influencerPayout = deal.influencerPayout ?? deal.amount;
         const wallet = await tx.wallet.upsert({
           where: { userId: deal.influencer.userId },
           create: {
             userId: deal.influencer.userId,
-            balance: deal.amount,
-            totalEarned: deal.amount,
+            balance: influencerPayout,
+            totalEarned: influencerPayout,
           },
           update: {
-            balance: { increment: deal.amount },
-            totalEarned: { increment: deal.amount },
+            balance: { increment: influencerPayout },
+            totalEarned: { increment: influencerPayout },
           },
         });
 
@@ -339,7 +353,7 @@ export class PaymentService {
             walletId: wallet.id,
             dealId: deal.id,
             type: "CREDIT",
-            amount: deal.amount,
+            amount: influencerPayout,
             status: "COMPLETED",
             description: `Payout for deal: ${deal.id}`,
           },
@@ -350,7 +364,7 @@ export class PaymentService {
           where: { userId: deal.influencer.userId },
           data: {
             completedDeals: { increment: 1 },
-            totalEarnings: { increment: deal.amount },
+            totalEarnings: { increment: influencerPayout },
           },
         });
 
@@ -512,7 +526,8 @@ export class PaymentService {
         errorMsg.includes("fetch") ||
         errorMsg.includes("network") ||
         errorMsg.includes("ENOTFOUND") ||
-        errorMsg.includes("ECONNREFUSED");
+        errorMsg.includes("ECONNREFUSED") ||
+        errorMsg.includes("Circuit is OPEN");
 
       logger.error("PAYOUT_FAILED: Payout creation failed", { userId, error });
 

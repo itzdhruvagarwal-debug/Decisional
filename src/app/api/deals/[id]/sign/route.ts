@@ -107,7 +107,9 @@ export async function POST(
             ? "Contract Fully Signed"
             : "Contract Signed",
           message: result.signed.isFullySigned
-            ? `Both parties have signed the contract for "${deal.campaign.title}". Please secure payment to activate the deal.`
+            ? deal.reservedFromWallet
+              ? `Both parties have signed the contract for "${deal.campaign.title}". Payment is secured and work can begin.`
+              : `Both parties have signed the contract for "${deal.campaign.title}". Please secure payment to activate the deal.`
             : `${signerName || "The other party"} has signed the contract for "${deal.campaign.title}". Please sign to proceed.`,
           data: { link: `/dashboard/deals/${dealId}` },
         },

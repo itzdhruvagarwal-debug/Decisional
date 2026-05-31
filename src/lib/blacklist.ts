@@ -27,8 +27,8 @@ export async function isIpBanned(ip: string): Promise<boolean> {
     const result = await redis.get(`${IP_BAN_PREFIX}${ip}`);
     return !!result;
   } catch (_error) {
-    // Fail open if Redis is down
-    return false;
+    logger.error("IP ban check failed; failing closed", _error, { ip });
+    return true;
   }
 }
 
@@ -55,6 +55,7 @@ export async function isTokenRevoked(jti: string): Promise<boolean> {
     const result = await redis.get(`${TOKEN_REVOKE_PREFIX}${jti}`);
     return !!result;
   } catch (_error) {
-    return false;
+    logger.error("Token revocation check failed; failing closed", _error);
+    return true;
   }
 }

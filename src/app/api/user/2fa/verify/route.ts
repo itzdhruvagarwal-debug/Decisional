@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { verify } from "otplib";
 import { logger } from "@/lib/logger";
+import { decrypt } from "@/lib/encryption";
 
 export async function POST(req: Request) {
   try {
@@ -38,10 +39,17 @@ export async function POST(req: Request) {
       );
     }
 
+    let twoFactorSecret = user.twoFactorSecret;
+    try {
+      twoFactorSecret = decrypt(user.twoFactorSecret);
+    } catch {
+      // Backward compatibility for pre-encryption setup records.
+    }
+
     // Verify the code
     const isValid = await verify({
       token: code,
-      secret: user.twoFactorSecret,
+      secret: twoFactorSecret,
     });
 
     if (!isValid) {

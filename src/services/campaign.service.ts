@@ -11,6 +11,7 @@ import { calculateTotalAmount } from "@/lib/razorpay";
 import { resolveBrandPlatformFee } from "@/lib/platform-fees";
 import { checkAndAwardBadges } from "@/lib/gamification-engine";
 import { processReferralReward } from "@/lib/referral-engine";
+import { checkTrustGate } from "@/lib/trust-engine";
 
 function normalizeStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -29,6 +30,16 @@ function normalizeStringArray(value: unknown): string[] {
   return [];
 }
 
+function assertAccountCanTransact(status: string | null | undefined) {
+  if (status === "SUSPENDED" || status === "BANNED") {
+    throw new Error("Account suspended. Cannot perform this action.");
+  }
+}
+
+function calculateProductHandlingFee(productValue: number | null, requiresProduct: boolean) {
+  if (!requiresProduct || !productValue) return 0;
+  return Math.max(0, Math.round(productValue * 0.02));
+}
 
 export class CampaignService {
   static async listCampaigns(
@@ -290,6 +301,7 @@ export class CampaignService {
       if (!user) {
         throw new Error("User not found");
       }
+      assertAccountCanTransact(user.status);
 
       const totalBudgetPaise = Number(data.totalBudget);
       const perInfluencerBudgetPaise =
@@ -389,6 +401,22 @@ export class CampaignService {
         data.productValue === null || data.productValue === undefined
           ? null
           : Math.max(0, Number(data.productValue));
+      if (requiresProduct) {
+        if (!data.productName || !String(data.productName).trim()) {
+          throw new Error("Product name is required when product shipping is enabled");
+        }
+        if (!productValuePaise || productValuePaise <= 0) {
+          throw new Error("Product value is required when product shipping is enabled");
+        }
+      }
+      const productName = data.productName ? String(data.productName).trim() : null;
+      const productDescription = data.productDescription
+        ? String(data.productDescription).trim()
+        : null;
+      const productHandlingFee = calculateProductHandlingFee(
+        productValuePaise,
+        requiresProduct,
+      );
 
       const tierCheck = await checkVerificationTierForAmount(
         userId,
@@ -465,11 +493,9 @@ export class CampaignService {
             postingDeadline,
             status: isDraft ? "DRAFT" : "ACTIVE",
             requiresProduct,
-            productName: data.productName ? String(data.productName).trim() : null,
+            productName,
             productValue: productValuePaise,
-            productDescription: data.productDescription
-              ? String(data.productDescription).trim()
-              : null,
+            productDescription,
             isDirectInvite: Boolean(data.invitedInfluencerId),
           },
         });
@@ -477,16 +503,44 @@ export class CampaignService {
         if (data.invitedInfluencerId) {
           const invitedInfluencer = await tx.influencerProfile.findUnique({
             where: { id: data.invitedInfluencerId },
-            select: { id: true, userId: true },
+            select: {
+              id: true,
+              userId: true,
+              user: { select: { status: true } },
+            },
           });
 
           if (invitedInfluencer) {
+            assertAccountCanTransact(invitedInfluencer.user.status);
+            const existingInviteDeal = await tx.deal.findFirst({
+              where: {
+                campaignId: newCampaign.id,
+                influencerId: invitedInfluencer.id,
+                deletedAt: null,
+                status: { not: "CANCELLED" },
+              },
+              select: { id: true },
+            });
+            if (existingInviteDeal) {
+              throw new Error("A deal already exists for this influencer");
+            }
+
             const dealAmount = perInfluencerBudgetPaise || totalBudgetPaise;
+            const inviteTrustGate = await checkTrustGate(
+              invitedInfluencer.userId,
+              dealAmount,
+            );
+            if (!inviteTrustGate.allowed) {
+              throw new Error(
+                inviteTrustGate.reason || "Influencer trust score too low for this invite",
+              );
+            }
 
             const brandFee = await resolveBrandPlatformFee(userId);
             const paymentAmounts = calculateTotalAmount(
               dealAmount,
               brandFee.effectivePlatformFee,
+              productHandlingFee,
             );
 
             const draftContractTerms = generateContractTerms(
@@ -499,6 +553,9 @@ export class CampaignService {
                 contentDeadline,
                 postingDeadline,
                 requiresProduct,
+                productName,
+                productValue: productValuePaise,
+                productDescription,
               },
               {
                 rate: dealAmount,
@@ -507,8 +564,18 @@ export class CampaignService {
                 totalAmount: paymentAmounts.totalAmount,
                 platformFeePercent: paymentAmounts.platformFeePercent,
                 influencerPayout: paymentAmounts.influencerReceives,
+                productHandlingFee,
               },
             );
+
+            const reserveResult = await tx.wallet.updateMany({
+              where: { userId, pendingBalance: { gte: dealAmount } },
+              data: { pendingBalance: { decrement: dealAmount } },
+            });
+
+            if (reserveResult.count === 0) {
+              throw new Error("Insufficient held campaign funds.");
+            }
 
             const createdDeal = await tx.deal.create({
               data: {
@@ -519,6 +586,15 @@ export class CampaignService {
                 platformFee: paymentAmounts.platformFee,
                 gatewayFee: paymentAmounts.gatewayFee,
                 totalAmount: paymentAmounts.totalAmount,
+                influencerPayout: paymentAmounts.influencerReceives,
+                reservedFromWallet: true,
+                requiresProduct,
+                productName,
+                productValue: productValuePaise,
+                productHandlingFee,
+                productFulfillmentStatus: requiresProduct
+                  ? "ADDRESS_PENDING"
+                  : "NOT_REQUIRED",
                 submissionDeadline: contentDeadline,
                 postingDeadline,
                 contractTerms:

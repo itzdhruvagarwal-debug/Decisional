@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { checkAndAwardBadges } from "@/lib/gamification-engine";
 import { auth } from "@/lib/auth";
@@ -13,12 +14,35 @@ async function requireAdmin() {
   return session!;
 }
 
+function getMissingVerificationDocs(
+  userType: string,
+  verifiedDocs: string[],
+): string[] {
+  if (userType !== "BRAND") {
+    return ["PAN_CARD", "AADHAAR", "BANK_STATEMENT"].filter(
+      (doc) => !verifiedDocs.includes(doc),
+    );
+  }
+
+  const missing = ["PAN_CARD", "BANK_STATEMENT"].filter(
+    (doc) => !verifiedDocs.includes(doc),
+  );
+  const hasBusinessProof = [
+    "GST_CERTIFICATE",
+    "CIN_CERTIFICATE",
+    "MSME_CERTIFICATE",
+    "STARTUP_CERTIFICATE",
+  ].some((doc) => verifiedDocs.includes(doc));
+
+  return hasBusinessProof ? missing : [...missing, "BUSINESS_PROOF"];
+}
+
 export async function approveUser(userId: string) {
   const _session = await requireAdmin();
 
   // Custom logic not yet in Service, keeping here but using transaction
   await prisma.$transaction(
-    async (tx: any) => {
+    async (tx: Prisma.TransactionClient) => {
       // Accept pending docs
       await tx.verificationDocument.updateMany({
         where: {
@@ -40,19 +64,10 @@ export async function approveUser(userId: string) {
 
       const docs = user.verificationDocs;
       const verifiedDocs = docs
-        .filter((d: any) => d.status === "VERIFIED" || d.status === "PENDING")
-        .map((d: any) => d.type);
+        .filter((d) => d.status === "VERIFIED" || d.status === "PENDING")
+        .map((d) => d.type);
 
-      let requiredDocs: string[] = [];
-      if (user.userType === "BRAND") {
-        requiredDocs = ["PAN_CARD", "GST_CERTIFICATE", "BANK_STATEMENT"];
-      } else {
-        requiredDocs = ["PAN_CARD", "AADHAAR", "BANK_STATEMENT"];
-      }
-
-      const missingDocs = requiredDocs.filter(
-        (req) => !verifiedDocs.includes(req as any),
-      );
+      const missingDocs = getMissingVerificationDocs(user.userType, verifiedDocs);
 
       if (missingDocs.length > 0) {
         // Missing docs -> PARTIAL
@@ -61,7 +76,7 @@ export async function approveUser(userId: string) {
           data: {
             status: "PENDING_VERIFICATION", // Needs more actions
             verificationLevel: "BASIC", // Downgraded to BASIC instead of invalid PARTIAL
-            trustScore: 50, // As requested, score stays 50
+            trustScore: Math.max(user.trustScore, 50),
           },
         });
 
@@ -80,7 +95,7 @@ export async function approveUser(userId: string) {
           data: {
             status: "ACTIVE",
             verificationLevel: "FULL",
-            trustScore: 50, // Keep 50 as maximum base initially after verification
+            trustScore: Math.max(user.trustScore, 50),
           },
         });
 
@@ -120,6 +135,7 @@ export async function rejectUser(userId: string, reason: string) {
     data: {
       status: "PENDING_VERIFICATION",
       verificationLevel: "NONE",
+      trustScore: 0,
     },
   });
 
@@ -151,7 +167,7 @@ export async function approveDocument(docId: string, userId: string) {
   const _session = await requireAdmin();
 
   await prisma.$transaction(
-    async (tx: any) => {
+    async (tx: Prisma.TransactionClient) => {
       await tx.verificationDocument.update({
         where: { id: docId },
         data: {
@@ -171,22 +187,19 @@ export async function approveDocument(docId: string, userId: string) {
       const docs = user.verificationDocs;
       // Count just approved doc + any existing verified
       const verifiedDocs = docs
-        .filter((d: any) => d.id === docId || d.status === "VERIFIED")
-        .map((d: any) => d.type);
+        .filter((d) => d.id === docId || d.status === "VERIFIED")
+        .map((d) => d.type);
 
-      const requiredDocs =
-        user.userType === "BRAND"
-          ? ["PAN_CARD", "GST_CERTIFICATE", "BANK_STATEMENT"]
-          : ["PAN_CARD", "AADHAAR", "BANK_STATEMENT"];
-
-      const missingDocs = requiredDocs.filter(
-        (req) => !verifiedDocs.includes(req as any),
-      );
+      const missingDocs = getMissingVerificationDocs(user.userType, verifiedDocs);
 
       if (missingDocs.length === 0 && user.verificationLevel !== "FULL") {
         await tx.user.update({
           where: { id: userId },
-          data: { status: "ACTIVE", verificationLevel: "FULL", trustScore: 50 },
+          data: {
+            status: "ACTIVE",
+            verificationLevel: "FULL",
+            trustScore: Math.max(user.trustScore, 50),
+          },
         });
 
         await checkAndAwardBadges(userId, "VERIFICATION", tx);

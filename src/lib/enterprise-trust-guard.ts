@@ -1,7 +1,5 @@
 import prisma from "./db";
 import { logger } from "./logger";
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { updateTrustAndLevel } from "./trust-engine";
 
 /**
  * Enterprise Risk & Trust Guard.
@@ -112,15 +110,15 @@ export async function applyAIFraudSignal(
     let newStatus = user.status;
 
     if (newScore <= 30 && user.status === "ACTIVE") {
-        newStatus = "FLAGGED"; // Puts account into manual review mode
-        logger.warn(`User ${userId} FLAGGED for manual review due to AI fraud signal.`);
+        newStatus = "SUSPENDED"; // Existing enum value used for manual review hold.
+        logger.warn(`User ${userId} suspended for manual review due to AI fraud signal.`);
     }
 
     await prisma.user.update({
         where: { id: userId },
         data: {
             trustScore: newScore,
-            status: newStatus as any,
+            status: newStatus,
         }
     });
 
@@ -129,7 +127,9 @@ export async function applyAIFraudSignal(
         data: {
             userId,
             type: "FRAUD",
+            severity: newScore <= 30 ? "HIGH" : "MEDIUM",
             description: `AI Risk Engine: ${reason} (Penalty: -${riskWeight})`,
+            action: newScore <= 30 ? "TEMP_SUSPENSION" : "TRUST_SCORE_LOG",
         }
     });
 }

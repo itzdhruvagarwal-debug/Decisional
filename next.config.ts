@@ -3,13 +3,40 @@ import type { NextConfig } from "next";
 // Validate environment variables at build time
 import "./src/env";
 
+function hostnameFromUrl(value?: string) {
+  if (!value) return null;
+  try {
+    return new URL(value).hostname;
+  } catch {
+    return null;
+  }
+}
+
+const storagePublicHost =
+  hostnameFromUrl(process.env.STORAGE_PUBLIC_URL) ||
+  hostnameFromUrl(process.env.R2_PUBLIC_URL);
+const storageEndpointHost = hostnameFromUrl(process.env.S3_ENDPOINT);
+const s3Bucket = process.env.S3_BUCKET;
+const s3Region = process.env.S3_REGION || "ap-south-1";
+
+const storageConnectSources = [
+  storagePublicHost ? `https://${storagePublicHost}` : null,
+  storageEndpointHost ? `https://${storageEndpointHost}` : null,
+  s3Bucket ? `https://${s3Bucket}.s3.${s3Region}.amazonaws.com` : null,
+].filter(Boolean);
+
+const storageImageSources = [
+  storagePublicHost ? `https://${storagePublicHost}` : null,
+  s3Bucket ? `https://${s3Bucket}.s3.${s3Region}.amazonaws.com` : null,
+].filter(Boolean);
+
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.google.com https://*.googleapis.com https://checkout.razorpay.com https://*.razorpay.com",
+  "script-src 'self' https://*.google.com https://*.googleapis.com https://checkout.razorpay.com https://*.razorpay.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "img-src 'self' data: https: blob:",
+  `img-src 'self' data: blob: https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://images.unsplash.com ${storageImageSources.join(" ")}`.trim(),
   "font-src 'self' https://fonts.gstatic.com",
-  "connect-src 'self' https://*.googleapis.com https://*.razorpay.com",
+  `connect-src 'self' https://*.googleapis.com https://*.razorpay.com https://api.razorpay.com https://graph.instagram.com https://api.instagram.com https://graph.facebook.com https://api.msg91.com https://surepass.io https://*.surepass.io ${storageConnectSources.join(" ")}`.trim(),
   "frame-src 'self' https://checkout.razorpay.com https://*.razorpay.com",
   "worker-src 'self' blob:",
   "object-src 'none'",
@@ -40,14 +67,17 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
-      {
-        protocol: "https",
-        hostname: "**.r2.dev",
-      },
-      {
-        protocol: "https",
-        hostname: "**.r2.cloudflarestorage.com",
-      },
+      ...(storagePublicHost
+        ? [{ protocol: "https" as const, hostname: storagePublicHost }]
+        : []),
+      ...(s3Bucket
+        ? [
+            {
+              protocol: "https" as const,
+              hostname: `${s3Bucket}.s3.${s3Region}.amazonaws.com`,
+            },
+          ]
+        : []),
     ],
   },
   async headers() {

@@ -3,10 +3,11 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { AuthService } from "@/services/auth.service";
 import { logger } from "@/lib/logger";
+import { passwordSchema } from "@/lib/validations";
 
 const changePasswordSchema = z.object({
   oldPassword: z.string().min(1, "Current password is required"),
-  newPassword: z.string().min(8, "New password must be at least 8 characters long"),
+  newPassword: passwordSchema,
 });
 
 export async function POST(request: Request) {

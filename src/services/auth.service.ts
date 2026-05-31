@@ -7,6 +7,8 @@ import { hasPermission, Permission } from "@/lib/rbac";
 import { UserType, OtpTokenType } from "@prisma/client";
 import { logger } from "@/lib/logger";
 import { sendPasswordResetEmail } from "@/lib/email";
+import { redis } from "@/lib/redis";
+import { isIpBanned } from "@/lib/blacklist";
 
 import { generateReferralCode } from "@/lib/utils";
 import type { RegisterInput } from "@/lib/validations";
@@ -28,6 +30,10 @@ export class AuthService {
     ip: string,
     options?: { emailVerified?: boolean; phoneVerified?: boolean },
   ) {
+    if (await isIpBanned(ip)) {
+      throw new Error("Access denied");
+    }
+
     const limit = await checkRateLimit(ip, "REGISTER");
     if (!limit.success) {
       throw new Error(
@@ -165,6 +171,11 @@ export class AuthService {
    * Validate Login Eligibility
    */
   static async validateLoginEligibility(email: string, ip: string) {
+    if (await isIpBanned(ip)) {
+      logger.warn("Login blocked by IP ban", { ip, email });
+      return { allowed: false, reason: "Access denied" };
+    }
+
     const ipLimit = await checkRateLimit(ip, "LOGIN_IP");
     if (!ipLimit.success) {
       logger.warn("Login blocked by IP rate limit", { ip, email });
@@ -256,6 +267,13 @@ export class AuthService {
       where: { id: userId },
       data: { passwordHash: newHash, lastPasswordChange: new Date() },
     });
+    await Promise.allSettled([
+      prisma.refreshToken.updateMany({
+        where: { userId, revoked: false },
+        data: { revoked: true },
+      }),
+      redis.del(`active_session:${userId}`),
+    ]);
 
     logger.info("User changed password", { userId });
     return true;
@@ -299,12 +317,21 @@ export class AuthService {
   static async resetPassword(token: string, newPass: string) {
     const hashedToken = hashResetToken(token);
     const newHash = await hash(newPass, 12);
+    const resetUser = await prisma.user.findFirst({
+      where: {
+        resetToken: hashedToken,
+        resetTokenExpiry: { gt: new Date() },
+      },
+      select: { id: true },
+    });
+    if (!resetUser) throw new Error("Invalid or expired token");
 
     // ATOMIC: Check token validity and clear it in a single query.
     // This prevents TOCTOU race conditions where two concurrent requests
     // with the same token could both succeed (double reset attack).
     const result = await prisma.user.updateMany({
       where: {
+        id: resetUser.id,
         resetToken: hashedToken,
         resetTokenExpiry: { gt: new Date() },
       },
@@ -317,6 +344,14 @@ export class AuthService {
     });
 
     if (result.count === 0) throw new Error("Invalid or expired token");
+
+    await Promise.allSettled([
+      prisma.refreshToken.updateMany({
+        where: { userId: resetUser.id, revoked: false },
+        data: { revoked: true },
+      }),
+      redis.del(`active_session:${resetUser.id}`),
+    ]);
 
     logger.info("User reset password (atomic)", { matchedCount: result.count });
     return true;

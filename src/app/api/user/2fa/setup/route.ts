@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import QRCode from "qrcode";
 import { generateSecret, generateURI } from "otplib";
 import { logger } from "@/lib/logger";
+import { encrypt } from "@/lib/encryption";
 
 export async function POST(_req: Request) {
   try {
@@ -31,11 +32,9 @@ export async function POST(_req: Request) {
     // Generate a new 2FA secret
     const secret = generateSecret();
 
-    // Temporarily store the secret in the database (or we could return it purely in memory,
-    // but let's store it locally as twoFactorSecret so we can verify it in the next step!)
     await prisma.user.update({
       where: { id: user.id },
-      data: { twoFactorSecret: secret },
+      data: { twoFactorSecret: encrypt(secret) },
     });
 
     // Generate QR Code URI

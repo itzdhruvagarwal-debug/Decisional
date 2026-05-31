@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { updateTrustAndLevel } from "@/lib/trust-engine";
 import { finalizeDealGamification } from "@/lib/gamification-engine";
@@ -36,6 +37,9 @@ export async function resolveDispute(
   });
 
   if (!dispute) throw new Error("Dispute not found");
+  if (dispute.deal.status === "COMPLETED" && decision === "RELEASE_INFLUENCER") {
+    throw new Error("Cannot release payout for an already completed deal.");
+  }
 
   const gatewayPaymentId = dispute.deal.paymentHold?.razorpayPaymentId;
   const gatewayStatus = dispute.deal.paymentHold?.status;
@@ -91,7 +95,8 @@ export async function resolveDispute(
     }
   }
 
-  await prisma.$transaction(async (tx: any) => {
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const payoutAmount = dispute.deal.influencerPayout ?? dispute.deal.amount;
     // 1. Update Dispute Status
     const lockCheck = await tx.dispute.updateMany({
       where: { id: disputeId, status: { notIn: ["RESOLVED", "CLOSED"] } },
@@ -187,12 +192,12 @@ export async function resolveDispute(
               where: { userId: influencer.userId },
               create: {
                 userId: influencer.userId,
-                balance: dispute.deal.amount,
-                totalEarned: dispute.deal.amount,
+                balance: payoutAmount,
+                totalEarned: payoutAmount,
               },
               update: {
-                balance: { increment: dispute.deal.amount },
-                totalEarned: { increment: dispute.deal.amount },
+                balance: { increment: payoutAmount },
+                totalEarned: { increment: payoutAmount },
               },
             });
 
@@ -203,22 +208,14 @@ export async function resolveDispute(
                   walletId: wallet.id,
                   dealId: dispute.deal.id,
                   type: "CREDIT",
-                  amount: dispute.deal.amount,
+                  amount: payoutAmount,
                   status: "COMPLETED",
                   description: `Dispute Resolved in Favor: ${dispute.deal.campaignId}`,
                 },
               });
             }
 
-            await tx.influencerProfile.update({
-              where: { id: influencer.id },
-              data: {
-                completedDeals: { increment: 1 },
-                totalEarnings: { increment: dispute.deal.amount },
-              },
-            });
-
-            await finalizeDealGamification(influencer.userId, dispute.deal.amount, tx);
+            await finalizeDealGamification(influencer.userId, payoutAmount, tx);
           }
         }
       } else {
@@ -229,7 +226,7 @@ export async function resolveDispute(
           });
           if (influencer) {
             // STRICT DEBT REQUIREMENT: Decrement pendingBalance from brand's wallet first!
-            if (dispute.deal.brand?.userId) {
+            if (dispute.deal.brand?.userId && !dispute.deal.reservedFromWallet) {
               const debitResult = await tx.wallet.updateMany({
                 where: { userId: dispute.deal.brand.userId, pendingBalance: { gte: dispute.deal.amount } },
                 data: { pendingBalance: { decrement: dispute.deal.amount } }
@@ -243,12 +240,12 @@ export async function resolveDispute(
             await tx.wallet.update({
               where: { userId: influencer.userId },
               data: {
-                balance: { increment: dispute.deal.amount },
-                totalEarned: { increment: dispute.deal.amount },
+                balance: { increment: payoutAmount },
+                totalEarned: { increment: payoutAmount },
                 transactions: {
                   create: {
                     type: "CREDIT",
-                    amount: dispute.deal.amount,
+                    amount: payoutAmount,
                     description: `Dispute Resolved in Favor: ${dispute.deal.campaignId}`,
                     status: "COMPLETED",
                   },
@@ -256,15 +253,7 @@ export async function resolveDispute(
               },
             });
 
-            await tx.influencerProfile.update({
-              where: { id: influencer.id },
-              data: {
-                completedDeals: { increment: 1 },
-                totalEarnings: { increment: dispute.deal.amount },
-              },
-            });
-
-            await finalizeDealGamification(influencer.userId, dispute.deal.amount, tx);
+            await finalizeDealGamification(influencer.userId, payoutAmount, tx);
           }
         }
       }

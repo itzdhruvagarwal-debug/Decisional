@@ -30,7 +30,7 @@ function maskPII(data: any): any {
         return data.replace(/^(.{2})(.*)(@.*)$/, "$1***$3");
       }
       // Mask Phone (approximate)
-      if (/^\+?[\d\s-]{10,}$/.test(data)) {
+      if (/^\+?(?:91)?[6-9]\d{9}$/.test(data.replace(/[\s-]/g, ""))) {
         return data.slice(0, 3) + "***" + data.slice(-2);
       }
     }

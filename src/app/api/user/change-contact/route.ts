@@ -5,12 +5,14 @@ import { logger } from "@/lib/logger";
 import { redis } from "@/lib/redis";
 import { createHash, randomInt } from "crypto";
 import { sendVerificationEmail } from "@/lib/email";
+import { checkRateLimit } from "@/lib/rate-limit";
 import {
     normalizeIndianPhone,
     sendOTP,
     verifyOTP as verifyPhoneOTP,
 } from "@/lib/sms";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 
 const changeContactSchema = z.object({
     action: z.enum(['init', 'verify-current', 'send-new', 'confirm-new']),
@@ -41,6 +43,10 @@ export async function POST(req: Request) {
 
         const { action, currentEmailOtp, currentPhoneOtp, type, newContact, newOtp } = parsed.data;
         const userId = session.user.id;
+        const rateLimit = await checkRateLimit(userId, "AUTH");
+        if (!rateLimit.success) {
+            return NextResponse.json({ error: "Too many attempts. Please try again later." }, { status: 429 });
+        }
 
         const user = await prisma.user.findUnique({
             where: { id: userId },
@@ -49,6 +55,8 @@ export async function POST(req: Request) {
         if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
         const authKey = `contact_change_auth_session_${userId}`;
+        const currentEmailOtpKey = `contact_change_current_email_otp_${userId}`;
+        const newEmailOtpKey = `contact_change_new_email_otp_${userId}`;
 
         if (action === 'init') {
             // Send OTPs to current email and phone
@@ -60,13 +68,7 @@ export async function POST(req: Request) {
             if (user.email) {
                 const emailOtp = generateOTP();
                 const emailOtpHash = createHash("sha256").update(emailOtp).digest("hex");
-                await prisma.user.update({
-                    where: { id: userId },
-                    data: {
-                        resetPasswordToken: emailOtpHash,
-                        resetPasswordExpiry: new Date(Date.now() + 10 * 60 * 1000), // 10 mins
-                    },
-                });
+                await redis.setex(currentEmailOtpKey, 600, emailOtpHash);
                 await sendVerificationEmail(user.email, emailOtp);
             }
 
@@ -102,10 +104,9 @@ export async function POST(req: Request) {
                 isValidEmail = false;
                 // Verify Email OTP
                 const submittedHash = createHash("sha256").update(currentEmailOtp || "").digest("hex");
-                const isExpired = !user.resetPasswordExpiry || user.resetPasswordExpiry < new Date();
-                const storedHash = user.resetPasswordToken || "";
+                const storedHash = await redis.get(currentEmailOtpKey);
 
-                if (!isExpired && storedHash.length > 0) {
+                if (storedHash) {
                     try {
                         const { timingSafeEqual } = await import("crypto");
                         const storedBuffer = Buffer.from(storedHash, "utf8");
@@ -134,11 +135,7 @@ export async function POST(req: Request) {
             // Set Auth Session
             await redis.setex(authKey, 600, "authorized"); // 10 minutes
 
-            // Clear reset token
-            await prisma.user.update({
-                where: { id: userId },
-                data: { resetPasswordToken: null, resetPasswordExpiry: null },
-            });
+            await redis.del(currentEmailOtpKey);
 
             return NextResponse.json({ success: true, message: "Current contacts verified" });
         }
@@ -151,7 +148,7 @@ export async function POST(req: Request) {
             if (type === 'email') {
                 const otp = generateOTP();
                 const otpHash = createHash("sha256").update(otp).digest("hex");
-                await redis.setex(`contact_change_new_email_otp_${userId}`, 600, otpHash);
+                await redis.setex(newEmailOtpKey, 600, otpHash);
                 await sendVerificationEmail(newContact, otp);
             } else if (type === 'phone') {
                 const normalizedPhone = normalizeIndianPhone(newContact);
@@ -187,7 +184,7 @@ export async function POST(req: Request) {
             let isValidNewOtp = false;
 
             if (type === 'email') {
-                const storedHash = await redis.get(`contact_change_new_email_otp_${userId}`);
+                const storedHash = await redis.get(newEmailOtpKey);
                 if (storedHash) {
                     const submittedHash = createHash("sha256").update(newOtp).digest("hex");
                     try {
@@ -222,6 +219,13 @@ export async function POST(req: Request) {
             // Update Database
             const updateData: any = {};
             if (type === 'email') {
+                const existing = await prisma.user.findUnique({
+                    where: { email: newContact.toLowerCase().trim() },
+                    select: { id: true },
+                });
+                if (existing && existing.id !== userId) {
+                    return NextResponse.json({ error: "Contact is already in use" }, { status: 409 });
+                }
                 updateData.email = newContact;
                 updateData.emailVerified = true;
             } else {
@@ -232,18 +236,40 @@ export async function POST(req: Request) {
                         { status: 400 },
                     );
                 }
+                const existing = await prisma.user.findUnique({
+                    where: { phone: normalizedPhone },
+                    select: { id: true },
+                });
+                if (existing && existing.id !== userId) {
+                    return NextResponse.json({ error: "Contact is already in use" }, { status: 409 });
+                }
                 updateData.phone = normalizedPhone;
                 updateData.phoneVerified = true;
             }
 
-            await prisma.user.update({
-                where: { id: userId },
-                data: updateData,
+            await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+                await tx.user.update({
+                    where: { id: userId },
+                    data: updateData,
+                });
+                await tx.refreshToken.updateMany({
+                    where: { userId, revoked: false },
+                    data: { revoked: true },
+                });
+                await tx.activityLog.create({
+                    data: {
+                        userId,
+                        action: type === "email" ? "EMAIL_CHANGED" : "PHONE_CHANGED",
+                        entityType: "User",
+                        entityId: userId,
+                    },
+                });
             });
 
             // Clean up Redis
             await redis.del(authKey);
-            if (type === 'email') await redis.del(`contact_change_new_email_otp_${userId}`);
+            await redis.del(`active_session:${userId}`);
+            if (type === 'email') await redis.del(newEmailOtpKey);
 
             return NextResponse.json({ success: true, message: `${type} updated successfully!` });
         }
