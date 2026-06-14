@@ -27,10 +27,17 @@ export default function BankAccountManager({
     isDefault: false,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [notice, setNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAccounts();
   }, []);
+
+  const showNotice = (message: string, type: "success" | "error" = "success") => {
+    setNotice({ type, message });
+    setTimeout(() => setNotice(null), 4000);
+  };
 
   const fetchAccounts = async () => {
     setLoading(true);
@@ -68,28 +75,54 @@ export default function BankAccountManager({
           upiId: "",
           isDefault: false,
         });
-        alert("Bank account added successfully!");
+        showNotice("Bank account added successfully!");
       } else {
-        alert(data.error || "Failed to add account");
+        showNotice(data.error || "Failed to add account", "error");
       }
     } catch (error) {
       console.error(error);
-      alert("An error occurred");
+      showNotice("An error occurred", "error");
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this account?")) return;
+  const handleSetDefault = async (id: string) => {
+    try {
+      const res = await fetch(`/api/wallet/bank-accounts?id=${id}`, {
+        method: "PUT",
+      });
+      if (res.ok) {
+        setAccounts((prev) =>
+          prev.map((a) => ({ ...a, isDefault: a.id === id }))
+        );
+        showNotice("Default bank account updated.");
+      } else {
+        const data = await res.json();
+        showNotice(data.error || "Failed to set default", "error");
+      }
+    } catch {
+      showNotice("An error occurred", "error");
+    }
+  };
+
+  const handleDeleteRequest = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirmId) return;
+    const id = deleteConfirmId;
+    setDeleteConfirmId(null);
     try {
       const res = await fetch(`/api/wallet/bank-accounts?id=${id}`, {
         method: "DELETE",
       });
       if (res.ok) {
         setAccounts((prev) => prev.filter((a) => a.id !== id));
+        showNotice("Account removed.");
       } else {
-        alert("Failed to delete account");
+        showNotice("Failed to delete account", "error");
       }
     } catch (error) {
       console.error(error);
@@ -118,6 +151,49 @@ export default function BankAccountManager({
           {showForm ? "Cancel" : "+ Add Account"}
         </button>
       </div>
+
+      {/* Inline notice */}
+      {notice && (
+        <div
+          style={{
+            marginBottom: "12px",
+            padding: "10px 14px",
+            borderRadius: "var(--radius-md)",
+            fontSize: "13px",
+            fontWeight: 600,
+            background: notice.type === "success" ? "rgba(16, 185, 129, 0.1)" : "rgba(244, 63, 94, 0.1)",
+            color: notice.type === "success" ? "var(--color-accent-emerald)" : "var(--color-accent-rose)",
+            border: `1px solid ${notice.type === "success" ? "rgba(16, 185, 129, 0.25)" : "rgba(244, 63, 94, 0.25)"}`,
+          }}
+        >
+          {notice.message}
+        </div>
+      )}
+
+      {/* Inline delete confirmation */}
+      {deleteConfirmId && (
+        <div
+          style={{
+            marginBottom: "12px",
+            padding: "12px 14px",
+            borderRadius: "var(--radius-md)",
+            background: "rgba(244, 63, 94, 0.08)",
+            border: "1px solid rgba(244, 63, 94, 0.3)",
+          }}
+        >
+          <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-accent-rose)", marginBottom: "10px" }}>
+            ⚠️ Are you sure you want to delete this bank account? This cannot be undone.
+          </p>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button className="btn btn-danger btn-sm" onClick={handleDeleteConfirm}>
+              Yes, Delete
+            </button>
+            <button className="btn btn-secondary btn-sm" onClick={() => setDeleteConfirmId(null)}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <form
@@ -190,6 +266,19 @@ export default function BankAccountManager({
                 }
               />
             </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingTop: "22px" }}>
+              <input
+                type="checkbox"
+                id="bank-is-default"
+                checked={newAccount.isDefault}
+                onChange={(e) =>
+                  setNewAccount({ ...newAccount, isDefault: e.target.checked })
+                }
+              />
+              <label htmlFor="bank-is-default" style={{ fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>
+                Set as default bank account
+              </label>
+            </div>
           </div>
           <div
             style={{
@@ -226,7 +315,9 @@ export default function BankAccountManager({
             key={acc.id}
             style={{
               padding: "16px",
-              border: "1px solid var(--color-border)",
+              border: acc.isDefault
+                ? "1px solid rgba(99, 102, 241, 0.5)"
+                : "1px solid var(--color-border)",
               borderRadius: "8px",
               display: "flex",
               justifyContent: "space-between",
@@ -237,8 +328,13 @@ export default function BankAccountManager({
             }}
           >
             <div>
-              <div style={{ fontWeight: 600 }}>
-                {acc.bankName} - {acc.accountName}
+              <div style={{ fontWeight: 600, display: "flex", alignItems: "center", gap: "8px" }}>
+                {acc.bankName} — {acc.accountName}
+                {acc.isDefault && (
+                  <span style={{ fontSize: "11px", fontWeight: 800, padding: "2px 8px", borderRadius: "999px", background: "rgba(99, 102, 241, 0.15)", color: "var(--color-accent-indigo)" }}>
+                    Default
+                  </span>
+                )}
               </div>
               <div
                 style={{
@@ -259,9 +355,18 @@ export default function BankAccountManager({
                   Select
                 </button>
               )}
+              {!acc.isDefault && (
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => handleSetDefault(acc.id)}
+                  style={{ fontSize: "12px" }}
+                >
+                  Set Default
+                </button>
+              )}
               <button
                 className="btn btn-ghost btn-sm"
-                onClick={() => handleDelete(acc.id)}
+                onClick={() => handleDeleteRequest(acc.id)}
                 style={{ color: "var(--color-accent-rose)" }}
               >
                 Delete

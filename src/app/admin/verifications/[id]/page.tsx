@@ -6,6 +6,7 @@ import {
   approveDocument,
   rejectDocument,
 } from "../../actions";
+import { getSignedUrl } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,22 @@ export default async function VerificationDetailPage({
   });
 
   if (!user) notFound();
+
+  // Regenerate presigned URLs for all KYC documents on load
+  // documentUrl stores either a full URL (already public/CDN) or an S3 key.
+  // For keys (no http prefix), we generate a fresh 1-hour presigned URL.
+  const docsWithRefreshedUrls = await Promise.all(
+    user.verificationDocs.map(async (doc: typeof user.verificationDocs[number]) => {
+      if (!doc.documentUrl) return doc;
+      // If it's already a full URL (CDN / local path), use as-is
+      if (doc.documentUrl.startsWith("http") || doc.documentUrl.startsWith("/")) {
+        return doc;
+      }
+      // Otherwise treat as S3 key and generate fresh presigned URL (1h)
+      const signedUrl = await getSignedUrl(doc.documentUrl, 3600);
+      return { ...doc, documentUrl: signedUrl || doc.documentUrl };
+    }),
+  );
 
   const name =
     user.influencerProfile?.displayName ||
@@ -146,7 +163,7 @@ export default async function VerificationDetailPage({
           <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
             🛡️ Proof Documents
           </h2>
-          {user.verificationDocs.length === 0 ? (
+          {docsWithRefreshedUrls.length === 0 ? (
             <div style={{ padding: "32px", textAlign: "center", background: "rgba(244, 63, 94, 0.05)", borderRadius: "var(--radius-md)", border: "1px dashed var(--color-accent-rose)" }}>
               <p style={{ color: "var(--color-accent-rose)", fontSize: "14px", fontWeight: 600 }}>
                 No verification documents uploaded.
@@ -154,7 +171,7 @@ export default async function VerificationDetailPage({
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {user.verificationDocs.map((doc: any) => (
+              {docsWithRefreshedUrls.map((doc: any) => (
                 <div
                   key={doc.id}
                   style={{

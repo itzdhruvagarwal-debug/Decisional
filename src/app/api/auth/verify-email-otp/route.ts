@@ -10,11 +10,12 @@ import { sendEmail } from "@/lib/communication";
 import prisma from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { env } from "@/env";
+import { apiWrapper } from "@/lib/api-wrapper";
 
 const OTP_TTL = 600; // 10 minutes
 
 // ── PUT: Send Email OTP ──
-export async function PUT(request: NextRequest) {
+export const PUT = apiWrapper(async function PUT(request: NextRequest) {
     try {
         let body;
         try {
@@ -123,10 +124,10 @@ export async function PUT(request: NextRequest) {
             { status: 500 },
         );
     }
-}
+});
 
 // ── POST: Verify Email OTP ──
-export async function POST(request: NextRequest) {
+export const POST = apiWrapper(async function POST(request: NextRequest) {
     try {
         let body;
         try {
@@ -230,4 +231,4 @@ export async function POST(request: NextRequest) {
             { status: 500 },
         );
     }
-}
+});

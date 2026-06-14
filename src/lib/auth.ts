@@ -92,6 +92,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const { email: rawEmail, password } = parsed.data;
           const email = rawEmail.toLowerCase().trim();
 
+          // Check if IP is blacklisted/banned
+          const { isIpBanned } = await import("./blacklist");
+          if (await isIpBanned(ip)) {
+            logger.warn(`Login blocked — blacklisted IP`, { ip });
+            throw new Error("SUSPICIOUS_IP_BLOCK: Login blocked due to suspicious IP detection.");
+          }
+
           // Check IP limit
           const ipLimit = await checkRateLimit(ip, "LOGIN_IP");
           if (!ipLimit.success) {

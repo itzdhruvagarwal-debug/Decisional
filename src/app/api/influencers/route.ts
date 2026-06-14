@@ -24,6 +24,13 @@ export const GET = apiWrapper(async (req) => {
   const city = searchParams.get("city");
   const minFollowersStr = searchParams.get("minFollowers");
   const minFollowers = minFollowersStr ? parseInt(minFollowersStr) : undefined;
+  const minEngagementRateStr = searchParams.get("minEngagementRate");
+  const minEngagementRate = minEngagementRateStr ? Math.round(parseFloat(minEngagementRateStr) * 100) : undefined;
+  const minRateStr = searchParams.get("minRate");
+  const minRate = minRateStr ? Math.round(parseFloat(minRateStr) * 100) : undefined;
+  const maxRateStr = searchParams.get("maxRate");
+  const maxRate = maxRateStr ? Math.round(parseFloat(maxRateStr) * 100) : undefined;
+  const platform = searchParams.get("platform");
   const searchTerm = searchParams.get("search");
   const page = Math.max(1, parseInt(searchParams.get("page") || "1") || 1);
   const limit = Math.min(
@@ -35,6 +42,10 @@ export const GET = apiWrapper(async (req) => {
     ...(category ? { category } : {}),
     ...(city ? { city } : {}),
     ...(minFollowers !== undefined ? { minFollowers } : {}),
+    ...(minEngagementRate !== undefined ? { minEngagementRate } : {}),
+    ...(minRate !== undefined ? { minRate } : {}),
+    ...(maxRate !== undefined ? { maxRate } : {}),
+    ...(platform ? { platform } : {}),
     ...(searchTerm ? { searchTerm } : {}),
     page,
     limit,

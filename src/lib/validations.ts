@@ -127,7 +127,7 @@ export const influencerProfileSchema = z.object({
   minRate: z.number().int().min(100, "Minimum rate must be at least ₹100").optional(),
   maxRate: z.number().int().optional(),
   instagramFollowers: z.number().int().min(0).optional(),
-  youtubeSubscribers: z.number().int().min(0).optional(),
+  youtubeSubscribers: z.number().int().min(-1).optional(),
   instagramEngagementRate: z.number().min(0).max(100, "Must be a valid percentage").optional(),
   youtubeEngagementRate: z.number().min(0).max(100, "Must be a valid percentage").optional(),
 }).refine(data => !data.maxRate || (data.minRate !== undefined && data.maxRate >= data.minRate), {
@@ -142,7 +142,15 @@ export const brandProfileSchema = z.object({
     .min(2, "Company name must be at least 2 characters")
     .max(100, "Company name cannot exceed 100 characters"),
   logo: z.string().url("Please provide a valid logo image URL").max(500).optional(),
-  website: z.string().url("Please provide a valid website URL").max(500).optional(),
+  website: z
+    .string()
+    .url("Please provide a valid website URL")
+    .max(500)
+    .refine(
+      (val) => val.startsWith("http://") || val.startsWith("https://"),
+      "Website URL must start with http:// or https://",
+    )
+    .optional(),
   description: z.string().trim().max(1000, "Description cannot exceed 1000 characters").optional(),
   industry: z.string().trim().max(50).optional(),
   gstNumber: z

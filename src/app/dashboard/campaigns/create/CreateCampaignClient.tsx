@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -23,7 +23,8 @@ export default function CreateCampaignClient() {
     targetAgeMin: null as number | null,
     targetAgeMax: null as number | null,
     minFollowers: 1000,
-    maxFollowers: 0,
+    maxFollowers: null as number | null,
+    maxInfluencers: null as number | null,
     applicationDeadline: "",
     contentDeadline: "",
     postingDeadline: "",
@@ -119,7 +120,7 @@ export default function CreateCampaignClient() {
       if (formData.perInfluencerBudget > formData.totalBudget) {
         throw new Error("Per influencer budget cannot exceed total budget");
       }
-      if (formData.maxFollowers > 0 && formData.maxFollowers < formData.minFollowers) {
+      if (formData.maxFollowers !== null && formData.maxFollowers > 0 && formData.maxFollowers < formData.minFollowers) {
         throw new Error("Max followers must be greater than min followers");
       }
       if (!formData.contentDeadline || !formData.postingDeadline) {
@@ -150,6 +151,8 @@ export default function CreateCampaignClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
+          maxFollowers: formData.maxFollowers || 0,
+          maxInfluencers: formData.maxInfluencers || null,
           applicationDeadline: applicationDeadline?.toISOString(),
           contentDeadline: contentDeadline.toISOString(),
           postingDeadline: postingDeadline.toISOString(),
@@ -503,7 +506,7 @@ export default function CreateCampaignClient() {
             </div>
           </div>
 
-          <div className="grid-2" style={{ gap: "24px", marginBottom: "24px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px", marginBottom: "24px" }}>
             <div className="form-group">
               <label
                 className="label"
@@ -538,15 +541,41 @@ export default function CreateCampaignClient() {
               <input
                 type="number"
                 className="input"
-                value={formData.maxFollowers || ""}
+                value={formData.maxFollowers === null ? "" : formData.maxFollowers}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    maxFollowers: e.target.value ? parseInt(e.target.value) : 0,
+                    maxFollowers: e.target.value ? parseInt(e.target.value) : null,
                   })
                 }
                 min={1000}
-                placeholder="e.g. 500000"
+                placeholder="No limit"
+                style={{
+                  background: "rgba(255, 255, 255, 0.03)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                }}
+              />
+            </div>
+            <div className="form-group">
+              <label
+                className="label"
+                style={{ color: "var(--color-text-primary)" }}
+              >
+                Max Influencer Slots
+              </label>
+              <input
+                type="number"
+                className="input"
+                value={formData.maxInfluencers === null ? "" : formData.maxInfluencers}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    maxInfluencers: e.target.value ? parseInt(e.target.value) : null,
+                  })
+                }
+                min={1}
+                max={100}
+                placeholder="Unlimited"
                 style={{
                   background: "rgba(255, 255, 255, 0.03)",
                   border: "1px solid rgba(255, 255, 255, 0.1)",

@@ -265,7 +265,7 @@ async function holdActivePayouts(userId: string) {
 export async function liftExpiredSuspensions(): Promise<{ lifted: number }> {
   const now = new Date();
 
-  // Find users with expired violation actions
+  // 1. Find users with expired violation actions (Query 1)
   const expiredViolations = await prisma.userViolation.findMany({
     where: {
       expiresAt: { lte: now },
@@ -274,44 +274,51 @@ export async function liftExpiredSuspensions(): Promise<{ lifted: number }> {
     },
     select: {
       userId: true,
-      id: true,
     },
-    distinct: ["userId"],
   });
 
-  let lifted = 0;
-
-  for (const violation of expiredViolations) {
-    // Check if user has any OTHER active (non-expired) suspensions
-    const activeViolations = await prisma.userViolation.count({
-      where: {
-        userId: violation.userId,
-        expiresAt: { gt: now },
-        action: "TEMP_SUSPENSION",
-      },
-    });
-
-    if (activeViolations === 0) {
-      await prisma.user.update({
-        where: { id: violation.userId },
-        data: { status: "ACTIVE" },
-      });
-
-      await prisma.notification.create({
-        data: {
-          userId: violation.userId,
-          type: "alert",
-          title: "✅ Suspension Lifted",
-          message:
-            "Your account suspension has expired. You can now resume normal activities. Please follow platform guidelines to avoid future penalties.",
-        },
-      });
-
-      lifted++;
-    }
+  const userIdsToCheck = Array.from(new Set(expiredViolations.map((v) => v.userId)));
+  if (userIdsToCheck.length === 0) {
+    return { lifted: 0 };
   }
 
-  return { lifted };
+  // 2. Check which users still have active (non-expired) suspensions (Query 2)
+  const stillActive = await prisma.userViolation.findMany({
+    where: {
+      userId: { in: userIdsToCheck },
+      expiresAt: { gt: now },
+      action: "TEMP_SUSPENSION",
+    },
+    select: {
+      userId: true,
+    },
+  });
+
+  const stillActiveSet = new Set(stillActive.map((v) => v.userId));
+  const userIdsToLift = userIdsToCheck.filter((id) => !stillActiveSet.has(id));
+
+  if (userIdsToLift.length === 0) {
+    return { lifted: 0 };
+  }
+
+  // 3. Update all lifted users to ACTIVE status (Query 3)
+  await prisma.user.updateMany({
+    where: { id: { in: userIdsToLift } },
+    data: { status: "ACTIVE" },
+  });
+
+  // 4. Create notifications for all lifted users (Query 4)
+  await prisma.notification.createMany({
+    data: userIdsToLift.map((userId) => ({
+      userId,
+      type: "alert",
+      title: "✅ Suspension Lifted",
+      message:
+        "Your account suspension has expired. You can now resume normal activities. Please follow platform guidelines to avoid future penalties.",
+    })),
+  });
+
+  return { lifted: userIdsToLift.length };
 }
 
 // ==================== IP RATE LIMITING ====================

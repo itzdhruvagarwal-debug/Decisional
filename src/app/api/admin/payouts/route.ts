@@ -8,7 +8,7 @@ import { decrypt, maskAccountNumber } from "@/lib/encryption";
 
 const querySchema = z.object({
   status: z
-    .enum(["PENDING", "PROCESSING", "COMPLETED", "FAILED", "ALL"])
+    .enum(["PENDING", "PENDING_REVIEW", "PROCESSING", "COMPLETED", "FAILED", "ALL"])
     .default("PENDING"),
   page: z.preprocess(
     (val) => (val === undefined ? undefined : Number(val)),
@@ -68,7 +68,11 @@ export async function GET(request: Request) {
     }
 
     const { status, page, limit } = parsed.data;
-    const where = status === "ALL" ? {} : { status };
+    const where = status === "ALL"
+      ? {}
+      : status === "PENDING"
+        ? { status: { in: ["PENDING", "PENDING_REVIEW"] as any[] } }
+        : { status };
 
     const [withdrawals, total] = await Promise.all([
       prisma.withdrawal.findMany({

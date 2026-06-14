@@ -15,6 +15,7 @@ import { resolveBrandPlatformFee } from "@/lib/platform-fees";
 import { processReferralReward } from "@/lib/referral-engine";
 import { addUserXp, checkAndAwardBadges } from "@/lib/gamification-engine";
 import { updateTrustAndLevel } from "@/lib/trust-engine";
+import { checkPaymentFraud } from "@/lib/fraud-detection";
 
 export class PaymentService {
   static async createWalletTopUpOrder(userId: string, amountInPaise: number) {
@@ -289,7 +290,7 @@ export class PaymentService {
         if (
           !hasGatewayHold &&
           !deal.reservedFromWallet &&
-          (!brandWallet || brandWallet.pendingBalance < deal.amount)
+          (!brandWallet || brandWallet.pendingBalance < (deal.totalAmount || deal.amount))
         ) {
           throw new Error("NO_RESERVED_CAMPAIGN_FUNDS");
         }
@@ -315,14 +316,14 @@ export class PaymentService {
         if (brandWallet) {
           const pendingRelease = deal.reservedFromWallet
             ? 0
-            : Math.min(brandWallet.pendingBalance, deal.amount);
+            : Math.min(brandWallet.pendingBalance, deal.totalAmount || deal.amount);
           await tx.wallet.update({
             where: { id: brandWallet.id },
             data: {
               ...(pendingRelease > 0
                 ? { pendingBalance: { decrement: pendingRelease } }
                 : {}),
-              totalSpent: { increment: deal.amount },
+              totalSpent: { increment: deal.totalAmount || deal.amount },
             },
           });
         }
@@ -330,21 +331,32 @@ export class PaymentService {
         if (deal.brandId) {
           await tx.brandProfile.update({
             where: { id: deal.brandId },
-            data: { totalSpent: { increment: deal.amount } },
+            data: { totalSpent: { increment: deal.totalAmount || deal.amount } },
           });
         }
 
         const influencerPayout = deal.influencerPayout ?? deal.amount;
+        // TDS Deduction — Section 194-O (1% on earnings >= ₹5,00,000)
+        const TDS_THRESHOLD = 500000; // ₹5 Lakh
+        const TDS_RATE = 0.01; // 1%
+        const influencerProfile = await tx.influencerProfile.findUnique({
+          where: { userId: deal.influencer.userId },
+          select: { totalEarnings: true },
+        });
+        const cumulativeEarnings = (influencerProfile?.totalEarnings || 0) + influencerPayout;
+        const tdsAmount = cumulativeEarnings >= TDS_THRESHOLD ? Math.round(influencerPayout * TDS_RATE) : 0;
+        const netPayout = influencerPayout - tdsAmount;
+
         const wallet = await tx.wallet.upsert({
           where: { userId: deal.influencer.userId },
           create: {
             userId: deal.influencer.userId,
-            balance: influencerPayout,
-            totalEarned: influencerPayout,
+            balance: netPayout,
+            totalEarned: netPayout,
           },
           update: {
-            balance: { increment: influencerPayout },
-            totalEarned: { increment: influencerPayout },
+            balance: { increment: netPayout },
+            totalEarned: { increment: netPayout },
           },
         });
 
@@ -353,11 +365,24 @@ export class PaymentService {
             walletId: wallet.id,
             dealId: deal.id,
             type: "CREDIT",
-            amount: influencerPayout,
+            amount: netPayout,
             status: "COMPLETED",
             description: `Payout for deal: ${deal.id}`,
           },
         });
+
+        if (tdsAmount > 0) {
+          await tx.transaction.create({
+            data: {
+              walletId: wallet.id,
+              dealId: deal.id,
+              type: "DEBIT",
+              amount: tdsAmount,
+              status: "COMPLETED",
+              description: `TDS deduction (Section 194-O, 1%) for deal: ${deal.id}`,
+            },
+          });
+        }
 
         // 1. Increment completedDeals and totalEarnings in influencerProfile
         await tx.influencerProfile.update({
@@ -406,6 +431,22 @@ export class PaymentService {
   }
 
   static async initiateWithdrawal(userId: string, data: { amount: number; bankAccountName: string; bankAccountNumber: string; ifscCode: string; upiId?: string }, idempotencyKey: string) {
+    const fraudCheck = await checkPaymentFraud({
+      userId,
+      amount: data.amount,
+      bankAccount: data.bankAccountNumber,
+      upiId: data.upiId,
+    });
+
+    if (fraudCheck.action === "BLOCK") {
+      logger.warn("Withdrawal blocked by fraud check", {
+        userId,
+        amount: data.amount,
+        flags: fraudCheck.flags.map((f) => f.description).join(", "),
+      });
+      throw new Error("Withdrawal blocked by fraud detection system. Please contact support.");
+    }
+
     const withdrawal = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const existing = await tx.transaction.findUnique({
         where: { razorpayPaymentId: idempotencyKey },
@@ -449,7 +490,9 @@ export class PaymentService {
           bankAccountNumber: encryptedAcc,
           ifscCode: data.ifscCode,
           upiId: data.upiId ? encrypt(data.upiId) : null,
-          status: "PROCESSING",
+          status: fraudCheck.action === "REVIEW" ? "PENDING_REVIEW" : "PROCESSING",
+          isManualReview: fraudCheck.action === "REVIEW",
+          riskScore: fraudCheck.riskScore,
         }
       });
 
@@ -472,6 +515,10 @@ export class PaymentService {
 
     if ("alreadyProcessed" in withdrawal) {
       return { success: true, alreadyProcessed: true };
+    }
+
+    if (withdrawal.w.status === "PENDING_REVIEW") {
+      return { success: true, status: "PENDING_REVIEW" };
     }
 
     try {

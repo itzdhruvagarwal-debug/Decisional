@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 
 const transactionTypeIcons: Record<string, { icon: string; color: string }> = {
@@ -105,6 +105,78 @@ export default function TransactionHistory() {
     setPage(1);
   };
 
+  const exportCsv = async () => {
+    const query = new URLSearchParams({ page: "1", limit: "1000" });
+    if (filters.type) query.set("type", filters.type);
+    if (filters.status) query.set("status", filters.status);
+    if (filters.startDate) query.set("startDate", filters.startDate);
+    if (filters.endDate) query.set("endDate", filters.endDate);
+
+    try {
+      const res = await fetch(`/api/wallet/transactions?${query.toString()}`);
+      const data = await res.json();
+      const rows: any[] = data.transactions || [];
+      if (rows.length === 0) return;
+
+      const header = ["Date", "Type", "Amount (INR)", "Status", "Description", "Transaction ID"];
+      const csvRows = rows.map((tx) => [
+        new Date(tx.createdAt).toISOString(),
+        tx.type,
+        (tx.amount / 100).toFixed(2),
+        tx.status,
+        '"' + (tx.description || "").replace(/"/g, "'") + '"',
+        tx.id,
+      ]);
+
+      const csvContent = [header, ...csvRows].map((r) => r.join(",")).join("\n");
+      const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ledger_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("CSV export failed", err);
+    }
+  };
+
+  const printLedger = () => {
+    const printWindow = window.open("", "_blank", "width=900,height=700");
+    if (!printWindow) return;
+
+    const rowsHtml = transactions
+      .map((tx) => {
+        const isOutflow = ["DEBIT", "WITHDRAWAL", "PLATFORM_FEE", "CHARGEBACK"].includes(tx.type);
+        const amtFormatted = (tx.amount / 100).toFixed(2);
+        const color = isOutflow ? "#e11d48" : "#10b981";
+        const sign = isOutflow ? "-" : "+";
+        return `<tr>
+          <td>${new Date(tx.createdAt).toLocaleDateString("en-IN")}</td>
+          <td>${tx.type}</td>
+          <td style="text-align:right;color:${color}">${sign}&#8377;${amtFormatted}</td>
+          <td>${tx.status}</td>
+          <td>${tx.description || "-"}</td>
+        </tr>`;
+      })
+      .join("");
+
+    printWindow.document.write(
+      `<!DOCTYPE html><html><head><title>Transaction Ledger</title>` +
+      `<style>body{font-family:Arial,sans-serif;padding:20px}h1{font-size:20px;margin-bottom:16px}` +
+      `table{width:100%;border-collapse:collapse;font-size:13px}` +
+      `th,td{border:1px solid #ddd;padding:8px 12px;text-align:left}` +
+      `th{background:#f4f4f4;font-weight:700}tr:nth-child(even){background:#fafafa}` +
+      `@media print{button{display:none}}</style></head><body>` +
+      `<h1>Transaction Ledger &mdash; ${new Date().toLocaleDateString("en-IN")}</h1>` +
+      `<table><thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Status</th><th>Description</th></tr></thead>` +
+      `<tbody>${rowsHtml}</tbody></table>` +
+      `<br/><button onclick="window.print()">Print</button>` +
+      `</body></html>`,
+    );
+    printWindow.document.close();
+  };
+
   return (
     <div className="card" style={{ padding: "0", overflow: "hidden" }}>
       <div
@@ -124,7 +196,24 @@ export default function TransactionHistory() {
           <h3 style={{ fontSize: "18px", fontWeight: 700 }}>
             Transaction History
           </h3>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={exportCsv}
+              title="Download CSV"
+              style={{ fontSize: "12px" }}
+            >
+              ⬇ CSV
+            </button>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={printLedger}
+              title="Print ledger"
+              style={{ fontSize: "12px" }}
+            >
+              🖨 Print
+            </button>
+
             <select
               name="type"
               className="input"

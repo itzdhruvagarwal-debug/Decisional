@@ -106,6 +106,16 @@ const allStates = [
 export default function SettingsPage() {
     const { data: session, update } = useSession();
     const [activeTab, setActiveTab] = useState<string>("profile");
+    const [toasts, setToasts] = useState<Array<{ id: string; type: "success" | "error" | "info"; message: string }>>([]);
+
+    const showToast = (message: string, type: "success" | "error" | "info" = "info") => {
+        const id = Math.random().toString(36).substring(2, 9);
+        setToasts((prev) => [...prev, { id, type, message }]);
+        setTimeout(() => {
+            setToasts((prev) => prev.filter((t) => t.id !== id));
+        }, 4000);
+    };
+
     const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
     const [referralCode, setReferralCode] = useState("");
@@ -184,6 +194,8 @@ export default function SettingsPage() {
     const [showAllLogins, setShowAllLogins] = useState(false);
     const [is2FASetupVisible, setIs2FASetupVisible] = useState(false);
     const [disable2FAPassword, setDisable2FAPassword] = useState("");
+    const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
+    const [passwordConfirmPending, setPasswordConfirmPending] = useState(false);
 
     const [verifyContactState, setVerifyContactState] = useState<{ type: 'email' | 'phone' | null, step: 'idle' | 'input' | 'code' }>({ type: null, step: 'idle' });
     const [contactVerifyCode, setContactVerifyCode] = useState("");
@@ -257,6 +269,12 @@ export default function SettingsPage() {
 
     const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
+        // First click: show inline confirmation instead of window.confirm
+        if (!passwordConfirmPending) {
+            setPasswordConfirmPending(true);
+            return;
+        }
+        setPasswordConfirmPending(false);
         setPasswordError("");
         setPasswordSuccess("");
 
@@ -351,7 +369,7 @@ export default function SettingsPage() {
 
     const handleStartContactChange = async (type: 'email' | 'phone') => {
         if (!user?.email && !user?.phone) {
-            alert("No available contact method to verify. Please contact support.");
+            showToast("No available contact method to verify. Please contact support.", "error");
             return;
         }
         setIsSaving(true);
@@ -365,10 +383,10 @@ export default function SettingsPage() {
             if (res.ok) {
                 setChangeContactState(prev => ({ ...prev, active: true, type, step: 'verify-current' }));
             } else {
-                alert(data.error || "Failed to initiate contact change");
+                showToast(data.error || "Failed to initiate contact change", "error");
             }
         } catch (_e) {
-            alert("Network error.");
+            showToast("Network error.", "error");
         } finally {
             setIsSaving(false);
         }
@@ -376,10 +394,10 @@ export default function SettingsPage() {
 
     const handleVerifyCurrentContacts = async () => {
         if (user?.email && !changeContactState.currentEmailOtp) {
-            alert("Please enter the Email OTP"); return;
+            showToast("Please enter the Email OTP", "error"); return;
         }
         if (user?.phone && !changeContactState.currentPhoneOtp) {
-            alert("Please enter the Phone OTP"); return;
+            showToast("Please enter the Phone OTP", "error"); return;
         }
         setIsSaving(true);
         try {
@@ -396,13 +414,13 @@ export default function SettingsPage() {
             if (res.ok) {
                 setChangeContactState(prev => ({ ...prev, step: 'enter-new' }));
             } else {
-                alert(data.error || "Invalid OTP(s)");
+                showToast(data.error || "Invalid OTP(s)", "error");
             }
-        } catch (_e) { alert("Network error"); } finally { setIsSaving(false); }
+        } catch (_e) { showToast("Network error", "error"); } finally { setIsSaving(false); }
     };
 
     const handleSendNewContactOtp = async () => {
-        if (!changeContactState.newContact) { alert(`Please enter your new ${changeContactState.type}`); return; }
+        if (!changeContactState.newContact) { showToast(`Please enter your new ${changeContactState.type}`, "error"); return; }
         setIsSaving(true);
         try {
             const res = await fetch("/api/user/change-contact", {
@@ -413,13 +431,13 @@ export default function SettingsPage() {
             const data = await res.json();
             if (res.ok) {
                 setChangeContactState(prev => ({ ...prev, step: 'verify-new' }));
-                alert(`OTP sent to new ${changeContactState.type}`);
-            } else { alert(data.error || "Failed to send OTP"); }
-        } catch (_e) { alert("Network error"); } finally { setIsSaving(false); }
+                showToast(`OTP sent to new ${changeContactState.type}`, "success");
+            } else { showToast(data.error || "Failed to send OTP", "error"); }
+        } catch (_e) { showToast("Network error", "error"); } finally { setIsSaving(false); }
     };
 
     const handleConfirmNewContact = async () => {
-        if (!changeContactState.newOtp) { alert("Please enter the OTP"); return; }
+        if (!changeContactState.newOtp) { showToast("Please enter the OTP", "error"); return; }
         setIsSaving(true);
         try {
             const res = await fetch("/api/user/change-contact", {
@@ -429,11 +447,11 @@ export default function SettingsPage() {
             });
             const data = await res.json();
             if (res.ok) {
-                alert(`${changeContactState.type} updated successfully!`);
+                showToast(`${changeContactState.type} updated successfully!`, "success");
                 setChangeContactState({ active: false, type: null, step: 'idle', currentEmailOtp: '', currentPhoneOtp: '', newContact: '', newOtp: '' });
                 window.location.reload(); // Refresh to reflect new session data
-            } else { alert(data.error || "Invalid OTP"); }
-        } catch (_e) { alert("Network error"); } finally { setIsSaving(false); }
+            } else { showToast(data.error || "Invalid OTP", "error"); }
+        } catch (_e) { showToast("Network error", "error"); } finally { setIsSaving(false); }
     };
 
     const handleProfileImageUpload = async (
@@ -470,16 +488,16 @@ export default function SettingsPage() {
                 });
                 if (saveRes.ok) {
                     await update();
-                    alert("Profile picture updated!");
+                    showToast("Profile picture updated!", "success");
                 } else {
-                    alert("Failed to save profile picture to settings");
+                    showToast("Failed to save profile picture to settings", "error");
                 }
             } else {
-                alert("Upload failed: " + (data.error || "Unknown error"));
+                showToast("Upload failed: " + (data.error || "Unknown error"), "error");
             }
         } catch (error) {
             console.error(error);
-            alert("Upload failed");
+            showToast("Upload failed", "error");
         } finally {
             setIsUploading(false);
             if (profileImageInputRef.current) profileImageInputRef.current.value = "";
@@ -518,17 +536,17 @@ export default function SettingsPage() {
             });
             const data = await res.json();
             if (data.success) {
-                alert("Document uploaded! Verification pending.");
+                showToast("Document uploaded! Verification pending.", "success");
                 // Refresh data
                 const refresh = await fetch("/api/verification");
                 const newData = await refresh.json();
                 setVerificationData(newData);
             } else {
-                alert(data.error || "Upload failed");
+                showToast(data.error || "Upload failed", "error");
             }
         } catch (error) {
             console.error(error);
-            alert("An error occurred");
+            showToast("An error occurred", "error");
         } finally {
             setIsUploading(false);
             setUploadingDocType(null);
@@ -558,13 +576,13 @@ export default function SettingsPage() {
                 body: JSON.stringify({ notificationPreferences }),
             });
             if (res.ok) {
-                alert("Preferences saved successfully");
+                showToast("Preferences saved successfully", "success");
             } else {
-                alert("Failed to save preferences");
+                showToast("Failed to save preferences", "error");
             }
         } catch (error) {
             console.error(error);
-            alert("An error occurred");
+            showToast("An error occurred", "error");
         } finally {
             setIsSaving(false);
         }
@@ -581,13 +599,13 @@ export default function SettingsPage() {
             const data = await res.json();
             if (res.ok) {
                 await update();
-                alert("Profile saved successfully!");
+                showToast("Profile saved successfully!", "success");
             } else {
-                alert(data.error || "Failed to save profile");
+                showToast(data.error || "Failed to save profile", "error");
             }
         } catch (error) {
             console.error(error);
-            alert("Failed to save profile");
+            showToast("Failed to save profile", "error");
         } finally {
             setIsSaving(false);
         }
@@ -630,7 +648,7 @@ export default function SettingsPage() {
                 ? profile.instagramHandle
                 : profile.youtubeHandle;
         if (!handle) {
-            alert(`Please enter your ${platform} handle first.`);
+            showToast(`Please enter your ${platform} handle first.`, "error");
             return;
         }
 
@@ -660,18 +678,20 @@ export default function SettingsPage() {
                         };
                     }
                 });
-                alert(
+                showToast(
                     `${platform.toUpperCase()} successfully verified! Stats linked in real.`,
+                    "success",
                 );
             } else {
-                alert(
+                showToast(
                     data.error ||
                     "Verification failed. Make sure the handle is public and correctly spelled.",
+                    "error",
                 );
             }
         } catch (error) {
             console.error(error);
-            alert("Failed to verify social account.");
+            showToast("Failed to verify social account.", "error");
         } finally {
             setIsSaving(false);
         }
@@ -701,6 +721,28 @@ export default function SettingsPage() {
 
     return (
         <DashboardShell user={session?.user || user}>
+            {/* Toast notifications */}
+            {toasts.length > 0 && (
+                <div style={{ position: "fixed", top: 24, right: 24, zIndex: 9999, display: "flex", flexDirection: "column", gap: "8px", maxWidth: "400px" }}>
+                    {toasts.map(t => (
+                        <div key={t.id} style={{
+                            padding: "12px 20px",
+                            borderRadius: "10px",
+                            color: "#fff",
+                            fontSize: "14px",
+                            fontWeight: 500,
+                            background: t.type === "success" ? "linear-gradient(135deg, #059669, #10b981)" : t.type === "error" ? "linear-gradient(135deg, #dc2626, #ef4444)" : "linear-gradient(135deg, #2563eb, #3b82f6)",
+                            boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                            backdropFilter: "blur(12px)",
+                            border: "1px solid rgba(255,255,255,0.1)",
+                            animation: "slideInRight 0.3s ease-out",
+                            cursor: "pointer",
+                        }} onClick={() => setToasts(prev => prev.filter(x => x.id !== t.id))}>
+                            {t.type === "success" ? "✓ " : t.type === "error" ? "✕ " : "ℹ "}{t.message}
+                        </div>
+                    ))}
+                </div>
+            )}
             {/* Header */}
             <div
                 style={{
@@ -1318,7 +1360,9 @@ export default function SettingsPage() {
                                             color: "var(--color-text-muted)",
                                         }}
                                     >
-                                        {profile.instagramHandle ? "Connected" : "Not connected"}
+                                        {profile.instagramHandle
+                                            ? (profile.instagramFollowers > 0 ? "✅ Verified" : "Handle saved — click Verify below")
+                                            : "Not verified"}
                                     </p>
                                 </div>
                             </div>
@@ -1417,7 +1461,9 @@ export default function SettingsPage() {
                                             color: "var(--color-text-muted)",
                                         }}
                                     >
-                                        {profile.youtubeHandle ? "Connected" : "Not connected"}
+                                        {profile.youtubeHandle
+                                            ? (profile.youtubeSubscribers === -1 || (profile.youtubeSubscribers || 0) > 0 ? "✅ Verified" : "Handle saved — click Verify below")
+                                            : "Not verified"}
                                     </p>
                                 </div>
                             </div>
@@ -1449,7 +1495,7 @@ export default function SettingsPage() {
                                     >
                                         <div style={{ textAlign: "center" }}>
                                             <div style={{ fontSize: "24px", fontWeight: 800 }}>
-                                                {((profile.youtubeSubscribers || 0) / 1000).toFixed(0)}K
+                                                {profile.youtubeSubscribers === -1 ? "Hidden" : `${((profile.youtubeSubscribers || 0) / 1000).toFixed(0)}K`}
                                             </div>
                                             <div
                                                 style={{
@@ -2510,12 +2556,12 @@ export default function SettingsPage() {
                                             <input type="text" placeholder="OTP" className="input" style={{ width: '80px', padding: '4px 8px', fontSize: '12px' }} value={contactVerifyCode} onChange={(e) => setContactVerifyCode(e.target.value)} />
                                             <button className="btn btn-primary btn-sm" onClick={async () => {
                                                 const res = await fetch('/api/user/verify-contact', { method: 'POST', body: JSON.stringify({ type: 'email', code: contactVerifyCode }) });
-                                                if (res.ok) { alert('Email Verified!'); setVerifyContactState({ type: null, step: 'idle' }); setContactVerifyCode(''); } else { alert('Invalid code'); }
+                                                if (res.ok) { showToast('Email Verified!', 'success'); setVerifyContactState({ type: null, step: 'idle' }); setContactVerifyCode(''); } else { showToast('Invalid code', 'error'); }
                                             }} style={{ fontSize: '12px', padding: '4px 8px' }}>Verify</button>
                                         </div>
                                     ) : (
                                         <button className="btn btn-secondary btn-sm" disabled={isSaving} onClick={async () => {
-                                            if (!user?.email) return alert('No email found to verify.');
+                                            if (!user?.email) { showToast('No email found to verify.', 'error'); return; }
                                             setIsSaving(true);
                                             try {
                                                 const res = await fetch('/api/user/send-otp', {
@@ -2523,14 +2569,14 @@ export default function SettingsPage() {
                                                     body: JSON.stringify({ type: 'email', contact: user.email })
                                                 });
                                                 if (res.ok) {
-                                                    alert(`Verification code sent to ${user.email}`);
+                                                    showToast(`Verification code sent to ${user.email}`, 'success');
                                                     setVerifyContactState({ type: 'email', step: 'code' });
                                                 } else {
                                                     const errorData = await res.json();
-                                                    alert(errorData.error || 'Failed to send OTP to email.');
+                                                    showToast(errorData.error || 'Failed to send OTP to email.', 'error');
                                                 }
                                             } catch (err: any) {
-                                                alert(err.message || 'Error occurred');
+                                                showToast(err.message || 'Error occurred', 'error');
                                             } finally {
                                                 setIsSaving(false);
                                             }
@@ -2570,7 +2616,7 @@ export default function SettingsPage() {
                                             <input type="text" placeholder="OTP" className="input" style={{ width: '80px', padding: '4px 8px', fontSize: '12px' }} value={contactVerifyCode} onChange={(e) => setContactVerifyCode(e.target.value)} />
                                             <button className="btn btn-primary btn-sm" onClick={async () => {
                                                 const res = await fetch('/api/user/verify-contact', { method: 'POST', body: JSON.stringify({ type: 'phone', code: contactVerifyCode }) });
-                                                if (res.ok) { alert('Phone Verified!'); setVerifyContactState({ type: null, step: 'idle' }); setContactVerifyCode(''); } else { alert('Invalid code'); }
+                                                if (res.ok) { showToast('Phone Verified!', 'success'); setVerifyContactState({ type: null, step: 'idle' }); setContactVerifyCode(''); } else { showToast('Invalid code', 'error'); }
                                             }} style={{ fontSize: '12px', padding: '4px 8px' }}>Verify</button>
                                         </div>
                                     ) : verifyContactState.type === 'phone' && verifyContactState.step === 'input' ? (
@@ -2585,14 +2631,14 @@ export default function SettingsPage() {
                                                             body: JSON.stringify({ type: 'phone', contact: pendingContact })
                                                         });
                                                         if (res.ok) {
-                                                            alert(`OTP sent to ${pendingContact}`);
+                                                            showToast(`OTP sent to ${pendingContact}`, 'success');
                                                             setVerifyContactState({ type: 'phone', step: 'code' });
                                                         } else {
                                                             const errorData = await res.json();
-                                                            alert(errorData.error || 'Failed to send OTP to phone. Ensure correct country code is used.');
+                                                            showToast(errorData.error || 'Failed to send OTP to phone. Ensure correct country code is used.', 'error');
                                                         }
                                                     } catch (err: any) {
-                                                        alert(err.message || 'Error occurred');
+                                                        showToast(err.message || 'Error occurred', 'error');
                                                     } finally {
                                                         setIsSaving(false);
                                                     }
@@ -2877,14 +2923,28 @@ export default function SettingsPage() {
                                             </div>
                                         </div>
 
-                                        <button
-                                            type="submit"
-                                            className="btn btn-primary"
-                                            disabled={isSaving}
-                                            style={{ width: "100%" }}
-                                        >
-                                            {isSaving ? <span className="loading" /> : "Update Password"}
-                                        </button>
+                                        {passwordConfirmPending ? (
+                                            <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "12px", background: "rgba(244, 63, 94, 0.08)", borderRadius: "var(--radius-md)", border: "1px solid rgba(244, 63, 94, 0.3)" }}>
+                                                <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-accent-rose)" }}>⚠️ Are you sure you want to update your password?</p>
+                                                <div style={{ display: "flex", gap: "8px" }}>
+                                                    <button type="submit" className="btn btn-danger" style={{ flex: 1 }} disabled={isSaving}>
+                                                        {isSaving ? <span className="loading" /> : "Yes, Update Password"}
+                                                    </button>
+                                                    <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setPasswordConfirmPending(false)}>
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                type="submit"
+                                                className="btn btn-primary"
+                                                disabled={isSaving}
+                                                style={{ width: "100%" }}
+                                            >
+                                                {isSaving ? <span className="loading" /> : "Update Password"}
+                                            </button>
+                                        )}
                                     </>
                                 )}
                             </form>
@@ -2893,6 +2953,32 @@ export default function SettingsPage() {
                         <div
                             style={{ display: "flex", flexDirection: "column", gap: "24px" }}
                         >
+                            {/* Recovery Codes Display — shown once after 2FA setup */}
+                            {recoveryCodes.length > 0 && (
+                                <div className="card" style={{ border: "2px solid var(--color-accent-amber)", background: "rgba(245, 158, 11, 0.06)" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                                        <h3 style={{ fontSize: "16px", fontWeight: 800, color: "var(--color-accent-amber)" }}>🔑 Save Your Recovery Codes</h3>
+                                        <button className="btn btn-sm btn-ghost" onClick={() => setRecoveryCodes([])} style={{ fontSize: "12px" }}>I've saved them ✓</button>
+                                    </div>
+                                    <p style={{ fontSize: "13px", color: "var(--color-text-secondary)", marginBottom: "12px" }}>
+                                        These codes can be used to access your account if you lose your authenticator. Each code can only be used once. Store them somewhere safe — they won't be shown again.
+                                    </p>
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "12px" }}>
+                                        {recoveryCodes.map((code) => (
+                                            <div key={code} style={{ fontFamily: "monospace", fontSize: "14px", fontWeight: 700, padding: "8px 12px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)", border: "1px solid var(--color-border)", letterSpacing: "0.1em" }}>
+                                                {code}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <button
+                                        className="btn btn-secondary btn-sm"
+                                        onClick={() => navigator.clipboard.writeText(recoveryCodes.join("\n")).then(() => showToast("Recovery codes copied!", "success"))}
+                                    >
+                                        📋 Copy All Codes
+                                    </button>
+                                </div>
+                            )}
+
                             {/* Two-Factor Authentication */}
                             <div className="card">
                                 <div
@@ -2944,7 +3030,7 @@ export default function SettingsPage() {
                                                 setQrCodeData(data);
                                                 setIs2FASetupVisible(true);
                                             } else {
-                                                alert("Failed to initiate 2FA setup");
+                                                showToast("Failed to initiate 2FA setup", "error");
                                             }
                                         }}
                                     >
@@ -3011,8 +3097,10 @@ export default function SettingsPage() {
                                             <button
                                                 className="btn btn-primary"
                                                 onClick={async () => {
-                                                    if (setupCode.length !== 6)
-                                                        return alert("Enter 6 digit code");
+                                                    if (setupCode.length !== 6) {
+                                                        showToast("Enter 6 digit code", "error");
+                                                        return;
+                                                    }
                                                     setIsSaving(true);
                                                     const res = await fetch("/api/user/2fa/verify", {
                                                         method: "POST",
@@ -3025,11 +3113,15 @@ export default function SettingsPage() {
                                                         setIs2FAEnabled(true);
                                                         setIs2FASetupVisible(false);
                                                         setSetupCode("");
-                                                        alert(
-                                                            "Two-Factor Authentication successfully enabled!",
+                                                        if (Array.isArray(data.recoveryCodes)) {
+                                                            setRecoveryCodes(data.recoveryCodes);
+                                                        }
+                                                        showToast(
+                                                            "Two-Factor Authentication successfully enabled! Save your recovery codes.",
+                                                            "success",
                                                         );
                                                     } else {
-                                                        alert(data.error || "Invalid code");
+                                                        showToast(data.error || "Invalid code", "error");
                                                     }
                                                 }}
                                             >
@@ -3068,8 +3160,10 @@ export default function SettingsPage() {
                                             <button
                                                 className="btn btn-danger"
                                                 onClick={async () => {
-                                                    if (!disable2FAPassword)
-                                                        return alert("Password required");
+                                                    if (!disable2FAPassword) {
+                                                        showToast("Password required", "error");
+                                                        return;
+                                                    }
                                                     setIsSaving(true);
                                                     const res = await fetch("/api/user/2fa/disable", {
                                                         method: "POST",
@@ -3083,11 +3177,12 @@ export default function SettingsPage() {
                                                     if (data.success) {
                                                         setIs2FAEnabled(false);
                                                         setDisable2FAPassword("");
-                                                        alert(
+                                                        showToast(
                                                             "Two-Factor Authentication successfully disabled.",
+                                                            "success",
                                                         );
                                                     } else {
-                                                        alert(data.error || "Failed to disable 2FA");
+                                                        showToast(data.error || "Failed to disable 2FA", "error");
                                                     }
                                                 }}
                                             >

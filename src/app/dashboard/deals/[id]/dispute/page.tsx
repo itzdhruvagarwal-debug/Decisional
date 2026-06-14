@@ -14,13 +14,19 @@ export default function DisputePage({
   const [issueType, setIssueType] = useState("TIMELINE");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toasts, setToasts] = useState<Array<{id: number; type: "success" | "error" | "info"; message: string}>>([]);
+  const showToast = (type: "success" | "error" | "info", message: string) => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, type, message }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
+  };
 
   const dealId = id;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (description.trim().length < 50) {
-      alert("Please describe the issue in at least 50 characters.");
+      showToast("error", "Please describe the issue in at least 50 characters.");
       return;
     }
 
@@ -39,20 +45,42 @@ export default function DisputePage({
 
       const data = await res.json();
       if (data.success) {
-        alert(data.message);
+        showToast("success", data.message);
         router.push(`/dashboard/deals/${dealId}`);
       } else {
-        alert(data.error || "Failed to raise dispute");
+        showToast("error", data.error || "Failed to raise dispute");
       }
     } catch (error) {
       console.error(error);
-      alert("Something went wrong");
+      showToast("error", "Something went wrong");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
+    <>
+    {toasts.length > 0 && (
+      <div style={{ position: "fixed", top: 24, right: 24, zIndex: 9999, display: "flex", flexDirection: "column", gap: "8px", maxWidth: "400px" }}>
+        {toasts.map(t => (
+          <div key={t.id} style={{
+            padding: "12px 20px",
+            borderRadius: "10px",
+            color: "#fff",
+            fontSize: "14px",
+            fontWeight: 500,
+            background: t.type === "success" ? "linear-gradient(135deg, #059669, #10b981)" : t.type === "error" ? "linear-gradient(135deg, #dc2626, #ef4444)" : "linear-gradient(135deg, #2563eb, #3b82f6)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+            backdropFilter: "blur(12px)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            animation: "slideInRight 0.3s ease-out",
+            cursor: "pointer",
+          }} onClick={() => setToasts(prev => prev.filter(x => x.id !== t.id))}>
+            {t.type === "success" ? "✓ " : t.type === "error" ? "✕ " : "ℹ "}{t.message}
+          </div>
+        ))}
+      </div>
+    )}
     <div
       style={{
         display: "flex",
@@ -140,5 +168,6 @@ export default function DisputePage({
         </form>
       </div>
     </div>
+    </>
   );
 }

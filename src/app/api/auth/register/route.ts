@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { AuthService } from "@/services/auth.service";
 import { logger } from "@/lib/logger";
 import { registerSchema } from "@/lib/validations";
 import redis from "@/lib/redis";
+import { apiWrapper } from "@/lib/api-wrapper";
 
-export async function POST(request: Request) {
+export const POST = apiWrapper(async function POST(request: NextRequest) {
   try {
     let body: unknown;
     try {
@@ -97,4 +98,4 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
-}
+});

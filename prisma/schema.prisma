@@ -23,6 +23,7 @@ enum UserStatus {
   ACTIVE
   SUSPENDED
   BANNED
+  FLAGGED
 }
 
 enum VerificationLevel {
@@ -53,6 +54,7 @@ model User {
   lockedUntil         DateTime?
   isTwoFactorEnabled  Boolean   @default(false)
   twoFactorSecret     String?
+  twoFactorRecoveryCodes String?
 
   // Relations
   influencerProfile       InfluencerProfile?
@@ -393,6 +395,7 @@ model Campaign {
   // Stats
   totalApplications   Int @default(0)
   selectedInfluencers Int @default(0)
+  maxInfluencers      Int?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -419,6 +422,7 @@ enum ApplicationStatus {
   SELECTED
   REJECTED
   WITHDRAWN
+  FLAGGED
 }
 
 model Application {
@@ -684,6 +688,7 @@ enum WithdrawalStatus {
   PROCESSING
   COMPLETED
   FAILED
+  PENDING_REVIEW
 }
 
 model Withdrawal {
@@ -700,6 +705,7 @@ model Withdrawal {
   razorpayPayoutId  String?
   processedAt       DateTime?
   failureReason     String?
+  adminNotes        String?
   isManualReview    Boolean          @default(false)
   riskScore         Int              @default(0)
   createdAt         DateTime         @default(now())

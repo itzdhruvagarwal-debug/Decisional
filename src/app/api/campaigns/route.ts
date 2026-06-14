@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/lib/auth";
@@ -16,6 +16,7 @@ const createCampaignSchema = z
 
     totalBudget: z.number().int().positive(),
     perInfluencerBudget: z.number().int().positive().optional(),
+    maxInfluencers: z.number().int().min(1).max(100).nullable().optional(),
 
     targetCategories: z.array(z.string().min(1)).min(1),
     targetCities: z.array(z.string().min(1)).optional().default([]),
@@ -103,6 +104,7 @@ export async function GET(request: Request) {
     const sortBy = searchParams.get("sortBy") || undefined;
     const sortOrder =
       searchParams.get("sortOrder") === "asc" ? "asc" : ("desc" as const);
+    const search = searchParams.get("search") || undefined;
     const ownerOnly = searchParams.get("scope") === "mine";
 
     const minBudgetRupees = searchParams.get("minBudget");
@@ -133,6 +135,7 @@ export async function GET(request: Request) {
       ...(minBudget !== undefined ? { minBudget } : {}),
       ...(maxBudget !== undefined ? { maxBudget } : {}),
       ...(sortBy ? { sortBy } : {}),
+      ...(search ? { search } : {}),
       ownerOnly,
     });
 

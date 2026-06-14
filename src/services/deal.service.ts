@@ -845,13 +845,16 @@ export class DealService {
       postingDeadline: deal.postingDeadline,
     });
 
-    if (!verificationResult.passed) {
+    // BLOCK: hard failure — influencer cannot proceed
+    if (verificationResult.action === "BLOCK") {
       throw new Error(
         `Post verification failed: ${formatFraudFlags(verificationResult.flags)}`,
       );
     }
 
-    const needsReview = verificationResult.action === "REVIEW";
+    // REVIEW: post passes but is flagged for admin inspection
+    const needsReview =
+      verificationResult.action === "REVIEW" || !verificationResult.passed;
 
     const resultStatus = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // LOCK THE DEAL ROW to prevent race conditions during verification

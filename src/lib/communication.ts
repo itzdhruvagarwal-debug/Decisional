@@ -49,18 +49,23 @@ function isValidEmail(email: string): boolean {
 
 /** Strip HTML tags to produce plain-text fallback */
 function htmlToPlainText(html: string): string {
-  return html
+  const decodeEntities = (value: string) =>
+    value
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+
+  const stripped = html
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/p>/gi, "\n\n")
     .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+
+  return decodeEntities(decodeEntities(stripped));
 }
 
 // ==================== EMAIL ====================
@@ -238,7 +243,22 @@ export async function sendSMS(
         },
         body: JSON.stringify({
           template_id: process.env.MSG91_TEMPLATE_ID || "",
-          recipients: [{ mobiles: phone.replace(/^\+/, ""), message }],
+          short_url: "0",
+          recipients: (() => {
+            // Extract the 6-digit OTP from the message body for MSG91 template variables
+            const otpMatch = message.match(/\b(\d{6})\b/);
+            const otp = otpMatch ? otpMatch[1] : undefined;
+            const recipient: Record<string, string> = {
+              mobiles: phone.replace(/^\+/, ""),
+              message,
+            };
+            if (otp) {
+              // MSG91 DLT templates use ##otp## / ##code## placeholders
+              recipient.otp = otp;
+              recipient.code = otp;
+            }
+            return [recipient];
+          })(),
           sender: senderId,
         }),
         signal: controller.signal,

@@ -139,17 +139,21 @@ export default function DealsPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedDeal, setSelectedDeal] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const DEALS_PER_PAGE = 50;
 
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
 
-    fetch("/api/deals", { cache: "no-store", signal: controller.signal })
+    fetch(`/api/deals?page=${currentPage}&limit=${DEALS_PER_PAGE}`, { cache: "no-store", signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
         if (!active) return;
         const rawDeals: unknown[] = Array.isArray(data?.deals) ? data.deals : [];
         setDeals(rawDeals.map(normalizeDeal).filter((deal) => deal.id));
+        if (data?.pagination?.totalPages) setTotalPages(data.pagination.totalPages);
         setLoading(false);
       })
       .catch((err) => {
@@ -165,7 +169,7 @@ export default function DealsPage() {
       active = false;
       controller.abort();
     };
-  }, []);
+  }, [currentPage]);
 
   const filteredDeals =
     statusFilter === "all"
@@ -602,6 +606,36 @@ export default function DealsPage() {
             </div>
           )}
         </>
+      )}
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "16px",
+          padding: "24px 0",
+        }}>
+          <button
+            className="btn btn-secondary"
+            disabled={currentPage <= 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            style={{ minWidth: "100px" }}
+          >
+            ← Previous
+          </button>
+          <span style={{ fontSize: "14px", color: "var(--color-text-secondary)" }}>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="btn btn-secondary"
+            disabled={currentPage >= totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+            style={{ minWidth: "100px" }}
+          >
+            Next →
+          </button>
+        </div>
       )}
     </DashboardShell>
   );

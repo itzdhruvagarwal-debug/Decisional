@@ -1,7 +1,7 @@
 export const homeStats = [
   { value: 3, suffix: "", label: "Role Workspaces" },
   { value: 7, suffix: "", label: "Protected Deal Stages" },
-  { value: 24, suffix: "/7", label: "Risk Monitoring" },
+  { value: 7, suffix: "", label: "Scheduled Risk Jobs" },
   { value: 100, suffix: "%", label: "PWA Ready" },
 ];
 
@@ -97,9 +97,9 @@ export const homeSteps = [
 
 export const homeTestimonials = [
   {
-    name: "Priya Sharma",
-    role: "Fashion Influencer",
-    followers: "120K",
+    name: "Creator workspace",
+    role: "Influencer flow",
+    followers: "Demo",
     avatar:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=128&auto=format&fit=crop",
     quote:
@@ -107,8 +107,8 @@ export const homeTestimonials = [
     rating: 5,
   },
   {
-    name: "Arjun Mehta",
-    role: "Tech Brand Manager",
+    name: "Brand workspace",
+    role: "Campaign flow",
     avatar:
       "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=128&auto=format&fit=crop",
     quote:
@@ -116,9 +116,9 @@ export const homeTestimonials = [
     rating: 5,
   },
   {
-    name: "Rahul Verma",
-    role: "Food Creator",
-    followers: "85K",
+    name: "Growth workspace",
+    role: "Rewards flow",
+    followers: "Demo",
     avatar:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=128&auto=format&fit=crop",
     quote:

@@ -269,28 +269,107 @@ export async function batchLookup(
     const results = new Map<string, IPFullInfo | null>();
     const uncached: string[] = [];
 
-    // Check cache for all IPs first
+    // Filter out private IPs first
+    const publicIps = ips.filter((ip) => !isPrivateIP(ip));
     for (const ip of ips) {
         if (isPrivateIP(ip)) {
             results.set(ip, null);
-            continue;
-        }
-        try {
-            const cached = await redis.get(`ipinfo:${ip}`);
-            if (cached) {
-                results.set(ip, { ...JSON.parse(cached), cached: true });
-            } else {
-                uncached.push(ip);
-            }
-        } catch {
-            uncached.push(ip);
         }
     }
 
-    // Fetch uncached IPs (sequentially to respect rate limits)
-    for (const ip of uncached) {
-        const info = await getIPInfo(ip);
-        results.set(ip, info);
+    if (publicIps.length > 0) {
+        let cachedValues: (string | null)[] = [];
+        try {
+            const keys = publicIps.map((ip) => `ipinfo:${ip}`);
+            cachedValues = await redis.mget(...keys);
+        } catch (err) {
+            logger.warn("[IPInfo] redis.mget failed, treating all public IPs as uncached", err);
+            cachedValues = new Array(publicIps.length).fill(null);
+        }
+
+        publicIps.forEach((ip, idx) => {
+            const cached = cachedValues[idx];
+            if (cached) {
+                try {
+                    const parsed = JSON.parse(cached) as IPFullInfo;
+                    results.set(ip, { ...parsed, cached: true });
+                } catch {
+                    uncached.push(ip);
+                }
+            } else {
+                uncached.push(ip);
+            }
+        });
+    }
+
+    // Fetch uncached IPs using IPInfo Batch API
+    if (uncached.length > 0) {
+        const token = getToken();
+        if (token) {
+            try {
+                // Request both standard geo and privacy data for each IP
+                const payload: string[] = [];
+                for (const ip of uncached) {
+                    payload.push(ip);
+                    payload.push(`${ip}/privacy`);
+                }
+
+                const response = await fetch(`${IPINFO_BASE_URL}/batch?token=${token}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+                });
+
+                if (response.ok) {
+                    const batchResult = (await response.json()) as Record<string, any>;
+
+                    for (const ip of uncached) {
+                        const geo = batchResult[ip] as IPGeoData | undefined;
+                        const privacy = batchResult[`${ip}/privacy`] as IPPrivacyData | undefined;
+
+                        if (geo) {
+                            const fullInfo: IPFullInfo = {
+                                geo,
+                                privacy: privacy || null,
+                                cached: false,
+                            };
+                            results.set(ip, fullInfo);
+
+                            // Cache in Redis asynchronously
+                            const cacheKey = `ipinfo:${ip}`;
+                            redis.setex(cacheKey, CACHE_TTL_SECONDS, JSON.stringify(fullInfo)).catch((err) => {
+                                logger.warn("[IPInfo] Failed to cache batch result", { error: err, ip });
+                            });
+                        } else {
+                            results.set(ip, null);
+                        }
+                    }
+                } else {
+                    logger.error("[IPInfo] Batch lookup API failed, falling back to sequential", {
+                        status: response.status,
+                    });
+                    for (const ip of uncached) {
+                        const info = await getIPInfo(ip);
+                        results.set(ip, info);
+                    }
+                }
+            } catch (err) {
+                logger.error("[IPInfo] Batch lookup API request failed, falling back to sequential", err);
+                for (const ip of uncached) {
+                    const info = await getIPInfo(ip);
+                    results.set(ip, info);
+                }
+            }
+        } else {
+            logger.error("CRITICAL: IPINFO_TOKEN not configured for batch lookup.");
+            for (const ip of uncached) {
+                results.set(ip, null);
+            }
+        }
     }
 
     return results;

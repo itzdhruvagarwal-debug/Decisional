@@ -236,7 +236,10 @@ export class AdminAnalyticsService {
     const now = new Date();
     const thirtyDaysAgo = subDays(now, 30);
     const sevenDaysAgo = subDays(now, 7);
-    const today = startOfDay(now);
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    const todayIST = new Date(now.getTime() + istOffset);
+    todayIST.setUTCHours(0, 0, 0, 0);
+    const today = new Date(todayIST.getTime() - istOffset);
 
     // ===== 1. REAL-TIME COUNTS =====
     const [totalUsers, totalInfluencers, totalBrands, activeUsers7d] =

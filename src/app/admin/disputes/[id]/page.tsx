@@ -16,8 +16,16 @@ export default async function AdminDisputeDetailPage({
       deal: {
         include: {
           campaign: true,
-          influencer: true,
-          brand: true,
+          influencer: {
+            include: {
+              user: { select: { id: true, email: true } },
+            },
+          },
+          brand: {
+            include: {
+              user: { select: { id: true, email: true } },
+            },
+          },
         },
       },
       raisedBy: true,
@@ -26,6 +34,52 @@ export default async function AdminDisputeDetailPage({
   });
 
   if (!dispute) notFound();
+
+  // Fetch deal histories for both parties
+  const [influencerDeals, brandDeals] = await Promise.all([
+    prisma.deal.findMany({
+      where: {
+        influencerId: dispute.deal.influencerId,
+        id: { not: dispute.dealId },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: {
+        id: true,
+        status: true,
+        amount: true,
+        createdAt: true,
+        campaign: { select: { title: true } },
+      },
+    }),
+    prisma.deal.findMany({
+      where: {
+        brandId: dispute.deal.brandId,
+        id: { not: dispute.dealId },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: {
+        id: true,
+        status: true,
+        amount: true,
+        createdAt: true,
+        campaign: { select: { title: true } },
+      },
+    }),
+  ]);
+
+  function StatusBadge({ status }: { status: string }) {
+    const color =
+      status === "COMPLETED" || status === "VERIFIED"
+        ? "badge-success"
+        : status === "DISPUTED"
+          ? "badge-danger"
+          : status === "CANCELLED"
+            ? "badge-warning"
+            : "badge-info";
+    return <span className={`badge ${color}`}>{status}</span>;
+  }
 
   return (
     <div className="admin-page">
@@ -52,34 +106,18 @@ export default async function AdminDisputeDetailPage({
               marginTop: "16px",
             }}
           >
-            <dt
-              style={{ fontWeight: 600, color: "var(--color-text-secondary)" }}
-            >
-              Status
-            </dt>
-            <dd
-              className={`badge badge-${dispute.status === "OPEN" ? "warning" : "success"}`}
-            >
+            <dt style={{ fontWeight: 600, color: "var(--color-text-secondary)" }}>Status</dt>
+            <dd className={`badge badge-${dispute.status === "OPEN" ? "warning" : "success"}`}>
               {dispute.status}
             </dd>
-            <dt
-              style={{ fontWeight: 600, color: "var(--color-text-secondary)" }}
-            >
-              Reason
-            </dt>
+            <dt style={{ fontWeight: 600, color: "var(--color-text-secondary)" }}>Reason</dt>
             <dd>{dispute.type}</dd>
-            <dt
-              style={{ fontWeight: 600, color: "var(--color-text-secondary)" }}
-            >
-              Description
-            </dt>
+            <dt style={{ fontWeight: 600, color: "var(--color-text-secondary)" }}>Description</dt>
             <dd>{dispute.description}</dd>
-            <dt
-              style={{ fontWeight: 600, color: "var(--color-text-secondary)" }}
-            >
-              Amount
-            </dt>
+            <dt style={{ fontWeight: 600, color: "var(--color-text-secondary)" }}>Amount</dt>
             <dd>₹{(dispute.deal.amount / 100).toFixed(2)}</dd>
+            <dt style={{ fontWeight: 600, color: "var(--color-text-secondary)" }}>Campaign</dt>
+            <dd>{dispute.deal.campaign?.title || "N/A"}</dd>
           </dl>
         </div>
 
@@ -122,6 +160,85 @@ export default async function AdminDisputeDetailPage({
                 </li>
               ))}
             </ul>
+          )}
+        </div>
+      </div>
+
+      {/* Party Deal Timelines */}
+      <div className="grid-2" style={{ gap: "32px", marginTop: "32px" }}>
+        {/* Influencer History */}
+        <div className="card">
+          <h2 style={{ marginBottom: "16px" }}>
+            📊 Influencer Deal History
+            <span style={{ fontSize: "13px", fontWeight: 400, color: "var(--color-text-secondary)", marginLeft: "8px" }}>
+              (last 10 deals, excl. this dispute)
+            </span>
+          </h2>
+          {influencerDeals.length === 0 ? (
+            <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>No previous deals found.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {influencerDeals.map((d: any) => (
+                <div
+                  key={d.id}
+                  style={{
+                    padding: "10px 12px",
+                    background: "var(--color-bg-tertiary)",
+                    borderRadius: "var(--radius-md)",
+                    border: "1px solid var(--color-border)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: 600 }}>{d.campaign?.title || "Campaign"}</div>
+                    <div style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
+                      {new Date(d.createdAt).toLocaleDateString()} • ₹{(d.amount / 100).toFixed(0)}
+                    </div>
+                  </div>
+                  <StatusBadge status={d.status} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Brand History */}
+        <div className="card">
+          <h2 style={{ marginBottom: "16px" }}>
+            🏢 Brand Deal History
+            <span style={{ fontSize: "13px", fontWeight: 400, color: "var(--color-text-secondary)", marginLeft: "8px" }}>
+              (last 10 deals, excl. this dispute)
+            </span>
+          </h2>
+          {brandDeals.length === 0 ? (
+            <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>No previous deals found.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {brandDeals.map((d: any) => (
+                <div
+                  key={d.id}
+                  style={{
+                    padding: "10px 12px",
+                    background: "var(--color-bg-tertiary)",
+                    borderRadius: "var(--radius-md)",
+                    border: "1px solid var(--color-border)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: 600 }}>{d.campaign?.title || "Campaign"}</div>
+                    <div style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
+                      {new Date(d.createdAt).toLocaleDateString()} • ₹{(d.amount / 100).toFixed(0)}
+                    </div>
+                  </div>
+                  <StatusBadge status={d.status} />
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

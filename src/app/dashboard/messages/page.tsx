@@ -100,6 +100,12 @@ export default function MessagesPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingRefreshRef = useRef<number>(0);
   const typingStopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [toasts, setToasts] = useState<Array<{id: number; type: "success" | "error" | "info"; message: string}>>([]);
+  const showToast = (type: "success" | "error" | "info", message: string) => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, type, message }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
+  };
 
   // Fetch conversations list
   useEffect(() => {
@@ -179,7 +185,7 @@ export default function MessagesPage() {
     fetchMessages(true);
     const interval = window.setInterval(() => {
       fetchMessages(false);
-    }, 3500);
+    }, 10000);
 
     return () => window.clearInterval(interval);
   }, [fetchMessages, selectedConversation, session]);
@@ -246,9 +252,7 @@ export default function MessagesPage() {
     // Front-end filter check
     const filterResult = checkMessageForContacts(trimmedMessage);
     if (filterResult.hasContactInfo) {
-      alert(
-        "Warning: Contact details detected. You cannot share emails, phone numbers, links, or social handles before a contract is finalized.",
-      );
+      showToast("error", "Warning: Contact details detected. You cannot share emails, phone numbers, links, or social handles before a contract is finalized.");
       return; // Block message sending completely from frontend.
     }
 
@@ -315,7 +319,7 @@ export default function MessagesPage() {
       console.error("Failed to send message", err);
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
       setNewMessage(messageCopy);
-      alert("Message send failed. Please try again.");
+      showToast("error", "Message send failed. Please try again.");
     }
   };
 
@@ -333,6 +337,27 @@ export default function MessagesPage() {
 
   return (
     <DashboardShell user={session.user}>
+      {toasts.length > 0 && (
+        <div style={{ position: "fixed", top: 24, right: 24, zIndex: 9999, display: "flex", flexDirection: "column", gap: "8px", maxWidth: "400px" }}>
+          {toasts.map(t => (
+            <div key={t.id} style={{
+              padding: "12px 20px",
+              borderRadius: "10px",
+              color: "#fff",
+              fontSize: "14px",
+              fontWeight: 500,
+              background: t.type === "success" ? "linear-gradient(135deg, #059669, #10b981)" : t.type === "error" ? "linear-gradient(135deg, #dc2626, #ef4444)" : "linear-gradient(135deg, #2563eb, #3b82f6)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              animation: "slideInRight 0.3s ease-out",
+              cursor: "pointer",
+            }} onClick={() => setToasts(prev => prev.filter(x => x.id !== t.id))}>
+              {t.type === "success" ? "✓ " : t.type === "error" ? "✕ " : "ℹ "}{t.message}
+            </div>
+          ))}
+        </div>
+      )}
       <div
         className="card"
         style={{
@@ -704,7 +729,7 @@ export default function MessagesPage() {
                     className="btn btn-ghost"
                     title="Share File"
                     onClick={() =>
-                      alert("File sharing will be available in the next phase.")
+                      showToast("info", "File sharing will be available in the next phase.")
                     }
                     style={{ padding: "8px", fontSize: "18px" }}
                   >
@@ -714,9 +739,7 @@ export default function MessagesPage() {
                     className="btn btn-ghost"
                     title="Create Offer"
                     onClick={() =>
-                      alert(
-                        "Offer creation will be available in the next phase.",
-                      )
+                      showToast("info", "Offer creation will be available in the next phase.")
                     }
                     style={{ padding: "8px", fontSize: "18px" }}
                   >

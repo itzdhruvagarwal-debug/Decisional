@@ -4,6 +4,17 @@ import prisma from "@/lib/db";
 import { verify } from "otplib";
 import { logger } from "@/lib/logger";
 import { decrypt } from "@/lib/encryption";
+import { randomBytes } from "crypto";
+
+/** Generate 8 cryptographically random 10-char alphanumeric recovery codes. */
+function generateRecoveryCodes(count = 8): string[] {
+  const codes: string[] = [];
+  for (let i = 0; i < count; i++) {
+    // 5 bytes → 10 hex chars, uppercase
+    codes.push(randomBytes(5).toString("hex").toUpperCase());
+  }
+  return codes;
+}
 
 export async function POST(req: Request) {
   try {
@@ -59,15 +70,24 @@ export async function POST(req: Request) {
       );
     }
 
-    // Enable 2FA permanently
+    // Generate recovery codes
+    const recoveryCodes = generateRecoveryCodes(8);
+
+    // Enable 2FA and persist recovery codes (stored as JSON array)
     await prisma.user.update({
       where: { id: user.id },
-      data: { isTwoFactorEnabled: true },
+      data: {
+        isTwoFactorEnabled: true,
+        twoFactorRecoveryCodes: JSON.stringify(recoveryCodes),
+      },
     });
+
+    logger.info("2FA enabled with recovery codes generated", { userId: user.id });
 
     return NextResponse.json({
       success: true,
       message: "2FA enabled successfully",
+      recoveryCodes, // Return once — user must copy these now
     });
   } catch (error) {
     logger.error("2FA verification error", error);

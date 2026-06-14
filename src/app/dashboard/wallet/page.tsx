@@ -1,10 +1,11 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import BankAccountManager from "@/components/dashboard/wallet/BankAccountManager";
 import TransactionHistory from "@/components/dashboard/wallet/TransactionHistory";
+import { useTokenRefreshGuard } from "@/hooks/useTokenRefreshGuard";
 
 interface WalletData {
   balance: number;
@@ -65,6 +66,7 @@ const loadRazorpay = () => {
 
 export default function WalletPage() {
   const { data: session, status } = useSession();
+  const { requireFreshSession } = useTokenRefreshGuard();
   const [activeTab, setActiveTab] = useState("overview");
 
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -77,6 +79,13 @@ export default function WalletPage() {
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [selectedAccount, setSelectedAccount] = useState<SelectedBankAccount | null>(null);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+
+  const [toasts, setToasts] = useState<Array<{id: number; type: "success" | "error" | "info"; message: string}>>([]);
+  const showToast = (type: "success" | "error" | "info", message: string) => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, type, message }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
+  };
 
   const fetchWalletData = useCallback(async () => {
     try {
@@ -114,20 +123,23 @@ export default function WalletPage() {
 
   const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
+    const fresh = await requireFreshSession();
+    if (!fresh) return;
+
     if (!selectedAccount) {
-      alert("Please select a bank account");
+      showToast("error", "Please select a bank account");
       return;
     }
 
     const withdrawRupees = Number(withdrawAmount);
     if (!Number.isFinite(withdrawRupees) || withdrawRupees < 500) {
-      alert("Minimum withdrawal amount is INR 500.");
+      showToast("error", "Minimum withdrawal amount is INR 500.");
       return;
     }
 
     const withdrawPaise = Math.round(withdrawRupees * 100);
     if (!walletData || withdrawPaise > walletData.balance) {
-      alert("Withdrawal amount exceeds available balance.");
+      showToast("error", "Withdrawal amount exceeds available balance.");
       return;
     }
 
@@ -150,13 +162,13 @@ export default function WalletPage() {
         throw new Error(data?.message || data?.error || "Withdrawal failed");
       }
 
-      alert(data?.message || "Withdrawal initiated successfully.");
+      showToast("success", data?.message || "Withdrawal initiated successfully.");
       setShowWithdrawModal(false);
       setWithdrawAmount("");
       setSelectedAccount(null);
       fetchWalletData();
     } catch (error: any) {
-      alert(error?.message || "Withdrawal failed");
+      showToast("error", error?.message || "Withdrawal failed");
     } finally {
       setIsWithdrawing(false);
     }
@@ -170,14 +182,14 @@ export default function WalletPage() {
 
     if (!amount) return;
     if (!Number.isFinite(Number(amount)) || Number(amount) < 100) {
-      alert("Minimum add-funds amount is INR 100.");
+      showToast("error", "Minimum add-funds amount is INR 100.");
       return;
     }
 
     try {
       const sdkLoaded = await loadRazorpay();
       if (!sdkLoaded) {
-        alert("Razorpay SDK failed to load");
+        showToast("error", "Razorpay SDK failed to load");
         return;
       }
 
@@ -212,14 +224,14 @@ export default function WalletPage() {
             });
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
-              alert("Funds added successfully.");
+              showToast("success", "Funds added successfully.");
               setShowAddFundsModal(false);
               fetchWalletData();
             } else {
-              alert("Payment verification failed. Please contact support.");
+              showToast("error", "Payment verification failed. Please contact support.");
             }
           } catch (verifyError: any) {
-            alert(verifyError?.message || "Verification error");
+            showToast("error", verifyError?.message || "Verification error");
           }
         },
         theme: { color: "#6366f1" },
@@ -229,7 +241,7 @@ export default function WalletPage() {
       const paymentObject = new RazorpayConstructor(options);
       paymentObject.open();
     } catch (error: any) {
-      alert(error?.message || "Payment failed");
+      showToast("error", error?.message || "Payment failed");
     }
   };
 
@@ -247,6 +259,27 @@ export default function WalletPage() {
 
   return (
     <DashboardShell user={session.user}>
+      {toasts.length > 0 && (
+        <div style={{ position: "fixed", top: 24, right: 24, zIndex: 9999, display: "flex", flexDirection: "column", gap: "8px", maxWidth: "400px" }}>
+          {toasts.map(t => (
+            <div key={t.id} style={{
+              padding: "12px 20px",
+              borderRadius: "10px",
+              color: "#fff",
+              fontSize: "14px",
+              fontWeight: 500,
+              background: t.type === "success" ? "linear-gradient(135deg, #059669, #10b981)" : t.type === "error" ? "linear-gradient(135deg, #dc2626, #ef4444)" : "linear-gradient(135deg, #2563eb, #3b82f6)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              animation: "slideInRight 0.3s ease-out",
+              cursor: "pointer",
+            }} onClick={() => setToasts(prev => prev.filter(x => x.id !== t.id))}>
+              {t.type === "success" ? "✓ " : t.type === "error" ? "✕ " : "ℹ "}{t.message}
+            </div>
+          ))}
+        </div>
+      )}
       <div className="animate-fade-in">
         <div
           style={{

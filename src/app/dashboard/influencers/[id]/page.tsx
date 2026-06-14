@@ -316,7 +316,9 @@ export default function InfluencerProfilePage() {
                 YouTube Subs
               </div>
               <div style={{ fontSize: "20px", fontWeight: 700 }}>
-                {profile.youtubeSubscribers
+                {profile.youtubeSubscribers === -1
+                  ? "Hidden"
+                  : profile.youtubeSubscribers
                   ? profile.youtubeSubscribers.toLocaleString("en-IN")
                   : "N/A"}
               </div>
@@ -531,7 +533,7 @@ export default function InfluencerProfilePage() {
               style={{ display: "flex", flexDirection: "column", gap: "12px" }}
             >
               <Link
-                href="/dashboard/campaigns/create"
+                href={`/dashboard/campaigns/create?invite=${profile?.id || id}`}
                 className="button-primary"
                 style={{
                   textAlign: "center",

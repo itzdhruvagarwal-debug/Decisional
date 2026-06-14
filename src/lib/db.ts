@@ -11,6 +11,7 @@ const ENCRYPTED_FIELDS = [
   "cinNumber",
   "bankAccountNumber",
   "upiId",
+  "twoFactorSecret",
 ];
 
 function isLikelyEncrypted(val: string): boolean {

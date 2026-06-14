@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { AuthService } from "@/services/auth.service";
 import { logger } from "@/lib/logger";
@@ -6,6 +6,7 @@ import prisma from "@/lib/db";
 import redis from "@/lib/redis";
 import { sendOTP, verifyOTP } from "@/lib/sms";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { apiWrapper } from "@/lib/api-wrapper";
 
 const sendRegistrationOtpSchema = z.object({
   phone: z
@@ -30,7 +31,7 @@ const verifyLegacyOtpSchema = z.object({
   type: z.enum(["EMAIL_VERIFICATION", "PHONE_VERIFICATION", "LOGIN_OTP"]),
 });
 
-export async function PUT(request: NextRequest) {
+export const PUT = apiWrapper(async function PUT(request: NextRequest) {
   try {
     let body: unknown;
     try {
@@ -121,9 +122,9 @@ export async function PUT(request: NextRequest) {
       { status: 500 },
     );
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = apiWrapper(async function POST(request: NextRequest) {
   try {
     let body: unknown;
     try {
@@ -232,4 +233,4 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
-}
+});

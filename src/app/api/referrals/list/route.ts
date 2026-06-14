@@ -19,8 +19,8 @@ export async function GET(_req: NextRequest) {
         createdAt: true,
         status: true,
         verificationLevel: true,
-        influencerProfile: { select: { displayName: true } },
-        brandProfile: { select: { companyName: true } },
+        influencerProfile: { select: { displayName: true, completedDeals: true } },
+        brandProfile: { select: { companyName: true, totalCampaigns: true, totalSpent: true } },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -53,19 +53,28 @@ export async function GET(_req: NextRequest) {
     const unattributedShare =
       referrals.length > 0 ? Math.floor(unattributedEarnings / referrals.length) : 0;
 
-    const formattedReferrals = referrals.map((ref: any) => ({
-      id: ref.id,
-      name:
-        ref.influencerProfile?.displayName ||
-        ref.brandProfile?.companyName ||
-        ref.email.split("@")[0],
-      email: ref.email.replace(/(.{2}).*(@.*)/, "$1***$2"), // Mask email for privacy
-      joinedAt: ref.createdAt,
-      status: ref.status,
-      verified: ref.verificationLevel !== "NONE",
-      type: ref.userType,
-      earnings: (exactEarningsByReferral.get(ref.id) || 0) + unattributedShare,
-    }));
+    const formattedReferrals = referrals.map((ref: any) => {
+      const isActive =
+        ref.influencerProfile
+          ? ref.influencerProfile.completedDeals > 0
+          : ref.brandProfile
+          ? (ref.brandProfile.totalSpent > 0 || ref.brandProfile.totalCampaigns > 0)
+          : false;
+
+      return {
+        id: ref.id,
+        name:
+          ref.influencerProfile?.displayName ||
+          ref.brandProfile?.companyName ||
+          ref.email.split("@")[0],
+        email: ref.email.replace(/(.{2}).*(@.*)/, "$1***$2"), // Mask email for privacy
+        joinedAt: ref.createdAt,
+        status: isActive ? "ACTIVE" : "PENDING",
+        verified: ref.verificationLevel !== "NONE",
+        type: ref.userType,
+        earnings: (exactEarningsByReferral.get(ref.id) || 0) + unattributedShare,
+      };
+    });
 
     return NextResponse.json({ referrals: formattedReferrals });
   } catch (error) {

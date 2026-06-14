@@ -141,6 +141,10 @@ export class UserService {
     category?: string;
     minFollowers?: number;
     city?: string;
+    minEngagementRate?: number; // In basis points
+    minRate?: number; // In paise
+    maxRate?: number; // In paise
+    platform?: string;
     page: number;
     limit: number;
     searchTerm?: string;
@@ -159,6 +163,37 @@ export class UserService {
 
       if (params.minFollowers) {
         where.instagramFollowers = { gte: params.minFollowers };
+      }
+
+      if (params.minEngagementRate !== undefined) {
+        if (params.platform === "instagram") {
+          where.instagramEngagementRate = { gte: params.minEngagementRate };
+        } else if (params.platform === "youtube") {
+          where.youtubeEngagementRate = { gte: params.minEngagementRate };
+        } else {
+          where.AND = where.AND || [];
+          where.AND.push({
+            OR: [
+              { instagramEngagementRate: { gte: params.minEngagementRate } },
+              { youtubeEngagementRate: { gte: params.minEngagementRate } },
+            ],
+          });
+        }
+      }
+
+      if (params.minRate !== undefined || params.maxRate !== undefined) {
+        where.minRate = {
+          ...(params.minRate !== undefined ? { gte: params.minRate } : {}),
+          ...(params.maxRate !== undefined ? { lte: params.maxRate } : {}),
+        };
+      }
+
+      if (params.platform) {
+        if (params.platform === "instagram") {
+          where.instagramHandle = { not: null, notIn: [""] };
+        } else if (params.platform === "youtube") {
+          where.youtubeHandle = { not: null, notIn: [""] };
+        }
       }
 
       if (params.searchTerm) {

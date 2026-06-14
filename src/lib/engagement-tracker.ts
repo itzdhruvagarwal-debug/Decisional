@@ -257,9 +257,12 @@ function calculateROI(
   const costPerClick =
     snapshot.clicks > 0 ? Math.round(dealAmountPaise / snapshot.clicks) : 0;
 
-  // Estimated value (industry benchmark: ₹0.50-₹2 per genuine engagement)
-  // Using ₹1 per engagement as median
-  const estimatedValue = totalEngagements * 100; // 100 paise = ₹1
+  // Estimated value (EMV) using weighted coefficients: views = ₹0.20 (20 paise), engagement = ₹1.00 (100 paise), clicks = ₹5.00 (500 paise)
+  const estimatedValue = Math.round(
+    snapshot.views * 20 +
+    totalEngagements * 100 +
+    snapshot.clicks * 500
+  );
 
   // ROI percentage: ((value - cost) / cost) * 100
   const roiPercentage =

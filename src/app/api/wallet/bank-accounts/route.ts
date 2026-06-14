@@ -167,3 +167,47 @@ export async function DELETE(req: NextRequest) {
     );
   }
 }
+
+export async function PUT(req: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "ID is required" }, { status: 400 });
+    }
+
+    // Verify ownership
+    const account = await prisma.bankAccount.findUnique({ where: { id } });
+    if (!account || account.userId !== session.user.id) {
+      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+    }
+
+    // Clear all defaults for this user, then set the chosen one
+    await prisma.$transaction([
+      prisma.bankAccount.updateMany({
+        where: { userId: session.user.id },
+        data: { isDefault: false },
+      }),
+      prisma.bankAccount.update({
+        where: { id },
+        data: { isDefault: true },
+      }),
+    ]);
+
+    logger.info("Bank account set as default", { userId: session.user.id, accountId: id });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    logger.error("Failed to set default bank account", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
+  }
+}
+

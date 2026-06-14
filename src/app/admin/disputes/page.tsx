@@ -1,17 +1,36 @@
-﻿import prisma from "@/lib/db";
+import prisma from "@/lib/db";
 import Link from "next/link";
 import { logger } from "@/lib/logger";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { requireActiveAdmin } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminDisputeListPage() {
+export default async function AdminDisputeListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const session = await auth();
+  try {
+    await requireActiveAdmin(session?.user);
+  } catch {
+    redirect("/dashboard");
+  }
+
+  const params = await searchParams;
+  const showHistory = params.history === "true";
+
   let activeDisputes: any[] = [];
   let loadError = false;
 
   try {
     activeDisputes = await prisma.dispute.findMany({
       where: {
-        status: { in: ["OPEN", "TIER2_MEDIATION"] },
+        status: showHistory
+          ? { in: ["RESOLVED", "CLOSED", "TIER1_AUTO"] }
+          : { in: ["OPEN", "TIER2_MEDIATION", "TIER3_ARBITRATION"] },
       },
       include: {
         deal: {
@@ -43,6 +62,24 @@ export default async function AdminDisputeListPage() {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: "8px", marginBottom: "24px" }}>
+        <Link
+          href="/admin/disputes"
+          className={`btn ${!showHistory ? "btn-primary" : "btn-secondary"}`}
+          style={{ padding: "8px 16px", fontSize: "14px" }}
+        >
+          Active Disputes
+        </Link>
+        <Link
+          href="/admin/disputes?history=true"
+          className={`btn ${showHistory ? "btn-primary" : "btn-secondary"}`}
+          style={{ padding: "8px 16px", fontSize: "14px" }}
+        >
+          Dispute History
+        </Link>
+      </div>
+
       {loadError ? (
         <div
           className="card"
@@ -62,7 +99,7 @@ export default async function AdminDisputeListPage() {
             color: "var(--color-text-secondary)",
           }}
         >
-          No active disputes.
+          {showHistory ? "No historical disputes found." : "No active disputes."}
         </div>
       ) : (
         <div style={{ display: "grid", gap: "16px" }}>
@@ -110,8 +147,19 @@ export default async function AdminDisputeListPage() {
                     style={{
                       padding: "2px 6px",
                       borderRadius: "4px",
-                      background: "rgba(239, 68, 68, 0.1)",
-                      color: "#ef4444",
+                      background: showHistory ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)",
+                      color: showHistory ? "#10b981" : "#ef4444",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {dispute.status}
+                  </span>
+                  <span
+                    style={{
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                      background: "rgba(255, 255, 255, 0.05)",
+                      color: "var(--color-text-secondary)",
                     }}
                   >
                     {dispute.type}
@@ -128,7 +176,7 @@ export default async function AdminDisputeListPage() {
                 className="btn btn-primary"
                 style={{ padding: "8px 16px", fontSize: "14px" }}
               >
-                Resolve
+                {showHistory ? "View Details" : "Resolve"}
               </Link>
             </div>
           ))}

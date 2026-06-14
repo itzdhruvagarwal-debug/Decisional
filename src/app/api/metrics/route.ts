@@ -16,17 +16,15 @@ export async function GET(request: Request) {
       return new NextResponse("Not Found", { status: 404 });
     }
 
-    if (EXPECTED_TOKEN) {
-      const authHeader = request.headers.get("Authorization");
-      if (authHeader !== `Bearer ${EXPECTED_TOKEN}`) {
-        logger.warn(
-          "[Metrics] Unauthorized attempt to access metrics endpoint",
-          {
-            ip: request.headers.get("x-forwarded-for"),
-          },
-        );
-        return new NextResponse("Unauthorized", { status: 401 });
-      }
+    const authHeader = request.headers.get("Authorization");
+    if (authHeader !== `Bearer ${EXPECTED_TOKEN}`) {
+      logger.warn(
+        "[Metrics] Unauthorized attempt to access metrics endpoint",
+        {
+          ip: request.headers.get("x-forwarded-for"),
+        },
+      );
+      return new NextResponse("Unauthorized", { status: 401 });
     }
 
     const metrics = await getMetrics();

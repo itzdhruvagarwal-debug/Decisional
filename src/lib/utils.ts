@@ -2,7 +2,7 @@
  * Utility Functions
  */
 
-import { randomInt, createHash } from "crypto";
+import { randomBytes, randomInt, createHash } from "crypto";
 
 // Read fee percentages at call-time, not import-time (supports runtime env changes in serverless)
 function getPlatformFeePercentage(): number {
@@ -194,15 +194,16 @@ export function generateOTP(): string {
 
 export function generateReferralCode(prefix: string = ""): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  // Use timestamp base36 suffix + 6 random chars for near-zero collision probability
-  const timePart = Date.now().toString(36).slice(-3).toUpperCase();
-  // Add random salt to reduce collision risk under concurrent load
-  const salt = randomInt(0, 1000).toString(36).toUpperCase();
-  let code = prefix.toUpperCase() + timePart + salt;
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(randomInt(0, chars.length));
+  const cleanPrefix = prefix
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, 2);
+  const random = randomBytes(8);
+  let suffix = "";
+  for (const byte of random) {
+    suffix += chars.charAt(byte % chars.length);
   }
-  return code;
+  return `${cleanPrefix}${suffix}`.slice(0, 10);
 }
 
 // ==================== HASH UTILITIES ====================

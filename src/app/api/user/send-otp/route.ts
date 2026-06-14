@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { normalizeIndianPhone, sendOTP } from "@/lib/sms";
 import { sendVerificationEmail } from "@/lib/email";
@@ -7,6 +7,8 @@ import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
+import { apiWrapper } from "@/lib/api-wrapper";
+import { redis } from "@/lib/redis";
 
 // Strict input validation schema
 const sendOtpSchema = z.discriminatedUnion("type", [
@@ -22,7 +24,7 @@ const sendOtpSchema = z.discriminatedUnion("type", [
     }),
 ]);
 
-export async function POST(req: Request) {
+export const POST = apiWrapper(async function POST(req: NextRequest) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -117,19 +119,11 @@ export async function POST(req: Request) {
             // 2. Send Email OTP
             const otp = generateOTP();
 
-            // Store OTP hash in database (NEVER store plaintext OTPs)
-            // We use resetPasswordToken field for OTP storage as a temp measure
-            // but store a hash, not plaintext
+            // Store OTP hash in Redis (NEVER store plaintext OTPs)
             const { createHash } = await import("crypto");
             const otpHash = createHash("sha256").update(otp).digest("hex");
 
-            await prisma.user.update({
-                where: { id: session.user.id },
-                data: {
-                    resetPasswordToken: otpHash, // Store SHA-256 hash, not plaintext
-                    resetPasswordExpiry: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
-                },
-            });
+            await redis.setex(`email-contact-otp:${session.user.id}`, 600, otpHash);
 
             await sendVerificationEmail(contact, otp);
             return NextResponse.json({
@@ -148,4 +142,4 @@ export async function POST(req: Request) {
             { status: 500 },
         );
     }
-}
+});

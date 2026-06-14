@@ -1,6 +1,7 @@
 import prisma from "./db";
 import { Prisma } from "@prisma/client";
 import { logger } from "./logger";
+import { redis } from "./redis";
 import { isEligibleForReferralEarnings } from "./enterprise-trust-guard";
 import { addUserXp, checkAndAwardBadges } from "./gamification-engine";
 
@@ -129,7 +130,14 @@ export function getNextTier(currentTier: ReferralTier): ReferralTier | null {
 
 // ==================== REFERRAL STATS ====================
 
-export async function getReferralStats(userId: string) {
+export async function getReferralStats(
+  userId: string,
+  options?: { includeUsers?: boolean; limit?: number; offset?: number },
+) {
+  const includeUsers = options?.includeUsers ?? true;
+  const limit = options?.limit ?? 50;
+  const offset = options?.offset ?? 0;
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
@@ -177,25 +185,59 @@ export async function getReferralStats(userId: string) {
   });
 
   // Lifetime referral tracking — get all referred users with their stats
-  const referredUsers = await prisma.user.findMany({
-    where: { referredBy: userId },
-    select: {
-      id: true,
-      createdAt: true,
-      influencerProfile: {
-        select: {
-          displayName: true,
-          completedDeals: true,
-          totalEarnings: true,
+  let referredUsers: any[] = [];
+  if (includeUsers) {
+    const rawReferredUsers = await prisma.user.findMany({
+      where: { referredBy: userId },
+      select: {
+        id: true,
+        email: true,
+        status: true,
+        userType: true,
+        createdAt: true,
+        influencerProfile: {
+          select: {
+            displayName: true,
+            completedDeals: true,
+            totalEarnings: true,
+          },
+        },
+        brandProfile: {
+          select: { companyName: true, totalCampaigns: true, totalSpent: true },
         },
       },
-      brandProfile: {
-        select: { companyName: true, totalCampaigns: true, totalSpent: true },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
+      orderBy: { createdAt: "desc" },
+      skip: offset,
+      take: limit,
+    });
+
+    referredUsers = rawReferredUsers.map((ru: any) => {
+      const isActive =
+        ru.influencerProfile
+          ? ru.influencerProfile.completedDeals > 0
+          : ru.brandProfile
+          ? (ru.brandProfile.totalSpent > 0 || ru.brandProfile.totalCampaigns > 0)
+          : false;
+
+      return {
+        id: ru.id,
+        name:
+          ru.influencerProfile?.displayName ||
+          ru.brandProfile?.companyName ||
+          ru.email.split("@")[0],
+        email: ru.email.replace(/(.{2}).*(@.*)/, "$1***$2"), // Mask email for privacy
+        joinedAt: ru.createdAt,
+        status: isActive ? "ACTIVE" : "PENDING",
+        type: ru.userType,
+        deals:
+          ru.influencerProfile?.completedDeals ||
+          ru.brandProfile?.totalCampaigns ||
+          0,
+        earnings:
+          ru.influencerProfile?.totalEarnings || ru.brandProfile?.totalSpent || 0,
+      };
+    });
+  }
 
   // Generate shareable link
   const shareableLink = `${process.env.NEXT_PUBLIC_APP_URL || "https://collabx.in"}/register?ref=${user.referralCode}`;
@@ -218,20 +260,7 @@ export async function getReferralStats(userId: string) {
     earnings: referralTx._sum.amount || 0,
     referralCode: user.referralCode,
     shareableLink,
-    referredUsers: referredUsers.map((ru: any) => ({
-      id: ru.id,
-      name:
-        ru.influencerProfile?.displayName ||
-        ru.brandProfile?.companyName ||
-        "User",
-      joinedAt: ru.createdAt,
-      deals:
-        ru.influencerProfile?.completedDeals ||
-        ru.brandProfile?.totalCampaigns ||
-        0,
-      earnings:
-        ru.influencerProfile?.totalEarnings || ru.brandProfile?.totalSpent || 0,
-    })),
+    referredUsers,
     feeDiscount: currentTier.feeDiscount,
   };
 }
@@ -257,6 +286,13 @@ export async function processReferralReward(
   if (!user || !user.referredBy) return;
 
   const referrerId = user.referredBy;
+
+  // Invalidate platform fee cache for referrer
+  try {
+    await redis.del(`platform_fee:effective:${referrerId}`);
+  } catch (err) {
+    logger.warn("Redis invalidation failed in processReferralReward", err);
+  }
 
   // Security gate: Check if referrer has a high enough trust score to earn rewards
   const referrerUser = await db.user.findUnique({
@@ -347,11 +383,7 @@ export async function processReferralReward(
     return;
   }
 
-  // 2. We already calculated totalReward and revenueShareAmount above.
-  // We continue logic seamlessly.
-  if (totalReward <= 0) return;
-
-  // 3. Credit referrer wallet
+  // 2. Credit referrer wallet
   const referrerWallet = await db.wallet.findUnique({
     where: { userId: referrerId },
   });
@@ -365,7 +397,7 @@ export async function processReferralReward(
     },
   });
 
-  // 4. Record transaction
+  // 3. Record transaction
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const revenueNote =
     revenueShareAmount > 0
@@ -430,6 +462,16 @@ export async function getEffectivePlatformFee(
   effectiveFee: number;
   tier: string;
 }> {
+  const cacheKey = `platform_fee:effective:${userId}`;
+  try {
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+  } catch (err) {
+    logger.warn("Redis read failed for getEffectivePlatformFee", err);
+  }
+
   const baseFee = Number(process.env.PLATFORM_FEE_PERCENTAGE) || 10;
 
   const activeReferrals = await prisma.user.count({
@@ -450,12 +492,20 @@ export async function getEffectivePlatformFee(
   });
 
   const tier = getTierFromCount(activeReferrals);
-  const effectiveFee = Math.max(0, baseFee - tier.feeDiscount);
+  const effectiveFee = Math.max(2, baseFee - tier.feeDiscount);
 
-  return {
+  const result = {
     baseFee,
     discount: tier.feeDiscount,
     effectiveFee,
     tier: tier.label,
   };
+
+  try {
+    await redis.setex(cacheKey, 300, JSON.stringify(result));
+  } catch (err) {
+    logger.warn("Redis write failed for getEffectivePlatformFee", err);
+  }
+
+  return result;
 }

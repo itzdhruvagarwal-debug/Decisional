@@ -48,6 +48,20 @@ export async function cache<T>(
  */
 export async function invalidate(pattern: string): Promise<void> {
   try {
+    const normalizedPattern = pattern.trim();
+    const namespace = normalizedPattern.split(":")[0];
+    const isSingleKey = !normalizedPattern.includes("*");
+    const isScopedWildcard =
+      normalizedPattern.endsWith("*") &&
+      normalizedPattern.includes(":") &&
+      namespace.length >= 3 &&
+      normalizedPattern.indexOf("*") === normalizedPattern.length - 1;
+
+    if (!isSingleKey && !isScopedWildcard) {
+      logger.warn(`[CACHE] Refused broad invalidation pattern ${pattern}`);
+      return;
+    }
+
     let cursor = "0";
     let totalDeleted = 0;
 
@@ -56,7 +70,7 @@ export async function invalidate(pattern: string): Promise<void> {
       const [nextCursor, keys] = await redis.scan(
         cursor,
         "MATCH",
-        pattern,
+        normalizedPattern,
         "COUNT",
         100, // Scan 100 keys per iteration — tunable
       );

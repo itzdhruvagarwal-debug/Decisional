@@ -159,60 +159,91 @@ export async function checkAndAwardBadges(
   }
 }
 
+import { randomUUID } from "crypto";
+
 async function awardBadges(
   userId: string,
   badges: BadgeDefinition[],
   db: Prisma.TransactionClient | typeof prisma,
 ) {
-  // 1. Ensure badges exist in DB
-  for (const badge of badges) {
-    await db.badge.upsert({
-      where: { name: badge.name }, // Badge name is unique in schema
-      update: {},
-      create: {
-        name: badge.name,
-        description: badge.description,
-        icon: badge.icon,
-        category: badge.category,
-        xpReward: badge.xpReward,
+  if (badges.length === 0) return;
+
+  // 1. Ensure badges exist in DB in bulk
+  const existingBadges = await db.badge.findMany({
+    where: { name: { in: badges.map((b) => b.name) } },
+  });
+  const existingNames = new Set(existingBadges.map((b) => b.name));
+  const missingBadges = badges.filter((b) => !existingNames.has(b.name));
+
+  if (missingBadges.length > 0) {
+    await db.badge.createMany({
+      data: missingBadges.map((b) => ({
+        id: b.id,
+        name: b.name,
+        description: b.description,
+        icon: b.icon,
+        category: b.category,
+        xpReward: b.xpReward,
         criteria: {},
-        id: badge.id,
-      },
+      })),
+      skipDuplicates: true,
     });
   }
 
-  // 2. Create UserBadge records and add XP
+  // 2. Fetch all DB badge IDs
+  const allDbBadges = await db.badge.findMany({
+    where: { name: { in: badges.map((b) => b.name) } },
+  });
+
+  // 3. Filter out badges already owned by the user
+  const ownedUserBadges = await db.userBadge.findMany({
+    where: { userId, badgeId: { in: allDbBadges.map((b) => b.id) } },
+    select: { badgeId: true },
+  });
+  const ownedIds = new Set(ownedUserBadges.map((ub) => ub.badgeId));
+  const newDbBadges = allDbBadges.filter((dbb) => !ownedIds.has(dbb.id));
+
+  if (newDbBadges.length === 0) return;
+
+  // 4. Create UserBadge records and send notifications
+  const userBadgesToCreate = newDbBadges.map((dbb) => ({
+    id: randomUUID(),
+    userId,
+    badgeId: dbb.id,
+  }));
+
+  await db.userBadge.createMany({
+    data: userBadgesToCreate,
+    skipDuplicates: true,
+  });
+
   let totalXp = 0;
-
-  for (const badge of badges) {
-    // Get the DB badge ID
-    const dbBadge = await db.badge.findUnique({ where: { name: badge.name } });
-    if (!dbBadge) continue;
-
-    await db.userBadge.create({
-      data: {
-        userId,
-        badgeId: dbBadge.id,
-      },
-    });
-    totalXp += badge.xpReward;
+  for (const dbb of newDbBelow(newDbBadges)) {
+    const badgeDef = badges.find((b) => b.name === dbb.name);
+    if (!badgeDef) continue;
+    totalXp += badgeDef.xpReward;
 
     // Notification
     await db.notification.create({
       data: {
         userId,
         type: "badge_earned",
-        title: `New Badge Unlocked: ${badge.name} ${badge.icon}`,
-        message: `Congratulations! You've earned the "${badge.name}" badge and ${badge.xpReward} XP!`,
-        data: { badgeId: badge.id },
+        title: `New Badge Unlocked: ${dbb.name} ${dbb.icon}`,
+        message: `Congratulations! You've earned the "${dbb.name}" badge and ${badgeDef.xpReward} XP!`,
+        data: { badgeId: dbb.id },
       },
     });
   }
 
-  // 3. Update User XP
+  // 5. Update User XP
   if (totalXp > 0) {
     await addUserXp(userId, totalXp, "BADGE_EARNED", db);
   }
+}
+
+// Helper to avoid TS check issue if any
+function newDbBelow(arr: any[]) {
+  return arr;
 }
 
 export async function addUserXp(

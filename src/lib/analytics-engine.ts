@@ -83,7 +83,7 @@ export async function getInfluencerAnalytics(userId: string) {
   });
 
   // 5. Gamification & Referrals
-  const referralStats = await getReferralStats(userId);
+  const referralStats = await getReferralStats(userId, { includeUsers: false });
   const userBadges = await prisma.userBadge.findMany({
     where: { userId },
     include: { badge: true },
@@ -368,7 +368,7 @@ export async function getBrandAnalytics(userId: string) {
   };
 
   // 7. Referrals
-  const referralStats = await getReferralStats(userId);
+  const referralStats = await getReferralStats(userId, { includeUsers: false });
 
   return {
     overview: {

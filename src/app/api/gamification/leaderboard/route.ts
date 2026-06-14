@@ -184,7 +184,7 @@ export async function GET(request: NextRequest) {
 
 // ==================== HELPER ====================
 
-async function getTopBrands(limit: number, filter: string, _city: string) {
+async function getTopBrands(limit: number, filter: string, city: string) {
   if (filter === "weekly") {
     const weekAgo = subDays(new Date(), 7);
     const weeklyBrands = await prisma.deal.groupBy({
@@ -203,7 +203,10 @@ async function getTopBrands(limit: number, filter: string, _city: string) {
       .map((d: any) => d.brandId)
       .filter(Boolean) as string[];
     const profiles = await prisma.brandProfile.findMany({
-      where: { id: { in: brandIds } },
+      where: {
+        id: { in: brandIds },
+        ...(city ? { city: { contains: city, mode: "insensitive" as const } } : {}),
+      },
       include: {
         user: { select: { id: true, xp: true, level: true, trustScore: true } },
       },
@@ -232,7 +235,10 @@ async function getTopBrands(limit: number, filter: string, _city: string) {
       userType: "BRAND",
       status: "ACTIVE",
       trustScore: { gte: 51 }, // Gamification Connection
-      brandProfile: { isNot: null },
+      brandProfile: {
+        isNot: null,
+        ...(city ? { city: { contains: city, mode: "insensitive" as const } } : {}),
+      },
     },
     take: limit,
     orderBy: { trustScore: "desc" },

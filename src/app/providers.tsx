@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { SessionProvider } from "next-auth/react";
 import { SecurityProvider } from "@/components/security/SecurityProvider";
@@ -10,7 +10,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <SessionProvider
       basePath="/api/auth"
       refetchOnWindowFocus={true}
-      refetchInterval={300}
     >
       <ErrorBoundary componentName="RootLayout">
         <SecurityProvider>

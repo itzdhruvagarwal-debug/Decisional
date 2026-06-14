@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/lib/auth";
@@ -6,6 +6,7 @@ import { logger } from "@/lib/logger";
 import { dbIdSchema } from "@/lib/validations";
 import { CampaignService } from "@/services/campaign.service";
 import { requireActiveAdmin } from "@/lib/admin-auth";
+import prisma from "@/lib/db";
 
 const paramsSchema = z.object({ id: dbIdSchema });
 const actionSchema = z.object({ action: z.enum(["ACTIVATE", "CANCEL"]) });
@@ -50,12 +51,39 @@ export async function GET(
       );
     }
 
+    let hasApplied = false;
+    let applicationStatus: string | null = null;
+
+    if (userType === "INFLUENCER" && session.user.id) {
+      const influencerProfile = await prisma.influencerProfile.findUnique({
+        where: { userId: session.user.id },
+        select: { id: true },
+      });
+      if (influencerProfile) {
+        const application = await prisma.campaignApplication.findFirst({
+          where: {
+            campaignId: parsed.data.id,
+            influencerId: influencerProfile.id,
+          },
+          select: { status: true },
+        });
+        if (application) {
+          hasApplied = true;
+          applicationStatus = application.status;
+        }
+      }
+    }
+
     return NextResponse.json(
       {
         success: true,
         message: "Campaign loaded",
-        data: { campaign },
-        campaign,
+        data: { campaign, hasApplied, applicationStatus },
+        campaign: {
+          ...campaign,
+          hasApplied,
+          applicationStatus,
+        },
       },
       { status: 200 },
     );

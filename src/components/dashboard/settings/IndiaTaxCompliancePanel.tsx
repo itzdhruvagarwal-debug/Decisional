@@ -88,6 +88,11 @@ export default function IndiaTaxCompliancePanel() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  // Regex validators
+  const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
+  const GSTIN_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
   async function loadCompliance() {
     setLoading(true);
@@ -129,6 +134,25 @@ export default function IndiaTaxCompliancePanel() {
     setSaving(true);
     setError("");
     setSuccess("");
+    setFieldErrors({});
+
+    // Client-side format validation
+    const newFieldErrors: Record<string, string> = {};
+    const pan = draft.panNumber.trim();
+    const gstin = draft.gstin.trim();
+
+    if (pan && !PAN_REGEX.test(pan)) {
+      newFieldErrors.panNumber = "Invalid PAN format. Expected: ABCDE1234F (5 letters, 4 digits, 1 letter)";
+    }
+    if (gstin && !GSTIN_REGEX.test(gstin)) {
+      newFieldErrors.gstin = "Invalid GSTIN format. Expected 15-char: 27ABCDE1234F1Z5";
+    }
+
+    if (Object.keys(newFieldErrors).length > 0) {
+      setFieldErrors(newFieldErrors);
+      setSaving(false);
+      return;
+    }
 
     const payload: Record<string, string> = {
       gstRegistrationType: draft.gstRegistrationType,
@@ -138,8 +162,8 @@ export default function IndiaTaxCompliancePanel() {
     if (draft.itrAssessmentYear.trim()) {
       payload.itrAssessmentYear = draft.itrAssessmentYear.trim();
     }
-    if (draft.panNumber.trim()) payload.panNumber = draft.panNumber.trim();
-    if (draft.gstin.trim()) payload.gstin = draft.gstin.trim();
+    if (pan) payload.panNumber = pan;
+    if (gstin) payload.gstin = gstin;
     if (draft.itrAcknowledgementNumber.trim()) {
       payload.itrAcknowledgementNumber = draft.itrAcknowledgementNumber.trim();
     }
@@ -167,6 +191,7 @@ export default function IndiaTaxCompliancePanel() {
       setSaving(false);
     }
   }
+
 
   if (loading) {
     return (
@@ -267,6 +292,11 @@ export default function IndiaTaxCompliancePanel() {
                 setDraft({ ...draft, panNumber: event.target.value.toUpperCase() })
               }
             />
+            {fieldErrors.panNumber && (
+              <div style={{ color: "var(--color-accent-rose)", fontSize: "12px", marginTop: "4px", fontWeight: 600 }}>
+                {fieldErrors.panNumber}
+              </div>
+            )}
           </div>
 
           <div>
@@ -300,6 +330,11 @@ export default function IndiaTaxCompliancePanel() {
                 setDraft({ ...draft, gstin: event.target.value.toUpperCase() })
               }
             />
+            {fieldErrors.gstin && (
+              <div style={{ color: "var(--color-accent-rose)", fontSize: "12px", marginTop: "4px", fontWeight: 600 }}>
+                {fieldErrors.gstin}
+              </div>
+            )}
           </div>
 
           <div>

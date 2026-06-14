@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -168,6 +168,8 @@ export default function CampaignDetailClient({ user }: { user: any }) {
   const [applicationsLoading, setApplicationsLoading] = useState(false);
   const [applicationActionId, setApplicationActionId] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [hasApplied, setHasApplied] = useState(false);
+  const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (!campaignId) return;
@@ -192,6 +194,12 @@ export default function CampaignDetailClient({ user }: { user: any }) {
         const normalized = normalizeCampaign(rawCampaign);
         setCampaign(normalized);
         setProposedRate(Math.round((normalized.perInfluencerBudget || 0) / 100));
+        
+        const applied = Boolean(payload?.data?.hasApplied || rawCampaign?.hasApplied || payload?.hasApplied);
+        const appStatus = payload?.data?.applicationStatus || rawCampaign?.applicationStatus || payload?.applicationStatus || null;
+        setHasApplied(applied);
+        setApplicationStatus(appStatus);
+        
         setLoading(false);
       })
       .catch((loadError) => {
@@ -204,7 +212,7 @@ export default function CampaignDetailClient({ user }: { user: any }) {
   }, [campaignId]);
 
   const isOwner = Boolean(campaign?.brand?.userId && campaign?.brand?.userId === user?.id);
-  const canApply = user?.userType === "INFLUENCER" && campaign?.status === "ACTIVE";
+  const canApply = user?.userType === "INFLUENCER" && campaign?.status === "ACTIVE" && !hasApplied;
 
   const fetchApplications = async () => {
     if (!campaignId || !isOwner) return;
@@ -279,7 +287,7 @@ export default function CampaignDetailClient({ user }: { user: any }) {
   const handleApply = async () => {
     if (!campaign) return;
     if (proposal.trim().length < 50) {
-      alert("Please write at least 50 characters in proposal.");
+      setNotice({ type: "error", message: "Please write at least 50 characters in proposal." });
       return;
     }
 
@@ -302,6 +310,8 @@ export default function CampaignDetailClient({ user }: { user: any }) {
 
       setShowApplyModal(false);
       setNotice({ type: "success", message: "Application submitted successfully." });
+      setHasApplied(true);
+      setApplicationStatus("PENDING");
       router.push("/dashboard/deals");
     } catch (applyError: any) {
       setNotice({ type: "error", message: applyError?.message || "Failed to submit application" });
@@ -412,6 +422,11 @@ export default function CampaignDetailClient({ user }: { user: any }) {
             {canApply && (
               <button className="btn btn-primary" onClick={() => setShowApplyModal(true)}>
                 Apply Now
+              </button>
+            )}
+            {user?.userType === "INFLUENCER" && hasApplied && (
+              <button className="btn btn-secondary" disabled style={{ opacity: 0.7, cursor: "not-allowed" }}>
+                Applied ({applicationStatus || "PENDING"})
               </button>
             )}
           </div>

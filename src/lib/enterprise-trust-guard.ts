@@ -34,15 +34,13 @@ export async function checkEnterpriseApplicationGate(
 
     // 1. New Accounts Logic
     if (isNewAccount) {
-        // 3 applications / day limit
         if (user.influencerProfile) {
-            const todayStart = new Date();
-            todayStart.setHours(0, 0, 0, 0);
+            const rolling24hAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
             const applicationsToday = await prisma.application.count({
                 where: {
                     influencerId: user.influencerProfile.id,
-                    createdAt: { gte: todayStart },
+                    createdAt: { gte: rolling24hAgo },
                 }
             });
 
@@ -135,16 +133,6 @@ export async function applyAIFraudSignal(
 }
 
 // ==================== FINANCIAL IMPACT ENGINES ====================
-
-/**
- * Determine withdrawal speed based on Trust Score
- */
-export function getWithdrawalSpeed(trustScore: number): "INSTANT" | "24_HOURS" | "72_HOURS" | "MANUAL_REVIEW" {
-    if (trustScore >= 86) return "INSTANT";
-    if (trustScore >= 71) return "24_HOURS";
-    if (trustScore >= 51) return "72_HOURS";
-    return "MANUAL_REVIEW";
-}
 
 /**
  * Determine if user is eligible to earn from referrals (stops bots farming code signups)

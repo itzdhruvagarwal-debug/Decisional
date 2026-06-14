@@ -46,6 +46,16 @@ export async function sendPushNotification(
   userId: string,
   payload: PushPayload,
 ): Promise<PushResult> {
+  // Skip BANNED / SUSPENDED users — no in-app noise, no wasted push slots
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { status: true },
+  });
+  if (user?.status === "BANNED" || user?.status === "SUSPENDED") {
+    logger.debug("Push notification skipped for inactive user", { userId, status: user.status });
+    return { success: true, provider: "in-app" };
+  }
+
   // Always create in-app notification as baseline
   await createInAppNotification(userId, payload);
 
@@ -66,6 +76,7 @@ export async function sendPushNotification(
   return { success: true, provider: "in-app" };
 }
 
+
 /**
  * Send push notification to multiple users.
  */
@@ -76,9 +87,19 @@ export async function sendBulkPush(
   let sent = 0;
   let failed = 0;
 
+  // Pre-filter out BANNED / SUSPENDED users in a single query
+  const inactiveUsers = await prisma.user.findMany({
+    where: { id: { in: userIds }, status: { in: ["BANNED", "SUSPENDED"] } },
+    select: { id: true },
+  });
+  const inactiveSet = new Set(inactiveUsers.map((u: { id: string }) => u.id));
+  const activeUserIds = userIds.filter((id) => !inactiveSet.has(id));
+
+  if (activeUserIds.length === 0) return { sent: 0, failed: 0 };
+
   // Create in-app notifications in bulk (single batch insert)
   await prisma.notification.createMany({
-    data: userIds.map((userId) => ({
+    data: activeUserIds.map((userId) => ({
       userId,
       type: "push",
       title: payload.title,
@@ -88,7 +109,7 @@ export async function sendBulkPush(
   });
 
   // Send external push notifications only (skip in-app since already created above)
-  for (const userId of userIds) {
+  for (const userId of activeUserIds) {
     try {
       // Try FCM
       if (getFCMServerKey()) {
@@ -118,6 +139,7 @@ export async function sendBulkPush(
 
   return { sent, failed };
 }
+
 
 // ==================== FCM ====================
 

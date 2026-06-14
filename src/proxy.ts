@@ -26,8 +26,27 @@ export const proxy = auth(async (req) => {
 
   // 1. WAF - Bot Protection
   const ua = (req.headers.get("user-agent") || "").toLowerCase();
-  const suspicious = ["sqlmap", "nikto", "nmap"];
-  if (suspicious.some((bot) => ua.includes(bot))) {
+  const requestFingerprint = `${ua} ${pathname.toLowerCase()} ${req.nextUrl.search.toLowerCase()}`;
+  const suspiciousPatterns = [
+    /\bsqlmap\b/,
+    /\bnikto\b/,
+    /\bnmap\b/,
+    /\bmasscan\b/,
+    /\bdirbuster\b/,
+    /\bgobuster\b/,
+    /\bwp-scan\b/,
+    /\bwpscan\b/,
+    /\/wp-admin\b/,
+    /\/wp-login\.php\b/,
+    /\/phpmyadmin\b/,
+    /\.\.\/|\.\.\\/,
+    /<script\b/,
+    /union(?:\s|%20|\+)+select/,
+    /sleep\s*\(/,
+    /benchmark\s*\(/,
+    /\/etc\/passwd/,
+  ];
+  if (suspiciousPatterns.some((pattern) => pattern.test(requestFingerprint))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -70,7 +89,7 @@ export const proxy = auth(async (req) => {
           { status: 403 },
         );
       }
-      return NextResponse.redirect(redirectTo("/dashboard"));
+      return NextResponse.redirect(redirectTo(isAuth ? "/dashboard" : "/login"));
     }
   }
 

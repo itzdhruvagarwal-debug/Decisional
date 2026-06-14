@@ -36,6 +36,7 @@ export interface InstagramPost {
   likeCount: number;
   commentsCount: number;
   isLive: boolean;
+  isPaidPartnership?: boolean;
 }
 
 export interface InstagramInsights {
@@ -198,31 +199,44 @@ export async function getRecentPosts(
 ): Promise<InstagramPost[]> {
   if (!accessToken) return [];
 
+  const allPosts: InstagramPost[] = [];
+  const fields =
+    "id,media_type,media_url,permalink,caption,timestamp,like_count,comments_count,is_paid_partnership";
+  let nextUrl: string | null = `${GRAPH_API_BASE}/${GRAPH_API_VERSION}/me/media?fields=${fields}&limit=${Math.min(limit, 50)}&access_token=${accessToken}`;
+
   try {
-    const fields =
-      "id,media_type,media_url,permalink,caption,timestamp,like_count,comments_count";
-    const res = await fetch(
-      `${GRAPH_API_BASE}/${GRAPH_API_VERSION}/me/media?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
-    );
+    while (nextUrl && allPosts.length < limit) {
+      const res = await fetch(nextUrl);
+      const data = await res.json();
 
-    const data = await res.json();
+      if (data.error || !data.data) {
+        if (data.error) {
+          logger.error("Instagram API error during getRecentPosts pagination", { message: data.error.message });
+        }
+        break;
+      }
 
-    if (data.error || !data.data) return [];
+      const pagePosts = data.data.map((post: Record<string, any>) => ({
+        id: post.id,
+        mediaType: post.media_type,
+        mediaUrl: post.media_url || "",
+        permalink: post.permalink || "",
+        caption: post.caption || "",
+        timestamp: post.timestamp,
+        likeCount: post.like_count || 0,
+        commentsCount: post.comments_count || 0,
+        isLive: true,
+        isPaidPartnership: post.is_paid_partnership || false,
+      }));
 
-    return data.data.map((post: Record<string, unknown>) => ({
-      id: post.id,
-      mediaType: post.media_type,
-      mediaUrl: post.media_url || "",
-      permalink: post.permalink || "",
-      caption: post.caption || "",
-      timestamp: post.timestamp,
-      likeCount: post.like_count || 0,
-      commentsCount: post.comments_count || 0,
-      isLive: true, // If it's returned by API, it's live
-    }));
+      allPosts.push(...pagePosts);
+      nextUrl = data.paging?.next || null;
+    }
+
+    return allPosts.slice(0, limit);
   } catch (error) {
     logger.error("Instagram posts fetch error", error);
-    return [];
+    return allPosts;
   }
 }
 
@@ -233,7 +247,7 @@ export async function findPostByUrl(
   accessToken: string,
   postUrl: string,
 ): Promise<InstagramPost | null> {
-  const posts = await getRecentPosts(accessToken, 50); // Check last 50
+  const posts = await getRecentPosts(accessToken, 150); // Check last 150
   const normalizedUrl = (postUrl.split("?")[0] ?? postUrl).replace(/\/$/, "");
 
   return (

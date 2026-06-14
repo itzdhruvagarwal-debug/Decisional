@@ -1,9 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 import { createHash } from "crypto";
+import { apiWrapper } from "@/lib/api-wrapper";
+import { redis } from "@/lib/redis";
 
 const verifyContactSchema = z.object({
     type: z.enum(["email", "phone"]),
@@ -13,7 +15,7 @@ const verifyContactSchema = z.object({
         .max(10, "Verification code is too long"),
 });
 
-export async function POST(req: Request) {
+export const POST = apiWrapper(async function POST(req: NextRequest) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -49,20 +51,17 @@ export async function POST(req: Request) {
         const updateData: Record<string, unknown> = {};
 
         if (type === "email") {
-            // OTPs are stored as SHA-256 hashes (changed in send-otp route)
+            // OTPs are stored as SHA-256 hashes in Redis
             // Compare the hash of the submitted code against the stored hash
             const submittedHash = createHash("sha256").update(code).digest("hex");
-
-            const isExpired =
-                !user.resetPasswordExpiry ||
-                user.resetPasswordExpiry < new Date();
+            const key = `email-contact-otp:${session.user.id}`;
+            const storedHash = await redis.get(key) || "";
 
             // Use constant-time comparison via timingSafeEqual to prevent timing attacks
             const { timingSafeEqual } = await import("crypto");
-            const storedHash = user.resetPasswordToken || "";
 
             let isValidCode = false;
-            if (!isExpired && storedHash.length > 0) {
+            if (storedHash.length > 0) {
                 try {
                     const storedBuffer = Buffer.from(storedHash, "utf8");
                     const submittedBuffer = Buffer.from(submittedHash, "utf8");
@@ -75,7 +74,7 @@ export async function POST(req: Request) {
                 }
             }
 
-            if (!isValidCode || isExpired) {
+            if (!isValidCode) {
                 logger.warn("Invalid or expired email OTP verification attempt", {
                     userId: session.user.id,
                 });
@@ -86,8 +85,7 @@ export async function POST(req: Request) {
             }
 
             updateData.emailVerified = true;
-            updateData.resetPasswordToken = null;
-            updateData.resetPasswordExpiry = null;
+            await redis.del(key);
         } else if (type === "phone") {
             const { verifyOTP } = await import("@/lib/sms");
             const result = await verifyOTP(user.phone || "", code, {
@@ -114,6 +112,21 @@ export async function POST(req: Request) {
                 where: { id: session.user.id },
                 data: updateData as any,
             });
+
+            await prisma.activityLog.create({
+                data: {
+                    userId: session.user.id,
+                    action: "CONTACT_CHANGED",
+                    entityType: "User",
+                    entityId: session.user.id,
+                    metadata: {
+                        field: type, // 'email' or 'phone'
+                        newValue: type === "email" ? user.email : user.phone,
+                        changedAt: new Date().toISOString(),
+                        ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
+                    },
+                },
+            });
         }
 
         return NextResponse.json({
@@ -128,4 +141,4 @@ export async function POST(req: Request) {
             { status: 500 },
         );
     }
-}
+});

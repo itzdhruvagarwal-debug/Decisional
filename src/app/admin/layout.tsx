@@ -16,7 +16,7 @@ export default async function AdminLayout({
     const admin = await requireActiveAdmin(session?.user);
     adminEmail = admin.email;
   } catch {
-    redirect("/dashboard");
+    redirect(session?.user ? "/dashboard" : "/login?callbackUrl=/admin");
   }
 
   return (

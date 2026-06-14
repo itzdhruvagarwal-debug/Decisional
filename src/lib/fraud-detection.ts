@@ -264,8 +264,8 @@ export async function checkApplicationFraud(
 interface PaymentCheckParams {
   userId: string;
   amount: number;
-  bankAccount?: string;
-  upiId?: string;
+  bankAccount?: string | undefined;
+  upiId?: string | undefined;
 }
 
 export async function checkPaymentFraud(
@@ -396,6 +396,7 @@ export async function checkPostVerification(
           verifiedPostData = {
             isPublic: true,
             caption: igPost.caption,
+            isPaidPartnership: igPost.isPaidPartnership ?? false,
             mentions: [...(igPost.caption.match(/@(\w+)/g) || [])].map((m) =>
               m.slice(1),
             ),
@@ -474,6 +475,11 @@ export async function checkPostVerification(
     };
   }
 
+  // Ensure isPaidPartnership is always present
+  if (verifiedPostData.isPaidPartnership === undefined) {
+    verifiedPostData.isPaidPartnership = false;
+  }
+
   // Rule 1: Post is private
   if (!verifiedPostData.isPublic) {
     flags.push({
@@ -518,18 +524,27 @@ export async function checkPostVerification(
     riskScore += 20;
   }
 
-  // Rule 4: #ad not in caption (FTC compliance)
+  // Rule 4: #ad / disclosure check (FTC + Indian ASCI compliance)
+  // Accepts: Instagram native paid-partnership label, FTC hashtags, or Indian ASCI hashtags
   const captionLower = verifiedPostData.caption.toLowerCase();
   const hasAdDisclosure =
+    verifiedPostData.isPaidPartnership === true || // Instagram native label
     captionLower.includes("#ad") ||
     captionLower.includes("#sponsored") ||
-    captionLower.includes("#paidpartnership");
+    captionLower.includes("#paidpartnership") ||
+    captionLower.includes("#collab") ||
+    captionLower.includes("#partnership") ||
+    captionLower.includes("#paidcollab") ||
+    captionLower.includes("#gifted");
 
   if (!hasAdDisclosure) {
     flags.push({
       rule: "NO_AD_DISCLOSURE",
       severity: "HIGH",
-      description: "#ad or #sponsored disclosure missing",
+      description:
+        "Paid partnership disclosure missing — required by FTC and Indian ASCI guidelines. " +
+        "Add #ad, #sponsored, #paidpartnership, #collab, #partnership, #paidcollab, or #gifted, " +
+        "or enable Instagram's native Paid Partnership label.",
     });
     riskScore += 35;
   }
@@ -542,10 +557,10 @@ export async function checkPostVerification(
     );
     flags.push({
       rule: "POSTED_LATE",
-      severity: "MEDIUM",
-      description: `Posted ${hoursLate} hours after deadline`,
+      severity: "HIGH",
+      description: `Posted ${hoursLate} hour${hoursLate === 1 ? "" : "s"} after deadline — requires admin review`,
     });
-    riskScore += 15;
+    riskScore += 50; // Elevated to trigger REVIEW (≥40) instead of FLAG
   }
 
   // Determine action

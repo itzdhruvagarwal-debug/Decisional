@@ -26,12 +26,22 @@ export default function DiscoverInfluencersPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [minFollowers, setMinFollowers] = useState("");
+  const [minEngagementRate, setMinEngagementRate] = useState("");
+  const [minRate, setMinRate] = useState("");
+  const [maxRate, setMaxRate] = useState("");
+  const [city, setCity] = useState("");
+  const [platform, setPlatform] = useState("");
   const { data: session } = useSession();
 
   const fetchInfluencers = async (
     currentSearch = search,
     currentCategory = category,
     currentMinFollowers = minFollowers,
+    currentMinEngagementRate = minEngagementRate,
+    currentMinRate = minRate,
+    currentMaxRate = maxRate,
+    currentCity = city,
+    currentPlatform = platform,
   ) => {
     setLoading(true);
     try {
@@ -40,6 +50,12 @@ export default function DiscoverInfluencersPage() {
       if (currentCategory) params.append("category", currentCategory);
       if (currentMinFollowers)
         params.append("minFollowers", currentMinFollowers);
+      if (currentMinEngagementRate)
+        params.append("minEngagementRate", currentMinEngagementRate);
+      if (currentMinRate) params.append("minRate", currentMinRate);
+      if (currentMaxRate) params.append("maxRate", currentMaxRate);
+      if (currentCity) params.append("city", currentCity);
+      if (currentPlatform) params.append("platform", currentPlatform);
 
       const res = await fetch(`/api/influencers?${params.toString()}`);
       if (res.ok) {
@@ -59,7 +75,7 @@ export default function DiscoverInfluencersPage() {
       session?.user?.userType === "ADMIN";
 
     if (canDiscover) {
-      fetchInfluencers("", "", "");
+      fetchInfluencers("", "", "", "", "", "", "", "");
     } else if (session) {
       setLoading(false);
     }
@@ -209,6 +225,30 @@ export default function DiscoverInfluencersPage() {
           </div>
           <div style={{ flex: "1 1 min(180px, 100%)" }}>
             <label style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
+              Platform
+            </label>
+            <select
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "14px 18px",
+                borderRadius: "8px",
+                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(0,0,0,0.2)",
+                color: "white",
+                fontSize: "15px",
+                cursor: "pointer",
+                outline: "none"
+              }}
+            >
+              <option value="" style={{ background: "#1a1a2e" }}>All Platforms</option>
+              <option value="instagram" style={{ background: "#1a1a2e" }}>Instagram</option>
+              <option value="youtube" style={{ background: "#1a1a2e" }}>YouTube</option>
+            </select>
+          </div>
+          <div style={{ flex: "1 1 min(180px, 100%)" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
               Minimum Reach
             </label>
             <select
@@ -232,6 +272,98 @@ export default function DiscoverInfluencersPage() {
               <option value="100000" style={{ background: "#1a1a2e" }}>100k+ Subs/Followers</option>
               <option value="1000000" style={{ background: "#1a1a2e" }}>1M+ Subs/Followers</option>
             </select>
+          </div>
+          <div style={{ flex: "1 1 min(180px, 100%)" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
+              Min Engagement
+            </label>
+            <select
+              value={minEngagementRate}
+              onChange={(e) => setMinEngagementRate(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "14px 18px",
+                borderRadius: "8px",
+                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(0,0,0,0.2)",
+                color: "white",
+                fontSize: "15px",
+                cursor: "pointer",
+                outline: "none"
+              }}
+            >
+              <option value="" style={{ background: "#1a1a2e" }}>Any Rate</option>
+              <option value="1" style={{ background: "#1a1a2e" }}>1%+</option>
+              <option value="2" style={{ background: "#1a1a2e" }}>2%+</option>
+              <option value="3" style={{ background: "#1a1a2e" }}>3%+</option>
+              <option value="5" style={{ background: "#1a1a2e" }}>5%+</option>
+            </select>
+          </div>
+          <div style={{ flex: "1 1 min(180px, 100%)" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
+              City
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Mumbai"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "14px 18px",
+                borderRadius: "8px",
+                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(0,0,0,0.2)",
+                color: "white",
+                fontSize: "15px",
+                outline: "none",
+                transition: "all 0.3s"
+              }}
+              onFocus={(e) => e.target.style.borderColor = "var(--color-primary)"}
+              onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
+            />
+          </div>
+          <div style={{ flex: "1 1 min(140px, 100%)" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
+              Min Price (₹)
+            </label>
+            <input
+              type="number"
+              placeholder="Min"
+              value={minRate}
+              onChange={(e) => setMinRate(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "14px 18px",
+                borderRadius: "8px",
+                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(0,0,0,0.2)",
+                color: "white",
+                fontSize: "15px",
+                outline: "none"
+              }}
+            />
+          </div>
+          <div style={{ flex: "1 1 min(140px, 100%)" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
+              Max Price (₹)
+            </label>
+            <input
+              type="number"
+              placeholder="Max"
+              value={maxRate}
+              onChange={(e) => setMaxRate(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "14px 18px",
+                borderRadius: "8px",
+                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(0,0,0,0.2)",
+                color: "white",
+                fontSize: "15px",
+                outline: "none"
+              }}
+            />
           </div>
           <div style={{ display: "flex", alignItems: "flex-end", flex: "1 1 auto" }}>
             <motion.button
@@ -421,7 +553,7 @@ export default function DiscoverInfluencersPage() {
                     </div>
                     <div style={{ textAlign: "center" }}>
                       <div style={{ fontSize: "11px", color: "var(--color-text-muted)", fontWeight: 700, marginBottom: "4px", textTransform: "uppercase" }}>Subs</div>
-                      <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--color-text-primary)" }}>{inf.youtubeSubscribers ? (inf.youtubeSubscribers > 1000 ? (inf.youtubeSubscribers / 1000).toFixed(1) + 'k' : inf.youtubeSubscribers) : '-'}</div>
+                      <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--color-text-primary)" }}>{inf.youtubeSubscribers === -1 ? 'Hidden' : inf.youtubeSubscribers ? (inf.youtubeSubscribers > 1000 ? (inf.youtubeSubscribers / 1000).toFixed(1) + 'k' : inf.youtubeSubscribers) : '-'}</div>
                     </div>
                     <div style={{ textAlign: "center" }}>
                       <div style={{ fontSize: "11px", color: "var(--color-text-muted)", fontWeight: 700, marginBottom: "4px", textTransform: "uppercase" }}>Deals</div>

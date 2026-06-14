@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
@@ -13,6 +13,7 @@ import {
 } from "@/lib/sms";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
+import { apiWrapper } from "@/lib/api-wrapper";
 
 const changeContactSchema = z.object({
     action: z.enum(['init', 'verify-current', 'send-new', 'confirm-new']),
@@ -27,7 +28,7 @@ function generateOTP() {
     return randomInt(100000, 999999).toString();
 }
 
-export async function POST(req: Request) {
+export const POST = apiWrapper(async function POST(req: NextRequest) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -279,4 +280,4 @@ export async function POST(req: Request) {
         logger.error("Change contact error:", error);
         return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
     }
-}
+});

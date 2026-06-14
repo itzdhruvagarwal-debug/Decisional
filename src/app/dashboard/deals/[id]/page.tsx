@@ -1,10 +1,11 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
+import { useTokenRefreshGuard } from "@/hooks/useTokenRefreshGuard";
 
 const formatCurrency = (amount: number) =>
   "INR " + (amount / 100).toLocaleString("en-IN");
@@ -81,6 +82,7 @@ function PaymentRow({ label, value }: { label: string; value: string }) {
 export default function DealDetailPage() {
   const params = useParams();
   const { data: session } = useSession();
+  const { requireFreshSession } = useTokenRefreshGuard();
   const id = params?.id as string;
 
   const [deal, setDeal] = useState<any>(null);
@@ -111,6 +113,16 @@ export default function DealDetailPage() {
     carrier: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [toasts, setToasts] = useState<Array<{id: number; type: "success" | "error" | "info"; message: string}>>([]);
+  const showToast = (type: "success" | "error" | "info", message: string) => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, type, message }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
+  };
 
   const fetchDeal = useCallback(async () => {
     try {
@@ -141,13 +153,13 @@ export default function DealDetailPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Action failed");
 
-      alert(data.message || "Success!");
+      showToast("success", data.message || "Success!");
       setShowSubmitModal(false);
       setShowVerifyModal(false);
       fetchDeal(); // Refresh data
       return true;
     } catch (err: any) {
-      alert(err.message);
+      showToast("error", err.message);
       return false;
     } finally {
       setIsSubmitting(false);
@@ -179,6 +191,9 @@ export default function DealDetailPage() {
   };
 
   const handleSignContract = async () => {
+    const fresh = await requireFreshSession();
+    if (!fresh) return;
+
     const terms = deal?.contractTerms as any;
     const payout =
       typeof terms?.influencerPayout === "number"
@@ -208,10 +223,10 @@ export default function DealDetailPage() {
         throw new Error(data?.message || data?.error || "Failed to sign contract");
       }
 
-      alert(data.message || "Contract signed successfully.");
+      showToast("success", data.message || "Contract signed successfully.");
       fetchDeal();
     } catch (err: any) {
-      alert(err.message);
+      showToast("error", err.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -219,7 +234,7 @@ export default function DealDetailPage() {
 
   const handleReviewContent = async () => {
     if (!reviewApproved && reviewFeedback.trim().length < 5) {
-      alert("Please add clear feedback for the revision request.");
+      showToast("error", "Please add clear feedback for the revision request.");
       return;
     }
 
@@ -248,10 +263,10 @@ export default function DealDetailPage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || data.error || "Failed to reject invite");
 
-        alert("Invite successfully rejected.");
+        showToast("success", "Invite successfully rejected.");
         fetchDeal();
       } catch (err: any) {
-        alert(err.message);
+        showToast("error", err.message);
       } finally {
         setIsSubmitting(false);
       }
@@ -318,6 +333,27 @@ export default function DealDetailPage() {
   return (
     <DashboardShell user={session.user}>
       <div className="deal-detail-page" style={{ maxWidth: "1280px", margin: "0 auto", display: "grid", gap: "24px" }}>
+        {toasts.length > 0 && (
+          <div style={{ position: "fixed", top: 24, right: 24, zIndex: 9999, display: "flex", flexDirection: "column", gap: "8px", maxWidth: "400px" }}>
+            {toasts.map(t => (
+              <div key={t.id} style={{
+                padding: "12px 20px",
+                borderRadius: "10px",
+                color: "#fff",
+                fontSize: "14px",
+                fontWeight: 500,
+                background: t.type === "success" ? "linear-gradient(135deg, #059669, #10b981)" : t.type === "error" ? "linear-gradient(135deg, #dc2626, #ef4444)" : "linear-gradient(135deg, #2563eb, #3b82f6)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                backdropFilter: "blur(12px)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                animation: "slideInRight 0.3s ease-out",
+                cursor: "pointer",
+              }} onClick={() => setToasts(prev => prev.filter(x => x.id !== t.id))}>
+                {t.type === "success" ? "✓ " : t.type === "error" ? "✕ " : "ℹ "}{t.message}
+              </div>
+            ))}
+          </div>
+        )}
         <header
           className="glass deal-detail-header"
           style={{
@@ -1541,6 +1577,115 @@ export default function DealDetailPage() {
                 {isSubmitting ? <span className="loading" /> : "Verify"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* ── Star Rating & Review Section ── */}
+      {deal.status === "COMPLETED" && !reviewSubmitted && (
+        <div
+          className="card"
+          style={{
+            padding: "28px",
+            borderRadius: "var(--radius-lg)",
+            border: "1px solid var(--color-border)",
+            background: "linear-gradient(135deg, rgba(16,185,129,0.05), rgba(59,130,246,0.05))",
+          }}
+        >
+          <h3 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "16px" }}>⭐ Rate This Deal</h3>
+          <p style={{ fontSize: "13px", color: "var(--color-text-secondary)", marginBottom: "16px" }}>How was your experience? Your review helps build trust on the platform.</p>
+          <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                onClick={() => setReviewRating(star)}
+                onMouseEnter={() => setHoverRating(star)}
+                onMouseLeave={() => setHoverRating(0)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "32px",
+                  transition: "transform 0.15s ease",
+                  transform: (hoverRating || reviewRating) >= star ? "scale(1.15)" : "scale(1)",
+                  filter: (hoverRating || reviewRating) >= star ? "none" : "grayscale(1) opacity(0.3)",
+                }}
+              >
+                ⭐
+              </button>
+            ))}
+            {reviewRating > 0 && (
+              <span style={{ alignSelf: "center", marginLeft: "8px", fontSize: "14px", fontWeight: 600, color: "var(--color-text-secondary)" }}>
+                {reviewRating === 1 ? "Poor" : reviewRating === 2 ? "Fair" : reviewRating === 3 ? "Good" : reviewRating === 4 ? "Great" : "Excellent"}
+              </span>
+            )}
+          </div>
+          <textarea
+            placeholder="Share your experience (optional)..."
+            value={reviewComment}
+            onChange={(e) => setReviewComment(e.target.value)}
+            rows={3}
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              borderRadius: "var(--radius-md)",
+              border: "1px solid var(--color-border)",
+              background: "var(--color-bg-primary)",
+              fontSize: "14px",
+              resize: "vertical",
+              marginBottom: "16px",
+            }}
+          />
+          <button
+            className="btn btn-primary"
+            disabled={reviewRating === 0 || isSubmitting}
+            onClick={async () => {
+              setIsSubmitting(true);
+              try {
+                const res = await fetch("/api/reviews", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    dealId: id,
+                    rating: reviewRating,
+                    ...(reviewComment.trim() ? { comment: reviewComment.trim() } : {}),
+                  }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Failed to submit review");
+                showToast("success", "Review submitted! Thank you.");
+                setReviewSubmitted(true);
+              } catch (err: any) {
+                showToast("error", err.message);
+              } finally {
+                setIsSubmitting(false);
+              }
+            }}
+            style={{ minWidth: "160px" }}
+          >
+            {isSubmitting ? <span className="loading" /> : "Submit Review"}
+          </button>
+        </div>
+      )}
+      {deal.status === "COMPLETED" && reviewSubmitted && (
+        <div
+          className="card"
+          style={{
+            padding: "20px 28px",
+            borderRadius: "var(--radius-lg)",
+            border: "1px solid var(--color-success)",
+            background: "linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.02))",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
+          <span style={{ fontSize: "24px" }}>✅</span>
+          <div>
+            <strong>Review Submitted</strong>
+            <p style={{ fontSize: "13px", color: "var(--color-text-secondary)", margin: 0 }}>
+              {"⭐".repeat(reviewRating)} — Thank you for your feedback!
+            </p>
           </div>
         </div>
       )}

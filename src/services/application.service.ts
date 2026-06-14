@@ -174,11 +174,12 @@ export class ApplicationService {
         );
       }
 
-      const instaFollowers = profile.instagramFollowers || 0;
-      const ytSubs = profile.youtubeSubscribers || 0;
-      const maxRelevantFollowers = Math.max(instaFollowers, ytSubs);
+      const instaFollowers = profile.instagramFollowers === undefined || profile.instagramFollowers === null ? 0 : profile.instagramFollowers;
+      const ytSubs = profile.youtubeSubscribers === undefined || profile.youtubeSubscribers === null ? 0 : profile.youtubeSubscribers;
+      const hasHiddenSubscribers = instaFollowers === -1 || ytSubs === -1;
+      const maxRelevantFollowers = hasHiddenSubscribers ? -1 : Math.max(instaFollowers, ytSubs);
 
-      if (maxRelevantFollowers < 1000) {
+      if (!hasHiddenSubscribers && maxRelevantFollowers < 1000) {
         throw new Error(
           "You must have at least 1,000 Instagram followers or YouTube subscribers to apply for campaigns on Decisional.",
         );
@@ -194,6 +195,8 @@ export class ApplicationService {
           maxFollowers: true,
           applicationDeadline: true,
           perInfluencerBudget: true,
+          maxInfluencers: true,
+          selectedInfluencers: true,
         },
       });
 
@@ -201,16 +204,23 @@ export class ApplicationService {
       if (campaign.status !== "ACTIVE")
         throw new Error("Campaign is not accepting applications");
       if (
+        campaign.maxInfluencers !== null &&
+        campaign.maxInfluencers !== undefined &&
+        campaign.selectedInfluencers >= campaign.maxInfluencers
+      ) {
+        throw new Error("This campaign has reached its maximum number of influencer slots.");
+      }
+      if (
         campaign.applicationDeadline &&
         new Date() > campaign.applicationDeadline
       )
         throw new Error("Application deadline has passed");
 
-      if (maxRelevantFollowers < campaign.minFollowers)
+      if (!hasHiddenSubscribers && maxRelevantFollowers < campaign.minFollowers)
         throw new Error(
           `Minimum ${campaign.minFollowers.toLocaleString()} followers required`,
         );
-      if (campaign.maxFollowers && maxRelevantFollowers > campaign.maxFollowers)
+      if (!hasHiddenSubscribers && campaign.maxFollowers && maxRelevantFollowers > campaign.maxFollowers)
         throw new Error(
           `Maximum ${campaign.maxFollowers.toLocaleString()} followers allowed`,
         );
@@ -256,6 +266,17 @@ export class ApplicationService {
         throw new Error("Application blocked. Please contact support.");
       }
 
+      if (fraudCheck.action === "REVIEW") {
+        logger.warn("Application flagged for admin review", {
+          userId,
+          campaignId: data.campaignId,
+          riskScore: fraudCheck.riskScore,
+          flags: fraudCheck.flags.map((f) => f.description),
+        });
+        // Create the application but mark it for review
+        // We'll set status to PENDING_REVIEW below instead of PENDING
+      }
+
       // 5. Trust Gate & Enterprise Velocity Guard
       const dealAmount = Math.max(
         data.proposedRate || 0,
@@ -291,7 +312,7 @@ export class ApplicationService {
             estimatedDelivery: data.estimatedDelivery
               ? new Date(data.estimatedDelivery)
               : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default 1 week
-            status: "PENDING",
+            status: fraudCheck.action === "REVIEW" ? "FLAGGED" : "PENDING",
           },
         });
 
@@ -369,6 +390,8 @@ export class ApplicationService {
                   productName: true,
                   productValue: true,
                   productDescription: true,
+                  maxInfluencers: true,
+                  selectedInfluencers: true,
                 },
               },
               influencer: {
@@ -387,6 +410,14 @@ export class ApplicationService {
 
           if (application.campaign.brandId !== brandProfile.id) {
             throw new Error("Not authorized to accept this application");
+          }
+
+          if (
+            application.campaign.maxInfluencers !== null &&
+            application.campaign.maxInfluencers !== undefined &&
+            application.campaign.selectedInfluencers >= application.campaign.maxInfluencers
+          ) {
+            throw new Error("This campaign has reached its maximum number of influencer slots.");
           }
 
           if (!["PENDING", "SHORTLISTED"].includes(application.status)) {

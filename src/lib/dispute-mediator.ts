@@ -11,6 +11,7 @@
 import prisma from "./db";
 import { logger } from "./logger";
 import { updateTrustAndLevel } from "./trust-engine";
+import { applyProgressivePenalty, ViolationCategory } from "./penalty-system";
 import {
   Dispute,
   Deal,
@@ -990,9 +991,30 @@ export async function applyResolution(
 
     // 5. Apply trust score changes (outside transaction for safety)
     if (analysis.verdict !== "ESCALATE") {
-      if (analysis.trustScoreChanges.influencer !== 0) {
+      if (analysis.verdict === "BRAND_FAVORED") {
+        let category: ViolationCategory = "OTHER";
+        if (dispute.type === "CONTENT_DELETED") category = "POST_DELETION";
+        else if (dispute.type === "TIMELINE") category = "MISSED_DEADLINE";
+        else if (dispute.type === "QUALITY") category = "OTHER";
+        else if (dispute.type === "PAYMENT") category = "PAYMENT_FRAUD";
+
+        try {
+          await applyProgressivePenalty(
+            influencerUserId,
+            category,
+            `Dispute resolution verdict brand favored: ${analysis.explanation || "Terms violation"}`,
+            deal.submittedContentUrl || undefined
+          );
+        } catch (penaltyError) {
+          logger.error("Failed to apply progressive penalty in dispute resolution", penaltyError, {
+            disputeId,
+            userId: influencerUserId,
+          });
+        }
+      } else if (analysis.trustScoreChanges.influencer !== 0) {
         await updateTrustAndLevel(influencerUserId, "DISPUTE_RESOLVED");
       }
+
       if (brandUserId && analysis.trustScoreChanges.brand !== 0) {
         await updateTrustAndLevel(brandUserId, "DISPUTE_RESOLVED");
       }

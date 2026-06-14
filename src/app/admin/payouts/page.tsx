@@ -349,7 +349,7 @@ export default function PayoutsAdminPage() {
                         {new Date(withdrawal.createdAt).toLocaleString("en-IN")}
                       </td>
                       <td style={{ padding: "16px", textAlign: "right" }}>
-                        {withdrawal.status === "PENDING" || withdrawal.status === "PROCESSING" ? (
+                        {withdrawal.status === "PENDING" || withdrawal.status === "PENDING_REVIEW" || withdrawal.status === "PROCESSING" ? (
                           <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
                             <button
                               type="button"
@@ -394,27 +394,29 @@ export default function PayoutsAdminPage() {
               {getUserName(draft.withdrawal.wallet.user)}
             </p>
 
-            <label className="label" htmlFor="payout-note">
-              {draft.action === "APPROVE"
-                ? "Bank reference / UTR / Razorpay payout ID"
-                : "Rejection reason"}
-            </label>
-            <textarea
-              id="payout-note"
-              className="input"
-              rows={4}
-              required={draft.action === "REJECT"}
-              value={draft.note}
-              onChange={(event) =>
-                setDraft({ ...draft, note: event.target.value })
-              }
-              placeholder={
-                draft.action === "APPROVE"
-                  ? "Optional reference for reconciliation"
-                  : "Explain why this payout is rejected"
-              }
-              style={{ resize: "vertical", minHeight: "104px", marginBottom: "18px" }}
-            />
+            {draft.action === "REJECT" ? (
+              <>
+                <label className="label" htmlFor="payout-note">
+                  Rejection reason
+                </label>
+                <textarea
+                  id="payout-note"
+                  className="input"
+                  rows={4}
+                  required
+                  value={draft.note}
+                  onChange={(event) =>
+                    setDraft({ ...draft, note: event.target.value })
+                  }
+                  placeholder="Explain why this payout is rejected"
+                  style={{ resize: "vertical", minHeight: "104px", marginBottom: "18px" }}
+                />
+              </>
+            ) : (
+              <div style={{ marginBottom: "18px", fontSize: "14px", color: "var(--color-text-secondary)" }}>
+                This will automatically trigger the Razorpay API to execute the transfer to the user's bank account.
+              </div>
+            )}
 
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", flexWrap: "wrap" }}>
               <button

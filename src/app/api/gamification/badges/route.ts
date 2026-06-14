@@ -19,8 +19,6 @@ export async function GET() {
       include: { badge: true },
     });
 
-    const _earnedBadgeIds = new Set(userBadges.map((ub: any) => ub.badgeId));
-
     // We want to return ALL badges, marking which ones are earned.
     // However, DB badge IDs are CUIDs, but match our BADGES constant by 'name'.
     // Let's map by name.

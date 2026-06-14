@@ -56,6 +56,7 @@ export class CampaignService {
       sortBy?: string;
       sortOrder?: "asc" | "desc";
       ownerOnly?: boolean;
+      search?: string;
     },
   ) {
     try {
@@ -119,6 +120,18 @@ export class CampaignService {
         const city = params.city.trim();
         if (city) {
           andConditions.push({ targetCities: { has: city } });
+        }
+      }
+
+      if (params.search) {
+        const search = params.search.trim();
+        if (search) {
+          andConditions.push({
+            OR: [
+              { title: { contains: search, mode: "insensitive" } },
+              { description: { contains: search, mode: "insensitive" } },
+            ],
+          });
         }
       }
 
@@ -472,6 +485,7 @@ export class CampaignService {
             guidelines,
             totalBudget: totalBudgetPaise,
             perInfluencerBudget: perInfluencerBudgetPaise,
+            maxInfluencers: data.maxInfluencers ? Number(data.maxInfluencers) : null,
             targetCategories,
             targetCities,
             targetLanguages,

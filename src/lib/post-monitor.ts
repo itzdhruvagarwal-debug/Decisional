@@ -302,35 +302,21 @@ async function handlePostFailure(
       });
     }
 
-    // 7. Penalize influencer trust score
+    // 7. Apply progressive penalty and record violation
     if (deal.influencer?.userId) {
       try {
-        await updateTrustAndLevel(deal.influencer.userId, "POST_DELETED");
-        logger.warn("Trust score penalized for post failure", {
-          userId: deal.influencer.userId,
-          dealId: deal.id,
-          status,
-          monitoringDay,
-        });
-      } catch (trustError) {
-        logger.error(
-          "Failed to update trust score after post failure",
-          trustError,
-          {
-            dealId: deal.id,
-          },
+        await applyProgressivePenalty(
+          deal.influencer.userId,
+          "POST_DELETION",
+          `Post ${status.toLowerCase()} on day ${monitoringDay} of 30-day monitoring window for deal ${deal.id}`,
+          deal.postUrl || undefined
         );
+      } catch (penaltyError) {
+        logger.error("Failed to apply progressive penalty after post failure", penaltyError, {
+          dealId: deal.id,
+          userId: deal.influencer.userId,
+        });
       }
-    }
-
-    // 8. Apply progressive strike handling so post deletion escalates.
-    if (deal.influencer?.userId) {
-      await applyProgressivePenalty(
-        deal.influencer.userId,
-        "POST_DELETION",
-        `Post ${status.toLowerCase()} on day ${monitoringDay} of 30-day monitoring window`,
-        deal.postUrl || undefined,
-      );
     }
   } catch (error) {
     logger.error("PostMonitor handlePostFailure error", error, {

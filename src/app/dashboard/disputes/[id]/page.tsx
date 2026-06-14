@@ -40,6 +40,12 @@ export default function DisputeDetailPage({
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [escalateReason, setEscalateReason] = useState("");
   const [showEscalateForm, setShowEscalateForm] = useState(false);
+  const [toasts, setToasts] = useState<Array<{id: number; type: "success" | "error" | "info"; message: string}>>([]);
+  const showToast = (type: "success" | "error" | "info", message: string) => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, type, message }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
+  };
 
   const fetchDispute = useCallback(() => {
     fetch(`/api/disputes/${id}`)
@@ -77,7 +83,7 @@ export default function DisputeDetailPage({
             }
           }
         } else if (data.error) {
-          alert(data.error);
+          showToast("error", data.error);
         }
       })
       .catch((err) => console.error(err))
@@ -108,17 +114,17 @@ export default function DisputeDetailPage({
 
       const data = await res.json();
       if (data.success) {
-        alert("Evidence added successfully");
+        showToast("success", "Evidence added successfully");
         setShowEvidenceForm(false);
         setEvidenceUrl("");
         setEvidenceDesc("");
         fetchDispute();
       } else {
-        alert(data.error || "Failed to add evidence");
+        showToast("error", data.error || "Failed to add evidence");
       }
     } catch (error) {
       console.error(error);
-      alert("Something went wrong");
+      showToast("error", "Something went wrong");
     } finally {
       setIsSubmitting(false);
     }
@@ -140,15 +146,15 @@ export default function DisputeDetailPage({
       });
       const data = await res.json();
       if (data.success) {
-        alert(data.message);
+        showToast("success", data.message);
         setShowEscalateForm(false);
         fetchDispute();
       } else {
-        alert(data.error || "Action failed");
+        showToast("error", data.error || "Action failed");
       }
     } catch (error) {
       console.error(error);
-      alert("Something went wrong");
+      showToast("error", "Something went wrong");
     } finally {
       setActionLoading(null);
     }
@@ -238,6 +244,27 @@ export default function DisputeDetailPage({
     <div
       style={{ display: "flex", minHeight: "100vh", flexDirection: "column" }}
     >
+      {toasts.length > 0 && (
+        <div style={{ position: "fixed", top: 24, right: 24, zIndex: 9999, display: "flex", flexDirection: "column", gap: "8px", maxWidth: "400px" }}>
+          {toasts.map(t => (
+            <div key={t.id} style={{
+              padding: "12px 20px",
+              borderRadius: "10px",
+              color: "#fff",
+              fontSize: "14px",
+              fontWeight: 500,
+              background: t.type === "success" ? "linear-gradient(135deg, #059669, #10b981)" : t.type === "error" ? "linear-gradient(135deg, #dc2626, #ef4444)" : "linear-gradient(135deg, #2563eb, #3b82f6)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              animation: "slideInRight 0.3s ease-out",
+              cursor: "pointer",
+            }} onClick={() => setToasts(prev => prev.filter(x => x.id !== t.id))}>
+              {t.type === "success" ? "✓ " : t.type === "error" ? "✕ " : "ℹ "}{t.message}
+            </div>
+          ))}
+        </div>
+      )}
       {/* Header */}
       <header
         className="glass"

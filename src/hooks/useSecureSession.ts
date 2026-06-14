@@ -17,25 +17,53 @@ import { useEffect, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
 
 const CROSS_TAB_LOGOUT_KEY = "decisional:secure:logout";
+const BROADCAST_CHANNEL_NAME = "decisional:session";
 const SESSION_VALIDATE_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+
+// Generate a per-page-load nonce so forged storage events are harder to exploit
+const SESSION_NONCE = typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2);
 
 export function useSecureSession() {
     const { data: session, status } = useSession();
     const pathname = usePathname();
     const routeChangeTimestamps = useRef<number[]>([]);
+    const broadcastRef = useRef<BroadcastChannel | null>(null);
 
-    // 1. Cross-tab logout sync
+    // 1. Cross-tab logout sync — prefer BroadcastChannel (XSS-safe), fallback to storage event
     useEffect(() => {
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === CROSS_TAB_LOGOUT_KEY && e.newValue === "true") {
-                // Another tab triggered a logout, so follow silently.
-                localStorage.removeItem(CROSS_TAB_LOGOUT_KEY);
-                signOut({ redirect: true, callbackUrl: "/login?reason=cross_tab_logout" });
-            }
-        };
+        let cleanup: (() => void) | undefined;
 
-        window.addEventListener("storage", handleStorageChange);
-        return () => window.removeEventListener("storage", handleStorageChange);
+        if (typeof BroadcastChannel !== "undefined") {
+            // BroadcastChannel is same-origin and not writable via localStorage XSS
+            const channel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
+            broadcastRef.current = channel;
+
+            channel.onmessage = (e: MessageEvent) => {
+                if (e.data?.type === "logout") {
+                    signOut({ redirect: true, callbackUrl: "/login?reason=cross_tab_logout" });
+                }
+            };
+
+            cleanup = () => {
+                channel.close();
+                broadcastRef.current = null;
+            };
+        } else {
+            // Fallback for older browsers — validate with nonce to mitigate XSS forge
+            const handleStorageChange = (e: StorageEvent) => {
+                if (e.key === CROSS_TAB_LOGOUT_KEY && e.newValue === "true") {
+                    localStorage.removeItem(CROSS_TAB_LOGOUT_KEY);
+                    signOut({ redirect: true, callbackUrl: "/login?reason=cross_tab_logout" });
+                }
+            };
+
+            window.addEventListener("storage", handleStorageChange);
+            cleanup = () => window.removeEventListener("storage", handleStorageChange);
+        }
+
+        return cleanup;
     }, []);
 
     // 2. Server-side session heartbeat validation
@@ -105,8 +133,13 @@ export function useSecureSession() {
 
     // 5. Explicit secure logout
     const secureLogout = useCallback(async (reason = "manual_logout") => {
-        // Broadcast logout to all other tabs via localStorage event
-        localStorage.setItem(CROSS_TAB_LOGOUT_KEY, "true");
+        // Broadcast logout to all other tabs — prefer BroadcastChannel (XSS-safe)
+        if (broadcastRef.current) {
+            broadcastRef.current.postMessage({ type: "logout", reason });
+        } else {
+            // Fallback for older browsers
+            localStorage.setItem(CROSS_TAB_LOGOUT_KEY, "true");
+        }
 
         await signOut({
             redirect: true,

@@ -184,6 +184,7 @@ function getNavIcon(label: string): AppIconName {
     "Create Campaign": "plus",
     Campaigns: "campaigns",
     "My Campaigns": "campaigns",
+    "My Applications": "deals",
     "Find Influencers": "search",
     "My Deals": "deals",
     Wallet: "wallet",
@@ -336,7 +337,10 @@ export default function DashboardShell({
       : []),
     // Show Campaigns only for Influencers (Browse)
     ...(!isBrandOrIndividual
-      ? [{ icon: "CP", label: "Campaigns", href: "/dashboard/campaigns" }]
+      ? [
+        { icon: "CP", label: "Campaigns", href: "/dashboard/campaigns" },
+        { icon: "DL", label: "My Applications", href: "/dashboard/applications" },
+      ]
       : [
         {
           icon: "FI",

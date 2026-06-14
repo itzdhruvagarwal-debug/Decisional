@@ -113,7 +113,9 @@ export async function getYouTubeChannel(
         channel.snippet.thumbnails?.high?.url ||
         channel.snippet.thumbnails?.default?.url ||
         "",
-      subscriberCount: parseInt(channel.statistics.subscriberCount || "0"),
+      subscriberCount: channel.statistics.hiddenSubscriberCount === true || channel.statistics.hiddenSubscriberCount === "true"
+        ? -1
+        : parseInt(channel.statistics.subscriberCount || "0"),
       videoCount: parseInt(channel.statistics.videoCount || "0"),
       viewCount: parseInt(channel.statistics.viewCount || "0"),
       country: channel.snippet.country,
@@ -158,7 +160,9 @@ export async function getYouTubeChannelByToken(
       description: channel.snippet.description || "",
       customUrl: channel.snippet.customUrl || "",
       thumbnail: channel.snippet.thumbnails?.high?.url || "",
-      subscriberCount: parseInt(channel.statistics.subscriberCount || "0"),
+      subscriberCount: channel.statistics.hiddenSubscriberCount === true || channel.statistics.hiddenSubscriberCount === "true"
+        ? -1
+        : parseInt(channel.statistics.subscriberCount || "0"),
       videoCount: parseInt(channel.statistics.videoCount || "0"),
       viewCount: parseInt(channel.statistics.viewCount || "0"),
       country: channel.snippet.country,

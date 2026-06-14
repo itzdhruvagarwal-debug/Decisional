@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -97,18 +97,64 @@ export default function CampaignsClient({ user }: { user: any }) {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortBy, setSortBy] = useState("newest");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  
   const canCreateCampaign = user?.userType === "BRAND";
 
+  // Debounce search input
   useEffect(() => {
-    const query = canCreateCampaign
-      ? "scope=mine&status=ALL"
-      : "status=ACTIVE";
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
-    fetch(`/api/campaigns?${query}`, { cache: "no-store" })
+  useEffect(() => {
+    setLoading(true);
+    const queryParams = new URLSearchParams();
+
+    if (canCreateCampaign) {
+      queryParams.set("scope", "mine");
+      queryParams.set("status", "ALL");
+    } else {
+      queryParams.set("status", "ACTIVE");
+    }
+
+    if (selectedCategory !== "All") {
+      queryParams.set("category", selectedCategory);
+    }
+
+    if (debouncedSearch.trim()) {
+      queryParams.set("search", debouncedSearch.trim());
+    }
+
+    // Sort mappings
+    if (sortBy === "budget_high") {
+      queryParams.set("sortBy", "perInfluencerBudget");
+      queryParams.set("sortOrder", "desc");
+    } else if (sortBy === "budget_low") {
+      queryParams.set("sortBy", "perInfluencerBudget");
+      queryParams.set("sortOrder", "asc");
+    } else if (sortBy === "deadline") {
+      queryParams.set("sortBy", "applicationDeadline");
+      queryParams.set("sortOrder", "asc");
+    } else {
+      queryParams.set("sortBy", "createdAt");
+      queryParams.set("sortOrder", "desc");
+    }
+
+    queryParams.set("page", String(page));
+    queryParams.set("limit", "12"); // 12 items per page
+
+    fetch(`/api/campaigns?${queryParams.toString()}`, { cache: "no-store" })
       .then((res) => res.json())
       .then((payload) => {
         const rawCampaigns = payload?.data?.campaigns || payload?.campaigns || [];
+        setTotalPages(payload?.data?.totalPages || payload?.totalPages || 1);
 
         const mapped: Campaign[] = rawCampaigns.map((campaign: any) => ({
           id: campaign.id,
@@ -138,41 +184,11 @@ export default function CampaignsClient({ user }: { user: any }) {
         console.error(error);
         setLoading(false);
       });
-  }, [canCreateCampaign]);
+  }, [canCreateCampaign, selectedCategory, debouncedSearch, sortBy, page]);
 
   const filteredCampaigns = useMemo(() => {
-    return campaigns
-      .filter((campaign) => {
-        if (
-          selectedCategory !== "All" &&
-          !campaign.targetCategories.includes(selectedCategory)
-        ) {
-          return false;
-        }
-        if (
-          searchQuery &&
-          !campaign.title.toLowerCase().includes(searchQuery.toLowerCase())
-        ) {
-          return false;
-        }
-        return true;
-      })
-      .sort((a, b) => {
-        if (sortBy === "budget_high") {
-          return b.perInfluencerBudget - a.perInfluencerBudget;
-        }
-        if (sortBy === "budget_low") {
-          return a.perInfluencerBudget - b.perInfluencerBudget;
-        }
-        if (sortBy === "deadline") {
-          return (
-            new Date(a.postingDeadline).getTime() -
-            new Date(b.postingDeadline).getTime()
-          );
-        }
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      });
-  }, [campaigns, selectedCategory, searchQuery, sortBy]);
+    return campaigns;
+  }, [campaigns]);
 
   return (
     <div>
@@ -216,7 +232,10 @@ export default function CampaignsClient({ user }: { user: any }) {
             <select
               className="input"
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                setPage(1);
+              }}
               style={{ minWidth: "160px" }}
             >
               <option value="newest">Newest</option>
@@ -239,7 +258,10 @@ export default function CampaignsClient({ user }: { user: any }) {
             <button
               key={category}
               className="btn"
-              onClick={() => setSelectedCategory(category)}
+              onClick={() => {
+                setSelectedCategory(category);
+                setPage(1);
+              }}
               style={{
                 whiteSpace: "nowrap",
                 background:
@@ -384,6 +406,39 @@ export default function CampaignsClient({ user }: { user: any }) {
               </div>
             </article>
           ))}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "12px",
+            marginTop: "32px",
+            marginBottom: "16px",
+          }}
+        >
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="btn btn-secondary"
+            style={{ minWidth: "90px" }}
+          >
+            Previous
+          </button>
+          <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--color-text-secondary)" }}>
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="btn btn-secondary"
+            style={{ minWidth: "90px" }}
+          >
+            Next
+          </button>
         </div>
       )}
     </div>
