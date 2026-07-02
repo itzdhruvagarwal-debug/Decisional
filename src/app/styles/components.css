@@ -1,0 +1,742 @@
+/* ==================== SECTIONS ==================== */
+
+.section {
+  padding: 100px 0;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 60px 0;
+  }
+}
+
+.section-title {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 800;
+  margin-bottom: 16px;
+  text-align: center;
+  letter-spacing: 0;
+}
+
+.section-subtitle {
+  font-size: clamp(15px, 2vw, 18px);
+  color: var(--color-text-secondary);
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 48px;
+  line-height: 1.7;
+}
+
+/* ==================== DIVIDER ==================== */
+
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent,
+      var(--color-border),
+      transparent);
+  margin: 32px 0;
+}
+
+/* ==================== LOADING ==================== */
+
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ==================== TOASTS ==================== */
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 16px 24px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  animation: slideInUp 0.3s ease;
+}
+
+.toast-success {
+  border-left: 3px solid var(--color-accent-emerald);
+}
+
+.toast-error {
+  border-left: 3px solid var(--color-accent-rose);
+}
+
+@media (max-width: 640px) {
+  .toast {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+/* ==================== STAT CARD ==================== */
+
+.stat-card {
+  text-align: center;
+  padding: 32px 16px;
+}
+
+.stat-value {
+  font-size: clamp(36px, 5vw, 48px);
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: 0;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 500;
+}
+
+/* ==================== TRUST METER ==================== */
+
+.trust-meter {
+  height: 8px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.trust-meter-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow);
+}
+
+/* ==================== XP BAR ==================== */
+
+.xp-bar {
+  height: 12px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.xp-bar-fill {
+  height: 100%;
+  background: var(--gradient-secondary);
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow);
+  position: relative;
+}
+
+.xp-bar-glow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 80px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
+  animation: shimmer 2s infinite;
+}
+
+/* ==================== NAVBAR ==================== */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 12px 0;
+  transition: all var(--transition-normal);
+}
+
+.navbar-scrolled {
+  padding: 8px 0;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 110;
+}
+
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--color-text-primary);
+  border-radius: 2px;
+  transition: all var(--transition-normal);
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Mobile Nav */
+.mobile-nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 90;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.mobile-nav-overlay.active {
+  opacity: 1;
+}
+
+.mobile-nav {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: min(320px, 85vw);
+  height: 100vh;
+  background: var(--color-bg-secondary);
+  border-left: 1px solid var(--color-border);
+  z-index: 95;
+  padding: 80px 24px 24px;
+  transition: right var(--transition-slow);
+  overflow-y: auto;
+}
+
+.mobile-nav.active {
+  right: 0;
+}
+
+.mobile-nav a {
+  display: block;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.mobile-nav a:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.mobile-nav .mobile-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 768px) {
+
+  .nav-links,
+  .nav-auth-buttons {
+    display: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .mobile-nav-overlay,
+  .mobile-nav {
+    display: block;
+  }
+}
+
+/* ==================== DASHBOARD SIDEBAR ==================== */
+
+.sidebar {
+  width: 260px;
+  background: var(--color-bg-secondary);
+  border-right: 1px solid var(--color-border);
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 50;
+  transition:
+    width var(--transition-normal),
+    transform var(--transition-normal);
+}
+
+.sidebar.collapsed {
+  width: 72px;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 45;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  pointer-events: none;
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dashboard-main {
+  flex: 1;
+  min-width: 0;
+  /* Prevents horizontal flex blowout */
+  margin-left: 260px;
+  transition: margin-left var(--transition-normal);
+  min-height: 100vh;
+}
+
+.sidebar.collapsed~.dashboard-main,
+.dashboard-main.collapsed {
+  margin-left: 72px;
+}
+
+.sidebar-toggle-mobile {
+  display: none;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: 18px;
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    transform: translateX(-100%);
+    z-index: 55;
+    width: 280px !important;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .dashboard-main {
+    margin-left: 0 !important;
+  }
+
+  .sidebar-toggle-mobile {
+    display: flex;
+  }
+}
+
+/* Sidebar nav link */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: var(--radius-md);
+  margin-bottom: 2px;
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+}
+
+.sidebar-link:hover {
+  background: rgba(99, 102, 241, 0.08);
+  color: var(--color-text-primary);
+}
+
+.sidebar-link.active {
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--color-primary-light);
+}
+
+.sidebar-link.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--gradient-primary);
+  border-radius: 0 3px 3px 0;
+}
+
+/* ==================== RESPONSIVE HELPERS ==================== */
+
+.hide-mobile {
+  display: block;
+}
+
+.show-mobile {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .show-mobile {
+    display: block !important;
+  }
+}
+
+/* ==================== ENHANCED COMPONENTS ==================== */
+
+/* Feature Card Icon Container */
+.feature-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg,
+      rgba(99, 102, 241, 0.12),
+      rgba(236, 72, 153, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin-bottom: 20px;
+  transition: transform var(--transition-spring);
+}
+
+.card:hover .feature-icon {
+  transform: scale(1.1) rotate(-3deg);
+}
+
+/* Mesh Background */
+.mesh-bg {
+  background-image: var(--gradient-mesh);
+  background-attachment: fixed;
+}
+
+/* Noise texture overlay */
+.noise-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.015;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* Orb background effect */
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+/* Pricing card popular */
+.pricing-popular {
+  border: 2px solid var(--color-primary) !important;
+  position: relative;
+}
+
+.pricing-popular::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: var(--radius-lg);
+  background: var(--gradient-primary);
+  z-index: -1;
+  opacity: 0.15;
+}
+
+/* ==================== IMPROVED RESPONSIVENESS ==================== */
+
+@media (max-width: 480px) {
+  .btn-lg {
+    padding: 14px 24px;
+    font-size: 15px;
+    width: 100%;
+  }
+
+  .stat-card {
+    padding: 20px 12px;
+  }
+
+  h1 {
+    font-size: clamp(28px, 7vw, 40px) !important;
+  }
+}
+
+/* Responsive Dashboard Content */
+.dashboard-content {
+  padding: 24px;
+}
+
+@media (max-width: 640px) {
+  .dashboard-content {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 16px !important;
+  }
+
+  .sidebar-toggle-mobile {
+    padding: 8px 12px;
+    /* larger touch target */
+  }
+}
+
+/* Dashboard Sub-Header (Sticky) */
+.dashboard-sub-header {
+  position: sticky;
+  top: 64px;
+  /* Matches DashboardShell header height */
+  z-index: 30;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--color-border);
+  margin: -24px -24px 24px -24px;
+  background: rgba(18, 18, 31, 0.85);
+  /* Changed to match dark theme glass */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+}
+
+/* Dashboard sub-header inherits dark mode by default instead of preferring scheme, since the whole app is dark */
+
+@media (max-width: 640px) {
+  .dashboard-sub-header {
+    margin: -16px -16px 20px -16px;
+    /* Match mobile padding */
+    padding: 16px;
+    top: 64px;
+  }
+}
+
+
+
+/* ==================== TOGGLE SWITCH ==================== */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked+.slider {
+  background-color: var(--color-primary);
+}
+
+input:checked+.slider:before {
+  transform: translateX(20px);
+}
+
+.slider.round {
+  border-radius: 24px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* ==================== PWA INSTALL BUTTON & DIALOG ==================== */
+
+.pwa-store-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  text-align: left;
+  min-height: 48px;
+  box-shadow: var(--shadow-sm);
+}
+
+.pwa-store-button:hover {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.pwa-store-button-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary-light);
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.pwa-store-button-copy {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.pwa-store-button-copy span {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pwa-store-button-copy small {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+/* Fallback Installation Dialogue Overlay */
+.pwa-install-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.pwa-install-dialog {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-lg), var(--shadow-glow-primary);
+  position: relative;
+  animation: slideInUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pwa-install-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  color: var(--color-primary-light);
+  font-size: 24px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.pwa-install-dialog h2 {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: var(--color-text-primary);
+}
+
+.pwa-install-dialog p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.pwa-install-steps {
+  text-align: left;
+  margin-bottom: 24px;
+  padding-left: 20px;
+  font-size: 13.5px;
+  color: var(--color-text-secondary);
+}
+
+.pwa-install-steps li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.pwa-install-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.pwa-install-actions .btn {
+  flex: 1;
+}
