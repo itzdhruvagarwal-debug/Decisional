@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 import { auth } from "@/lib/auth";
 import { apiWrapper } from "@/lib/api-wrapper";
 import prisma from "@/lib/db";
@@ -43,8 +44,8 @@ export const GET = apiWrapper(async (req, { params }) => {
       1,
       1,
     );
-  } catch (_e) {
-    // Fallback or ignore
+  } catch (error) {
+    logger.warn("Failed to fetch viewer wallet in influencer profile detail API", { error });
   }
 
   return NextResponse.json({

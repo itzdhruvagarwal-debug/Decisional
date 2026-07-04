@@ -5,7 +5,7 @@ import prisma from "@/lib/db";
 import { verify } from "otplib";
 import { logger } from "@/lib/logger";
 import { decrypt } from "@/lib/encryption";
-import { randomBytes } from "crypto";
+import { randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -32,7 +32,7 @@ async function _handler_POST(req: NextRequest) {
     }
 
     const { code } = await req.json();
-    if (!code || code.length !== 6) {
+    if (code?.length !== 6) {
       return NextResponse.json(
         { error: "Valid 6-digit code is required" },
         { status: 400 },
@@ -44,7 +44,7 @@ async function _handler_POST(req: NextRequest) {
       select: { id: true, twoFactorSecret: true, isTwoFactorEnabled: true },
     });
 
-    if (!user || !user.twoFactorSecret) {
+    if (!user?.twoFactorSecret) {
       return NextResponse.json(
         { error: "2FA setup not initiated" },
         { status: 400 },

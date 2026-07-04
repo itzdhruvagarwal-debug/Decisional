@@ -14,8 +14,8 @@ async function _handler_GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "50", 10);
+    const page = Number.parseInt(searchParams.get("page") || "1", 10);
+    const limit = Number.parseInt(searchParams.get("limit") || "50", 10);
     const skip = (page - 1) * limit;
 
     const total = await prisma.user.count({
@@ -72,12 +72,19 @@ async function _handler_GET(req: NextRequest) {
       total > 0 ? roundPaise(unattributedEarnings / total) : 0;
 
     const formattedReferrals = referrals.map((ref) => {
-      const isActive =
-        ref.influencerProfile
-          ? ref.influencerProfile.completedDeals > 0
-          : ref.brandProfile
-          ? (ref.brandProfile.totalSpent > 0 || ref.brandProfile.totalCampaigns > 0)
-          : false;
+      let isActive = false;
+      if (ref.influencerProfile) {
+        isActive = ref.influencerProfile.completedDeals > 0;
+      } else if (ref.brandProfile) {
+        isActive = ref.brandProfile.totalSpent > 0 || ref.brandProfile.totalCampaigns > 0;
+      }
+
+      const emailParts = ref.email.split("@");
+      const part1 = emailParts[0];
+      const part2 = emailParts[1];
+      const maskedEmail = (part1 && part2)
+        ? (part1.length <= 2 ? `${part1}***@${part2}` : `${part1.slice(0, 2)}***@${part2}`)
+        : ref.email;
 
       return {
         id: ref.id,
@@ -85,7 +92,7 @@ async function _handler_GET(req: NextRequest) {
           ref.influencerProfile?.displayName ||
           ref.brandProfile?.companyName ||
           ref.email.split("@")[0],
-        email: ref.email.replace(/(.{2}).*(@.*)/, "$1***$2"), // Mask email for privacy
+        email: maskedEmail,
         joinedAt: ref.createdAt,
         status: isActive ? "ACTIVE" : "PENDING",
         verified: ref.verificationLevel !== "NONE",

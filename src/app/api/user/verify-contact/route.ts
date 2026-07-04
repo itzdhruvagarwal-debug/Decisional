@@ -4,7 +4,7 @@ import { createActivityLog } from "@/lib/audit";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
 import { apiWrapper } from "@/lib/api-wrapper";
 import { redis } from "@/lib/redis";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -16,6 +16,47 @@ const verifyContactSchema = z.object({
         .min(4, "Verification code is too short")
         .max(10, "Verification code is too long"),
 });
+
+async function verifyEmailCode(userId: string, code: string): Promise<boolean> {
+    const submittedHash = createHash("sha256").update(code).digest("hex");
+    const key = `email-contact-otp:${userId}`;
+    const storedHash = await redis.get(key) || "";
+
+    const { timingSafeEqual } = await import("node:crypto");
+
+    let isValidCode = false;
+    if (storedHash.length > 0) {
+        try {
+            const storedBuffer = Buffer.from(storedHash, "utf8");
+            const submittedBuffer = Buffer.from(submittedHash, "utf8");
+            if (storedBuffer.length === submittedBuffer.length) {
+                isValidCode = timingSafeEqual(storedBuffer, submittedBuffer);
+            }
+        } catch {
+            isValidCode = false;
+        }
+    }
+
+    if (isValidCode) {
+        await redis.del(key);
+    }
+    return isValidCode;
+}
+
+async function verifyPhoneCode(phone: string, code: string, userId: string): Promise<boolean> {
+    const { verifyOTP } = await import("@/lib/sms");
+    const result = await verifyOTP(phone, code, {
+        purpose: "phone_verification",
+    });
+
+    if (!result.success) {
+        logger.warn("Invalid phone OTP verification attempt", {
+            userId,
+            error: result.error,
+        });
+    }
+    return result.success;
+}
 
 export const POST = apiWrapper(async function POST(req: NextRequest) {
     try {
@@ -52,67 +93,30 @@ export const POST = apiWrapper(async function POST(req: NextRequest) {
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
         });
-        if (!user)
+        if (!user) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
 
-        const updateData: { emailVerified?: boolean; phoneVerified?: boolean } = {};
-
+        let isVerified = false;
         if (type === "email") {
-            // OTPs are stored as SHA-256 hashes in Redis
-            // Compare the hash of the submitted code against the stored hash
-            const submittedHash = createHash("sha256").update(code).digest("hex");
-            const key = `email-contact-otp:${session.user.id}`;
-            const storedHash = await redis.get(key) || "";
+            isVerified = await verifyEmailCode(session.user.id, code);
+        } else if (type === "phone") {
+            isVerified = await verifyPhoneCode(user.phone || "", code, session.user.id);
+        }
 
-            // Use constant-time comparison via timingSafeEqual to prevent timing attacks
-            const { timingSafeEqual } = await import("crypto");
-
-            let isValidCode = false;
-            if (storedHash.length > 0) {
-                try {
-                    const storedBuffer = Buffer.from(storedHash, "utf8");
-                    const submittedBuffer = Buffer.from(submittedHash, "utf8");
-                    // Only compare if same length to avoid length-leak
-                    if (storedBuffer.length === submittedBuffer.length) {
-                        isValidCode = timingSafeEqual(storedBuffer, submittedBuffer);
-                    }
-                } catch {
-                    isValidCode = false;
-                }
-            }
-
-            if (!isValidCode) {
+        if (!isVerified) {
+            if (type === "email") {
                 logger.warn("Invalid or expired email OTP verification attempt", {
                     userId: session.user.id,
                 });
-                return NextResponse.json(
-                    { error: "Invalid or expired verification code" },
-                    { status: 400 },
-                );
             }
-
-            updateData.emailVerified = true;
-            await redis.del(key);
-        } else if (type === "phone") {
-            const { verifyOTP } = await import("@/lib/sms");
-            const result = await verifyOTP(user.phone || "", code, {
-                purpose: "phone_verification",
-            });
-
-            if (!result.success) {
-                logger.warn("Invalid phone OTP verification attempt", {
-                    userId: session.user.id,
-                    error: result.error,
-                });
-                // Don't expose the underlying SMS service error to the client
-                return NextResponse.json(
-                    { error: "Invalid or expired verification code" },
-                    { status: 400 },
-                );
-            }
-
-            updateData.phoneVerified = true;
+            return NextResponse.json(
+                { error: "Invalid or expired verification code" },
+                { status: 400 },
+            );
         }
+
+        const updateData = type === "email" ? { emailVerified: true } : { phoneVerified: true };
 
         if (Object.keys(updateData).length > 0) {
             await prisma.user.update({

@@ -16,46 +16,21 @@ import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 function bytesToAscii(bytes: Uint8Array): string {
-  return String.fromCharCode(...bytes);
+  return String.fromCodePoint(...bytes);
+}
+
+function matchesHeader(bytes: Uint8Array, pattern: number[]): boolean {
+  if (bytes.length < pattern.length) return false;
+  return pattern.every((val, i) => bytes[i] === val);
 }
 
 function detectMimeFromMagicBytes(bytes: Uint8Array): string | null {
   if (bytes.length < 12) return null;
 
-  // PDF: %PDF
-  if (
-    bytes[0] === 0x25 &&
-    bytes[1] === 0x50 &&
-    bytes[2] === 0x44 &&
-    bytes[3] === 0x46
-  ) {
-    return "application/pdf";
-  }
-
-  // JPEG: FF D8 FF
-  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
-    return "image/jpeg";
-  }
-
-  // PNG
-  if (
-    bytes[0] === 0x89 &&
-    bytes[1] === 0x50 &&
-    bytes[2] === 0x4e &&
-    bytes[3] === 0x47
-  ) {
-    return "image/png";
-  }
-
-  // GIF
-  if (
-    bytes[0] === 0x47 &&
-    bytes[1] === 0x49 &&
-    bytes[2] === 0x46 &&
-    bytes[3] === 0x38
-  ) {
-    return "image/gif";
-  }
+  if (matchesHeader(bytes, [0x25, 0x50, 0x44, 0x46])) return "application/pdf";
+  if (matchesHeader(bytes, [0xff, 0xd8, 0xff])) return "image/jpeg";
+  if (matchesHeader(bytes, [0x89, 0x50, 0x4e, 0x47])) return "image/png";
+  if (matchesHeader(bytes, [0x47, 0x49, 0x46, 0x38])) return "image/gif";
 
   // WEBP: RIFF....WEBP
   if (
@@ -66,14 +41,7 @@ function detectMimeFromMagicBytes(bytes: Uint8Array): string | null {
   }
 
   // WEBM (EBML)
-  if (
-    bytes[0] === 0x1a &&
-    bytes[1] === 0x45 &&
-    bytes[2] === 0xdf &&
-    bytes[3] === 0xa3
-  ) {
-    return "video/webm";
-  }
+  if (matchesHeader(bytes, [0x1a, 0x45, 0xdf, 0xa3])) return "video/webm";
 
   // MP4 / MOV / HEIC (ftyp box at offset 4)
   if (bytesToAscii(bytes.slice(4, 8)) === "ftyp") {
@@ -329,7 +297,8 @@ async function handleFormDataUpload(req: NextRequest, session: UploadSession) {
     let formData: FormData;
     try {
       formData = await req.formData();
-    } catch (_e) {
+    } catch (error) {
+      logger.warn("Failed to parse form data in upload API", { error });
       return ApiResponse.error("Invalid multipart payload");
     }
 

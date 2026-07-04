@@ -46,7 +46,7 @@ async function _handler_GET() {
         time: act.createdAt.toISOString(),
         active:
           act.success &&
-          new Date().getTime() - act.createdAt.getTime() < 3600000 * 24, // Rough heuristic for active vs old session
+          Date.now() - act.createdAt.getTime() < 3600000 * 24, // Rough heuristic for active vs old session
         success: act.success,
       };
     });

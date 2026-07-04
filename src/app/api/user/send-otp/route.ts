@@ -24,6 +24,69 @@ const sendOtpSchema = z.discriminatedUnion("type", [
     }),
 ]);
 
+async function handleSendPhoneOtp(userId: string, contact: string) {
+    const normalizedPhone = normalizeIndianPhone(contact);
+    if (!normalizedPhone) {
+        return NextResponse.json(
+            { error: "Invalid Indian phone number format" },
+            { status: 400 },
+        );
+    }
+
+    const result = await sendOTP(normalizedPhone, {
+        purpose: "phone_verification",
+    });
+    if (!result.success) {
+        logger.warn("OTP send failed for phone", {
+            userId,
+            error: result.error,
+        });
+        return NextResponse.json(
+            {
+                error: result.retryAfterSeconds
+                    ? result.error
+                    : "Failed to send OTP. Please try again.",
+                ...(result.retryAfterSeconds
+                    ? { retryAfterSeconds: result.retryAfterSeconds }
+                    : {}),
+            },
+            { status: result.retryAfterSeconds ? 429 : 500 },
+        );
+    }
+
+    await prisma.user.update({
+        where: { id: userId },
+        data: { phone: normalizedPhone },
+    });
+
+    return NextResponse.json({
+        success: true,
+        message:
+            result.channel === "whatsapp"
+                ? "OTP sent on WhatsApp"
+                : "OTP sent by SMS",
+        channel: result.channel,
+        fallbackUsed: result.fallbackUsed,
+        ...(process.env.NODE_ENV !== "production" && result.otp
+            ? { otp: result.otp }
+            : {}),
+    });
+}
+
+async function handleSendEmailOtp(userId: string, contact: string) {
+    const otp = generateOTP();
+    const { createHash } = await import("node:crypto");
+    const otpHash = createHash("sha256").update(otp).digest("hex");
+
+    await redis.setex(`email-contact-otp:${userId}`, 600, otpHash);
+    await sendVerificationEmail(contact, otp);
+
+    return NextResponse.json({
+        success: true,
+        message: "OTP sent to email",
+    });
+}
+
 export const POST = apiWrapper(async function POST(req: NextRequest) {
     try {
         const session = await auth();
@@ -31,7 +94,6 @@ export const POST = apiWrapper(async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // --- Rate Limiting: Prevent OTP spam ---
         const otpRateLimit = await checkRateLimit(session.user.id, "AUTH");
         if (!otpRateLimit.success) {
             return NextResponse.json(
@@ -67,69 +129,9 @@ export const POST = apiWrapper(async function POST(req: NextRequest) {
         const { type, contact } = parsed.data;
 
         if (type === "phone") {
-            const normalizedPhone = normalizeIndianPhone(contact);
-            if (!normalizedPhone) {
-                return NextResponse.json(
-                    { error: "Invalid Indian phone number format" },
-                    { status: 400 },
-                );
-            }
-
-            const result = await sendOTP(normalizedPhone, {
-                purpose: "phone_verification",
-            });
-            if (!result.success) {
-                // Do NOT expose internal error details to client
-                logger.warn("OTP send failed for phone", {
-                    userId: session.user.id,
-                    error: result.error,
-                });
-                return NextResponse.json(
-                    {
-                        error: result.retryAfterSeconds
-                            ? result.error
-                            : "Failed to send OTP. Please try again.",
-                        ...(result.retryAfterSeconds
-                            ? { retryAfterSeconds: result.retryAfterSeconds }
-                            : {}),
-                    },
-                    { status: result.retryAfterSeconds ? 429 : 500 },
-                );
-            }
-
-            // Update user with the phone number only after OTP is successfully sent
-            await prisma.user.update({
-                where: { id: session.user.id },
-                data: { phone: normalizedPhone },
-            });
-
-            return NextResponse.json({
-                success: true,
-                message:
-                    result.channel === "whatsapp"
-                        ? "OTP sent on WhatsApp"
-                        : "OTP sent by SMS",
-                channel: result.channel,
-                fallbackUsed: result.fallbackUsed,
-                ...(process.env.NODE_ENV !== "production" && result.otp
-                    ? { otp: result.otp }
-                    : {}),
-            });
+            return handleSendPhoneOtp(session.user.id, contact);
         } else if (type === "email") {
-            // 2. Send Email OTP
-            const otp = generateOTP();
-
-            // Store OTP hash in Redis (NEVER store plaintext OTPs)
-            const { createHash } = await import("crypto");
-            const otpHash = createHash("sha256").update(otp).digest("hex");
-
-            await redis.setex(`email-contact-otp:${session.user.id}`, 600, otpHash);
-
-            await sendVerificationEmail(contact, otp);
-            return NextResponse.json({
-                success: true,
-                message: "OTP sent to email",
-            });
+            return handleSendEmailOtp(session.user.id, contact);
         }
 
         // TypeScript exhaustive check — this should never execute

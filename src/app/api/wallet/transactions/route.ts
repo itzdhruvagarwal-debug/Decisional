@@ -8,15 +8,15 @@ import { toCsv, csvResponse, paiseToRupees } from "@/lib/csv-export";
 import { format } from "date-fns";
 
 const querySchema = z.object({
-  page: z.preprocess((val) => Number(val), z.number().int().min(1).default(1)),
-  limit: z.preprocess((val) => Number(val), z.number().int().min(1).max(100).default(20)),
+  page: z.preprocess(Number, z.number().int().min(1).default(1)),
+  limit: z.preprocess(Number, z.number().int().min(1).max(100).default(20)),
   type: z.nativeEnum(TransactionType).optional(),
   status: z.nativeEnum(TransactionStatus).optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
 }).superRefine((data, ctx) => {
-  const startTs = data.startDate ? Date.parse(data.startDate) : NaN;
-  const endTs = data.endDate ? Date.parse(data.endDate) : NaN;
+  const startTs = data.startDate ? Date.parse(data.startDate) : Number.NaN;
+  const endTs = data.endDate ? Date.parse(data.endDate) : Number.NaN;
 
   if (data.startDate && Number.isNaN(startTs)) {
     ctx.addIssue({

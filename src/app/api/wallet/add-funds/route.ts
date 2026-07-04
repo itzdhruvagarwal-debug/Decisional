@@ -8,7 +8,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 const addFundsSchema = z.object({
   amount: z.preprocess(
-    (value) => Number(value),
+    Number,
     z
       .number()
       .int()

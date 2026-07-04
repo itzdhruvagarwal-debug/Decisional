@@ -227,32 +227,36 @@ export default function CreateCampaignClient() {
     });
   }, [formData.deliverables, formData.maxInfluencers]);
 
+function validateCampaignForm(formData: any) {
+  if (formData.requiresProduct && formData.totalBudget === 0) {
+    if (formData.productValue < 500) {
+      throw new Error("Product-only campaigns must specify a product value of at least ₹500");
+    }
+    if (formData.minFollowers > 10000) {
+      throw new Error("Product-only campaigns can only target influencers with up to 10,000 followers");
+    }
+  }
+  if (formData.targetCategories.length === 0) {
+    throw new Error("Please select at least one category");
+  }
+  if (formData.perInfluencerBudget > formData.totalBudget) {
+    throw new Error("Per influencer budget cannot exceed total budget");
+  }
+  if (formData.maxFollowers !== null && formData.maxFollowers > 0 && formData.maxFollowers < formData.minFollowers) {
+    throw new Error("Max followers must be greater than min followers");
+  }
+  if (!formData.contentDeadline || !formData.postingDeadline) {
+    throw new Error("Please select content and posting deadlines");
+  }
+}
+
   const handleSubmit = async (e: React.FormEvent, isDraft: boolean = false) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
     try {
-      if (formData.requiresProduct && formData.totalBudget === 0) {
-        if (formData.productValue < 500) {
-          throw new Error("Product-only campaigns must specify a product value of at least ₹500");
-        }
-        if (formData.minFollowers > 10000) {
-          throw new Error("Product-only campaigns can only target influencers with up to 10,000 followers");
-        }
-      }
-      if (formData.targetCategories.length === 0) {
-        throw new Error("Please select at least one category");
-      }
-      if (formData.perInfluencerBudget > formData.totalBudget) {
-        throw new Error("Per influencer budget cannot exceed total budget");
-      }
-      if (formData.maxFollowers !== null && formData.maxFollowers > 0 && formData.maxFollowers < formData.minFollowers) {
-        throw new Error("Max followers must be greater than min followers");
-      }
-      if (!formData.contentDeadline || !formData.postingDeadline) {
-        throw new Error("Please select content and posting deadlines");
-      }
+      validateCampaignForm(formData);
 
       const contentDeadline = new Date(`${formData.contentDeadline}T12:00:00.000Z`);
       const postingDeadline = new Date(`${formData.postingDeadline}T12:00:00.000Z`);
@@ -261,13 +265,13 @@ export default function CreateCampaignClient() {
         : null;
 
       if (Number.isNaN(contentDeadline.getTime()) || Number.isNaN(postingDeadline.getTime())) {
-        throw new Error("Invalid campaign deadlines");
+        throw new TypeError("Invalid campaign deadlines");
       }
       if (postingDeadline < contentDeadline) {
         throw new Error("Posting deadline must be after content deadline");
       }
       if (applicationDeadline && Number.isNaN(applicationDeadline.getTime())) {
-        throw new Error("Invalid application deadline");
+        throw new TypeError("Invalid application deadline");
       }
       if (applicationDeadline && applicationDeadline > contentDeadline) {
         throw new Error("Application deadline must be before content deadline");
@@ -398,11 +402,13 @@ export default function CreateCampaignClient() {
           <div className="form-group" style={{ marginBottom: "24px" }}>
             <label
               className="label"
+              htmlFor="campaign-title"
               style={{ color: "var(--color-text-primary)" }}
             >
               Campaign Title
             </label>
             <input
+              id="campaign-title"
               type="text"
               className="input"
               value={formData.title}
@@ -421,11 +427,13 @@ export default function CreateCampaignClient() {
           <div className="form-group" style={{ marginBottom: "24px" }}>
             <label
               className="label"
+              htmlFor="campaign-description"
               style={{ color: "var(--color-text-primary)" }}
             >
               Overview / Description
             </label>
             <textarea
+              id="campaign-description"
               className="input"
               style={{
                 minHeight: "120px",
@@ -444,11 +452,13 @@ export default function CreateCampaignClient() {
           <div className="form-group" style={{ marginBottom: "24px" }}>
             <label
               className="label"
+              htmlFor="campaign-requirements"
               style={{ color: "var(--color-text-primary)" }}
             >
               Requirements & Guidelines
             </label>
             <textarea
+              id="campaign-requirements"
               className="input"
               style={{
                 minHeight: "120px",
@@ -468,6 +478,7 @@ export default function CreateCampaignClient() {
           <div className="form-group" style={{ marginBottom: "24px" }}>
             <label
               className="label"
+              htmlFor="custom-category-input"
               style={{ color: "var(--color-text-primary)" }}
             >
               Target Categories (Select up to 5)
@@ -505,6 +516,7 @@ export default function CreateCampaignClient() {
 
             <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
               <input
+                id="custom-category-input"
                 type="text"
                 className="input"
                 placeholder="Enter custom category..."
@@ -546,11 +558,13 @@ export default function CreateCampaignClient() {
           <div className="form-group" style={{ marginBottom: "24px" }}>
             <label
               className="label"
+              htmlFor="application-deadline"
               style={{ color: "var(--color-text-primary)" }}
             >
               Application Deadline (Optional)
             </label>
             <input
+              id="application-deadline"
               type="date"
               className="input"
               value={formData.applicationDeadline}
@@ -570,11 +584,13 @@ export default function CreateCampaignClient() {
             <div className="form-group">
               <label
                 className="label"
+                htmlFor="target-cities"
                 style={{ color: "var(--color-text-primary)" }}
               >
                 Target Cities (Comma Separated)
               </label>
               <input
+                id="target-cities"
                 type="text"
                 className="input"
                 placeholder="e.g. Mumbai, Delhi"
@@ -594,11 +610,13 @@ export default function CreateCampaignClient() {
             <div className="form-group">
               <label
                 className="label"
+                htmlFor="target-gender"
                 style={{ color: "var(--color-text-primary)" }}
               >
                 Target Gender
               </label>
               <select
+                id="target-gender"
                 className="input"
                 value={formData.targetGender}
                 onChange={(e) =>
@@ -624,11 +642,13 @@ export default function CreateCampaignClient() {
             <div className="form-group">
               <label
                 className="label"
+                htmlFor="target-age-min"
                 style={{ color: "var(--color-text-primary)" }}
               >
                 Min Target Age
               </label>
               <input
+                id="target-age-min"
                 type="number"
                 className="input"
                 placeholder="e.g. 18"
@@ -636,7 +656,7 @@ export default function CreateCampaignClient() {
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    targetAgeMin: e.target.value ? parseInt(e.target.value) : null,
+                    targetAgeMin: e.target.value ? Number.parseInt(e.target.value, 10) : null,
                   })
                 }
                 min={13}
@@ -649,11 +669,13 @@ export default function CreateCampaignClient() {
             <div className="form-group">
               <label
                 className="label"
+                htmlFor="target-age-max"
                 style={{ color: "var(--color-text-primary)" }}
               >
                 Max Target Age
               </label>
               <input
+                id="target-age-max"
                 type="number"
                 className="input"
                 placeholder="e.g. 35"
@@ -661,7 +683,7 @@ export default function CreateCampaignClient() {
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    targetAgeMax: e.target.value ? parseInt(e.target.value) : null,
+                    targetAgeMax: e.target.value ? Number.parseInt(e.target.value, 10) : null,
                   })
                 }
                 min={13}
@@ -677,18 +699,20 @@ export default function CreateCampaignClient() {
             <div className="form-group">
               <label
                 className="label"
+                htmlFor="min-followers"
                 style={{ color: "var(--color-text-primary)" }}
               >
                 Min Followers Req.
               </label>
               <input
+                id="min-followers"
                 type="number"
                 className="input"
                 value={formData.minFollowers}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    minFollowers: parseInt(e.target.value) || 0,
+                    minFollowers: Number.parseInt(e.target.value, 10) || 0,
                   })
                 }
                 min={100}
@@ -701,18 +725,20 @@ export default function CreateCampaignClient() {
             <div className="form-group">
               <label
                 className="label"
+                htmlFor="max-followers"
                 style={{ color: "var(--color-text-primary)" }}
               >
                 Max Followers Req. (Optional)
               </label>
               <input
+                id="max-followers"
                 type="number"
                 className="input"
                 value={formData.maxFollowers === null ? "" : formData.maxFollowers}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    maxFollowers: e.target.value ? parseInt(e.target.value) : null,
+                    maxFollowers: e.target.value ? Number.parseInt(e.target.value, 10) : null,
                   })
                 }
                 min={1000}
@@ -726,18 +752,20 @@ export default function CreateCampaignClient() {
             <div className="form-group">
               <label
                 className="label"
+                htmlFor="max-influencers"
                 style={{ color: "var(--color-text-primary)" }}
               >
                 Max Influencer Slots
               </label>
               <input
+                id="max-influencers"
                 type="number"
                 className="input"
                 value={formData.maxInfluencers === null ? "" : formData.maxInfluencers}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    maxInfluencers: e.target.value ? parseInt(e.target.value) : null,
+                    maxInfluencers: e.target.value ? Number.parseInt(e.target.value, 10) : null,
                   })
                 }
                 min={1}
@@ -756,11 +784,13 @@ export default function CreateCampaignClient() {
             <div className="form-group">
               <label
                 className="label"
+                htmlFor="total-budget"
                 style={{ color: "var(--color-text-primary)" }}
               >
                 Total Budget (Rs)
               </label>
               <input
+                id="total-budget"
                 type="number"
                 className="input"
                 value={formData.totalBudget}
@@ -782,11 +812,13 @@ export default function CreateCampaignClient() {
             <div className="form-group">
               <label
                 className="label"
+                htmlFor="per-influencer-budget"
                 style={{ color: "var(--color-text-primary)" }}
               >
                 Budget Per Influencer (Approx Rs)
               </label>
               <input
+                id="per-influencer-budget"
                 type="number"
                 className="input"
                 value={formData.perInfluencerBudget}
@@ -811,11 +843,13 @@ export default function CreateCampaignClient() {
             <div className="form-group">
               <label
                 className="label"
+                htmlFor="content-deadline"
                 style={{ color: "var(--color-text-primary)" }}
               >
                 Content Deadline
               </label>
               <input
+                id="content-deadline"
                 type="date"
                 className="input"
                 value={formData.contentDeadline}
@@ -834,11 +868,13 @@ export default function CreateCampaignClient() {
             <div className="form-group">
               <label
                 className="label"
+                htmlFor="posting-deadline"
                 style={{ color: "var(--color-text-primary)" }}
               >
                 Posting Deadline
               </label>
               <input
+                id="posting-deadline"
                 type="date"
                 className="input"
                 value={formData.postingDeadline}
@@ -895,7 +931,7 @@ export default function CreateCampaignClient() {
                   Do you need to ship a physical product to the influencer?
                 </p>
               </div>
-              <label className="switch">
+              <label className="switch" aria-label="Requires physical product seeding">
                 <input
                   type="checkbox"
                   checked={formData.requiresProduct}
@@ -904,6 +940,7 @@ export default function CreateCampaignClient() {
                   }
                 />
                 <span className="slider round"></span>
+                <span className="sr-only">Requires physical product seeding</span>
               </label>
             </div>
 
@@ -913,11 +950,13 @@ export default function CreateCampaignClient() {
                   <div className="form-group">
                     <label
                       className="label"
+                      htmlFor="product-name"
                       style={{ color: "var(--color-text-primary)" }}
                     >
                       Product Name
                     </label>
                     <input
+                      id="product-name"
                       type="text"
                       className="input"
                       value={formData.productName}
@@ -935,18 +974,20 @@ export default function CreateCampaignClient() {
                   <div className="form-group">
                     <label
                       className="label"
+                      htmlFor="product-value"
                       style={{ color: "var(--color-text-primary)" }}
                     >
                       Product Value (Rs)
                     </label>
                     <input
+                      id="product-value"
                       type="number"
                       className="input"
                       value={formData.productValue}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          productValue: parseInt(e.target.value) || 0,
+                          productValue: Number.parseInt(e.target.value, 10) || 0,
                         })
                       }
                       min={0}
@@ -961,11 +1002,13 @@ export default function CreateCampaignClient() {
                 <div className="form-group">
                   <label
                     className="label"
+                    htmlFor="product-description"
                     style={{ color: "var(--color-text-primary)" }}
                   >
                     Logistics / Shipping Instructions
                   </label>
                   <textarea
+                    id="product-description"
                     className="input"
                     value={formData.productDescription}
                     onChange={(e) =>
@@ -993,7 +1036,7 @@ export default function CreateCampaignClient() {
                 marginBottom: "8px",
               }}
             >
-              <label className="label">Deliverables Required</label>
+              <div className="label">Deliverables Required</div>
               <button
                 type="button"
                 onClick={handleAddDeliverable}
@@ -1042,7 +1085,7 @@ export default function CreateCampaignClient() {
                     handleDeliverableChange(
                       index,
                       "count",
-                      parseInt(e.target.value) || 1,
+                      Number.parseInt(e.target.value, 10) || 1,
                     )
                   }
                   min={1}
@@ -1066,7 +1109,7 @@ export default function CreateCampaignClient() {
                       handleDeliverableChange(
                         index,
                         "rate",
-                        parseInt(e.target.value) || 0,
+                        Number.parseInt(e.target.value, 10) || 0,
                       )
                     }
                     min={0}

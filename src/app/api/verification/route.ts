@@ -35,11 +35,11 @@ const aadhaarOtpSchema = z.object({
 }).strip();
 const panSchema = z.object({
   action: z.literal("VERIFY_PAN"),
-  panNumber: z.string().trim().toUpperCase().regex(/^[A-Z]{5}[0-9]{4}[A-Z]$/),
+  panNumber: z.string().trim().toUpperCase().regex(/^[A-Z]{5}\d{4}[A-Z]$/),
 }).strip();
 const gstSchema = z.object({
   action: z.literal("VERIFY_GST"),
-  gstNumber: z.string().trim().toUpperCase().regex(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/),
+  gstNumber: z.string().trim().toUpperCase().regex(/^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[\dA-Z]$/),
 }).strip();
 const bankSchema = z.object({
   action: z.literal("VERIFY_BANK"),
@@ -77,7 +77,7 @@ const ALLOWED_VERIFICATION_MIME_TYPES = [
 const MAX_VERIFICATION_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 function bytesToAscii(bytes: Uint8Array): string {
-  return String.fromCharCode(...bytes);
+  return String.fromCodePoint(...bytes);
 }
 
 function detectVerificationMimeFromMagicBytes(bytes: Uint8Array): string | null {

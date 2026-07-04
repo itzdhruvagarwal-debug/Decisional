@@ -18,7 +18,15 @@ const bankAccountSchema = z
   })
   .superRefine((data, ctx) => {
     const isUpiOnly = !!data.upiId && !data.accountNumber && !data.ifscCode && !data.bankName;
-    if (!isUpiOnly) {
+    if (isUpiOnly) {
+      if (!data.upiId || !/^[\w.-]{2,256}@[a-zA-Z]{2,64}$/.test(data.upiId)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["upiId"],
+          message: "Invalid UPI ID format (e.g. name@bank)",
+        });
+      }
+    } else {
       if (!data.accountNumber || !/^\d{9,18}$/.test(data.accountNumber)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -38,14 +46,6 @@ const bankAccountSchema = z
           code: z.ZodIssueCode.custom,
           path: ["bankName"],
           message: "Bank name is required",
-        });
-      }
-    } else {
-      if (!data.upiId || !/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(data.upiId)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["upiId"],
-          message: "Invalid UPI ID format (e.g. name@bank)",
         });
       }
     }

@@ -32,7 +32,7 @@ export const GET = apiWrapper(async (req) => {
   if (!dealId && !conversationWith) {
     const convPage = Math.max(
       1,
-      parseInt(searchParams.get("convPage") || "1") || 1,
+      Number.parseInt(searchParams.get("convPage") || "1", 10) || 1,
     );
     const result = await MessageService.listConversations(
       session.user.id,

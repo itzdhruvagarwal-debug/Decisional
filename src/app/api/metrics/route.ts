@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getMetrics, getMetricsContentType } from "@/lib/metrics";
 import { logger } from "@/lib/logger";
-import crypto from "crypto";
+import crypto from "node:crypto";
 
 // Optional: you can restrict access to this route with a bearer token for enterprise security
 // This is typical for Prometheus scraping endpoints

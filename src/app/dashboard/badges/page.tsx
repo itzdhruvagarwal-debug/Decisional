@@ -239,7 +239,7 @@ export default function BadgesPage() {
           >
             {error}
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => globalThis.location.reload()}
               className="btn btn-secondary"
               style={{ marginTop: "16px" }}
             >
@@ -452,10 +452,10 @@ function StatCard({
   color,
   delay,
 }: {
-  label: string;
-  value: string;
-  color: string;
-  delay: number;
+  readonly label: string;
+  readonly value: string;
+  readonly color: string;
+  readonly delay: number;
 }) {
   return (
     <motion.div

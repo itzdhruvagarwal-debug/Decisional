@@ -93,7 +93,7 @@ function normalizeDeliverables(value: unknown): CampaignDetail["deliverables"] {
     .map((item) => {
       const parsed = item as { type?: unknown; count?: unknown; specs?: unknown };
       return {
-        type: String(parsed?.type || "").trim(),
+        type: typeof parsed?.type === "string" ? parsed.type.trim() : "",
         count: Math.max(1, Number(parsed?.count || 1)),
         ...(parsed?.specs ? { specs: String(parsed.specs) } : {}),
       };
@@ -458,7 +458,7 @@ export default function CampaignDetailClient({
         ? "Activate this campaign and hold funds from wallet?"
         : "Cancel this campaign? This cannot be undone.";
 
-    if (!window.confirm(confirmText)) return;
+    if (!globalThis.confirm(confirmText)) return;
 
     try {
       const response = await fetch(`/api/campaigns/${campaignId}`, {
@@ -512,6 +512,170 @@ export default function CampaignDetailClient({
     campaign.totalApplications,
     Number(campaign?._count?.applications || 0),
   );
+
+  let applicationsList;
+  if (applicationsLoading) {
+    applicationsList = (
+      <div style={{ padding: "24px", textAlign: "center" }}>
+        <span className="loading" />
+      </div>
+    );
+  } else if (applications.length === 0) {
+    applicationsList = (
+      <div
+        style={{
+          padding: "32px 16px",
+          textAlign: "center",
+          color: "var(--color-text-secondary)",
+          border: "1px dashed var(--color-border)",
+          borderRadius: "var(--radius-md)",
+        }}
+      >
+        No applications yet.
+      </div>
+    );
+  } else {
+    applicationsList = (
+      <div style={{ display: "grid", gap: "12px" }}>
+        {applications.map((application) => {
+          const canAct = ["PENDING", "SHORTLISTED"].includes(application.status);
+          return (
+            <article
+              key={application.id}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 1fr) auto",
+                gap: "16px",
+                padding: "16px",
+                background: "var(--color-bg-tertiary)",
+                borderRadius: "var(--radius-md)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    flexWrap: "wrap",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <strong>{application.influencer.displayName}</strong>
+                  <span className="badge">{application.status}</span>
+                  <span className="badge">
+                    Trust {application.influencer.user?.trustScore ?? 0}
+                  </span>
+                  <span className="badge">
+                    {formatCurrency(application.proposedRate)}
+                  </span>
+                  {(() => {
+                    if (application.matchScore === undefined) return null;
+                    let matchBgColor = "rgba(239, 68, 68, 0.15)";
+                    let matchTextColor = "#ef4444";
+                    if (application.matchScore >= 80) {
+                      matchBgColor = "rgba(16, 185, 129, 0.15)";
+                      matchTextColor = "#10b981";
+                    } else if (application.matchScore >= 50) {
+                      matchBgColor = "rgba(245, 158, 11, 0.15)";
+                      matchTextColor = "#f59e0b";
+                    }
+                    return (
+                      <span
+                        className="badge"
+                        style={{
+                          backgroundColor: matchBgColor,
+                          color: matchTextColor,
+                          borderColor: matchTextColor,
+                          fontWeight: "bold",
+                        }}
+                        title={`Match Score Details:\n- Niche Fit: ${application.matchBreakdown?.categoryScore}%\n- Engagement Fit: ${application.matchBreakdown?.engagementScore}%\n- Authenticity Fit: ${application.matchBreakdown?.authenticityScore}%\n- Reputation Fit: ${application.matchBreakdown?.qualityScore}%\n- ROI/CPV Fit (Projected): ${application.matchBreakdown?.roiScore}%\n- Est. Views (Modelled): ${application.matchBreakdown?.estimatedViews}\n- Est. CPV (Modelled): ₹${((application.matchBreakdown?.estimatedCpvPaise || 0) / 100).toFixed(2)}`}
+                      >
+                        🔥 {application.matchScore}% Match
+                      </span>
+                    );
+                  })()}
+                </div>
+                <p
+                  style={{
+                    color: "var(--color-text-secondary)",
+                    fontSize: "14px",
+                    lineHeight: 1.5,
+                    marginBottom: "10px",
+                  }}
+                >
+                  {application.proposal}
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    flexWrap: "wrap",
+                    color: "var(--color-text-muted)",
+                    fontSize: "12px",
+                  }}
+                >
+                  <span>
+                    Followers:{" "}
+                    {(application.influencer.instagramFollowers || 0).toLocaleString("en-IN")}
+                  </span>
+                  <span>
+                    Deals: {application.influencer.completedDeals || 0}
+                  </span>
+                  <span>
+                    Category: {application.influencer.categories?.split(",")[0] || "Other"}
+                  </span>
+                  {application.matchBreakdown && (
+                    <span style={{ color: "#10b981", fontWeight: "600" }} title="This is a modelled projection based on follower stats and campaign budget, not verified API statistics.">
+                      Projected CPV: ₹{((application.matchBreakdown.estimatedCpvPaise || 0) / 100).toFixed(2)} / view (Est.)
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "8px",
+                  flexWrap: "wrap",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <Link
+                  href={`/dashboard/influencers/${application.influencer.id}`}
+                  className="btn btn-secondary btn-sm"
+                >
+                  Profile
+                </Link>
+                {canAct && (
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      disabled={applicationActionId === application.id}
+                      onClick={() => handleApplicationAction(application.id, "accept")}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-sm"
+                      disabled={applicationActionId === application.id}
+                      onClick={() => handleApplicationAction(application.id, "reject")}
+                    >
+                      Reject
+                    </button>
+                  </>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
     <div className="campaign-detail-page" style={{ maxWidth: "980px", margin: "0 auto", display: "grid", gap: "16px" }}>
@@ -589,7 +753,7 @@ export default function CampaignDetailClient({
           <div className="campaign-detail-stat" style={{ margin: 0 }}>
             <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Slots Filled</div>
             <div style={{ fontSize: "20px", fontWeight: 700 }}>
-              {campaign.maxInfluencers !== null && campaign.maxInfluencers !== undefined
+              {typeof campaign.maxInfluencers === "number"
                 ? `${campaign.acceptedCount} / ${campaign.maxInfluencers}`
                 : `${campaign.acceptedCount} (Unlimited)`}
             </div>
@@ -652,162 +816,7 @@ export default function CampaignDetailClient({
             </button>
           </div>
 
-          {applicationsLoading ? (
-            <div style={{ padding: "24px", textAlign: "center" }}>
-              <span className="loading" />
-            </div>
-          ) : applications.length === 0 ? (
-            <div
-              style={{
-                padding: "32px 16px",
-                textAlign: "center",
-                color: "var(--color-text-secondary)",
-                border: "1px dashed var(--color-border)",
-                borderRadius: "var(--radius-md)",
-              }}
-            >
-              No applications yet.
-            </div>
-          ) : (
-            <div style={{ display: "grid", gap: "12px" }}>
-              {applications.map((application) => {
-                const canAct = ["PENDING", "SHORTLISTED"].includes(application.status);
-                return (
-                  <article
-                    key={application.id}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "minmax(0, 1fr) auto",
-                      gap: "16px",
-                      padding: "16px",
-                      background: "var(--color-bg-tertiary)",
-                      borderRadius: "var(--radius-md)",
-                      border: "1px solid var(--color-border)",
-                    }}
-                  >
-                    <div style={{ minWidth: 0 }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                          flexWrap: "wrap",
-                          marginBottom: "8px",
-                        }}
-                      >
-                        <strong>{application.influencer.displayName}</strong>
-                        <span className="badge">{application.status}</span>
-                        <span className="badge">
-                          Trust {application.influencer.user?.trustScore ?? 0}
-                        </span>
-                        <span className="badge">
-                          {formatCurrency(application.proposedRate)}
-                        </span>
-                        {(() => {
-                          if (application.matchScore === undefined) return null;
-                          let matchBgColor = "rgba(239, 68, 68, 0.15)";
-                          let matchTextColor = "#ef4444";
-                          if (application.matchScore >= 80) {
-                            matchBgColor = "rgba(16, 185, 129, 0.15)";
-                            matchTextColor = "#10b981";
-                          } else if (application.matchScore >= 50) {
-                            matchBgColor = "rgba(245, 158, 11, 0.15)";
-                            matchTextColor = "#f59e0b";
-                          }
-                          return (
-                            <span
-                              className="badge"
-                              style={{
-                                backgroundColor: matchBgColor,
-                                color: matchTextColor,
-                                borderColor: matchTextColor,
-                                fontWeight: "bold",
-                              }}
-                              title={`Match Score Details:\n- Niche Fit: ${application.matchBreakdown?.categoryScore}%\n- Engagement Fit: ${application.matchBreakdown?.engagementScore}%\n- Authenticity Fit: ${application.matchBreakdown?.authenticityScore}%\n- Reputation Fit: ${application.matchBreakdown?.qualityScore}%\n- ROI/CPV Fit (Projected): ${application.matchBreakdown?.roiScore}%\n- Est. Views (Modelled): ${application.matchBreakdown?.estimatedViews}\n- Est. CPV (Modelled): ₹${((application.matchBreakdown?.estimatedCpvPaise || 0) / 100).toFixed(2)}`}
-                            >
-                              🔥 {application.matchScore}% Match
-                            </span>
-                          );
-                        })()}
-                      </div>
-                      <p
-                        style={{
-                          color: "var(--color-text-secondary)",
-                          fontSize: "14px",
-                          lineHeight: 1.5,
-                          marginBottom: "10px",
-                        }}
-                      >
-                        {application.proposal}
-                      </p>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "10px",
-                          flexWrap: "wrap",
-                          color: "var(--color-text-muted)",
-                          fontSize: "12px",
-                        }}
-                      >
-                        <span>
-                          Followers:{" "}
-                          {(application.influencer.instagramFollowers || 0).toLocaleString("en-IN")}
-                        </span>
-                        <span>
-                          Deals: {application.influencer.completedDeals || 0}
-                        </span>
-                        <span>
-                          Category: {application.influencer.categories?.split(",")[0] || "Other"}
-                        </span>
-                        {application.matchBreakdown && (
-                          <span style={{ color: "#10b981", fontWeight: "600" }} title="This is a modelled projection based on follower stats and campaign budget, not verified API statistics.">
-                            Projected CPV: ₹{((application.matchBreakdown.estimatedCpvPaise || 0) / 100).toFixed(2)} / view (Est.)
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: "8px",
-                        flexWrap: "wrap",
-                        justifyContent: "flex-end",
-                      }}
-                    >
-                      <Link
-                        href={`/dashboard/influencers/${application.influencer.id}`}
-                        className="btn btn-secondary btn-sm"
-                      >
-                        Profile
-                      </Link>
-                      {canAct && (
-                        <>
-                          <button
-                            type="button"
-                            className="btn btn-primary btn-sm"
-                            disabled={applicationActionId === application.id}
-                            onClick={() => handleApplicationAction(application.id, "accept")}
-                          >
-                            Accept
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-danger btn-sm"
-                            disabled={applicationActionId === application.id}
-                            onClick={() => handleApplicationAction(application.id, "reject")}
-                          >
-                            Reject
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
+          {applicationsList}
         </section>
       )}
 
@@ -897,8 +906,9 @@ export default function CampaignDetailClient({
           <div className="card" style={{ width: "100%", maxWidth: "560px" }}>
             <h3 style={{ marginBottom: "12px" }}>Apply for Campaign</h3>
 
-            <label className="label">Proposal (minimum 50 characters)</label>
+            <label className="label" htmlFor="proposal-input">Proposal (minimum 50 characters)</label>
             <textarea
+              id="proposal-input"
               className="input"
               rows={5}
               value={proposal}
@@ -909,8 +919,9 @@ export default function CampaignDetailClient({
               {proposal.length}/1000
             </p>
 
-            <label className="label" style={{ marginTop: "12px" }}>Your rate (Rs)</label>
+            <label className="label" htmlFor="proposed-rate-input" style={{ marginTop: "12px" }}>Your rate (Rs)</label>
             <input
+              id="proposed-rate-input"
               className="input"
               type="number"
               min={1}

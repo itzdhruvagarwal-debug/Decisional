@@ -9,10 +9,48 @@ import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { AppError } from "@/lib/errors";
 
+function validateWithdrawalInput(data: { bankAccountId?: string | undefined; bankAccountName?: string | undefined; bankAccountNumber?: string | undefined; ifscCode?: string | undefined; upiId?: string | undefined }, ctx: z.RefinementCtx) {
+  if (data.bankAccountId) return;
+
+  const isUpiInline = !!data.upiId && !data.bankAccountNumber && !data.ifscCode;
+  if (isUpiInline) {
+    if (!/^[\w.-]{2,256}@[a-zA-Z]{2,64}$/.test(data.upiId!)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["upiId"],
+        message: "Invalid UPI ID format (e.g. name@bank)",
+      });
+    }
+  } else {
+    if (!data.bankAccountName || !data.bankAccountNumber || !data.ifscCode) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "Provide either bankAccountId, full bank account details, or a UPI ID for withdrawal",
+      });
+    } else {
+      if (!/^\d{9,18}$/.test(data.bankAccountNumber)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["bankAccountNumber"],
+          message: "Invalid account number",
+        });
+      }
+      if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(data.ifscCode)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["ifscCode"],
+          message: "Invalid IFSC code",
+        });
+      }
+    }
+  }
+}
+
 const withdrawalSchema = z
   .object({
     amount: z.preprocess(
-      (value) => Number(value),
+      Number,
       z.number().int().positive().min(50000, "Minimum withdrawal is INR 500"),
     ),
     bankAccountId: z.string().optional(),
@@ -21,43 +59,7 @@ const withdrawalSchema = z
     ifscCode: z.string().optional(),
     upiId: z.string().optional(),
   })
-  .superRefine((data, ctx) => {
-    if (!data.bankAccountId) {
-      const isUpiInline = !!data.upiId && !data.bankAccountNumber && !data.ifscCode;
-      if (!isUpiInline) {
-        if (!data.bankAccountName || !data.bankAccountNumber || !data.ifscCode) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message:
-              "Provide either bankAccountId, full bank account details, or a UPI ID for withdrawal",
-          });
-        } else {
-          if (!/^\d{9,18}$/.test(data.bankAccountNumber)) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              path: ["bankAccountNumber"],
-              message: "Invalid account number",
-            });
-          }
-          if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(data.ifscCode)) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              path: ["ifscCode"],
-              message: "Invalid IFSC code",
-            });
-          }
-        }
-      } else {
-        if (!/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(data.upiId!)) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ["upiId"],
-            message: "Invalid UPI ID format (e.g. name@bank)",
-          });
-        }
-      }
-    }
-  });
+  .superRefine(validateWithdrawalInput);
 
 function getWithdrawalIdempotencyKey(request: NextRequest, userId: string) {
   const headerKey = request.headers.get("Idempotency-Key")?.trim();
