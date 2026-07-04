@@ -88,9 +88,8 @@ interface ContractSignatureDetails {
   };
 }
 
-function buildMandatoryContractCsvRows(rows: Record<string, string | number>[], deal: any, terms: ContractTermsType, platform: PlatformDetails) {
-  // Platform details
-  rows.push(
+function buildMandatoryContractCsvRows(deal: any, terms: ContractTermsType, platform: PlatformDetails): Record<string, string | number>[] {
+  return [
     { "Section": "PLATFORM DETAILS", "Field": "", "Value": "" },
     { "Section": "", "Field": "Platform Name", "Value": platform.name || "Decisional" },
     { "Section": "", "Field": "Legal Name", "Value": platform.legalName || "—" },
@@ -99,11 +98,7 @@ function buildMandatoryContractCsvRows(rows: Record<string, string | number>[], 
     { "Section": "", "Field": "Email", "Value": platform.email || "—" },
     { "Section": "", "Field": "Phone", "Value": platform.phone || "—" },
     { "Section": "", "Field": "Website", "Value": platform.website || "—" },
-    { "Section": "", "Field": "", "Value": "─────" }
-  );
-
-  // Deal Information
-  rows.push(
+    { "Section": "", "Field": "", "Value": "─────" },
     { "Section": "DEAL INFORMATION", "Field": "", "Value": "" },
     { "Section": "", "Field": "Deal ID", "Value": deal.id },
     { "Section": "", "Field": "Campaign", "Value": deal.campaign.title },
@@ -117,70 +112,51 @@ function buildMandatoryContractCsvRows(rows: Record<string, string | number>[], 
     { "Section": "", "Field": "Contract Version", "Value": String(terms.version || 1) },
     { "Section": "", "Field": "Created At", "Value": terms.createdAt ? format(new Date(terms.createdAt), "dd/MM/yyyy HH:mm") : "—" },
     { "Section": "", "Field": "", "Value": "─────" }
-  );
+  ];
 }
 
-function buildOptionalContractCsvRows(rows: Record<string, string | number>[], terms: ContractTermsType) {
-  // Product Details (if applicable)
-  if (terms.requiresProduct) {
-    rows.push(
-      { "Section": "PRODUCT DETAILS", "Field": "", "Value": "" },
-      { "Section": "", "Field": "Product Required", "Value": "Yes" },
-      { "Section": "", "Field": "Product Name", "Value": terms.productName || "—" },
-      { "Section": "", "Field": "Product Value (₹)", "Value": terms.productValue ? paiseToRupees(terms.productValue) : "—" },
-      { "Section": "", "Field": "Product Description", "Value": terms.productDescription || "—" },
-      { "Section": "", "Field": "", "Value": "─────" }
-    );
-  }
+function buildOptionalContractCsvRows(terms: ContractTermsType): Record<string, string | number>[] {
+  const productRows = terms.requiresProduct ? [
+    { "Section": "PRODUCT DETAILS", "Field": "", "Value": "" },
+    { "Section": "", "Field": "Product Required", "Value": "Yes" },
+    { "Section": "", "Field": "Product Name", "Value": terms.productName || "—" },
+    { "Section": "", "Field": "Product Value (₹)", "Value": terms.productValue ? paiseToRupees(terms.productValue) : "—" },
+    { "Section": "", "Field": "Product Description", "Value": terms.productDescription || "—" },
+    { "Section": "", "Field": "", "Value": "─────" }
+  ] : [];
 
-  // Deliverables
-  rows.push({ "Section": "DELIVERABLES", "Field": "", "Value": "" });
-  if (Array.isArray(terms.deliverables)) {
-    terms.deliverables.forEach((del, idx: number) => {
-      rows.push(
+  const deliverableRows = Array.isArray(terms.deliverables)
+    ? terms.deliverables.flatMap((del, idx: number) => [
         { "Section": "", "Field": `Deliverable ${idx + 1}`, "Value": "" },
         { "Section": "", "Field": "Type", "Value": del.type || "—" },
         { "Section": "", "Field": "Count", "Value": String(del.count || 1) },
         { "Section": "", "Field": "Platform", "Value": del.platform || "—" },
         { "Section": "", "Field": "Details", "Value": del.details || "—" },
         { "Section": "", "Field": "", "Value": "─────" }
-      );
-    });
-  }
+      ])
+    : [];
+
+  return [
+    ...productRows,
+    { "Section": "DELIVERABLES", "Field": "", "Value": "" },
+    ...deliverableRows
+  ];
 }
 
-function buildPolicyAndObligationCsvRows(rows: Record<string, string | number>[], terms: ContractTermsType) {
-  // Cancellation Policy
-  rows.push({ "Section": "CANCELLATION POLICY", "Field": "", "Value": "" });
-  if (terms.cancellationFee) {
-    rows.push(
-      { "Section": "", "Field": "Before Approval", "Value": `${terms.cancellationFee.beforeApproval || 0}% fee` },
-      { "Section": "", "Field": "After Approval", "Value": `${terms.cancellationFee.afterApproval || 30}% fee` },
-      { "Section": "", "Field": "After Submission", "Value": `${terms.cancellationFee.afterSubmission || 70}% fee` },
-      { "Section": "", "Field": "After Posting", "Value": `${terms.cancellationFee.afterPosting || 100}% fee` }
-    );
-  }
-  rows.push(
-    { "Section": "", "Field": "Brand Late Approval Fee", "Value": `${terms.brandLateApprovalFee || 10}%` },
-    { "Section": "", "Field": "", "Value": "─────" }
-  );
+function buildPolicyAndObligationCsvRows(terms: ContractTermsType): Record<string, string | number>[] {
+  const cancellationFeeRows = terms.cancellationFee ? [
+    { "Section": "", "Field": "Before Approval", "Value": `${terms.cancellationFee.beforeApproval || 0}% fee` },
+    { "Section": "", "Field": "After Approval", "Value": `${terms.cancellationFee.afterApproval || 30}% fee` },
+    { "Section": "", "Field": "After Submission", "Value": `${terms.cancellationFee.afterSubmission || 70}% fee` },
+    { "Section": "", "Field": "After Posting", "Value": `${terms.cancellationFee.afterPosting || 100}% fee` }
+  ] : [];
 
-  // Content Usage
-  const usageRows = [];
-  if (terms.contentUsage) {
-    usageRows.push(
-      { "Section": "", "Field": "Organic Repost", "Value": terms.contentUsage.organicRepost || "—" },
-      { "Section": "", "Field": "Paid Ads", "Value": terms.contentUsage.paidAds || "—" },
-      { "Section": "", "Field": "Whitelisting", "Value": terms.contentUsage.whitelisting || "—" }
-    );
-  }
-  rows.push(
-    { "Section": "CONTENT USAGE RIGHTS", "Field": "", "Value": "" },
-    ...usageRows,
-    { "Section": "", "Field": "", "Value": "─────" }
-  );
+  const usageRows = terms.contentUsage ? [
+    { "Section": "", "Field": "Organic Repost", "Value": terms.contentUsage.organicRepost || "—" },
+    { "Section": "", "Field": "Paid Ads", "Value": terms.contentUsage.paidAds || "—" },
+    { "Section": "", "Field": "Whitelisting", "Value": terms.contentUsage.whitelisting || "—" }
+  ] : [];
 
-  // Obligations
   const influencerObligationRows = Array.isArray(terms.influencerObligations)
     ? terms.influencerObligations.map((obligation: string, idx: number) => ({
         "Section": "",
@@ -188,11 +164,6 @@ function buildPolicyAndObligationCsvRows(rows: Record<string, string | number>[]
         "Value": obligation,
       }))
     : [];
-  rows.push(
-    { "Section": "INFLUENCER OBLIGATIONS", "Field": "", "Value": "" },
-    ...influencerObligationRows,
-    { "Section": "", "Field": "", "Value": "─────" }
-  );
 
   const brandObligationRows = Array.isArray(terms.brandObligations)
     ? terms.brandObligations.map((obligation: string, idx: number) => ({
@@ -201,22 +172,31 @@ function buildPolicyAndObligationCsvRows(rows: Record<string, string | number>[]
         "Value": obligation,
       }))
     : [];
-  rows.push(
+
+  return [
+    { "Section": "CANCELLATION POLICY", "Field": "", "Value": "" },
+    ...cancellationFeeRows,
+    { "Section": "", "Field": "Brand Late Approval Fee", "Value": `${terms.brandLateApprovalFee || 10}%` },
+    { "Section": "", "Field": "", "Value": "─────" },
+    { "Section": "CONTENT USAGE RIGHTS", "Field": "", "Value": "" },
+    ...usageRows,
+    { "Section": "", "Field": "", "Value": "─────" },
+    { "Section": "INFLUENCER OBLIGATIONS", "Field": "", "Value": "" },
+    ...influencerObligationRows,
+    { "Section": "", "Field": "", "Value": "─────" },
     { "Section": "BRAND OBLIGATIONS", "Field": "", "Value": "" },
     ...brandObligationRows,
     { "Section": "", "Field": "", "Value": "─────" }
-  );
+  ];
 }
 
-function buildLegalAndSignatureCsvRows(rows: Record<string, string | number>[], deal: any, terms: ContractTermsType) {
-  // Tax Note
-  rows.push(
+function buildLegalAndSignatureCsvRows(deal: any, terms: ContractTermsType): Record<string, string | number>[] {
+  const taxRows = [
     { "Section": "TAX & LEGAL", "Field": "", "Value": "" },
     { "Section": "", "Field": "Tax Note", "Value": terms.taxNote || "—" },
     { "Section": "", "Field": "", "Value": "─────" }
-  );
+  ];
 
-  // Mandatory Tags
   const mandatoryTagRows = Array.isArray(terms.mandatoryTags)
     ? terms.mandatoryTags.map((tag: string, idx: number) => ({
         "Section": "",
@@ -224,60 +204,61 @@ function buildLegalAndSignatureCsvRows(rows: Record<string, string | number>[], 
         "Value": tag,
       }))
     : [];
-  rows.push(
+
+  const tagRows = [
     { "Section": "MANDATORY TAGS", "Field": "", "Value": "" },
     ...mandatoryTagRows,
     { "Section": "", "Field": "", "Value": "─────" }
-  );
+  ];
 
-  // Disclosure Requirement
-  rows.push(
+  const disclosureRows = [
     { "Section": "DISCLOSURE", "Field": "", "Value": "" },
     { "Section": "", "Field": "Disclosure Requirement", "Value": terms.disclosureRequirement || "—" },
     { "Section": "", "Field": "", "Value": "─────" }
-  );
+  ];
 
-  // Signature Information
-  const sigRows = [];
   if (deal.contractSignature) {
     const sig = deal.contractSignature as ContractSignatureDetails;
-    sigRows.push(
+    const baseSig = [
       { "Section": "", "Field": "Contract Hash", "Value": sig.contractHash || "—" },
       { "Section": "", "Field": "Fully Signed", "Value": sig.isFullySigned ? "Yes" : "No" },
       { "Section": "", "Field": "Signed At", "Value": sig.signedAt ? format(new Date(sig.signedAt), "dd/MM/yyyy HH:mm") : "—" }
-    );
+    ];
+    const influencerSig = sig.influencerSignature ? [
+      { "Section": "", "Field": "Influencer Signed At", "Value": format(new Date(sig.influencerSignature.signedAt), "dd/MM/yyyy HH:mm") },
+      { "Section": "", "Field": "Influencer Signature Hash", "Value": sig.influencerSignature.signatureHash || "—" }
+    ] : [];
+    const brandSig = sig.brandSignature ? [
+      { "Section": "", "Field": "Brand Signed At", "Value": format(new Date(sig.brandSignature.signedAt), "dd/MM/yyyy HH:mm") },
+      { "Section": "", "Field": "Brand Signature Hash", "Value": sig.brandSignature.signatureHash || "—" }
+    ] : [];
 
-    if (sig.influencerSignature) {
-      sigRows.push(
-        { "Section": "", "Field": "Influencer Signed At", "Value": format(new Date(sig.influencerSignature.signedAt), "dd/MM/yyyy HH:mm") },
-        { "Section": "", "Field": "Influencer Signature Hash", "Value": sig.influencerSignature.signatureHash || "—" }
-      );
-    }
-
-    if (sig.brandSignature) {
-      sigRows.push(
-        { "Section": "", "Field": "Brand Signed At", "Value": format(new Date(sig.brandSignature.signedAt), "dd/MM/yyyy HH:mm") },
-        { "Section": "", "Field": "Brand Signature Hash", "Value": sig.brandSignature.signatureHash || "—" }
-      );
-    }
+    return [
+      ...taxRows,
+      ...tagRows,
+      ...disclosureRows,
+      { "Section": "SIGNATURES", "Field": "", "Value": "" },
+      ...baseSig,
+      ...influencerSig,
+      ...brandSig,
+      { "Section": "", "Field": "", "Value": "─────" }
+    ];
   } else {
-    sigRows.push({ "Section": "", "Field": "Status", "Value": "Not signed yet" });
+    return [
+      ...taxRows,
+      ...tagRows,
+      ...disclosureRows,
+      { "Section": "SIGNATURES", "Field": "", "Value": "" },
+      { "Section": "", "Field": "Status", "Value": "Not signed yet" },
+      { "Section": "", "Field": "", "Value": "─────" }
+    ];
   }
-
-  rows.push(
-    { "Section": "SIGNATURES", "Field": "", "Value": "" },
-    ...sigRows,
-    { "Section": "", "Field": "", "Value": "─────" }
-  );
 }
 
 function buildContractCsvRows(deal: any, terms: ContractTermsType, platform: PlatformDetails) {
-  const rows: Record<string, string | number>[] = [];
+  const mandatoryRows = buildMandatoryContractCsvRows(deal, terms, platform);
 
-  buildMandatoryContractCsvRows(rows, deal, terms, platform);
-
-  // Financial Terms
-  rows.push(
+  const financialRows = [
     { "Section": "FINANCIAL TERMS", "Field": "", "Value": "" },
     { "Section": "", "Field": "Creator Fee (₹)", "Value": paiseToRupees(terms.dealAmount || 0) },
     { "Section": "", "Field": "Platform Fee (₹)", "Value": paiseToRupees(terms.platformFee || 0) },
@@ -286,31 +267,37 @@ function buildContractCsvRows(deal: any, terms: ContractTermsType, platform: Pla
     { "Section": "", "Field": "Total Payable (₹)", "Value": paiseToRupees(terms.totalAmount || 0) },
     { "Section": "", "Field": "Influencer Payout (₹)", "Value": paiseToRupees(terms.influencerPayout || 0) },
     { "Section": "", "Field": "", "Value": "─────" }
-  );
+  ];
 
-  buildOptionalContractCsvRows(rows, terms);
+  const optionalRows = buildOptionalContractCsvRows(terms);
 
-  // Timeline
-  rows.push(
+  const timelineRows = [
     { "Section": "TIMELINE", "Field": "", "Value": "" },
     { "Section": "", "Field": "Submission Deadline", "Value": terms.submissionDeadline ? format(new Date(terms.submissionDeadline), "dd/MM/yyyy") : "—" },
     { "Section": "", "Field": "Review Period (hours)", "Value": String(terms.reviewPeriodHours || 48) },
     { "Section": "", "Field": "Posting Deadline", "Value": terms.postingDeadline ? format(new Date(terms.postingDeadline), "dd/MM/yyyy") : "—" },
     { "Section": "", "Field": "", "Value": "─────" }
-  );
+  ];
 
-  // Revisions
-  rows.push(
+  const revisionRows = [
     { "Section": "REVISIONS", "Field": "", "Value": "" },
     { "Section": "", "Field": "Included Revisions", "Value": String(terms.includedRevisions || 2) },
     { "Section": "", "Field": "Cost Per Extra Revision (₹)", "Value": paiseToRupees(terms.costPerExtraRevision || 50000) },
     { "Section": "", "Field": "", "Value": "─────" }
-  );
+  ];
 
-  buildPolicyAndObligationCsvRows(rows, terms);
-  buildLegalAndSignatureCsvRows(rows, deal, terms);
+  const policyRows = buildPolicyAndObligationCsvRows(terms);
+  const legalRows = buildLegalAndSignatureCsvRows(deal, terms);
 
-  return rows;
+  return [
+    ...mandatoryRows,
+    ...financialRows,
+    ...optionalRows,
+    ...timelineRows,
+    ...revisionRows,
+    ...policyRows,
+    ...legalRows
+  ];
 }
 
 async function _handler(

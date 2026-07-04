@@ -17,7 +17,7 @@ async function _handler_GET(request: NextRequest) {
     const filter = searchParams.get("filter") || "all-time"; // all-time | weekly
     const city = searchParams.get("city") || "";
     const category = searchParams.get("category") || "";
-    const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 50);
+    const limit = Math.min(Number.parseInt(searchParams.get("limit") || "20", 10), 50);
 
     // ==================== INFLUENCER LEADERBOARD ====================
 

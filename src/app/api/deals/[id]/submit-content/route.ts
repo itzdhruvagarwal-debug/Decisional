@@ -58,12 +58,12 @@ async function _handler_POST(
   } catch (error) {
     logger.error("Content submission error", error);
     const message = getErrorMessage(error) || "Failed to submit content";
-    const status =
-      message.includes("Unauthorized")
-        ? 403
-        : message.includes("status") || message.includes("valid")
-          ? 400
-          : 500;
+    let status = 500;
+    if (message.includes("Unauthorized")) {
+      status = 403;
+    } else if (message.includes("status") || message.includes("valid")) {
+      status = 400;
+    }
 
     return NextResponse.json({ error: message }, { status });
   }

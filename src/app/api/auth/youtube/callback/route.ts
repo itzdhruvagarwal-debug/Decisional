@@ -126,7 +126,7 @@ async function _handler_GET(req: NextRequest) {
     }
 
     const storedState = await prisma.oAuthState.findUnique({ where: { state } });
-    if (!storedState || storedState.provider !== "youtube") {
+    if (storedState?.provider !== "youtube") {
       return redirect(req, "/dashboard/settings?tab=social&error=invalid_state");
     }
 

@@ -34,7 +34,7 @@ function taxStatusLabel(user: TaxComplianceUser) {
   if (!tax?.panLast4) return "PAN missing";
   if (user.userType === "BRAND" && tax.eInvoiceApplicable) return "E-invoice";
   if (tax.status === "READY") return "Ready";
-  return tax.status ? tax.status.toLowerCase().replace(/_/g, " ") : "Pending";
+  return tax.status ? tax.status.toLowerCase().replaceAll("_", " ") : "Pending";
 }
 
 function taxStatusColor(user: TaxComplianceUser) {
@@ -48,7 +48,7 @@ function taxStatusColor(user: TaxComplianceUser) {
 export default async function AdminUsersPage({
   searchParams,
 }: {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  readonly searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) || {};
   const query = (getParam(params, "search") || getParam(params, "q"))?.trim() || "";
@@ -140,7 +140,12 @@ export default async function AdminUsersPage({
                         key={heading}
                         style={{
                           padding: "14px 18px",
-                          textAlign: heading === "Action" ? "right" : heading === "Trust" ? "center" : "left",
+                          textAlign: (
+                            {
+                              Action: "right",
+                              Trust: "center"
+                            } as const
+                          )[heading as "Action" | "Trust"] || "left",
                           borderBottom: "1px solid var(--color-border)",
                           color: "var(--color-text-muted)",
                           fontSize: "12px",
@@ -216,7 +221,7 @@ export default async function AdminUsersPage({
                             textTransform: "capitalize",
                           }}
                         >
-                          {user.status.toLowerCase().replace(/_/g, " ")}
+                          {user.status.toLowerCase().replaceAll("_", " ")}
                         </span>
                       </td>
                       <td style={{ padding: "16px 18px" }}>

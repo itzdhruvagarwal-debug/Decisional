@@ -124,8 +124,8 @@ async function _handler_GET(request: NextRequest) {
     const minBudgetRupees = searchParams.get("minBudget");
     const maxBudgetRupees = searchParams.get("maxBudget");
 
-    const parsedMinBudget = minBudgetRupees ? Number(minBudgetRupees) : NaN;
-    const parsedMaxBudget = maxBudgetRupees ? Number(maxBudgetRupees) : NaN;
+    const parsedMinBudget = minBudgetRupees ? Number(minBudgetRupees) : Number.NaN;
+    const parsedMaxBudget = maxBudgetRupees ? Number(maxBudgetRupees) : Number.NaN;
     const minBudget = Number.isFinite(parsedMinBudget)
       ? toPaise(parsedMinBudget)
       : undefined;
@@ -139,19 +139,21 @@ async function _handler_GET(request: NextRequest) {
       await requireActiveAdmin(session.user);
     }
 
-    const list = await CampaignService.listCampaigns(userId, userType, {
+    const listParams: any = {
       page,
       limit,
       sortOrder,
-      ...(status ? { status } : {}),
-      ...(category ? { category } : {}),
-      ...(city ? { city } : {}),
-      ...(minBudget !== undefined ? { minBudget } : {}),
-      ...(maxBudget !== undefined ? { maxBudget } : {}),
-      ...(sortBy ? { sortBy } : {}),
-      ...(search ? { search } : {}),
       ownerOnly,
-    });
+    };
+    if (status) listParams.status = status;
+    if (category) listParams.category = category;
+    if (city) listParams.city = city;
+    if (typeof minBudget === "number") listParams.minBudget = minBudget;
+    if (typeof maxBudget === "number") listParams.maxBudget = maxBudget;
+    if (sortBy) listParams.sortBy = sortBy;
+    if (search) listParams.search = search;
+
+    const list = await CampaignService.listCampaigns(userId, userType, listParams);
 
     return ApiResponse.success(
       {
@@ -198,16 +200,16 @@ async function _handler_POST(request: NextRequest) {
       ...parsed.data,
       totalBudget: toPaise(parsed.data.totalBudget),
       perInfluencerBudget:
-        parsed.data.perInfluencerBudget !== undefined
+        typeof parsed.data.perInfluencerBudget === "number"
           ? toPaise(parsed.data.perInfluencerBudget)
           : undefined,
       productValue:
-        parsed.data.productValue !== undefined
+        typeof parsed.data.productValue === "number"
           ? toPaise(parsed.data.productValue)
           : undefined,
       deliverables: parsed.data.deliverables.map((d) => ({
         ...d,
-        rate: d.rate !== undefined ? toPaise(d.rate) : undefined,
+        rate: typeof d.rate === "number" ? toPaise(d.rate) : undefined,
       })),
     };
 

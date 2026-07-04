@@ -44,11 +44,12 @@ async function _handler_GET(request: NextRequest) {
     }
 
     const { status, page, limit } = parsed.data;
-    const where = status === "ALL"
-      ? {}
-      : status === "PENDING"
-        ? { status: { in: [WithdrawalStatus.PENDING, WithdrawalStatus.PENDING_REVIEW] } }
-        : { status };
+    let where = {};
+    if (status === "PENDING") {
+      where = { status: { in: [WithdrawalStatus.PENDING, WithdrawalStatus.PENDING_REVIEW] } };
+    } else if (status !== "ALL") {
+      where = { status };
+    }
 
     const [withdrawals, total] = await Promise.all([
       prisma.withdrawal.findMany({

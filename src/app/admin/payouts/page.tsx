@@ -393,7 +393,7 @@ export default function PayoutsAdminPage() {
       {renderContent()}
 
       {draft && (
-        <div className="admin-modal-backdrop" role="presentation">
+        <div className="admin-modal-backdrop">
           <form className="admin-modal card" onSubmit={handleAction}>
             <h2 style={{ fontSize: "20px", fontWeight: 900, marginBottom: "8px" }}>
               {draft.action === "APPROVE" ? "Approve payout" : "Reject payout"}

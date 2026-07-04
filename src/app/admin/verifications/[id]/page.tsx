@@ -10,10 +10,16 @@ import { getSignedUrl } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
+function getDocBadgeClass(status: string): string {
+  if (status === "VERIFIED") return "badge-success";
+  if (status === "REJECTED") return "badge-danger";
+  return "badge-warning";
+}
+
 export default async function VerificationDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  readonly params: Promise<{ readonly id: string }>;
 }) {
   const { id } = await params;
   const user = await prisma.user.findUnique({
@@ -70,14 +76,14 @@ export default async function VerificationDetailPage({
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {[
-              { label: "Internal ID", value: user.id },
-              { label: "Email Address", value: user.email },
-              { label: "Phone Contact", value: user.phone || "Not provided" },
-              { label: "Account Type", value: user.userType, highlight: true },
-              { label: "Registration", value: activeSince },
-              { label: "Trust Score", value: user.trustScore, score: true },
-            ].map((item, i) => (
-              <div key={i} style={{
+              { label: "Internal ID", value: user.id, color: "inherit" },
+              { label: "Email Address", value: user.email, color: "inherit" },
+              { label: "Phone Contact", value: user.phone || "Not provided", color: "inherit" },
+              { label: "Account Type", value: user.userType, color: "inherit" },
+              { label: "Registration", value: activeSince, color: "inherit" },
+              { label: "Trust Score", value: user.trustScore, color: user.trustScore >= 50 ? "var(--color-accent-emerald)" : "var(--color-accent-amber)" },
+            ].map((item) => (
+              <div key={item.label} style={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -92,7 +98,7 @@ export default async function VerificationDetailPage({
                 <span style={{
                   fontSize: "14px",
                   fontWeight: 700,
-                  color: item.score ? (user.trustScore >= 50 ? "var(--color-accent-emerald)" : "var(--color-accent-amber)") : "inherit"
+                  color: item.color
                 }}>
                   {item.value}
                 </span>
@@ -184,8 +190,8 @@ export default async function VerificationDetailPage({
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
                     <div>
                       <div style={{ fontWeight: 800, fontSize: "14px", color: "var(--color-text-primary)", display: "flex", alignItems: "center", gap: "8px", textTransform: "uppercase" }}>
-                        {doc.type.replace(/_/g, " ")}
-                        <span className={`badge ${doc.status === "VERIFIED" ? "badge-success" : doc.status === "REJECTED" ? "badge-danger" : "badge-warning"}`}>
+                        {doc.type.replaceAll("_", " ")}
+                        <span className={`badge ${getDocBadgeClass(doc.status)}`}>
                           {doc.status}
                         </span>
                       </div>

@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { createHash, timingSafeEqual } from "crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { AppError } from "@/lib/errors";
 
 export async function validateCronSecret() {

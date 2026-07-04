@@ -9,4 +9,5 @@ SET "completedDeals" = (
   SELECT COUNT(*)
   FROM "Deal" d
   WHERE d."influencerId" = p.id
-);
+)
+WHERE true;

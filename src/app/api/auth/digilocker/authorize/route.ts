@@ -2,7 +2,7 @@ import { apiWrapper } from "@/lib/api-wrapper";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
-import { createHash, randomBytes } from "crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { appUrl } from "@/lib/app-url";

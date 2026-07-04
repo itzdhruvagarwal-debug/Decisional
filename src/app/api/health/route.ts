@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from "crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { redis } from "@/lib/redis";
@@ -59,6 +59,101 @@ function isAuthorizedDeepHealth(request: NextRequest): boolean {
   return timingSafeEqual(actualHash, expectedHash);
 }
 
+async function checkDatabaseHealth(healthCheck: any) {
+  try {
+    await prisma.user.findFirst({ select: { id: true } });
+    healthCheck.services.database = "OK";
+  } catch (error) {
+    healthCheck.services.database = "DOWN";
+    healthCheck.status = "DEGRADED";
+    logger.error("[Health] Database health check failed", error);
+    systemErrorsTotal
+      .labels({ error_type: "database_health_check", route: "/api/health" })
+      .inc();
+  }
+}
+
+async function checkRedisHealth(healthCheck: any) {
+  try {
+    await redis.ping();
+    healthCheck.services.redis = "OK";
+  } catch (error) {
+    healthCheck.services.redis = "DOWN";
+    healthCheck.status = "DEGRADED";
+    logger.error("[Health] Redis health check failed", error);
+    systemErrorsTotal
+      .labels({ error_type: "redis_health_check", route: "/api/health" })
+      .inc();
+  }
+}
+
+async function checkRazorpayHealth(healthCheck: any) {
+  try {
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keyId || !keySecret) {
+      healthCheck.services.razorpay = "UNCONFIGURED";
+    } else {
+      const razorpay = getRazorpay();
+      await razorpay.payments.all({ count: 1 });
+      healthCheck.services.razorpay = "OK";
+    }
+  } catch (error) {
+    healthCheck.services.razorpay = "DOWN";
+    healthCheck.status = "DEGRADED";
+    logger.error("[Health] Razorpay health check failed", error);
+    systemErrorsTotal
+      .labels({ error_type: "razorpay_health_check", route: "/api/health" })
+      .inc();
+  }
+}
+
+async function checkStorageHealth(healthCheck: any) {
+  try {
+    const { client, bucket, provider } = getHealthS3Client();
+    if (provider === "local" || !client) {
+      healthCheck.services.storage = "OK (LOCAL)";
+    } else {
+      await client.send(new ListObjectsV2Command({ Bucket: bucket, MaxKeys: 1 }));
+      healthCheck.services.storage = "OK";
+    }
+  } catch (error) {
+    healthCheck.services.storage = "DOWN";
+    healthCheck.status = "DEGRADED";
+    logger.error("[Health] Storage health check failed", error);
+    systemErrorsTotal
+      .labels({ error_type: "storage_health_check", route: "/api/health" })
+      .inc();
+  }
+}
+
+async function checkEmailHealth(healthCheck: any) {
+  try {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (apiKey) {
+      const res = await fetch("https://api.resend.com/emails", {
+        headers: { Authorization: "Bearer invalid_ping_token" },
+        signal: AbortSignal.timeout(5000),
+      });
+      if (res.status === 401 || res.ok) {
+        healthCheck.services.email = "OK";
+      } else {
+        healthCheck.services.email = `DOWN (HTTP ${res.status})`;
+        healthCheck.status = "DEGRADED";
+      }
+    } else {
+      healthCheck.services.email = "UNCONFIGURED";
+    }
+  } catch (error) {
+    healthCheck.services.email = "DOWN";
+    healthCheck.status = "DEGRADED";
+    logger.error("[Health] Email provider health check failed", error);
+    systemErrorsTotal
+      .labels({ error_type: "email_health_check", route: "/api/health" })
+      .inc();
+  }
+}
+
 export async function GET(request: NextRequest) {
   const deep = request.nextUrl.searchParams.get("deep") === "1";
 
@@ -100,99 +195,11 @@ export async function GET(request: NextRequest) {
     },
   };
 
-  // 1. Check Database Health
-  try {
-    await prisma.user.findFirst({ select: { id: true } });
-    healthCheck.services.database = "OK";
-  } catch (error) {
-    healthCheck.services.database = "DOWN";
-    healthCheck.status = "DEGRADED";
-    logger.error("[Health] Database health check failed", error);
-    systemErrorsTotal
-      .labels({ error_type: "database_health_check", route: "/api/health" })
-      .inc();
-  }
-
-  // 2. Check Redis Health
-  try {
-    await redis.ping();
-    healthCheck.services.redis = "OK";
-  } catch (error) {
-    healthCheck.services.redis = "DOWN";
-    healthCheck.status = "DEGRADED";
-    logger.error("[Health] Redis health check failed", error);
-    systemErrorsTotal
-      .labels({ error_type: "redis_health_check", route: "/api/health" })
-      .inc();
-  }
-
-  // 3. Check Razorpay Health
-  try {
-    const keyId = process.env.RAZORPAY_KEY_ID;
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
-    if (!keyId || !keySecret) {
-      healthCheck.services.razorpay = "UNCONFIGURED";
-    } else {
-      const razorpay = getRazorpay();
-      // Try to fetch last 1 payment as a live connectivity test
-      await razorpay.payments.all({ count: 1 });
-      healthCheck.services.razorpay = "OK";
-    }
-  } catch (error) {
-    healthCheck.services.razorpay = "DOWN";
-    healthCheck.status = "DEGRADED";
-    logger.error("[Health] Razorpay health check failed", error);
-    systemErrorsTotal
-      .labels({ error_type: "razorpay_health_check", route: "/api/health" })
-      .inc();
-  }
-
-  // 4. Check Cloud Storage Health (S3/R2)
-  try {
-    const { client, bucket, provider } = getHealthS3Client();
-    if (provider === "local" || !client) {
-      healthCheck.services.storage = "OK (LOCAL)";
-    } else {
-      // Actively verify R2/S3 access by listing with limit of 1
-      await client.send(new ListObjectsV2Command({ Bucket: bucket, MaxKeys: 1 }));
-      healthCheck.services.storage = "OK";
-    }
-  } catch (error) {
-    healthCheck.services.storage = "DOWN";
-    healthCheck.status = "DEGRADED";
-    logger.error("[Health] Storage health check failed", error);
-    systemErrorsTotal
-      .labels({ error_type: "storage_health_check", route: "/api/health" })
-      .inc();
-  }
-
-  // 5. Check Resend Email Health
-  try {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-      healthCheck.services.email = "UNCONFIGURED";
-    } else {
-      // Ping Resend endpoint briefly (should respond with 401/403 or ok, verifying DNS/HTTPS connection)
-      const res = await fetch("https://api.resend.com/emails", {
-        headers: { Authorization: "Bearer invalid_ping_token" },
-        signal: AbortSignal.timeout(5000),
-      });
-      // A 401 responds confirming Resend servers are alive and DNS is fully active
-      if (res.status === 401 || res.ok) {
-        healthCheck.services.email = "OK";
-      } else {
-        healthCheck.services.email = `DOWN (HTTP ${res.status})`;
-        healthCheck.status = "DEGRADED";
-      }
-    }
-  } catch (error) {
-    healthCheck.services.email = "DOWN";
-    healthCheck.status = "DEGRADED";
-    logger.error("[Health] Email provider health check failed", error);
-    systemErrorsTotal
-      .labels({ error_type: "email_health_check", route: "/api/health" })
-      .inc();
-  }
+  await checkDatabaseHealth(healthCheck);
+  await checkRedisHealth(healthCheck);
+  await checkRazorpayHealth(healthCheck);
+  await checkStorageHealth(healthCheck);
+  await checkEmailHealth(healthCheck);
 
   const statusCode = healthCheck.status === "OK" ? 200 : 503;
 

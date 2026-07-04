@@ -8,4 +8,4 @@ ALTER TABLE "Wallet" ADD COLUMN IF NOT EXISTS "debt" INTEGER NOT NULL DEFAULT 0;
 UPDATE "Campaign" c SET "reservedAmount" = COALESCE((
   SELECT SUM(d.amount) FROM "Deal" d
   WHERE d."campaignId" = c.id AND d."deletedAt" IS NULL AND d.status != 'CANCELLED'
-), 0);
+), 0) WHERE true;

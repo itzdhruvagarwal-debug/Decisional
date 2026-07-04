@@ -16,7 +16,7 @@
 
 -- 3. AUTOMATIC AUDIT: Capture Schema Changes
 -- Logs all DDL changes to a dedicated history table for compliance (SOC2 requirement).
-CREATE TABLE IF NOT EXISTS "SchemaAudit" (
+CREATE TABLE IF NOT EXISTS schema_audit (
     id SERIAL PRIMARY KEY,
     event_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     tag TEXT,
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS "SchemaAudit" (
 
 CREATE OR REPLACE FUNCTION log_ddl_changes() RETURNS event_trigger AS $$
 BEGIN
-    INSERT INTO "SchemaAudit" (tag, object_type, schema_name, object_identity, query)
+    INSERT INTO schema_audit (tag, object_type, schema_name, object_identity, query)
     VALUES (tg_tag, tg_type, tg_schema, tg_identity, current_query());
 END;
 $$ LANGUAGE plpgsql;
@@ -45,8 +45,8 @@ REVOKE ALL ON SCHEMA public FROM public;
 GRANT USAGE ON SCHEMA public TO public;
 
 -- Note: In Production, create a 'decisional_app' user with limited permissions
--- GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO decisional_app;
--- REVOKE TRUNCATE ON ALL TABLES IN SCHEMA public FROM decisional_app;
+-- (e.g. GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO decisional_app)
+-- (e.g. REVOKE TRUNCATE ON ALL TABLES IN SCHEMA public FROM decisional_app)
 
 -- 5. DB-LEVEL CHECK CONSTRAINTS (Money Rules)
 -- Ensure balances and amounts never dip below zero at the DB level, averting race conditions

@@ -104,7 +104,7 @@ export const POST = apiWrapper(async function POST(request: NextRequest) {
     if (
       typeof body === "object" &&
       body !== null &&
-      Object.prototype.hasOwnProperty.call(body, "userId")
+      Object.hasOwn(body, "userId")
     ) {
       const parsedLegacy = verifyLegacyOtpSchema.safeParse(body);
       if (!parsedLegacy.success) {

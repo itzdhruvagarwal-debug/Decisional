@@ -77,15 +77,20 @@ async function sendSignNotifications(dealId: string, deal: any, isInfluencer: bo
   if (counterpartyUserId) {
     const signerName = isInfluencer ? deal.influencer.displayName : deal.brand?.companyName;
 
+    let message = `${signerName || "The other party"} has signed the contract for "${deal.campaign.title}". Please sign to proceed.`;
+    if (result.signed.isFullySigned) {
+      if (deal.reservedFromWallet) {
+        message = `Both parties have signed the contract for "${deal.campaign.title}". Payment is secured and work can begin.`;
+      } else {
+        message = `Both parties have signed the contract for "${deal.campaign.title}". Please secure payment to activate the deal.`;
+      }
+    }
+
     await NotificationService.createNotification({
       userId: counterpartyUserId,
       type: "deal_update",
       title: result.signed.isFullySigned ? "Contract Fully Signed" : "Contract Signed",
-      message: result.signed.isFullySigned
-        ? deal.reservedFromWallet
-          ? `Both parties have signed the contract for "${deal.campaign.title}". Payment is secured and work can begin.`
-          : `Both parties have signed the contract for "${deal.campaign.title}". Please secure payment to activate the deal.`
-        : `${signerName || "The other party"} has signed the contract for "${deal.campaign.title}". Please sign to proceed.`,
+      message,
       data: { link: `/dashboard/deals/${dealId}` },
     });
   }

@@ -31,7 +31,7 @@ async function _handler_GET(req: NextRequest) {
     // Verify the state param — CSRF guard
     const storedState = await prisma.oAuthState.findUnique({ where: { state } });
 
-    if (!storedState || storedState.provider !== "instagram") {
+    if (storedState?.provider !== "instagram") {
       return redirect(req, "/dashboard/settings?error=invalid_state");
     }
 

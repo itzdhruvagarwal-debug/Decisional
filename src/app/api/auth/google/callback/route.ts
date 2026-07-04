@@ -52,7 +52,7 @@ async function fetchGoogleUserProfile(accessToken: string) {
   }
 
   const profile = await profileRes.json();
-  if (!profile || !profile.email) {
+  if (!profile?.email) {
     throw AppError.badRequest("Google profile missing email");
   }
 
@@ -133,7 +133,7 @@ async function _handler_GET(req: NextRequest) {
     }
 
     const storedState = await prisma.oAuthState.findUnique({ where: { state } });
-    if (!storedState || storedState.provider !== "google") {
+    if (storedState?.provider !== "google") {
       return redirect(req, "/dashboard/settings?tab=social&error=invalid_state");
     }
 

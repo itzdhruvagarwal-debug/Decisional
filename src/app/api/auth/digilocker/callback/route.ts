@@ -112,7 +112,7 @@ async function _handler_GET(req: NextRequest) {
       where: { state },
     });
 
-    if (!storedState || storedState.provider !== "digilocker") {
+    if (storedState?.provider !== "digilocker") {
       return NextResponse.redirect(
         appUrl("/dashboard/settings?tab=verification&error=invalid_state", req.nextUrl.origin)
       );

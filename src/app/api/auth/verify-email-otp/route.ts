@@ -3,7 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { randomInt, createHash, timingSafeEqual } from "crypto";
+import { randomInt, createHash, timingSafeEqual } from "node:crypto";
 import redis from "@/lib/redis";
 import { logger } from "@/lib/logger";
 import { sendVerificationEmail } from "@/lib/email";
@@ -26,7 +26,7 @@ export const PUT = apiWrapper(async function PUT(request: NextRequest) {
 
         const { email, type } = body;
 
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        if (!email || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
             return NextResponse.json(
                 { error: "Valid email address is required" },
                 { status: 400 },

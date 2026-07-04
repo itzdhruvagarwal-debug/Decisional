@@ -82,10 +82,10 @@ async function seedBankAccount(userId: string, accountName: string, bankName: st
     where: { userId },
   });
 
-  if (!account) {
-    await prisma.bankAccount.create({
+  if (account) {
+    await prisma.bankAccount.update({
+      where: { id: account.id },
       data: {
-        userId,
         accountName,
         accountNumber: "912345678901",
         ifscCode: "HDFC0000123",
@@ -95,9 +95,9 @@ async function seedBankAccount(userId: string, accountName: string, bankName: st
       },
     });
   } else {
-    await prisma.bankAccount.update({
-      where: { id: account.id },
+    await prisma.bankAccount.create({
       data: {
+        userId,
         accountName,
         accountNumber: "912345678901",
         ifscCode: "HDFC0000123",

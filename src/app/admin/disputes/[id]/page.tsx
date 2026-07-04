@@ -4,10 +4,22 @@ import { resolveDispute } from "../../dispute-actions";
 
 export const dynamic = "force-dynamic";
 
+function StatusBadge({ status }: { readonly status: string }) {
+  let color = "badge-info";
+  if (status === "COMPLETED" || status === "VERIFIED") {
+    color = "badge-success";
+  } else if (status === "DISPUTED") {
+    color = "badge-danger";
+  } else if (status === "CANCELLED") {
+    color = "badge-warning";
+  }
+  return <span className={`badge ${color}`}>{status}</span>;
+}
+
 export default async function AdminDisputeDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  readonly params: Promise<{ readonly id: string }>;
 }) {
   const { id } = await params;
   const dispute = await prisma.dispute.findUnique({
@@ -68,18 +80,6 @@ export default async function AdminDisputeDetailPage({
       },
     }),
   ]);
-
-  function StatusBadge({ status }: { status: string }) {
-    const color =
-      status === "COMPLETED" || status === "VERIFIED"
-        ? "badge-success"
-        : status === "DISPUTED"
-          ? "badge-danger"
-          : status === "CANCELLED"
-            ? "badge-warning"
-            : "badge-info";
-    return <span className={`badge ${color}`}>{status}</span>;
-  }
 
   return (
     <div className="admin-page">
@@ -169,7 +169,7 @@ export default async function AdminDisputeDetailPage({
         {/* Influencer History */}
         <div className="card">
           <h2 style={{ marginBottom: "16px" }}>
-            📊 Influencer Deal History
+            📊 Influencer Deal History{" "}
             <span style={{ fontSize: "13px", fontWeight: 400, color: "var(--color-text-secondary)", marginLeft: "8px" }}>
               (last 10 deals, excl. this dispute)
             </span>
@@ -207,7 +207,7 @@ export default async function AdminDisputeDetailPage({
         {/* Brand History */}
         <div className="card">
           <h2 style={{ marginBottom: "16px" }}>
-            🏢 Brand Deal History
+            🏢 Brand Deal History{" "}
             <span style={{ fontSize: "13px", fontWeight: 400, color: "var(--color-text-secondary)", marginLeft: "8px" }}>
               (last 10 deals, excl. this dispute)
             </span>

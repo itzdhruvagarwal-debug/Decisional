@@ -7,7 +7,7 @@ import { requireActiveAdmin } from "@/lib/admin-auth";
 export default async function AdminLayout({
   children,
 }: {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 }) {
   const session = await auth();
 

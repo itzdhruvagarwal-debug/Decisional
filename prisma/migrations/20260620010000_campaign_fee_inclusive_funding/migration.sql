@@ -11,4 +11,5 @@ SET
   "reservedTotalAmount" = CASE
     WHEN "reservedTotalAmount" = 0 THEN "reservedAmount"
     ELSE "reservedTotalAmount"
-  END;
+  END
+WHERE true;
