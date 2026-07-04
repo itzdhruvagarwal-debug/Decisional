@@ -213,7 +213,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               throw AppError.badRequest("SUSPICIOUS_IP_BLOCK: Login blocked due to suspicious IP detection (VPN/Proxy/Tor). Please disable your VPN.");
             }
           } catch (ipErr: unknown) {
-            if ((ipErr instanceof Error ? (ipErr instanceof Error ? ipErr.message : String(ipErr)) : String(ipErr))?.startsWith("SUSPICIOUS_IP_BLOCK")) throw ipErr;
+            const ipErrMsg = ipErr instanceof Error ? ipErr.message : String(ipErr);
+            if (ipErrMsg.startsWith("SUSPICIOUS_IP_BLOCK")) throw ipErr;
             logger.warn("IP info lookup failed — non-fatal", { error: ipErr, ip });
           }
 
@@ -271,13 +272,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                       }).catch(() => {});
 
                       // Require 2FA or block the session
-                      if (!user.isTwoFactorEnabled) {
-                        throw AppError.badRequest("SUSPICIOUS_LOGIN_BLOCK: Geo-suspicious login detected (Impossible Travel). Account security review required.");
-                      } else {
+                      if (user.isTwoFactorEnabled) {
                         const code = (credentials as Record<string, string>).twoFactorCode;
                         if (!code) {
                           throw AppError.badRequest("2FA_REQUIRED");
                         }
+                      } else {
+                        throw AppError.badRequest("SUSPICIOUS_LOGIN_BLOCK: Geo-suspicious login detected (Impossible Travel). Account security review required.");
                       }
                     }
                   }
@@ -432,7 +433,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               }
             } catch (e: unknown) {
               logger.warn("Failed to track device fingerprint", {
-                error: (e instanceof Error ? (e instanceof Error ? e.message : String(e)) : String(e)) || e,
+                error: e instanceof Error ? e.message : String(e),
               });
             }
           })().catch((err) => {
@@ -457,7 +458,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           };
         } catch (entireAuthorizeError: unknown) {
           // Re-throw structured errors for 2FA, suspicious IPs, and geo-suspicious login errors
-          const msg = (entireAuthorizeError instanceof Error ? (entireAuthorizeError instanceof Error ? entireAuthorizeError.message : String(entireAuthorizeError)) : String(entireAuthorizeError));
+          const msg = entireAuthorizeError instanceof Error ? entireAuthorizeError.message : String(entireAuthorizeError);
           if (
             msg === "2FA_REQUIRED" ||
             msg === "INVALID_2FA" ||
@@ -736,7 +737,9 @@ async function handleInitialJwtSession(
       headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       "unknown";
     token.ua = headerList.get("user-agent") || "unknown";
-  } catch (_e) { }
+  } catch (_e) {
+    logger.debug("Failed to get request headers for JWT enrichment", { error: _e });
+  }
 
   if (user?.refreshToken) {
     token.refreshToken = user.refreshToken;
@@ -763,27 +766,35 @@ async function verifyUserAccountStatus(userId: string, token: Record<string, unk
   return { valid: true };
 }
 
+async function isSessionRevokedByJti(jti: unknown): Promise<boolean> {
+  if (typeof jti === "string") {
+    const { isTokenRevoked } = await import("./blacklist");
+    return await isTokenRevoked(jti);
+  }
+  return false;
+}
+
+async function verifyActiveSessionToken(userId: string, currentRefreshToken: unknown): Promise<boolean> {
+  const activeToken = await redis.get(`active_session:${userId}`);
+  return !activeToken || activeToken === currentRefreshToken;
+}
+
 async function checkSessionSecurityAndStatus(token: Record<string, unknown>): Promise<{ valid: boolean; status?: string }> {
   try {
-    if (token.id) {
-      const activeToken = await redis.get(`active_session:${token.id}`);
-      if (activeToken && activeToken !== token.refreshToken) {
-        return { valid: false };
-      }
+    if (typeof token.id === "string") {
+      const isSessionValid = await verifyActiveSessionToken(token.id, token.refreshToken);
+      if (!isSessionValid) return { valid: false };
 
       const now = Date.now();
       const lastChecked = (token.lastCheckedStatus as number) || 0;
       if (now - lastChecked > 60 * 1000) {
-        const check = await verifyUserAccountStatus(token.id as string, token, now);
+        const check = await verifyUserAccountStatus(token.id, token, now);
         if (!check.valid) return check;
       }
     }
 
-    if (token.jti) {
-      const { isTokenRevoked } = await import("./blacklist");
-      if (await isTokenRevoked(token.jti as string)) {
-        return { valid: false };
-      }
+    if (await isSessionRevokedByJti(token.jti)) {
+      return { valid: false };
     }
   } catch (error) {
     logger.error(
@@ -812,7 +823,7 @@ async function rotateSessionToken(token: Record<string, unknown>): Promise<Recor
     }
 
     try {
-      if (token.id) {
+      if (typeof token.id === "string") {
         await redis.set(
           `active_session:${token.id}`,
           newRefreshToken.token,

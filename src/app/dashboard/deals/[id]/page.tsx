@@ -873,7 +873,12 @@ export default function DealDetailPage() {
                         {sub.contentUrls && Array.isArray(sub.contentUrls) && sub.contentUrls.length > 0 ? (
                           <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px", marginBottom: "8px" }}>
                             {sub.contentUrls.map((item) => {
-                              const itemBg = item.status === "APPROVED" ? "var(--color-success)" : item.status === "REVISION_REQUESTED" ? "var(--color-warning)" : "var(--color-accent-blue)";
+                              let itemBg = "var(--color-accent-blue)";
+                              if (item.status === "APPROVED") {
+                                itemBg = "var(--color-success)";
+                              } else if (item.status === "REVISION_REQUESTED") {
+                                itemBg = "var(--color-warning)";
+                              }
                               return (
                                 <div key={item.type} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-sm)" }}>
                                   <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>

@@ -132,6 +132,15 @@ export default function InfluencerDashboard({
     recentActivity = [],
   } = data;
 
+  let trustScoreColor = "var(--color-accent-rose)";
+  if (overview.trustScore >= 850) {
+    trustScoreColor = "var(--color-accent-emerald)";
+  } else if (overview.trustScore >= 750) {
+    trustScoreColor = "var(--color-primary-light)";
+  } else if (overview.trustScore >= 600) {
+    trustScoreColor = "var(--color-accent-amber)";
+  }
+
   if (!overview || !performance) {
     return (
       <div
@@ -187,14 +196,7 @@ export default function InfluencerDashboard({
           <span>Trust Score</span>
           <strong
             style={{
-              color:
-                overview.trustScore >= 850
-                  ? "var(--color-accent-emerald)"
-                  : overview.trustScore >= 750
-                  ? "var(--color-primary-light)"
-                  : overview.trustScore >= 600
-                  ? "var(--color-accent-amber)"
-                  : "var(--color-accent-rose)",
+              color: trustScoreColor,
             }}
           >
             {overview.trustScore}

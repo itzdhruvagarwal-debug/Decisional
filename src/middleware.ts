@@ -77,7 +77,7 @@ export default auth(async (req) => {
 
   // Generate unique nonce for this request
   const nonce = crypto.randomUUID();
-  const cspWithNonce = BASE_CSP.replace(/\{NONCE\}/g, nonce);
+  const cspWithNonce = BASE_CSP.replaceAll('{NONCE}', nonce);
 
   const redirectTo = (targetPath: string) => {
     const configured =
@@ -129,8 +129,8 @@ export default auth(async (req) => {
       if (await isIpBannedEdge(ip)) {
         return applyCSP(NextResponse.json({ error: "Access Denied: Your IP is banned." }, { status: 403 }));
       }
-    } catch (_err) {
-      // Non-blocking in dev if resolver fails
+    } catch (err) {
+      console.error("Middleware edge blacklist lookup failed:", err);
     }
   }
 

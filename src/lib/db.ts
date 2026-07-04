@@ -3,7 +3,7 @@ import "server-only";
 
 import { PrismaClient, Prisma } from "@prisma/client";
 import { encrypt, decrypt } from "./encryption";
-import { randomBytes } from "crypto";
+import { randomBytes } from "node:crypto";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -205,7 +205,7 @@ function createPrismaClient() {
             ) {
               args = args || ({} as Record<string, unknown>);
               const typedArgs = args as Record<string, unknown>;
-              typedArgs["where"] = { ...((typedArgs["where"] as object) || {}), deletedAt: null };
+              typedArgs["where"] = { ...(typedArgs["where"] as object), deletedAt: null };
             }
           }
 
@@ -312,7 +312,7 @@ export async function ensurePlatformTreasury(tx?: Prisma.TransactionClient) {
   });
   
   if (!user) {
-    user = await client.user.create({
+    await client.user.create({
       data: {
         id: "PLATFORM_TREASURY",
         email: "treasury@platform.local",

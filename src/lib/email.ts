@@ -272,7 +272,8 @@ async function sendEmail(params: EmailParams): Promise<EmailResult> {
         error: errorBody,
       });
     } catch (err: unknown) {
-      if ((err instanceof Error ? (err instanceof Error ? err.name : 'Error') : 'Error') === "AbortError") {
+      const errName = err instanceof Error ? err.name : "Error";
+      if (errName === "AbortError") {
         log.warn(`Email send timed out after ${REQUEST_TIMEOUT_MS}ms. Attempt ${attempt}/${MAX_RETRIES}`);
       } else {
         log.error(`Network error sending email. Attempt ${attempt}/${MAX_RETRIES}`, err);

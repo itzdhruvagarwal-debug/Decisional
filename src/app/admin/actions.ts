@@ -85,7 +85,7 @@ export async function approveUser(userId: string) {
 
         await NotificationService.createNotification({
           userId,
-          type: "SYSTEM",
+          type: "system",
           title: "Document Verified (Action Required)",
           message: `Your document was approved, but we still need: ${missingDocs.map((m) => m.replace("_", " ")).join(", ")} to fully verify your account.`,
         }, tx);
@@ -105,7 +105,7 @@ export async function approveUser(userId: string) {
 
         await NotificationService.createNotification({
           userId,
-          type: "SYSTEM",
+          type: "system",
           title: "Verification Approved",
           message:
             "Your profile is now fully verified. You can now create campaigns and hire influencers!",
@@ -151,7 +151,7 @@ export async function rejectUser(userId: string, reason: string) {
 
   await NotificationService.createNotification({
     userId,
-    type: "SYSTEM",
+    type: "system",
     title: "Verification Rejected",
     message: `Your verification was rejected. Reason: ${reason}. Please re-upload documents.`,
   });
@@ -203,7 +203,7 @@ export async function approveDocument(docId: string, userId: string) {
 
         await NotificationService.createNotification({
           userId,
-          type: "SYSTEM",
+          type: "system",
           title: "Verification Approved",
           message:
             "Your profile is now fully verified. You can now create campaigns and hire influencers!",
@@ -242,7 +242,7 @@ export async function rejectDocument(
 
   await NotificationService.createNotification({
     userId,
-    type: "SYSTEM",
+    type: "system",
     title: "Document Rejected",
     message: `Your ${doc.type.replace("_", " ")} was rejected. Reason: ${reason}. Please re-upload.`,
   });
@@ -289,7 +289,7 @@ export async function approveFlaggedApplication(applicationId: string) {
   if (app?.influencer?.userId) {
     await NotificationService.createNotification({
       userId: app.influencer.userId,
-      type: "SYSTEM",
+      type: "system",
       title: "Application Approved by Admin",
       message: "Your flagged application was reviewed and approved. It is now pending brand selection.",
     });
@@ -310,7 +310,7 @@ export async function rejectFlaggedApplication(applicationId: string, reason: st
   if (app?.influencer?.userId) {
     await NotificationService.createNotification({
       userId: app.influencer.userId,
-      type: "SYSTEM",
+      type: "system",
       title: "Application Rejected",
       message: `Your application was rejected by security review. Reason: ${reason}`,
     });

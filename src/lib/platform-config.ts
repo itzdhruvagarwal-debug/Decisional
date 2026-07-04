@@ -17,7 +17,7 @@
 
 function configValue(envKey: string, placeholder: string): string {
   const val = process.env[envKey];
-  if (val && val.trim()) return val.trim();
+  if (val?.trim()) return val.trim();
   // In production, surface the missing-config problem loudly in every report
   // rather than emitting a fake value that could be legally relied upon.
   return `[MISSING: set ${envKey} env var — ${placeholder}]`;

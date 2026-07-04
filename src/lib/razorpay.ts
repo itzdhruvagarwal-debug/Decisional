@@ -128,7 +128,7 @@ export async function createOrder(params: {
 
   return {
     orderId: order.id,
-    amount: typeof order.amount === "string" ? parseInt(order.amount, 10) : order.amount,
+    amount: typeof order.amount === "string" ? Number.parseInt(order.amount, 10) : order.amount,
     currency: order.currency,
     receipt: order.receipt,
     status: order.status,

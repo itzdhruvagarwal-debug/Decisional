@@ -86,15 +86,21 @@ export class UserService {
         } else if (params.platform === "youtube") {
           where.youtubeEngagementRate = { gte: params.minEngagementRate };
         } else {
-          where.AND = [
-            ...(Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []),
-            {
-              OR: [
-                { instagramEngagementRate: { gte: params.minEngagementRate } },
-                { youtubeEngagementRate: { gte: params.minEngagementRate } },
-              ],
+          const andConditions: Prisma.InfluencerProfileWhereInput[] = [];
+          if (where.AND) {
+            if (Array.isArray(where.AND)) {
+              andConditions.push(...where.AND);
+            } else {
+              andConditions.push(where.AND as Prisma.InfluencerProfileWhereInput);
             }
-          ];
+          }
+          andConditions.push({
+            OR: [
+              { instagramEngagementRate: { gte: params.minEngagementRate } },
+              { youtubeEngagementRate: { gte: params.minEngagementRate } },
+            ],
+          });
+          where.AND = andConditions;
         }
       }
 
@@ -137,7 +143,15 @@ export class UserService {
           where.OR = where.OR || [];
           if (where.OR.length > 0) {
             // if there's already an OR condition (like searchTerm), we need to COMBINE it with an AND
-            where.AND = [
+            const andConditions: Prisma.InfluencerProfileWhereInput[] = [];
+            if (where.AND) {
+              if (Array.isArray(where.AND)) {
+                andConditions.push(...where.AND);
+              } else {
+                andConditions.push(where.AND as Prisma.InfluencerProfileWhereInput);
+              }
+            }
+            andConditions.push(
               { OR: where.OR },
               {
                 OR: [
@@ -145,8 +159,9 @@ export class UserService {
                   { minRate: null },
                   { minRate: 0 },
                 ],
-              },
-            ];
+              }
+            );
+            where.AND = andConditions;
             delete where.OR;
           } else {
             where.OR = [

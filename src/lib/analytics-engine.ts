@@ -200,13 +200,13 @@ async function getMonthlyEarnings(influencerId: string, fy?: string) {
   
   if (fy) {
     const bounds = getIndianFYBounds(fy);
-    if (!bounds) {
+    if (bounds) {
+      startDate = bounds.start;
+      endDate = bounds.end;
+    } else {
       // Invalid FY, fallback to rolling 12 months
       startDate = new Date(Date.now() - 12 * 30 * 24 * 60 * 60 * 1000);
       endDate = new Date();
-    } else {
-      startDate = bounds.start;
-      endDate = bounds.end;
     }
   } else {
     // Default: rolling 12 months
@@ -447,13 +447,13 @@ async function getMonthlySpend(userId: string, fy?: string) {
   
   if (fy) {
     const bounds = getIndianFYBounds(fy);
-    if (!bounds) {
+    if (bounds) {
+      startDate = bounds.start;
+      endDate = bounds.end;
+    } else {
       // Invalid FY, fallback to rolling 12 months
       startDate = new Date(Date.now() - 12 * 30 * 24 * 60 * 60 * 1000);
       endDate = new Date();
-    } else {
-      startDate = bounds.start;
-      endDate = bounds.end;
     }
   } else {
     // Default: rolling 12 months

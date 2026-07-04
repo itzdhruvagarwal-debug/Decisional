@@ -66,6 +66,23 @@ function estimateCampaignDealSlots(
   );
 }
 
+interface DirectInviteParams {
+  tx: Prisma.TransactionClient;
+  newCampaign: any;
+  data: any;
+  profile: any;
+  totalBudgetPaise: number;
+  perInfluencerBudgetPaise: number | null;
+  normalizedDeliverables: any;
+  requirements: string;
+  contentDeadline: Date;
+  postingDeadline: Date;
+  requiresProduct: boolean;
+  productName: string | null;
+  productValuePaise: number | null;
+  productHandlingFee: number;
+}
+
 export class CampaignService {
   static async listCampaigns(
     userId: string | undefined,
@@ -458,22 +475,25 @@ export class CampaignService {
     return campaignFundingAmounts;
   }
 
-  private static async handleDirectInviteInCampaign(
-    tx: Prisma.TransactionClient,
-    newCampaign: any,
-    data: any,
-    profile: any,
-    totalBudgetPaise: number,
-    perInfluencerBudgetPaise: number | null,
-    normalizedDeliverables: any,
-    requirements: string,
-    contentDeadline: Date,
-    postingDeadline: Date,
-    requiresProduct: boolean,
-    productName: string | null,
-    productValuePaise: number | null,
-    productHandlingFee: number
-  ) {
+
+
+  private static async handleDirectInviteInCampaign(params: DirectInviteParams) {
+    const {
+      tx,
+      newCampaign,
+      data,
+      profile,
+      totalBudgetPaise,
+      perInfluencerBudgetPaise,
+      normalizedDeliverables,
+      requirements,
+      contentDeadline,
+      postingDeadline,
+      requiresProduct,
+      productName,
+      productValuePaise,
+      productHandlingFee,
+    } = params;
     if (!data.invitedInfluencerId) return;
 
     const invitedInfluencer = (await tx.influencerProfile.findUnique({
@@ -827,7 +847,7 @@ export class CampaignService {
           },
         });
 
-        await this.handleDirectInviteInCampaign(
+        await this.handleDirectInviteInCampaign({
           tx,
           newCampaign,
           data,
@@ -841,8 +861,8 @@ export class CampaignService {
           requiresProduct,
           productName,
           productValuePaise,
-          productHandlingFee
-        );
+          productHandlingFee,
+        });
 
         const profileUpdateData: Prisma.BrandProfileUpdateInput = {
           totalCampaigns: { increment: 1 },

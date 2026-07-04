@@ -128,7 +128,8 @@ export async function sendSMS(
         error: errorText,
       });
     } catch (err: unknown) {
-      if ((err instanceof Error ? (err instanceof Error ? err.name : 'Error') : 'Error') === "AbortError") {
+      const errName = err instanceof Error ? err.name : "Error";
+      if (errName === "AbortError") {
         log.warn(`SMS send timed out. Attempt ${attempt}/${SMS_MAX_RETRIES}`);
       } else {
         log.error(`Network error sending SMS. Attempt ${attempt}/${SMS_MAX_RETRIES}`, err);

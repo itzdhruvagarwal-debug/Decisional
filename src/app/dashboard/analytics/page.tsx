@@ -53,7 +53,6 @@ export default async function AnalyticsPage({
       <DashboardShell user={session.user}>
         <AnalyticsPageClient 
           userType="INFLUENCER" 
-          _userId={userId} 
           initialData={influencerData}
           currentFY={fy || undefined}
         />
@@ -68,7 +67,6 @@ export default async function AnalyticsPage({
       <DashboardShell user={session.user}>
         <AnalyticsPageClient 
           userType="BRAND" 
-          _userId={userId} 
           initialData={brandData}
           currentFY={fy || undefined}
         />

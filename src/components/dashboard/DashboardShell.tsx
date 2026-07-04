@@ -349,6 +349,13 @@ export default function DashboardShell({
   const isBrandOrIndividual = userType === "BRAND";
   const isAdmin = userType === "ADMIN";
 
+  let subtitleText = `Welcome, ${user?.name || "User"}!`;
+  if (user?.userType === "BRAND") {
+    subtitleText = "Brand Dashboard";
+  } else if (user?.userType === "INFLUENCER") {
+    subtitleText = "Influencer Dashboard";
+  }
+
   const navItems = isAdmin
     ? [
         { icon: "AD", label: "Admin Panel", href: "/admin" },
@@ -691,11 +698,7 @@ export default function DashboardShell({
                   fontSize: "13px",
                 }}
               >
-                {user?.userType === "BRAND"
-                  ? "Brand Dashboard"
-                  : user?.userType === "INFLUENCER"
-                  ? "Influencer Dashboard"
-                  : `Welcome, ${user?.name || "User"}!`}
+                {subtitleText}
               </p>
             </div>
           </div>

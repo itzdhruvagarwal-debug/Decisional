@@ -58,13 +58,18 @@ export default async function AdminUsersPage({
   const limit = 50;
 
   // Call AdminService directly on the server to prevent port-binding failures and loopback request overhead
-  const { users, total } = await AdminService.listUsers({
-    page,
-    limit,
-    ...(query ? { search: query } : {}),
-    ...(userType === "ALL" ? {} : { userType }),
-    ...(status === "ALL" ? {} : { status }),
-  });
+  const listParams: {
+    page: number;
+    limit: number;
+    search?: string;
+    userType?: string;
+    status?: string;
+  } = { page, limit };
+  if (query) listParams.search = query;
+  if (userType !== "ALL") listParams.userType = userType;
+  if (status !== "ALL") listParams.status = status;
+
+  const { users, total } = await AdminService.listUsers(listParams);
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
 

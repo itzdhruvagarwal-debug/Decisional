@@ -121,8 +121,10 @@ async function _handler(req: NextRequest, context: { params: Promise<Record<stri
     }));
 
     // Add summary rows
-    rows.push({ "Influencer": "", "Handle": "", "Followers": "─────", "Paid (₹)": "─────", "Reach": "─────", "Views": "─────", "Likes": "─────", "Comments": "─────", "Shares": "─────", "Saves": "─────", "Total Engagements": "─────", "Engagement Rate": "─────", "CPE (₹)": "─────", "CPR (₹)": "─────", "Rating": "─────" });
-    rows.push({ "Influencer": "TOTAL", "Handle": `${influencerBreakdown.length} influencers`, "Followers": "", "Paid (₹)": paiseToRupees(totals.totalSpend), "Reach": totals.totalReach, "Views": totals.totalViews, "Likes": influencerBreakdown.reduce((s, d) => s + d.likes, 0), "Comments": influencerBreakdown.reduce((s, d) => s + d.comments, 0), "Shares": influencerBreakdown.reduce((s, d) => s + d.shares, 0), "Saves": influencerBreakdown.reduce((s, d) => s + d.saves, 0), "Total Engagements": totals.totalEngagements, "Engagement Rate": `${totals.avgEngagementRate.toFixed(2)}%`, "CPE (₹)": blendedCPE, "CPR (₹)": totals.totalReach > 0 ? paiseToRupees(Math.round(totals.totalSpend / totals.totalReach)) : "N/A", "Rating": "" });
+    rows.push(
+      { "Influencer": "", "Handle": "", "Followers": "─────", "Paid (₹)": "─────", "Reach": "─────", "Views": "─────", "Likes": "─────", "Comments": "─────", "Shares": "─────", "Saves": "─────", "Total Engagements": "─────", "Engagement Rate": "─────", "CPE (₹)": "─────", "CPR (₹)": "─────", "Rating": "─────" },
+      { "Influencer": "TOTAL", "Handle": `${influencerBreakdown.length} influencers`, "Followers": "", "Paid (₹)": paiseToRupees(totals.totalSpend), "Reach": totals.totalReach, "Views": totals.totalViews, "Likes": influencerBreakdown.reduce((s, d) => s + d.likes, 0), "Comments": influencerBreakdown.reduce((s, d) => s + d.comments, 0), "Shares": influencerBreakdown.reduce((s, d) => s + d.shares, 0), "Saves": influencerBreakdown.reduce((s, d) => s + d.saves, 0), "Total Engagements": totals.totalEngagements, "Engagement Rate": `${totals.avgEngagementRate.toFixed(2)}%`, "CPE (₹)": blendedCPE, "CPR (₹)": totals.totalReach > 0 ? paiseToRupees(Math.round(totals.totalSpend / totals.totalReach)) : "N/A", "Rating": "" }
+    );
 
     // Add platform header and footer
     const platformHeader = getPlatformHeader().map((line) => ({ "Platform Info": line }));

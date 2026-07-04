@@ -75,7 +75,7 @@ export class MatchingService {
     }
 
     const totalBP = uniqueSnaps.reduce((sum, s) => sum + s.engagementRate, 0);
-    const rate = totalBP / uniqueSnaps.length / 100;
+    const rate = uniqueSnaps.length > 0 ? totalBP / uniqueSnaps.length / 100 : 0;
     return { rate, hasData: rate > 0 };
   }
 

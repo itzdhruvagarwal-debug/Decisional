@@ -16,10 +16,10 @@ export function toCsv(rows: CsvRow[], headers?: string[]): string {
   
   const escape = (val: unknown): string => {
     if (val === null || val === undefined) return "";
-    const str = String(val);
+    const str = typeof val === "object" && !(val instanceof Date) ? JSON.stringify(val) : String(val);
     // Wrap in quotes if contains comma, quote, or newline
     if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-      return `"${str.replace(/"/g, '""')}"`;
+      return `"${str.replaceAll('"', '""')}"`;
     }
     return str;
   };
@@ -59,10 +59,10 @@ export function paiseToRupees(paise: number): string {
  */
 export function getIndianFYBounds(fy: string): { start: Date; end: Date } | null {
   // fy format: "2025-26"
-  const match = fy.match(/^(\d{4})-(\d{2})$/);
+  const match = /^(\d{4})-(\d{2})$/.exec(fy);
   if (!match) return null;
   
-  const startYear = parseInt(match[1]!);
+  const startYear = Number.parseInt(match[1]!, 10);
   const endYear = startYear + 1;
   
   // April 1 of startYear, 00:00 IST = March 31 18:30 UTC

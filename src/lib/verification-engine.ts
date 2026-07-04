@@ -88,7 +88,7 @@ export async function reviewVerification(data: VerificationReview) {
     userId: doc.userId,
     type: "verification_update",
     title: `Document ${data.status === "VERIFIED" ? "Verified" : "Rejected"}`,
-    message: `Your ${doc.type} has been ${data.status.toLowerCase()}. ${data.reason ? `Reason: ${data.reason}` : ""}`
+    message: `Your ${doc.type} has been ${data.status.toLowerCase()}. ${data.reason ? "Reason: " + data.reason : ""}`
   });
 
   return { success: true };

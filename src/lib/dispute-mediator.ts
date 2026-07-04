@@ -9,7 +9,7 @@ import { AppError } from "@/lib/errors";
  * NO ML / NO BLOCKCHAIN — Pure rule-based logic.
  */
 
-import { DealStatus } from "@prisma/client";
+
 import prisma, { ensurePlatformTreasury } from "./db";
 import { redis } from "./redis";
 import { logger } from "./logger";
@@ -24,7 +24,7 @@ import {
   creditInfluencerPayoutWithTax,
   recordPlatformFeeRevenue,
 } from "./deal-settlement";
-import { randomInt } from "crypto";
+import { randomInt } from "node:crypto";
 import {
   Dispute,
   Deal,
@@ -40,6 +40,7 @@ import {
   TransactionType,
   TransactionStatus,
   Prisma,
+  DealStatus,
 } from "@prisma/client";
 
 type FullDeal = Deal & {

@@ -137,12 +137,14 @@ function buildOptionalContractCsvRows(rows: Record<string, string | number>[], t
   rows.push({ "Section": "DELIVERABLES", "Field": "", "Value": "" });
   if (Array.isArray(terms.deliverables)) {
     terms.deliverables.forEach((del, idx: number) => {
-      rows.push({ "Section": "", "Field": `Deliverable ${idx + 1}`, "Value": "" });
-      rows.push({ "Section": "", "Field": "Type", "Value": del.type || "—" });
-      rows.push({ "Section": "", "Field": "Count", "Value": String(del.count || 1) });
-      rows.push({ "Section": "", "Field": "Platform", "Value": del.platform || "—" });
-      rows.push({ "Section": "", "Field": "Details", "Value": del.details || "—" });
-      rows.push({ "Section": "", "Field": "", "Value": "─────" });
+      rows.push(
+        { "Section": "", "Field": `Deliverable ${idx + 1}`, "Value": "" },
+        { "Section": "", "Field": "Type", "Value": del.type || "—" },
+        { "Section": "", "Field": "Count", "Value": String(del.count || 1) },
+        { "Section": "", "Field": "Platform", "Value": del.platform || "—" },
+        { "Section": "", "Field": "Details", "Value": del.details || "—" },
+        { "Section": "", "Field": "", "Value": "─────" }
+      );
     });
   }
 }
@@ -164,32 +166,46 @@ function buildPolicyAndObligationCsvRows(rows: Record<string, string | number>[]
   );
 
   // Content Usage
-  rows.push({ "Section": "CONTENT USAGE RIGHTS", "Field": "", "Value": "" });
+  const usageRows = [];
   if (terms.contentUsage) {
-    rows.push(
+    usageRows.push(
       { "Section": "", "Field": "Organic Repost", "Value": terms.contentUsage.organicRepost || "—" },
       { "Section": "", "Field": "Paid Ads", "Value": terms.contentUsage.paidAds || "—" },
       { "Section": "", "Field": "Whitelisting", "Value": terms.contentUsage.whitelisting || "—" }
     );
   }
-  rows.push({ "Section": "", "Field": "", "Value": "─────" });
+  rows.push(
+    { "Section": "CONTENT USAGE RIGHTS", "Field": "", "Value": "" },
+    ...usageRows,
+    { "Section": "", "Field": "", "Value": "─────" }
+  );
 
   // Obligations
-  rows.push({ "Section": "INFLUENCER OBLIGATIONS", "Field": "", "Value": "" });
-  if (Array.isArray(terms.influencerObligations)) {
-    terms.influencerObligations.forEach((obligation: string, idx: number) => {
-      rows.push({ "Section": "", "Field": `Obligation ${idx + 1}`, "Value": obligation });
-    });
-  }
-  rows.push({ "Section": "", "Field": "", "Value": "─────" });
+  const influencerObligationRows = Array.isArray(terms.influencerObligations)
+    ? terms.influencerObligations.map((obligation: string, idx: number) => ({
+        "Section": "",
+        "Field": `Obligation ${idx + 1}`,
+        "Value": obligation,
+      }))
+    : [];
+  rows.push(
+    { "Section": "INFLUENCER OBLIGATIONS", "Field": "", "Value": "" },
+    ...influencerObligationRows,
+    { "Section": "", "Field": "", "Value": "─────" }
+  );
 
-  rows.push({ "Section": "BRAND OBLIGATIONS", "Field": "", "Value": "" });
-  if (Array.isArray(terms.brandObligations)) {
-    terms.brandObligations.forEach((obligation: string, idx: number) => {
-      rows.push({ "Section": "", "Field": `Obligation ${idx + 1}`, "Value": obligation });
-    });
-  }
-  rows.push({ "Section": "", "Field": "", "Value": "─────" });
+  const brandObligationRows = Array.isArray(terms.brandObligations)
+    ? terms.brandObligations.map((obligation: string, idx: number) => ({
+        "Section": "",
+        "Field": `Obligation ${idx + 1}`,
+        "Value": obligation,
+      }))
+    : [];
+  rows.push(
+    { "Section": "BRAND OBLIGATIONS", "Field": "", "Value": "" },
+    ...brandObligationRows,
+    { "Section": "", "Field": "", "Value": "─────" }
+  );
 }
 
 function buildLegalAndSignatureCsvRows(rows: Record<string, string | number>[], deal: any, terms: ContractTermsType) {
@@ -201,13 +217,18 @@ function buildLegalAndSignatureCsvRows(rows: Record<string, string | number>[], 
   );
 
   // Mandatory Tags
-  rows.push({ "Section": "MANDATORY TAGS", "Field": "", "Value": "" });
-  if (Array.isArray(terms.mandatoryTags)) {
-    terms.mandatoryTags.forEach((tag: string, idx: number) => {
-      rows.push({ "Section": "", "Field": `Tag ${idx + 1}`, "Value": tag });
-    });
-  }
-  rows.push({ "Section": "", "Field": "", "Value": "─────" });
+  const mandatoryTagRows = Array.isArray(terms.mandatoryTags)
+    ? terms.mandatoryTags.map((tag: string, idx: number) => ({
+        "Section": "",
+        "Field": `Tag ${idx + 1}`,
+        "Value": tag,
+      }))
+    : [];
+  rows.push(
+    { "Section": "MANDATORY TAGS", "Field": "", "Value": "" },
+    ...mandatoryTagRows,
+    { "Section": "", "Field": "", "Value": "─────" }
+  );
 
   // Disclosure Requirement
   rows.push(
@@ -217,32 +238,37 @@ function buildLegalAndSignatureCsvRows(rows: Record<string, string | number>[], 
   );
 
   // Signature Information
-  rows.push({ "Section": "SIGNATURES", "Field": "", "Value": "" });
+  const sigRows = [];
   if (deal.contractSignature) {
     const sig = deal.contractSignature as ContractSignatureDetails;
-    rows.push(
+    sigRows.push(
       { "Section": "", "Field": "Contract Hash", "Value": sig.contractHash || "—" },
       { "Section": "", "Field": "Fully Signed", "Value": sig.isFullySigned ? "Yes" : "No" },
       { "Section": "", "Field": "Signed At", "Value": sig.signedAt ? format(new Date(sig.signedAt), "dd/MM/yyyy HH:mm") : "—" }
     );
 
     if (sig.influencerSignature) {
-      rows.push(
+      sigRows.push(
         { "Section": "", "Field": "Influencer Signed At", "Value": format(new Date(sig.influencerSignature.signedAt), "dd/MM/yyyy HH:mm") },
         { "Section": "", "Field": "Influencer Signature Hash", "Value": sig.influencerSignature.signatureHash || "—" }
       );
     }
 
     if (sig.brandSignature) {
-      rows.push(
+      sigRows.push(
         { "Section": "", "Field": "Brand Signed At", "Value": format(new Date(sig.brandSignature.signedAt), "dd/MM/yyyy HH:mm") },
         { "Section": "", "Field": "Brand Signature Hash", "Value": sig.brandSignature.signatureHash || "—" }
       );
     }
   } else {
-    rows.push({ "Section": "", "Field": "Status", "Value": "Not signed yet" });
+    sigRows.push({ "Section": "", "Field": "Status", "Value": "Not signed yet" });
   }
-  rows.push({ "Section": "", "Field": "", "Value": "─────" });
+
+  rows.push(
+    { "Section": "SIGNATURES", "Field": "", "Value": "" },
+    ...sigRows,
+    { "Section": "", "Field": "", "Value": "─────" }
+  );
 }
 
 function buildContractCsvRows(deal: any, terms: ContractTermsType, platform: PlatformDetails) {

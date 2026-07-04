@@ -50,8 +50,8 @@ export async function getIpDetails(ip: string): Promise<IpDetails | null> {
     if (cached !== null) {
       return JSON.parse(cached) as IpDetails;
     }
-  } catch (_e) {
-    // Redis offline/failure is non-fatal — skip cache
+  } catch (err) {
+    logger.debug("[IPInfo] Redis read failure; failing over to live check", { error: err });
   }
 
   try {
@@ -89,8 +89,8 @@ export async function getIpDetails(ip: string): Promise<IpDetails | null> {
     // Cache result in Redis
     try {
       await redis.setex(cacheKey, CACHE_TTL_SECONDS, JSON.stringify(details));
-    } catch (_e) {
-      // Cache write failure is non-fatal
+    } catch (err) {
+      logger.debug("[IPInfo] Redis cache write failure", { error: err });
     }
 
     return details;

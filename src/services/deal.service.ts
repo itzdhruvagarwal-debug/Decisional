@@ -1005,7 +1005,6 @@ export class DealService {
 
       if (result.requiresPostVerification === false) {
         try {
-          const { PaymentService } = await import("./payment.service");
           await PaymentService.processDealCompletion(dealId);
           await invalidateDealCache(dealId);
         } catch (error) {
@@ -1035,7 +1034,6 @@ export class DealService {
 
       if (deal.requiresPostVerification === false) {
         try {
-          const { PaymentService } = await import("./payment.service");
           await PaymentService.processDealCompletion(deal.id);
           await invalidateDealCache(deal.id);
         } catch (error) {

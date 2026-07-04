@@ -1,8 +1,7 @@
 import { AppError } from "@/lib/errors";
-import { Prisma } from "@prisma/client";
+import { Prisma, ApplicationStatus } from "@prisma/client";
 
 import prisma from "@/lib/db";
-import { ApplicationStatus } from "@prisma/client";
 import { checkApplicationFraud } from "@/lib/fraud-detection";
 import { checkTrustGate } from "@/lib/trust-engine";
 import {
@@ -14,10 +13,9 @@ import { ApplicationInput } from "@/lib/validations";
 import { checkEnterpriseApplicationGate } from "@/lib/enterprise-trust-guard";
 import { generateContractTerms } from "@/lib/contract-engine";
 import { calculateTotalAmount } from "@/lib/razorpay";
-import { assertSufficientBalance } from "@/lib/utils";
+import { assertSufficientBalance, assertAccountCanTransact, calculateProductHandlingFee } from "@/lib/utils";
 import { resolveBrandPlatformFee } from "@/lib/platform-fees";
 import { addUserXp } from "@/lib/gamification-engine";
-import { assertAccountCanTransact, calculateProductHandlingFee } from "@/lib/utils";
 import { NotificationService } from "@/services/notification.service";
 import { createActivityLog } from "@/lib/audit";
 import { TierError } from "@/services/campaign.service";

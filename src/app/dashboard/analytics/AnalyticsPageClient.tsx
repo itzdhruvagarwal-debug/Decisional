@@ -6,7 +6,6 @@ import BrandDashboard from "@/components/analytics/BrandDashboard";
 
 interface AnalyticsPageClientProps {
   readonly userType: "INFLUENCER" | "BRAND";
-  readonly _userId?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly initialData: any;
   readonly currentFY?: string | undefined;

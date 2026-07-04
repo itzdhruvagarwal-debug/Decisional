@@ -36,8 +36,8 @@ export function addDays(date: Date, days: number): Date {
 export function isExpired(date: Date): boolean { return new Date() > date; }
 
 export function parsePagination(searchParams: URLSearchParams, defaultLimit = 20) {
-  const page = Math.max(1, parseInt(searchParams.get("page") || "1") || 1);
-  const limit = Math.min(Math.max(1, parseInt(searchParams.get("limit") || String(defaultLimit)) || defaultLimit), 50);
+  const page = Math.max(1, Number.parseInt(searchParams.get("page") || "1", 10) || 1);
+  const limit = Math.min(Math.max(1, Number.parseInt(searchParams.get("limit") || String(defaultLimit), 10) || defaultLimit), 50);
   return { page, limit, skip: (page - 1) * limit };
 }
 

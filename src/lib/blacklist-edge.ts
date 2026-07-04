@@ -31,7 +31,8 @@ export async function isIpBannedEdge(ip: string): Promise<boolean> {
     const data = await response.json();
     // Upstash REST returns { result: "value" } or { result: null }
     return data && data.result !== null;
-  } catch (_err) {
+  } catch (err) {
+    console.error("Edge blacklist lookup failed:", err);
     // Fail closed in production for security, fail open in development/testing
     if (process.env.NODE_ENV === "production") {
       return true;

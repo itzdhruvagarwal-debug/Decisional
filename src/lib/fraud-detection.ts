@@ -591,9 +591,7 @@ export async function checkPostVerification(
   }
 
   // Ensure isPaidPartnership is always present
-  if (verifiedPostData.isPaidPartnership === undefined) {
-    verifiedPostData.isPaidPartnership = false;
-  }
+  verifiedPostData.isPaidPartnership ??= false;
 
   // Rule 1: Post is private
   if (!verifiedPostData.isPublic) {

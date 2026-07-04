@@ -369,7 +369,7 @@ export const contentApprovalSchema = z.object({
   approved: z.boolean(),
   feedback: z.string().trim().max(500).optional(),
   reviews: z.array(deliverableReviewSchema).optional(),
-}).refine(data => data.approved || (data.reviews && data.reviews.some(r => r.status === "REVISION_REQUESTED")) || (!!data.feedback && data.feedback.length > 0), {
+}).refine(data => data.approved || data.reviews?.some(r => r.status === "REVISION_REQUESTED") || (!!data.feedback && data.feedback.length > 0), {
   message: "You must provide feedback if you are requesting revisions",
   path: ["feedback"]
 });

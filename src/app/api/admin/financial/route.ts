@@ -93,17 +93,17 @@ async function _handler_GET(req: NextRequest) {
     );
 
     // Add monthly revenue trend
+    const trendRows = financials.monthlyRevenue.map((m: { month: string; revenue: number; gmv: number; deals: number }) => ({
+      "Metric": m.month,
+      "Value (₹)": paiseToRupees(m.revenue),
+      "Description": `GMV: ${paiseToRupees(m.gmv)}, Deals: ${m.deals}`,
+    }));
+
     rows.push(
       { "Metric": "", "Value (₹)": "─────", "Description": "─────" },
-      { "Metric": "MONTHLY REVENUE TREND", "Value (₹)": "", "Description": "" }
+      { "Metric": "MONTHLY REVENUE TREND", "Value (₹)": "", "Description": "" },
+      ...trendRows
     );
-    financials.monthlyRevenue.forEach((m: { month: string; revenue: number; gmv: number; deals: number }) => {
-      rows.push({
-        "Metric": m.month,
-        "Value (₹)": paiseToRupees(m.revenue),
-        "Description": `GMV: ${paiseToRupees(m.gmv)}, Deals: ${m.deals}`,
-      });
-    });
 
     // Add platform header and footer
     const platformHeader = getPlatformHeader().map((line) => ({ "Platform Info": line }));

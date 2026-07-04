@@ -164,6 +164,166 @@ export default function PayoutsAdminPage() {
     }
   };
 
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="card" style={{ padding: "48px", textAlign: "center" }}>
+          Loading payouts...
+        </div>
+      );
+    }
+
+    if (withdrawals.length === 0) {
+      return (
+        <div className="card" style={{ padding: "56px 24px", textAlign: "center" }}>
+          <h3 style={{ fontSize: "18px", fontWeight: 800, marginBottom: "8px" }}>
+            No payouts in this queue
+          </h3>
+          <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+            {filter === "PENDING"
+              ? "There are no pending withdrawals waiting for review."
+              : `No ${filter.toLowerCase()} payouts found.`}
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+        <div className="admin-table-wrap">
+          <table style={{ width: "100%", minWidth: "980px", borderCollapse: "collapse" }}>
+            <thead style={{ background: "var(--color-bg-tertiary)" }}>
+              <tr>
+                {["User", "Amount", "Destination", "Risk", "Requested", "Actions"].map(
+                  (heading) => (
+                    <th
+                      key={heading}
+                      style={{
+                        padding: "14px 16px",
+                        textAlign: heading === "Actions" ? "right" : "left",
+                        borderBottom: "1px solid var(--color-border)",
+                        color: "var(--color-text-secondary)",
+                        fontSize: "12px",
+                        fontWeight: 800,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {heading}
+                    </th>
+                  ),
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {withdrawals.map((withdrawal) => {
+                const statusStyle = getStatusStyle(withdrawal.status);
+                const user = withdrawal.wallet.user;
+
+                return (
+                  <tr
+                    key={withdrawal.id}
+                    style={{ borderBottom: "1px solid var(--color-border)" }}
+                  >
+                    <td style={{ padding: "16px" }}>
+                      <div style={{ fontWeight: 800, fontSize: "14px" }}>
+                        {getUserName(user)}
+                      </div>
+                      <div style={{ color: "var(--color-text-muted)", fontSize: "12px" }}>
+                        {user.email}
+                      </div>
+                      <div style={{ color: "var(--color-primary-light)", fontSize: "11px" }}>
+                        {user.userType}
+                      </div>
+                      <div
+                        style={{
+                          color: user.taxCompliance?.panLast4
+                            ? "var(--color-accent-emerald)"
+                            : "var(--color-accent-rose)",
+                          fontSize: "11px",
+                          marginTop: "4px",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {user.taxCompliance?.panLast4
+                          ? `PAN ****${user.taxCompliance.panLast4}`
+                          : "PAN missing"}
+                      </div>
+                    </td>
+                    <td style={{ padding: "16px", fontWeight: 900 }}>
+                      {formatCurrency(withdrawal.amount)}
+                    </td>
+                    <td style={{ padding: "16px", fontSize: "13px" }}>
+                      <div style={{ fontWeight: 700 }}>{withdrawal.bankAccountName}</div>
+                      <div style={{ color: "var(--color-text-muted)" }}>
+                        A/c {maskAccount(withdrawal.bankAccountNumber)}
+                      </div>
+                      <div style={{ color: "var(--color-text-muted)" }}>
+                        IFSC {withdrawal.ifscCode}
+                      </div>
+                      {withdrawal.upiId && (
+                        <div style={{ color: "var(--color-text-muted)" }}>
+                          UPI {withdrawal.upiId}
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: "16px" }}>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          border: "1px solid",
+                          borderRadius: "999px",
+                          padding: "4px 9px",
+                          fontSize: "12px",
+                          fontWeight: 800,
+                          ...statusStyle,
+                        }}
+                      >
+                        {withdrawal.status}
+                      </span>
+                      <div style={{ color: "var(--color-text-muted)", fontSize: "12px", marginTop: "6px" }}>
+                        Risk {withdrawal.riskScore}
+                        {withdrawal.isManualReview ? " / manual" : ""}
+                      </div>
+                    </td>
+                    <td style={{ padding: "16px", color: "var(--color-text-muted)", fontSize: "13px" }}>
+                      {new Date(withdrawal.createdAt).toLocaleString("en-IN")}
+                    </td>
+                    <td style={{ padding: "16px", textAlign: "right" }}>
+                      {withdrawal.status === "PENDING" || withdrawal.status === "PENDING_REVIEW" || withdrawal.status === "PROCESSING" ? (
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            disabled={processing === withdrawal.id}
+                            onClick={() => openAction(withdrawal, "REJECT")}
+                          >
+                            Reject
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-success btn-sm"
+                            disabled={processing === withdrawal.id}
+                            onClick={() => openAction(withdrawal, "APPROVE")}
+                          >
+                            {processing === withdrawal.id ? "Working..." : "Approve"}
+                          </button>
+                        </div>
+                      ) : (
+                        <span style={{ color: "var(--color-text-muted)", fontSize: "13px" }}>
+                          Closed
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="admin-page">
       <div className="admin-toolbar">
@@ -230,155 +390,7 @@ export default function PayoutsAdminPage() {
         </div>
       )}
 
-      {loading ? (
-        <div className="card" style={{ padding: "48px", textAlign: "center" }}>
-          Loading payouts...
-        </div>
-      ) : withdrawals.length === 0 ? (
-        <div className="card" style={{ padding: "56px 24px", textAlign: "center" }}>
-          <h3 style={{ fontSize: "18px", fontWeight: 800, marginBottom: "8px" }}>
-            No payouts in this queue
-          </h3>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
-            {filter === "PENDING"
-              ? "There are no pending withdrawals waiting for review."
-              : `No ${filter.toLowerCase()} payouts found.`}
-          </p>
-        </div>
-      ) : (
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-          <div className="admin-table-wrap">
-            <table style={{ width: "100%", minWidth: "980px", borderCollapse: "collapse" }}>
-              <thead style={{ background: "var(--color-bg-tertiary)" }}>
-                <tr>
-                  {["User", "Amount", "Destination", "Risk", "Requested", "Actions"].map(
-                    (heading) => (
-                      <th
-                        key={heading}
-                        style={{
-                          padding: "14px 16px",
-                          textAlign: heading === "Actions" ? "right" : "left",
-                          borderBottom: "1px solid var(--color-border)",
-                          color: "var(--color-text-secondary)",
-                          fontSize: "12px",
-                          fontWeight: 800,
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        {heading}
-                      </th>
-                    ),
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {withdrawals.map((withdrawal) => {
-                  const statusStyle = getStatusStyle(withdrawal.status);
-                  const user = withdrawal.wallet.user;
-
-                  return (
-                    <tr
-                      key={withdrawal.id}
-                      style={{ borderBottom: "1px solid var(--color-border)" }}
-                    >
-                      <td style={{ padding: "16px" }}>
-                        <div style={{ fontWeight: 800, fontSize: "14px" }}>
-                          {getUserName(user)}
-                        </div>
-                        <div style={{ color: "var(--color-text-muted)", fontSize: "12px" }}>
-                          {user.email}
-                        </div>
-                        <div style={{ color: "var(--color-primary-light)", fontSize: "11px" }}>
-                          {user.userType}
-                        </div>
-                        <div
-                          style={{
-                            color: user.taxCompliance?.panLast4
-                              ? "var(--color-accent-emerald)"
-                              : "var(--color-accent-rose)",
-                            fontSize: "11px",
-                            marginTop: "4px",
-                            fontWeight: 700,
-                          }}
-                        >
-                          {user.taxCompliance?.panLast4
-                            ? `PAN ****${user.taxCompliance.panLast4}`
-                            : "PAN missing"}
-                        </div>
-                      </td>
-                      <td style={{ padding: "16px", fontWeight: 900 }}>
-                        {formatCurrency(withdrawal.amount)}
-                      </td>
-                      <td style={{ padding: "16px", fontSize: "13px" }}>
-                        <div style={{ fontWeight: 700 }}>{withdrawal.bankAccountName}</div>
-                        <div style={{ color: "var(--color-text-muted)" }}>
-                          A/c {maskAccount(withdrawal.bankAccountNumber)}
-                        </div>
-                        <div style={{ color: "var(--color-text-muted)" }}>
-                          IFSC {withdrawal.ifscCode}
-                        </div>
-                        {withdrawal.upiId && (
-                          <div style={{ color: "var(--color-text-muted)" }}>
-                            UPI {withdrawal.upiId}
-                          </div>
-                        )}
-                      </td>
-                      <td style={{ padding: "16px" }}>
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            border: "1px solid",
-                            borderRadius: "999px",
-                            padding: "4px 9px",
-                            fontSize: "12px",
-                            fontWeight: 800,
-                            ...statusStyle,
-                          }}
-                        >
-                          {withdrawal.status}
-                        </span>
-                        <div style={{ color: "var(--color-text-muted)", fontSize: "12px", marginTop: "6px" }}>
-                          Risk {withdrawal.riskScore}
-                          {withdrawal.isManualReview ? " / manual" : ""}
-                        </div>
-                      </td>
-                      <td style={{ padding: "16px", color: "var(--color-text-muted)", fontSize: "13px" }}>
-                        {new Date(withdrawal.createdAt).toLocaleString("en-IN")}
-                      </td>
-                      <td style={{ padding: "16px", textAlign: "right" }}>
-                        {withdrawal.status === "PENDING" || withdrawal.status === "PENDING_REVIEW" || withdrawal.status === "PROCESSING" ? (
-                          <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
-                            <button
-                              type="button"
-                              className="btn btn-secondary btn-sm"
-                              disabled={processing === withdrawal.id}
-                              onClick={() => openAction(withdrawal, "REJECT")}
-                            >
-                              Reject
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-success btn-sm"
-                              disabled={processing === withdrawal.id}
-                              onClick={() => openAction(withdrawal, "APPROVE")}
-                            >
-                              {processing === withdrawal.id ? "Working..." : "Approve"}
-                            </button>
-                          </div>
-                        ) : (
-                          <span style={{ color: "var(--color-text-muted)", fontSize: "13px" }}>
-                            Closed
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      {renderContent()}
 
       {draft && (
         <div className="admin-modal-backdrop" role="presentation">

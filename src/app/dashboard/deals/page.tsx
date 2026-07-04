@@ -262,188 +262,195 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
     <div
       className="card"
       style={{
-        cursor: "pointer",
+        padding: 0,
+        overflow: "hidden",
         border:
           selectedDeal === deal.id
             ? "1px solid var(--color-primary)"
             : "1px solid transparent",
       }}
-      role="button"
-      tabIndex={0}
-      onClick={() =>
-        setSelectedDeal(selectedDeal === deal.id ? null : deal.id)
-      }
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          setSelectedDeal(selectedDeal === deal.id ? null : deal.id);
-        }
-      }}
     >
-      <div
+      <button
+        type="button"
+        onClick={() =>
+          setSelectedDeal(selectedDeal === deal.id ? null : deal.id)
+        }
+        aria-expanded={selectedDeal === deal.id}
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          marginBottom: "16px",
-          flexWrap: "wrap",
-          gap: "12px",
+          display: "block",
+          width: "100%",
+          padding: "24px",
+          background: "none",
+          border: "none",
+          fontFamily: "inherit",
+          color: "inherit",
+          cursor: "pointer",
+          textAlign: "left",
         }}
       >
         <div
           style={{
             display: "flex",
-            gap: "16px",
-            alignItems: "center",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: "16px",
+            flexWrap: "wrap",
+            gap: "12px",
           }}
         >
           <div
             style={{
-              width: "48px",
-              height: "48px",
-              background: "var(--gradient-primary)",
-              borderRadius: "var(--radius-md)",
               display: "flex",
+              gap: "16px",
               alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 700,
-              fontSize: "18px",
-              color: "white",
-              flexShrink: 0,
-              overflow: "hidden",
             }}
           >
-            {deal.brand.logo ? (
-              <img
-                src={deal.brand.logo}
-                alt={deal.brand.companyName}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                  const parent = (e.target as HTMLImageElement).parentElement;
-                  if (parent) parent.textContent = deal.brand.companyName?.[0]?.toUpperCase() || "B";
-                }}
-              />
-            ) : (
-              deal.brand.companyName?.[0]?.toUpperCase() || "B"
-            )}
-          </div>
-          <div>
-            <h3 style={{ fontSize: "16px", fontWeight: 700 }}>
-              {deal.campaign.title}
-            </h3>
-            <p
-              style={{
-                fontSize: "14px",
-                color: "var(--color-text-secondary)",
-              }}
-            >
-              {deal.brand.companyName}
-            </p>
-          </div>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "6px 12px",
-            background: `${status.color}20`,
-            borderRadius: "var(--radius-full)",
-            color: status.color,
-            fontSize: "12px",
-            fontWeight: 600,
-            alignSelf: "flex-start",
-          }}
-        >
-          <span>{status.icon}</span>
-          <span>{status.label}</span>
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "16px",
-        }}
-      >
-        <div
-          style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}
-        >
-          <div>
             <div
               style={{
-                fontSize: "12px",
-                color: "var(--color-text-muted)",
-              }}
-            >
-              Deliverables
-            </div>
-            <div
-              style={{
+                width: "48px",
+                height: "48px",
+                background: "var(--gradient-primary)",
+                borderRadius: "var(--radius-md)",
                 display: "flex",
-                gap: "8px",
-                marginTop: "4px",
-                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 700,
+                fontSize: "18px",
+                color: "white",
+                flexShrink: 0,
+                overflow: "hidden",
               }}
             >
-              {deal.deliverables.map((d, i) => (
-                <span key={i} style={{ fontSize: "14px" }}>
-                  {getDeliverableIcon(d.type)} x{d.count}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "var(--color-text-muted)",
-              }}
-            >
-              Deadline
-            </div>
-            <div style={{ fontSize: "14px", fontWeight: 600 }}>
-              {new Date(deal.postingDeadline).toLocaleDateString(
-                "en-IN",
-                {
-                  day: "numeric",
-                  month: "short",
-                },
+              {deal.brand.logo ? (
+                <img
+                  src={deal.brand.logo}
+                  alt={deal.brand.companyName}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                    const parent = (e.target as HTMLImageElement).parentElement;
+                    if (parent) parent.textContent = deal.brand.companyName?.[0]?.toUpperCase() || "B";
+                  }}
+                />
+              ) : (
+                deal.brand.companyName?.[0]?.toUpperCase() || "B"
               )}
             </div>
+            <div>
+              <h3 style={{ fontSize: "16px", fontWeight: 700 }}>
+                {deal.campaign.title}
+              </h3>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "var(--color-text-secondary)",
+                }}
+              >
+                {deal.brand.companyName}
+              </p>
+            </div>
           </div>
-        </div>
-        <div style={{ textAlign: "right", minWidth: "80px" }}>
           <div
             style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "6px 12px",
+              background: `${status.color}20`,
+              borderRadius: "var(--radius-full)",
+              color: status.color,
               fontSize: "12px",
-              color: "var(--color-text-muted)",
+              fontWeight: 600,
+              alignSelf: "flex-start",
             }}
           >
-            Amount
-          </div>
-          <div
-            style={{ fontSize: "18px", fontWeight: 800 }}
-            className="gradient-text"
-          >
-            {formatCurrency(deal.amount)}
+            <span>{status.icon}</span>
+            <span>{status.label}</span>
           </div>
         </div>
-      </div>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "16px",
+          }}
+        >
+          <div
+            style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "var(--color-text-muted)",
+                }}
+              >
+                Deliverables
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "8px",
+                  marginTop: "4px",
+                  flexWrap: "wrap",
+                }}
+              >
+                {deal.deliverables.map((d, i) => (
+                  <span key={i} style={{ fontSize: "14px" }}>
+                    {getDeliverableIcon(d.type)} x{d.count}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "var(--color-text-muted)",
+                }}
+              >
+                Deadline
+              </div>
+              <div style={{ fontSize: "14px", fontWeight: 600 }}>
+                {new Date(deal.postingDeadline).toLocaleDateString(
+                  "en-IN",
+                  {
+                    day: "numeric",
+                    month: "short",
+                  },
+                )}
+              </div>
+            </div>
+          </div>
+          <div style={{ textAlign: "right", minWidth: "80px" }}>
+            <div
+              style={{
+                fontSize: "12px",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              Amount
+            </div>
+            <div
+              style={{ fontSize: "18px", fontWeight: 800 }}
+              className="gradient-text"
+            >
+              {formatCurrency(deal.amount)}
+            </div>
+          </div>
+        </div>
+      </button>
 
       {selectedDeal === deal.id && (
         <div
           style={{
-            marginTop: "20px",
+            margin: "0 24px 24px 24px",
             paddingTop: "20px",
             borderTop: "1px solid var(--color-border)",
           }}
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
         >
           <div
             className="grid-2"

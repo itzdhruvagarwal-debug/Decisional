@@ -305,13 +305,12 @@ export default function CreateCampaignClient() {
     }
   };
 
-  const publishButtonContent = isLoading ? (
-    <span className="loading" />
-  ) : editCampaignId ? (
-    "Save & Publish"
-  ) : (
-    "Create Campaign"
-  );
+  let publishButtonContent: React.ReactNode = "Create Campaign";
+  if (isLoading) {
+    publishButtonContent = <span className="loading" />;
+  } else if (editCampaignId) {
+    publishButtonContent = "Save & Publish";
+  }
 
   return (
     <div style={{ maxWidth: "800px", margin: "0 auto", paddingBottom: "64px" }}>

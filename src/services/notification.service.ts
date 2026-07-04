@@ -23,8 +23,7 @@ export type NotificationType =
   | "contact_violation"
   | "trust_warning"
   | "badge"
-  | "verification_update"
-  | "SYSTEM";
+  | "verification_update";
 
 export class NotificationService {
   static async listNotifications(

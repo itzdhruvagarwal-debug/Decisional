@@ -197,7 +197,7 @@ export async function markWebhookProcessed(eventId: string, eventType: string, p
             data: {
                 eventId,
                 eventType,
-                ...(payload !== undefined ? { payload } : {})
+                ...(payload === undefined ? {} : { payload })
             }
         });
     } catch (error) {
