@@ -92,10 +92,11 @@ function normalizeDeliverables(value: unknown): CampaignDetail["deliverables"] {
   return value
     .map((item) => {
       const parsed = item as { type?: unknown; count?: unknown; specs?: unknown };
+      const specsStr = typeof parsed?.specs === "string" ? parsed.specs.trim() : "";
       return {
         type: typeof parsed?.type === "string" ? parsed.type.trim() : "",
         count: Math.max(1, Number(parsed?.count || 1)),
-        ...(parsed?.specs ? { specs: String(parsed.specs) } : {}),
+        ...(specsStr ? { specs: specsStr } : {}),
       };
     })
     .filter((item) => Boolean(item.type));
@@ -173,24 +174,103 @@ function normalizeCampaign(raw: RawCampaign): CampaignDetail {
       applications: Number(raw?._count?.applications || 0),
       deals: Number(raw?._count?.deals || 0),
     },
-    maxInfluencers: raw.maxInfluencers !== undefined ? raw.maxInfluencers : null,
+    maxInfluencers: raw.maxInfluencers ?? null,
     acceptedCount: raw.applications ? raw.applications.length : 0,
   };
+}
+
+interface CampaignDetailClientProps {
+  readonly user: { readonly id: string; readonly userType?: string };
+  readonly influencerProfile?: {
+    readonly id: string;
+    readonly instagramFollowers: number | null;
+    readonly instagramEngagementRate: number | null;
+    readonly youtubeSubscribers: number | null;
+    readonly youtubeEngagementRate: number | null;
+  } | null;
+}
+
+function calculateRecommendedPayout(
+  influencerProfile: {
+    readonly instagramFollowers: number | null;
+    readonly instagramEngagementRate: number | null;
+    readonly youtubeSubscribers: number | null;
+    readonly youtubeEngagementRate: number | null;
+  },
+  deliverables: Array<{ type: string; count: number }>
+): number {
+  let instagramCount = 0;
+  let youtubeCount = 0;
+
+  deliverables.forEach((d) => {
+    const type = d.type.toUpperCase();
+    if (type.startsWith("INSTAGRAM")) {
+      instagramCount += d.count;
+    } else if (type.startsWith("YOUTUBE")) {
+      youtubeCount += d.count;
+    }
+  });
+
+  const igFollowers = influencerProfile.instagramFollowers || 0;
+  const igER = influencerProfile.instagramEngagementRate || 0;
+  const instagramPayout = (igFollowers * (igER / 100)) * 2 * instagramCount;
+
+  const ytSubscribers = influencerProfile.youtubeSubscribers || 0;
+  const ytER = influencerProfile.youtubeEngagementRate || 0;
+  const youtubePayout = (ytSubscribers * (ytER / 100)) * 2.5 * youtubeCount;
+
+  return Math.round(instagramPayout + youtubePayout);
+}
+
+function promptNegotiatedRate(proposedRate: number): number | null {
+  const proposedRateInRupees = proposedRate / 100;
+  const rateInput = prompt(
+    `Accept application at the proposed rate of ₹${proposedRateInRupees.toLocaleString()}?\n\nOr enter a custom negotiated payout rate in INR:`,
+    proposedRateInRupees.toString()
+  );
+  if (rateInput === null) {
+    return null;
+  }
+  const customRateRupees = Number(rateInput);
+  if (Number.isNaN(customRateRupees) || customRateRupees <= 0) {
+    alert("Please enter a valid rate");
+    return null;
+  }
+  return Math.round(customRateRupees * 100);
+}
+
+function buildApplicationActionRequest(
+  action: "accept" | "reject",
+  applicationId: string,
+  applications: CampaignApplication[]
+): RequestInit | null {
+  const requestInit: RequestInit = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  };
+
+  if (action === "reject") {
+    requestInit.body = JSON.stringify({
+      reason: "Application rejected by brand.",
+    });
+    return requestInit;
+  }
+
+  const app = applications.find((a: CampaignApplication) => a.id === applicationId);
+  if (app) {
+    const customRatePaise = promptNegotiatedRate(app.proposedRate);
+    if (customRatePaise === null) {
+      return null;
+    }
+    requestInit.body = JSON.stringify({ customRate: customRatePaise });
+  }
+  return requestInit;
 }
 
 export default function CampaignDetailClient({
   user,
   influencerProfile,
-}: {
-  user: { id: string; userType?: string };
-  influencerProfile?: {
-    id: string;
-    instagramFollowers: number | null;
-    instagramEngagementRate: number | null;
-    youtubeSubscribers: number | null;
-    youtubeEngagementRate: number | null;
-  } | null;
-}) {
+}: CampaignDetailClientProps) {
   const params = useParams();
   const router = useRouter();
 
@@ -239,22 +319,7 @@ export default function CampaignDetailClient({
         
         let defaultRate = Math.round((normalized.perInfluencerBudget || 0) / 100);
         if (influencerProfile) {
-          let instagramCount = 0;
-          let youtubeCount = 0;
-          normalized.deliverables.forEach((d) => {
-            const type = d.type.toUpperCase();
-            if (type.startsWith("INSTAGRAM")) instagramCount += d.count;
-            else if (type.startsWith("YOUTUBE")) youtubeCount += d.count;
-          });
-          const igFollowers = influencerProfile.instagramFollowers || 0;
-          const igER = influencerProfile.instagramEngagementRate || 0;
-          const instagramPayout = (igFollowers * (igER / 100)) * 2.0 * instagramCount;
-
-          const ytSubscribers = influencerProfile.youtubeSubscribers || 0;
-          const ytER = influencerProfile.youtubeEngagementRate || 0;
-          const youtubePayout = (ytSubscribers * (ytER / 100)) * 2.5 * youtubeCount;
-
-          const calculatedPayout = Math.round(instagramPayout + youtubePayout);
+          const calculatedPayout = calculateRecommendedPayout(influencerProfile, normalized.deliverables);
           if (calculatedPayout > 0) {
             defaultRate = calculatedPayout;
           }
@@ -279,28 +344,7 @@ export default function CampaignDetailClient({
 
   const recommendedPayout = useMemo(() => {
     if (!influencerProfile || !campaign) return 0;
-
-    let instagramCount = 0;
-    let youtubeCount = 0;
-
-    campaign.deliverables.forEach((d) => {
-      const type = d.type.toUpperCase();
-      if (type.startsWith("INSTAGRAM")) {
-        instagramCount += d.count;
-      } else if (type.startsWith("YOUTUBE")) {
-        youtubeCount += d.count;
-      }
-    });
-
-    const igFollowers = influencerProfile.instagramFollowers || 0;
-    const igER = influencerProfile.instagramEngagementRate || 0;
-    const instagramPayout = (igFollowers * (igER / 100)) * 2.0 * instagramCount;
-
-    const ytSubscribers = influencerProfile.youtubeSubscribers || 0;
-    const ytER = influencerProfile.youtubeEngagementRate || 0;
-    const youtubePayout = (ytSubscribers * (ytER / 100)) * 2.5 * youtubeCount;
-
-    return Math.round(instagramPayout + youtubePayout);
+    return calculateRecommendedPayout(influencerProfile, campaign.deliverables);
   }, [influencerProfile, campaign]);
 
   const isOwner = Boolean(campaign?.brand?.userId && campaign?.brand?.userId === user?.id);
@@ -332,50 +376,6 @@ export default function CampaignDetailClient({
     fetchApplications();
   }, [fetchApplications]);
 
-  const promptNegotiatedRate = (proposedRate: number): number | null => {
-    const proposedRateInRupees = proposedRate / 100;
-    const rateInput = prompt(
-      `Accept application at the proposed rate of ₹${proposedRateInRupees.toLocaleString()}?\n\nOr enter a custom negotiated payout rate in INR:`,
-      proposedRateInRupees.toString()
-    );
-    if (rateInput === null) {
-      return null;
-    }
-    const customRateRupees = Number(rateInput);
-    if (Number.isNaN(customRateRupees) || customRateRupees <= 0) {
-      alert("Please enter a valid rate");
-      return null;
-    }
-    return Math.round(customRateRupees * 100);
-  };
-
-  const buildApplicationActionRequest = (
-    action: "accept" | "reject",
-    applicationId: string
-  ): RequestInit | null => {
-    const requestInit: RequestInit = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    };
-
-    if (action === "reject") {
-      requestInit.body = JSON.stringify({
-        reason: "Application rejected by brand.",
-      });
-      return requestInit;
-    }
-
-    const app = applications.find((a: CampaignApplication) => a.id === applicationId);
-    if (app) {
-      const customRatePaise = promptNegotiatedRate(app.proposedRate);
-      if (customRatePaise === null) {
-        return null;
-      }
-      requestInit.body = JSON.stringify({ customRate: customRatePaise });
-    }
-    return requestInit;
-  };
-
   const handleApplicationAction = async (
     applicationId: string,
     action: "accept" | "reject",
@@ -383,7 +383,7 @@ export default function CampaignDetailClient({
     setApplicationActionId(applicationId);
     setNotice(null);
     try {
-      const requestInit = buildApplicationActionRequest(action, applicationId);
+      const requestInit = buildApplicationActionRequest(action, applicationId, applications);
       if (!requestInit) {
         setApplicationActionId(null);
         return;

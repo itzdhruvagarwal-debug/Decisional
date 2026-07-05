@@ -64,7 +64,7 @@ const statusConfig: Record<
 function getStatusInfo(status: string) {
   return (
     statusConfig[status] || {
-      label: status.replace(/_/g, " "),
+      label: status.replaceAll("_", " "),
       color: "var(--color-text-muted)",
       icon: "--",
     }
@@ -89,7 +89,7 @@ function normalizeDeliverables(value: unknown): Deal["deliverables"] {
     .map((item) => {
       const parsed = item as { type?: unknown; count?: unknown };
       return {
-        type: String(parsed?.type || "").trim(),
+        type: typeof parsed?.type === "string" ? parsed.type.trim() : "",
         count: Math.max(1, Number(parsed?.count || 1)),
       };
     })
@@ -398,8 +398,8 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
                   flexWrap: "wrap",
                 }}
               >
-                {deal.deliverables.map((d, i) => (
-                  <span key={i} style={{ fontSize: "14px" }}>
+                {deal.deliverables.map((d, idx) => (
+                  <span key={d.type + "_" + idx} style={{ fontSize: "14px" }}>
                     {getDeliverableIcon(d.type)} x{d.count}
                   </span>
                 ))}
@@ -486,16 +486,16 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
               >
                 Required Deliverables
               </h4>
-              {deal.deliverables.map((d, i) => (
+              {deal.deliverables.map((d, idx) => (
                 <p
-                  key={i}
+                  key={d.type + "_" + idx}
                   style={{
                     fontSize: "13px",
                     color: "var(--color-text-secondary)",
                   }}
                 >
                   {getDeliverableIcon(d.type)}{" "}
-                  {d.type.replace(/_/g, " ")} x {d.count}
+                  {d.type.replaceAll("_", " ")} x {d.count}
                 </p>
               ))}
             </div>
@@ -556,7 +556,7 @@ export default function DealsPage() {
     const controller = new AbortController();
     setLoading(true);
 
-    const statusParam = statusFilter !== "all" ? `&status=${statusFilter}` : "";
+    const statusParam = statusFilter === "all" ? "" : `&status=${statusFilter}`;
     fetch(`/api/deals?page=${currentPage}&limit=${DEALS_PER_PAGE}${statusParam}`, { cache: "no-store", signal: controller.signal })
       .then((res) => res.json())
       .then((payload) => {

@@ -1,4 +1,5 @@
 import { AppError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 /**
  * Encryption utilities for sensitive data (bank account numbers, etc.)
  * Uses AES-256-GCM with per-record random IVs.
@@ -27,7 +28,7 @@ function getAllKeys(): Map<string, Buffer> {
     if (singleKey && singleKey.length === 64) {
       return new Map([["v1", Buffer.from(singleKey, "hex")]]);
     }
-    throw AppError.badRequest("ENCRYPTION_KEYS or ENCRYPTION_KEY env var is required.");
+    throw AppError.internal("ENCRYPTION_KEYS or ENCRYPTION_KEY env var is required.");
   }
 
   const keysMap = new Map<string, Buffer>();
@@ -39,7 +40,7 @@ function getAllKeys(): Map<string, Buffer> {
   });
 
   if (keysMap.size === 0) {
-    throw AppError.badRequest("No valid keys found in ENCRYPTION_KEYS.");
+    throw AppError.internal("No valid keys found in ENCRYPTION_KEYS.");
   }
 
   return keysMap;
@@ -56,12 +57,12 @@ function getLatestKey(): { version: string; key: Buffer } {
 
   const latestVersion = versions[0];
   if (!latestVersion) {
-    throw AppError.badRequest("CRITICAL: No versioned encryption keys found in ENCRYPTION_KEYS mapping.");
+    throw AppError.internal("CRITICAL: No versioned encryption keys found in ENCRYPTION_KEYS mapping.");
   }
 
   const key = keys.get(latestVersion);
   if (!key) {
-    throw AppError.badRequest(`CRITICAL: Key buffer missing for version ${latestVersion}`);
+    throw AppError.internal(`CRITICAL: Key buffer missing for version ${latestVersion}`);
   }
 
   return { version: latestVersion, key };
@@ -121,7 +122,7 @@ export function decrypt(encryptedData: string): string {
   const key = keys.get(version);
 
   if (!key) {
-    throw AppError.notFound(`Encryption key version ${version} not found in environment.`);
+    throw AppError.internal(`Encryption key version ${version} not found in environment.`);
   }
 
   const iv = Buffer.from(ivHex, "hex");
@@ -154,8 +155,9 @@ export function maskAccountNumber(value: string): string {
   if (looksEncrypted) {
     try {
       plaintext = decrypt(value);
-    } catch {
+    } catch (e) {
       // If decryption fails, treat as plain text
+      logger.warn("maskAccountNumber decryption failed, falling back to plaintext", { error: e });
       plaintext = value;
     }
   } else {
@@ -181,7 +183,8 @@ export function maskUpiId(value: string): string {
   if (looksEncrypted) {
     try {
       plaintext = decrypt(value);
-    } catch {
+    } catch (e) {
+      logger.warn("maskUpiId decryption failed, falling back to plaintext", { error: e });
       plaintext = value;
     }
   } else {

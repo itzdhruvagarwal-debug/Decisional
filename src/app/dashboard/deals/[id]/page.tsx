@@ -94,7 +94,47 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   CANCELLED: { label: "Cancelled", color: "var(--color-error)" },
 };
 
-function PaymentRow({ label, value }: { label: string; value: string }) {
+function getToastBackground(type: "success" | "error" | "info"): string {
+  if (type === "success") return "linear-gradient(135deg, #059669, #10b981)";
+  if (type === "error") return "linear-gradient(135deg, #dc2626, #ef4444)";
+  return "linear-gradient(135deg, #2563eb, #3b82f6)";
+}
+
+function getToastPrefix(type: "success" | "error" | "info"): string {
+  if (type === "success") return "✓ ";
+  if (type === "error") return "✕ ";
+  return "ℹ ";
+}
+
+const ratingLabelMap: Record<number, string> = {
+  1: "Poor",
+  2: "Fair",
+  3: "Good",
+  4: "Great",
+  5: "Excellent"
+};
+
+function getFlatDeliverablesList(dealObj: DealDetail | null | undefined) {
+  if (!dealObj?.campaign?.deliverables) return [];
+  const deliverables = Array.isArray(dealObj.campaign.deliverables)
+    ? dealObj.campaign.deliverables
+    : [];
+  
+  const list: Array<{ type: string; index: number; label: string }> = [];
+  deliverables.forEach((d: { type: string; count: number }) => {
+    const typeLabel = d.type.replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase());
+    for (let i = 0; i < d.count; i++) {
+      list.push({
+        type: `${d.type}_${i + 1}`,
+        index: i + 1,
+        label: `${typeLabel} #${i + 1}`,
+      });
+    }
+  });
+  return list;
+}
+
+function PaymentRow({ label, value }: { readonly label: string; readonly value: string }) {
   return (
     <div
       style={{
@@ -199,25 +239,6 @@ export default function DealDetailPage() {
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [postUrl, setPostUrl] = useState("");
 
-  const getFlatDeliverablesList = (dealObj: DealDetail | null | undefined) => {
-    if (!dealObj?.campaign?.deliverables) return [];
-    const deliverables = Array.isArray(dealObj.campaign.deliverables)
-      ? dealObj.campaign.deliverables
-      : [];
-    
-    const list: Array<{ type: string; index: number; label: string }> = [];
-    deliverables.forEach((d: { type: string; count: number }) => {
-      const typeLabel = d.type.replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase());
-      for (let i = 0; i < d.count; i++) {
-        list.push({
-          type: `${d.type}_${i + 1}`,
-          index: i + 1,
-          label: `${typeLabel} #${i + 1}`,
-        });
-      }
-    });
-    return list;
-  };
   const [shippingAddress, setShippingAddress] = useState({
     fullName: "",
     phone: "",
@@ -240,10 +261,15 @@ export default function DealDetailPage() {
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [hoverRating, setHoverRating] = useState(0);
   const [toasts, setToasts] = useState<Array<{id: number; type: "success" | "error" | "info"; message: string}>>([]);
+  
+  const removeToast = (toastId: number) => {
+    setToasts(prev => prev.filter(t => t.id !== toastId));
+  };
+
   const showToast = (type: "success" | "error" | "info", message: string) => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, type, message }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
+    const toastId = Date.now();
+    setToasts(prev => [...prev, { id: toastId, type, message }]);
+    setTimeout(() => removeToast(toastId), 5000);
   };
 
   const fetchDeal = useCallback(async () => {
@@ -463,11 +489,12 @@ export default function DealDetailPage() {
   const isClient = session?.user?.userType === "BRAND";
   const isInfluencer = session?.user?.userType === "INFLUENCER";
   const contractTerms = parseContractTerms(deal.contractTerms);
-  const mandatoryElements = Array.isArray(contractTerms?.mandatoryElements)
-    ? contractTerms.mandatoryElements
-    : Array.isArray(contractTerms?.mandatoryTags)
-      ? contractTerms.mandatoryTags
-      : [];
+  let mandatoryElements: any[] = [];
+  if (Array.isArray(contractTerms?.mandatoryElements)) {
+    mandatoryElements = contractTerms.mandatoryElements;
+  } else if (Array.isArray(contractTerms?.mandatoryTags)) {
+    mandatoryElements = contractTerms.mandatoryTags;
+  }
   const contractDeliverables = Array.isArray(contractTerms?.deliverables)
     ? contractTerms.deliverables
     : [];
@@ -513,20 +540,31 @@ export default function DealDetailPage() {
         {toasts.length > 0 && (
           <div style={{ position: "fixed", top: 24, right: 24, zIndex: 9999, display: "flex", flexDirection: "column", gap: "8px", maxWidth: "400px" }}>
             {toasts.map(t => (
-              <div key={t.id} style={{
-                padding: "12px 20px",
-                borderRadius: "10px",
-                color: "#fff",
-                fontSize: "14px",
-                fontWeight: 500,
-                background: t.type === "success" ? "linear-gradient(135deg, #059669, #10b981)" : t.type === "error" ? "linear-gradient(135deg, #dc2626, #ef4444)" : "linear-gradient(135deg, #2563eb, #3b82f6)",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                animation: "slideInRight 0.3s ease-out",
-                cursor: "pointer",
-              }} onClick={() => setToasts(prev => prev.filter(x => x.id !== t.id))}>
-                {t.type === "success" ? "✓ " : t.type === "error" ? "✕ " : "ℹ "}{t.message}
+              <div
+                key={t.id}
+                role="button"
+                tabIndex={0}
+                style={{
+                  padding: "12px 20px",
+                  borderRadius: "10px",
+                  color: "#fff",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  background: getToastBackground(t.type),
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                  backdropFilter: "blur(12px)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  animation: "slideInRight 0.3s ease-out",
+                  cursor: "pointer",
+                }}
+                onClick={() => removeToast(t.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    removeToast(t.id);
+                  }
+                }}
+              >
+                {getToastPrefix(t.type)}{t.message}
               </div>
             ))}
           </div>
@@ -729,6 +767,13 @@ export default function DealDetailPage() {
                     const isCurrent = currentIndex === idx;
                     const isCancelled = deal.status === "CANCELLED";
 
+                    let stepBg = "var(--color-bg-tertiary)";
+                    if (isCompleted) {
+                      stepBg = "var(--color-success)";
+                    } else if (isCurrent && !isCancelled) {
+                      stepBg = "var(--color-primary)";
+                    }
+
                     return (
                       <div
                         key={step.s}
@@ -747,11 +792,7 @@ export default function DealDetailPage() {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            background: isCompleted
-                              ? "var(--color-success)"
-                              : isCurrent && !isCancelled
-                                ? "var(--color-primary)"
-                                : "var(--color-bg-tertiary)",
+                            background: stepBg,
                             color:
                               isCompleted || isCurrent
                                 ? "white"
@@ -821,48 +862,51 @@ export default function DealDetailPage() {
                 {deal.contentSubmissions?.length === 0 ? (
                   <p className="text-muted">No submissions yet.</p>
                 ) : (
-                  deal.contentSubmissions?.map((sub) => (
-                    <div
-                      key={sub.id}
-                      style={{
-                        padding: "16px",
-                        background: "var(--color-bg-tertiary)",
-                        borderRadius: "var(--radius-md)",
-                        marginBottom: "12px",
-                        border:
-                          sub.status === "APPROVED"
-                            ? "1px solid var(--color-success)"
-                            : "1px solid transparent",
-                      }}
-                    >
+                  deal.contentSubmissions?.map((sub) => {
+                    let subBg = "var(--color-accent-blue)";
+                    if (sub.status === "APPROVED") {
+                      subBg = "var(--color-success)";
+                    } else if (sub.status === "REVISION_REQUESTED") {
+                      subBg = "var(--color-warning)";
+                    }
+
+                    return (
                       <div
+                        key={sub.id}
                         style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          marginBottom: "8px",
+                          padding: "16px",
+                          background: "var(--color-bg-tertiary)",
+                          borderRadius: "var(--radius-md)",
+                          marginBottom: "12px",
+                          border:
+                            sub.status === "APPROVED"
+                              ? "1px solid var(--color-success)"
+                              : "1px solid transparent",
                         }}
                       >
-                        <span style={{ fontWeight: 600 }}>
-                          Version {sub.version}
-                        </span>
-                        <span
+                        <div
                           style={{
-                            fontSize: "12px",
-                            padding: "4px 8px",
-                            borderRadius: "var(--radius-sm)",
-                            background:
-                              sub.status === "APPROVED"
-                                ? "var(--color-success)"
-                                : sub.status === "REVISION_REQUESTED"
-                                  ? "var(--color-warning)"
-                                  : "var(--color-accent-blue)",
-                            color: "white",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "8px",
                           }}
                         >
-                          {sub.status}
-                        </span>
-                      </div>
+                          <span style={{ fontWeight: 600 }}>
+                            Version {sub.version}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              padding: "4px 8px",
+                              borderRadius: "var(--radius-sm)",
+                              background: subBg,
+                              color: "white",
+                            }}
+                          >
+                            {sub.status}
+                          </span>
+                        </div>
                       <div
                         style={{
                           display: "flex",
@@ -956,7 +1000,8 @@ export default function DealDetailPage() {
                         {new Date(sub.createdAt).toLocaleDateString()}
                       </div>
                     </div>
-                  ))
+                );
+              })
                 )}
               </div>
 
@@ -1289,7 +1334,7 @@ export default function DealDetailPage() {
                   {deal.dispatchTrackingNumber && (
                     <PaymentRow
                       label="Tracking"
-                      value={`${deal.dispatchCarrier ? `${deal.dispatchCarrier} ` : ""}${deal.dispatchTrackingNumber}`}
+                      value={(deal.dispatchCarrier ? (deal.dispatchCarrier + " ") : "") + deal.dispatchTrackingNumber}
                     />
                   )}
                   {isClient && deal.shippingAddress && (
@@ -1815,8 +1860,9 @@ export default function DealDetailPage() {
             </div>
 
             <div style={{ marginBottom: "20px" }}>
-              <label className="label">Notes (Optional)</label>
+              <label className="label" htmlFor="submit-notes-textarea">Notes (Optional)</label>
               <textarea
+                id="submit-notes-textarea"
                 className="input"
                 rows={3}
                 placeholder="Any message for the brand..."
@@ -1923,8 +1969,9 @@ export default function DealDetailPage() {
               </button>
             </div>
             <div style={{ marginBottom: "20px" }}>
-              <label className="label">Live Post URL *</label>
+              <label className="label" htmlFor="live-post-url-input">Live Post URL *</label>
               <input
+                id="live-post-url-input"
                 type="url"
                 className="input"
                 placeholder="https://instagram.com/p/..."
@@ -2000,7 +2047,7 @@ export default function DealDetailPage() {
             ))}
             {reviewRating > 0 && (
               <span style={{ alignSelf: "center", marginLeft: "8px", fontSize: "14px", fontWeight: 600, color: "var(--color-text-secondary)" }}>
-                {reviewRating === 1 ? "Poor" : reviewRating === 2 ? "Fair" : reviewRating === 3 ? "Good" : reviewRating === 4 ? "Great" : "Excellent"}
+                {ratingLabelMap[reviewRating] || "Excellent"}
               </span>
             )}
           </div>

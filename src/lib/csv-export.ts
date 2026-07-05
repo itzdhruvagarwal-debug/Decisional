@@ -24,6 +24,18 @@ export function toCsv(rows: CsvRow[], headers?: string[]): string {
     } else {
       str = String(val);
     }
+    // Neutralize formula injection characters: =, +, -, @, Tab, CR
+    if (
+      str.startsWith("=") ||
+      str.startsWith("+") ||
+      str.startsWith("-") ||
+      str.startsWith("@") ||
+      str.startsWith("\t") ||
+      str.startsWith("\r")
+    ) {
+      str = "'" + str;
+    }
+
     // Wrap in quotes if contains comma, quote, or newline
     if (str.includes(",") || str.includes('"') || str.includes("\n")) {
       return `"${str.replaceAll('"', '""')}"`;

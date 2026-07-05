@@ -44,9 +44,8 @@ GRANT CONNECT ON DATABASE postgres TO public;
 REVOKE ALL ON SCHEMA public FROM public;
 GRANT USAGE ON SCHEMA public TO public;
 
--- Note: In Production, create a 'decisional_app' user with limited permissions
--- (e.g. GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO decisional_app)
--- (e.g. REVOKE TRUNCATE ON ALL TABLES IN SCHEMA public FROM decisional_app)
+-- Note: In Production, create a 'decisional_app' user with limited permissions,
+-- granting select/insert/update/delete and revoking truncate on all tables.
 
 -- 5. DB-LEVEL CHECK CONSTRAINTS (Money Rules)
 -- Ensure balances and amounts never dip below zero at the DB level, averting race conditions

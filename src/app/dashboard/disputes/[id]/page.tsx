@@ -50,11 +50,87 @@ interface DisputeDetail {
   }>;
 }
 
+interface DisputeDetailPageProps {
+  readonly params: Promise<{ readonly id: string }>;
+}
+
+function getToastBackground(type: "success" | "error" | "info"): string {
+  if (type === "success") return "linear-gradient(135deg, #059669, #10b981)";
+  if (type === "error") return "linear-gradient(135deg, #dc2626, #ef4444)";
+  return "linear-gradient(135deg, #2563eb, #3b82f6)";
+}
+
+function getToastPrefix(type: "success" | "error" | "info"): string {
+  if (type === "success") return "✓ ";
+  if (type === "error") return "✕ ";
+  return "ℹ ";
+}
+
+function getStatusColor(status: string) {
+  switch (status) {
+    case "OPEN":
+      return "var(--color-primary)";
+    case "TIER1_AUTO":
+      return "var(--color-accent-cyan)";
+    case "TIER2_MEDIATION":
+      return "var(--color-warning)";
+    case "TIER3_ARBITRATION":
+      return "#ef4444";
+    case "RESOLVED":
+      return "var(--color-success)";
+    case "CLOSED":
+      return "var(--color-text-muted)";
+    default:
+      return "var(--color-text-secondary)";
+  }
+}
+
+function getVerdictColor(verdict: string) {
+  switch (verdict) {
+    case "INFLUENCER_FAVORED":
+      return "#22c55e";
+    case "BRAND_FAVORED":
+      return "#3b82f6";
+    case "SPLIT":
+      return "#f59e0b";
+    case "DISMISSED":
+      return "#6b7280";
+    case "ESCALATE":
+      return "#ef4444";
+    default:
+      return "var(--color-text-secondary)";
+  }
+}
+
+function getFindingColor(result: string) {
+  switch (result) {
+    case "PASS":
+      return "#22c55e";
+    case "FAIL":
+      return "#ef4444";
+    case "WARNING":
+      return "#f59e0b";
+    default:
+      return "#6b7280";
+  }
+}
+
+function getFindingIcon(result: string) {
+  switch (result) {
+    case "PASS":
+      return "✅";
+    case "FAIL":
+      return "❌";
+    case "WARNING":
+      return "⚠️";
+    default:
+      return "➖";
+  }
+}
+
 export default function DisputeDetailPage({
   params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+}: DisputeDetailPageProps) {
   const { id } = use(params);
   const [dispute, setDispute] = useState<DisputeDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -68,10 +144,13 @@ export default function DisputeDetailPage({
   const [escalateReason, setEscalateReason] = useState("");
   const [showEscalateForm, setShowEscalateForm] = useState(false);
   const [toasts, setToasts] = useState<Array<{id: number; type: "success" | "error" | "info"; message: string}>>([]);
+  const removeToast = (toastId: number) => {
+    setToasts(prev => prev.filter(t => t.id !== toastId));
+  };
   const showToast = (type: "success" | "error" | "info", message: string) => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, type, message }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
+    const toastId = Date.now();
+    setToasts(prev => [...prev, { id: toastId, type, message }]);
+    setTimeout(() => removeToast(toastId), 5000);
   };
 
   const fetchDispute = useCallback(() => {
@@ -206,76 +285,6 @@ export default function DisputeDetailPage({
       </div>
     );
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "OPEN":
-        return "var(--color-primary)";
-      case "TIER1_AUTO":
-        return "var(--color-accent-cyan)";
-      case "TIER2_MEDIATION":
-        return "var(--color-warning)";
-      case "TIER3_ARBITRATION":
-        return "#ef4444";
-      case "RESOLVED":
-        return "var(--color-success)";
-      case "CLOSED":
-        return "var(--color-text-muted)";
-      default:
-        return "var(--color-text-secondary)";
-    }
-  };
-
-  const getVerdictColor = (verdict: string) => {
-    switch (verdict) {
-      case "INFLUENCER_FAVORED":
-        return "#22c55e";
-      case "BRAND_FAVORED":
-        return "#3b82f6";
-      case "SPLIT":
-        return "#f59e0b";
-      case "DISMISSED":
-        return "#6b7280";
-      case "ESCALATE":
-        return "#ef4444";
-      default:
-        return "var(--color-text-secondary)";
-    }
-  };
-
-  const getFindingColor = (result: string) => {
-    switch (result) {
-      case "PASS":
-        return "#22c55e";
-      case "FAIL":
-        return "#ef4444";
-      case "WARNING":
-        return "#f59e0b";
-      default:
-        return "#6b7280";
-    }
-  };
-
-  const getFindingIcon = (result: string) => {
-    switch (result) {
-      case "PASS":
-        return "✅";
-      case "FAIL":
-        return "❌";
-      case "WARNING":
-        return "⚠️";
-      default:
-        return "➖";
-    }
-  };
-
-  if (isLoading) {
-    return <div style={{ padding: "40px", textAlign: "center" }}>Loading dispute...</div>;
-  }
-
-  if (!dispute) {
-    return <div style={{ padding: "40px", textAlign: "center", color: "var(--color-error)" }}>Dispute not found</div>;
-  }
-
   const canTakeAction = ["TIER1_AUTO", "OPEN"].includes(dispute.status);
   const canEscalate = ["TIER1_AUTO", "TIER2_MEDIATION"].includes(
     dispute.status,
@@ -288,20 +297,31 @@ export default function DisputeDetailPage({
       {toasts.length > 0 && (
         <div style={{ position: "fixed", top: 24, right: 24, zIndex: 9999, display: "flex", flexDirection: "column", gap: "8px", maxWidth: "400px" }}>
           {toasts.map(t => (
-            <div key={t.id} style={{
-              padding: "12px 20px",
-              borderRadius: "10px",
-              color: "#fff",
-              fontSize: "14px",
-              fontWeight: 500,
-              background: t.type === "success" ? "linear-gradient(135deg, #059669, #10b981)" : t.type === "error" ? "linear-gradient(135deg, #dc2626, #ef4444)" : "linear-gradient(135deg, #2563eb, #3b82f6)",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-              backdropFilter: "blur(12px)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              animation: "slideInRight 0.3s ease-out",
-              cursor: "pointer",
-            }} onClick={() => setToasts(prev => prev.filter(x => x.id !== t.id))}>
-              {t.type === "success" ? "✓ " : t.type === "error" ? "✕ " : "ℹ "}{t.message}
+            <div
+              key={t.id}
+              role="button"
+              tabIndex={0}
+              style={{
+                padding: "12px 20px",
+                borderRadius: "10px",
+                color: "#fff",
+                fontSize: "14px",
+                fontWeight: 500,
+                background: getToastBackground(t.type),
+                boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                backdropFilter: "blur(12px)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                animation: "slideInRight 0.3s ease-out",
+                cursor: "pointer",
+              }}
+              onClick={() => removeToast(t.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  removeToast(t.id);
+                }
+              }}
+            >
+              {getToastPrefix(t.type)}{t.message}
             </div>
           ))}
         </div>
@@ -338,7 +358,7 @@ export default function DisputeDetailPage({
             fontWeight: 600,
           }}
         >
-          {dispute.status.replace(/_/g, " ")}
+          {dispute.status.replaceAll("_", " ")}
         </span>
         {dispute.tier > 1 && (
           <span
@@ -399,30 +419,31 @@ export default function DisputeDetailPage({
                   </span>
                 </div>
               </div>
-              {analysis.confidence && (
-                <span
-                  style={{
-                    padding: "4px 12px",
-                    borderRadius: "12px",
-                    fontSize: "11px",
-                    fontWeight: 700,
-                    background:
-                      analysis.confidence === "HIGH"
-                        ? "rgba(34, 197, 94, 0.15)"
-                        : analysis.confidence === "MEDIUM"
-                          ? "rgba(245, 158, 11, 0.15)"
-                          : "rgba(239, 68, 68, 0.15)",
-                    color:
-                      analysis.confidence === "HIGH"
-                        ? "#22c55e"
-                        : analysis.confidence === "MEDIUM"
-                          ? "#f59e0b"
-                          : "#ef4444",
-                  }}
-                >
-                  {analysis.confidence} CONFIDENCE
-                </span>
-              )}
+              {(() => {
+                let confBg = "rgba(239, 68, 68, 0.15)";
+                let confColor = "#ef4444";
+                if (analysis.confidence === "HIGH") {
+                  confBg = "rgba(34, 197, 94, 0.15)";
+                  confColor = "#22c55e";
+                } else if (analysis.confidence === "MEDIUM") {
+                  confBg = "rgba(245, 158, 11, 0.15)";
+                  confColor = "#f59e0b";
+                }
+                return (
+                  <span
+                    style={{
+                      padding: "4px 12px",
+                      borderRadius: "12px",
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      background: confBg,
+                      color: confColor,
+                    }}
+                  >
+                    {analysis.confidence} CONFIDENCE
+                  </span>
+                );
+              })()}
             </div>
 
             {/* Verdict */}
@@ -451,7 +472,7 @@ export default function DisputeDetailPage({
                     color: getVerdictColor(analysis.verdict),
                   }}
                 >
-                  {analysis.verdict.replace(/_/g, " ")}
+                  {analysis.verdict.replaceAll("_", " ")}
                 </div>
               </div>
             )}
@@ -615,9 +636,9 @@ export default function DisputeDetailPage({
                     gap: "6px",
                   }}
                 >
-                  {analysis.findings.map((f, i) => (
+                  {analysis.findings.map((f, idx) => (
                     <div
-                      key={i}
+                      key={f.check + "_" + idx}
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -1092,8 +1113,9 @@ export default function DisputeDetailPage({
                   }}
                 >
                   <div style={{ marginBottom: "12px" }}>
-                    <label className="label">Type</label>
+                    <label className="label" htmlFor="evidence-type-select">Type</label>
                     <select
+                      id="evidence-type-select"
                       className="input"
                       value={evidenceType}
                       onChange={(e) => setEvidenceType(e.target.value)}
@@ -1107,8 +1129,9 @@ export default function DisputeDetailPage({
                     </select>
                   </div>
                   <div style={{ marginBottom: "12px" }}>
-                    <label className="label">URL</label>
+                    <label className="label" htmlFor="evidence-url-input">URL</label>
                     <input
+                      id="evidence-url-input"
                       type="url"
                       className="input"
                       placeholder="https://drive.google.com/..."
@@ -1118,8 +1141,9 @@ export default function DisputeDetailPage({
                     />
                   </div>
                   <div style={{ marginBottom: "12px" }}>
-                    <label className="label">Description</label>
+                    <label className="label" htmlFor="evidence-desc-textarea">Description</label>
                     <textarea
+                      id="evidence-desc-textarea"
                       className="input"
                       rows={2}
                       placeholder="What does this evidence show?"

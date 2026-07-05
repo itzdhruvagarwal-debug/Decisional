@@ -158,7 +158,7 @@ function createPrismaClient() {
       logger.warn(`[BUILD] ${message}`);
     } else {
       logger.error(`[SECURITY] ${message}`);
-      throw AppError.badRequest(message);
+      throw AppError.internal(message);
     }
   }
 

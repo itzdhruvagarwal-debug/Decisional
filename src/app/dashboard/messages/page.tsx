@@ -6,6 +6,18 @@ import { useSearchParams } from "next/navigation";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { checkMessageForContacts } from "@/lib/contact-filter";
 
+function getToastBackground(type: "success" | "error" | "info"): string {
+  if (type === "success") return "linear-gradient(135deg, #059669, #10b981)";
+  if (type === "error") return "linear-gradient(135deg, #dc2626, #ef4444)";
+  return "linear-gradient(135deg, #2563eb, #3b82f6)";
+}
+
+function getToastPrefix(type: "success" | "error" | "info"): string {
+  if (type === "success") return "✓ ";
+  if (type === "error") return "✕ ";
+  return "ℹ ";
+}
+
 interface Message {
   id: string;
   senderId: string;
@@ -105,10 +117,13 @@ function MessagesContent() {
   const typingRefreshRef = useRef<number>(0);
   const typingStopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [toasts, setToasts] = useState<Array<{id: number; type: "success" | "error" | "info"; message: string}>>([]);
+  const removeToast = (toastId: number) => {
+    setToasts(prev => prev.filter(t => t.id !== toastId));
+  };
   const showToast = (type: "success" | "error" | "info", message: string) => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, type, message }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
+    const toastId = Date.now();
+    setToasts(prev => [...prev, { id: toastId, type, message }]);
+    setTimeout(() => removeToast(toastId), 5000);
   };
 
   // Fetch conversations list
@@ -129,9 +144,11 @@ function MessagesContent() {
           .map((raw: RawConversation) => normalizeConversation(raw))
           .filter((conv: Conversation | null): conv is Conversation => Boolean(conv));
         setConversations(convs);
-        setSelectedConversation((prev) =>
-          prev && convs.some((c) => c.userId === prev) ? prev : null,
-        );
+        setSelectedConversation((prev) => {
+          if (!prev) return null;
+          const exists = convs.some((c) => c.userId === prev);
+          return exists ? prev : null;
+        });
         setLoadingConversations(false);
       })
       .catch((err) => {
@@ -254,11 +271,11 @@ function MessagesContent() {
     if (!selectedConversation || !session) return;
 
     fetchMessages(true);
-    const interval = window.setInterval(() => {
+    const interval = globalThis.setInterval(() => {
       fetchMessages(false);
     }, 10000);
 
-    return () => window.clearInterval(interval);
+    return () => globalThis.clearInterval(interval);
   }, [fetchMessages, selectedConversation, session]);
 
   // Scroll to bottom
@@ -411,20 +428,31 @@ function MessagesContent() {
       {toasts.length > 0 && (
         <div style={{ position: "fixed", top: 24, right: 24, zIndex: 9999, display: "flex", flexDirection: "column", gap: "8px", maxWidth: "400px" }}>
           {toasts.map(t => (
-            <div key={t.id} style={{
-              padding: "12px 20px",
-              borderRadius: "10px",
-              color: "#fff",
-              fontSize: "14px",
-              fontWeight: 500,
-              background: t.type === "success" ? "linear-gradient(135deg, #059669, #10b981)" : t.type === "error" ? "linear-gradient(135deg, #dc2626, #ef4444)" : "linear-gradient(135deg, #2563eb, #3b82f6)",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-              backdropFilter: "blur(12px)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              animation: "slideInRight 0.3s ease-out",
-              cursor: "pointer",
-            }} onClick={() => setToasts(prev => prev.filter(x => x.id !== t.id))}>
-              {t.type === "success" ? "✓ " : t.type === "error" ? "✕ " : "ℹ "}{t.message}
+            <div
+              key={t.id}
+              role="button"
+              tabIndex={0}
+              style={{
+                padding: "12px 20px",
+                borderRadius: "10px",
+                color: "#fff",
+                fontSize: "14px",
+                fontWeight: 500,
+                background: getToastBackground(t.type),
+                boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                backdropFilter: "blur(12px)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                animation: "slideInRight 0.3s ease-out",
+                cursor: "pointer",
+              }}
+              onClick={() => removeToast(t.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  removeToast(t.id);
+                }
+              }}
+            >
+              {getToastPrefix(t.type)}{t.message}
             </div>
           ))}
         </div>
@@ -452,25 +480,31 @@ function MessagesContent() {
             <h1 style={{ fontSize: "20px", fontWeight: 800 }}>Messages</h1>
           </div>
           <div style={{ flex: 1, overflowY: "auto" }}>
-            {loadingConversations ? (
-              <div style={{ padding: "20px", textAlign: "center" }}>
-                <span
-                  className="loading"
-                  style={{ width: "24px", height: "24px" }}
-                />
-              </div>
-            ) : conversations.length === 0 ? (
-              <div
-                style={{
-                  padding: "20px",
-                  textAlign: "center",
-                  color: "var(--color-text-muted)",
-                }}
-              >
-                No conversations
-              </div>
-            ) : (
-              conversations.map((conv) => (
+            {(() => {
+              if (loadingConversations) {
+                return (
+                  <div style={{ padding: "20px", textAlign: "center" }}>
+                    <span
+                      className="loading"
+                      style={{ width: "24px", height: "24px" }}
+                    />
+                  </div>
+                );
+              }
+              if (conversations.length === 0) {
+                return (
+                  <div
+                    style={{
+                      padding: "20px",
+                      textAlign: "center",
+                      color: "var(--color-text-muted)",
+                    }}
+                  >
+                    No conversations
+                  </div>
+                );
+              }
+              return conversations.map((conv) => (
                 <div
                   key={conv.userId}
                   onClick={() => setSelectedConversation(conv.userId)}
@@ -577,8 +611,8 @@ function MessagesContent() {
                     </div>
                   </div>
                 </div>
-              ))
-            )}
+              ));
+            })()}
           </div>
         </div>
 

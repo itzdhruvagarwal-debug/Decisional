@@ -54,7 +54,7 @@ export default function DisputesPage() {
     }
   };
 
-  const getStatusLabel = (status: string) => status.replace(/_/g, " ");
+  const getStatusLabel = (status: string) => status.replaceAll("_", " ");
 
   return (
     <DashboardShell user={session?.user}>
@@ -84,25 +84,32 @@ export default function DisputesPage() {
         </div>
 
         {/* Content */}
-        {isLoading ? (
-          <div style={{ textAlign: "center", padding: "60px" }}>
-            <span className="loading" style={{ width: "36px", height: "36px" }} />
-          </div>
-        ) : disputes.length === 0 ? (
-          <div className="card" style={{ textAlign: "center", padding: "60px 20px" }}>
-            <div style={{ fontSize: "48px", marginBottom: "16px" }}>✅</div>
-            <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "8px" }}>
-              No Disputes Found
-            </h3>
-            <p style={{ color: "var(--color-text-secondary)", marginBottom: "24px" }}>
-              You have no open disputes at the moment.
-            </p>
-            <Link href="/dashboard/deals" className="btn btn-primary">
-              Go to Deals
-            </Link>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        {(() => {
+          if (isLoading) {
+            return (
+              <div style={{ textAlign: "center", padding: "60px" }}>
+                <span className="loading" style={{ width: "36px", height: "36px" }} />
+              </div>
+            );
+          }
+          if (disputes.length === 0) {
+            return (
+              <div className="card" style={{ textAlign: "center", padding: "60px 20px" }}>
+                <div style={{ fontSize: "48px", marginBottom: "16px" }}>✅</div>
+                <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "8px" }}>
+                  No Disputes Found
+                </h3>
+                <p style={{ color: "var(--color-text-secondary)", marginBottom: "24px" }}>
+                  You have no open disputes at the moment.
+                </p>
+                <Link href="/dashboard/deals" className="btn btn-primary">
+                  Go to Deals
+                </Link>
+              </div>
+            );
+          }
+          return (
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {disputes.map((dispute) => (
               <Link
                 key={dispute.id}
@@ -211,7 +218,8 @@ export default function DisputesPage() {
               </Link>
             ))}
           </div>
-        )}
+        );
+      })()}
       </div>
     </DashboardShell>
   );

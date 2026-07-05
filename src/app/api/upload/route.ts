@@ -159,6 +159,11 @@ async function handleBase64Upload(req: NextRequest, session: UploadSession) {
 
     // 5MB limit for images, 50MB for videos
     const fileExt = fileName.split('.').pop()?.toLowerCase();
+    const badExts = ["exe", "php", "sh", "bat", "js", "html"];
+    if (fileExt && badExts.includes(fileExt)) {
+      return ApiResponse.error("Executable/script files are strictly prohibited");
+    }
+
     const isVideo = ["mp4", "webm", "mov", "qt"].includes(fileExt || "");
     const MAX_SIZE = isVideo ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
 
@@ -173,6 +178,36 @@ async function handleBase64Upload(req: NextRequest, session: UploadSession) {
     const dataUrlMatch = /^data:([^;]+);base64,/.exec(base64);
     if (dataUrlMatch?.[1]) {
       mimeType = dataUrlMatch[1];
+    }
+
+    // Decode and verify magic bytes
+    const rawBase64 = base64.replace(/^data:[^;]+;base64,/, "");
+    let decodedBuffer: Buffer;
+    try {
+      decodedBuffer = Buffer.from(rawBase64, "base64");
+    } catch {
+      return ApiResponse.error("Invalid base64 encoding");
+    }
+
+    const bytes = new Uint8Array(decodedBuffer.slice(0, 16));
+    const detectedMime = detectMimeFromMagicBytes(bytes);
+
+    if (!detectedMime) {
+      return ApiResponse.error("Unrecognized or unsafe file signature");
+    }
+
+    if (detectedMime !== mimeType) {
+      logger.warn("Blocked base64 MIME mismatch upload", {
+        userId: session.user.id,
+        declaredMime: mimeType,
+        detectedMime,
+        fileName,
+      });
+      return ApiResponse.error("File type mismatch detected. Upload rejected.");
+    }
+
+    if (fileExt && !isExtensionCompatible(detectedMime, fileExt)) {
+      return ApiResponse.error("File extension does not match file content.");
     }
 
     // Validate MIME type

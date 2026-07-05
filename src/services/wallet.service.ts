@@ -61,7 +61,7 @@ export class WalletService {
           },
         });
         if (!wallet) {
-          throw AppError.badRequest("Failed to find wallet after creation conflict");
+          throw AppError.internal("Failed to find wallet after creation conflict");
         }
         return wallet;
       }
@@ -91,7 +91,7 @@ export class WalletService {
           where: { userId },
         });
         if (!wallet) {
-          throw AppError.badRequest("Failed to find wallet after basic creation conflict");
+          throw AppError.internal("Failed to find wallet after basic creation conflict");
         }
         return wallet;
       }
@@ -181,7 +181,8 @@ export class WalletService {
       };
     } catch (error) {
       logger.error("Error fetching wallet", error, { userId });
-      throw AppError.badRequest("Failed to fetch wallet details");
+      if (error instanceof AppError) throw error;
+      throw AppError.internal("Failed to fetch wallet details");
     }
   }
 
@@ -190,7 +191,8 @@ export class WalletService {
       return await this.findOrCreateWalletBasic(userId);
     } catch (error) {
       logger.error("Error fetching basic wallet", error, { userId });
-      throw AppError.badRequest("Failed to fetch wallet");
+      if (error instanceof AppError) throw error;
+      throw AppError.internal("Failed to fetch wallet");
     }
   }
 }

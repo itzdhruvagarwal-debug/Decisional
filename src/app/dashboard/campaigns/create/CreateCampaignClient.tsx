@@ -203,7 +203,7 @@ export default function CreateCampaignClient() {
 
   const getRecommendedRate = (type: string, minFollowers: number) => {
     const isYoutube = type.startsWith("YOUTUBE");
-    const multiplier = isYoutube ? 2.5 : 2.0;
+    const multiplier = isYoutube ? 2.5 : 2;
     const estimatedEngagement = minFollowers * 0.03;
     const calculated = Math.round(estimatedEngagement * multiplier);
     const floor = isYoutube ? 750 : 500;
@@ -1056,7 +1056,7 @@ export default function CreateCampaignClient() {
 
             {formData.deliverables.map((item, index) => (
               <div
-                key={index}
+                key={`deliv-${item.type}-${index}`}
                 style={{
                   display: "flex",
                   gap: "12px",

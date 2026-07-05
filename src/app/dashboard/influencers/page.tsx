@@ -20,6 +20,12 @@ interface Influencer {
   userId: string;
 }
 
+function formatNumber(val: number | null | undefined): string {
+  if (!val) return "-";
+  if (val > 1000) return (val / 1000).toFixed(1) + "k";
+  return val.toString();
+}
+
 export default function DiscoverInfluencersPage() {
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,17 +39,25 @@ export default function DiscoverInfluencersPage() {
   const [platform, setPlatform] = useState("");
   const { data: session } = useSession();
 
-  const fetchInfluencers = async (
-    currentSearch = search,
-    currentCategory = category,
-    currentMinFollowers = minFollowers,
-    currentMinEngagementRate = minEngagementRate,
-    currentMinRate = minRate,
-    currentMaxRate = maxRate,
-    currentCity = city,
-    currentPlatform = platform,
-  ) => {
+  const fetchInfluencers = async (options?: {
+    search?: string;
+    category?: string;
+    minFollowers?: string;
+    minEngagement?: string;
+    minRate?: string;
+    maxRate?: string;
+    city?: string;
+    platform?: string;
+  }) => {
     setLoading(true);
+    const currentSearch = options && options.search !== undefined ? options.search : search;
+    const currentCategory = options && options.category !== undefined ? options.category : category;
+    const currentMinFollowers = options && options.minFollowers !== undefined ? options.minFollowers : minFollowers;
+    const currentMinEngagementRate = options && options.minEngagement !== undefined ? options.minEngagement : minEngagementRate;
+    const currentMinRate = options && options.minRate !== undefined ? options.minRate : minRate;
+    const currentMaxRate = options && options.maxRate !== undefined ? options.maxRate : maxRate;
+    const currentCity = options && options.city !== undefined ? options.city : city;
+    const currentPlatform = options && options.platform !== undefined ? options.platform : platform;
     try {
       const params = new URLSearchParams();
       if (currentSearch) params.append("search", currentSearch);
@@ -75,7 +89,16 @@ export default function DiscoverInfluencersPage() {
       session?.user?.userType === "ADMIN";
 
     if (canDiscover) {
-      fetchInfluencers("", "", "", "", "", "", "", "");
+      fetchInfluencers({
+        search: "",
+        category: "",
+        minFollowers: "",
+        minEngagement: "",
+        minRate: "",
+        maxRate: "",
+        city: "",
+        platform: "",
+      });
     } else if (session) {
       setLoading(false);
     }
@@ -173,10 +196,11 @@ export default function DiscoverInfluencersPage() {
           }}
         >
           <div style={{ flex: "1 1 min(280px, 100%)" }}>
-            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
+            <label htmlFor="search-keywords-input" style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
               Search Keywords
             </label>
             <input
+              id="search-keywords-input"
               type="text"
               placeholder="Name, bio, or handle..."
               value={search}
@@ -197,10 +221,11 @@ export default function DiscoverInfluencersPage() {
             />
           </div>
           <div style={{ flex: "1 1 min(180px, 100%)" }}>
-            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
+            <label htmlFor="category-select" style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
               Category
             </label>
             <select
+              id="category-select"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               style={{
@@ -224,10 +249,11 @@ export default function DiscoverInfluencersPage() {
             </select>
           </div>
           <div style={{ flex: "1 1 min(180px, 100%)" }}>
-            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
+            <label htmlFor="platform-select" style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
               Platform
             </label>
             <select
+              id="platform-select"
               value={platform}
               onChange={(e) => setPlatform(e.target.value)}
               style={{
@@ -248,10 +274,11 @@ export default function DiscoverInfluencersPage() {
             </select>
           </div>
           <div style={{ flex: "1 1 min(180px, 100%)" }}>
-            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
+            <label htmlFor="min-followers-select" style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
               Minimum Reach
             </label>
             <select
+              id="min-followers-select"
               value={minFollowers}
               onChange={(e) => setMinFollowers(e.target.value)}
               style={{
@@ -274,10 +301,11 @@ export default function DiscoverInfluencersPage() {
             </select>
           </div>
           <div style={{ flex: "1 1 min(180px, 100%)" }}>
-            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
+            <label htmlFor="min-engagement-select" style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
               Min Engagement
             </label>
             <select
+              id="min-engagement-select"
               value={minEngagementRate}
               onChange={(e) => setMinEngagementRate(e.target.value)}
               style={{
@@ -300,10 +328,11 @@ export default function DiscoverInfluencersPage() {
             </select>
           </div>
           <div style={{ flex: "1 1 min(180px, 100%)" }}>
-            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
+            <label htmlFor="city-input" style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
               City
             </label>
             <input
+              id="city-input"
               type="text"
               placeholder="e.g. Mumbai"
               value={city}
@@ -324,10 +353,11 @@ export default function DiscoverInfluencersPage() {
             />
           </div>
           <div style={{ flex: "1 1 min(140px, 100%)" }}>
-            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
+            <label htmlFor="min-rate-input" style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
               Min Price (₹)
             </label>
             <input
+              id="min-rate-input"
               type="number"
               placeholder="Min"
               value={minRate}
@@ -345,10 +375,11 @@ export default function DiscoverInfluencersPage() {
             />
           </div>
           <div style={{ flex: "1 1 min(140px, 100%)" }}>
-            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
+            <label htmlFor="max-rate-input" style={{ display: "block", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0, marginBottom: "10px", color: "var(--color-text-secondary)" }}>
               Max Price (₹)
             </label>
             <input
+              id="max-rate-input"
               type="number"
               placeholder="Max"
               value={maxRate}
@@ -389,49 +420,56 @@ export default function DiscoverInfluencersPage() {
         </motion.form>
 
         <AnimatePresence mode="wait">
-          {loading ? (
-            <motion.div
-              key="loader"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{ textAlign: "center", padding: "80px", color: "var(--color-text-secondary)" }}
-            >
-              <div className="loader" style={{
-                width: "48px",
-                height: "48px",
-                border: "4px solid rgba(255,255,255,0.1)",
-                borderTopColor: "var(--color-primary)",
-                borderRadius: "8px",
-                margin: "0 auto 24px",
-                animation: "spin 1s linear infinite",
-              }} />
-              <p style={{ fontSize: "16px", fontWeight: 600, letterSpacing: 0 }}>Loading creator data...</p>
-            </motion.div>
-          ) : influencers.length === 0 ? (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              style={{
-                textAlign: "center",
-                padding: "80px 40px",
-                background: "rgba(255,255,255,0.02)",
-                borderRadius: "8px",
-                border: "1px dashed rgba(255,255,255,0.1)"
-              }}
-            >
-              <div style={{ fontSize: "14px", fontWeight: 800, marginBottom: "12px", color: "var(--color-text-muted)" }}>
-                No matches
-              </div>
-              <h2 style={{ fontSize: "24px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "12px" }}>
-                Zero Matches Found
-              </h2>
-              <p style={{ color: "var(--color-text-secondary)", fontSize: "16px" }}>
-                Our scouts couldn't find anyone with those exact filters. Try broadening your criteria.
-              </p>
-            </motion.div>
-          ) : (
+          {(() => {
+            if (loading) {
+              return (
+                <motion.div
+                  key="loader"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  style={{ textAlign: "center", padding: "80px", color: "var(--color-text-secondary)" }}
+                >
+                  <div className="loader" style={{
+                    width: "48px",
+                    height: "48px",
+                    border: "4px solid rgba(255,255,255,0.1)",
+                    borderTopColor: "var(--color-primary)",
+                    borderRadius: "8px",
+                    margin: "0 auto 24px",
+                    animation: "spin 1s linear infinite",
+                  }} />
+                  <p style={{ fontSize: "16px", fontWeight: 600, letterSpacing: 0 }}>Loading creator data...</p>
+                </motion.div>
+              );
+            }
+            if (influencers.length === 0) {
+              return (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    textAlign: "center",
+                    padding: "80px 40px",
+                    background: "rgba(255,255,255,0.02)",
+                    borderRadius: "8px",
+                    border: "1px dashed rgba(255,255,255,0.1)"
+                  }}
+                >
+                  <div style={{ fontSize: "14px", fontWeight: 800, marginBottom: "12px", color: "var(--color-text-muted)" }}>
+                    No matches
+                  </div>
+                  <h2 style={{ fontSize: "24px", fontWeight: 800, color: "var(--color-text-primary)", marginBottom: "12px" }}>
+                    Zero Matches Found
+                  </h2>
+                  <p style={{ color: "var(--color-text-secondary)", fontSize: "16px" }}>
+                    Our scouts couldn't find anyone with those exact filters. Try broadening your criteria.
+                  </p>
+                </motion.div>
+              );
+            }
+            return (
             <motion.div
               key="grid"
               className="grid-3"
@@ -549,11 +587,11 @@ export default function DiscoverInfluencersPage() {
                   }}>
                     <div style={{ textAlign: "center" }}>
                       <div style={{ fontSize: "11px", color: "var(--color-text-muted)", fontWeight: 700, marginBottom: "4px", textTransform: "uppercase" }}>Followers</div>
-                      <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--color-text-primary)" }}>{inf.instagramFollowers ? (inf.instagramFollowers > 1000 ? (inf.instagramFollowers / 1000).toFixed(1) + 'k' : inf.instagramFollowers) : '-'}</div>
+                      <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--color-text-primary)" }}>{formatNumber(inf.instagramFollowers)}</div>
                     </div>
                     <div style={{ textAlign: "center" }}>
                       <div style={{ fontSize: "11px", color: "var(--color-text-muted)", fontWeight: 700, marginBottom: "4px", textTransform: "uppercase" }}>Subs</div>
-                      <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--color-text-primary)" }}>{inf.youtubeSubscribers === -1 ? 'Hidden' : inf.youtubeSubscribers ? (inf.youtubeSubscribers > 1000 ? (inf.youtubeSubscribers / 1000).toFixed(1) + 'k' : inf.youtubeSubscribers) : '-'}</div>
+                      <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--color-text-primary)" }}>{inf.youtubeSubscribers === -1 ? 'Hidden' : formatNumber(inf.youtubeSubscribers)}</div>
                     </div>
                     <div style={{ textAlign: "center" }}>
                       <div style={{ fontSize: "11px", color: "var(--color-text-muted)", fontWeight: 700, marginBottom: "4px", textTransform: "uppercase" }}>Deals</div>
@@ -614,7 +652,8 @@ export default function DiscoverInfluencersPage() {
                 </motion.div>
               ))}
             </motion.div>
-          )}
+          );
+        })()}
         </AnimatePresence>
       </div>
     </DashboardShell>

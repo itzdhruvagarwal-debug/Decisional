@@ -2,13 +2,15 @@
 
 import { useEffect } from "react";
 
-export default function Error({
+interface DashboardErrorProps {
+  readonly error: Error & { readonly digest?: string };
+  readonly reset: () => void;
+}
+
+export default function DashboardError({
   error,
   reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+}: DashboardErrorProps) {
   useEffect(() => {
     console.error(error);
   }, [error]);

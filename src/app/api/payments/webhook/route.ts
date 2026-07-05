@@ -32,7 +32,6 @@ async function handleWalletTopupWebhook(payload: { event?: string; payload?: { p
 
   const transaction = await prisma.transaction.findFirst({
     where: {
-      status: "PENDING",
       razorpayOrderId: orderId,
     },
     select: {
@@ -44,18 +43,27 @@ async function handleWalletTopupWebhook(payload: { event?: string; payload?: { p
   });
 
   if (!transaction) {
+    throw new Error(`Transaction not found for orderId: ${orderId}`);
+  }
+
+  if (transaction.status !== "PENDING") {
+    logger.info("Transaction already processed, ignoring webhook", {
+      orderId,
+      status: transaction.status,
+    });
     return;
   }
 
   if (transaction.amount !== amount) {
-    logger.error("Webhook amount mismatch for wallet top-up", {
+    const errorMsg = `Webhook amount mismatch: expected ${transaction.amount}, received ${amount}`;
+    logger.error(errorMsg, {
       transactionId: transaction.id,
       expectedAmount: transaction.amount,
       receivedAmount: amount,
       orderId,
       paymentId,
     });
-    return;
+    throw new Error(errorMsg);
   }
 
   try {
@@ -112,8 +120,9 @@ async function handlePayoutWebhook(payload: { event?: string; payload?: { payout
   });
 
   if (!withdrawal) {
-    logger.warn("Withdrawal not found for webhook", { withdrawalId, payoutId });
-    return;
+    const errorMsg = `Withdrawal not found for webhook: reference_id=${withdrawalId}`;
+    logger.error(errorMsg, { withdrawalId, payoutId });
+    throw new Error(errorMsg);
   }
 
   const transaction = await prisma.transaction.findFirst({
@@ -121,8 +130,9 @@ async function handlePayoutWebhook(payload: { event?: string; payload?: { payout
   });
 
   if (!transaction) {
-    logger.warn("Transaction not found for withdrawal", { withdrawalId });
-    return;
+    const errorMsg = `Transaction not found for withdrawal: id=${withdrawal.id}`;
+    logger.error(errorMsg, { withdrawalId });
+    throw new Error(errorMsg);
   }
 
   try {

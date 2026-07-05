@@ -13,6 +13,40 @@ const CONTACT_REGEX = {
   upi: /[a-zA-Z0-9.\-_]+@(ybl|okaxis|okicici|paytm|upi|apl|axl|ibl|sib|federal|hsbc|hdfc|icici|barodampay|sbi|waaxis|wasbi|kmbl|oklahoma|okl|postbank)/gi,
 };
 
+function normalizeHomoglyphs(str: string): string {
+  const homoglyphsMap: Record<string, string> = {
+    // lowercase cyrillic/greek
+    "а": "a", "е": "e", "о": "o", "р": "p", "с": "c", "у": "y", "х": "x", "і": "i", "ѕ": "s", "α": "a",
+    // uppercase cyrillic/greek
+    "А": "A", "В": "B", "Е": "E", "К": "K", "М": "M", "Н": "H", "О": "O", "Р": "P", "С": "C", "Т": "T", "Х": "X", "І": "I",
+    // other common lookalikes/accents
+    "à": "a", "á": "a", "â": "a", "ã": "a", "ä": "a", "å": "a", "æ": "ae", "ç": "c", "è": "e", "é": "e", "ê": "e", "ë": "e", "ì": "i",
+    "í": "i", "î": "i", "ï": "i", "ñ": "n", "ò": "o", "ó": "o", "ô": "o", "õ": "o", "ö": "o", "ù": "u", "ú": "u", "û": "u", "ü": "u",
+    "ý": "y", "ÿ": "y",
+  };
+  return str.split("").map((char) => homoglyphsMap[char] || char).join("");
+}
+
+function cleanAndNormalizeText(str: string): string {
+  let clean = str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  clean = clean.replace(/[\u200B-\u200D\uFEFF\u0000-\u001F\u007F-\u009F]/g, "");
+  clean = normalizeHomoglyphs(clean);
+  clean = clean.toLowerCase();
+  clean = clean
+    .replace(/@/g, "a")
+    .replace(/\$/g, "s")
+    .replace(/[0o]/g, "o")
+    .replace(/[1i]/g, "i")
+    .replace(/[3e]/g, "e")
+    .replace(/[4a]/g, "a")
+    .replace(/[5s]/g, "s")
+    .replace(/[7t]/g, "t");
+
+  // Keep only alphanumeric characters to strip spaces, emojis, punctuation, etc.
+  clean = clean.replace(/[^a-z0-9]/g, "");
+  return clean;
+}
+
 export function checkMessageForContacts(content: string) {
   const findings: string[] = [];
 
@@ -36,15 +70,7 @@ export function checkMessageForContacts(content: string) {
 
   // Check Social Handles & Obfuscated platform names (Leetspeak / Spaced Out)
   // Converts "w h a t s a p p" to "whatsapp", "1nstagram" to "instagram", "tele gram" to "telegram"
-  const normalizedContent = content
-    .toLowerCase()
-    .replace(/[\s_.,-]/g, "")
-    .replace(/[0o]/g, "o")
-    .replace(/[1i]/g, "i")
-    .replace(/[3e]/g, "e")
-    .replace(/[4a@]/g, "a")
-    .replace(/[5s$]/g, "s")
-    .replace(/[7t]/g, "t");
+  const normalizedContent = cleanAndNormalizeText(content);
 
   if (
     content.match(CONTACT_REGEX.socialHandle) ||
@@ -173,15 +199,7 @@ export function checkAttachmentForContacts(fileUrl: string) {
     findings.push("attachment_upi");
   }
 
-  const normalizedFilename = filename
-    .toLowerCase()
-    .replace(/[\s_.,-]/g, "")
-    .replace(/[0o]/g, "o")
-    .replace(/[1i]/g, "i")
-    .replace(/[3e]/g, "e")
-    .replace(/[4a@]/g, "a")
-    .replace(/[5s$]/g, "s")
-    .replace(/[7t]/g, "t");
+  const normalizedFilename = cleanAndNormalizeText(filename);
 
   if (
     filename.match(CONTACT_REGEX.socialHandle) ||

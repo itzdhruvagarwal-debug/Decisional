@@ -18,7 +18,7 @@ function getRazorpayCredentials(): { keyId: string; keySecret: string } {
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
   if (!keyId || !keySecret) {
-    throw AppError.badRequest("RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables are required",);
+    throw AppError.internal("RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables are required",);
   }
 
   return { keyId, keySecret };

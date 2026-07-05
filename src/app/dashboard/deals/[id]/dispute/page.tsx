@@ -4,21 +4,40 @@ import { useState, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+interface DisputePageProps {
+  readonly params: Promise<{ readonly id: string }>;
+}
+
+function getToastBackground(type: "success" | "error" | "info"): string {
+  if (type === "success") return "linear-gradient(135deg, #059669, #10b981)";
+  if (type === "error") return "linear-gradient(135deg, #dc2626, #ef4444)";
+  return "linear-gradient(135deg, #2563eb, #3b82f6)";
+}
+
+function getToastPrefix(type: "success" | "error" | "info"): string {
+  if (type === "success") return "✓ ";
+  if (type === "error") return "✕ ";
+  return "ℹ ";
+}
+
 export default function DisputePage({
   params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+}: DisputePageProps) {
   const { id } = use(params);
   const router = useRouter();
   const [issueType, setIssueType] = useState("TIMELINE");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [toasts, setToasts] = useState<Array<{id: number; type: "success" | "error" | "info"; message: string}>>([]);
+  const [toasts, setToasts] = useState<Array<{ id: number; type: "success" | "error" | "info"; message: string }>>([]);
+
+  const removeToast = (toastId: number) => {
+    setToasts(prev => prev.filter(t => t.id !== toastId));
+  };
+
   const showToast = (type: "success" | "error" | "info", message: string) => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, type, message }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
+    const toastId = Date.now();
+    setToasts(prev => [...prev, { id: toastId, type, message }]);
+    setTimeout(() => removeToast(toastId), 5000);
   };
 
   const dealId = id;
@@ -63,20 +82,31 @@ export default function DisputePage({
     {toasts.length > 0 && (
       <div style={{ position: "fixed", top: 24, right: 24, zIndex: 9999, display: "flex", flexDirection: "column", gap: "8px", maxWidth: "400px" }}>
         {toasts.map(t => (
-          <div key={t.id} style={{
-            padding: "12px 20px",
-            borderRadius: "10px",
-            color: "#fff",
-            fontSize: "14px",
-            fontWeight: 500,
-            background: t.type === "success" ? "linear-gradient(135deg, #059669, #10b981)" : t.type === "error" ? "linear-gradient(135deg, #dc2626, #ef4444)" : "linear-gradient(135deg, #2563eb, #3b82f6)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            animation: "slideInRight 0.3s ease-out",
-            cursor: "pointer",
-          }} onClick={() => setToasts(prev => prev.filter(x => x.id !== t.id))}>
-            {t.type === "success" ? "✓ " : t.type === "error" ? "✕ " : "ℹ "}{t.message}
+          <div
+            key={t.id}
+            role="button"
+            tabIndex={0}
+            style={{
+              padding: "12px 20px",
+              borderRadius: "10px",
+              color: "#fff",
+              fontSize: "14px",
+              fontWeight: 500,
+              background: getToastBackground(t.type),
+              boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              animation: "slideInRight 0.3s ease-out",
+              cursor: "pointer",
+            }}
+            onClick={() => removeToast(t.id)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                removeToast(t.id);
+              }
+            }}
+          >
+            {getToastPrefix(t.type)}{t.message}
           </div>
         ))}
       </div>
@@ -113,8 +143,9 @@ export default function DisputePage({
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: "20px" }}>
-            <label className="label">Issue Type</label>
+            <label className="label" htmlFor="issue-type-select">Issue Type</label>
             <select
+              id="issue-type-select"
               className="input"
               value={issueType}
               onChange={(e) => setIssueType(e.target.value)}
@@ -130,8 +161,9 @@ export default function DisputePage({
           </div>
 
           <div style={{ marginBottom: "24px" }}>
-            <label className="label">Description</label>
+            <label className="label" htmlFor="description-textarea">Description</label>
             <textarea
+              id="description-textarea"
               className="input"
               rows={6}
               placeholder="Please describe the issue in detail..."

@@ -36,8 +36,6 @@ interface ViewerWallet {
 
 export default function InfluencerProfilePage() {
   const { id } = useParams() as { id: string };
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const router = useRouter();
   const { data: session } = useSession();
 
   const [profile, setProfile] = useState<InfluencerProfile | null>(null);
@@ -110,6 +108,49 @@ export default function InfluencerProfilePage() {
   const canAfford =
     !profile.minRate || (wallet && wallet.availableBalance >= profile.minRate);
   const isBrandOrIndividual = session?.user?.userType === "BRAND";
+
+  let youtubeSubsLabel = "N/A";
+  if (profile.youtubeSubscribers === -1) {
+    youtubeSubsLabel = "Hidden";
+  } else if (profile.youtubeSubscribers) {
+    youtubeSubsLabel = profile.youtubeSubscribers.toLocaleString("en-IN");
+  }
+
+  let budgetNoticeText = "";
+  let budgetNoticeStyle = {};
+  if (canAfford) {
+    if (profile.minRate) {
+      budgetNoticeText = "Your current wallet balance covers this creator's base rate.";
+      budgetNoticeStyle = {
+        padding: "12px",
+        background: "rgba(34, 197, 94, 0.1)",
+        color: "var(--color-accent-emerald)",
+        borderRadius: "var(--radius-md)",
+        fontSize: "13px",
+        lineHeight: 1.4,
+      };
+    } else {
+      budgetNoticeText = "This creator's rate is negotiable. You can propose a custom budget or a barter (product) deal.";
+      budgetNoticeStyle = {
+        padding: "12px",
+        background: "rgba(34, 197, 94, 0.1)",
+        color: "var(--color-accent-emerald)",
+        borderRadius: "var(--radius-md)",
+        fontSize: "13px",
+        lineHeight: 1.4,
+      };
+    }
+  } else {
+    budgetNoticeText = "Your wallet balance is lower than this creator's minimum rate. Consider depositing funds before initiating a deal.";
+    budgetNoticeStyle = {
+      padding: "12px",
+      background: "rgba(239, 68, 68, 0.1)",
+      color: "var(--color-accent-rose)",
+      borderRadius: "var(--radius-md)",
+      fontSize: "13px",
+      lineHeight: 1.4,
+    };
+  }
 
   return (
     <DashboardShell user={session.user}>
@@ -316,11 +357,7 @@ export default function InfluencerProfilePage() {
                 YouTube Subs
               </div>
               <div style={{ fontSize: "20px", fontWeight: 700 }}>
-                {profile.youtubeSubscribers === -1
-                  ? "Hidden"
-                  : profile.youtubeSubscribers
-                  ? profile.youtubeSubscribers.toLocaleString("en-IN")
-                  : "N/A"}
+                {youtubeSubsLabel}
               </div>
               {profile.youtubeHandle && (
                 <div
@@ -484,45 +521,9 @@ export default function InfluencerProfilePage() {
                 </span>
               </div>
 
-              {!canAfford ? (
-                <div
-                  style={{
-                    padding: "12px",
-                    background: "rgba(239, 68, 68, 0.1)",
-                    color: "var(--color-accent-rose)",
-                    borderRadius: "var(--radius-md)",
-                    fontSize: "13px",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  Your wallet balance is lower than this creator's minimum rate.
-                  Consider depositing funds before initiating a deal.
-                </div>
-              ) : !profile.minRate ? (
-                <div
-                  style={{
-                    padding: "12px",
-                    background: "rgba(34, 197, 94, 0.1)",
-                    color: "var(--color-accent-emerald)",
-                    borderRadius: "var(--radius-md)",
-                    fontSize: "13px",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  This creator's rate is negotiable. You can propose a custom budget or a barter (product) deal.
-                </div>
-              ) : (
-                <div
-                  style={{
-                    padding: "12px",
-                    background: "rgba(34, 197, 94, 0.1)",
-                    color: "var(--color-accent-emerald)",
-                    borderRadius: "var(--radius-md)",
-                    fontSize: "13px",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  Your current wallet balance covers this creator's base rate.
+              {budgetNoticeText && (
+                <div style={budgetNoticeStyle}>
+                  {budgetNoticeText}
                 </div>
               )}
             </div>

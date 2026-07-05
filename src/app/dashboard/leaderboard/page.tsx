@@ -5,6 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 
+const rankColorMap: Record<number, string> = {
+  0: "#ffd700",
+  1: "#c0c0c0",
+  2: "#cd7f32",
+};
+
 interface LeaderboardUser {
   id: string;
   name: string;
@@ -94,20 +100,18 @@ export default function LeaderboardPage() {
   }, [filter, city, category]);
 
   const activeList = tab === "influencers" ? influencers : brands;
-  const scoreLabel =
-    tab === "influencers"
-      ? filter === "weekly"
-        ? "Deals This Week"
-        : "XP"
-      : filter === "weekly"
-        ? "Deals This Week"
-        : "Trust Score";
+  let scoreLabel = "";
+  if (tab === "influencers") {
+    scoreLabel = filter === "weekly" ? "Deals This Week" : "XP";
+  } else {
+    scoreLabel = filter === "weekly" ? "Deals This Week" : "Trust Score";
+  }
 
   let leaderboardContent;
   if (loading) {
-    leaderboardContent = Array.from({ length: 5 }).map((_, i) => (
+    leaderboardContent = Array.from({ length: 5 }).map((_, idx) => (
       <div
-        key={i}
+        key={"skeleton-" + idx}
         style={{
           height: "64px",
           borderRadius: "12px",
@@ -186,14 +190,7 @@ export default function LeaderboardPage() {
           style={{
             fontSize: index < 3 ? "20px" : "14px",
             fontWeight: 800,
-            color:
-              index === 0
-                ? "#ffd700"
-                : index === 1
-                  ? "#c0c0c0"
-                  : index === 2
-                    ? "#cd7f32"
-                    : "var(--color-text-secondary)",
+            color: rankColorMap[index] || "var(--color-text-secondary)",
           }}
         >
           {index < 3 ? ["🥇", "🥈", "🥉"][index] : index + 1}
@@ -401,12 +398,10 @@ export default function LeaderboardPage() {
                   fontWeight: 600,
                   fontSize: "13px",
                   transition: "all 0.2s",
-                  background:
-                    filter === f
-                      ? f === "weekly"
-                        ? "#f59e0b"
-                        : "var(--color-primary)"
-                      : "transparent",
+                  background: (() => {
+                    if (filter !== f) return "transparent";
+                    return f === "weekly" ? "#f59e0b" : "var(--color-primary)";
+                  })(),
                   color: filter === f ? "white" : "var(--color-text-secondary)",
                 }}
               >
@@ -605,6 +600,16 @@ export default function LeaderboardPage() {
   );
 }
 
+interface PodiumUserProps {
+  readonly user: HallOfFameUser;
+  readonly rank: number;
+  readonly color: string;
+  readonly height: number;
+  readonly delay: number;
+  readonly isFirst?: boolean;
+  readonly unit: string;
+}
+
 function PodiumUser({
   user,
   rank,
@@ -613,15 +618,7 @@ function PodiumUser({
   delay,
   isFirst,
   unit,
-}: {
-  user: HallOfFameUser;
-  rank: number;
-  color: string;
-  height: number;
-  delay: number;
-  isFirst?: boolean;
-  unit: string;
-}) {
+}: PodiumUserProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
