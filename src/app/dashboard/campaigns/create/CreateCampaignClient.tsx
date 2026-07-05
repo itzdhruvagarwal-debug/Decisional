@@ -3,6 +3,29 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+function validateCampaignForm(formData: any) {
+  if (formData.requiresProduct && formData.totalBudget === 0) {
+    if (formData.productValue < 500) {
+      throw new Error("Product-only campaigns must specify a product value of at least ₹500");
+    }
+    if (formData.minFollowers > 10000) {
+      throw new Error("Product-only campaigns can only target influencers with up to 10,000 followers");
+    }
+  }
+  if (formData.targetCategories.length === 0) {
+    throw new Error("Please select at least one category");
+  }
+  if (formData.perInfluencerBudget > formData.totalBudget) {
+    throw new Error("Per influencer budget cannot exceed total budget");
+  }
+  if (formData.maxFollowers !== null && formData.maxFollowers > 0 && formData.maxFollowers < formData.minFollowers) {
+    throw new Error("Max followers must be greater than min followers");
+  }
+  if (!formData.contentDeadline || !formData.postingDeadline) {
+    throw new Error("Please select content and posting deadlines");
+  }
+}
+
 export default function CreateCampaignClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -227,28 +250,6 @@ export default function CreateCampaignClient() {
     });
   }, [formData.deliverables, formData.maxInfluencers]);
 
-function validateCampaignForm(formData: any) {
-  if (formData.requiresProduct && formData.totalBudget === 0) {
-    if (formData.productValue < 500) {
-      throw new Error("Product-only campaigns must specify a product value of at least ₹500");
-    }
-    if (formData.minFollowers > 10000) {
-      throw new Error("Product-only campaigns can only target influencers with up to 10,000 followers");
-    }
-  }
-  if (formData.targetCategories.length === 0) {
-    throw new Error("Please select at least one category");
-  }
-  if (formData.perInfluencerBudget > formData.totalBudget) {
-    throw new Error("Per influencer budget cannot exceed total budget");
-  }
-  if (formData.maxFollowers !== null && formData.maxFollowers > 0 && formData.maxFollowers < formData.minFollowers) {
-    throw new Error("Max followers must be greater than min followers");
-  }
-  if (!formData.contentDeadline || !formData.postingDeadline) {
-    throw new Error("Please select content and posting deadlines");
-  }
-}
 
   const handleSubmit = async (e: React.FormEvent, isDraft: boolean = false) => {
     e.preventDefault();

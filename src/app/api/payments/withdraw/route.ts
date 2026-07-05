@@ -21,28 +21,26 @@ function validateWithdrawalInput(data: { bankAccountId?: string | undefined; ban
         message: "Invalid UPI ID format (e.g. name@bank)",
       });
     }
+  } else if (!data.bankAccountName || !data.bankAccountNumber || !data.ifscCode) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message:
+        "Provide either bankAccountId, full bank account details, or a UPI ID for withdrawal",
+    });
   } else {
-    if (!data.bankAccountName || !data.bankAccountNumber || !data.ifscCode) {
+    if (!/^\d{9,18}$/.test(data.bankAccountNumber)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message:
-          "Provide either bankAccountId, full bank account details, or a UPI ID for withdrawal",
+        path: ["bankAccountNumber"],
+        message: "Invalid account number",
       });
-    } else {
-      if (!/^\d{9,18}$/.test(data.bankAccountNumber)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["bankAccountNumber"],
-          message: "Invalid account number",
-        });
-      }
-      if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(data.ifscCode)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["ifscCode"],
-          message: "Invalid IFSC code",
-        });
-      }
+    }
+    if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(data.ifscCode)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["ifscCode"],
+        message: "Invalid IFSC code",
+      });
     }
   }
 }

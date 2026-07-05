@@ -170,9 +170,9 @@ export class MatchingService {
         : profileER;
 
       let engagementScore = 20;
-      if (blendedER >= 5.0) {
+      if (blendedER >= 5) {
         engagementScore = 100;
-      } else if (blendedER >= 3.0) {
+      } else if (blendedER >= 3) {
         engagementScore = 85;
       } else if (blendedER >= 1.5) {
         engagementScore = 70;

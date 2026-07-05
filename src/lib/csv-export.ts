@@ -16,7 +16,14 @@ export function toCsv(rows: CsvRow[], headers?: string[]): string {
   
   const escape = (val: unknown): string => {
     if (val === null || val === undefined) return "";
-    const str = typeof val === "object" && !(val instanceof Date) ? JSON.stringify(val) : String(val);
+    let str = "";
+    if (val instanceof Date) {
+      str = val.toISOString();
+    } else if (typeof val === "object") {
+      str = JSON.stringify(val);
+    } else {
+      str = String(val);
+    }
     // Wrap in quotes if contains comma, quote, or newline
     if (str.includes(",") || str.includes('"') || str.includes("\n")) {
       return `"${str.replaceAll('"', '""')}"`;

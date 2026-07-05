@@ -180,8 +180,16 @@ export class UserService {
           { AND: [{ youtubeHandle: { not: null } }, { youtubeHandle: { not: "" } }] },
         ]
       };
+      let existingAnd: any[] = [];
+      if (where.AND) {
+        if (Array.isArray(where.AND)) {
+          existingAnd = where.AND;
+        } else {
+          existingAnd = [where.AND];
+        }
+      }
       where.AND = [
-        ...(Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []),
+        ...existingAnd,
         hasSocialHandleCondition,
       ];
 

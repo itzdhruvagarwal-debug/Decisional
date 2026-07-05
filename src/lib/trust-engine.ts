@@ -158,11 +158,14 @@ export async function updateTrustAndLevel(
 
       let progressiveReduction = 0;
       for (const v of recentViolations) {
-        const rawMetadata = v.metadata
-          ? typeof v.metadata === "string"
-            ? JSON.parse(v.metadata)
-            : v.metadata
-          : null;
+        let rawMetadata = null;
+        if (v.metadata) {
+          if (typeof v.metadata === "string") {
+            rawMetadata = JSON.parse(v.metadata);
+          } else {
+            rawMetadata = v.metadata;
+          }
+        }
         const metadata =
           rawMetadata && typeof rawMetadata === "object"
             ? (rawMetadata as Record<string, unknown>)

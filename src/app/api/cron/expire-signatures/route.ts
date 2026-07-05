@@ -80,6 +80,109 @@ async function _handler_POST(_req: NextRequest) {
 
 export const POST = apiWrapper(_handler_POST);
 
+async function handleWalletRefund(tx: Prisma.TransactionClient, deal: any, brandUserId: string) {
+  const wallet = await tx.wallet.findUnique({
+    where: { userId: brandUserId },
+    select: { id: true },
+  });
+
+  if (wallet && deal.amount > 0) {
+    const refundAmount = getDealTotalAmount(deal);
+    const isCampaignPoolRefund = !deal.campaign.isDirectInvite;
+    await tx.wallet.update({
+      where: { id: wallet.id },
+      data: {
+        ...(isCampaignPoolRefund
+          ? { pendingBalance: { increment: refundAmount } }
+          : { balance: { increment: refundAmount } }),
+      },
+    });
+
+    await tx.transaction.create({
+      data: {
+        walletId: wallet.id,
+        dealId: deal.id,
+        type: "REFUND",
+        amount: refundAmount,
+        status: "COMPLETED",
+        description: `Refund for expired invite: ${deal.campaign.title}`,
+        metadata: {
+          balanceImpact: !isCampaignPoolRefund,
+          source: isCampaignPoolRefund ? "campaign_pool_refund" : "direct_invite_refund",
+        },
+      },
+    });
+  }
+}
+
+async function handleDirectInviteRefund(tx: Prisma.TransactionClient, deal: any, brandUserId: string) {
+  const wallet = await tx.wallet.findUnique({
+    where: { userId: brandUserId },
+    select: { id: true, pendingBalance: true },
+  });
+
+  const refundableAmount = wallet
+    ? Math.min(wallet.pendingBalance, getDealTotalAmount(deal))
+    : 0;
+
+  if (wallet && refundableAmount > 0) {
+    await tx.wallet.update({
+      where: { id: wallet.id },
+      data: {
+        pendingBalance: { decrement: refundableAmount },
+        balance: { increment: refundableAmount },
+      },
+    });
+
+    await tx.transaction.create({
+      data: {
+        walletId: wallet.id,
+        dealId: deal.id,
+        type: "REFUND",
+        amount: refundableAmount,
+        status: "COMPLETED",
+        description: `Refund for expired invite: ${deal.campaign.title}`,
+      },
+    });
+  }
+}
+
+async function handleFallbackRefund(tx: Prisma.TransactionClient, deal: any, brandUserId: string) {
+  const wallet = await tx.wallet.findUnique({
+    where: { userId: brandUserId },
+    select: { id: true, pendingBalance: true },
+  });
+
+  const refundableAmount = wallet
+    ? Math.min(wallet.pendingBalance, getDealTotalAmount(deal))
+    : 0;
+
+  if (wallet && refundableAmount > 0) {
+    await tx.wallet.update({
+      where: { id: wallet.id },
+      data: {
+        pendingBalance: { decrement: refundableAmount },
+        balance: { increment: refundableAmount },
+      },
+    });
+
+    await tx.transaction.create({
+      data: {
+        walletId: wallet.id,
+        dealId: deal.id,
+        type: "REFUND",
+        amount: refundableAmount,
+        status: "COMPLETED",
+        description: `Refund for expired deal signature: ${deal.campaign.title}`,
+        metadata: {
+          balanceImpact: true,
+          source: "non_wallet_pool_refund",
+        },
+      },
+    });
+  }
+}
+
 async function expireSingleDealSignature(tx: Prisma.TransactionClient, deal: any) {
   // Atomic status update guard
   const lockResult = await tx.deal.updateMany({
@@ -115,105 +218,14 @@ async function expireSingleDealSignature(tx: Prisma.TransactionClient, deal: any
     },
   });
 
-  if (deal.brand?.userId && deal.reservedFromWallet) {
-    const wallet = await tx.wallet.findUnique({
-      where: { userId: deal.brand.userId },
-      select: { id: true },
-    });
-
-    if (wallet && deal.amount > 0) {
-      const refundAmount = getDealTotalAmount(deal);
-      const isCampaignPoolRefund = !deal.campaign.isDirectInvite;
-      await tx.wallet.update({
-        where: { id: wallet.id },
-        data: {
-          ...(isCampaignPoolRefund
-            ? { pendingBalance: { increment: refundAmount } }
-            : { balance: { increment: refundAmount } }),
-        },
-      });
-
-      await tx.transaction.create({
-        data: {
-          walletId: wallet.id,
-          dealId: deal.id,
-          type: "REFUND",
-          amount: refundAmount,
-          status: "COMPLETED",
-          description: `Refund for expired invite: ${deal.campaign.title}`,
-          metadata: {
-            balanceImpact: !isCampaignPoolRefund,
-            source: isCampaignPoolRefund
-              ? "campaign_pool_refund"
-              : "direct_invite_refund",
-          },
-        },
-      });
-    }
-  } else if (deal.campaign.isDirectInvite && deal.brand?.userId) {
-    const wallet = await tx.wallet.findUnique({
-      where: { userId: deal.brand.userId },
-      select: { id: true, pendingBalance: true },
-    });
-
-    const refundableAmount = wallet
-      ? Math.min(wallet.pendingBalance, getDealTotalAmount(deal))
-      : 0;
-
-    if (wallet && refundableAmount > 0) {
-      await tx.wallet.update({
-        where: { id: wallet.id },
-        data: {
-          pendingBalance: { decrement: refundableAmount },
-          balance: { increment: refundableAmount },
-        },
-      });
-
-      await tx.transaction.create({
-        data: {
-          walletId: wallet.id,
-          dealId: deal.id,
-          type: "REFUND",
-          amount: refundableAmount,
-          status: "COMPLETED",
-          description: `Refund for expired invite: ${deal.campaign.title}`,
-        },
-      });
-    }
-  } else if (deal.brand?.userId) {
-    // Fallback case: reservedFromWallet = false and !isDirectInvite
-    const wallet = await tx.wallet.findUnique({
-      where: { userId: deal.brand.userId },
-      select: { id: true, pendingBalance: true },
-    });
-
-    const refundableAmount = wallet
-      ? Math.min(wallet.pendingBalance, getDealTotalAmount(deal))
-      : 0;
-
-    if (wallet && refundableAmount > 0) {
-      await tx.wallet.update({
-        where: { id: wallet.id },
-        data: {
-          pendingBalance: { decrement: refundableAmount },
-          balance: { increment: refundableAmount },
-        },
-      });
-
-      await tx.transaction.create({
-        data: {
-          walletId: wallet.id,
-          dealId: deal.id,
-          type: "REFUND",
-          amount: refundableAmount,
-          status: "COMPLETED",
-          description: `Refund for expired deal signature: ${deal.campaign.title}`,
-          metadata: {
-            balanceImpact: true,
-            source: "non_wallet_pool_refund",
-          },
-        },
-      });
+  const brandUserId = deal.brand?.userId;
+  if (brandUserId) {
+    if (deal.reservedFromWallet) {
+      await handleWalletRefund(tx, deal, brandUserId);
+    } else if (deal.campaign.isDirectInvite) {
+      await handleDirectInviteRefund(tx, deal, brandUserId);
+    } else {
+      await handleFallbackRefund(tx, deal, brandUserId);
     }
   }
 

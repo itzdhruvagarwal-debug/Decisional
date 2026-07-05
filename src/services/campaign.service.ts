@@ -43,6 +43,18 @@ function normalizeStringArray(value: unknown): string[] {
   return [];
 }
 
+function safeStringCast(val: unknown): string {
+  if (val === null || val === undefined) return "";
+  if (typeof val === "object") return "";
+  return String(val);
+}
+
+function safeStringOrNullCast(val: unknown): string | null {
+  if (val === null || val === undefined) return null;
+  if (typeof val === "object") return null;
+  return String(val);
+}
+
 function estimateCampaignDealSlots(
   totalBudget: number,
   perInfluencerBudget: number | null,
@@ -645,6 +657,143 @@ export class CampaignService {
     );
   }
 
+  static parseAndValidateCampaignDetails(data: Record<string, unknown>) {
+    const requiresProduct = Boolean(data.requiresProduct);
+    const productValuePaise =
+      data.productValue === null || data.productValue === undefined
+        ? null
+        : Math.max(0, Number(data.productValue));
+
+    const totalBudgetPaise = Number(data.totalBudget);
+    const perInfluencerBudgetPaise =
+      data.perInfluencerBudget === null || data.perInfluencerBudget === undefined
+        ? null
+        : Number(data.perInfluencerBudget);
+    const minFollowers = Math.max(0, Number(data.minFollowers || 0));
+
+    this.validateCampaignInputAndBudgets(
+      data,
+      requiresProduct,
+      totalBudgetPaise,
+      perInfluencerBudgetPaise,
+      productValuePaise,
+      minFollowers
+    );
+
+    const title = safeStringCast(data.title).trim();
+    const description = safeStringCast(data.description).trim();
+    const requirements = safeStringCast(data.requirements).trim();
+    const guidelines = safeStringOrNullCast(data.guidelines)?.trim() ?? null;
+
+    if (!title || !description || !requirements) {
+      throw AppError.badRequest("Missing required fields: title, description, requirements");
+    }
+
+    const contentDeadline = new Date(data.contentDeadline as string);
+    const postingDeadline = new Date(data.postingDeadline as string);
+
+    if (Number.isNaN(contentDeadline.getTime()) || Number.isNaN(postingDeadline.getTime())) {
+      throw AppError.badRequest("Invalid campaign deadlines");
+    }
+    if (postingDeadline < contentDeadline) {
+      throw AppError.badRequest("Posting deadline must be after content deadline");
+    }
+
+    const now = new Date();
+    const applicationDeadline = data.applicationDeadline
+      ? new Date(data.applicationDeadline as string)
+      : null;
+
+    if (applicationDeadline && Number.isNaN(applicationDeadline.getTime())) {
+      throw AppError.badRequest("Invalid application deadline");
+    }
+    if (applicationDeadline && applicationDeadline < now) {
+      throw AppError.badRequest("Application deadline cannot be in the past");
+    }
+    if (applicationDeadline && applicationDeadline > contentDeadline) {
+      throw AppError.badRequest("Application deadline must be before content deadline");
+    }
+
+    const targetCategories = normalizeStringArray(data.targetCategories);
+    const targetCities = normalizeStringArray(data.targetCities);
+    const targetLanguages = normalizeStringArray(data.targetLanguages);
+
+    if (targetCategories.length === 0) {
+      throw AppError.badRequest("At least one target category is required");
+    }
+
+    if (!Array.isArray(data.deliverables) || data.deliverables.length === 0) {
+      throw AppError.badRequest("At least one deliverable is required");
+    }
+
+    const normalizedDeliverables = data.deliverables
+      .map((item: { type?: unknown; count?: unknown; rate?: unknown; specs?: unknown }) => {
+        const rawType = item?.type;
+        const typeStr = typeof rawType === "string" ? rawType.trim() : "";
+        const specsStr = typeof item?.specs === "string" ? item.specs.trim() : undefined;
+        return {
+          type: typeStr,
+          count: Math.max(1, Number(item?.count || 1)),
+          rate: item?.rate !== undefined && item?.rate !== null ? Math.max(0, Number(item.rate)) : undefined,
+          ...(specsStr ? { specs: specsStr } : {}),
+        };
+      })
+      .filter((item: { type: string }) => Boolean(item.type));
+
+    if (normalizedDeliverables.length === 0) {
+      throw AppError.badRequest("Deliverables are invalid");
+    }
+
+    const maxFollowers = Number(data.maxFollowers || 0);
+
+    if (maxFollowers > 0 && maxFollowers < minFollowers) {
+      throw AppError.badRequest("maxFollowers must be greater than or equal to minFollowers");
+    }
+
+    const minEngagementRate =
+      data.minEngagementRate === null || data.minEngagementRate === undefined
+        ? null
+        : Math.max(0, Number(data.minEngagementRate));
+
+    if (requiresProduct) {
+      const pName = data.productName;
+      if (typeof pName !== "string" || !pName.trim()) {
+        throw AppError.badRequest("Product name is required when product shipping is enabled");
+      }
+      if (!productValuePaise || productValuePaise <= 0) {
+        throw AppError.badRequest("Product value is required when product shipping is enabled");
+      }
+    }
+
+    const productName = data.productName ? safeStringCast(data.productName).trim() : null;
+    const productDescription = data.productDescription
+      ? safeStringCast(data.productDescription).trim()
+      : null;
+
+    return {
+      requiresProduct,
+      productValuePaise,
+      totalBudgetPaise,
+      perInfluencerBudgetPaise,
+      minFollowers,
+      title,
+      description,
+      requirements,
+      guidelines,
+      contentDeadline,
+      postingDeadline,
+      applicationDeadline,
+      targetCategories,
+      targetCities,
+      targetLanguages,
+      normalizedDeliverables,
+      maxFollowers,
+      minEngagementRate,
+      productName,
+      productDescription,
+    };
+  }
+
   static async createCampaign(userId: string, userType: UserType, data: Record<string, unknown>) {
     try {
       if (userType !== "BRAND") {
@@ -657,127 +806,27 @@ export class CampaignService {
       }
       assertAccountCanTransact(user.status);
 
-      const requiresProduct = Boolean(data.requiresProduct);
-      const productValuePaise =
-        data.productValue === null || data.productValue === undefined
-          ? null
-          : Math.max(0, Number(data.productValue));
+      const parsed = this.parseAndValidateCampaignDetails(data);
 
-      const totalBudgetPaise = Number(data.totalBudget);
-      const perInfluencerBudgetPaise =
-        data.perInfluencerBudget === null || data.perInfluencerBudget === undefined
-          ? null
-          : Number(data.perInfluencerBudget);
-      const minFollowers = Math.max(0, Number(data.minFollowers || 0));
-
-      this.validateCampaignInputAndBudgets(
-        data,
-        requiresProduct,
-        totalBudgetPaise,
-        perInfluencerBudgetPaise,
-        productValuePaise,
-        minFollowers
-      );
-
-      const title = String(data.title || "").trim();
-      const description = String(data.description || "").trim();
-      const requirements = String(data.requirements || "").trim();
-      const guidelines = data.guidelines ? String(data.guidelines).trim() : null;
-
-      if (!title || !description || !requirements) {
-        throw AppError.badRequest("Missing required fields: title, description, requirements");
-      }
-
-      const contentDeadline = new Date(data.contentDeadline as string);
-      const postingDeadline = new Date(data.postingDeadline as string);
-      if (Number.isNaN(contentDeadline.getTime()) || Number.isNaN(postingDeadline.getTime())) {
-        throw AppError.badRequest("Invalid campaign deadlines");
-      }
-      if (postingDeadline < contentDeadline) {
-        throw AppError.badRequest("Posting deadline must be after content deadline");
-      }
-
-      const now = new Date();
-      const applicationDeadline = data.applicationDeadline
-        ? new Date(data.applicationDeadline as string)
-        : null;
-
-      if (applicationDeadline && Number.isNaN(applicationDeadline.getTime())) {
-        throw AppError.badRequest("Invalid application deadline");
-      }
-      if (applicationDeadline && applicationDeadline < now) {
-        throw AppError.badRequest("Application deadline cannot be in the past");
-      }
-      if (applicationDeadline && applicationDeadline > contentDeadline) {
-        throw AppError.badRequest("Application deadline must be before content deadline");
-      }
-
-      const targetCategories = normalizeStringArray(data.targetCategories);
-      const targetCities = normalizeStringArray(data.targetCities);
-      const targetLanguages = normalizeStringArray(data.targetLanguages);
-
-      if (targetCategories.length === 0) {
-        throw AppError.badRequest("At least one target category is required");
-      }
-
-      if (!Array.isArray(data.deliverables) || data.deliverables.length === 0) {
-        throw AppError.badRequest("At least one deliverable is required");
-      }
-
-      const normalizedDeliverables = data.deliverables
-        .map((item: { type?: unknown; count?: unknown; rate?: unknown; specs?: unknown }) => ({
-          type: String(item?.type || "").trim(),
-          count: Math.max(1, Number(item?.count || 1)),
-          rate: item?.rate !== undefined && item?.rate !== null ? Math.max(0, Number(item.rate)) : undefined,
-          ...(item?.specs ? { specs: String(item.specs).trim() } : {}),
-        }))
-        .filter((item: { type: string }) => Boolean(item.type));
-
-      if (normalizedDeliverables.length === 0) {
-        throw AppError.badRequest("Deliverables are invalid");
-      }
-
-      const maxFollowers = Number(data.maxFollowers || 0);
-
-      if (maxFollowers > 0 && maxFollowers < minFollowers) {
-        throw AppError.badRequest("maxFollowers must be greater than or equal to minFollowers");
-      }
-
-      const minEngagementRate =
-        data.minEngagementRate === null || data.minEngagementRate === undefined
-          ? null
-          : Math.max(0, Number(data.minEngagementRate));
-      if (requiresProduct) {
-        if (!data.productName || !String(data.productName).trim()) {
-          throw AppError.badRequest("Product name is required when product shipping is enabled");
-        }
-        if (!productValuePaise || productValuePaise <= 0) {
-          throw AppError.badRequest("Product value is required when product shipping is enabled");
-        }
-      }
-      const productName = data.productName ? String(data.productName).trim() : null;
-      const productDescription = data.productDescription
-        ? String(data.productDescription).trim()
-        : null;
       const campaignBrandFee = await resolveBrandPlatformFee(userId);
-      const isProductOnly = requiresProduct && totalBudgetPaise === 0;
+      const isProductOnly = parsed.requiresProduct && parsed.totalBudgetPaise === 0;
       const productHandlingFee = calculateProductHandlingFee(
-        productValuePaise,
-        requiresProduct,
+        parsed.productValuePaise,
+        parsed.requiresProduct,
         isProductOnly,
         campaignBrandFee.effectivePlatformFee,
       );
 
       const fundedDealSlots = estimateCampaignDealSlots(
-        totalBudgetPaise,
-        perInfluencerBudgetPaise,
+        parsed.totalBudgetPaise,
+        parsed.perInfluencerBudgetPaise,
         data.maxInfluencers ? Number(data.maxInfluencers) : null,
       );
 
       const campaignFundingAmounts = await this.checkBrandVerificationTiers(
         userId,
-        totalBudgetPaise,
-        productValuePaise,
+        parsed.totalBudgetPaise,
+        parsed.productValuePaise,
         campaignBrandFee,
         fundedDealSlots,
         productHandlingFee
@@ -811,17 +860,17 @@ export class CampaignService {
         const newCampaign = await tx.campaign.create({
           data: {
             brandId: profile.id,
-            title,
-            description,
-            requirements,
-            guidelines,
-            totalBudget: totalBudgetPaise,
-            perInfluencerBudget: perInfluencerBudgetPaise,
+            title: parsed.title,
+            description: parsed.description,
+            requirements: parsed.requirements,
+            guidelines: parsed.guidelines,
+            totalBudget: parsed.totalBudgetPaise,
+            perInfluencerBudget: parsed.perInfluencerBudgetPaise,
             fundedAmount: isDraft ? 0 : campaignFundingAmounts.totalAmount,
             maxInfluencers: data.maxInfluencers ? Number(data.maxInfluencers) : null,
-            targetCategories,
-            targetCities,
-            targetLanguages,
+            targetCategories: parsed.targetCategories,
+            targetCities: parsed.targetCities,
+            targetLanguages: parsed.targetLanguages,
             targetGender: typeof data.targetGender === "string" ? data.targetGender : null,
             targetAgeMin:
               data.targetAgeMin === null || data.targetAgeMin === undefined
@@ -831,18 +880,18 @@ export class CampaignService {
               data.targetAgeMax === null || data.targetAgeMax === undefined
                 ? null
                 : Number(data.targetAgeMax),
-            minFollowers,
-            maxFollowers: maxFollowers > 0 ? maxFollowers : null,
-            minEngagementRate,
-            deliverables: normalizedDeliverables,
-            applicationDeadline,
-            contentDeadline,
-            postingDeadline,
+            minFollowers: parsed.minFollowers,
+            maxFollowers: parsed.maxFollowers > 0 ? parsed.maxFollowers : null,
+            minEngagementRate: parsed.minEngagementRate,
+            deliverables: parsed.normalizedDeliverables,
+            applicationDeadline: parsed.applicationDeadline,
+            contentDeadline: parsed.contentDeadline,
+            postingDeadline: parsed.postingDeadline,
             status: isDraft ? "DRAFT" : "ACTIVE",
-            requiresProduct,
-            productName,
-            productValue: productValuePaise,
-            productDescription,
+            requiresProduct: parsed.requiresProduct,
+            productName: parsed.productName,
+            productValue: parsed.productValuePaise,
+            productDescription: parsed.productDescription,
             isDirectInvite: Boolean(data.invitedInfluencerId),
           },
         });
@@ -852,15 +901,15 @@ export class CampaignService {
           newCampaign,
           data,
           profile,
-          totalBudgetPaise,
-          perInfluencerBudgetPaise,
-          normalizedDeliverables,
-          requirements,
-          contentDeadline,
-          postingDeadline,
-          requiresProduct,
-          productName,
-          productValuePaise,
+          totalBudgetPaise: parsed.totalBudgetPaise,
+          perInfluencerBudgetPaise: parsed.perInfluencerBudgetPaise,
+          normalizedDeliverables: parsed.normalizedDeliverables,
+          requirements: parsed.requirements,
+          contentDeadline: parsed.contentDeadline,
+          postingDeadline: parsed.postingDeadline,
+          requiresProduct: parsed.requiresProduct,
+          productName: parsed.productName,
+          productValuePaise: parsed.productValuePaise,
           productHandlingFee,
         });
 
@@ -883,11 +932,11 @@ export class CampaignService {
               type: "DEBIT",
               amount: campaignFundingAmounts.totalAmount,
               status: "COMPLETED",
-              description: `Funds held for campaign creation: ${title}`,
+              description: `Funds held for campaign creation: ${parsed.title}`,
               metadata: {
                 balanceImpact: true,
                 campaignId: newCampaign.id,
-                totalBudget: totalBudgetPaise,
+                totalBudget: parsed.totalBudgetPaise,
                 platformFee: campaignFundingAmounts.platformFee,
                 gatewayFee: campaignFundingAmounts.gatewayFee,
                 fundedDealSlots,
@@ -998,57 +1047,70 @@ export class CampaignService {
     return campaign;
   }
   
-  private static buildCampaignUpdatePayload(data: Record<string, unknown>): Prisma.CampaignUpdateInput {
-    const updateData: Prisma.CampaignUpdateInput = {};
-    const {
-      title,
-      description,
-      requirements,
-      guidelines,
-      totalBudget: totalBudgetPaise,
-      perInfluencerBudget: perInfluencerBudgetPaise,
-      requiresProduct,
-      productName,
-      productValue: productValuePaise,
-      productDescription,
-    } = data;
+  private static buildBasicInfoUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
+    if (data.title !== undefined) updateData.title = safeStringCast(data.title);
+    if (data.description !== undefined) updateData.description = safeStringCast(data.description);
+    if (data.requirements !== undefined) updateData.requirements = safeStringCast(data.requirements);
+    if (data.guidelines !== undefined) {
+      updateData.guidelines = safeStringOrNullCast(data.guidelines);
+    }
+  }
 
-    if (title !== undefined) updateData.title = String(title);
-    if (description !== undefined) updateData.description = String(description);
-    if (requirements !== undefined) updateData.requirements = String(requirements);
-    if (guidelines !== undefined) updateData.guidelines = guidelines ? String(guidelines) : null;
-    if (totalBudgetPaise !== undefined) updateData.totalBudget = Number(totalBudgetPaise);
-    if (perInfluencerBudgetPaise !== undefined)
-      updateData.perInfluencerBudget = perInfluencerBudgetPaise ? Number(perInfluencerBudgetPaise) : null;
-    if (data.maxInfluencers !== undefined)
-      updateData.maxInfluencers = data.maxInfluencers ? Number(data.maxInfluencers) : null;
+  private static buildTargetAudienceUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
     if (data.targetCategories !== undefined) updateData.targetCategories = data.targetCategories as string[];
     if (data.targetCities !== undefined) updateData.targetCities = data.targetCities as string[];
     if (data.targetLanguages !== undefined) updateData.targetLanguages = data.targetLanguages as string[];
-    if (data.targetGender !== undefined)
-      updateData.targetGender = data.targetGender ? String(data.targetGender) : null;
-    if (data.targetAgeMin !== undefined)
+    if (data.targetGender !== undefined) {
+      updateData.targetGender = safeStringOrNullCast(data.targetGender);
+    }
+    if (data.targetAgeMin !== undefined) {
       updateData.targetAgeMin = data.targetAgeMin !== null && data.targetAgeMin !== undefined ? Number(data.targetAgeMin) : null;
-    if (data.targetAgeMax !== undefined)
+    }
+    if (data.targetAgeMax !== undefined) {
       updateData.targetAgeMax = data.targetAgeMax !== null && data.targetAgeMax !== undefined ? Number(data.targetAgeMax) : null;
+    }
     if (data.minFollowers !== undefined) updateData.minFollowers = Number(data.minFollowers);
-    if (data.maxFollowers !== undefined)
+    if (data.maxFollowers !== undefined) {
       updateData.maxFollowers = Number(data.maxFollowers) > 0 ? Number(data.maxFollowers) : null;
-    if (data.minEngagementRate !== undefined)
+    }
+    if (data.minEngagementRate !== undefined) {
       updateData.minEngagementRate = data.minEngagementRate ? Number(data.minEngagementRate) : null;
-    if (data.deliverables !== undefined)
-      updateData.deliverables = data.deliverables as Prisma.InputJsonValue;
-    if (data.applicationDeadline !== undefined)
-      updateData.applicationDeadline = data.applicationDeadline ? new Date(data.applicationDeadline as string) : null;
-    if (data.contentDeadline !== undefined)
-      updateData.contentDeadline = new Date(data.contentDeadline as string);
-    if (data.postingDeadline !== undefined)
-      updateData.postingDeadline = new Date(data.postingDeadline as string);
-    if (requiresProduct !== undefined) updateData.requiresProduct = Boolean(requiresProduct);
-    if (productName !== undefined) updateData.productName = String(productName);
-    if (productValuePaise !== undefined) updateData.productValue = Number(productValuePaise);
-    if (productDescription !== undefined) updateData.productDescription = String(productDescription);
+    }
+  }
 
+  private static buildBudgetAndTimelineUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
+    if (data.totalBudget !== undefined) updateData.totalBudget = Number(data.totalBudget);
+    if (data.perInfluencerBudget !== undefined) {
+      updateData.perInfluencerBudget = data.perInfluencerBudget ? Number(data.perInfluencerBudget) : null;
+    }
+    if (data.maxInfluencers !== undefined) {
+      updateData.maxInfluencers = data.maxInfluencers ? Number(data.maxInfluencers) : null;
+    }
+    if (data.deliverables !== undefined) updateData.deliverables = data.deliverables as Prisma.InputJsonValue;
+    if (data.applicationDeadline !== undefined) {
+      updateData.applicationDeadline = data.applicationDeadline ? new Date(data.applicationDeadline as string) : null;
+    }
+    if (data.contentDeadline !== undefined) updateData.contentDeadline = new Date(data.contentDeadline as string);
+    if (data.postingDeadline !== undefined) updateData.postingDeadline = new Date(data.postingDeadline as string);
+  }
+
+  private static buildProductSeedingUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
+    if (data.requiresProduct !== undefined) updateData.requiresProduct = Boolean(data.requiresProduct);
+    if (data.productName !== undefined) {
+      updateData.productName = safeStringCast(data.productName);
+    }
+    if (data.productValue !== undefined) updateData.productValue = Number(data.productValue);
+    if (data.productDescription !== undefined) {
+      updateData.productDescription = safeStringCast(data.productDescription);
+    }
+  }
+
+  private static buildCampaignUpdatePayload(data: Record<string, unknown>): Prisma.CampaignUpdateInput {
+    const updateData: Prisma.CampaignUpdateInput = {};
+    this.buildBasicInfoUpdate(data, updateData);
+    this.buildTargetAudienceUpdate(data, updateData);
+    this.buildBudgetAndTimelineUpdate(data, updateData);
+    this.buildProductSeedingUpdate(data, updateData);
     return updateData;
   }
 

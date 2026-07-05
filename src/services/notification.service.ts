@@ -67,7 +67,7 @@ export class NotificationService {
   static async createNotification(
     data: {
       userId: string;
-      type: NotificationType | string;
+      type: NotificationType | (string & {});
       title: string;
       message: string;
       data?: Record<string, unknown>;
@@ -90,7 +90,7 @@ export class NotificationService {
   static async createNotifications(
     data: Array<{
       userId: string;
-      type: NotificationType | string;
+      type: NotificationType | (string & {});
       title: string;
       message: string;
       data?: Record<string, unknown>;

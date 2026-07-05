@@ -159,7 +159,7 @@ export function apiWrapper(handler: ApiHandler, options?: ApiWrapperOptions) {
       const sqlInjectionPattern =
         /(?:^|[^a-zA-Z])(?:union\s+select|drop\s+table|insert\s+into|delete\s+from|alter\s+table|;\s*--)|(?:\/\*|\*\/)/i;
       const pathTraversalPattern = /(?:\.\.\/|\.\.\\|etc\/passwd|boot\.ini)/i;
-      const cmdInjectionPattern = /[;|&\`]\ (?:[{}]|eval|exec|system)/i;
+      const cmdInjectionPattern = /[;|&`] (?:[{}]|eval|exec|system)/i;
       const scannerPattern = /(?:\/wp-admin|\.env|\.git|phpinfo)/i;
 
       if (

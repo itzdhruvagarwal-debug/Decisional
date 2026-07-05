@@ -92,14 +92,147 @@ async function _handler_POST(
 // Wrapped handlers via apiWrapper
 export const POST = apiWrapper(_handler_POST);
 
+async function processPayoutAndPlatformFees(
+  tx: Prisma.TransactionClient,
+  deal: any,
+  cancelSummary: any,
+) {
+  const { payoutAmount, platformFeeKept, reason } = cancelSummary;
+  if (payoutAmount <= 0) return;
+
+  const grossPayout = payoutAmount - platformFeeKept;
+  if (grossPayout > 0) {
+    // Credit influencer payout
+    await creditInfluencerPayoutWithTax(tx, {
+      userId: deal.influencer.userId,
+      dealId: deal.id,
+      grossPayout,
+      description: `Cancellation payout: ${reason}`,
+      metadata: {
+        source: "wallet_cancellation_payout",
+      },
+    });
+  } else {
+    logger.warn("Cancellation payout resulted in zero or negative gross payout for influencer", {
+      dealId: deal.id,
+      influencerId: deal.influencer.userId,
+      payoutAmount,
+      platformFeeKept,
+      grossPayout,
+    });
+  }
+
+  if (platformFeeKept > 0) {
+    if (deal.brand?.userId) {
+      const brandWallet = await tx.wallet.upsert({
+        where: { userId: deal.brand.userId },
+        create: { userId: deal.brand.userId, balance: 0, pendingBalance: 0 },
+        update: {},
+      });
+
+      await tx.transaction.create({
+        data: {
+          walletId: brandWallet.id,
+          dealId: deal.id,
+          type: "PLATFORM_FEE",
+          amount: platformFeeKept,
+          status: "COMPLETED",
+          description: `Platform cancellation fee for deal: ${deal.id}`,
+          metadata: {
+            balanceImpact: false,
+            source: "wallet_cancellation_fee",
+            grossDealAmount: deal.amount,
+            payoutAmount,
+            platformFeeKept,
+          },
+        },
+      });
+    }
+
+    // Credit the PLATFORM_TREASURY wallet
+    await ensurePlatformTreasury(tx);
+    const treasuryWallet = await tx.wallet.update({
+      where: { userId: "PLATFORM_TREASURY" },
+      data: { balance: { increment: platformFeeKept } },
+    });
+
+    await tx.transaction.create({
+      data: {
+        walletId: treasuryWallet.id,
+        dealId: deal.id,
+        type: "CREDIT",
+        amount: platformFeeKept,
+        status: "COMPLETED",
+        description: `Platform fee income from cancellation credited to treasury for deal: ${deal.id}`,
+        metadata: {
+          source: "wallet_cancellation_fee",
+          brandUserId: deal.brand?.userId,
+        },
+      },
+    });
+  }
+}
+
+async function processBrandCancellationRefund(
+  tx: Prisma.TransactionClient,
+  deal: any,
+  cancelSummary: any,
+) {
+  const { refundAmount, reason } = cancelSummary;
+  if (!deal.brand?.userId) return;
+
+  let brandWallet = await tx.wallet.findUnique({
+    where: { userId: deal.brand.userId },
+  });
+
+  if (brandWallet) {
+    const updateData = deal.reservedFromWallet
+      ? {
+          balance: { increment: refundAmount },
+          pendingBalance: { decrement: deal.totalAmount ?? deal.amount },
+        }
+      : {
+          pendingBalance: { decrement: deal.totalAmount ?? deal.amount },
+        };
+
+    brandWallet = await tx.wallet.update({
+      where: { id: brandWallet.id },
+      data: updateData,
+    });
+  } else {
+    brandWallet = await tx.wallet.create({
+      data: {
+        userId: deal.brand.userId,
+        balance: deal.reservedFromWallet ? refundAmount : 0,
+        pendingBalance: 0,
+      },
+    });
+  }
+
+  if (refundAmount > 0) {
+    await tx.transaction.create({
+      data: {
+        walletId: brandWallet.id,
+        dealId: deal.id,
+        type: "REFUND",
+        amount: refundAmount,
+        status: "COMPLETED",
+        description: `Cancellation refund: ${reason}`,
+        metadata: {
+          balanceImpact: deal.reservedFromWallet,
+          source: "wallet_cancellation_refund",
+        },
+      },
+    });
+  }
+}
+
 async function executeCancellationTransaction(
   tx: Prisma.TransactionClient,
   deal: any,
   cancelSummary: any,
   sessionUserId: string,
 ) {
-  const { payoutAmount, refundAmount, platformFeeKept, reason } = cancelSummary;
-
   const cancelResult = await tx.deal.updateMany({
     where: {
       id: deal.id,
@@ -123,125 +256,6 @@ async function executeCancellationTransaction(
     },
   });
 
-  // Wallet-funded deal
-  if (payoutAmount > 0) {
-    const grossPayout = payoutAmount - platformFeeKept;
-    if (grossPayout > 0) {
-      // Credit influencer payout
-      await creditInfluencerPayoutWithTax(tx, {
-        userId: deal.influencer.userId,
-        dealId: deal.id,
-        grossPayout,
-        description: `Cancellation payout: ${reason}`,
-        metadata: {
-          source: "wallet_cancellation_payout",
-        },
-      });
-    } else {
-      logger.warn("Cancellation payout resulted in zero or negative gross payout for influencer", {
-        dealId: deal.id,
-        influencerId: deal.influencer.userId,
-        payoutAmount,
-        platformFeeKept,
-        grossPayout,
-      });
-    }
-
-    if (platformFeeKept > 0) {
-      if (deal.brand?.userId) {
-        const brandWallet = await tx.wallet.upsert({
-          where: { userId: deal.brand.userId },
-          create: { userId: deal.brand.userId, balance: 0, pendingBalance: 0 },
-          update: {},
-        });
-
-        await tx.transaction.create({
-          data: {
-            walletId: brandWallet.id,
-            dealId: deal.id,
-            type: "PLATFORM_FEE",
-            amount: platformFeeKept,
-            status: "COMPLETED",
-            description: `Platform cancellation fee for deal: ${deal.id}`,
-            metadata: {
-              balanceImpact: false,
-              source: "wallet_cancellation_fee",
-              grossDealAmount: deal.amount,
-              payoutAmount,
-              platformFeeKept,
-            },
-          },
-        });
-      }
-
-      // Credit the PLATFORM_TREASURY wallet
-      await ensurePlatformTreasury(tx);
-      const treasuryWallet = await tx.wallet.update({
-        where: { userId: "PLATFORM_TREASURY" },
-        data: { balance: { increment: platformFeeKept } },
-      });
-
-      await tx.transaction.create({
-        data: {
-          walletId: treasuryWallet.id,
-          dealId: deal.id,
-          type: "CREDIT",
-          amount: platformFeeKept,
-          status: "COMPLETED",
-          description: `Platform fee income from cancellation credited to treasury for deal: ${deal.id}`,
-          metadata: {
-            source: "wallet_cancellation_fee",
-            brandUserId: deal.brand?.userId,
-          },
-        },
-      });
-    }
-  }
-
-  if (deal.brand?.userId) {
-    let brandWallet = await tx.wallet.findUnique({
-      where: { userId: deal.brand.userId },
-    });
-
-    if (brandWallet) {
-      const updateData = deal.reservedFromWallet
-        ? {
-            balance: { increment: refundAmount },
-            pendingBalance: { decrement: deal.totalAmount ?? deal.amount },
-          }
-        : {
-            pendingBalance: { decrement: deal.totalAmount ?? deal.amount },
-          };
-
-      brandWallet = await tx.wallet.update({
-        where: { id: brandWallet.id },
-        data: updateData,
-      });
-    } else {
-      brandWallet = await tx.wallet.create({
-        data: {
-          userId: deal.brand.userId,
-          balance: deal.reservedFromWallet ? refundAmount : 0,
-          pendingBalance: 0,
-        },
-      });
-    }
-
-    if (refundAmount > 0) {
-      await tx.transaction.create({
-        data: {
-          walletId: brandWallet.id,
-          dealId: deal.id,
-          type: "REFUND",
-          amount: refundAmount,
-          status: "COMPLETED",
-          description: `Cancellation refund: ${reason}`,
-          metadata: {
-            balanceImpact: deal.reservedFromWallet,
-            source: "wallet_cancellation_refund",
-          },
-        },
-      });
-    }
-  }
+  await processPayoutAndPlatformFees(tx, deal, cancelSummary);
+  await processBrandCancellationRefund(tx, deal, cancelSummary);
 }

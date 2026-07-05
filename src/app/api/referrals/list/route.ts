@@ -82,9 +82,14 @@ async function _handler_GET(req: NextRequest) {
       const emailParts = ref.email.split("@");
       const part1 = emailParts[0];
       const part2 = emailParts[1];
-      const maskedEmail = (part1 && part2)
-        ? (part1.length <= 2 ? `${part1}***@${part2}` : `${part1.slice(0, 2)}***@${part2}`)
-        : ref.email;
+      let maskedEmail = ref.email;
+      if (part1 && part2) {
+        if (part1.length <= 2) {
+          maskedEmail = `${part1}***@${part2}`;
+        } else {
+          maskedEmail = `${part1.slice(0, 2)}***@${part2}`;
+        }
+      }
 
       return {
         id: ref.id,

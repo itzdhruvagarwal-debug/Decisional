@@ -75,18 +75,21 @@ async function releaseWalletHold(
 
   if (finalAmount <= 0) return;
 
+  let updateData = {};
+  if (mode === "INCREMENT_PENDING") {
+    updateData = { pendingBalance: { increment: finalAmount } };
+  } else if (mode === "INCREMENT_BALANCE") {
+    updateData = { balance: { increment: finalAmount } };
+  } else {
+    updateData = {
+      pendingBalance: { decrement: finalAmount },
+      balance: { increment: finalAmount },
+    };
+  }
+
   await tx.wallet.update({
     where: { id: wallet.id },
-    data: {
-      ...(mode === "INCREMENT_PENDING"
-        ? { pendingBalance: { increment: finalAmount } }
-        : mode === "INCREMENT_BALANCE"
-        ? { balance: { increment: finalAmount } }
-        : {
-            pendingBalance: { decrement: finalAmount },
-            balance: { increment: finalAmount },
-          }),
-    },
+    data: updateData,
   });
 
   await tx.transaction.create({
@@ -813,7 +816,7 @@ export class DealService {
 
     let currentUrls: Array<{ type: string; url: string; status: string; feedback: string }> = [];
     if (latestSubmission.contentUrls) {
-      currentUrls = JSON.parse(JSON.stringify(latestSubmission.contentUrls));
+      currentUrls = structuredClone(latestSubmission.contentUrls);
     } else {
       currentUrls = [
         {

@@ -147,6 +147,79 @@ async function handleSendNewAction(userId: string, type?: "email" | "phone", new
     return ApiResponse.success(null, `OTP sent to new ${type}`);
 }
 
+async function validateNewOtp(
+    userId: string,
+    type: "email" | "phone",
+    newContact: string,
+    newOtp: string
+): Promise<{ success: boolean; errorResponse?: any }> {
+    if (type === 'email') {
+        const newEmailOtpKey = `contact_change_new_email_otp_${userId}`;
+        const storedHash = await redis.get(newEmailOtpKey);
+        if (!storedHash) {
+            return { success: false };
+        }
+        const submittedHash = createHash("sha256").update(newOtp).digest("hex");
+        try {
+            const { timingSafeEqual } = await import("node:crypto");
+            const storedBuffer = Buffer.from(storedHash, "utf8");
+            const submittedBuffer = Buffer.from(submittedHash, "utf8");
+            if (storedBuffer.length === submittedBuffer.length) {
+                const isValid = timingSafeEqual(storedBuffer, submittedBuffer);
+                return { success: isValid };
+            }
+        } catch {
+            return { success: false };
+        }
+        return { success: false };
+    } else {
+        const normalizedPhone = normalizeIndianPhone(newContact);
+        if (!normalizedPhone) {
+            return { success: false, errorResponse: ApiResponse.error("Invalid Indian phone number format") };
+        }
+        const phoneVerifyResult = await verifyPhoneOTP(
+            normalizedPhone,
+            newOtp,
+            { purpose: `contact_change:${userId}:new_phone` },
+        );
+        return { success: phoneVerifyResult.success };
+    }
+}
+
+async function getContactUpdateData(
+    userId: string,
+    type: "email" | "phone",
+    newContact: string
+): Promise<{ success: boolean; updateData?: any; errorResponse?: any }> {
+    const updateData: { email?: string; emailVerified?: boolean; phone?: string; phoneVerified?: boolean } = {};
+    if (type === 'email') {
+        const existing = await prisma.user.findUnique({
+            where: { email: newContact.toLowerCase().trim() },
+            select: { id: true },
+        });
+        if (existing && existing.id !== userId) {
+            return { success: false, errorResponse: ApiResponse.conflict("Contact is already in use") };
+        }
+        updateData.email = newContact;
+        updateData.emailVerified = true;
+    } else {
+        const normalizedPhone = normalizeIndianPhone(newContact);
+        if (!normalizedPhone) {
+            return { success: false, errorResponse: ApiResponse.error("Invalid Indian phone number format") };
+        }
+        const existing = await prisma.user.findUnique({
+            where: { phone: normalizedPhone },
+            select: { id: true },
+        });
+        if (existing && existing.id !== userId) {
+            return { success: false, errorResponse: ApiResponse.conflict("Contact is already in use") };
+        }
+        updateData.phone = normalizedPhone;
+        updateData.phoneVerified = true;
+    }
+    return { success: true, updateData };
+}
+
 async function handleConfirmNewAction(
     userId: string,
     type?: "email" | "phone",
@@ -158,67 +231,19 @@ async function handleConfirmNewAction(
     if (!isAuthorized) return ApiResponse.forbidden("Session expired or unauthorized");
     if (!type || !newContact || !newOtp) return ApiResponse.error("Missing required fields");
 
-    let isValidNewOtp = false;
-    const newEmailOtpKey = `contact_change_new_email_otp_${userId}`;
-
-    if (type === 'email') {
-        const storedHash = await redis.get(newEmailOtpKey);
-        if (storedHash) {
-            const submittedHash = createHash("sha256").update(newOtp).digest("hex");
-            try {
-                const { timingSafeEqual } = await import("node:crypto");
-                const storedBuffer = Buffer.from(storedHash, "utf8");
-                const submittedBuffer = Buffer.from(submittedHash, "utf8");
-                if (storedBuffer.length === submittedBuffer.length) {
-                    isValidNewOtp = timingSafeEqual(storedBuffer, submittedBuffer);
-                }
-            } catch {
-                isValidNewOtp = false;
-            }
-        }
-    } else {
-        const normalizedPhone = normalizeIndianPhone(newContact);
-        if (!normalizedPhone) {
-            return ApiResponse.error("Invalid Indian phone number format");
-        }
-        const phoneVerifyResult = await verifyPhoneOTP(
-            normalizedPhone,
-            newOtp,
-            { purpose: `contact_change:${userId}:new_phone` },
-        );
-        isValidNewOtp = phoneVerifyResult.success;
-    }
-
-    if (!isValidNewOtp) {
+    const otpValidation = await validateNewOtp(userId, type, newContact, newOtp);
+    if (otpValidation.errorResponse) return otpValidation.errorResponse;
+    if (!otpValidation.success) {
         return ApiResponse.error("Invalid OTP for new contact");
     }
 
-    const updateData: { email?: string; emailVerified?: boolean; phone?: string; phoneVerified?: boolean } = {};
-    if (type === 'email') {
-        const existing = await prisma.user.findUnique({
-            where: { email: newContact.toLowerCase().trim() },
-            select: { id: true },
-        });
-        if (existing && existing.id !== userId) {
-            return ApiResponse.conflict("Contact is already in use");
-        }
-        updateData.email = newContact;
-        updateData.emailVerified = true;
-    } else {
-        const normalizedPhone = normalizeIndianPhone(newContact);
-        if (!normalizedPhone) {
-            return ApiResponse.error("Invalid Indian phone number format");
-        }
-        const existing = await prisma.user.findUnique({
-            where: { phone: normalizedPhone },
-            select: { id: true },
-        });
-        if (existing && existing.id !== userId) {
-            return ApiResponse.conflict("Contact is already in use");
-        }
-        updateData.phone = normalizedPhone;
-        updateData.phoneVerified = true;
+    const updateCheck = await getContactUpdateData(userId, type, newContact);
+    if (updateCheck.errorResponse) return updateCheck.errorResponse;
+    if (!updateCheck.success || !updateCheck.updateData) {
+        return ApiResponse.error("Failed to process contact change update data");
     }
+
+    const updateData = updateCheck.updateData;
 
     await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         await tx.user.update({
@@ -237,6 +262,7 @@ async function handleConfirmNewAction(
         }, tx);
     });
 
+    const newEmailOtpKey = `contact_change_new_email_otp_${userId}`;
     await redis.del(authKey);
     await redis.del(`active_session:${userId}`);
     if (type === 'email') await redis.del(newEmailOtpKey);
