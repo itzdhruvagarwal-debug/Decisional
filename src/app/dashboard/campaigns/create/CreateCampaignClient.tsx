@@ -1,0 +1,997 @@
+"use client";
+
+
+import { logger } from "@/lib/logger-client";
+import { useState, useEffect } from "react";
+import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button, Input, Select, Textarea, Card } from "@/components/ui";
+import { createCampaignSchema } from "@/lib/validations/campaign";
+
+export interface CampaignFormData {
+  title: string;
+  description: string;
+  requirements: string;
+  totalBudget: number;
+  perInfluencerBudget: number;
+  targetCategories: string[];
+  targetCities: string[];
+  targetGender: string;
+  targetAgeMin: number | null;
+  targetAgeMax: number | null;
+  minFollowers: number;
+  maxFollowers: number | null;
+  maxInfluencers: number | null;
+  applicationDeadline: string;
+  contentDeadline: string;
+  postingDeadline: string;
+  requiresProduct: boolean;
+  productName: string;
+  productValue: number;
+  productDescription: string;
+  deliverables: Array<{ type: string; count: number; rate: number }>;
+}
+
+function validateCampaignForm(formData: CampaignFormData) {
+  const result = createCampaignSchema.safeParse({
+    title: formData.title.trim(),
+    description: formData.description.trim(),
+    perInfluencerBudget: formData.perInfluencerBudget,
+    maxInfluencers: formData.maxInfluencers ?? 1,
+    minFollowers: formData.minFollowers,
+    targetCategories: formData.targetCategories,
+    applicationDeadline: formData.applicationDeadline,
+    postingDeadline: formData.postingDeadline,
+  });
+
+  if (!result.success) {
+    throw new Error(result.error.issues[0]?.message || "Invalid campaign details");
+  }
+
+  if (formData.requiresProduct && formData.totalBudget === 0) {
+    if (formData.productValue < 500) {
+      throw new Error("Product-only campaigns must specify a product value of at least ₹500");
+    }
+    if (formData.minFollowers > 10000) {
+      throw new Error("Product-only campaigns can only target influencers with up to 10,000 followers");
+    }
+  }
+  if (formData.targetCategories.length === 0) {
+    throw new Error("Please select at least one category");
+  }
+  if (formData.perInfluencerBudget > formData.totalBudget) {
+    throw new Error("Per influencer budget cannot exceed total budget");
+  }
+  if (formData.maxFollowers !== null && formData.maxFollowers > 0 && formData.maxFollowers < formData.minFollowers) {
+    throw new Error("Max followers must be greater than min followers");
+  }
+  if (!formData.contentDeadline || !formData.postingDeadline) {
+    throw new Error("Please select content and posting deadlines");
+  }
+}
+
+interface DraftCampaignData {
+  status?: string;
+  title?: string;
+  description?: string;
+  requirements?: string;
+  totalBudget?: number;
+  perInfluencerBudget?: number;
+  targetCategories?: string[];
+  targetCities?: string[];
+  targetGender?: string;
+  targetAgeMin?: number | null;
+  targetAgeMax?: number | null;
+  minFollowers?: number;
+  maxFollowers?: number | null;
+  maxInfluencers?: number | null;
+  applicationDeadline?: string;
+  contentDeadline?: string;
+  postingDeadline?: string;
+  requiresProduct?: boolean;
+  productName?: string;
+  productValue?: number;
+  productDescription?: string;
+  deliverables?: Array<{ type: string; count: number; rate?: number }>;
+}
+
+interface DraftCampaignResponse {
+  campaign?: DraftCampaignData;
+  data?: { campaign?: DraftCampaignData };
+}
+
+export default function CreateCampaignClient() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const invitedInfluencerId = searchParams.get("invite");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [invitedInfluencer, setInvitedInfluencer] = useState<{
+    displayName: string;
+    instagramHandle?: string;
+    youtubeHandle?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!invitedInfluencerId) return;
+    const fetchInfluencer = async () => {
+      try {
+        const res = await fetch(`/api/influencers/${invitedInfluencerId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.influencer) {
+            setInvitedInfluencer(data.influencer);
+          }
+        }
+      } catch (err) {
+        logger.error("[campaign-create] Failed to fetch invited influencer details:", err);
+      }
+    };
+    fetchInfluencer();
+  }, [invitedInfluencerId]);
+
+  const editCampaignId = searchParams.get("edit");
+
+  const { data: draftData } = useSWR<DraftCampaignResponse>(
+    editCampaignId ? `/api/campaigns/${editCampaignId}` : null,
+    fetcher
+  );
+
+  useEffect(() => {
+    if (!draftData) return;
+    const campaign: DraftCampaignData | undefined = draftData.campaign || draftData.data?.campaign;
+    if (campaign?.status === "DRAFT") {
+      const formatDateForInput = (dateStr: string) => {
+        if (!dateStr) return "";
+        return dateStr.split("T")[0] || "";
+      };
+
+      setFormData({
+        title: campaign.title || "",
+        description: campaign.description || "",
+        requirements: campaign.requirements || "",
+        totalBudget: (campaign.totalBudget || 0) / 100,
+        perInfluencerBudget: (campaign.perInfluencerBudget || 0) / 100,
+        targetCategories: campaign.targetCategories || [],
+        targetCities: campaign.targetCities || [],
+        targetGender: campaign.targetGender || "ANY",
+        targetAgeMin: campaign.targetAgeMin ?? null,
+        targetAgeMax: campaign.targetAgeMax ?? null,
+        minFollowers: campaign.minFollowers || 0,
+        maxFollowers: campaign.maxFollowers || null,
+        maxInfluencers: campaign.maxInfluencers || null,
+        applicationDeadline: formatDateForInput(campaign.applicationDeadline || ""),
+        contentDeadline: formatDateForInput(campaign.contentDeadline || ""),
+        postingDeadline: formatDateForInput(campaign.postingDeadline || ""),
+        requiresProduct: campaign.requiresProduct || false,
+        productName: campaign.productName || "",
+        productValue: (campaign.productValue || 0) / 100,
+        productDescription: campaign.productDescription || "",
+        deliverables: (campaign.deliverables || []).map((d: { type: string; count: number; rate?: number }) => ({
+          type: d.type,
+          count: d.count,
+          rate: (d.rate || 0) / 100,
+        })),
+      });
+    }
+  }, [draftData]);
+
+  // Form State
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    requirements: "",
+    totalBudget: 5000,
+    perInfluencerBudget: 1000,
+    targetCategories: [] as string[],
+    targetCities: [] as string[],
+    targetGender: "ANY",
+    targetAgeMin: null as number | null,
+    targetAgeMax: null as number | null,
+    minFollowers: 1000,
+    maxFollowers: null as number | null,
+    maxInfluencers: null as number | null,
+    applicationDeadline: "",
+    contentDeadline: "",
+    postingDeadline: "",
+    requiresProduct: false,
+    productName: "",
+    productValue: 0,
+    productDescription: "",
+    deliverables: [{ type: "INSTAGRAM_POST", count: 1, rate: 1000 }],
+  });
+
+  const [customCategory, setCustomCategory] = useState("");
+  const [categories, setCategories] = useState([
+    "Fashion",
+    "Beauty",
+    "Lifestyle",
+    "Food",
+    "Travel",
+    "Fitness",
+    "Technology",
+    "Gaming",
+    "Entertainment",
+    "Education",
+    "Finance",
+    "Health",
+    "Parenting",
+    "Sports",
+    "Art",
+    "Music",
+    "Automotive",
+    "Pets",
+    "Real Estate",
+    "Business"
+  ]);
+
+  const deliverableTypes = [
+    { value: "INSTAGRAM_POST", label: "Instagram Post" },
+    { value: "INSTAGRAM_REEL", label: "Instagram Reel" },
+    { value: "INSTAGRAM_STORY", label: "Instagram Story" },
+    { value: "YOUTUBE_VIDEO", label: "YouTube Video" },
+    { value: "YOUTUBE_SHORT", label: "YouTube Short" },
+  ];
+
+  const handleCategoryToggle = (cat: string) => {
+    setFormData((prev) => {
+      if (prev.targetCategories.includes(cat)) {
+        return {
+          ...prev,
+          targetCategories: prev.targetCategories.filter((c) => c !== cat),
+        };
+      } else {
+        if (prev.targetCategories.length >= 5) return prev;
+        return { ...prev, targetCategories: [...prev.targetCategories, cat] };
+      }
+    });
+  };
+
+  const handleAddDeliverable = () => {
+    setFormData((prev) => {
+      const type = "INSTAGRAM_POST";
+      const count = 1;
+      const rate = getRecommendedRate(type, prev.minFollowers);
+      return {
+        ...prev,
+        deliverables: [
+          ...prev.deliverables,
+          { type, count, rate },
+        ],
+      };
+    });
+  };
+
+  const handleRemoveDeliverable = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      deliverables: prev.deliverables.filter((_, i) => i !== index),
+    }));
+  };
+
+  const getRecommendedRate = (type: string, minFollowers: number) => {
+    const isYoutube = type.startsWith("YOUTUBE");
+    const multiplier = isYoutube ? 2.5 : 2;
+    const estimatedEngagement = minFollowers * 0.03;
+    const calculated = Math.round(estimatedEngagement * multiplier);
+    const floor = isYoutube ? 750 : 500;
+    return Math.max(floor, Math.round(calculated / 10) * 10);
+  };
+
+  const handleDeliverableChange = (
+    index: number,
+    field: string,
+    value: unknown,
+  ) => {
+    const newDeliverables = [...formData.deliverables] as Array<{ type: string; rate: number; count: number }>;
+    const item = { ...newDeliverables[index]!, [field]: value };
+    
+    // Automatically recalculate recommended rate if type changes
+    if (field === "type" && typeof value === "string") {
+      item.rate = getRecommendedRate(value, formData.minFollowers);
+    }
+    
+    newDeliverables[index] = item;
+    setFormData((prev) => ({ ...prev, deliverables: newDeliverables }));
+  };
+
+  // Auto calculate perInfluencerBudget and totalBudget based on deliverables and maxInfluencers
+  useEffect(() => {
+    const calculatedPerInfluencer = formData.deliverables.reduce(
+      (sum, d: { rate?: number; count?: number }) => sum + (d.rate || 0) * (d.count || 0),
+      0
+    );
+    const calculatedTotal = calculatedPerInfluencer * (formData.maxInfluencers || 1);
+
+    setFormData((prev) => {
+      if (
+        prev.perInfluencerBudget !== calculatedPerInfluencer ||
+        prev.totalBudget !== calculatedTotal
+      ) {
+        return {
+          ...prev,
+          perInfluencerBudget: calculatedPerInfluencer,
+          totalBudget: calculatedTotal,
+        };
+      }
+      return prev;
+    });
+  }, [formData.deliverables, formData.maxInfluencers]);
+
+
+  const handleSubmit = async (e: React.FormEvent, isDraft: boolean = false) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      validateCampaignForm(formData);
+
+      const contentDeadline = new Date(`${formData.contentDeadline}T12:00:00.000Z`);
+      const postingDeadline = new Date(`${formData.postingDeadline}T12:00:00.000Z`);
+      const applicationDeadline = formData.applicationDeadline
+        ? new Date(`${formData.applicationDeadline}T23:59:59.000Z`)
+        : null;
+
+      if (Number.isNaN(contentDeadline.getTime()) || Number.isNaN(postingDeadline.getTime())) {
+        throw new TypeError("Invalid campaign deadlines");
+      }
+      if (postingDeadline < contentDeadline) {
+        throw new Error("Posting deadline must be after content deadline");
+      }
+      if (applicationDeadline && Number.isNaN(applicationDeadline.getTime())) {
+        throw new TypeError("Invalid application deadline");
+      }
+      if (applicationDeadline && applicationDeadline > contentDeadline) {
+        throw new Error("Application deadline must be before content deadline");
+      }
+
+      const url = editCampaignId ? `/api/campaigns/${editCampaignId}` : "/api/campaigns";
+      const method = editCampaignId ? "PUT" : "POST";
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          maxFollowers: formData.maxFollowers || 0,
+          maxInfluencers: formData.maxInfluencers || null,
+          applicationDeadline: applicationDeadline?.toISOString(),
+          contentDeadline: contentDeadline.toISOString(),
+          postingDeadline: postingDeadline.toISOString(),
+          invitedInfluencerId: invitedInfluencerId || undefined,
+          status: isDraft ? "DRAFT" : "ACTIVE",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || "Failed to create campaign");
+      }
+
+      router.push("/dashboard/campaigns");
+      router.refresh();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  let publishButtonContent: React.ReactNode = "Create Campaign";
+  if (isLoading) {
+    publishButtonContent = <span className="loading" />;
+  } else if (editCampaignId) {
+    publishButtonContent = "Save & Publish";
+  }
+
+  return (
+    <div className="w-full" style={{ maxWidth: "800px", margin: "0 auto", paddingBottom: "64px" }}>
+      <h1
+        className="font-black"
+        style={{
+          fontSize: "32px",
+          marginBottom: "8px",
+          background: "var(--gradient-primary)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+        }}
+      >
+        {editCampaignId ? "Edit Draft Campaign" : "Create New Campaign"}
+      </h1>
+      <p
+        className="text-secondary"
+        style={{
+          marginBottom: "32px",
+          fontSize: "16px",
+        }}
+      >
+        {editCampaignId
+          ? "Update your draft campaign details before launching"
+          : "Launch your campaign and connect with influencers"}
+      </p>
+
+      {invitedInfluencer && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "16px 20px",
+            background: "rgba(99, 102, 241, 0.1)",
+            border: "1px solid rgba(99, 102, 241, 0.2)",
+            borderRadius: "16px",
+            marginBottom: "24px",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <div
+            style={{
+              width: "8px",
+              height: "8px",
+              borderRadius: "50%",
+              background: "#6366f1",
+              boxShadow: "0 0 12px #6366f1",
+            }}
+          />
+          <span style={{ fontSize: "15px", fontWeight: 500, color: "var(--color-text-primary)" }}>
+            Inviting: <strong style={{ color: "#6366f1" }}>@{invitedInfluencer.instagramHandle || invitedInfluencer.youtubeHandle || invitedInfluencer.displayName}</strong> ({invitedInfluencer.displayName})
+          </span>
+        </div>
+      )}
+
+      <Card
+        style={{
+          borderRadius: "24px",
+          padding: "32px",
+        }}
+      >
+        {error && (
+          <div
+            style={{
+              padding: "12px 16px",
+              background: "rgba(244, 63, 94, 0.1)",
+              border: "1px solid rgba(244, 63, 94, 0.2)",
+              borderRadius: "var(--radius-md)",
+              color: "var(--color-accent-rose)",
+              marginBottom: "24px",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        <form>
+          {/* Basic Info */}
+          <Input
+            label="Campaign Title"
+            id="campaign-title"
+            type="text"
+            value={formData.title}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
+            required
+            placeholder="e.g. Summer Collection Launch"
+            className="mb-4"
+            fullWidth
+          />
+
+          <Textarea
+            label="Overview / Description"
+            id="campaign-description"
+            value={formData.description}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
+            required
+            placeholder="Describe your campaign goals and brand story..."
+            className="mb-4"
+            fullWidth
+          />
+
+          <Textarea
+            label="Requirements & Guidelines"
+            id="campaign-requirements"
+            value={formData.requirements}
+            onChange={(e) =>
+              setFormData({ ...formData, requirements: e.target.value })
+            }
+            required
+            placeholder="Specific requirements for influencers (e.g. 'Must use #SummerVibes', 'Link in bio')"
+            className="mb-4"
+            fullWidth
+          />
+
+          {/* Target Audience */}
+          <div className="form-group" style={{ marginBottom: "24px" }}>
+            <label
+              className="label"
+              htmlFor="custom-category-input"
+              style={{ color: "var(--color-text-primary)" }}
+            >
+              Target Categories (Select up to 5)
+            </label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
+              {categories.map((cat) => (
+                <Button
+                  key={cat}
+                  type="button"
+                  onClick={() => handleCategoryToggle(cat)}
+                  variant={formData.targetCategories.includes(cat) ? "primary" : "ghost"}
+                  style={{
+                    cursor: "pointer",
+                    background: formData.targetCategories.includes(cat)
+                      ? "var(--gradient-primary)"
+                      : "var(--color-bg-tertiary)",
+                    color: formData.targetCategories.includes(cat)
+                      ? "white"
+                      : "var(--color-text-secondary)",
+                    border: formData.targetCategories.includes(cat)
+                      ? "none"
+                      : "1px solid var(--color-border)",
+                    boxShadow: formData.targetCategories.includes(cat)
+                      ? "0 4px 16px rgba(99, 102, 241, 0.4)"
+                      : "none",
+                    padding: "8px 16px",
+                    fontSize: "13px",
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  {cat}
+                </Button>
+              ))}
+            </div>
+
+            <div className="flex gap-2 items-center">
+              <Input
+                id="custom-category-input"
+                type="text"
+                placeholder="Enter custom category..."
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+                style={{
+                  maxWidth: "200px"
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (customCategory.trim() && !categories.includes(customCategory.trim())) {
+                      setCategories(prev => [...prev, customCategory.trim()]);
+                      handleCategoryToggle(customCategory.trim());
+                      setCustomCategory("");
+                    }
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  if (customCategory.trim() && !categories.includes(customCategory.trim())) {
+                    setCategories(prev => [...prev, customCategory.trim()]);
+                    handleCategoryToggle(customCategory.trim());
+                    setCustomCategory("");
+                  }
+                }}
+              >
+                Add Category
+              </Button>
+            </div>
+          </div>
+
+          <Input
+            label="Application Deadline (Optional)"
+            id="application-deadline"
+            type="date"
+            value={formData.applicationDeadline}
+            onChange={(e) =>
+              setFormData({ ...formData, applicationDeadline: e.target.value })
+            }
+            className="mb-4"
+            fullWidth
+            style={{
+              colorScheme: "dark",
+            }}
+          />
+
+          <div className="grid-2 gap-4 mb-4">
+            <Input
+              label="Target Cities (Comma Separated)"
+              id="target-cities"
+              type="text"
+              placeholder="e.g. Mumbai, Delhi"
+              value={formData.targetCities.join(", ")}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  targetCities: e.target.value.split(",").map(c => c.trim()).filter(Boolean),
+                })
+              }
+              fullWidth
+            />
+            <Select
+              label="Target Gender"
+              id="target-gender"
+              value={formData.targetGender}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  targetGender: e.target.value,
+                })
+              }
+              fullWidth
+            >
+              <option value="ANY">Any</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+            </Select>
+          </div>
+
+          <div className="grid-2 gap-4 mb-4">
+            <Input
+              label="Min Target Age"
+              id="target-age-min"
+              type="number"
+              placeholder="e.g. 18"
+              value={formData.targetAgeMin || ""}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  targetAgeMin: e.target.value ? Number.parseInt(e.target.value, 10) : null,
+                })
+              }
+              min={13}
+              fullWidth
+            />
+            <Input
+              label="Max Target Age"
+              id="target-age-max"
+              type="number"
+              placeholder="e.g. 35"
+              value={formData.targetAgeMax || ""}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  targetAgeMax: e.target.value ? Number.parseInt(e.target.value, 10) : null,
+                })
+              }
+              min={13}
+              fullWidth
+            />
+          </div>
+
+          <div className="mb-4" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+            <Input
+              label="Min Followers Req."
+              id="min-followers"
+              type="number"
+              value={formData.minFollowers}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  minFollowers: Number.parseInt(e.target.value, 10) || 0,
+                })
+              }
+              min={100}
+              fullWidth
+            />
+            <Input
+              label="Max Followers Req. (Optional)"
+              id="max-followers"
+              type="number"
+              value={formData.maxFollowers === null ? "" : formData.maxFollowers}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  maxFollowers: e.target.value ? Number.parseInt(e.target.value, 10) : null,
+                })
+              }
+              min={1000}
+              placeholder="No limit"
+              fullWidth
+            />
+            <Input
+              label="Max Influencer Slots"
+              id="max-influencers"
+              type="number"
+              value={formData.maxInfluencers === null ? "" : formData.maxInfluencers}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  maxInfluencers: e.target.value ? Number.parseInt(e.target.value, 10) : null,
+                })
+              }
+              min={1}
+              max={100}
+              placeholder="Unlimited"
+              fullWidth
+            />
+          </div>
+
+          {/* Budget & Timeline */}
+          <div className="grid-2 gap-4 mb-4">
+            <Input
+              label="Total Budget (Rs)"
+              id="total-budget"
+              type="number"
+              value={formData.totalBudget}
+              readOnly
+              disabled
+              required
+              min={formData.requiresProduct ? 0 : 1000}
+              fullWidth
+              style={{
+                background: "var(--color-bg-tertiary)",
+                cursor: "not-allowed",
+                color: "var(--color-text-secondary)",
+              }}
+            />
+            <Input
+              label="Budget Per Influencer (Approx Rs)"
+              id="per-influencer-budget"
+              type="number"
+              value={formData.perInfluencerBudget}
+              readOnly
+              disabled
+              required
+              min={formData.requiresProduct ? 0 : 500}
+              fullWidth
+              style={{
+                background: "var(--color-bg-tertiary)",
+                cursor: "not-allowed",
+                color: "var(--color-text-secondary)",
+              }}
+            />
+          </div>
+
+          <div className="grid-2 gap-4 mb-4">
+            <Input
+              label="Content Deadline"
+              id="content-deadline"
+              type="date"
+              value={formData.contentDeadline}
+              onChange={(e) =>
+                setFormData({ ...formData, contentDeadline: e.target.value })
+              }
+              required
+              fullWidth
+              style={{
+                colorScheme: "dark",
+              }}
+            />
+            <Input
+              label="Posting Deadline"
+              id="posting-deadline"
+              type="date"
+              value={formData.postingDeadline}
+              onChange={(e) =>
+                setFormData({ ...formData, postingDeadline: e.target.value })
+              }
+              required
+              fullWidth
+              style={{
+                colorScheme: "dark",
+              }}
+            />
+          </div>
+
+          <Card
+            className="mb-4"
+            style={{
+              padding: "20px",
+              background: "var(--color-bg-tertiary)",
+              border: "1px dashed var(--color-border)",
+            }}
+          >
+            <div
+              className="flex items-center justify-between"
+              style={{
+                marginBottom: formData.requiresProduct ? "16px" : "0",
+              }}
+            >
+              <div>
+                <h3
+                  style={{
+                    color: "var(--color-text-primary)",
+                    fontSize: "16px",
+                    fontWeight: 600,
+                  }}
+                >
+                  Product Seeding (Barter / Logistics)
+                </h3>
+                <p
+                  style={{
+                    color: "var(--color-text-secondary)",
+                    fontSize: "13px",
+                    marginTop: "4px",
+                  }}
+                >
+                  Do you need to ship a physical product to the influencer?
+                </p>
+              </div>
+              <label className="switch" aria-label="Requires physical product seeding">
+                <Input
+                  type="checkbox"
+                  checked={formData.requiresProduct}
+                  onChange={(e) =>
+                    setFormData({ ...formData, requiresProduct: e.target.checked })
+                  }
+                />
+                <span className="slider round"></span>
+                <span className="sr-only">Requires physical product seeding</span>
+              </label>
+            </div>
+
+            {formData.requiresProduct && (
+              <div style={{ marginTop: "16px" }}>
+                <div className="grid-2 gap-4 mb-3">
+                  <Input
+                    label="Product Name"
+                    id="product-name"
+                    type="text"
+                    value={formData.productName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, productName: e.target.value })
+                    }
+                    required={formData.requiresProduct}
+                    placeholder="e.g. Glowing Skin Serum 50ml"
+                    fullWidth
+                  />
+                  <Input
+                    label="Product Value (Rs)"
+                    id="product-value"
+                    type="number"
+                    value={formData.productValue}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        productValue: Number.parseInt(e.target.value, 10) || 0,
+                      })
+                    }
+                    min={0}
+                    placeholder="e.g. 1500"
+                    fullWidth
+                  />
+                </div>
+                <Textarea
+                  label="Logistics / Shipping Instructions"
+                  id="product-description"
+                  value={formData.productDescription}
+                  onChange={(e) =>
+                    setFormData({ ...formData, productDescription: e.target.value })
+                  }
+                  placeholder="Provide any details about the product and shipping timelines..."
+                  fullWidth
+                />
+              </div>
+            )}
+          </Card>
+
+          {/* Deliverables */}
+          <div className="form-group mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <div className="label">Deliverables Required</div>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleAddDeliverable}
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  padding: "4px 8px"
+                }}
+              >
+                + Add Deliverable
+              </Button>
+            </div>
+
+            {formData.deliverables.map((item, index) => (
+              <div
+                key={`deliv-${item.type}-${index}`}
+                className="flex gap-3 items-center mb-2"
+              >
+                <Select
+                  value={item.type}
+                  onChange={(e) =>
+                    handleDeliverableChange(index, "type", e.target.value)
+                  }
+                  style={{ flex: 2 }}
+                >
+                  {deliverableTypes.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </Select>
+                
+                <Input
+                  type="number"
+                  value={item.count}
+                  onChange={(e) =>
+                    handleDeliverableChange(
+                      index,
+                      "count",
+                      Number.parseInt(e.target.value, 10) || 1,
+                    )
+                  }
+                  min={1}
+                  max={10}
+                  style={{ width: "80px" }}
+                />
+                
+                <span className="text-secondary text-sm">
+                  qty
+                </span>
+                
+                <div className="flex flex-col gap-1">
+                  <Input
+                    type="number"
+                    value={item.rate || ""}
+                    onChange={(e) =>
+                      handleDeliverableChange(
+                        index,
+                        "rate",
+                        Number.parseInt(e.target.value, 10) || 0,
+                      )
+                    }
+                    min={0}
+                    placeholder="Rate (Rs)"
+                    style={{ width: "110px" }}
+                  />
+                  <span style={{ fontSize: "10px", color: "var(--color-text-muted)", whiteSpace: "nowrap" }}>
+                    Rec: ₹{getRecommendedRate(item.type, formData.minFollowers).toLocaleString("en-IN")}
+                  </span>
+                </div>
+                
+                {formData.deliverables.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => handleRemoveDeliverable(index)}
+                    style={{
+                      color: "var(--color-accent-rose)",
+                      fontSize: "18px",
+                      padding: "0 8px"
+                    }}
+                  >
+                    x
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-end gap-3 mt-6">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => router.back()}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={(e) => handleSubmit(e, true)}
+              disabled={isLoading}
+            >
+              {isLoading ? <span className="loading" /> : "Save as Draft"}
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={(e) => handleSubmit(e, false)}
+              disabled={isLoading}
+            >
+              {publishButtonContent}
+            </Button>
+          </div>
+        </form>
+      </Card>
+    </div>
+  );
+}
+

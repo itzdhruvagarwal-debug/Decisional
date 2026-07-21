@@ -1,0 +1,1084 @@
+/* =====================================================================
+   PAGE-SPECIFIC MOBILE RESPONSIVE OVERRIDES
+   Covers: Messages, Leaderboard, Badges, Referrals, Campaigns,
+           Create Campaign, Deals, Influencers, Analytics Dashboards
+   ===================================================================== */
+
+/* ── MESSAGES PAGE ── */
+/* On mobile, show list OR chat (not both side-by-side) */
+@media (max-width: 768px) {
+
+  /* Shrink message panel to full-height viewport minus dash header */
+  .card[style*="height: calc(100vh - 120px)"] {
+    height: calc(100dvh - 64px) !important;
+    border-radius: 0 !important;
+  }
+
+  /* Conversation list takes full width when no chat open */
+  .hide-mobile {
+    display: none !important;
+  }
+
+  /* Chat area takes full width */
+  .show-mobile {
+    display: flex !important;
+  }
+
+  /* Message input area: stack attach buttons above | make send btn full-width */
+  .card[style*="height: calc(100vh - 120px)"] [style*="padding: 16px 24px"][style*="display: flex"][style*="gap: 12px"] {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    padding: 10px 12px !important;
+    gap: 8px !important;
+  }
+
+  .card[style*="height: calc(100vh - 120px)"] input[type="text"] {
+    min-width: 0;
+    flex: 1;
+  }
+
+  /* Message bubble max-width narrower on mobile */
+  .card[style*="height: calc(100vh - 120px)"] [style*="maxWidth: 75%"] {
+    max-width: 88% !important;
+  }
+
+  /* Chat messages padding tighter */
+  .card[style*="height: calc(100vh - 120px)"] [style*="padding: 24px"][style*="flex-direction: column"] {
+    padding: 12px !important;
+  }
+}
+
+/* ── LEADERBOARD PAGE ── */
+@media (max-width: 768px) {
+
+  /* Podium: stack 2nd/1st/3rd vertically on small screens */
+  [style*="display: flex"][style*="alignItems: flex-end"][style*="padding: 32px 16px"] {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 20px !important;
+    padding: 20px 12px !important;
+  }
+
+  /* Leaderboard grid row: reduce columns */
+  [style*="gridTemplateColumns: 40px 1fr 100px 80px"] {
+    grid-template-columns: 32px 1fr 80px 60px !important;
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+  }
+
+  /* Filter controls: wrap and center */
+  [style*="display: flex"][style*="flexWrap: wrap"][style*="gap: 12px"][style*="justifyContent: center"] {
+    gap: 8px !important;
+  }
+
+  /* Toggle buttons: smaller padding */
+  [style*="padding: 8px 20px"][style*="borderRadius: 10px"] {
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+  }
+
+  /* City/Category selects: full row */
+  [style*="padding: 8px 14px"][style*="fontFamily"][role="combobox"],
+  [style*="padding: 8px 14px"][style*="borderRadius: 10px"][style*="background: var(--color-bg-secondary)"] {
+    width: 100% !important;
+    max-width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* Leaderboard score column: hide on very small screens, keep rank/name/level */
+  [style*="gridTemplateColumns: 40px 1fr 100px 80px"] {
+    grid-template-columns: 30px 1fr 56px !important;
+  }
+
+  /* Hide score column content on tiny screens */
+  [style*="gridTemplateColumns: 40px 1fr 100px 80px"]> :nth-child(3) {
+    display: none !important;
+  }
+}
+
+/* ── BADGES PAGE ── */
+@media (max-width: 768px) {
+
+  /* Badges grid: 2 columns on tablet, full responsive */
+  [style*="gridTemplateColumns: repeat(auto-fill, minmax(280px, 1fr))"] {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  /* Badge cards: more compact */
+  [style*="gridTemplateColumns: repeat(auto-fill, minmax(280px, 1fr))"] .card {
+    padding: 16px 12px !important;
+  }
+
+  /* Badge icon smaller on mobile */
+  [style*="fontSize: 48px"][style*="marginBottom: 16px"] {
+    font-size: 36px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* Stats row: shrink for mobile */
+  [style*="display: flex"][style*="justifyContent: center"][style*="gap: 20px"][style*="marginBottom: 40px"] {
+    gap: 10px !important;
+    margin-bottom: 24px !important;
+  }
+
+  [style*="minWidth: 160px"][style*="padding: 24px"][style*="borderRadius: 16px"] {
+    min-width: 0 !important;
+    flex: 1 1 100px;
+    padding: 14px 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* Badges grid: 2 cols always */
+  [style*="gridTemplateColumns: repeat(auto-fill, minmax(280px, 1fr))"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* ── REFERRALS PAGE ── */
+@media (max-width: 768px) {
+
+  /* Main referral code card: compact padding */
+  [style*="padding: 40px"][style*="background: linear-gradient(135deg, rgba(16, 185, 129"] {
+    padding: 24px 16px !important;
+    border-radius: 16px !important;
+    margin-bottom: 24px !important;
+  }
+
+  /* Giant referral code: smaller */
+  [style*="fontSize: 48px"][style*="fontFamily: monospace"] {
+    font-size: 28px !important;
+    letter-spacing: 0.12em;
+  }
+
+  /* Tier cards grid: 3 cols on tablet */
+  [style*="gridTemplateColumns: repeat(auto-fit, minmax(110px, 1fr))"] {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  /* Tier card: compact */
+  [style*="gridTemplateColumns: repeat(auto-fit, minmax(110px, 1fr))"]>div {
+    padding: 10px 8px !important;
+  }
+
+  /* Step rows: tighter */
+  [style*="display: flex"][style*="alignItems: center"][style*="gap: 16px"][style*="background: var(--color-bg-secondary)"][style*="borderRadius: 16px"] {
+    padding: 12px !important;
+    gap: 12px !important;
+  }
+
+  /* Stats grid in referral code card: wrap */
+  [style*="gridTemplateColumns: repeat(auto-fit, minmax(140px, 1fr))"][style*="maxWidth: 600px"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* Tier cards: 2 cols on small phone */
+  [style*="gridTemplateColumns: repeat(auto-fit, minmax(110px, 1fr))"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Referral code size: even smaller */
+  [style*="fontSize: 48px"][style*="fontFamily: monospace"] {
+    font-size: 22px !important;
+  }
+}
+
+/* ── CREATE CAMPAIGN FORM ── */
+@media (max-width: 768px) {
+
+  /* Form container: tighter padding */
+  [style*="maxWidth: 800px"][style*="margin: 0 auto"][style*="paddingBottom: 64px"] {
+    padding: 0 0 80px !important;
+  }
+
+  [style*="maxWidth: 800px"] .card[style*="padding: 32px"] {
+    padding: 20px 16px !important;
+    border-radius: 16px !important;
+  }
+
+  /* Deliverable row: stack select and count */
+  [style*="display: flex"][style*="gap: 12px"][style*="marginBottom: 8px"][style*="alignItems: center"] {
+    flex-wrap: wrap;
+    gap: 8px !important;
+  }
+
+  [style*="display: flex"][style*="gap: 12px"][style*="marginBottom: 8px"][style*="alignItems: center"] select {
+    flex: 1 1 160px !important;
+  }
+
+  /* Custom category input row: stack */
+  [style*="display: flex"][style*="gap: 8px"][style*="alignItems: center"]>input[type="text"][style*="maxWidth: 200px"] {
+    max-width: 100% !important;
+    flex: 1 !important;
+  }
+
+  /* Submit buttons: full width */
+  [style*="marginTop: 32px"][style*="display: flex"][style*="justifyContent: flex-end"][style*="gap: 12px"] {
+    flex-direction: column-reverse !important;
+    gap: 8px !important;
+  }
+
+  [style*="marginTop: 32px"][style*="display: flex"][style*="justifyContent: flex-end"][style*="gap: 12px"]>button {
+    width: 100% !important;
+  }
+}
+
+/* ── INFLUENCERS LIST PAGE ── */
+@media (max-width: 768px) {
+
+  /* Search form: already flex-wrap, just ensure gap is right */
+  form.card[style*="display: flex"][style*="gap: 16px"][style*="flexWrap: wrap"] {
+    gap: 12px !important;
+    padding: 16px !important;
+  }
+
+  /* Search button: full width on mobile */
+  form.card [style*="display: flex"][style*="alignItems: flex-end"] {
+    width: 100% !important;
+  }
+
+  form.card [type="submit"] {
+    width: 100% !important;
+  }
+
+  /* Influencer cards: 1 col on mobile */
+  .grid-3.stagger-children {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── ANALYTICS DASHBOARD COMPONENTS ── */
+@media (max-width: 768px) {
+
+  /* Influencer/Brand dashboard stat grid: 2 cols */
+  .grid-4.stagger-children {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Chart section: stack charts */
+  .grid-2:has(.card [style*="height: 280px"]) {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Chart container: shorter on mobile */
+  [style*="height: 280px"][style*="width: 100%"] {
+    height: 200px !important;
+  }
+
+  /* Performance metrics + badges/referral grid: stack */
+  .grid-2:has(.card [style*="marginBottom: 20px"]) {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Recent activity row: stack */
+  [style*="display: flex"][style*="alignItems: center"][style*="justifyContent: space-between"][style*="padding: 12px"][style*="background: var(--color-bg-tertiary)"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+  }
+
+  /* Referral code box in dashboard: stack */
+  [style*="display: flex"][style*="alignItems: center"][style*="justifyContent: space-between"][style*="border: 1px solid rgba(99, 102, 241"] {
+    flex-direction: column !important;
+    gap: 12px !important;
+    text-align: center !important;
+  }
+
+  [style*="display: flex"][style*="alignItems: center"][style*="justifyContent: space-between"][style*="border: 1px solid rgba(99, 102, 241"] .btn {
+    width: 100% !important;
+  }
+}
+
+/* Stat card value: tighter on mobile */
+@media (max-width: 640px) {
+  .grid-4.stagger-children {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* Stat card font reduce */
+  .grid-4.stagger-children .card [style*="fontSize: 28px"] {
+    font-size: 20px !important;
+  }
+}
+
+/* ── DEALS PAGE ── */
+@media (max-width: 768px) {
+
+  /* Deals filter tabs: horizontal scroll */
+  [style*="borderBottom: 1px solid var(--color-border)"][style*="display: flex"] {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0 !important;
+    flex-wrap: nowrap !important;
+  }
+
+  [style*="borderBottom: 1px solid var(--color-border)"][style*="display: flex"]>button {
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 12px 16px !important;
+    font-size: 13px !important;
+    min-height: 44px;
+  }
+
+  /* Deal card action row: stack */
+  .card [style*="display: flex"][style*="justifyContent: space-between"][style*="marginTop: auto"] {
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-top: 16px !important;
+  }
+
+  .card [style*="display: flex"][style*="justifyContent: space-between"][style*="marginTop: auto"] .btn {
+    width: 100% !important;
+    max-width: 100% !important;
+    text-align: center;
+  }
+}
+
+/* ── ADMIN PAGES ── */
+@media (max-width: 768px) {
+
+  /* Admin layout: remove left margin, make full width */
+  [style*="flex: 1"][style*="marginLeft: 260px"] {
+    margin-left: 0 !important;
+  }
+
+  /* Admin aside (custom sidebar): hide on mobile */
+  aside[style*="width: 260px"][style*="position: fixed"] {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+}
+
+/* ── HERO CTA BUTTONS (mobile stack) ── */
+@media (max-width: 480px) {
+  .hero-cta-group {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding: 0 8px;
+  }
+
+  .hero-cta-group .btn {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+}
+
+/* ── CAMPAIGNS CREATE FORM — deliverable qty input ── */
+@media (max-width: 480px) {
+  [style*="flex: 2"]+input[type="number"][style*="width: 80px"] {
+    width: 60px !important;
+  }
+}
+
+/* ── GLOBAL UTILS ── */
+/* Prevent fixed-width columns from breaking out */
+@media (max-width: 768px) {
+  [style*="width: 320px"][style*="borderRight"] {
+    width: 100% !important;
+    border-right: none !important;
+  }
+
+  /* Campaign sub-header: full flex-col wrap */
+  .dashboard-sub-header>div:first-child {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .dashboard-sub-header>div:first-child>div:last-child {
+    width: 100% !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  /* Search input in sub-header: full width */
+  .dashboard-sub-header input[type="text"] {
+    width: 100% !important;
+  }
+
+  /* Sort select in sub-header: full width */
+  .dashboard-sub-header select {
+    width: 100% !important;
+  }
+}
+
+/* ── CAMPAIGN CARD GRID ── */
+@media (max-width: 768px) {
+
+  /* Campaign cards auto-fill: single column */
+  [style*="gridTemplateColumns: repeat(auto-fill, minmax(300px, 1fr))"] {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  /* Campaign card inner stats grid */
+  [style*="gridTemplateColumns: repeat(3, 1fr)"][style*="padding: 16px"][style*="background: rgba(0, 0, 0"] {
+    grid-template-columns: repeat(3, 1fr) !important;
+    padding: 12px 8px !important;
+    gap: 8px !important;
+  }
+
+  /* Campaign card stats values: smaller */
+  [style*="gridTemplateColumns: repeat(3, 1fr)"][style*="padding: 16px"][style*="background: rgba(0, 0, 0"] [style*="fontSize: 18px"] {
+    font-size: 15px !important;
+  }
+
+  /* Campaign card footer: stack */
+  [style*="display: flex"][style*="alignItems: center"][style*="justifyContent: space-between"][style*="gap: 12px"][style*="marginTop: auto"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  [style*="display: flex"][style*="alignItems: center"][style*="justifyContent: space-between"][style*="gap: 12px"][style*="marginTop: auto"] .btn {
+    max-width: 100% !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+}
+
+/* ── CAMPAIGN DETAIL [id] PAGE ── */
+@media (max-width: 768px) {
+
+  /* 2-column layout inside campaign detail: stack */
+  [style*="1fr 360px"],
+  [style*="gridTemplateColumns: 2fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── INFLUENCER DETAIL [id] PAGE ── */
+@media (max-width: 768px) {
+
+  /* Profile header: stack avatar + info */
+  [style*="display: flex"][style*="gap: 24px"][style*="alignItems: flex-start"] {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  /* Social stats: wrap */
+  [style*="display: flex"][style*="gap: 24px"][style*="flexWrap: wrap"] {
+    justify-content: center !important;
+    gap: 16px !important;
+  }
+}
+
+/* ── ANALYTICS ADMIN VIEW ── */
+@media (max-width: 768px) {
+
+  /* Admin quick stats grid: 2 col */
+  [style*="gridTemplateColumns: repeat(4, 1fr)"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Admin chart section: stack 2 col charts */
+  [style*="display: grid"][style*="gridTemplateColumns: 2fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── FINAL SAFETY NET ── */
+/* Any remaining inline-style grid-2 layouts that missed responsive classes */
+@media (max-width: 640px) {
+  [style*="display: grid"][style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  [style*="display: grid"][style*="grid-template-columns: repeat(2"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Ensure no element wider than viewport */
+  .dashboard-content * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* ==================== SCROLLABLE TABS (MOBILE) ==================== */
+.scrollable-tabs {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.scrollable-tabs::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Edge */
+}
+
+/* === MESSAGES SIDEBAR === */
+.messages-list {
+  width: 320px;
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-secondary);
+}
+
+@media (max-width: 768px) {
+  .messages-list {
+    width: 100% !important;
+    border-right: none;
+  }
+}
+
+/* ==================== DASHBOARD SHELL SEMANTIC CLASSES ==================== */
+
+/* App Shell root */
+.dashboard-app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-bg-primary);
+}
+
+/* Sidebar header row (logo + collapse toggle) */
+.sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+}
+
+.sidebar-header.collapsed {
+  justify-content: center;
+}
+
+/* Sidebar collapse toggle button */
+.sidebar-collapse-btn {
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  transition: all var(--transition-fast);
+}
+
+.sidebar-collapse-btn:hover {
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+}
+
+/* Sidebar user profile strip (mobile only) */
+.sidebar-user-profile {
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Sidebar nav scroll area */
+.sidebar-nav {
+  padding: 12px 10px;
+}
+
+/* Sidebar logout button */
+.sidebar-logout-btn {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--color-accent-rose);
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+/* Sidebar level card */
+.dashboard-level-card {
+  margin: 12px;
+  margin-top: auto;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.05));
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.dashboard-level-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.dashboard-level-xp-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+/* Topbar */
+.dashboard-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: 12px clamp(12px, 3vw, 24px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-border);
+  min-height: 64px;
+}
+
+.dashboard-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dashboard-topbar-title {
+  font-size: clamp(18px, 2.2vw, 20px);
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.dashboard-topbar-subtitle {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+/* Notification badge dot (unread count) */
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: var(--color-accent-rose);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-bg-primary);
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* Notification dropdown panel */
+.notif-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  width: min(320px, calc(100vw - 24px));
+  padding: 0;
+  z-index: 50;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Notification dropdown header */
+.notif-dropdown-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notif-dropdown-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.notif-mark-read-btn {
+  font-size: 11px;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Individual notification item */
+.notif-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background 0.2s;
+  color: inherit;
+  font-family: inherit;
+  background: transparent;
+}
+
+.notif-item.unread {
+  background: var(--color-bg-tertiary);
+}
+
+.notif-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--color-text-primary);
+}
+
+.notif-item-message {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.notif-item-date {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+}
+
+/* Topbar profile pill (desktop) */
+.topbar-profile-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+}
+
+.topbar-profile-name {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.topbar-profile-role {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: capitalize;
+}
+
+/* Sidebar link text (overflow truncation) */
+.sidebar-link-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Sidebar nav position wrapper */
+.sidebar-notif-wrapper {
+  position: relative;
+}
+
+/* ==================== UTILITY EXTENSIONS ==================== */
+
+.position-relative { position: relative; }
+.flex-shrink-0 { flex-shrink: 0; }
+.text-capitalize { text-transform: capitalize; }
+.overflow-hidden { overflow: hidden; }
+.text-ellipsis { text-overflow: ellipsis; }
+.whitespace-nowrap { white-space: nowrap; }
+.min-h-screen { min-height: 100vh; }
+.flex-1 { flex: 1; }
+.pt-20 { padding-top: 80px; }
+.bg-primary { background: var(--color-bg-primary); }
+
+/* ==================== VERIFICATION QUEUE ==================== */
+.vq-card {
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.vq-user-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.vq-user-name {
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--color-text-primary);
+}
+
+.vq-user-meta {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vq-badge-xs {
+  font-size: 9px;
+  padding: 2px 8px;
+}
+
+.vq-actions {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.vq-stat {
+  text-align: right;
+}
+
+.vq-stat-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.vq-stat-value {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.text-emerald { color: var(--color-accent-emerald); }
+.text-rose    { color: var(--color-accent-rose); }
+.text-amber   { color: var(--color-accent-amber); }
+
+/* ==================== ADMIN FRAME ==================== */
+.admin-logout-button {
+  width: 100%;
+  padding: 10px;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: var(--radius-md);
+  color: #f87171;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.admin-logout-button:hover,
+.admin-logout-button:focus {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.admin-sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ==================== ANALYTICS DASHBOARDS ==================== */
+
+/* Level benefits card */
+.level-perks-section {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.level-perks-card {
+  padding: 28px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(236, 72, 153, 0.04) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.level-perks-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.level-perks-text {
+  flex: 1 1 500px;
+}
+
+.level-perks-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.level-perks-title {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.level-perks-desc {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.level-perks-stats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Small stat chip used in level perks */
+.stat-chip {
+  padding: 16px 24px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  min-width: 150px;
+  text-align: center;
+}
+
+.stat-chip-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.stat-chip-value-lg {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.stat-chip-sub {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* Chart / section card header */
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.chart-wrapper {
+  height: 280px;
+  width: 100%;
+}
+
+/* Flex col with gap for metrics, badge lists */
+.metric-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.badge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Section header row (title + count badge) */
+.section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Badge item row */
+.badge-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-tertiary);
+  transition: all var(--transition-fast);
+}
+
+.badge-item-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.badge-item-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.badge-item-desc {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* Referral stat row */
+.referral-stat-row {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.referral-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.referral-stat-label {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.referral-stat-value {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Error state */
+.dashboard-error-state {
+  padding: 48px;
+  text-align: center;
+  color: var(--color-accent-rose);
+}
+
+/* Brand campaign table */
+.overflow-x-auto { overflow-x: auto; }
+
+/* Brand micro vs macro comparison */
+.influencer-type-grid {
+  display: flex;
+  gap: 8px;
+}
+
+

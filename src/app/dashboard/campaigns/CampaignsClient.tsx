@@ -1,0 +1,440 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
+import { useEffect, useMemo, useState } from "react";
+import { formatCurrency, formatNumber } from "@/lib/utils-client";
+import { Pagination } from "@/components/ui/pagination";
+import EmptyState from "@/components/ui/EmptyState";
+import { Button, Input, Select } from "@/components/ui";
+
+interface Campaign {
+  id: string;
+  title: string;
+  description: string;
+  createdAt: string;
+  perInfluencerBudget: number;
+  minFollowers: number;
+  postingDeadline: string;
+  targetCategories: string[];
+  totalApplications: number;
+  brand: {
+    companyName: string;
+    logo: string | null;
+    avgRating: number;
+  };
+  deliverables: { type: string; count: number }[];
+  maxInfluencers: number | null;
+  acceptedCount: number;
+}
+
+const categories = [
+  "All",
+  "Fashion",
+  "Beauty",
+  "Lifestyle",
+  "Food",
+  "Travel",
+  "Fitness",
+  "Technology",
+  "Gaming",
+  "Entertainment",
+];
+
+const deliverableLabels: Record<string, string> = {
+  INSTAGRAM_POST: "IG Post",
+  INSTAGRAM_REEL: "IG Reel",
+  INSTAGRAM_STORY: "IG Story",
+  YOUTUBE_VIDEO: "YT Video",
+  YOUTUBE_SHORT: "YT Short",
+};
+
+function normalizeStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => String(item || "").trim())
+      .filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function normalizeDeliverables(
+  value: unknown,
+): Array<{ type: string; count: number }> {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => {
+      const parsed = item as { type?: unknown; count?: unknown };
+      return {
+        type: typeof parsed?.type === "string" ? parsed.type.trim() : "",
+        count: Math.max(1, Number(parsed?.count || 1)),
+      };
+    })
+    .filter((item) => Boolean(item.type));
+}
+
+interface CampaignsPayload {
+  data?: { campaigns?: RawCampaign[]; totalPages?: number };
+  campaigns?: RawCampaign[];
+  totalPages?: number;
+}
+
+interface RawCampaign {
+  id?: string;
+  title?: string;
+  description?: string;
+  createdAt?: string;
+  perInfluencerBudget?: number | string;
+  minFollowers?: number | string;
+  postingDeadline?: string;
+  targetCategories?: unknown;
+  totalApplications?: number;
+  brand?: { companyName?: string; logo?: string | null; avgRating?: number; averageRating?: number };
+  deliverables?: unknown;
+  maxInfluencers?: number | null;
+  acceptedCount?: number;
+  _count?: { applications?: number };
+  applications?: unknown[];
+}
+
+export default function CampaignsClient({ user }: { readonly user: { readonly userType?: string } }) {
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+  const [page, setPage] = useState(1);
+  
+  const canCreateCampaign = user?.userType === "BRAND";
+
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  const queryParams = new URLSearchParams();
+
+  if (canCreateCampaign) {
+    queryParams.set("scope", "mine");
+    queryParams.set("status", "ALL");
+  } else {
+    queryParams.set("status", "ACTIVE");
+  }
+
+  if (selectedCategory !== "All") {
+    queryParams.set("category", selectedCategory);
+  }
+
+  if (debouncedSearch.trim()) {
+    queryParams.set("search", debouncedSearch.trim());
+  }
+
+  if (sortBy === "budget_high") {
+    queryParams.set("sortBy", "perInfluencerBudget");
+    queryParams.set("sortOrder", "desc");
+  } else if (sortBy === "budget_low") {
+    queryParams.set("sortBy", "perInfluencerBudget");
+    queryParams.set("sortOrder", "asc");
+  } else if (sortBy === "deadline") {
+    queryParams.set("sortBy", "applicationDeadline");
+    queryParams.set("sortOrder", "asc");
+  } else {
+    queryParams.set("sortBy", "createdAt");
+    queryParams.set("sortOrder", "desc");
+  }
+
+  queryParams.set("page", String(page));
+  queryParams.set("limit", "12");
+
+  const { data: payload, isLoading: loading, error: fetchErr } = useSWR<CampaignsPayload>(
+    `/api/campaigns?${queryParams.toString()}`,
+    fetcher
+  );
+
+  const { campaigns, totalPages } = useMemo(() => {
+    const rawCampaigns: RawCampaign[] = payload?.data?.campaigns ?? payload?.campaigns ?? [];
+    const pages = payload?.data?.totalPages ?? payload?.totalPages ?? 1;
+
+    const mapped: Campaign[] = rawCampaigns.map((campaign: RawCampaign) => ({
+      id: campaign.id || '',
+      title: campaign.title || "Untitled Campaign",
+      description: campaign.description || "",
+      createdAt: campaign.createdAt || new Date(0).toISOString(),
+      perInfluencerBudget: Number(campaign.perInfluencerBudget || 0),
+      minFollowers: Number(campaign.minFollowers || 0),
+      postingDeadline: campaign.postingDeadline || new Date(0).toISOString(),
+      targetCategories: normalizeStringArray(campaign.targetCategories),
+      totalApplications: Number(campaign.totalApplications || campaign._count?.applications || 0),
+      brand: {
+        companyName: campaign.brand?.companyName || "Unknown Brand",
+        logo: campaign.brand?.logo || null,
+        avgRating: Number(campaign.brand?.avgRating || campaign.brand?.averageRating || 0) / 100,
+      },
+      deliverables: normalizeDeliverables(campaign.deliverables),
+      maxInfluencers: campaign.maxInfluencers ?? null,
+      acceptedCount: Array.isArray(campaign.applications) ? campaign.applications.length : 0,
+    }));
+
+    return { campaigns: mapped, totalPages: pages };
+  }, [payload]);
+
+  const error = fetchErr ? "Unable to load campaigns right now." : null;
+
+  const filteredCampaigns = useMemo(() => {
+    return campaigns;
+  }, [campaigns]);
+
+  let content;
+  if (loading) {
+    content = (
+      <div style={{ display: "flex", justifyContent: "center", padding: "48px" }}>
+        <span className="loading" style={{ width: "40px", height: "40px" }} />
+      </div>
+    );
+  } else if (error) {
+    content = (
+      <EmptyState
+        emoji="⚠️"
+        title="Error Loading Campaigns"
+        description={error}
+      />
+    );
+  } else if (filteredCampaigns.length === 0) {
+    content = (
+      <EmptyState
+        emoji="🔍"
+        title="No Campaigns Found"
+        description="Try broadening your search query or changing category and budget filters."
+      />
+    );
+  } else {
+    content = (
+      <div
+        className="campaign-card-grid"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+          gap: "16px",
+        }}
+      >
+        {filteredCampaigns.map((campaign) => (
+          <article key={campaign.id} className="card campaign-card" style={{ padding: "18px" }}>
+            <div className="campaign-card-brand-row">
+              <div className="campaign-card-logo" aria-hidden="true">
+                {campaign.brand.logo ? (
+                  <Image src={campaign.brand.logo} alt="" fill unoptimized style={{ objectFit: "cover" }} />
+                ) : (
+                  campaign.brand.companyName.slice(0, 2).toUpperCase()
+                )}
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div className="campaign-card-brand-name">
+                  {campaign.brand.companyName}
+                </div>
+                <h3>{campaign.title}</h3>
+              </div>
+              <span className="badge badge-success campaign-card-rate">
+                {formatCurrency(campaign.perInfluencerBudget)}
+              </span>
+            </div>
+
+            <p
+              className="campaign-card-description"
+              style={{
+                color: "var(--color-text-secondary)",
+                fontSize: "14px",
+                lineHeight: 1.5,
+                minHeight: "42px",
+              }}
+            >
+              {campaign.description}
+            </p>
+
+            <div
+              className="campaign-card-tags"
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "6px",
+                margin: "10px 0 14px",
+              }}
+            >
+              {campaign.deliverables.slice(0, 2).map((item, index) => (
+                <span key={`${campaign.id}-del-${index}`} className="badge badge-primary">
+                  {item.count}x {deliverableLabels[item.type] || item.type}
+                </span>
+              ))}
+              {campaign.targetCategories.slice(0, 2).map((category) => (
+                <span key={`${campaign.id}-${category}`} className="badge">
+                  {category}
+                </span>
+              ))}
+            </div>
+
+            <div
+              className="campaign-card-metrics"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "8px",
+                marginBottom: "14px",
+              }}
+            >
+              <div>
+                <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+                  Slots
+                </div>
+                <div style={{ fontSize: "13px", fontWeight: 600 }}>
+                  {campaign.maxInfluencers !== null && campaign.maxInfluencers !== undefined
+                    ? `${campaign.acceptedCount}/${campaign.maxInfluencers} filled`
+                    : "Unlimited"}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+                  Followers
+                </div>
+                <div style={{ fontSize: "13px", fontWeight: 600 }}>
+                  {formatNumber(campaign.minFollowers)}+
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+                  Applied
+                </div>
+                <div style={{ fontSize: "13px", fontWeight: 600 }}>
+                  {campaign.totalApplications}
+                </div>
+              </div>
+            </div>
+
+            <div
+              className="campaign-card-footer"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "10px",
+              }}
+            >
+              <span style={{ fontSize: "12px", color: "var(--color-text-secondary)" }}>
+                Post by {new Date(campaign.postingDeadline).toLocaleDateString("en-IN")}
+              </span>
+              <Link href={`/dashboard/campaigns/${campaign.id}`} className="btn btn-primary">
+                View Details
+              </Link>
+            </div>
+          </article>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <header className="dashboard-sub-header glass">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
+          <div>
+            <h2 style={{ fontSize: "18px", fontWeight: 800 }}>Explore Campaigns</h2>
+            <p style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}>
+              Apply to active campaigns matching your niche.
+            </p>
+          </div>
+          {canCreateCampaign && (
+            <Link href="/dashboard/campaigns/create" className="btn btn-primary">
+              Create Campaign
+            </Link>
+          )}
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "12px",
+            marginTop: "20px",
+            flexWrap: "wrap",
+          }}
+        >
+          <Input
+            type="text"
+            placeholder="Search campaigns..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ minWidth: "220px" }}
+          />
+
+          <Select
+            value={sortBy}
+            onChange={(e) => {
+              setSortBy(e.target.value);
+              setPage(1);
+            }}
+            style={{ minWidth: "160px" }}
+          >
+            <option value="newest">Newest</option>
+            <option value="budget_high">Budget: High to Low</option>
+            <option value="budget_low">Budget: Low to High</option>
+            <option value="deadline">Deadline Soon</option>
+          </Select>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            marginTop: "16px",
+            overflowX: "auto",
+          }}
+        >
+          {categories.map((category) => (
+            <Button
+              key={category}
+              variant={selectedCategory === category ? "primary" : "ghost"}
+              onClick={() => {
+                setSelectedCategory(category);
+                setPage(1);
+              }}
+              style={{
+                whiteSpace: "nowrap",
+                background:
+                  selectedCategory === category
+                    ? "var(--gradient-primary)"
+                    : "var(--color-bg-tertiary)",
+                color: selectedCategory === category ? "white" : "inherit",
+              }}
+            >
+              {category}
+            </Button>
+          ))}
+        </div>
+      </header>
+
+      {content}
+
+      <Pagination page={page} totalPages={totalPages} setPage={setPage} marginTop="32px" />
+    </div>
+  );
+}
