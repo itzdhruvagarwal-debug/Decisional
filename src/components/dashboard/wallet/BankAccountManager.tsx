@@ -4,8 +4,48 @@ import { fetcher } from "@/lib/fetcher";
 import EmptyState from "@/components/ui/EmptyState";
 import { logger } from "@/lib/logger-client";
 import { Button, Input } from "@/components/ui";
-import { bankAccountSchema } from "@/lib/validations/auth";
 import { z } from "zod";
+
+export const bankAccountSchema = z.object({
+  payoutType: z.enum(["bank", "upi"]),
+  accountName: z.string().min(2, "Beneficiary name must be at least 2 characters").max(100, "Beneficiary name cannot exceed 100 characters"),
+  accountNumber: z.string().optional().or(z.literal("")),
+  ifscCode: z.string().optional().or(z.literal("")),
+  bankName: z.string().optional().or(z.literal("")),
+  upiId: z.string().optional().or(z.literal("")),
+}).superRefine((data, ctx) => {
+  if (data.payoutType === "bank") {
+    if (!data.accountNumber || data.accountNumber.length < 9 || data.accountNumber.length > 18 || !/^\d+$/.test(data.accountNumber)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please enter a valid 9 to 18 digit account number",
+        path: ["accountNumber"],
+      });
+    }
+    if (!data.ifscCode || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(data.ifscCode)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please enter a valid 11-digit IFSC code (e.g. SBIN0001234)",
+        path: ["ifscCode"],
+      });
+    }
+    if (!data.bankName || data.bankName.length < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please enter a valid bank name",
+        path: ["bankName"],
+      });
+    }
+  } else if (data.payoutType === "upi") {
+    if (!data.upiId || !/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(data.upiId)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please enter a valid UPI ID (e.g. user@okaxis)",
+        path: ["upiId"],
+      });
+    }
+  }
+});
 
 export type BankAccountValues = z.infer<typeof bankAccountSchema>;
 

@@ -5,8 +5,15 @@ import { logger } from "@/lib/logger-client";
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { Button, Input } from "@/components/ui";
-import { deleteAccountSchema } from "@/lib/validations/auth";
 import { z } from "zod";
+
+export const deleteAccountSchema = z.object({
+  confirmText: z.literal("DELETE", {
+    message: "Please type DELETE to confirm",
+  }),
+  password: z.string().min(1, "Password is required to delete your account"),
+  reason: z.string().max(500, "Reason cannot exceed 500 characters").optional(),
+});
 
 export type DeleteAccountValues = z.infer<typeof deleteAccountSchema>;
 

@@ -4,8 +4,13 @@
 import { logger } from "@/lib/logger-client";
 import Link from "next/link";
 import Image from "next/image";
-import { loginSchema } from "@/lib/validations/auth";
 import { z } from "zod";
+
+export const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
+  twoFactorCode: z.string().length(6, "2FA code must be 6 digits").optional().or(z.literal("")),
+});
 
 export type LoginFormValues = z.infer<typeof loginSchema>;
 
