@@ -108,20 +108,13 @@ export default function LeaderboardPage() {
   } else if (error) {
     leaderboardContent = (
       <div
-        style={{
-          textAlign: "center",
-          padding: "40px",
-          color: "#ef4444",
-        }}
+        className="text-center" style={{ padding: "40px", color: "#ef4444" }}
       >
         {error}
         <Button
           onClick={() => globalThis.location.reload()}
           variant="primary"
-          style={{
-            marginTop: "16px",
-            padding: "8px 16px",
-          }}
+          className="mt-4" style={{ padding: "8px 16px" }}
         >
           Retry
         </Button>
@@ -143,58 +136,28 @@ export default function LeaderboardPage() {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: index * 0.03 }}
-        style={{
-          display: "grid",
-          gridTemplateColumns: "40px 1fr 100px 80px",
-          alignItems: "center",
-          padding: "12px 16px",
-          borderRadius: "12px",
-          background:
+        className="grid items-center cursor-pointer" style={{ gridTemplateColumns: "40px 1fr 100px 80px", padding: "12px 16px", borderRadius: "12px", background:
             index < 3
               ? "linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(139, 92, 246, 0.05))"
-              : "var(--color-bg-secondary)",
-          border:
+              : "var(--color-bg-secondary)", border:
             index === 0
               ? "1px solid rgba(245, 158, 11, 0.3)"
-              : "1px solid transparent",
-          transition: "all 0.2s",
-          cursor: "pointer",
-        }}
+              : "1px solid transparent", transition: "all 0.2s" }}
         whileHover={{ x: 4 }}
       >
         {/* Rank */}
         <span
-          style={{
-            fontSize: index < 3 ? "20px" : "14px",
-            fontWeight: 800,
-            color: rankColorMap[index] || "var(--color-text-secondary)",
-          }}
+          className="font-extrabold" style={{ fontSize: index < 3 ? "20px" : "14px", color: rankColorMap[index] || "var(--color-text-secondary)" }}
         >
           {index < 3 ? ["🥇", "🥈", "🥉"][index] : index + 1}
         </span>
 
         {/* User Info */}
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-          }}
+          className="flex items-center gap-3"
         >
           <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "50%",
-              background: `linear-gradient(135deg, hsl(${(index * 40) % 360}, 70%, 50%), hsl(${(index * 40 + 60) % 360}, 70%, 60%))`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "16px",
-              fontWeight: 700,
-              color: "white",
-              overflow: "hidden",
-            }}
+            className="flex items-center justify-center text-base font-bold overflow-hidden" style={{ width: "40px", height: "40px", borderRadius: "50%", background: `linear-gradient(135deg, hsl(${(index * 40) % 360}, 70%, 50%), hsl(${(index * 40 + 60) % 360}, 70%, 60%))`, color: "white" }}
           >
             {user.avatar ? (
               <Image
@@ -202,7 +165,7 @@ export default function LeaderboardPage() {
                 alt={user.name + " avatar"}
                 fill
                 unoptimized
-                style={{ objectFit: "cover" }}
+                className="object-cover"
               />
             ) : (
               user.name?.charAt(0)?.toUpperCase() || "?"
@@ -210,35 +173,19 @@ export default function LeaderboardPage() {
           </div>
           <div>
             <div
-              style={{
-                fontWeight: 600,
-                fontSize: "14px",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
+              className="font-semibold text-sm flex items-center" style={{ gap: "6px" }}
             >
               {user.name || "Anonymous"}
               {user.isWeeklyChampion && (
                 <span
-                  style={{
-                    fontSize: "10px",
-                    padding: "2px 6px",
-                    borderRadius: "6px",
-                    background: "rgba(245, 158, 11, 0.2)",
-                    color: "#f59e0b",
-                    fontWeight: 700,
-                  }}
+                  className="font-bold" style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "6px", background: "rgba(245, 158, 11, 0.2)", color: "#f59e0b" }}
                 >
                   🔥 HOT
                 </span>
               )}
             </div>
             <div
-              style={{
-                fontSize: "12px",
-                color: "var(--color-text-secondary)",
-              }}
+              className="text-xs text-secondary"
             >
               {user.subtitle}
               {user.city ? ` • ${user.city}` : ""}
@@ -248,12 +195,7 @@ export default function LeaderboardPage() {
 
         {/* Score */}
         <div
-          style={{
-            textAlign: "right",
-            fontWeight: 700,
-            fontSize: "14px",
-            color: "var(--color-primary)",
-          }}
+          className="text-right font-bold text-sm text-primary"
         >
           {typeof user.score === "number"
             ? user.score.toLocaleString()
@@ -261,16 +203,9 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Level */}
-        <div style={{ textAlign: "right" }}>
+        <div className="text-right">
           <span
-            style={{
-              fontSize: "12px",
-              fontWeight: 700,
-              padding: "4px 10px",
-              borderRadius: "8px",
-              background: "rgba(139, 92, 246, 0.15)",
-              color: "#a855f7",
-            }}
+            className="text-xs font-bold" style={{ padding: "4px 10px", borderRadius: "8px", background: "rgba(139, 92, 246, 0.15)", color: "#a855f7" }}
           >
             Lv.{user.level}
           </span>
@@ -282,7 +217,7 @@ export default function LeaderboardPage() {
   if (!session) {
     return (
       <DashboardShell user={null}>
-        <div style={{ display: "flex", minHeight: "60vh", alignItems: "center", justifyContent: "center" }}>
+        <div className="flex items-center justify-center" style={{ minHeight: "60vh" }}>
           <span className="loading" />
         </div>
       </DashboardShell>
@@ -293,56 +228,31 @@ export default function LeaderboardPage() {
     <DashboardShell user={session.user}>
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+        <div className="text-center mb-8">
           <h1
-            style={{
-              fontSize: "32px",
-              fontWeight: 800,
-              background: "linear-gradient(135deg, #f59e0b, #ef4444)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
+            className="font-extrabold" style={{ fontSize: "32px", background: "linear-gradient(135deg, #f59e0b, #ef4444)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
           >
             🏆 Leaderboard
           </h1>
-          <p style={{ color: "var(--color-text-secondary)", marginTop: "8px" }}>
+          <p className="text-secondary mt-2">
             Top performers on CollabX
           </p>
         </div>
 
         {/* Filter Controls */}
         <div
-          className="scrollable-tabs"
-          style={{
-            display: "flex",
-            gap: "12px",
-            marginBottom: "24px",
-            alignItems: "center",
-            paddingBottom: "8px",
-          }}
+          className="scrollable-tabs flex gap-3 mb-6 items-center" style={{ paddingBottom: "8px" }}
         >
           {/* Influencer/Brand Toggle */}
           <div
-            style={{
-              display: "flex",
-              background: "var(--color-bg-secondary)",
-              borderRadius: "12px",
-              padding: "4px",
-            }}
+            className="flex" style={{ background: "var(--color-bg-secondary)", borderRadius: "12px", padding: "4px" }}
           >
             {(["influencers", "brands"] as const).map((t) => (
               <Button
                 key={t}
                 onClick={() => setTab(t)}
                 variant={tab === t ? "primary" : "ghost"}
-                style={{
-                  padding: "8px 20px",
-                  borderRadius: "10px",
-                  fontWeight: 600,
-                  fontSize: "13px",
-                  transition: "all 0.2s",
-                  color: tab === t ? "white" : "var(--color-text-secondary)",
-                }}
+                className="font-semibold text-sm" style={{ padding: "8px 20px", borderRadius: "10px", transition: "all 0.2s", color: tab === t ? "white" : "var(--color-text-secondary)" }}
               >
                 {t === "influencers" ? "👤 Creators" : "🏢 Brands"}
               </Button>
@@ -351,26 +261,14 @@ export default function LeaderboardPage() {
 
           {/* Weekly/All-time Toggle */}
           <div
-            style={{
-              display: "flex",
-              background: "var(--color-bg-secondary)",
-              borderRadius: "12px",
-              padding: "4px",
-            }}
+            className="flex" style={{ background: "var(--color-bg-secondary)", borderRadius: "12px", padding: "4px" }}
           >
             {(["all-time", "weekly"] as const).map((f) => (
               <Button
                 key={f}
                 onClick={() => setFilter(f)}
                 variant={filter === f ? (f === "weekly" ? "warning" : "primary") : "ghost"}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "10px",
-                  fontWeight: 600,
-                  fontSize: "13px",
-                  transition: "all 0.2s",
-                  color: filter === f ? "white" : "var(--color-text-secondary)",
-                }}
+                className="font-semibold text-sm" style={{ padding: "8px 16px", borderRadius: "10px", transition: "all 0.2s", color: filter === f ? "white" : "var(--color-text-secondary)" }}
               >
                 {f === "weekly" ? "🔥 This Week" : "🏛️ All-Time"}
               </Button>
@@ -421,19 +319,8 @@ export default function LeaderboardPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "flex-end",
-                gap: "16px",
-                marginBottom: "40px",
-                padding: "32px 16px",
-                background:
-                  "linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(239, 68, 68, 0.08))",
-                borderRadius: "16px",
-                border: "1px solid rgba(245, 158, 11, 0.2)",
-                flexWrap: "wrap",
-              }}
+              className="flex justify-center items-end gap-4 flex-wrap" style={{ marginBottom: "40px", padding: "32px 16px", background:
+                  "linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(239, 68, 68, 0.08))", borderRadius: "16px", border: "1px solid rgba(245, 158, 11, 0.2)" }}
             >
               {/* 2nd place */}
               {hallOfFame[1] && (
@@ -479,47 +366,23 @@ export default function LeaderboardPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "16px",
-                padding: "20px",
-                background:
-                  "linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.15))",
-                borderRadius: "16px",
-                border: "2px solid #f59e0b",
-                marginBottom: "24px",
-                flexWrap: "wrap",
-              }}
+              className="flex items-center gap-4 mb-6 flex-wrap" style={{ padding: "20px", background:
+                  "linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.15))", borderRadius: "16px", border: "2px solid #f59e0b" }}
             >
               <div style={{ fontSize: "48px" }}>🔥</div>
               <div>
                 <div
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: 700,
-                    color: "#f59e0b",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                  }}
+                  className="font-bold" style={{ fontSize: "11px", color: "#f59e0b", textTransform: "uppercase", letterSpacing: "1px" }}
                 >
                   🏆 HOT CREATOR OF THE WEEK
                 </div>
                 <div
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: 800,
-                    color: "var(--color-text-primary)",
-                    marginTop: "4px",
-                  }}
+                  className="text-xl font-extrabold mt-1" style={{ color: "var(--color-text-primary)" }}
                 >
                   {influencers[0].name}
                 </div>
                 <div
-                  style={{
-                    fontSize: "13px",
-                    color: "var(--color-text-secondary)",
-                  }}
+                  className="text-sm text-secondary"
                 >
                   {influencers[0].score} deals completed this week
                 </div>
@@ -528,24 +391,15 @@ export default function LeaderboardPage() {
           )}
 
         {/* Leaderboard List */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        <div className="flex flex-col gap-2">
           {/* Header Row */}
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "40px 1fr 100px 80px",
-              padding: "8px 16px",
-              fontSize: "11px",
-              fontWeight: 700,
-              color: "var(--color-text-secondary)",
-              textTransform: "uppercase",
-              letterSpacing: "1px",
-            }}
+            className="grid font-bold text-secondary" style={{ gridTemplateColumns: "40px 1fr 100px 80px", padding: "8px 16px", fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px" }}
           >
             <span>#</span>
             <span>Name</span>
-            <span style={{ textAlign: "right" }}>{scoreLabel}</span>
-            <span style={{ textAlign: "right" }}>Level</span>
+            <span className="text-right">{scoreLabel}</span>
+            <span className="text-right">Level</span>
           </div>
 
           <AnimatePresence>
@@ -581,30 +435,11 @@ function PodiumUser({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "8px",
-      }}
+      className="flex flex-col items-center gap-2"
     >
       {isFirst && <div style={{ fontSize: "28px" }}>👑</div>}
       <div
-        style={{
-          width: isFirst ? "64px" : "52px",
-          height: isFirst ? "64px" : "52px",
-          borderRadius: "50%",
-          background: `linear-gradient(135deg, ${color}, ${color}88)`,
-          border: `3px solid ${color}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: isFirst ? "24px" : "18px",
-          fontWeight: 700,
-          color: "white",
-          overflow: "hidden",
-          boxShadow: `0 0 20px ${color}44`,
-        }}
+        className="flex items-center justify-center font-bold overflow-hidden" style={{ width: isFirst ? "64px" : "52px", height: isFirst ? "64px" : "52px", borderRadius: "50%", background: `linear-gradient(135deg, ${color}, ${color}88)`, border: `3px solid ${color}`, fontSize: isFirst ? "24px" : "18px", color: "white", boxShadow: `0 0 20px ${color}44` }}
       >
         {user.avatar ? (
           <Image
@@ -612,46 +447,26 @@ function PodiumUser({
             alt=""
             fill
             unoptimized
-            style={{ objectFit: "cover" }}
+            className="object-cover"
           />
         ) : (
           user.name?.charAt(0)?.toUpperCase() || "?"
         )}
       </div>
       <div
-        style={{
-          fontWeight: 700,
-          fontSize: isFirst ? "15px" : "13px",
-          textAlign: "center",
-          maxWidth: "100px",
-        }}
+        className="font-bold text-center" style={{ fontSize: isFirst ? "15px" : "13px", maxWidth: "100px" }}
       >
         {user.name || "Anonymous"}
       </div>
       <div
-        style={{
-          width: isFirst ? "100px" : "80px",
-          height: `${height}px`,
-          borderRadius: "12px 12px 0 0",
-          background: `linear-gradient(to top, ${color}33, ${color}11)`,
-          border: `1px solid ${color}44`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-          gap: "4px",
-        }}
+        className="flex items-center justify-center flex-col gap-1" style={{ width: isFirst ? "100px" : "80px", height: `${height}px`, borderRadius: "12px 12px 0 0", background: `linear-gradient(to top, ${color}33, ${color}11)`, border: `1px solid ${color}44` }}
       >
         <div
-          style={{
-            fontSize: isFirst ? "22px" : "18px",
-            fontWeight: 800,
-            color,
-          }}
+          className="font-extrabold" style={{ fontSize: isFirst ? "22px" : "18px", color }}
         >
           {rank}
         </div>
-        <div style={{ fontSize: "11px", color: "var(--color-text-secondary)" }}>
+        <div className="text-secondary" style={{ fontSize: "11px" }}>
           {user.xp.toLocaleString()} {unit}
         </div>
       </div>

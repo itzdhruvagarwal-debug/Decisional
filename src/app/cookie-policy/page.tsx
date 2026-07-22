@@ -7,20 +7,20 @@ export default function CookiePage() {
   const lastUpdated = "June 20, 2026";
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="flex flex-col" style={{ minHeight: "100vh" }}>
       <Navbar />
 
-      <main style={{ flex: 1, paddingTop: "80px" }}>
+      <main className="flex-1" style={{ paddingTop: "80px" }}>
         <section className="section">
           <div className="container" style={{ maxWidth: "860px" }}>
-            <h1 className="section-title gradient-text" style={{ fontSize: "40px", fontWeight: 900, marginBottom: "12px" }}>
+            <h1 className="section-title gradient-text mb-3" style={{ fontSize: "40px", fontWeight: 900 }}>
               Cookie Policy
             </h1>
-            <p className="text-secondary" style={{ marginBottom: "40px", fontWeight: 600 }}>
+            <p className="text-secondary font-semibold" style={{ marginBottom: "40px" }}>
               Last updated: {lastUpdated}
             </p>
 
-            <div style={{ lineHeight: 1.8, color: "var(--color-text-secondary)", fontSize: "15px", display: "grid", gap: "32px" }}>
+            <div className="text-secondary grid gap-8" style={{ lineHeight: 1.8, fontSize: "15px" }}>
               <section>
                 <h2 style={headingStyle}>1. What cookies do</h2>
                 <p>

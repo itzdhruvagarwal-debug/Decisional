@@ -40,33 +40,19 @@ export default function Footer() {
     >
       <div className="container">
         <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-            gap: "40px",
-            marginBottom: "48px",
-          }}
+          className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "40px", marginBottom: "48px" }}
         >
           <div style={{ gridColumn: "span 1" }}>
             <Logo />
             <p
-              style={{
-                color: "var(--color-text-secondary)",
-                fontSize: "14px",
-                lineHeight: 1.7,
-                maxWidth: "280px",
-              }}
+              className="text-secondary text-sm" style={{ lineHeight: 1.7, maxWidth: "280px" }}
             >
               Decisional helps Indian brands and influencers run trusted
               collaborations with verified profiles, protected payments, and
               clearer delivery workflows.
             </p>
             <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                marginTop: "20px",
-              }}
+              className="flex gap-3" style={{ marginTop: "20px" }}
             >
               {socialLinks.map((social) => (
                 <a
@@ -75,22 +61,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  style={{
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "var(--radius-sm)",
-                    background: "var(--color-bg-tertiary)",
-                    border: "1px solid var(--color-border)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "12px",
-                    fontWeight: 800,
-                    cursor: "pointer",
-                    transition: "all var(--transition-fast)",
-                    color: "inherit",
-                    textDecoration: "none",
-                  }}
+                  className="flex items-center justify-center text-xs font-extrabold cursor-pointer" style={{ width: "36px", height: "36px", borderRadius: "var(--radius-sm)", background: "var(--color-bg-tertiary)", border: "1px solid var(--color-border)", transition: "all var(--transition-fast)", color: "inherit", textDecoration: "none" }}
                 >
                   {social.label}
                 </a>
@@ -106,27 +77,15 @@ export default function Footer() {
         <div className="divider" />
 
         <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "12px",
-          }}
+          className="flex justify-between items-center flex-wrap gap-3"
         >
           <p
-            style={{
-              color: "var(--color-text-muted)",
-              fontSize: "13px",
-            }}
+            className="text-muted text-sm"
           >
             (c) 2026 Decisional. All rights reserved.
           </p>
           <p
-            style={{
-              color: "var(--color-text-muted)",
-              fontSize: "13px",
-            }}
+            className="text-muted text-sm"
           >
             Built in India for trusted collaborations.
           </p>
@@ -146,11 +105,7 @@ function FooterColumn({
   return (
     <div>
       <h4
-        style={{
-          fontWeight: 700,
-          marginBottom: "16px",
-          fontSize: "15px",
-        }}
+        className="font-bold mb-4" style={{ fontSize: "15px" }}
       >
         {title}
       </h4>
@@ -159,11 +114,7 @@ function FooterColumn({
           <li key={item.label} style={{ marginBottom: "10px" }}>
             <Link
               href={item.href}
-              style={{
-                color: "var(--color-text-secondary)",
-                fontSize: "14px",
-                transition: "color var(--transition-fast)",
-              }}
+              className="text-secondary text-sm" style={{ transition: "color var(--transition-fast)" }}
             >
               {item.label}
             </Link>

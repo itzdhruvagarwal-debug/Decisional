@@ -174,7 +174,7 @@ export default function PayoutsAdminPage() {
   const renderContent = () => {
     if (loading) {
       return (
-        <div className="card" style={{ padding: "48px", textAlign: "center" }}>
+        <div className="card text-center" style={{ padding: "48px" }}>
           Loading payouts...
         </div>
       );
@@ -193,24 +193,16 @@ export default function PayoutsAdminPage() {
     }
 
     return (
-      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+      <div className="card overflow-hidden" style={{ padding: 0 }}>
         <div className="admin-table-wrap">
-          <table style={{ width: "100%", minWidth: "980px", borderCollapse: "collapse" }}>
+          <table className="w-full" style={{ minWidth: "980px", borderCollapse: "collapse" }}>
             <thead style={{ background: "var(--color-bg-tertiary)" }}>
               <tr>
                 {["User", "Amount", "Destination", "Risk", "Requested", "Actions"].map(
                   (heading) => (
                     <th
                       key={heading}
-                      style={{
-                        padding: "14px 16px",
-                        textAlign: heading === "Actions" ? "right" : "left",
-                        borderBottom: "1px solid var(--color-border)",
-                        color: "var(--color-text-secondary)",
-                        fontSize: "12px",
-                        fontWeight: 800,
-                        textTransform: "uppercase",
-                      }}
+                      className="border-b-card text-secondary text-xs font-extrabold" style={{ padding: "14px 16px", textAlign: heading === "Actions" ? "right" : "left", textTransform: "uppercase" }}
                     >
                       {heading}
                     </th>
@@ -226,75 +218,62 @@ export default function PayoutsAdminPage() {
                 return (
                   <tr
                     key={withdrawal.id}
-                    style={{ borderBottom: "1px solid var(--color-border)" }}
+                    className="border-b-card"
                   >
-                    <td style={{ padding: "16px" }}>
-                      <div style={{ fontWeight: 800, fontSize: "14px" }}>
+                    <td className="p-4">
+                      <div className="font-extrabold text-sm">
                         {getUserName(user)}
                       </div>
-                      <div style={{ color: "var(--color-text-muted)", fontSize: "12px" }}>
+                      <div className="text-muted text-xs">
                         {user.email}
                       </div>
                       <div style={{ color: "var(--color-primary-light)", fontSize: "11px" }}>
                         {user.userType}
                       </div>
                       <div
-                        style={{
-                          color: user.taxCompliance?.panLast4
+                        className="mt-1 font-bold" style={{ color: user.taxCompliance?.panLast4
                             ? "var(--color-accent-emerald)"
-                            : "var(--color-accent-rose)",
-                          fontSize: "11px",
-                          marginTop: "4px",
-                          fontWeight: 700,
-                        }}
+                            : "var(--color-accent-rose)", fontSize: "11px" }}
                       >
                         {user.taxCompliance?.panLast4
                           ? `PAN ****${user.taxCompliance.panLast4}`
                           : "PAN missing"}
                       </div>
                     </td>
-                    <td style={{ padding: "16px", fontWeight: 900 }}>
+                    <td className="p-4" style={{ fontWeight: 900 }}>
                       {formatCurrency(withdrawal.amount)}
                     </td>
-                    <td style={{ padding: "16px", fontSize: "13px" }}>
-                      <div style={{ fontWeight: 700 }}>{withdrawal.bankAccountName}</div>
-                      <div style={{ color: "var(--color-text-muted)" }}>
+                    <td className="p-4 text-sm">
+                      <div className="font-bold">{withdrawal.bankAccountName}</div>
+                      <div className="text-muted">
                         A/c {maskAccount(withdrawal.bankAccountNumber)}
                       </div>
-                      <div style={{ color: "var(--color-text-muted)" }}>
+                      <div className="text-muted">
                         IFSC {withdrawal.ifscCode}
                       </div>
                       {withdrawal.upiId && (
-                        <div style={{ color: "var(--color-text-muted)" }}>
+                        <div className="text-muted">
                           UPI {withdrawal.upiId}
                         </div>
                       )}
                     </td>
-                    <td style={{ padding: "16px" }}>
+                    <td className="p-4">
                       <span
-                        style={{
-                          display: "inline-flex",
-                          border: "1px solid",
-                          borderRadius: "999px",
-                          padding: "4px 9px",
-                          fontSize: "12px",
-                          fontWeight: 800,
-                          ...statusStyle,
-                        }}
+                        className="inline-flex text-xs font-extrabold" style={{ border: "1px solid", borderRadius: "999px", padding: "4px 9px", ...statusStyle }}
                       >
                         {withdrawal.status}
                       </span>
-                      <div style={{ color: "var(--color-text-muted)", fontSize: "12px", marginTop: "6px" }}>
+                      <div className="text-muted text-xs" style={{ marginTop: "6px" }}>
                         Risk {withdrawal.riskScore}
                         {withdrawal.isManualReview ? " / manual" : ""}
                       </div>
                     </td>
-                    <td style={{ padding: "16px", color: "var(--color-text-muted)", fontSize: "13px" }}>
+                    <td className="p-4 text-muted text-sm">
                       {new Date(withdrawal.createdAt).toLocaleString("en-IN")}
                     </td>
-                    <td style={{ padding: "16px", textAlign: "right" }}>
+                    <td className="p-4 text-right">
                       {withdrawal.status === "PENDING" || withdrawal.status === "PENDING_REVIEW" || withdrawal.status === "PROCESSING" ? (
-                        <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+                        <div className="flex justify-end gap-2">
                           <Button
                             type="button"
                             variant="secondary"
@@ -315,7 +294,7 @@ export default function PayoutsAdminPage() {
                           </Button>
                         </div>
                       ) : (
-                        <span style={{ color: "var(--color-text-muted)", fontSize: "13px" }}>
+                        <span className="text-muted text-sm">
                           Closed
                         </span>
                       )}
@@ -337,7 +316,7 @@ export default function PayoutsAdminPage() {
           <h1 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "6px" }}>
             Payout Operations
           </h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+          <p className="text-secondary text-sm">
             Review withdrawal risk, bank details, and manual payout decisions.
           </p>
         </div>
@@ -350,10 +329,10 @@ export default function PayoutsAdminPage() {
             borderColor: "rgba(99, 102, 241, 0.22)",
           }}
         >
-          <div style={{ color: "var(--color-text-muted)", fontSize: "12px" }}>
+          <div className="text-muted text-xs">
             Current view
           </div>
-          <div style={{ fontSize: "18px", fontWeight: 900 }}>
+          <div className="text-lg" style={{ fontWeight: 900 }}>
             {total} payouts / {formatCurrency(totalAmount)}
           </div>
         </div>
@@ -384,13 +363,7 @@ export default function PayoutsAdminPage() {
 
       {error && (
         <div
-          className="card"
-          style={{
-            marginBottom: "16px",
-            padding: "14px 16px",
-            borderColor: "rgba(244, 63, 94, 0.35)",
-            color: "var(--color-accent-rose)",
-          }}
+          className="card mb-4" style={{ padding: "14px 16px", borderColor: "rgba(244, 63, 94, 0.35)", color: "var(--color-accent-rose)" }}
         >
           {error}
         </div>
@@ -401,16 +374,16 @@ export default function PayoutsAdminPage() {
       {draft && (
         <div className="admin-modal-backdrop">
           <form className="admin-modal card" onSubmit={handleAction}>
-            <h2 style={{ fontSize: "20px", fontWeight: 900, marginBottom: "8px" }}>
+            <h2 className="text-xl mb-2" style={{ fontWeight: 900 }}>
               {draft.action === "APPROVE" ? "Approve payout" : "Reject payout"}
             </h2>
-            <p style={{ color: "var(--color-text-secondary)", fontSize: "14px", marginBottom: "18px" }}>
+            <p className="text-secondary text-sm" style={{ marginBottom: "18px" }}>
               {formatCurrency(draft.withdrawal.amount)} for{" "}
               {getUserName(draft.withdrawal.wallet.user)}
             </p>
 
             {actionError && (
-              <div style={{ color: "var(--color-accent-rose)", fontSize: "13px", marginBottom: "12px" }}>
+              <div className="text-sm mb-3" style={{ color: "var(--color-accent-rose)" }}>
                 {actionError}
               </div>
             )}
@@ -433,12 +406,12 @@ export default function PayoutsAdminPage() {
                 />
               </>
             ) : (
-              <div style={{ marginBottom: "18px", fontSize: "14px", color: "var(--color-text-secondary)" }}>
+              <div className="text-sm text-secondary" style={{ marginBottom: "18px" }}>
                 This will automatically trigger the Razorpay API to execute the transfer to the user&apos;s bank account.
               </div>
             )}
 
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", flexWrap: "wrap" }}>
+            <div className="flex justify-end flex-wrap" style={{ gap: "10px" }}>
               <Button
                 type="button"
                 variant="secondary"

@@ -29,46 +29,36 @@ const legalPages = [
 
 export default function LegalPage() {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="flex flex-col" style={{ minHeight: "100vh" }}>
       <Navbar />
 
-      <main style={{ flex: 1, paddingTop: "80px" }}>
+      <main className="flex-1" style={{ paddingTop: "80px" }}>
         <section className="section">
           <div className="container" style={{ maxWidth: "980px" }}>
             <h1
-              className="section-title gradient-text"
-              style={{ fontSize: "40px", fontWeight: 900, marginBottom: "12px" }}
+              className="section-title gradient-text mb-3" style={{ fontSize: "40px", fontWeight: 900 }}
             >
               Legal Center
             </h1>
-            <p className="text-secondary" style={{ maxWidth: "720px", marginBottom: "36px", fontWeight: 600 }}>
+            <p className="text-secondary font-semibold" style={{ maxWidth: "720px", marginBottom: "36px" }}>
               Core policies for Decisional users, including India-focused marketplace,
               payment, privacy, tax-readiness, and dispute workflows.
             </p>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "18px" }}>
+            <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "18px" }}>
               {legalPages.map((page) => (
                 <Link
                   key={page.href}
                   href={page.href}
-                  className="card"
-                  style={{
-                    padding: "22px",
-                    color: "inherit",
-                    textDecoration: "none",
-                    border: "1px solid var(--color-border)",
-                    background: "rgba(255,255,255,0.02)",
-                    display: "grid",
-                    gap: "10px",
-                  }}
+                  className="card grid" style={{ padding: "22px", color: "inherit", textDecoration: "none", border: "1px solid var(--color-border)", background: "rgba(255,255,255,0.02)", gap: "10px" }}
                 >
-                  <h2 style={{ fontSize: "18px", fontWeight: 850, color: "var(--color-text-primary)" }}>
+                  <h2 className="text-lg" style={{ fontWeight: 850, color: "var(--color-text-primary)" }}>
                     {page.title}
                   </h2>
-                  <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.65, fontSize: "14px" }}>
+                  <p className="text-secondary text-sm" style={{ lineHeight: 1.65 }}>
                     {page.body}
                   </p>
-                  <span style={{ color: "var(--color-primary)", fontWeight: 800, fontSize: "14px" }}>
+                  <span className="text-primary font-extrabold text-sm">
                     Open policy
                   </span>
                 </Link>

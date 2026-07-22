@@ -157,23 +157,18 @@ export default function ContactVerificationPanel({
     const renderEmailAction = () => {
         if (user?.emailVerified && user?.email) {
             return (
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <span style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '4px',
-                        fontSize: '12px', fontWeight: 700, color: '#10b981',
-                        background: 'rgba(16, 185, 129, 0.1)', padding: '5px 12px',
-                        borderRadius: '20px',
-                    }}>
+                <div className="flex gap-2 items-center">
+                    <span className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '5px 12px', borderRadius: '20px' }}>
                         ✅ Verified
                     </span>
-                <Button variant="secondary" disabled={isSaving} style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => handleStartContactChange('email')}>{isSaving ? '...' : 'Change'}</Button>
+                <Button variant="secondary" disabled={isSaving} className="text-xs" style={{ padding: '4px 8px' }} onClick={() => handleStartContactChange('email')}>{isSaving ? '...' : 'Change'}</Button>
                 </div>
             );
         }
         if (verifyContactState.type === 'email' && verifyContactState.step === 'code') {
             return (
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    <Input type="text" id="email-verify-code" placeholder="OTP" aria-label="Email verification code" style={{ width: '80px', padding: '4px 8px', fontSize: '12px' }} value={contactVerifyCode} onChange={(e) => setContactVerifyCode(e.target.value)} />
+                <div className="flex gap-2">
+                    <Input type="text" id="email-verify-code" placeholder="OTP" aria-label="Email verification code" className="text-xs" style={{ width: '80px', padding: '4px 8px' }} value={contactVerifyCode} onChange={(e) => setContactVerifyCode(e.target.value)} />
                     <Button variant="primary" onClick={async () => {
                         const res = await fetch('/api/user/verify-contact', { method: 'POST', body: JSON.stringify({ type: 'email', code: contactVerifyCode }) });
                         if (res.ok) {
@@ -182,7 +177,7 @@ export default function ContactVerificationPanel({
                             setContactVerifyCode('');
                             setUser(prev => prev ? { ...prev, emailVerified: true } : null);
                         } else { showToast('Invalid code', 'error'); }
-                    }} style={{ fontSize: '12px', padding: '4px 8px' }}>Verify</Button>
+                    }} className="text-xs" style={{ padding: '4px 8px' }}>Verify</Button>
                 </div>
             );
         }
@@ -208,7 +203,7 @@ export default function ContactVerificationPanel({
                 } finally {
                     setIsSaving(false);
                 }
-            }} style={{ fontSize: '12px', padding: '6px 12px' }}>
+            }} className="text-xs" style={{ padding: '6px 12px' }}>
                 Verify Email
             </Button>
         );
@@ -217,23 +212,18 @@ export default function ContactVerificationPanel({
     const renderPhoneAction = () => {
         if (user?.phoneVerified && user?.phone) {
             return (
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <span style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '4px',
-                        fontSize: '12px', fontWeight: 700, color: '#10b981',
-                        background: 'rgba(16, 185, 129, 0.1)', padding: '5px 12px',
-                        borderRadius: '20px',
-                    }}>
+                <div className="flex gap-2 items-center">
+                    <span className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '5px 12px', borderRadius: '20px' }}>
                         ✅ Verified
                     </span>
-                    <Button variant="secondary" disabled={isSaving} style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => handleStartContactChange('phone')}>{isSaving ? '...' : 'Change'}</Button>
+                    <Button variant="secondary" disabled={isSaving} className="text-xs" style={{ padding: '4px 8px' }} onClick={() => handleStartContactChange('phone')}>{isSaving ? '...' : 'Change'}</Button>
                 </div>
             );
         }
         if (verifyContactState.type === 'phone' && verifyContactState.step === 'code') {
             return (
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    <Input type="text" id="phone-verify-code" placeholder="OTP" aria-label="Phone verification code" style={{ width: '80px', padding: '4px 8px', fontSize: '12px' }} value={contactVerifyCode} onChange={(e) => setContactVerifyCode(e.target.value)} />
+                <div className="flex gap-2">
+                    <Input type="text" id="phone-verify-code" placeholder="OTP" aria-label="Phone verification code" className="text-xs" style={{ width: '80px', padding: '4px 8px' }} value={contactVerifyCode} onChange={(e) => setContactVerifyCode(e.target.value)} />
                     <Button variant="primary" onClick={async () => {
                         const res = await fetch('/api/user/verify-contact', { method: 'POST', body: JSON.stringify({ type: 'phone', code: contactVerifyCode }) });
                         if (res.ok) {
@@ -248,14 +238,14 @@ export default function ContactVerificationPanel({
                                 return nextUser;
                             });
                         } else { showToast('Invalid code', 'error'); }
-                    }} style={{ fontSize: '12px', padding: '4px 8px' }}>Verify</Button>
+                    }} className="text-xs" style={{ padding: '4px 8px' }}>Verify</Button>
                 </div>
             );
         }
         if (verifyContactState.type === 'phone' && verifyContactState.step === 'input') {
             return (
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    <Input type="text" aria-label="Phone number with country code" placeholder="e.g. 919876543210" style={{ width: '130px', padding: '4px 8px', fontSize: '12px' }} value={pendingContact} onChange={(e) => setPendingContact(e.target.value)} />
+                <div className="flex gap-2">
+                    <Input type="text" aria-label="Phone number with country code" placeholder="e.g. 919876543210" className="text-xs" style={{ width: '130px', padding: '4px 8px' }} value={pendingContact} onChange={(e) => setPendingContact(e.target.value)} />
                     <Button variant="primary" disabled={isSaving} onClick={async () => {
                         if (pendingContact) {
                             setIsSaving(true);
@@ -278,7 +268,7 @@ export default function ContactVerificationPanel({
                                 setIsSaving(false);
                             }
                         }
-                    }} style={{ fontSize: '12px', padding: '4px 8px' }}>
+                    }} className="text-xs" style={{ padding: '4px 8px' }}>
                         {isSaving ? '...' : 'Send OTP'}
                     </Button>
                 </div>
@@ -288,7 +278,7 @@ export default function ContactVerificationPanel({
             <Button variant="secondary" disabled={isSaving} onClick={() => {
                 setPendingContact('');
                 setVerifyContactState({ type: 'phone', step: 'input' });
-            }} style={{ fontSize: '12px', padding: '6px 12px' }}>
+            }} className="text-xs" style={{ padding: '6px 12px' }}>
                 Add & Verify
             </Button>
         );
@@ -296,34 +286,24 @@ export default function ContactVerificationPanel({
 
     return (
         <div className="card">
-            <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "24px" }}>
+            <h3 className="text-xl font-bold mb-6">
                 Contact Verification
             </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="flex flex-col gap-4">
                 {/* Email Verification */}
-                <div style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px',
-                    background: (user?.emailVerified && user?.email) ? 'rgba(16, 185, 129, 0.06)' : 'var(--color-bg-tertiary)',
-                    borderRadius: 'var(--radius-sm)',
-                    border: (user?.emailVerified && user?.email) ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid transparent',
-                }}>
+                <div className="flex justify-between items-center p-3" style={{ background: (user?.emailVerified && user?.email) ? 'rgba(16, 185, 129, 0.06)' : 'var(--color-bg-tertiary)', borderRadius: 'var(--radius-sm)', border: (user?.emailVerified && user?.email) ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid transparent' }}>
                     <div>
-                        <div style={{ fontWeight: 600, fontSize: '14px' }}>📧 Email Address</div>
-                        <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>{user?.email || 'N/A'}</div>
+                        <div className="font-semibold text-sm">📧 Email Address</div>
+                        <div className="text-xs text-muted">{user?.email || 'N/A'}</div>
                     </div>
                     {renderEmailAction()}
                 </div>
  
                 {/* Phone Verification */}
-                <div style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px',
-                    background: (user?.phoneVerified && user?.phone) ? 'rgba(16, 185, 129, 0.06)' : 'var(--color-bg-tertiary)',
-                    borderRadius: 'var(--radius-sm)',
-                    border: (user?.phoneVerified && user?.phone) ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid transparent',
-                }}>
+                <div className="flex justify-between items-center p-3" style={{ background: (user?.phoneVerified && user?.phone) ? 'rgba(16, 185, 129, 0.06)' : 'var(--color-bg-tertiary)', borderRadius: 'var(--radius-sm)', border: (user?.phoneVerified && user?.phone) ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid transparent' }}>
                     <div>
-                        <div style={{ fontWeight: 600, fontSize: '14px' }}>📱 Phone Number</div>
-                        <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+                        <div className="font-semibold text-sm">📱 Phone Number</div>
+                        <div className="text-xs text-muted">
                             {user?.phoneVerified && user?.phone ? `+91-${user.phone}` : 'Required for campaign payout calls'}
                         </div>
                     </div>
@@ -333,18 +313,15 @@ export default function ContactVerificationPanel({
 
             {/* Change Contact Inline UI */}
             {changeContactState.active && (
-                <div style={{
-                    marginTop: '20px', padding: '16px', background: 'var(--color-bg-tertiary)',
-                    borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)'
-                }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                        <h4 style={{ fontSize: '16px', fontWeight: 600, margin: 0 }}>Change {changeContactState.type === 'email' ? 'Email Address' : 'Phone Number'}</h4>
-                        <Button variant="ghost" aria-label="Dismiss contact change dialog" style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }} onClick={() => setChangeContactState({ active: false, type: null, step: 'idle', currentEmailOtp: '', currentPhoneOtp: '', newContact: '', newOtp: '' })}>✕</Button>
+                <div className="p-4" style={{ marginTop: '20px', background: 'var(--color-bg-tertiary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+                    <div className="flex justify-between items-center mb-4">
+                        <h4 className="text-base font-semibold" style={{ margin: 0 }}>Change {changeContactState.type === 'email' ? 'Email Address' : 'Phone Number'}</h4>
+                        <Button variant="ghost" aria-label="Dismiss contact change dialog" className="text-muted cursor-pointer" style={{ background: 'none', border: 'none' }} onClick={() => setChangeContactState({ active: false, type: null, step: 'idle', currentEmailOtp: '', currentPhoneOtp: '', newContact: '', newOtp: '' })}>✕</Button>
                     </div>
 
                     {changeContactState.step === 'verify-current' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>To protect your account, we've sent an OTP to your current contact method(s). Please enter the OTP to continue.</div>
+                        <div className="flex flex-col gap-3">
+                            <div className="text-sm text-secondary">To protect your account, we've sent an OTP to your current contact method(s). Please enter the OTP to continue.</div>
                             {user?.email && (
                                 <div>
                                     <label className="label" htmlFor="verify-current-email-otp">OTP from Email</label>
@@ -362,7 +339,7 @@ export default function ContactVerificationPanel({
                     )}
 
                     {changeContactState.step === 'enter-new' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div className="flex flex-col gap-3">
                             <div>
                                 <label className="label" htmlFor="verify-new-contact">Enter your new {changeContactState.type}</label>
                                 <Input id="verify-new-contact" type={changeContactState.type === 'email' ? 'email' : 'text'} placeholder={`New ${changeContactState.type}`} value={changeContactState.newContact} onChange={e => setChangeContactState({ ...changeContactState, newContact: e.target.value })} fullWidth />
@@ -372,8 +349,8 @@ export default function ContactVerificationPanel({
                     )}
 
                     {changeContactState.step === 'verify-new' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>We've sent an OTP to {changeContactState.newContact}.</div>
+                        <div className="flex flex-col gap-3">
+                            <div className="text-sm text-secondary">We've sent an OTP to {changeContactState.newContact}.</div>
                             <div>
                                 <label className="label" htmlFor="verify-new-contact-otp">Enter OTP</label>
                                 <Input id="verify-new-contact-otp" type="text" placeholder="e.g. 123456" value={changeContactState.newOtp} onChange={e => setChangeContactState({ ...changeContactState, newOtp: e.target.value })} fullWidth />

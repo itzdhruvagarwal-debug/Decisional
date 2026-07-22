@@ -93,40 +93,16 @@ export class ErrorBoundary extends React.Component<Props, State> {
         <div
           role="alert"
           aria-live="assertive"
-          style={{
-            padding: "40px 24px",
-            textAlign: "center",
-            minHeight: "200px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "16px",
-            background: "rgba(244, 63, 94, 0.04)",
-            border: "1px solid rgba(244, 63, 94, 0.15)",
-            borderRadius: "12px",
-            margin: "16px",
-          }}
+          className="text-center flex flex-col items-center justify-center gap-4" style={{ padding: "40px 24px", minHeight: "200px", background: "rgba(244, 63, 94, 0.04)", border: "1px solid rgba(244, 63, 94, 0.15)", borderRadius: "12px", margin: "16px" }}
         >
           <div style={{ fontSize: "32px" }}>⚠️</div>
           <h3
-            style={{
-              fontSize: "18px",
-              fontWeight: 700,
-              color: "var(--color-text, #fff)",
-              margin: 0,
-            }}
+            className="text-lg font-bold" style={{ color: "var(--color-text, #fff)", margin: 0 }}
           >
             Something went wrong
           </h3>
           <p
-            style={{
-              fontSize: "14px",
-              color: "var(--color-text-secondary, #aaa)",
-              maxWidth: "360px",
-              margin: 0,
-              lineHeight: 1.6,
-            }}
+            className="text-sm" style={{ color: "var(--color-text-secondary, #aaa)", maxWidth: "360px", margin: 0, lineHeight: 1.6 }}
           >
             An unexpected error occurred in this section.
             {this.state.errorId && (
@@ -134,13 +110,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 {" "}
                 Please reference ID{" "}
                 <code
-                  style={{
-                    background: "rgba(255,255,255,0.08)",
-                    padding: "2px 6px",
-                    borderRadius: "4px",
-                    fontSize: "12px",
-                    fontFamily: "monospace",
-                  }}
+                  className="text-xs" style={{ background: "rgba(255,255,255,0.08)", padding: "2px 6px", borderRadius: "4px", fontFamily: "monospace" }}
                 >
                   ERR-{this.state.errorId}
                 </code>{" "}
@@ -148,7 +118,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
               </>
             )}
           </p>
-          <div style={{ display: "flex", gap: "12px" }}>
+          <div className="flex gap-3">
             <Button
               variant="secondary"
               aria-label="Try rendering this component again"

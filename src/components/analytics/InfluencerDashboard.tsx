@@ -197,7 +197,7 @@ export default function InfluencerDashboard({
                 <h3 className="level-perks-title">
                   ✨ Level {overview.level} Perks & Benefits
                 </h3>
-                <span className="badge badge-primary" style={{ fontSize: "12px", fontWeight: 700, padding: "4px 10px", textTransform: "uppercase" }}>
+                <span className="badge badge-primary text-xs font-bold" style={{ padding: "4px 10px", textTransform: "uppercase" }}>
                   {calculateLevel(overview.xp).name}
                 </span>
               </div>
@@ -326,7 +326,7 @@ export default function InfluencerDashboard({
         {/* Recent Badges */}
         <div className="card">
           <div className="section-header-row">
-            <h3 style={{ fontSize: "16px", fontWeight: 700 }}>
+            <h3 className="text-base font-bold">
               Recent Achievements
             </h3>
             <span className="badge badge-primary">
@@ -337,7 +337,7 @@ export default function InfluencerDashboard({
             {data.gamification?.recentBadges?.map((badge: { id: string; name: string; description: string; icon: string; earnedAt: Date; xpReward?: number }) => (
               <div key={badge.id} className="badge-item">
                 <span className="badge-item-icon">{badge.icon}</span>
-                <div style={{ flex: 1 }}>
+                <div className="flex-1">
                   <div className="badge-item-name">
                     {badge.name}
                   </div>
@@ -368,7 +368,7 @@ export default function InfluencerDashboard({
         {/* Referral Stats */}
         <div className="card">
           <div className="section-header-row">
-            <h3 style={{ fontSize: "16px", fontWeight: 700 }}>
+            <h3 className="text-base font-bold">
               Referral Rewards
             </h3>
             <span className="badge badge-primary">
@@ -376,49 +376,29 @@ export default function InfluencerDashboard({
             </span>
           </div>
 
-          <div className="grid-2" style={{ gap: "12px", marginBottom: "20px" }}>
+          <div className="grid-2 gap-3 mb-5">
             <div
-              style={{
-                padding: "16px",
-                borderRadius: "var(--radius-md)",
-                background: "var(--color-bg-tertiary)",
-              }}
+              className="p-4" style={{ borderRadius: "var(--radius-md)", background: "var(--color-bg-tertiary)" }}
             >
               <div
-                style={{
-                  fontSize: "12px",
-                  color: "var(--color-text-muted)",
-                  marginBottom: "6px",
-                }}
+                className="text-xs text-muted" style={{ marginBottom: "6px" }}
               >
                 Active Referrals
               </div>
-              <div style={{ fontSize: "24px", fontWeight: 800 }}>
+              <div className="text-2xl font-extrabold">
                 {data.gamification?.referralStats?.activeReferrals || 0}
               </div>
             </div>
             <div
-              style={{
-                padding: "16px",
-                borderRadius: "var(--radius-md)",
-                background: "var(--color-bg-tertiary)",
-              }}
+              className="p-4" style={{ borderRadius: "var(--radius-md)", background: "var(--color-bg-tertiary)" }}
             >
               <div
-                style={{
-                  fontSize: "12px",
-                  color: "var(--color-text-muted)",
-                  marginBottom: "6px",
-                }}
+                className="text-xs text-muted" style={{ marginBottom: "6px" }}
               >
                 Total Earnings
               </div>
               <div
-                style={{
-                  fontSize: "24px",
-                  fontWeight: 800,
-                  color: "var(--color-accent-emerald)",
-                }}
+                className="text-2xl font-extrabold" style={{ color: "var(--color-accent-emerald)" }}
               >
                 Rs{" "}
                 {(
@@ -429,36 +409,17 @@ export default function InfluencerDashboard({
           </div>
 
           <div
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1))",
-              borderRadius: "var(--radius-md)",
-              padding: "16px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              border: "1px solid rgba(99, 102, 241, 0.2)",
-            }}
+            className="p-4 flex items-center justify-between" style={{ background:
+                "linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1))", borderRadius: "var(--radius-md)", border: "1px solid rgba(99, 102, 241, 0.2)" }}
           >
             <div>
               <div
-                style={{
-                  fontSize: "11px",
-                  color: "var(--color-text-muted)",
-                  marginBottom: "4px",
-                  textTransform: "uppercase",
-                  letterSpacing: 0,
-                }}
+                className="text-muted mb-1" style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: 0 }}
               >
                 Your Referral Code
               </div>
               <code
-                style={{
-                  fontSize: "18px",
-                  fontWeight: 800,
-                  fontFamily: "monospace",
-                  letterSpacing: 0,
-                }}
+                className="text-lg font-extrabold" style={{ fontFamily: "monospace", letterSpacing: 0 }}
               >
                 {data.gamification?.referralStats?.referralCode || "..."}
               </code>
@@ -487,15 +448,14 @@ export default function InfluencerDashboard({
           {recentActivity.map((log: { action: string; createdAt: Date }) => (
             <div
               key={`${log.action}-${new Date(log.createdAt).getTime()}`}
-              className="badge-item"
-              style={{ justifyContent: "space-between" }}
+              className="badge-item justify-between"
             >
               <div>
-                <div style={{ fontSize: "14px", fontWeight: 500 }}>
+                <div className="text-sm font-medium">
                   {formatAction(log.action)}
                 </div>
                 <div
-                  style={{ fontSize: "12px", color: "var(--color-text-muted)" }}
+                  className="text-xs text-muted"
                 >
                   {new Date(log.createdAt).toLocaleDateString()}
                 </div>
@@ -561,41 +521,22 @@ function StatCard({
   return (
     <div className="card hover-lift">
       <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          marginBottom: "14px",
-          color: accentColor,
-        }}
+        className="flex items-center" style={{ gap: "10px", marginBottom: "14px", color: accentColor }}
       >
         {STAT_ICONS[icon]}
         <span
-          style={{
-            color: "var(--color-text-secondary)",
-            fontSize: "13px",
-            fontWeight: 500,
-          }}
+          className="text-secondary text-sm font-medium"
         >
           {label}
         </span>
       </div>
       <div
-        style={{
-          fontSize: "28px",
-          fontWeight: 800,
-          color: accentColor,
-          lineHeight: 1.2,
-        }}
+        className="font-extrabold" style={{ fontSize: "28px", color: accentColor, lineHeight: 1.2 }}
       >
         {value}
       </div>
       <div
-        style={{
-          fontSize: "12px",
-          color: "var(--color-text-muted)",
-          marginTop: "6px",
-        }}
+        className="text-xs text-muted" style={{ marginTop: "6px" }}
       >
         {subvalue}
       </div>
@@ -615,18 +556,14 @@ function MetricBar({ label, value, max, color, displayValue }: MetricBarProps) {
   return (
     <div>
       <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "6px",
-        }}
+        className="flex justify-between" style={{ marginBottom: "6px" }}
       >
         <span
-          style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}
+          className="text-sm text-secondary"
         >
           {label}
         </span>
-        <span style={{ fontSize: "13px", fontWeight: 600 }}>
+        <span className="text-sm font-semibold">
           {displayValue || `${value}%`}
         </span>
       </div>

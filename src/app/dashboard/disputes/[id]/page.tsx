@@ -211,13 +211,7 @@ function DisputeTimeline({ dispute }: Readonly<DisputeTimelineProps>) {
         )}
         {dispute.tier >= 3 && (
           <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              padding: "8px 0",
-              borderBottom: "1px solid var(--color-border)",
-            }}
+            className="flex items-center gap-3 border-b-card" style={{ padding: "8px 0" }}
           >
             <div
               className="flex-shrink-0"
@@ -373,58 +367,37 @@ function DisputeEvidence({
 
       {dispute.evidence.length === 0 ? (
         <p
-          style={{
-            color: "var(--color-text-secondary)",
-            fontSize: "14px",
-          }}
+          className="text-secondary text-sm"
         >
           No evidence submitted yet.
         </p>
       ) : (
         <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-          }}
+          className="flex flex-col gap-3"
         >
           {dispute.evidence.map((ev) => (
             <div
               key={ev.id}
-              style={{
-                padding: "12px",
-                border: "1px solid var(--color-border)",
-                borderRadius: "var(--radius-sm)",
-              }}
+              className="p-3" style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)" }}
             >
               <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "4px",
-                }}
+                className="flex justify-between mb-1"
               >
                 <span className="badge">{ev.type}</span>
                 <span
-                  style={{
-                    fontSize: "11px",
-                    color: "var(--color-text-secondary)",
-                  }}
+                  className="text-secondary" style={{ fontSize: "11px" }}
                 >
                   {ev.submittedAt ? new Date(ev.submittedAt).toLocaleDateString() : ""}
                 </span>
               </div>
-              <p style={{ fontSize: "13px", marginBottom: "8px" }}>
+              <p className="text-sm mb-2">
                 {ev.description}
               </p>
               <a
                 href={ev.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  fontSize: "13px",
-                  color: "var(--color-primary)",
-                }}
+                className="text-sm text-primary"
               >
                 🔗 View File
               </a>
@@ -582,13 +555,13 @@ export default function DisputeDetailPage({
 
   if (isLoading)
     return (
-      <div className="loading" style={{ padding: "40px", textAlign: "center" }}>
+      <div className="loading text-center" style={{ padding: "40px" }}>
         Loading dispute details...
       </div>
     );
   if (!dispute)
     return (
-      <div style={{ padding: "40px", textAlign: "center" }}>
+      <div className="text-center" style={{ padding: "40px" }}>
         Dispute not found
       </div>
     );
@@ -600,51 +573,30 @@ export default function DisputeDetailPage({
 
   return (
     <div
-      style={{ display: "flex", minHeight: "100vh", flexDirection: "column" }}
+      className="flex flex-col" style={{ minHeight: "100vh" }}
     >
       <ToastContainer toasts={toasts} onClose={removeToast} />
       {/* Header */}
       <header
-        className="glass"
-        style={{
-          padding: "16px 24px",
-          borderBottom: "1px solid var(--color-border)",
-          display: "flex",
-          alignItems: "center",
-          gap: "16px",
-          flexWrap: "wrap",
-        }}
+        className="glass border-b-card flex items-center gap-4 flex-wrap" style={{ padding: "16px 24px" }}
       >
         <Link
           href="/dashboard/disputes"
-          style={{ fontSize: "14px", color: "var(--color-text-secondary)" }}
+          className="text-sm text-secondary"
         >
           ← Back to Disputes
         </Link>
-        <h1 style={{ fontSize: "20px", fontWeight: 800 }}>
+        <h1 className="text-xl font-extrabold">
           Dispute #{dispute.id.slice(-6)}
         </h1>
         <span
-          className="badge"
-          style={{
-            background: getStatusColor(dispute.status),
-            color: "white",
-            padding: "4px 12px",
-            borderRadius: "12px",
-            fontSize: "12px",
-            fontWeight: 600,
-          }}
+          className="badge text-xs font-semibold" style={{ background: getStatusColor(dispute.status), color: "white", padding: "4px 12px", borderRadius: "12px" }}
         >
           {dispute.status.replaceAll("_", " ")}
         </span>
         {dispute.tier > 1 && (
           <span
-            className="badge badge-warning"
-            style={{
-              padding: "4px 12px",
-              borderRadius: "12px",
-              fontSize: "12px",
-            }}
+            className="badge badge-warning text-xs" style={{ padding: "4px 12px", borderRadius: "12px" }}
           >
             Tier {dispute.tier}
           </span>
@@ -652,45 +604,27 @@ export default function DisputeDetailPage({
       </header>
 
       <main
-        style={{
-          padding: "24px",
-          maxWidth: "1200px",
-          margin: "0 auto",
-          width: "100%",
-        }}
+        className="p-6 w-full" style={{ maxWidth: "1200px", margin: "0 auto" }}
       >
         {/* AI Mediator Analysis Card */}
         {analysis && (
           <div
-            className="card"
-            style={{
-              marginBottom: "24px",
-              border: "1px solid var(--color-primary)",
-              background:
-                "linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(14, 165, 233, 0.05))",
-            }}
+            className="card mb-6" style={{ border: "1px solid var(--color-primary)", background:
+                "linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(14, 165, 233, 0.05))" }}
           >
             <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "16px",
-              }}
+              className="flex justify-between items-center mb-4"
             >
               <div
-                style={{ display: "flex", alignItems: "center", gap: "12px" }}
+                className="flex items-center gap-3"
               >
-                <span style={{ fontSize: "24px" }}>🤖</span>
+                <span className="text-2xl">🤖</span>
                 <div>
-                  <h2 style={{ fontSize: "18px", fontWeight: 700 }}>
+                  <h2 className="text-lg font-bold">
                     AI Mediator Analysis
                   </h2>
                   <span
-                    style={{
-                      fontSize: "12px",
-                      color: "var(--color-text-secondary)",
-                    }}
+                    className="text-xs text-secondary"
                   >
                     Tier {analysis.tier} • Auto-Resolution Engine
                   </span>
@@ -708,14 +642,7 @@ export default function DisputeDetailPage({
                 }
                 return (
                   <span
-                    style={{
-                      padding: "4px 12px",
-                      borderRadius: "12px",
-                      fontSize: "11px",
-                      fontWeight: 700,
-                      background: confBg,
-                      color: confColor,
-                    }}
+                    className="font-bold" style={{ padding: "4px 12px", borderRadius: "12px", fontSize: "11px", background: confBg, color: confColor }}
                   >
                     {analysis.confidence} CONFIDENCE
                   </span>
@@ -726,28 +653,15 @@ export default function DisputeDetailPage({
             {/* Verdict */}
             {analysis.verdict && analysis.verdict !== "PENDING" && (
               <div
-                style={{
-                  padding: "16px",
-                  background: "var(--color-bg-tertiary)",
-                  borderRadius: "8px",
-                  marginBottom: "16px",
-                }}
+                className="p-4 mb-4" style={{ background: "var(--color-bg-tertiary)", borderRadius: "8px" }}
               >
                 <div
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--color-text-secondary)",
-                    marginBottom: "4px",
-                  }}
+                  className="text-xs text-secondary mb-1"
                 >
                   VERDICT
                 </div>
                 <div
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 700,
-                    color: getVerdictColor(analysis.verdict),
-                  }}
+                  className="text-base font-bold" style={{ color: getVerdictColor(analysis.verdict) }}
                 >
                   {analysis.verdict.replaceAll("_", " ")}
                 </div>
@@ -755,17 +669,13 @@ export default function DisputeDetailPage({
             )}
 
             {/* Explanation */}
-            <div style={{ marginBottom: "16px" }}>
+            <div className="mb-4">
               <div
-                style={{
-                  fontSize: "12px",
-                  color: "var(--color-text-secondary)",
-                  marginBottom: "4px",
-                }}
+                className="text-xs text-secondary mb-1"
               >
                 EXPLANATION
               </div>
-              <p style={{ fontSize: "14px", lineHeight: "1.6" }}>
+              <p className="text-sm" style={{ lineHeight: "1.6" }}>
                 {analysis.explanation}
               </p>
             </div>
@@ -774,48 +684,29 @@ export default function DisputeDetailPage({
             {(analysis.refundPercentage > 0 ||
               analysis.influencerPayoutPercentage > 0) && (
               <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "12px",
-                  marginBottom: "16px",
-                }}
+                className="grid gap-3 mb-4" style={{ gridTemplateColumns: "1fr 1fr" }}
               >
                 <div
-                  style={{
-                    padding: "12px",
-                    background: "var(--color-bg-tertiary)",
-                    borderRadius: "8px",
-                  }}
+                  className="p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "8px" }}
                 >
                   <div
-                    style={{
-                      fontSize: "11px",
-                      color: "var(--color-text-secondary)",
-                    }}
+                    className="text-secondary" style={{ fontSize: "11px" }}
                   >
                     Brand Refund
                   </div>
-                  <div style={{ fontSize: "20px", fontWeight: 700 }}>
+                  <div className="text-xl font-bold">
                     {analysis.refundPercentage}%
                   </div>
                 </div>
                 <div
-                  style={{
-                    padding: "12px",
-                    background: "var(--color-bg-tertiary)",
-                    borderRadius: "8px",
-                  }}
+                  className="p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "8px" }}
                 >
                   <div
-                    style={{
-                      fontSize: "11px",
-                      color: "var(--color-text-secondary)",
-                    }}
+                    className="text-secondary" style={{ fontSize: "11px" }}
                   >
                     Influencer Payout
                   </div>
-                  <div style={{ fontSize: "20px", fontWeight: 700 }}>
+                  <div className="text-xl font-bold">
                     {analysis.influencerPayoutPercentage}%
                   </div>
                 </div>
@@ -826,66 +717,39 @@ export default function DisputeDetailPage({
             {(analysis.trustScoreChanges.influencer !== 0 ||
               analysis.trustScoreChanges.brand !== 0) && (
               <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "12px",
-                  marginBottom: "16px",
-                }}
+                className="grid gap-3 mb-4" style={{ gridTemplateColumns: "1fr 1fr" }}
               >
                 <div
-                  style={{
-                    padding: "12px",
-                    background: "var(--color-bg-tertiary)",
-                    borderRadius: "8px",
-                  }}
+                  className="p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "8px" }}
                 >
                   <div
-                    style={{
-                      fontSize: "11px",
-                      color: "var(--color-text-secondary)",
-                    }}
+                    className="text-secondary" style={{ fontSize: "11px" }}
                   >
                     Influencer Trust Δ
                   </div>
                   <div
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: 700,
-                      color:
+                    className="text-base font-bold" style={{ color:
                         analysis.trustScoreChanges.influencer >= 0
                           ? "#22c55e"
-                          : "#ef4444",
-                    }}
+                          : "#ef4444" }}
                   >
                     {analysis.trustScoreChanges.influencer >= 0 ? "+" : ""}
                     {analysis.trustScoreChanges.influencer}
                   </div>
                 </div>
                 <div
-                  style={{
-                    padding: "12px",
-                    background: "var(--color-bg-tertiary)",
-                    borderRadius: "8px",
-                  }}
+                  className="p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "8px" }}
                 >
                   <div
-                    style={{
-                      fontSize: "11px",
-                      color: "var(--color-text-secondary)",
-                    }}
+                    className="text-secondary" style={{ fontSize: "11px" }}
                   >
                     Brand Trust Δ
                   </div>
                   <div
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: 700,
-                      color:
+                    className="text-base font-bold" style={{ color:
                         analysis.trustScoreChanges.brand >= 0
                           ? "#22c55e"
-                          : "#ef4444",
-                    }}
+                          : "#ef4444" }}
                   >
                     {analysis.trustScoreChanges.brand >= 0 ? "+" : ""}
                     {analysis.trustScoreChanges.brand}
@@ -896,56 +760,33 @@ export default function DisputeDetailPage({
 
             {/* Findings */}
             {analysis.findings?.length > 0 && (
-              <div style={{ marginBottom: "16px" }}>
+              <div className="mb-4">
                 <div
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--color-text-secondary)",
-                    marginBottom: "8px",
-                  }}
+                  className="text-xs text-secondary mb-2"
                 >
                   FINDINGS
                 </div>
                 <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "6px",
-                  }}
+                  className="flex flex-col" style={{ gap: "6px" }}
                 >
                   {analysis.findings.map((f, idx) => (
                     <div
                       key={f.check + "_" + idx}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        padding: "8px 12px",
-                        background: "var(--color-bg-tertiary)",
-                        borderRadius: "6px",
-                        borderLeft: `3px solid ${getFindingColor(f.result)}`,
-                      }}
+                      className="flex items-center gap-2" style={{ padding: "8px 12px", background: "var(--color-bg-tertiary)", borderRadius: "6px", borderLeft: `3px solid ${getFindingColor(f.result)}` }}
                     >
                       <span>{getFindingIcon(f.result)}</span>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: "13px", fontWeight: 600 }}>
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold">
                           {f.check}
                         </div>
                         <div
-                          style={{
-                            fontSize: "12px",
-                            color: "var(--color-text-secondary)",
-                          }}
+                          className="text-xs text-secondary"
                         >
                           {f.detail}
                         </div>
                       </div>
                       <span
-                        style={{
-                          fontSize: "11px",
-                          fontWeight: 700,
-                          color: getFindingColor(f.result),
-                        }}
+                        className="font-bold" style={{ fontSize: "11px", color: getFindingColor(f.result) }}
                       >
                         {f.result}
                       </span>
@@ -958,19 +799,13 @@ export default function DisputeDetailPage({
             {/* Action Buttons */}
             {canTakeAction && dispute.status !== "RESOLVED" && (
               <div
-                style={{
-                  display: "flex",
-                  gap: "12px",
-                  flexWrap: "wrap",
-                  borderTop: "1px solid var(--color-border)",
-                  paddingTop: "16px",
-                }}
+                className="flex gap-3 flex-wrap" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "16px" }}
               >
                 <Button
                   variant="primary"
                   onClick={() => handleDisputeAction("accept_resolution")}
                   disabled={!!actionLoading}
-                  style={{ flex: 1 }}
+                  className="flex-1"
                 >
                   {actionLoading === "accept_resolution"
                     ? "Processing..."
@@ -980,7 +815,7 @@ export default function DisputeDetailPage({
                   variant="secondary"
                   onClick={() => handleDisputeAction("reject_resolution")}
                   disabled={!!actionLoading}
-                  style={{ flex: 1 }}
+                  className="flex-1"
                 >
                   {actionLoading === "reject_resolution"
                     ? "Processing..."
@@ -994,67 +829,51 @@ export default function DisputeDetailPage({
         <div className="grid-2" style={{ alignItems: "start" }}>
           {/* Left Column: Details */}
           <div>
-            <div className="card" style={{ marginBottom: "24px" }}>
+            <div className="card mb-6">
               <h2
-                style={{
-                  fontSize: "18px",
-                  fontWeight: 700,
-                  marginBottom: "16px",
-                }}
+                className="text-lg font-bold mb-4"
               >
                 Issue Details
               </h2>
-              <div style={{ marginBottom: "16px" }}>
+              <div className="mb-4">
                 <div
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--color-text-secondary)",
-                  }}
+                  className="text-xs text-secondary"
                 >
                   Type
                 </div>
-                <div style={{ fontWeight: 600 }}>{dispute.type}</div>
+                <div className="font-semibold">{dispute.type}</div>
               </div>
-              <div style={{ marginBottom: "16px" }}>
+              <div className="mb-4">
                 <div
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--color-text-secondary)",
-                  }}
+                  className="text-xs text-secondary"
                 >
                   Description
                 </div>
-                <p style={{ fontSize: "14px", lineHeight: "1.5" }}>
+                <p className="text-sm" style={{ lineHeight: "1.5" }}>
                   {dispute.description}
                 </p>
               </div>
-              <div style={{ marginBottom: "16px" }}>
+              <div className="mb-4">
                 <div
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--color-text-secondary)",
-                  }}
+                  className="text-xs text-secondary"
                 >
                   Deal
                 </div>
                 <Link
                   href={`/dashboard/deals/${dispute.deal.id}`}
-                  style={{ color: "var(--color-primary)", fontWeight: 600 }}
+                  className="text-primary font-semibold"
                 >
                   {dispute.deal.campaign.title} ({dispute.deal.amount / 100}{" "}
                   INR)
                 </Link>
               </div>
-              <div style={{ marginBottom: "16px" }}>
+              <div className="mb-4">
                 <div
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--color-text-secondary)",
-                  }}
+                  className="text-xs text-secondary"
                 >
                   Filed on
                 </div>
-                <div style={{ fontSize: "14px" }}>
+                <div className="text-sm">
                   {new Date(dispute.createdAt).toLocaleString()}
                 </div>
               </div>
@@ -1063,30 +882,17 @@ export default function DisputeDetailPage({
             {/* Resolution */}
             {dispute.resolution && (
               <div
-                className="card"
-                style={{
-                  marginBottom: "24px",
-                  border: "1px solid var(--color-success)",
-                }}
+                className="card mb-6" style={{ border: "1px solid var(--color-success)" }}
               >
                 <h2
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 700,
-                    marginBottom: "16px",
-                    color: "var(--color-success)",
-                  }}
+                  className="text-lg font-bold mb-4" style={{ color: "var(--color-success)" }}
                 >
                   ✅ Resolution
                 </h2>
                 <p>{dispute.resolution}</p>
                 {dispute.resolvedAt && (
                   <div
-                    style={{
-                      marginTop: "16px",
-                      fontSize: "12px",
-                      color: "var(--color-text-secondary)",
-                    }}
+                    className="mt-4 text-xs text-secondary"
                   >
                     Resolved on{" "}
                     {dispute.resolvedAt ? new Date(dispute.resolvedAt).toLocaleDateString() : ""}
@@ -1097,22 +903,14 @@ export default function DisputeDetailPage({
 
             {/* Escalate Button */}
             {canEscalate && dispute.status !== "RESOLVED" && (
-              <div className="card" style={{ marginBottom: "24px" }}>
+              <div className="card mb-6">
                 <h2
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 700,
-                    marginBottom: "12px",
-                  }}
+                  className="text-base font-bold mb-3"
                 >
                   ⚖️ Escalate Dispute
                 </h2>
                 <p
-                  style={{
-                    fontSize: "13px",
-                    color: "var(--color-text-secondary)",
-                    marginBottom: "12px",
-                  }}
+                  className="text-sm text-secondary mb-3"
                 >
                   Not satisfied with the AI resolution? Escalate to{" "}
                   {dispute.tier === 1
@@ -1127,14 +925,14 @@ export default function DisputeDetailPage({
                       placeholder="Why do you want to escalate? Provide your reasoning..."
                       value={escalateReason}
                       onChange={(e) => setEscalateReason(e.target.value)}
-                      style={{ marginBottom: "12px" }}
+                      className="mb-3"
                     />
-                    <div style={{ display: "flex", gap: "8px" }}>
+                    <div className="flex gap-2">
                       <Button
                         variant="warning"
                         onClick={() => handleDisputeAction("escalate")}
                         disabled={!escalateReason || !!actionLoading}
-                        style={{ flex: 1 }}
+                        className="flex-1"
                       >
                         {actionLoading === "escalate"
                           ? "Escalating..."
@@ -1152,7 +950,7 @@ export default function DisputeDetailPage({
                   <Button
                     variant="warning"
                     onClick={() => setShowEscalateForm(true)}
-                    style={{ width: "100%" }}
+                    className="w-full"
                   >
                     Request Escalation
                   </Button>

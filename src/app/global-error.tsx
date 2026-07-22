@@ -31,25 +31,9 @@ export default function GlobalError({
         }}
       >
         {/* Abstract Background Elements */}
-        <div style={{
-          position: "fixed",
-          top: "10%",
-          left: "5%",
-          width: "400px",
-          height: "400px",
-          background: "radial-gradient(circle, rgba(244, 63, 94, 0.08) 0%, transparent 70%)",
-          zIndex: 0
-        }} />
+        <div className="fixed" style={{ top: "10%", left: "5%", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(244, 63, 94, 0.08) 0%, transparent 70%)", zIndex: 0 }} />
 
-        <div className="glass col-span-2 text-center" style={{
-          maxWidth: "500px",
-          width: "100%",
-          padding: "48px 32px",
-          borderRadius: "var(--radius-xl)",
-          border: "1px solid rgba(244, 63, 94, 0.2)",
-          position: "relative",
-          zIndex: 1
-        }}>
+        <div className="glass col-span-2 text-center w-full relative" style={{ maxWidth: "500px", padding: "48px 32px", borderRadius: "var(--radius-xl)", border: "1px solid rgba(244, 63, 94, 0.2)", zIndex: 1 }}>
           <div
             className="flex items-center justify-center mb-8"
             style={{
@@ -79,13 +63,7 @@ export default function GlobalError({
           </p>
 
           {error.digest && (
-            <div className="text-xs text-muted mb-8" style={{
-              background: "rgba(255,255,255,0.03)",
-              padding: "12px",
-              borderRadius: "var(--radius-md)",
-              fontFamily: "monospace",
-              border: "1px solid var(--color-border)"
-            }}>
+            <div className="text-xs text-muted mb-8 p-3" style={{ background: "rgba(255,255,255,0.03)", borderRadius: "var(--radius-md)", fontFamily: "monospace", border: "1px solid var(--color-border)" }}>
               Digest: {error.digest}
             </div>
           )}
@@ -95,14 +73,14 @@ export default function GlobalError({
               onClick={() => reset()}
               variant="danger"
               aria-label="Restart Session"
-              style={{ flex: 1, boxShadow: "0 0 20px rgba(244, 63, 94, 0.2)" }}
+              className="flex-1" style={{ boxShadow: "0 0 20px rgba(244, 63, 94, 0.2)" }}
             >
               🔄 Restart Session
             </Button>
             <Button
               href="/"
               variant="secondary"
-              style={{ flex: 1 }}
+              className="flex-1"
             >
               🏠 Return Home
             </Button>

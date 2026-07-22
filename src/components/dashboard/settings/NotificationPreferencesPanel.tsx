@@ -42,11 +42,7 @@ export default function NotificationPreferencesPanel({
   return (
     <div className="card" style={{ maxWidth: "800px" }}>
       <h3
-        style={{
-          fontSize: "20px",
-          fontWeight: 700,
-          marginBottom: "24px",
-        }}
+        className="text-xl font-bold mb-6"
       >
         Notification Preferences
       </h3>
@@ -59,7 +55,7 @@ export default function NotificationPreferencesPanel({
       />
 
 
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+      <div className="flex justify-end">
         <Button
           type="button"
           variant="primary"
@@ -85,47 +81,28 @@ function PreferenceGroup({
   onToggle: NotificationPreferencesPanelProps["onToggle"];
 }>) {
   return (
-    <section style={{ marginBottom: "32px" }}>
+    <section className="mb-8">
       <h4
-        style={{
-          fontSize: "16px",
-          fontWeight: 600,
-          marginBottom: "16px",
-        }}
+        className="text-base font-semibold mb-4"
       >
         {title}
       </h4>
       <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-        }}
+        className="flex flex-col gap-4"
       >
         {Object.entries(values).map(([key, value]) => {
           const category = key as NotificationCategory;
           return (
             <div
               key={key}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "16px",
-                padding: "12px",
-                background: "var(--color-bg-tertiary)",
-                borderRadius: "var(--radius-sm)",
-              }}
+              className="flex items-center justify-between gap-4 p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)" }}
             >
               <div>
-                <div style={{ fontWeight: 600 }}>
+                <div className="font-semibold">
                   {notificationLabels[category]}
                 </div>
                 <div
-                  style={{
-                    fontSize: "13px",
-                    color: "var(--color-text-secondary)",
-                  }}
+                  className="text-sm text-secondary"
                 >
                   Receive {notificationLabels[category].toLowerCase()} by{" "}
                   {type === "email" ? "email" : "push notification"}.
@@ -156,13 +133,7 @@ function Toggle({
   return (
     <label
       aria-label={label}
-      style={{
-        position: "relative",
-        display: "inline-block",
-        width: "44px",
-        height: "24px",
-        flex: "0 0 auto",
-      }}
+      className="relative" style={{ display: "inline-block", width: "44px", height: "24px", flex: "0 0 auto" }}
     >
       <input
         type="checkbox"
@@ -172,30 +143,11 @@ function Toggle({
       />
       <span
         aria-hidden="true"
-        style={{
-          position: "absolute",
-          cursor: "pointer",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: checked ? "var(--color-primary)" : "#2f2f46",
-          transition: ".2s",
-          borderRadius: "34px",
-        }}
+        className="absolute cursor-pointer" style={{ top: 0, left: 0, right: 0, bottom: 0, backgroundColor: checked ? "var(--color-primary)" : "#2f2f46", transition: ".2s", borderRadius: "34px" }}
       />
       <span
         aria-hidden="true"
-        style={{
-          position: "absolute",
-          height: "18px",
-          width: "18px",
-          left: checked ? "23px" : "3px",
-          bottom: "3px",
-          backgroundColor: "white",
-          transition: ".2s",
-          borderRadius: "50%",
-        }}
+        className="absolute" style={{ height: "18px", width: "18px", left: checked ? "23px" : "3px", bottom: "3px", backgroundColor: "white", transition: ".2s", borderRadius: "50%" }}
       />
     </label>
   );

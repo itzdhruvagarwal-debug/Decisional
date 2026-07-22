@@ -26,12 +26,12 @@ const values = [
 
 export default function AboutPage() {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="flex flex-col" style={{ minHeight: "100vh" }}>
       <Navbar />
 
-      <main style={{ flex: 1, paddingTop: "80px" }}>
+      <main className="flex-1" style={{ paddingTop: "80px" }}>
         <section className="section" style={{ background: "var(--color-bg-secondary)" }}>
-          <div className="container" style={{ textAlign: "center", maxWidth: "840px" }}>
+          <div className="container text-center" style={{ maxWidth: "840px" }}>
             <h1 className="section-title">
               Decisional helps brands and creators run trusted collaborations
             </h1>
@@ -43,9 +43,9 @@ export default function AboutPage() {
 
         <section className="section">
           <div className="container">
-            <div className="grid-2" style={{ alignItems: "center", gap: "48px" }}>
+            <div className="grid-2 items-center" style={{ gap: "48px" }}>
               <div>
-                <h2 style={{ fontSize: "32px", fontWeight: 800, marginBottom: "20px" }}>
+                <h2 className="font-extrabold mb-5" style={{ fontSize: "32px" }}>
                   Why Decisional exists
                 </h2>
                 <p style={bodyStyle}>
@@ -62,13 +62,13 @@ export default function AboutPage() {
               </div>
               <div style={visualPanelStyle}>
                 <div style={{ maxWidth: "340px" }}>
-                  <div style={{ fontSize: "13px", color: "var(--color-primary-light)", fontWeight: 800, marginBottom: "12px", textTransform: "uppercase" }}>
+                  <div className="text-sm font-extrabold mb-3" style={{ color: "var(--color-primary-light)", textTransform: "uppercase" }}>
                     Built for operational trust
                   </div>
-                  <h3 style={{ fontSize: "28px", lineHeight: 1.2, marginBottom: "16px" }}>
+                  <h3 className="mb-4" style={{ fontSize: "28px", lineHeight: 1.2 }}>
                     Brief. Escrow. Verify. Release.
                   </h3>
-                  <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
+                  <p className="text-secondary" style={{ lineHeight: 1.7 }}>
                     Every deal has a visible trail: who agreed, what was promised, when work was submitted, how it was approved, and how payment moved.
                   </p>
                 </div>
@@ -83,13 +83,13 @@ export default function AboutPage() {
             <div className="grid-3">
               {values.map((item) => (
                 <article key={item.title} className="card">
-                  <div style={{ color: "var(--color-primary-light)", fontSize: "12px", fontWeight: 800, marginBottom: "12px", textTransform: "uppercase" }}>
+                  <div className="text-xs font-extrabold mb-3" style={{ color: "var(--color-primary-light)", textTransform: "uppercase" }}>
                     {item.label}
                   </div>
-                  <h3 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "10px" }}>
+                  <h3 className="text-xl font-extrabold" style={{ marginBottom: "10px" }}>
                     {item.title}
                   </h3>
-                  <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
+                  <p className="text-secondary" style={{ lineHeight: 1.7 }}>
                     {item.description}
                   </p>
                 </article>

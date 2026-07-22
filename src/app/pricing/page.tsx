@@ -32,27 +32,15 @@ export default function PricingPage() {
       <Navbar />
 
       <main
-        style={{
-          paddingTop: "120px",
-          paddingBottom: "80px",
-          overflow: "hidden",
-          position: "relative",
-        }}
+        className="overflow-hidden relative" style={{ paddingTop: "120px", paddingBottom: "80px" }}
       >
         <div style={{ maxWidth: "1040px", margin: "0 auto", padding: "0 20px" }}>
-          <div style={{ textAlign: "center", marginBottom: "52px" }}>
+          <div className="text-center" style={{ marginBottom: "52px" }}>
             <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              style={{
-                fontSize: "clamp(34px, 7vw, 48px)",
-                fontWeight: 800,
-                background:
-                  "linear-gradient(135deg, var(--color-primary), var(--color-accent-cyan))",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                marginBottom: "16px",
-              }}
+              className="font-extrabold mb-4" style={{ fontSize: "clamp(34px, 7vw, 48px)", background:
+                  "linear-gradient(135deg, var(--color-primary), var(--color-accent-cyan))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
             >
               Transparent Pricing
             </motion.h1>
@@ -60,13 +48,7 @@ export default function PricingPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
-              style={{
-                color: "var(--color-text-secondary)",
-                fontSize: "18px",
-                lineHeight: 1.7,
-                maxWidth: "720px",
-                margin: "0 auto",
-              }}
+              className="text-secondary text-lg" style={{ lineHeight: 1.7, maxWidth: "720px", margin: "0 auto" }}
             >
               Join for free. Decisional earns when a protected collaboration is
               successfully completed, verified, and paid out.
@@ -74,12 +56,7 @@ export default function PricingPage() {
           </div>
 
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-              gap: "28px",
-              marginBottom: "72px",
-            }}
+            className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "28px", marginBottom: "72px" }}
           >
             <PricingCard
               title="Influencer"
@@ -122,13 +99,13 @@ export default function PricingPage() {
           </div>
 
           <section style={{ maxWidth: "820px", margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: "36px" }}>
-              <h2 style={{ fontSize: "28px", fontWeight: 700 }}>
+            <div className="text-center" style={{ marginBottom: "36px" }}>
+              <h2 className="font-bold" style={{ fontSize: "28px" }}>
                 Frequently Asked Questions
               </h2>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div className="flex flex-col gap-4">
               <FAQItem
                 question="Are there any subscription fees?"
                 answer="No. Brands and influencers can create an account without a subscription. Fees apply only when a collaboration uses Decisional's protected workflow."
@@ -158,27 +135,16 @@ export default function PricingPage() {
           </section>
 
           <div
-            style={{
-              textAlign: "center",
-              marginTop: "60px",
-              paddingBottom: "40px",
-            }}
+            className="text-center" style={{ marginTop: "60px", paddingBottom: "40px" }}
           >
             <p
-              style={{
-                color: "var(--color-text-secondary)",
-                marginBottom: "16px",
-              }}
+              className="text-secondary mb-4"
             >
               Need a custom workflow, enterprise controls, or compliance review?
             </p>
             <Link
               href="/contact"
-              style={{
-                color: "var(--color-primary)",
-                fontWeight: 700,
-                textDecoration: "none",
-              }}
+              className="text-primary font-bold" style={{ textDecoration: "none" }}
             >
               Contact support
             </Link>
@@ -209,81 +175,35 @@ function PricingCard({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      style={{
-        background: `linear-gradient(135deg, ${color}11, ${color}05)`,
-        border: `1px solid ${color}33`,
-        borderRadius: "20px",
-        padding: "34px",
-        position: "relative",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        boxShadow: isPopular ? `0 10px 40px -10px ${color}33` : "none",
-      }}
+      className="relative overflow-hidden flex flex-col" style={{ background: `linear-gradient(135deg, ${color}11, ${color}05)`, border: `1px solid ${color}33`, borderRadius: "20px", padding: "34px", boxShadow: isPopular ? `0 10px 40px -10px ${color}33` : "none" }}
     >
       {isPopular && (
         <div
-          style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            background: color,
-            color: "#05030f",
-            fontSize: "11px",
-            fontWeight: 800,
-            padding: "6px 16px",
-            borderRadius: "0 0 0 14px",
-            textTransform: "uppercase",
-            letterSpacing: 0,
-          }}
+          className="absolute font-extrabold" style={{ top: 0, right: 0, background: color, color: "#05030f", fontSize: "11px", padding: "6px 16px", borderRadius: "0 0 0 14px", textTransform: "uppercase", letterSpacing: 0 }}
         >
           Most Popular
         </div>
       )}
 
-      <div style={{ marginBottom: "24px" }}>
+      <div className="mb-6">
         <div
           aria-hidden="true"
-          style={{
-            width: "58px",
-            height: "58px",
-            borderRadius: "18px",
-            background: `linear-gradient(135deg, ${color}, ${color}88)`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "18px",
-            fontWeight: 900,
-            marginBottom: "20px",
-            color: "#05030f",
-            boxShadow: `0 8px 20px ${color}44`,
-          }}
+          className="flex items-center justify-center text-lg mb-5" style={{ width: "58px", height: "58px", borderRadius: "18px", background: `linear-gradient(135deg, ${color}, ${color}88)`, fontWeight: 900, color: "#05030f", boxShadow: `0 8px 20px ${color}44` }}
         >
           {marker}
         </div>
-        <h3 style={{ fontSize: "24px", fontWeight: 800, marginBottom: "8px" }}>
+        <h3 className="text-2xl font-extrabold mb-2">
           {title}
         </h3>
         <p
-          style={{
-            color: "var(--color-text-secondary)",
-            fontSize: "14px",
-            lineHeight: 1.7,
-          }}
+          className="text-secondary text-sm" style={{ lineHeight: 1.7 }}
         >
           {description}
         </p>
       </div>
 
       <div
-        style={{
-          marginBottom: "30px",
-          padding: "20px",
-          background: "var(--color-bg-tertiary)",
-          borderRadius: "16px",
-          textAlign: "center",
-          border: "1px solid var(--color-border)",
-        }}
+        className="text-center" style={{ marginBottom: "30px", padding: "20px", background: "var(--color-bg-tertiary)", borderRadius: "16px", border: "1px solid var(--color-border)" }}
       >
         <div
           style={{
@@ -295,50 +215,23 @@ function PricingCard({
           {price}
         </div>
         <div
-          style={{
-            fontSize: "12px",
-            fontWeight: 700,
-            color: "var(--color-text-secondary)",
-            textTransform: "uppercase",
-            letterSpacing: 0,
-          }}
+          className="text-xs font-bold text-secondary" style={{ textTransform: "uppercase", letterSpacing: 0 }}
         >
           {subtitle}
         </div>
       </div>
 
       <ul
-        style={{
-          flex: 1,
-          marginBottom: "30px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          listStyle: "none",
-          padding: 0,
-        }}
+        className="flex-1 flex flex-col gap-3" style={{ marginBottom: "30px", listStyle: "none", padding: 0 }}
       >
         {features.map((feature) => (
           <li
             key={feature}
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "12px",
-              fontSize: "14px",
-              color: "var(--color-text-secondary)",
-              lineHeight: 1.55,
-            }}
+            className="flex items-start gap-3 text-sm text-secondary" style={{ lineHeight: 1.55 }}
           >
             <svg
               aria-hidden="true"
-              style={{
-                color,
-                width: "16px",
-                height: "16px",
-                flexShrink: 0,
-                marginTop: "3px",
-              }}
+              className="flex-shrink-0" style={{ color, width: "16px", height: "16px", marginTop: "3px" }}
               fill="none"
               stroke="currentColor"
               strokeWidth="3"
@@ -351,21 +244,11 @@ function PricingCard({
         ))}
       </ul>
 
-      <Link href={ctaLink} style={{ width: "100%" }}>
+      <Link href={ctaLink} className="w-full">
         <Button
-          style={{
-            width: "100%",
-            background: isPopular
+          className="w-full p-4 text-base font-bold cursor-pointer" style={{ background: isPopular
               ? `linear-gradient(135deg, ${color}, ${color}dd)`
-              : "var(--color-bg-secondary)",
-            color: isPopular ? "#05030f" : "var(--color-text-primary)",
-            border: isPopular ? "none" : `1px solid ${color}44`,
-            padding: "16px",
-            fontSize: "16px",
-            fontWeight: 700,
-            cursor: "pointer",
-            transition: "transform 0.2s",
-          }}
+              : "var(--color-bg-secondary)", color: isPopular ? "#05030f" : "var(--color-text-primary)", border: isPopular ? "none" : `1px solid ${color}44`, transition: "transform 0.2s" }}
         >
           {ctaText}
         </Button>
@@ -380,24 +263,11 @@ function FAQItem({ question, answer, delay }: Readonly<FAQItemProps>) {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay }}
-      style={{
-        background: "var(--color-bg-secondary)",
-        borderRadius: "16px",
-        border: "1px solid var(--color-border)",
-        overflow: "hidden",
-      }}
+      className="overflow-hidden" style={{ background: "var(--color-bg-secondary)", borderRadius: "16px", border: "1px solid var(--color-border)" }}
     >
-      <details style={{ cursor: "pointer" }} className="group">
+      <details   className="cursor-pointer group">
         <summary
-          style={{
-            padding: "20px",
-            fontWeight: 600,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "16px",
-            listStyle: "none",
-          }}
+          className="font-semibold flex justify-between items-center gap-4" style={{ padding: "20px", listStyle: "none" }}
         >
           <span>{question}</span>
           <svg
@@ -417,12 +287,7 @@ function FAQItem({ question, answer, delay }: Readonly<FAQItemProps>) {
           </svg>
         </summary>
         <div
-          style={{
-            padding: "0 20px 20px",
-            color: "var(--color-text-secondary)",
-            fontSize: "14px",
-            lineHeight: "1.6",
-          }}
+          className="text-secondary text-sm" style={{ padding: "0 20px 20px", lineHeight: "1.6" }}
         >
           {answer}
         </div>

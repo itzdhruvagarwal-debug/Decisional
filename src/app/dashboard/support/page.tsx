@@ -99,16 +99,16 @@ export default function SupportPage() {
   return (
     <DashboardShell user={session?.user}>
       <div style={{ maxWidth: "680px", margin: "0 auto", padding: "24px 16px" }}>
-        <header style={{ marginBottom: "32px", textAlign: "center" }}>
-          <h1 style={{ fontSize: "32px", fontWeight: 800, marginBottom: "8px" }} className="gradient-text">
+        <header className="mb-8 text-center">
+          <h1 className="font-extrabold mb-2 gradient-text text-3xl">
             Support & Feedback Hub
           </h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "16px" }}>
+          <p className="text-secondary text-base">
             Submit bug reports or platform feedback and earn gamification badges!
           </p>
         </header>
 
-        <form onSubmit={handleSubmit} className="card" style={{ display: "grid", gap: "20px", padding: "32px" }}>
+        <form onSubmit={handleSubmit} className="card grid gap-5" style={{ padding: "32px" }}>
           <div>
             <Select
               id="type"
@@ -153,13 +153,13 @@ export default function SupportPage() {
           </div>
 
           <div>
-            <label htmlFor="screenshot-file-input" style={{ display: "block", fontWeight: 600, marginBottom: "8px", fontSize: "14px" }}>
+            <label htmlFor="screenshot-file-input" className="block font-semibold mb-2 text-sm">
               Screenshot (Optional)
             </label>
             {screenshotUrl ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "var(--color-bg-tertiary)", padding: "12px", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
-                <Image src={screenshotUrl} alt="Uploaded screenshot" width={48} height={48} unoptimized style={{ objectFit: "cover", borderRadius: "var(--radius-sm)" }} />
-                <div style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "14px" }}>
+              <div className="flex items-center gap-3 p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
+                <Image src={screenshotUrl} alt="Uploaded screenshot" width={48} height={48} unoptimized className="object-cover" style={{ borderRadius: "var(--radius-sm)" }} />
+                <div className="flex-1 overflow-hidden text-sm" style={{ textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   Screenshot uploaded successfully
                 </div>
                 <Button
@@ -167,7 +167,7 @@ export default function SupportPage() {
                   aria-label="Remove uploaded screenshot"
                   onClick={() => setScreenshotUrl("")}
                   variant="ghost"
-                  style={{ color: "var(--color-error)", fontWeight: 600 }}
+                  className="font-semibold" style={{ color: "var(--color-error)" }}
                 >
                   Remove
                 </Button>
@@ -180,14 +180,7 @@ export default function SupportPage() {
                   disabled={uploadingScreenshot}
                   onClick={() => fileInputRef.current?.click()}
                   variant="ghost"
-                  style={{
-                    width: "100%",
-                    padding: "12px",
-                    border: "1px dashed var(--color-border)",
-                    color: "var(--color-text-secondary)",
-                    textAlign: "center",
-                    fontWeight: 600,
-                  }}
+                  className="w-full p-3 text-secondary text-center font-semibold" style={{ border: "1px dashed var(--color-border)" }}
                 >
                   {uploadingScreenshot ? "Uploading screenshot..." : "📷 Upload Screenshot (Max 5MB)"}
                 </Button>
@@ -197,38 +190,30 @@ export default function SupportPage() {
                   ref={fileInputRef}
                   onChange={handleScreenshotUpload}
                   accept="image/png, image/jpeg, image/webp, image/gif"
-                  style={{ display: "none" }}
+                  className="hidden"
                 />
               </div>
             )}
           </div>
 
           {errorMsg && (
-            <div role="alert" aria-live="assertive" style={{ color: "var(--color-error)", padding: "12px", background: "rgba(225,29,72,0.1)", borderRadius: "var(--radius-sm)", fontSize: "14px" }}>
+            <div role="alert" aria-live="assertive" className="p-3 text-sm" style={{ color: "var(--color-error)", background: "rgba(225,29,72,0.1)", borderRadius: "var(--radius-sm)" }}>
               {errorMsg}
             </div>
           )}
 
           {statusMsg && (
-            <div role="status" aria-live="polite" style={{ color: "var(--color-success)", padding: "12px", background: "rgba(16,185,129,0.1)", borderRadius: "var(--radius-sm)", fontSize: "14px" }}>
+            <div role="status" aria-live="polite" className="p-3 text-sm" style={{ color: "var(--color-success)", background: "rgba(16,185,129,0.1)", borderRadius: "var(--radius-sm)" }}>
               {statusMsg}
             </div>
           )}
 
           {badgeAwarded && (
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "16px",
-              padding: "16px",
-              background: "linear-gradient(135deg, rgba(234,179,8,0.15), rgba(249,115,22,0.15))",
-              border: "1px solid rgba(234,179,8,0.3)",
-              borderRadius: "var(--radius-md)",
-            }}>
+            <div className="flex items-center gap-4 p-4" style={{ background: "linear-gradient(135deg, rgba(234,179,8,0.15), rgba(249,115,22,0.15))", border: "1px solid rgba(234,179,8,0.3)", borderRadius: "var(--radius-md)" }}>
               <span style={{ fontSize: "36px" }}>🏆</span>
               <div>
-                <h4 style={{ fontWeight: 800, color: "var(--color-warning)" }}>New Badge Earned!</h4>
-                <p style={{ fontSize: "14px", color: "var(--color-text-primary)", marginTop: "2px" }}>
+                <h4 className="font-extrabold" style={{ color: "var(--color-warning)" }}>New Badge Earned!</h4>
+                <p className="text-sm" style={{ color: "var(--color-text-primary)", marginTop: "2px" }}>
                   You earned the <strong>{badgeAwarded === "bug_reporter" ? "Bug Reporter" : "Feedback Giver"}</strong> badge! Check it in your Badges tab.
                 </p>
               </div>
@@ -239,7 +224,7 @@ export default function SupportPage() {
             type="submit"
             disabled={loading || uploadingScreenshot}
             variant="primary"
-            style={{ justifyContent: "center", padding: "14px", fontWeight: 700 }}
+            className="justify-center font-bold" style={{ padding: "14px" }}
           >
             {loading ? "Submitting..." : "Submit to Support"}
           </Button>

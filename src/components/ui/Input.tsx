@@ -12,14 +12,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     
     return (
       <div 
-        className="input-wrapper" 
-        style={{ 
-          width: fullWidth ? "100%" : "auto", 
-          display: "flex", 
-          flexDirection: "column", 
-          gap: "8px", 
-          ...style 
-        }}
+        className="input-wrapper flex flex-col gap-2" style={{ width: fullWidth ? "100%" : "auto", ...style }}
       >
         {label && (
           <label className="label" htmlFor={inputId} style={{ marginBottom: 0 }}>
@@ -34,12 +27,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         />
         {error && (
           <span 
-            className="input-error-message" 
-            style={{ 
-              fontSize: "12px", 
-              color: "var(--color-accent-rose, #f43f5e)", 
-              marginTop: "2px" 
-            }}
+            className="input-error-message text-xs" style={{ color: "var(--color-accent-rose, #f43f5e)", marginTop: "2px" }}
           >
             {error}
           </span>

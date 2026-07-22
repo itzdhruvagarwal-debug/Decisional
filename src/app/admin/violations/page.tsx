@@ -51,7 +51,7 @@ export default async function AdminViolationsPage() {
           <h1 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "6px" }}>
             User Violations
           </h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+          <p className="text-secondary text-sm">
             View all user violations and enforcement actions.
           </p>
         </div>
@@ -64,24 +64,16 @@ export default async function AdminViolationsPage() {
           description="No violations have been recorded yet."
         />
       ) : (
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+        <div className="card overflow-hidden" style={{ padding: 0 }}>
           <div className="admin-table-wrap">
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <table className="w-full" style={{ borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: "var(--color-bg-secondary)" }}>
                   {["User", "Type", "Severity", "Action", "Description", "Date", "Expires"].map(
                     (heading) => (
                       <th
                         key={heading}
-                        style={{
-                          padding: "14px 18px",
-                          textAlign: "left",
-                          borderBottom: "1px solid var(--color-border)",
-                          color: "var(--color-text-muted)",
-                          fontSize: "12px",
-                          fontWeight: 800,
-                          textTransform: "uppercase",
-                        }}
+                        className="text-left border-b-card text-muted text-xs font-extrabold" style={{ padding: "14px 18px", textTransform: "uppercase" }}
                       >
                         {heading}
                       </th>
@@ -99,57 +91,39 @@ export default async function AdminViolationsPage() {
                     violation.user.email;
 
                   return (
-                    <tr key={violation.id} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                      <td style={{ padding: "16px 18px" }}>
-                        <div style={{ fontWeight: 800 }}>{name}</div>
-                        <div style={{ color: "var(--color-text-muted)", fontSize: "12px", marginTop: "2px" }}>
+                    <tr key={violation.id} className="border-b-card">
+                      <td className="p-card">
+                        <div className="font-extrabold">{name}</div>
+                        <div className="text-muted text-xs" style={{ marginTop: "2px" }}>
                           {violation.user.email} ({violation.user.userType})
                         </div>
                       </td>
-                      <td style={{ padding: "16px 18px", fontWeight: 700 }}>
+                      <td className="p-card font-bold">
                         {violation.type}
                       </td>
-                      <td style={{ padding: "16px 18px" }}>
+                      <td className="p-card">
                         <span
-                          className="badge"
-                          style={{
-                            background: severityStyle.background,
-                            color: severityStyle.color,
-                            fontSize: "11px",
-                            fontWeight: 800,
-                            padding: "4px 8px",
-                            borderRadius: "12px",
-                            textTransform: "uppercase",
-                          }}
+                          className="badge font-extrabold" style={{ background: severityStyle.background, color: severityStyle.color, fontSize: "11px", padding: "4px 8px", borderRadius: "12px", textTransform: "uppercase" }}
                         >
                           {violation.severity}
                         </span>
                       </td>
-                      <td style={{ padding: "16px 18px" }}>
+                      <td className="p-card">
                         <span
-                          className="badge"
-                          style={{
-                            background: actionStyle.background,
-                            color: actionStyle.color,
-                            fontSize: "11px",
-                            fontWeight: 800,
-                            padding: "4px 8px",
-                            borderRadius: "6px",
-                            textTransform: "uppercase",
-                          }}
+                          className="badge font-extrabold" style={{ background: actionStyle.background, color: actionStyle.color, fontSize: "11px", padding: "4px 8px", borderRadius: "6px", textTransform: "uppercase" }}
                         >
                           {violation.action}
                         </span>
                       </td>
-                      <td style={{ padding: "16px 18px", color: "var(--color-text-primary)", fontSize: "13px" }}>
-                        <div style={{ maxWidth: "240px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={violation.description}>
+                      <td className="p-card text-sm" style={{ color: "var(--color-text-primary)" }}>
+                        <div className="overflow-hidden" style={{ maxWidth: "240px", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={violation.description}>
                           {violation.description}
                         </div>
                       </td>
-                      <td style={{ padding: "16px 18px", color: "var(--color-text-secondary)", fontSize: "13px" }}>
+                      <td className="p-card text-secondary text-sm">
                         {new Date(violation.createdAt).toLocaleDateString("en-IN")}
                       </td>
-                      <td style={{ padding: "16px 18px", color: "var(--color-text-secondary)", fontSize: "13px" }}>
+                      <td className="p-card text-secondary text-sm">
                         {violation.expiresAt
                           ? new Date(violation.expiresAt).toLocaleDateString("en-IN")
                           : "Never"}

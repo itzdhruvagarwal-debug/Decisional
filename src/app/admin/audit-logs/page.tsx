@@ -40,7 +40,7 @@ export default async function AdminAuditLogsPage() {
           <h1 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "6px" }}>
             Audit Logs
           </h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+          <p className="text-secondary text-sm">
             View all system activity and administrative actions.
           </p>
         </div>
@@ -53,24 +53,16 @@ export default async function AdminAuditLogsPage() {
           description="No activity has been logged yet."
         />
       ) : (
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+        <div className="card overflow-hidden" style={{ padding: 0 }}>
           <div className="admin-table-wrap">
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <table className="w-full" style={{ borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: "var(--color-bg-secondary)" }}>
                   {["Actor ID", "Action Type", "Entity Type", "Entity ID", "Timestamp", "Details"].map(
                     (heading) => (
                       <th
                         key={heading}
-                        style={{
-                          padding: "14px 18px",
-                          textAlign: "left",
-                          borderBottom: "1px solid var(--color-border)",
-                          color: "var(--color-text-muted)",
-                          fontSize: "12px",
-                          fontWeight: 800,
-                          textTransform: "uppercase",
-                        }}
+                        className="text-left border-b-card text-muted text-xs font-extrabold" style={{ padding: "14px 18px", textTransform: "uppercase" }}
                       >
                         {heading}
                       </th>
@@ -82,37 +74,28 @@ export default async function AdminAuditLogsPage() {
                 {auditLogs.map((log) => {
                   const badgeStyle = getEntityTypeBadgeStyle(log.entityType);
                   return (
-                    <tr key={log.id} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                      <td style={{ padding: "16px 18px", color: "var(--color-text-secondary)", fontSize: "13px" }}>
+                    <tr key={log.id} className="border-b-card">
+                      <td className="p-card text-secondary text-sm">
                         {log.actorId}
                       </td>
-                      <td style={{ padding: "16px 18px", fontWeight: 800 }}>
+                      <td className="p-card font-extrabold">
                         {log.actionType}
                       </td>
-                      <td style={{ padding: "16px 18px" }}>
+                      <td className="p-card">
                         <span
-                          className="badge"
-                          style={{
-                            background: badgeStyle.background,
-                            color: badgeStyle.color,
-                            fontSize: "11px",
-                            fontWeight: 800,
-                            padding: "4px 8px",
-                            borderRadius: "12px",
-                            textTransform: "uppercase",
-                          }}
+                          className="badge font-extrabold" style={{ background: badgeStyle.background, color: badgeStyle.color, fontSize: "11px", padding: "4px 8px", borderRadius: "12px", textTransform: "uppercase" }}
                         >
                           {log.entityType}
                         </span>
                       </td>
-                      <td style={{ padding: "16px 18px", color: "var(--color-text-secondary)", fontSize: "13px" }}>
+                      <td className="p-card text-secondary text-sm">
                         {log.entityId || "-"}
                       </td>
-                      <td style={{ padding: "16px 18px", color: "var(--color-text-secondary)", fontSize: "13px" }}>
+                      <td className="p-card text-secondary text-sm">
                         {new Date(log.timestamp).toLocaleString("en-IN")}
                       </td>
-                      <td style={{ padding: "16px 18px" }}>
-                        <div style={{ fontSize: "13px", color: "var(--color-text-primary)", maxWidth: "240px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : ""}>
+                      <td className="p-card">
+                        <div className="text-sm overflow-hidden" style={{ color: "var(--color-text-primary)", maxWidth: "240px", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : ""}>
                           {log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : "-"}
                         </div>
                       </td>

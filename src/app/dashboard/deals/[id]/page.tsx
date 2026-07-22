@@ -350,14 +350,7 @@ function DealProgress({ status }: Readonly<DealProgressProps>) {
         })}
         {status === "CANCELLED" && (
           <div
-            style={{
-              padding: "12px",
-              background: "rgba(239, 68, 68, 0.1)",
-              color: "var(--color-error)",
-              borderRadius: "var(--radius-md)",
-              fontWeight: 600,
-              textAlign: "center",
-            }}
+            className="p-3 font-semibold text-center" style={{ background: "rgba(239, 68, 68, 0.1)", color: "var(--color-error)", borderRadius: "var(--radius-md)" }}
           >
             Deal Cancelled
           </div>
@@ -382,13 +375,9 @@ interface ContentSubmissionsCardProps {
 
 function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissionsCardProps>) {
   return (
-    <div className="card" style={{ marginBottom: "24px" }}>
+    <div className="card mb-6">
       <h2
-        style={{
-          fontSize: "18px",
-          fontWeight: 700,
-          marginBottom: "20px",
-        }}
+        className="text-lg font-bold mb-5"
       >
         Content Submissions
       </h2>
@@ -411,49 +400,28 @@ function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissionsCard
           return (
             <div
               key={sub.id}
-              style={{
-                padding: "16px",
-                background: "var(--color-bg-tertiary)",
-                borderRadius: "var(--radius-md)",
-                marginBottom: "12px",
-                border:
+              className="p-4 mb-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border:
                   sub.status === "APPROVED"
                     ? "1px solid var(--color-success)"
-                    : "1px solid transparent",
-              }}
+                    : "1px solid transparent" }}
             >
               <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "8px",
-                }}
+                className="flex justify-between items-center mb-2"
               >
-                <span style={{ fontWeight: 600 }}>
+                <span className="font-semibold">
                   Version {sub.version}
                 </span>
                 <span
-                  style={{
-                    fontSize: "12px",
-                    padding: "4px 8px",
-                    borderRadius: "var(--radius-sm)",
-                    background: subBg,
-                    color: "white",
-                  }}
+                  className="text-xs" style={{ padding: "4px 8px", borderRadius: "var(--radius-sm)", background: subBg, color: "white" }}
                 >
                   {sub.status}
                 </span>
               </div>
               <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "4px",
-                }}
+                className="flex flex-col gap-1"
               >
                 {sub.contentUrls && Array.isArray(sub.contentUrls) && sub.contentUrls.length > 0 ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px", marginBottom: "8px" }}>
+                  <div className="flex flex-col gap-2 mt-1 mb-2">
                     {sub.contentUrls.map((item) => {
                       let itemBg = "var(--color-accent-blue)";
                       if (item.status === "APPROVED") {
@@ -462,16 +430,16 @@ function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissionsCard
                         itemBg = "var(--color-warning)";
                       }
                       return (
-                        <div key={item.type} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-sm)" }}>
-                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                            <span style={{ fontSize: "13px", fontWeight: 600 }}>
+                        <div key={item.type} className="flex items-center justify-between p-2" style={{ background: "var(--color-bg-secondary)", borderRadius: "var(--radius-sm)" }}>
+                          <div className="flex flex-col" style={{ gap: "2px" }}>
+                            <span className="text-sm font-semibold">
                               {item.type.replace(/_\d+$/, '').replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase())}
                             </span>
-                            <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "12px", color: "var(--color-primary)", wordBreak: "break-all" }}>
+                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary" style={{ wordBreak: "break-all" }}>
                               View Link
                             </a>
                             {item.feedback && (
-                              <span style={{ fontSize: "12px", color: "var(--color-warning)", marginTop: "2px" }}>
+                              <span className="text-xs" style={{ color: "var(--color-warning)", marginTop: "2px" }}>
                                 Feedback: {item.feedback}
                               </span>
                             )}
@@ -494,20 +462,14 @@ function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissionsCard
                     href={sub.contentUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{
-                      fontSize: "13px",
-                      color: "var(--color-primary)",
-                    }}
+                    className="text-sm text-primary"
                   >
                     View Content
                   </a>
                 )}
                 {sub.notes && (
                   <div
-                    style={{
-                      fontSize: "12px",
-                      color: "var(--color-text-secondary)",
-                    }}
+                    className="text-xs text-secondary"
                   >
                     Note: {sub.notes}
                   </div>
@@ -515,24 +477,13 @@ function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissionsCard
               </div>
               {sub.feedback && (
                 <div
-                  style={{
-                    marginTop: "8px",
-                    padding: "8px",
-                    background: "var(--color-bg-secondary)",
-                    borderRadius: "var(--radius-sm)",
-                    fontSize: "13px",
-                    color: "var(--color-text-secondary)",
-                  }}
+                  className="mt-2 p-2 text-sm text-secondary" style={{ background: "var(--color-bg-secondary)", borderRadius: "var(--radius-sm)" }}
                 >
                   Feedback: {sub.feedback}
                 </div>
               )}
               <div
-                style={{
-                  marginTop: "8px",
-                  fontSize: "11px",
-                  color: "var(--color-text-muted)",
-                }}
+                className="mt-2 text-muted" style={{ fontSize: "11px" }}
               >
                 Submitted:{" "}
                 {new Date(sub.createdAt).toLocaleDateString()}
@@ -575,41 +526,27 @@ function EngagementCard({
   const roi = engagement.roi;
 
   return (
-    <div className="card" style={{ marginBottom: "24px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-        <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: 0 }}>📊 Post Performance</h2>
-        <span style={{ fontSize: "13px", fontWeight: 600, color: trendColors[engagement.trend] }}>
+    <div className="card mb-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-bold" style={{ marginBottom: 0 }}>📊 Post Performance</h2>
+        <span className="text-sm font-semibold" style={{ color: trendColors[engagement.trend] }}>
           {trendLabels[engagement.trend]}
         </span>
       </div>
 
       {disclaimer && (
-        <div style={{
-          fontSize: "12px",
-          color: "var(--color-warning)",
-          background: "rgba(245,158,11,0.08)",
-          border: "1px solid rgba(245,158,11,0.2)",
-          borderRadius: "var(--radius-sm)",
-          padding: "8px 12px",
-          marginBottom: "14px",
-        }}>
+        <div className="text-xs" style={{ color: "var(--color-warning)", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: "var(--radius-sm)", padding: "8px 12px", marginBottom: "14px" }}>
           {disclaimer}
         </div>
       )}
 
-      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
+      <div className="flex gap-2 flex-wrap mb-4">
         {engagement.snapshots.map((snap) => (
-          <div key={snap.interval} style={{
-            flex: "1 1 140px",
-            padding: "12px",
-            background: "var(--color-bg-tertiary)",
-            borderRadius: "var(--radius-sm)",
-            border: "1px solid var(--color-border)",
-          }}>
-            <div style={{ fontSize: "11px", color: "var(--color-text-muted)", marginBottom: "8px", textTransform: "uppercase", fontWeight: 700 }}>
+          <div key={snap.interval} className="p-3" style={{ flex: "1 1 140px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)", border: "1px solid var(--color-border)" }}>
+            <div className="text-muted mb-2 font-bold" style={{ fontSize: "11px", textTransform: "uppercase" }}>
               {snap.interval}{snap.isEstimated ? " (est.)" : ""}
             </div>
-            <div style={{ display: "grid", gap: "4px" }}>
+            <div className="grid gap-1">
               {([
                 ["Views", snap.metrics.views.toLocaleString("en-IN")],
                 ["Likes", snap.metrics.likes.toLocaleString("en-IN")],
@@ -618,9 +555,9 @@ function EngagementCard({
                 ["Reach", snap.metrics.estimatedReach.toLocaleString("en-IN")],
                 ["Eng. Rate", `${snap.metrics.engagementRate.toFixed(2)}%`],
               ] as [string, string][]).map(([label, val]) => (
-                <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
-                  <span style={{ color: "var(--color-text-muted)" }}>{label}</span>
-                  <span style={{ fontWeight: 600 }}>{val}</span>
+                <div key={label} className="flex justify-between text-xs">
+                  <span className="text-muted">{label}</span>
+                  <span className="font-semibold">{val}</span>
                 </div>
               ))}
             </div>
@@ -635,21 +572,21 @@ function EngagementCard({
           border: "1px solid rgba(99,102,241,0.2)",
           borderRadius: "var(--radius-sm)",
         }}>
-          <div style={{ fontSize: "13px", fontWeight: 700, marginBottom: "10px" }}>💰 ROI Summary</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px" }}>
+          <div className="text-sm font-bold" style={{ marginBottom: "10px" }}>💰 ROI Summary</div>
+          <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px" }}>
             {([
               ["Est. Value", `₹${(roi.estimatedValue / 100).toLocaleString("en-IN")}`],
               ["ROI", `${roi.roiPercentage >= 0 ? "+" : ""}${roi.roiPercentage}%`],
               ["Cost/View", `₹${(roi.costPerView / 100).toFixed(2)}`],
               ["Cost/Eng.", `₹${(roi.costPerEngagement / 100).toFixed(2)}`],
             ] as [string, string][]).map(([label, val]) => (
-              <div key={label} style={{ padding: "8px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-sm)" }}>
-                <div style={{ fontSize: "10px", color: "var(--color-text-muted)", marginBottom: "2px" }}>{label}</div>
-                <div style={{ fontSize: "14px", fontWeight: 800, color: roi.roiPercentage >= 0 ? "var(--color-success)" : "var(--color-error)" }}>{val}</div>
+              <div key={label} className="p-2" style={{ background: "var(--color-bg-secondary)", borderRadius: "var(--radius-sm)" }}>
+                <div className="text-muted" style={{ fontSize: "10px", marginBottom: "2px" }}>{label}</div>
+                <div className="text-sm font-extrabold" style={{ color: roi.roiPercentage >= 0 ? "var(--color-success)" : "var(--color-error)" }}>{val}</div>
               </div>
             ))}
           </div>
-          <div style={{ fontSize: "11px", color: "var(--color-text-muted)", marginTop: "8px" }}>
+          <div className="text-muted mt-2" style={{ fontSize: "11px" }}>
             Based on {latestSnap?.interval || "latest"} data. EMV: views=₹0.20, engagements=₹1.00, clicks=₹5.00.
           </div>
         </div>
@@ -1277,12 +1214,7 @@ function DealContractCard({
       {hasContractTerms ? (
         <>
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-              gap: "12px",
-              marginBottom: "18px",
-            }}
+            className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", marginBottom: "18px" }}
           >
             {([
               ["Creator payout", formatCurrency(creatorPayout)],
@@ -1292,25 +1224,25 @@ function DealContractCard({
             ] as [string, string][]).map(([label, value]) => (
               <div
                 key={label}
-                style={{ padding: "12px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)" }}
+                className="p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)" }}
               >
-                <div style={{ fontSize: "11px", color: "var(--color-text-muted)", marginBottom: "4px" }}>{label}</div>
-                <div style={{ fontSize: "13px", fontWeight: 700 }}>{value}</div>
+                <div className="text-muted mb-1" style={{ fontSize: "11px" }}>{label}</div>
+                <div className="text-sm font-bold">{value}</div>
               </div>
             ))}
           </div>
 
           {contractDeliverables.length > 0 && (
             <div style={{ marginBottom: "18px" }}>
-              <div style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "8px" }}>Deliverables</div>
-              <div style={{ display: "grid", gap: "8px" }}>
+              <div className="text-sm text-muted mb-2">Deliverables</div>
+              <div className="grid gap-2">
                 {contractDeliverables.map((item, index) => (
                   <div
                     key={`${item.type}-${index}`}
-                    style={{ padding: "10px 12px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)", fontSize: "13px", lineHeight: 1.5 }}
+                    className="text-sm" style={{ padding: "10px 12px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)", lineHeight: 1.5 }}
                   >
                     <strong>{item.count || 1}x {item.type || "Deliverable"}</strong>
-                    <span style={{ color: "var(--color-text-secondary)" }}>
+                    <span className="text-secondary">
                       {" "}on {item.platform || "selected platform"}{item.details ? ` - ${item.details}` : ""}
                     </span>
                   </div>
@@ -1319,9 +1251,9 @@ function DealContractCard({
             </div>
           )}
 
-          <div style={{ marginBottom: "16px" }}>
-            <div style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "8px" }}>Mandatory Elements</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+          <div className="mb-4">
+            <div className="text-sm text-muted mb-2">Mandatory Elements</div>
+            <div className="flex flex-wrap gap-2">
               {mandatoryElements.map((el: string) => (
                 <span key={el} className="badge badge-primary">{el}</span>
               ))}
@@ -1331,9 +1263,9 @@ function DealContractCard({
             </div>
           </div>
 
-          <div style={{ marginBottom: "16px" }}>
-            <div style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "8px" }}>Timeline</div>
-            <div style={{ display: "grid", gap: "6px", fontSize: "13px", color: "var(--color-text-secondary)" }}>
+          <div className="mb-4">
+            <div className="text-sm text-muted mb-2">Timeline</div>
+            <div className="grid text-sm text-secondary" style={{ gap: "6px" }}>
               <div>Submit by: <strong>{formatContractDate(contractTerms.submissionDeadline)}</strong></div>
               <div>Post by: <strong>{formatContractDate(contractTerms.postingDeadline)}</strong></div>
               <div>Brand review window: <strong>{typeof contractTerms.reviewPeriodHours === "number" ? contractTerms.reviewPeriodHours : 48} hours</strong></div>
@@ -1343,17 +1275,12 @@ function DealContractCard({
 
           {(influencerObligations.length > 0 || brandObligations.length > 0) && (
             <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                gap: "14px",
-                marginBottom: "16px",
-              }}
+              className="grid mb-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "14px" }}
             >
               {influencerObligations.length > 0 && (
                 <div>
-                  <div style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "8px" }}>Influencer obligations</div>
-                  <ul style={{ paddingLeft: "18px", display: "grid", gap: "6px", color: "var(--color-text-secondary)", fontSize: "13px" }}>
+                  <div className="text-sm text-muted mb-2">Influencer obligations</div>
+                  <ul className="grid text-secondary text-sm" style={{ paddingLeft: "18px", gap: "6px" }}>
                     {influencerObligations.slice(0, 4).map((item) => (
                       <li key={item}>{item}</li>
                     ))}
@@ -1362,8 +1289,8 @@ function DealContractCard({
               )}
               {brandObligations.length > 0 && (
                 <div>
-                  <div style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "8px" }}>Brand obligations</div>
-                  <ul style={{ paddingLeft: "18px", display: "grid", gap: "6px", color: "var(--color-text-secondary)", fontSize: "13px" }}>
+                  <div className="text-sm text-muted mb-2">Brand obligations</div>
+                  <ul className="grid text-secondary text-sm" style={{ paddingLeft: "18px", gap: "6px" }}>
                     {brandObligations.slice(0, 4).map((item) => (
                       <li key={item}>{item}</li>
                     ))}
@@ -1374,14 +1301,7 @@ function DealContractCard({
           )}
 
           <div
-            style={{
-              padding: "12px",
-              background: "rgba(99, 102, 241, 0.08)",
-              border: "1px solid rgba(99, 102, 241, 0.18)",
-              borderRadius: "var(--radius-sm)",
-              fontSize: "13px",
-              color: "var(--color-text-secondary)",
-            }}
+            className="p-3 text-sm text-secondary" style={{ background: "rgba(99, 102, 241, 0.08)", border: "1px solid rgba(99, 102, 241, 0.18)", borderRadius: "var(--radius-sm)" }}
           >
             Signatures: Brand {brandSigned ? "signed" : "pending"} /
             Influencer {influencerSigned ? "signed" : "pending"}
@@ -1485,56 +1405,26 @@ export default function DealDetailPage() {
   } = computeDealDisplay(deal, contractTerms);
   return (
     <DashboardShell user={session.user}>
-      <div className="deal-detail-page" style={{ maxWidth: "1280px", margin: "0 auto", display: "grid", gap: "24px" }}>
+      <div className="deal-detail-page grid gap-6" style={{ maxWidth: "1280px", margin: "0 auto" }}>
         <ToastContainer toasts={toasts} onClose={removeToast} />
         <header
-          className="glass deal-detail-header"
-          style={{
-            position: "sticky",
-            top: 0,
-            zIndex: 40,
-            padding: "16px 24px",
-            borderBottom: "1px solid var(--color-border)",
-          }}
+          className="glass deal-detail-header border-b-card" style={{ position: "sticky", top: 0, zIndex: 40, padding: "16px 24px" }}
         >
           <Link
             href="/dashboard/deals"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              color: "var(--color-text-secondary)",
-              fontSize: "14px",
-              marginBottom: "8px",
-            }}
+            className="inline-flex items-center gap-2 text-secondary text-sm mb-2"
           >
             Back to Deals
           </Link>
           <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
+            className="flex justify-between items-center"
           >
             <div>
-              <h1 style={{ fontSize: "24px", fontWeight: 800 }}>
+              <h1 className="text-2xl font-extrabold">
                 {deal.campaign.title}
               </h1>
               <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginTop: "8px",
-                  padding: "6px 12px",
-                  background: `${status.color}20`,
-                  borderRadius: "var(--radius-full)",
-                  width: "fit-content",
-                  color: status.color,
-                  fontSize: "14px",
-                  fontWeight: 600,
-                }}
+                className="flex items-center gap-2 mt-2 text-sm font-semibold" style={{ padding: "6px 12px", background: `${status.color}20`, borderRadius: "var(--radius-full)", width: "fit-content", color: status.color }}
               >
                 {status.label}
               </div>
@@ -1560,13 +1450,9 @@ export default function DealDetailPage() {
           </div>
         </header>
 
-        <div className="deal-detail-content" style={{ padding: "24px" }}>
+        <div className="deal-detail-content p-6">
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
-              gap: "24px",
-            }}
+            className="grid gap-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))" }}
           >
             <div>
               <DealProgress status={deal.status} />
@@ -1597,13 +1483,9 @@ export default function DealDetailPage() {
 
             {/* Sidebar */}
             <div>
-              <div className="card deal-payment-card" style={{ marginBottom: "24px" }}>
+              <div className="card deal-payment-card mb-6">
                 <h3
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 700,
-                    marginBottom: "16px",
-                  }}
+                  className="text-base font-bold mb-4"
                 >
                   Payment Details
                 </h3>
@@ -1622,17 +1504,10 @@ export default function DealDetailPage() {
                     />
                     <PaymentRow label="Gateway fee" value={formatCurrency(gatewayFee)} />
                     <div
-                      style={{
-                        borderTop: "1px solid var(--color-border)",
-                        paddingTop: "8px",
-                        marginTop: "8px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: "16px",
-                      }}
+                      className="mt-2 flex justify-between text-base" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "8px" }}
                     >
-                      <span style={{ fontWeight: 600 }}>Brand payable</span>
-                      <span style={{ fontWeight: 800 }} className="gradient-text">
+                      <span className="font-semibold">Brand payable</span>
+                      <span className="gradient-text font-extrabold">
                         {formatCurrency(brandPayable)}
                       </span>
                     </div>
@@ -1642,17 +1517,10 @@ export default function DealDetailPage() {
                     <PaymentRow label="Deal amount" value={formatCurrency(deal.amount)} />
                     <PaymentRow label="Platform fee" value="Paid by brand" />
                     <div
-                      style={{
-                        borderTop: "1px solid var(--color-border)",
-                        paddingTop: "8px",
-                        marginTop: "8px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: "16px",
-                      }}
+                      className="mt-2 flex justify-between text-base" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "8px" }}
                     >
-                      <span style={{ fontWeight: 600 }}>You receive</span>
-                      <span style={{ fontWeight: 800 }} className="gradient-text">
+                      <span className="font-semibold">You receive</span>
+                      <span className="gradient-text font-extrabold">
                         {formatCurrency(creatorPayout)}
                       </span>
                     </div>
@@ -1661,13 +1529,9 @@ export default function DealDetailPage() {
               </div>
 
               {requiresProduct && (
-                <div className="card" style={{ marginBottom: "24px" }}>
+                <div className="card mb-6">
                   <h3
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: 700,
-                      marginBottom: "16px",
-                    }}
+                    className="text-base font-bold mb-4"
                   >
                     Product
                   </h3>
@@ -1690,16 +1554,9 @@ export default function DealDetailPage() {
                   )}
                   {isClient && deal.shippingAddress && (
                     <div
-                      style={{
-                        marginTop: "12px",
-                        padding: "12px",
-                        background: "var(--color-bg-tertiary)",
-                        borderRadius: "var(--radius-md)",
-                        fontSize: "13px",
-                        color: "var(--color-text-secondary)",
-                      }}
+                      className="mt-3 p-3 text-sm text-secondary" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
                     >
-                      <div style={{ fontWeight: 700, color: "var(--color-text-primary)" }}>
+                      <div className="font-bold" style={{ color: "var(--color-text-primary)" }}>
                         {deal.shippingAddress.fullName}
                       </div>
                       <div>{deal.shippingAddress.phone}</div>
@@ -1710,7 +1567,7 @@ export default function DealDetailPage() {
                       </div>
                     </div>
                   )}
-                  <div style={{ display: "grid", gap: "10px", marginTop: "14px" }}>
+                  <div className="grid" style={{ gap: "10px", marginTop: "14px" }}>
                       {isInfluencer &&
                       ["ADDRESS_PENDING", "READY_TO_DISPATCH"].includes(
                         deal.productFulfillmentStatus || "",
@@ -1748,42 +1605,29 @@ export default function DealDetailPage() {
                 </div>
               )}
 
-              <div className="card" style={{ marginBottom: "24px" }}>
+              <div className="card mb-6">
                 <h3
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 700,
-                    marginBottom: "16px",
-                  }}
+                  className="text-base font-bold mb-4"
                 >
                   Timeline
                 </h3>
                 <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "8px",
-                    fontSize: "13px",
-                  }}
+                  className="flex justify-between mb-2 text-sm"
                 >
-                  <span style={{ color: "var(--color-text-secondary)" }}>
+                  <span className="text-secondary">
                     Created
                   </span>
                   <span>{new Date(deal.createdAt).toLocaleDateString()}</span>
                 </div>
                 {deal.postingDeadline && (
                   <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: "13px",
-                    }}
+                    className="flex justify-between text-sm"
                   >
-                    <span style={{ color: "var(--color-text-secondary)" }}>
+                    <span className="text-secondary">
                       Post Deadline
                     </span>
                     <span
-                      style={{ fontWeight: 600, color: "var(--color-warning)" }}
+                      className="font-semibold" style={{ color: "var(--color-warning)" }}
                     >
                       {new Date(deal.postingDeadline).toLocaleDateString()}
                     </span>
@@ -1793,29 +1637,15 @@ export default function DealDetailPage() {
 
               <div className="card">
                 <h3
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 700,
-                    marginBottom: "16px",
-                  }}
+                  className="text-base font-bold mb-4"
                 >
                   Brand
                 </h3>
                 <div
-                  style={{ display: "flex", alignItems: "center", gap: "12px" }}
+                  className="flex items-center gap-3"
                 >
                   <div
-                    style={{
-                      width: "48px",
-                      height: "48px",
-                      background: "var(--gradient-card)",
-                      borderRadius: "var(--radius-md)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: 700,
-                      overflow: "hidden",
-                    }}
+                    className="flex items-center justify-center font-bold overflow-hidden" style={{ width: "48px", height: "48px", background: "var(--gradient-card)", borderRadius: "var(--radius-md)" }}
                   >
                     {deal.brand?.logo ? (
                       <Image
@@ -1823,22 +1653,19 @@ export default function DealDetailPage() {
                         alt={deal.brand.companyName || "Brand"}
                         fill
                         unoptimized
-                        style={{ objectFit: "cover" }}
+                        className="object-cover"
                       />
                     ) : (
                       deal.brand?.companyName?.[0] || "?"
                     )}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 600 }}>
+                    <div className="font-semibold">
                       {deal.brand?.companyName || "Brand"}
                     </div>
                     {deal.brand?.isGstVerified && (
                       <div
-                        style={{
-                          fontSize: "12px",
-                          color: "var(--color-text-muted)",
-                        }}
+                        className="text-xs text-muted"
                       >
                         Verified Business
                       </div>
@@ -1857,7 +1684,7 @@ export default function DealDetailPage() {
         title="Shipping Address"
         maxWidth="560px"
       >
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+        <div className="grid gap-3 mb-4" style={{ gridTemplateColumns: "1fr 1fr" }}>
           {([
             ["fullName", "Full name"],
             ["phone", "Phone"],
@@ -1879,8 +1706,8 @@ export default function DealDetailPage() {
             />
           ))}
         </div>
-        <div style={{ display: "flex", gap: "12px" }}>
-          <Button variant="secondary" onClick={() => setShowAddressModal(false)} style={{ flex: 1 }}>
+        <div className="flex gap-3">
+          <Button variant="secondary" onClick={() => setShowAddressModal(false)} className="flex-1">
             Cancel
           </Button>
           <Button
@@ -1892,7 +1719,7 @@ export default function DealDetailPage() {
                 address: shippingAddress,
               })
             }
-            style={{ flex: 1 }}
+            className="flex-1"
           >
             {isSubmitting ? <span className="loading" /> : "Save Address"}
           </Button>
@@ -1905,7 +1732,7 @@ export default function DealDetailPage() {
         title="Dispatch Details"
         maxWidth="480px"
       >
-        <div style={{ display: "grid", gap: "12px", marginBottom: "16px" }}>
+        <div className="grid gap-3 mb-4">
           <Input
             placeholder="Tracking number"
             aria-label="Tracking number"
@@ -1923,8 +1750,8 @@ export default function DealDetailPage() {
             }
           />
         </div>
-        <div style={{ display: "flex", gap: "12px" }}>
-          <Button variant="secondary" onClick={() => setShowDispatchModal(false)} style={{ flex: 1 }}>
+        <div className="flex gap-3">
+          <Button variant="secondary" onClick={() => setShowDispatchModal(false)} className="flex-1">
             Cancel
           </Button>
           <Button
@@ -1937,7 +1764,7 @@ export default function DealDetailPage() {
                 carrier: dispatchForm.carrier || undefined,
               })
             }
-            style={{ flex: 1 }}
+            className="flex-1"
           >
             {isSubmitting ? <span className="loading" /> : "Save Tracking"}
           </Button>
@@ -1950,7 +1777,7 @@ export default function DealDetailPage() {
         title="Review Content"
         maxWidth="520px"
       >
-        <div style={{ maxHeight: "400px", overflowY: "auto", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "16px", paddingRight: "4px" }}>
+        <div className="mb-5 flex flex-col gap-4" style={{ maxHeight: "400px", overflowY: "auto", paddingRight: "4px" }}>
           {getFlatDeliverablesList(deal).map((item) => {
             const latestSub = deal?.contentSubmissions?.[0];
             const submittedUrlObj = latestSub?.contentUrls && Array.isArray(latestSub.contentUrls)
@@ -1961,20 +1788,20 @@ export default function DealDetailPage() {
             const itemReview = itemizedReviews[item.type] || { status: "APPROVED", feedback: "" };
 
             return (
-              <div key={item.type} style={{ padding: "12px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px", gap: "8px" }}>
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    <span style={{ fontWeight: 600, fontSize: "14px" }}>{item.label}</span>
+              <div key={item.type} className="p-3" style={{ background: "var(--color-bg-secondary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
+                <div className="flex justify-between items-start mb-2 gap-2">
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm">{item.label}</span>
                     {url ? (
-                      <a href={url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "12px", color: "var(--color-primary)", wordBreak: "break-all", marginTop: "2px" }}>
+                      <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary" style={{ wordBreak: "break-all", marginTop: "2px" }}>
                         View Submission Link
                       </a>
                     ) : (
-                      <span style={{ fontSize: "12px", color: "var(--color-text-muted)", fontStyle: "italic" }}>No link submitted</span>
+                      <span className="text-xs text-muted" style={{ fontStyle: "italic" }}>No link submitted</span>
                     )}
                   </div>
                   
-                  <div style={{ display: "flex", gap: "4px" }}>
+                  <div className="flex gap-1">
                     <Button
                       type="button"
                       variant="ghost"
@@ -1984,12 +1811,7 @@ export default function DealDetailPage() {
                         ...itemizedReviews,
                         [item.type]: { ...itemReview, status: "APPROVED" }
                       })}
-                      style={{
-                        padding: "4px 8px",
-                        fontSize: "12px",
-                        background: itemReview.status === "APPROVED" ? "var(--color-success)" : "var(--color-bg-tertiary)",
-                        color: itemReview.status === "APPROVED" ? "white" : "inherit"
-                      }}
+                      className="text-xs" style={{ padding: "4px 8px", background: itemReview.status === "APPROVED" ? "var(--color-success)" : "var(--color-bg-tertiary)", color: itemReview.status === "APPROVED" ? "white" : "inherit" }}
                     >
                       Approve
                     </Button>
@@ -2002,12 +1824,7 @@ export default function DealDetailPage() {
                         ...itemizedReviews,
                         [item.type]: { ...itemReview, status: "REVISION_REQUESTED" }
                       })}
-                      style={{
-                        padding: "4px 8px",
-                        fontSize: "12px",
-                        background: itemReview.status === "REVISION_REQUESTED" ? "var(--color-warning)" : "var(--color-bg-tertiary)",
-                        color: itemReview.status === "REVISION_REQUESTED" ? "white" : "inherit"
-                      }}
+                      className="text-xs" style={{ padding: "4px 8px", background: itemReview.status === "REVISION_REQUESTED" ? "var(--color-warning)" : "var(--color-bg-tertiary)", color: itemReview.status === "REVISION_REQUESTED" ? "white" : "inherit" }}
                     >
                       Revision
                     </Button>
@@ -2015,7 +1832,7 @@ export default function DealDetailPage() {
                 </div>
 
                 {itemReview.status === "REVISION_REQUESTED" && (
-                  <div style={{ marginTop: "8px" }}>
+                  <div className="mt-2">
                     <Textarea
                       rows={2}
                       placeholder="What needs to change for this specific deliverable?"
@@ -2025,7 +1842,7 @@ export default function DealDetailPage() {
                         ...itemizedReviews,
                         [item.type]: { ...itemReview, feedback: e.target.value }
                       })}
-                      style={{ fontSize: "12px", padding: "8px" }}
+                      className="text-xs p-2"
                     />
                   </div>
                 )}
@@ -2034,11 +1851,11 @@ export default function DealDetailPage() {
           })}
         </div>
 
-        <div style={{ display: "flex", gap: "12px" }}>
+        <div className="flex gap-3">
           <Button
             variant="secondary"
             onClick={() => setShowReviewModal(false)}
-            style={{ flex: 1 }}
+            className="flex-1"
           >
             Cancel
           </Button>
@@ -2046,7 +1863,7 @@ export default function DealDetailPage() {
             variant="primary"
             onClick={handleReviewContent}
             disabled={isSubmitting}
-            style={{ flex: 1 }}
+            className="flex-1"
           >
             {isSubmitting ? <span className="loading" /> : "Submit Review"}
           </Button>
@@ -2059,7 +1876,7 @@ export default function DealDetailPage() {
         title="Submit Content"
         maxWidth="550px"
       >
-        <div style={{ maxHeight: "350px", overflowY: "auto", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "16px", paddingRight: "4px" }}>
+        <div className="mb-5 flex flex-col gap-4" style={{ maxHeight: "350px", overflowY: "auto", paddingRight: "4px" }}>
           {getFlatDeliverablesList(deal).map((item) => {
             const latestSub = deal?.contentSubmissions?.[0];
             const existing = latestSub?.contentUrls && Array.isArray(latestSub.contentUrls)
@@ -2069,17 +1886,17 @@ export default function DealDetailPage() {
             const inputId = `input-${item.type}`;
 
             return (
-              <div key={item.type} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <label className="label" htmlFor={inputId} style={{ marginBottom: 0, fontWeight: 600 }}>{item.label} *</label>
+              <div key={item.type} className="flex flex-col gap-2">
+                <div className="flex justify-between items-center">
+                  <label className="label font-semibold mb-0" htmlFor={inputId}>{item.label} *</label>
                   {isApproved && (
-                    <span style={{ fontSize: "12px", color: "var(--color-success)", fontWeight: 600 }}>
+                    <span className="text-xs font-semibold text-success">
                       ✅ Approved (Locked)
                     </span>
                   )}
                 </div>
                 
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div className="flex gap-2">
                   <Input
                     id={inputId}
                     type="url"
@@ -2089,7 +1906,7 @@ export default function DealDetailPage() {
                       setItemizedUrls({ ...itemizedUrls, [item.type]: e.target.value })
                     }
                     disabled={isApproved}
-                    style={{ flex: 1 }}
+                    className="flex-1"
                   />
                   {!isApproved && (
                     <Button
@@ -2115,13 +1932,13 @@ export default function DealDetailPage() {
             type="file"
             ref={fileInputRef}
             aria-hidden="true"
-            style={{ display: "none" }}
+            className="hidden"
             onChange={handleContentUpload}
             accept="image/*,video/*,.pdf"
           />
         </div>
 
-        <div style={{ marginBottom: "20px" }}>
+        <div className="mb-5">
           <Textarea
             label="Notes (Optional)"
             id="submit-notes-textarea"
@@ -2135,11 +1952,11 @@ export default function DealDetailPage() {
           />
         </div>
         
-        <div style={{ display: "flex", gap: "12px" }}>
+        <div className="flex gap-3">
           <Button
             variant="secondary"
             onClick={() => setShowSubmitModal(false)}
-            style={{ flex: 1 }}
+            className="flex-1"
           >
             Cancel
           </Button>
@@ -2182,7 +1999,7 @@ export default function DealDetailPage() {
               });
             }}
             disabled={isSubmitting}
-            style={{ flex: 1 }}
+            className="flex-1"
           >
             {isSubmitting ? <span className="loading" /> : "Submit"}
           </Button>
@@ -2195,7 +2012,7 @@ export default function DealDetailPage() {
         title="Verify Post"
         maxWidth="500px"
       >
-        <div style={{ marginBottom: "20px" }}>
+        <div className="mb-5">
           <Input
             label="Live Post URL *"
             id="live-post-url-input"
@@ -2207,22 +2024,15 @@ export default function DealDetailPage() {
           />
         </div>
         <div
-          style={{
-            padding: "12px",
-            background: "var(--color-bg-tertiary)",
-            borderRadius: "var(--radius-md)",
-            marginBottom: "20px",
-            fontSize: "13px",
-            color: "var(--color-text-secondary)",
-          }}
+          className="p-3 mb-5 text-sm text-secondary" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
         >
           Ensure required hashtags are present.
         </div>
-        <div style={{ display: "flex", gap: "12px" }}>
+        <div className="flex gap-3">
           <Button
             variant="secondary"
             onClick={() => setShowVerifyModal(false)}
-            style={{ flex: 1 }}
+            className="flex-1"
           >
             Cancel
           </Button>
@@ -2230,7 +2040,7 @@ export default function DealDetailPage() {
             variant="primary"
             onClick={() => handleAction("verify_post", { postUrl })}
             disabled={isSubmitting || !postUrl}
-            style={{ flex: 1 }}
+            className="flex-1"
           >
             {isSubmitting ? <span className="loading" /> : "Verify"}
           </Button>
@@ -2247,9 +2057,9 @@ export default function DealDetailPage() {
             background: "linear-gradient(135deg, rgba(16,185,129,0.05), rgba(59,130,246,0.05))",
           }}
         >
-          <h3 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "16px" }}>⭐ Rate This Deal</h3>
-          <p style={{ fontSize: "13px", color: "var(--color-text-secondary)", marginBottom: "16px" }}>How was your experience? Your review helps build trust on the platform.</p>
-          <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+          <h3 className="text-lg font-bold mb-4">⭐ Rate This Deal</h3>
+          <p className="text-sm text-secondary mb-4">How was your experience? Your review helps build trust on the platform.</p>
+          <div className="flex gap-2 mb-4">
             {[1, 2, 3, 4, 5].map((star) => (
               <Button
                 key={star}
@@ -2259,15 +2069,7 @@ export default function DealDetailPage() {
                 onMouseLeave={() => setHoverRating(0)}
                 aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
                 aria-pressed={(hoverRating || reviewRating) >= star ? "true" : "false"}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "32px",
-                  transition: "transform 0.15s ease",
-                  transform: (hoverRating || reviewRating) >= star ? "scale(1.15)" : "scale(1)",
-                  filter: (hoverRating || reviewRating) >= star ? "none" : "grayscale(1) opacity(0.3)",
-                }}
+                className="cursor-pointer" style={{ background: "none", border: "none", fontSize: "32px", transition: "transform 0.15s ease", transform: (hoverRating || reviewRating) >= star ? "scale(1.15)" : "scale(1)", filter: (hoverRating || reviewRating) >= star ? "none" : "grayscale(1) opacity(0.3)" }}
               >
                 ⭐
               </Button>
@@ -2276,7 +2078,7 @@ export default function DealDetailPage() {
               <span
                 role="status"
                 aria-live="polite"
-                style={{ alignSelf: "center", marginLeft: "8px", fontSize: "14px", fontWeight: 600, color: "var(--color-text-secondary)" }}
+                className="text-sm font-semibold text-secondary" style={{ alignSelf: "center", marginLeft: "8px" }}
               >
                 {ratingLabelMap[reviewRating] || "Excellent"}
               </span>
@@ -2288,16 +2090,7 @@ export default function DealDetailPage() {
             value={reviewComment}
             onChange={(e) => setReviewComment(e.target.value)}
             rows={3}
-            style={{
-              width: "100%",
-              padding: "12px 16px",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--color-border)",
-              background: "var(--color-bg-primary)",
-              fontSize: "14px",
-              resize: "vertical",
-              marginBottom: "16px",
-            }}
+            className="w-full text-sm mb-4" style={{ padding: "12px 16px", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)", background: "var(--color-bg-primary)", resize: "vertical" }}
           />
           <Button
             variant="primary"
@@ -2332,21 +2125,12 @@ export default function DealDetailPage() {
       )}
       {deal.status === "COMPLETED" && reviewSubmitted && (
         <div
-          className="card"
-          style={{
-            padding: "20px 28px",
-            borderRadius: "var(--radius-lg)",
-            border: "1px solid var(--color-success)",
-            background: "linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.02))",
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-          }}
+          className="card flex items-center gap-3" style={{ padding: "20px 28px", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-success)", background: "linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.02))" }}
         >
-          <span style={{ fontSize: "24px" }}>✅</span>
+          <span className="text-2xl">✅</span>
           <div>
             <strong>Review Submitted</strong>
-            <p style={{ fontSize: "13px", color: "var(--color-text-secondary)", margin: 0 }}>
+            <p className="text-sm text-secondary" style={{ margin: 0 }}>
               {"⭐".repeat(reviewRating)} — Thank you for your feedback!
             </p>
           </div>

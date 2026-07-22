@@ -107,13 +107,13 @@ export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, Bu
       <>
         {loading && <span className="loading" style={{ marginRight: children ? "8px" : "0" }} />}
         {!loading && leftIcon && (
-          <span className="btn-icon-left" style={{ display: "inline-flex", alignItems: "center" }}>
+          <span className="btn-icon-left inline-flex items-center">
             {leftIcon}
           </span>
         )}
         {children}
         {!loading && rightIcon && (
-          <span className="btn-icon-right" style={{ display: "inline-flex", alignItems: "center" }}>
+          <span className="btn-icon-right inline-flex items-center">
             {rightIcon}
           </span>
         )}

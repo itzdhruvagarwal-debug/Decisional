@@ -62,50 +62,20 @@ export default function ForgotPasswordPage() {
 
   return (
     <div
-      className="flex items-center justify-center p-6"
-      style={{
-        minHeight: "100vh",
-        position: "relative",
-        overflow: "hidden",
-      }}
+      className="flex items-center justify-center p-6 relative overflow-hidden" style={{ minHeight: "100vh" }}
     >
       {/* Background Effects (Same as Login) */}
       <div
-        style={{
-          position: "absolute",
-          top: "20%",
-          left: "10%",
-          width: "400px",
-          height: "400px",
-          background:
-            "radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%)",
-          borderRadius: "50%",
-          filter: "blur(80px)",
-        }}
+        className="absolute" style={{ top: "20%", left: "10%", width: "400px", height: "400px", background:
+            "radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%)", borderRadius: "50%", filter: "blur(80px)" }}
       />
       <div
-        style={{
-          position: "absolute",
-          bottom: "20%",
-          right: "10%",
-          width: "350px",
-          height: "350px",
-          background:
-            "radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%)",
-          borderRadius: "50%",
-          filter: "blur(80px)",
-        }}
+        className="absolute" style={{ bottom: "20%", right: "10%", width: "350px", height: "350px", background:
+            "radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%)", borderRadius: "50%", filter: "blur(80px)" }}
       />
 
       <div
-        className="card"
-        style={{
-          width: "100%",
-          maxWidth: "420px",
-          padding: "40px",
-          position: "relative",
-          zIndex: 1,
-        }}
+        className="card w-full relative" style={{ maxWidth: "420px", padding: "40px", zIndex: 1 }}
       >
         <Link
           href="/login"
@@ -146,15 +116,7 @@ export default function ForgotPasswordPage() {
 
         {resetLink && (
           <div
-            className="mb-6"
-            style={{
-              padding: "12px",
-              background: "#f3f4f6",
-              borderRadius: "var(--radius-md)",
-              wordBreak: "break-all",
-              fontSize: "12px",
-              border: "1px dashed #ccc",
-            }}
+            className="mb-6 p-3 text-xs" style={{ background: "#f3f4f6", borderRadius: "var(--radius-md)", wordBreak: "break-all", border: "1px dashed #ccc" }}
           >
             <strong>DEV LINK:</strong>{" "}
             <a

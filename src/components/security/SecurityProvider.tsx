@@ -41,95 +41,42 @@ function InactivityWarningModal({
     <dialog
       open
       aria-labelledby="inactivity-title"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9999,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "rgba(0,0,0,0.75)",
-        backdropFilter: "blur(8px)",
-        padding: "24px",
-        border: "none",
-      }}
+      className="fixed flex items-center justify-center p-6" style={{ inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", border: "none" }}
     >
       <div
-        style={{
-          background: "var(--color-surface, #111)",
-          border: "1px solid rgba(245, 158, 11, 0.3)",
-          borderRadius: "16px",
-          padding: "36px 32px",
-          maxWidth: "400px",
-          width: "100%",
-          textAlign: "center",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.6)",
-          animation: "slideDown 0.25s ease-out",
-        }}
+        className="w-full text-center" style={{ background: "var(--color-surface, #111)", border: "1px solid rgba(245, 158, 11, 0.3)", borderRadius: "16px", padding: "36px 32px", maxWidth: "400px", boxShadow: "0 24px 60px rgba(0,0,0,0.6)", animation: "slideDown 0.25s ease-out" }}
       >
         <div
-          style={{
-            width: "64px",
-            height: "64px",
-            borderRadius: "50%",
-            background: "rgba(245, 158, 11, 0.12)",
-            border: "2px solid rgba(245, 158, 11, 0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: "0 auto 20px",
-            fontSize: "28px",
-          }}
+          className="flex items-center justify-center" style={{ width: "64px", height: "64px", borderRadius: "50%", background: "rgba(245, 158, 11, 0.12)", border: "2px solid rgba(245, 158, 11, 0.4)", margin: "0 auto 20px", fontSize: "28px" }}
         >
           !
         </div>
 
         <h2
           id="inactivity-title"
-          style={{
-            fontSize: "20px",
-            fontWeight: 700,
-            color: "var(--color-text, #fff)",
-            marginBottom: "12px",
-          }}
+          className="text-xl font-bold mb-3" style={{ color: "var(--color-text, #fff)" }}
         >
           Session Expiring Soon
         </h2>
 
         <p
-          style={{
-            fontSize: "14px",
-            color: "var(--color-text-secondary, #aaa)",
-            lineHeight: 1.6,
-            marginBottom: "8px",
-          }}
+          className="text-sm mb-2" style={{ color: "var(--color-text-secondary, #aaa)", lineHeight: 1.6 }}
         >
           For your security, you&apos;ll be automatically signed out due to
           inactivity in:
         </p>
 
         <div
-          style={{
-            fontSize: "36px",
-            fontWeight: 800,
-            color: secondsRemaining <= 60 ? "#f43f5e" : "#f59e0b",
-            letterSpacing: 0,
-            marginBottom: "28px",
-            fontVariantNumeric: "tabular-nums",
-            transition: "color 0.3s",
-          }}
+          className="font-extrabold" style={{ fontSize: "36px", color: secondsRemaining <= 60 ? "#f43f5e" : "#f59e0b", letterSpacing: 0, marginBottom: "28px", fontVariantNumeric: "tabular-nums", transition: "color 0.3s" }}
         >
           {timeStr}
         </div>
 
-        <div style={{ display: "flex", gap: "12px" }}>
+        <div className="flex gap-3">
           <Button
             variant="secondary"
             onClick={onLogout}
-            style={{
-              flex: 1,
-              padding: "12px",
-            }}
+            className="flex-1 p-3"
           >
             Sign Out Now
           </Button>
@@ -137,10 +84,7 @@ function InactivityWarningModal({
             variant="primary"
             onClick={onExtend}
             autoFocus
-            style={{
-              flex: 2,
-              padding: "12px",
-            }}
+            className="p-3" style={{ flex: 2 }}
           >
             Stay Signed In
           </Button>

@@ -77,22 +77,12 @@ export default function DeleteAccountPanel({
     return (
         <div className="card" style={{ border: "1px solid rgba(239, 68, 68, 0.2)" }}>
             <h3
-                style={{
-                    fontSize: "20px",
-                    fontWeight: 700,
-                    marginBottom: "12px",
-                    color: "var(--color-error)",
-                }}
+                className="text-xl font-bold mb-3" style={{ color: "var(--color-error)" }}
             >
                 ⚠️ Danger Zone: Delete Account
             </h3>
             <p
-                style={{
-                    fontSize: "14px",
-                    color: "var(--color-text-secondary)",
-                    marginBottom: "20px",
-                    lineHeight: "1.5",
-                }}
+                className="text-sm text-secondary mb-5" style={{ lineHeight: "1.5" }}
             >
                 Permanently delete your account. This action is irreversible. All your personal data will be anonymized in compliance with DPDP Act 2023. Financial transactions and tax records will be retained for audit compliance.
             </p>
@@ -101,14 +91,7 @@ export default function DeleteAccountPanel({
                 <div
                     role="alert"
                     aria-live="assertive"
-                    style={{
-                        padding: "12px",
-                        background: "rgba(239, 68, 68, 0.1)",
-                        color: "var(--color-error)",
-                        borderRadius: "var(--radius-sm)",
-                        marginBottom: "16px",
-                        border: "1px solid rgba(239, 68, 68, 0.2)",
-                    }}
+                    className="p-3 mb-4" style={{ background: "rgba(239, 68, 68, 0.1)", color: "var(--color-error)", borderRadius: "var(--radius-sm)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
                 >
                     {error}
                 </div>
@@ -119,12 +102,12 @@ export default function DeleteAccountPanel({
                     type="button"
                     variant="danger"
                     onClick={() => setIsConfirming(true)}
-                    style={{ width: "100%" }}
+                    className="w-full"
                 >
                     Delete My Account
                 </Button>
             ) : (
-                <form onSubmit={handleDelete} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <form onSubmit={handleDelete} className="flex flex-col gap-4">
                     <Input
                         label="Enter Password"
                         id="delete-password-input"
@@ -164,11 +147,11 @@ export default function DeleteAccountPanel({
                         />
                     </div>
 
-                    <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
+                    <div className="flex gap-3 mt-2">
                         <Button
                             type="submit"
                             variant="danger"
-                            style={{ flex: 1 }}
+                            className="flex-1"
                             disabled={isSaving || confirmText !== "DELETE"}
                         >
                             {isSaving ? <span className="loading" /> : "Permanently Delete Account"}
@@ -176,7 +159,7 @@ export default function DeleteAccountPanel({
                         <Button
                             type="button"
                             variant="secondary"
-                            style={{ flex: 1 }}
+                            className="flex-1"
                             onClick={() => {
                                 setIsConfirming(false);
                                 setPassword("");

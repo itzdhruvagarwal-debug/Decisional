@@ -31,30 +31,30 @@ export default async function AdminNewsletterPage() {
           <h1 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "6px" }}>
             Send Newsletter
           </h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+          <p className="text-secondary text-sm">
             Compose and send newsletters to verified blog subscribers.
           </p>
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px", marginBottom: "28px" }}>
+      <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", marginBottom: "28px" }}>
         <div className="card" style={{ padding: "18px 20px" }}>
-          <div style={{ color: "var(--color-text-muted)", fontSize: "12px", marginBottom: "6px" }}>Total Subscribers</div>
+          <div className="text-muted text-xs" style={{ marginBottom: "6px" }}>Total Subscribers</div>
           <div style={{ fontSize: "28px", fontWeight: 900, color: "var(--color-primary-light)" }}>{stats.total}</div>
         </div>
         <div className="card" style={{ padding: "18px 20px" }}>
-          <div style={{ color: "var(--color-text-muted)", fontSize: "12px", marginBottom: "6px" }}>Verified Subscribers</div>
+          <div className="text-muted text-xs" style={{ marginBottom: "6px" }}>Verified Subscribers</div>
           <div style={{ fontSize: "28px", fontWeight: 900, color: "var(--color-success)" }}>{stats.verified}</div>
         </div>
         <div className="card" style={{ padding: "18px 20px" }}>
-          <div style={{ color: "var(--color-text-muted)", fontSize: "12px", marginBottom: "6px" }}>Pending Verification</div>
+          <div className="text-muted text-xs" style={{ marginBottom: "6px" }}>Pending Verification</div>
           <div style={{ fontSize: "28px", fontWeight: 900, color: "var(--color-warning)" }}>{stats.unverified}</div>
         </div>
       </div>
 
       <div className="card" style={{ padding: "28px" }}>
         <form action="/api/admin/newsletter" method="POST">
-          <div style={{ marginBottom: "20px" }}>
+          <div className="mb-5">
             <Input
               type="text"
               id="subject"
@@ -66,29 +66,24 @@ export default async function AdminNewsletterPage() {
             />
           </div>
 
-          <div style={{ marginBottom: "20px" }}>
+          <div className="mb-5">
             <Textarea
               id="content"
               name="content"
               label="Content (HTML supported)"
               required
               rows={12}
-              style={{
-                fontFamily: "var(--font-mono, monospace)",
-                fontSize: "14px",
-                minHeight: "220px",
-                resize: "vertical",
-              }}
+              className="text-sm" style={{ fontFamily: "var(--font-mono, monospace)", minHeight: "220px", resize: "vertical" }}
               placeholder="Enter your newsletter content here. You can use HTML tags for formatting."
               fullWidth
             />
-            <p style={{ color: "var(--color-text-muted)", fontSize: "12px", marginTop: "6px" }}>
+            <p className="text-muted text-xs" style={{ marginTop: "6px" }}>
               Tip: Use &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;a&gt;, &lt;ul&gt;, &lt;li&gt; for basic formatting.
             </p>
           </div>
 
-          <div className="card-gradient" style={{ padding: "16px 20px", borderRadius: "var(--radius-md)", border: "1px dashed rgba(245, 158, 11, 0.4)", marginBottom: "24px", background: "rgba(245, 158, 11, 0.05)" }}>
-            <p style={{ color: "var(--color-accent-amber)", fontSize: "13px", lineHeight: "1.5", fontWeight: 600 }}>
+          <div className="card-gradient mb-6" style={{ padding: "16px 20px", borderRadius: "var(--radius-md)", border: "1px dashed rgba(245, 158, 11, 0.4)", background: "rgba(245, 158, 11, 0.05)" }}>
+            <p className="text-sm font-semibold" style={{ color: "var(--color-accent-amber)", lineHeight: "1.5" }}>
               ⚠️ Warning: This will send an email to {stats.verified} verified subscribers immediately. Make sure to test your content before sending.
             </p>
           </div>
@@ -96,7 +91,7 @@ export default async function AdminNewsletterPage() {
           <Button
             type="submit"
             variant="primary"
-            style={{ width: "100%", justifyContent: "center", padding: "14px 28px", fontWeight: 800 }}
+            className="w-full justify-center font-extrabold" style={{ padding: "14px 28px" }}
           >
             Send Newsletter to {stats.verified} Subscribers
           </Button>

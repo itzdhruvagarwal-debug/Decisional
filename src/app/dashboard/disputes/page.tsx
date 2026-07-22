@@ -49,20 +49,13 @@ export default function DisputesPage() {
       <div className="animate-fade-in">
         {/* Page Header */}
         <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "28px",
-            flexWrap: "wrap",
-            gap: "12px",
-          }}
+          className="flex justify-between items-center flex-wrap gap-3" style={{ marginBottom: "28px" }}
         >
           <div>
-            <h1 style={{ fontSize: "26px", fontWeight: 800 }}>
+            <h1 className="font-extrabold" style={{ fontSize: "26px" }}>
               ⚖️ Disputes & Resolution
             </h1>
-            <p style={{ color: "var(--color-text-secondary)", fontSize: "14px", marginTop: "4px" }}>
+            <p className="text-secondary text-sm mt-1">
               Manage and track your dispute cases
             </p>
           </div>
@@ -75,7 +68,7 @@ export default function DisputesPage() {
         {(() => {
           if (isLoading) {
             return (
-              <div style={{ textAlign: "center", padding: "60px" }}>
+              <div className="text-center" style={{ padding: "60px" }}>
                 <span className="loading" style={{ width: "36px", height: "36px" }} />
               </div>
             );
@@ -92,26 +85,19 @@ export default function DisputesPage() {
             );
           }
           return (
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div className="flex flex-col gap-4">
             {disputes.map((dispute) => (
               <Link
                 key={dispute.id}
                 href={`/dashboard/disputes/${dispute.id}`}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
-                <div className="card hover-lift" style={{ cursor: "pointer" }}>
+                <div className="card hover-lift cursor-pointer">
                   {/* Top Row: Status + meta */}
                   <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      marginBottom: "12px",
-                      flexWrap: "wrap",
-                      gap: "8px",
-                    }}
+                    className="flex justify-between items-start mb-3 flex-wrap gap-2"
                   >
-                    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px" }}>
+                    <div className="flex flex-wrap items-center gap-2">
                       <span
                         className="badge"
                         style={{
@@ -122,10 +108,10 @@ export default function DisputesPage() {
                       >
                         {getStatusLabel(dispute.status)}
                       </span>
-                      <span style={{ fontSize: "12px", color: "var(--color-text-secondary)" }}>
+                      <span className="text-xs text-secondary">
                         #{dispute.id.slice(-6)}
                       </span>
-                      <span style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+                      <span className="text-xs text-muted">
                         {new Date(dispute.createdAt).toLocaleDateString("en-IN", {
                           day: "numeric",
                           month: "short",
@@ -134,34 +120,20 @@ export default function DisputesPage() {
                       </span>
                     </div>
                     <span
-                      style={{
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        color: "var(--color-accent-amber)",
-                        background: "rgba(245,158,11,0.1)",
-                        padding: "4px 10px",
-                        borderRadius: "8px",
-                      }}
+                      className="text-xs font-semibold" style={{ color: "var(--color-accent-amber)", background: "rgba(245,158,11,0.1)", padding: "4px 10px", borderRadius: "8px" }}
                     >
                       {dispute.type} Issue
                     </span>
                   </div>
 
                   {/* Campaign Title */}
-                  <h3 style={{ fontSize: "17px", fontWeight: 700, marginBottom: "6px" }}>
+                  <h3 className="font-bold" style={{ fontSize: "17px", marginBottom: "6px" }}>
                     {dispute.deal.campaign.title}
                   </h3>
 
                   {/* Deal Info */}
                   <div
-                    style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: "12px",
-                      marginBottom: "14px",
-                      fontSize: "13px",
-                      color: "var(--color-text-secondary)",
-                    }}
+                    className="flex flex-wrap gap-3 text-sm text-secondary" style={{ marginBottom: "14px" }}
                   >
                     <span>💳 ₹{(dispute.deal.amount / 100).toLocaleString("en-IN")}</span>
                     <span>🎬 {dispute.deal.influencer?.displayName}</span>
@@ -170,15 +142,7 @@ export default function DisputesPage() {
 
                   {/* Description Excerpt */}
                   <div
-                    style={{
-                      padding: "12px 14px",
-                      background: "var(--color-bg-tertiary)",
-                      borderRadius: "var(--radius-md)",
-                      fontSize: "13px",
-                      color: "var(--color-text-secondary)",
-                      lineHeight: 1.6,
-                      borderLeft: `3px solid ${getStatusColor(dispute.status)}`,
-                    }}
+                    className="text-sm text-secondary" style={{ padding: "12px 14px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", lineHeight: 1.6, borderLeft: `3px solid ${getStatusColor(dispute.status)}` }}
                   >
                     "{dispute.description.length > 120
                       ? dispute.description.slice(0, 120) + "..."
@@ -186,13 +150,9 @@ export default function DisputesPage() {
                   </div>
 
                   {/* View Details CTA */}
-                  <div style={{ marginTop: "14px", display: "flex", justifyContent: "flex-end" }}>
+                  <div className="flex justify-end" style={{ marginTop: "14px" }}>
                     <span
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        color: "var(--color-primary)",
-                      }}
+                      className="text-sm font-semibold text-primary"
                     >
                       View Full Details →
                     </span>

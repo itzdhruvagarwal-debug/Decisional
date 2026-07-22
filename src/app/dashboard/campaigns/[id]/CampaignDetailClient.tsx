@@ -209,7 +209,7 @@ function ApplicationsList({
 }: ApplicationsListProps) {
   if (loading) {
     return (
-      <div style={{ padding: "24px", textAlign: "center" }}>
+      <div className="p-6 text-center">
         <span className="loading" />
       </div>
     );
@@ -226,7 +226,7 @@ function ApplicationsList({
   }
 
   return (
-    <div style={{ display: "grid", gap: "12px" }}>
+    <div className="grid gap-3">
       {applications.map((application) => {
         const canAct = ["PENDING", "SHORTLISTED"].includes(application.status);
         const matchScore = application.matchScore;
@@ -246,25 +246,11 @@ function ApplicationsList({
         return (
           <article
             key={application.id}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(0, 1fr) auto",
-              gap: "16px",
-              padding: "16px",
-              background: "var(--color-bg-tertiary)",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--color-border)",
-            }}
+            className="grid gap-4 p-4" style={{ gridTemplateColumns: "minmax(0, 1fr) auto", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}
           >
             <div style={{ minWidth: 0 }}>
               <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  flexWrap: "wrap",
-                  marginBottom: "8px",
-                }}
+                className="flex items-center flex-wrap mb-2" style={{ gap: "10px" }}
               >
                 <strong>{application.influencer.displayName}</strong>
                 <span className="badge">{application.status}</span>
@@ -276,13 +262,7 @@ function ApplicationsList({
                 </span>
                 {matchScore !== undefined && (
                   <span
-                    className="badge"
-                    style={{
-                      backgroundColor: matchBgColor,
-                      color: matchTextColor,
-                      borderColor: matchTextColor,
-                      fontWeight: "bold",
-                    }}
+                    className="badge font-bold" style={{ backgroundColor: matchBgColor, color: matchTextColor, borderColor: matchTextColor }}
                     title={`Match Score Details:\n- Niche Fit: ${application.matchBreakdown?.categoryScore}%\n- Engagement Fit: ${application.matchBreakdown?.engagementScore}%\n- Authenticity Fit: ${application.matchBreakdown?.authenticityScore}%\n- Reputation Fit: ${application.matchBreakdown?.qualityScore}%\n- ROI/CPV Fit (Projected): ${application.matchBreakdown?.roiScore}%\n- Est. Views (Modelled): ${application.matchBreakdown?.estimatedViews}\n- Est. CPV (Modelled): ₹${((application.matchBreakdown?.estimatedCpvPaise || 0) / 100).toFixed(2)}`}
                   >
                     🔥 {matchScore}% Match
@@ -290,23 +270,12 @@ function ApplicationsList({
                 )}
               </div>
               <p
-                style={{
-                  color: "var(--color-text-secondary)",
-                  fontSize: "14px",
-                  lineHeight: 1.5,
-                  marginBottom: "10px",
-                }}
+                className="text-secondary text-sm" style={{ lineHeight: 1.5, marginBottom: "10px" }}
               >
                 {application.proposal}
               </p>
               <div
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  flexWrap: "wrap",
-                  color: "var(--color-text-muted)",
-                  fontSize: "12px",
-                }}
+                className="flex flex-wrap text-muted text-xs" style={{ gap: "10px" }}
               >
                 <span>
                   Followers:{" "}
@@ -327,13 +296,7 @@ function ApplicationsList({
             </div>
 
             <div
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: "8px",
-                flexWrap: "wrap",
-                justifyContent: "flex-end",
-              }}
+              className="flex items-start gap-2 flex-wrap justify-end"
             >
               <Link
                 href={`/dashboard/influencers/${application.influencer.id}`}
@@ -690,7 +653,7 @@ export default function CampaignDetailClient({
 
   if (loading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", padding: "64px" }}>
+      <div className="flex justify-center" style={{ padding: "64px" }}>
         <span className="loading" style={{ width: "40px", height: "40px" }} />
       </div>
     );
@@ -698,8 +661,8 @@ export default function CampaignDetailClient({
 
   if (error || !campaign) {
     return (
-      <div className="card" style={{ maxWidth: "760px", margin: "0 auto", textAlign: "center" }}>
-        <h2 style={{ marginBottom: "8px" }}>{error || "Campaign not found"}</h2>
+      <div className="card text-center" style={{ maxWidth: "760px", margin: "0 auto" }}>
+        <h2 className="mb-2">{error || "Campaign not found"}</h2>
         <Link href="/dashboard/campaigns" className="btn btn-secondary">
           Back to Campaigns
         </Link>
@@ -722,30 +685,30 @@ export default function CampaignDetailClient({
   );
 
   return (
-    <div className="campaign-detail-page" style={{ maxWidth: "980px", margin: "0 auto", display: "grid", gap: "16px" }}>
-      <Link href="/dashboard/campaigns" className="campaign-detail-back" style={{ fontSize: "14px", color: "var(--color-text-secondary)" }}>
+    <div className="campaign-detail-page grid gap-4" style={{ maxWidth: "980px", margin: "0 auto" }}>
+      <Link href="/dashboard/campaigns" className="campaign-detail-back text-sm text-secondary">
         Back to campaigns
       </Link>
 
-      <section className="card campaign-detail-hero" style={{ display: "grid", gap: "12px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
+      <section className="card campaign-detail-hero grid gap-3">
+        <div className="flex justify-between gap-3 flex-wrap">
           <div className="campaign-detail-title-block">
             <div className="campaign-card-logo campaign-detail-logo" aria-hidden="true">
               {campaign.brand?.logo ? (
-                <Image src={campaign.brand.logo} alt="" fill unoptimized style={{ objectFit: "cover" }} />
+                <Image src={campaign.brand.logo} alt="" fill unoptimized className="object-cover" />
               ) : (
                 (campaign.brand?.companyName || "DC").slice(0, 2).toUpperCase()
               )}
             </div>
-            <h1 style={{ fontSize: "28px", fontWeight: 800 }}>{campaign.title}</h1>
-            <p style={{ color: "var(--color-text-secondary)", marginTop: "6px" }}>
+            <h1 className="font-extrabold" style={{ fontSize: "28px" }}>{campaign.title}</h1>
+            <p className="text-secondary" style={{ marginTop: "6px" }}>
               {campaign.brand?.companyName || "Unknown Brand"}
               {campaign.brand?.isGstVerified ? " · Verified" : ""}
               {campaign.brand?.averageRating ? ` · ${campaign.brand.averageRating.toFixed(1)} rating` : ""}
             </p>
           </div>
 
-          <div className="campaign-detail-actions" style={{ display: "flex", gap: "8px", alignItems: "flex-start", flexWrap: "wrap" }}>
+          <div className="campaign-detail-actions flex gap-2 items-start flex-wrap">
             <span className="badge">Status: {campaign.status}</span>
             {isOwner && campaign.status === "DRAFT" && (
               <>
@@ -766,7 +729,7 @@ export default function CampaignDetailClient({
               <Button
                 href={`/api/reports/brand/campaign/${campaign.id}/roi?format=csv`}
                 variant="secondary"
-                style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                className="inline-flex items-center" style={{ gap: "6px" }}
               >
                 📊 Download ROI Report (CSV)
               </Button>
@@ -786,36 +749,36 @@ export default function CampaignDetailClient({
           </div>
         </div>
 
-        <div className="campaign-detail-stats" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "12px" }}>
+        <div className="campaign-detail-stats grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))" }}>
           <div className="campaign-detail-stat" style={{ margin: 0 }}>
-            <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Per Influencer</div>
-            <div style={{ fontSize: "20px", fontWeight: 700 }}>
+            <div className="text-xs text-muted">Per Influencer</div>
+            <div className="text-xl font-bold">
               {formatCurrency(campaign.perInfluencerBudget || campaign.totalBudget)}
             </div>
           </div>
           {user?.userType === "INFLUENCER" && recommendedPayout > 0 && (
             <div className="campaign-detail-stat" style={{ margin: 0, border: "1px solid #10b981", background: "rgba(16, 185, 129, 0.08)" }}>
-              <div style={{ fontSize: "12px", color: "#10b981", fontWeight: 600 }}>💡 Recommended Payout</div>
-              <div style={{ fontSize: "20px", fontWeight: 800, color: "#10b981" }}>
+              <div className="text-xs font-semibold" style={{ color: "#10b981" }}>💡 Recommended Payout</div>
+              <div className="text-xl font-extrabold" style={{ color: "#10b981" }}>
                 ₹{recommendedPayout.toLocaleString("en-IN")}
               </div>
             </div>
           )}
           <div className="campaign-detail-stat" style={{ margin: 0 }}>
-            <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Applications</div>
-            <div style={{ fontSize: "20px", fontWeight: 700 }}>{applicationsCount}</div>
+            <div className="text-xs text-muted">Applications</div>
+            <div className="text-xl font-bold">{applicationsCount}</div>
           </div>
           <div className="campaign-detail-stat" style={{ margin: 0 }}>
-            <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Slots Filled</div>
-            <div style={{ fontSize: "20px", fontWeight: 700 }}>
+            <div className="text-xs text-muted">Slots Filled</div>
+            <div className="text-xl font-bold">
               {typeof campaign.maxInfluencers === "number"
                 ? `${campaign.acceptedCount} / ${campaign.maxInfluencers}`
                 : `${campaign.acceptedCount} (Unlimited)`}
             </div>
           </div>
           <div className="campaign-detail-stat" style={{ margin: 0 }}>
-            <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Followers Needed</div>
-            <div style={{ fontSize: "20px", fontWeight: 700 }}>
+            <div className="text-xs text-muted">Followers Needed</div>
+            <div className="text-xl font-bold">
               {campaign.maxFollowers
                 ? `${campaign.minFollowers.toLocaleString()} - ${campaign.maxFollowers.toLocaleString()}`
                 : `${campaign.minFollowers.toLocaleString()}+`}
@@ -846,18 +809,11 @@ export default function CampaignDetailClient({
       {isOwner && (
         <section className="card">
           <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: "12px",
-              flexWrap: "wrap",
-              marginBottom: "16px",
-            }}
+            className="flex justify-between items-center gap-3 flex-wrap mb-4"
           >
             <div>
-              <h3 style={{ marginBottom: "4px" }}>Applications</h3>
-              <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+              <h3 className="mb-1">Applications</h3>
+              <p className="text-secondary text-sm">
                 Review applicants and start deals from this campaign.
               </p>
             </div>
@@ -876,36 +832,36 @@ export default function CampaignDetailClient({
       )}
 
       <section className="card">
-        <h3 style={{ marginBottom: "8px" }}>Description</h3>
-        <p style={{ color: "var(--color-text-secondary)", whiteSpace: "pre-line" }}>
+        <h3 className="mb-2">Description</h3>
+        <p className="text-secondary" style={{ whiteSpace: "pre-line" }}>
           {campaign.description || "No description provided."}
         </p>
       </section>
 
       <section className="card">
-        <h3 style={{ marginBottom: "8px" }}>Requirements</h3>
-        <p style={{ color: "var(--color-text-secondary)", whiteSpace: "pre-line" }}>
+        <h3 className="mb-2">Requirements</h3>
+        <p className="text-secondary" style={{ whiteSpace: "pre-line" }}>
           {campaign.requirements || "No requirements provided."}
         </p>
       </section>
 
       {campaign.guidelines && (
         <section className="card">
-          <h3 style={{ marginBottom: "8px" }}>Guidelines</h3>
-          <p style={{ color: "var(--color-text-secondary)", whiteSpace: "pre-line" }}>
+          <h3 className="mb-2">Guidelines</h3>
+          <p className="text-secondary" style={{ whiteSpace: "pre-line" }}>
             {campaign.guidelines}
           </p>
         </section>
       )}
 
       <section className="card">
-        <h3 style={{ marginBottom: "8px" }}>Deliverables</h3>
+        <h3 className="mb-2">Deliverables</h3>
         {campaign.deliverables.length === 0 ? (
-          <p style={{ color: "var(--color-text-secondary)" }}>No deliverables specified.</p>
+          <p className="text-secondary">No deliverables specified.</p>
         ) : (
-          <div style={{ display: "grid", gap: "8px" }}>
+          <div className="grid gap-2">
             {campaign.deliverables.map((item, index) => (
-              <div key={`${item.type}-${index}`} className="badge" style={{ display: "flex", justifyContent: "space-between" }}>
+              <div key={`${item.type}-${index}`} className="badge flex justify-between">
                 <span>{item.type}</span>
                 <span>x{item.count}</span>
               </div>
@@ -915,8 +871,8 @@ export default function CampaignDetailClient({
       </section>
 
       <section className="card">
-        <h3 style={{ marginBottom: "8px" }}>Targeting</h3>
-        <div style={{ display: "grid", gap: "10px" }}>
+        <h3 className="mb-2">Targeting</h3>
+        <div className="grid" style={{ gap: "10px" }}>
           <div>
             <strong>Categories:</strong>{" "}
             {campaign.targetCategories.length > 0
@@ -937,8 +893,8 @@ export default function CampaignDetailClient({
       </section>
 
       <section className="card">
-        <h3 style={{ marginBottom: "8px" }}>Timeline</h3>
-        <div style={{ display: "grid", gap: "6px", color: "var(--color-text-secondary)" }}>
+        <h3 className="mb-2">Timeline</h3>
+        <div className="grid text-secondary" style={{ gap: "6px" }}>
           <div>Apply by: {formatDate(campaign.applicationDeadline)}</div>
           <div>Content due: {formatDate(campaign.contentDeadline)}</div>
           <div>Posting due: {formatDate(campaign.postingDeadline)}</div>
@@ -947,19 +903,10 @@ export default function CampaignDetailClient({
 
       {showApplyModal && (
         <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.75)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 60,
-            padding: "16px",
-          }}
+          className="fixed flex items-center justify-center p-4" style={{ inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 60 }}
         >
-          <div className="card" style={{ width: "100%", maxWidth: "560px" }}>
-            <h3 style={{ marginBottom: "12px" }}>Apply for Campaign</h3>
+          <div className="card w-full" style={{ maxWidth: "560px" }}>
+            <h3 className="mb-3">Apply for Campaign</h3>
 
             <Textarea
               label="Proposal (minimum 50 characters)"
@@ -970,7 +917,7 @@ export default function CampaignDetailClient({
               placeholder="Tell the brand why you are a strong fit for this campaign"
               fullWidth
             />
-            <p style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+            <p className="text-xs text-muted">
               {proposal.length}/1000
             </p>
 
@@ -982,15 +929,15 @@ export default function CampaignDetailClient({
               value={proposedRate}
               onChange={(e) => setProposedRate(Number(e.target.value) || 0)}
               fullWidth
-              style={{ marginTop: "12px" }}
+              className="mt-3"
             />
             {recommendedPayout > 0 && (
-              <span style={{ fontSize: "12px", color: "#10b981", marginTop: "4px", display: "block" }}>
+              <span className="text-xs mt-1 block" style={{ color: "#10b981" }}>
                 💡 Recommended Payout Estimate for your stats: <strong>₹{recommendedPayout.toLocaleString("en-IN")}</strong>
               </span>
             )}
 
-            <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
+            <div className="flex mt-4" style={{ gap: "10px" }}>
               <Button
                 variant="secondary"
                 onClick={() => setShowApplyModal(false)}

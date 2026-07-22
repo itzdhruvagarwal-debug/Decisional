@@ -203,7 +203,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
   let content;
   if (loading) {
     content = (
-      <div style={{ display: "flex", justifyContent: "center", padding: "48px" }}>
+      <div className="flex justify-center" style={{ padding: "48px" }}>
         <span className="loading" style={{ width: "40px", height: "40px" }} />
       </div>
     );
@@ -226,24 +226,19 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
   } else {
     content = (
       <div
-        className="campaign-card-grid"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-          gap: "16px",
-        }}
+        className="campaign-card-grid grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}
       >
         {filteredCampaigns.map((campaign) => (
           <article key={campaign.id} className="card campaign-card" style={{ padding: "18px" }}>
             <div className="campaign-card-brand-row">
               <div className="campaign-card-logo" aria-hidden="true">
                 {campaign.brand.logo ? (
-                  <Image src={campaign.brand.logo} alt="" fill unoptimized style={{ objectFit: "cover" }} />
+                  <Image src={campaign.brand.logo} alt="" fill unoptimized className="object-cover" />
                 ) : (
                   campaign.brand.companyName.slice(0, 2).toUpperCase()
                 )}
               </div>
-              <div style={{ minWidth: 0, flex: 1 }}>
+              <div className="flex-1" style={{ minWidth: 0 }}>
                 <div className="campaign-card-brand-name">
                   {campaign.brand.companyName}
                 </div>
@@ -255,25 +250,13 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
             </div>
 
             <p
-              className="campaign-card-description"
-              style={{
-                color: "var(--color-text-secondary)",
-                fontSize: "14px",
-                lineHeight: 1.5,
-                minHeight: "42px",
-              }}
+              className="campaign-card-description text-secondary text-sm" style={{ lineHeight: 1.5, minHeight: "42px" }}
             >
               {campaign.description}
             </p>
 
             <div
-              className="campaign-card-tags"
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "6px",
-                margin: "10px 0 14px",
-              }}
+              className="campaign-card-tags flex flex-wrap" style={{ gap: "6px", margin: "10px 0 14px" }}
             >
               {campaign.deliverables.slice(0, 2).map((item, index) => (
                 <span key={`${campaign.id}-del-${index}`} className="badge badge-primary">
@@ -288,52 +271,40 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
             </div>
 
             <div
-              className="campaign-card-metrics"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "8px",
-                marginBottom: "14px",
-              }}
+              className="campaign-card-metrics grid gap-2" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: "14px" }}
             >
               <div>
-                <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+                <div className="text-xs text-muted">
                   Slots
                 </div>
-                <div style={{ fontSize: "13px", fontWeight: 600 }}>
+                <div className="text-sm font-semibold">
                   {campaign.maxInfluencers !== null && campaign.maxInfluencers !== undefined
                     ? `${campaign.acceptedCount}/${campaign.maxInfluencers} filled`
                     : "Unlimited"}
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+                <div className="text-xs text-muted">
                   Followers
                 </div>
-                <div style={{ fontSize: "13px", fontWeight: 600 }}>
+                <div className="text-sm font-semibold">
                   {formatNumber(campaign.minFollowers)}+
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+                <div className="text-xs text-muted">
                   Applied
                 </div>
-                <div style={{ fontSize: "13px", fontWeight: 600 }}>
+                <div className="text-sm font-semibold">
                   {campaign.totalApplications}
                 </div>
               </div>
             </div>
 
             <div
-              className="campaign-card-footer"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "10px",
-              }}
+              className="campaign-card-footer flex items-center justify-between" style={{ gap: "10px" }}
             >
-              <span style={{ fontSize: "12px", color: "var(--color-text-secondary)" }}>
+              <span className="text-xs text-secondary">
                 Post by {new Date(campaign.postingDeadline).toLocaleDateString("en-IN")}
               </span>
               <Link href={`/dashboard/campaigns/${campaign.id}`} className="btn btn-primary">
@@ -350,16 +321,11 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
     <div>
       <header className="dashboard-sub-header glass">
         <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-          }}
+          className="flex justify-between items-center w-full"
         >
           <div>
-            <h2 style={{ fontSize: "18px", fontWeight: 800 }}>Explore Campaigns</h2>
-            <p style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}>
+            <h2 className="text-lg font-extrabold">Explore Campaigns</h2>
+            <p className="text-sm text-secondary">
               Apply to active campaigns matching your niche.
             </p>
           </div>
@@ -371,12 +337,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
         </div>
 
         <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            marginTop: "20px",
-            flexWrap: "wrap",
-          }}
+          className="flex gap-3 flex-wrap" style={{ marginTop: "20px" }}
         >
           <Input
             type="text"
@@ -402,12 +363,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
         </div>
 
         <div
-          style={{
-            display: "flex",
-            gap: "8px",
-            marginTop: "16px",
-            overflowX: "auto",
-          }}
+          className="flex gap-2 mt-4" style={{ overflowX: "auto" }}
         >
           {categories.map((category) => (
             <Button

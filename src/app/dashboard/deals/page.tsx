@@ -169,17 +169,17 @@ function getDeliverableIcon(type: string): string {
 
 function DealSkeleton() {
   return (
-    <div className="card" style={{ marginBottom: "16px" }}>
-      <div style={{ display: "flex", gap: "16px", alignItems: "center", marginBottom: "16px" }}>
-        <div className="skeleton" style={{ width: 48, height: 48, borderRadius: "var(--radius-md)", flexShrink: 0 }} />
-        <div style={{ flex: 1 }}>
+    <div className="card mb-4">
+      <div className="flex gap-4 items-center mb-4">
+        <div className="skeleton flex-shrink-0" style={{ width: 48, height: 48, borderRadius: "var(--radius-md)" }} />
+        <div className="flex-1">
           <div className="skeleton" style={{ height: 16, width: "60%", borderRadius: 6, marginBottom: 8 }} />
           <div className="skeleton" style={{ height: 13, width: "40%", borderRadius: 6 }} />
         </div>
         <div className="skeleton" style={{ height: 28, width: 100, borderRadius: "var(--radius-full)" }} />
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-        <div style={{ display: "flex", gap: 24, flex: 1 }}>
+      <div className="flex justify-between items-center flex-wrap" style={{ gap: 16 }}>
+        <div className="flex flex-1" style={{ gap: 24 }}>
           <div>
             <div className="skeleton" style={{ height: 11, width: 70, borderRadius: 4, marginBottom: 6 }} />
             <div className="skeleton" style={{ height: 14, width: 90, borderRadius: 4 }} />
@@ -189,7 +189,7 @@ function DealSkeleton() {
             <div className="skeleton" style={{ height: 14, width: 60, borderRadius: 4 }} />
           </div>
         </div>
-        <div style={{ textAlign: "right" }}>
+        <div className="text-right">
           <div className="skeleton" style={{ height: 11, width: 50, borderRadius: 4, marginBottom: 6, marginLeft: "auto" }} />
           <div className="skeleton" style={{ height: 22, width: 90, borderRadius: 4, marginLeft: "auto" }} />
         </div>
@@ -244,15 +244,10 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
 
   return (
     <div
-      className="card"
-      style={{
-        padding: 0,
-        overflow: "hidden",
-        border:
+      className="card overflow-hidden" style={{ padding: 0, border:
           selectedDeal === deal.id
             ? "1px solid var(--color-primary)"
-            : "1px solid transparent",
-      }}
+            : "1px solid transparent" }}
     >
       <Button
         type="button"
@@ -261,45 +256,16 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
           setSelectedDeal(selectedDeal === deal.id ? null : deal.id)
         }
         aria-expanded={selectedDeal === deal.id}
-        style={{
-          display: "block",
-          width: "100%",
-          padding: "24px",
-          textAlign: "left",
-        }}
+        className="block w-full p-6 text-left"
       >
         <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: "16px",
-            flexWrap: "wrap",
-            gap: "12px",
-          }}
+          className="flex justify-between items-start mb-4 flex-wrap gap-3"
         >
           <div
-            style={{
-              display: "flex",
-              gap: "16px",
-              alignItems: "center",
-            }}
+            className="flex gap-4 items-center"
           >
             <div
-              style={{
-                width: "48px",
-                height: "48px",
-                background: "var(--gradient-primary)",
-                borderRadius: "var(--radius-md)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: 700,
-                fontSize: "18px",
-                color: "white",
-                flexShrink: 0,
-                overflow: "hidden",
-              }}
+              className="flex items-center justify-center font-bold text-lg flex-shrink-0 overflow-hidden" style={{ width: "48px", height: "48px", background: "var(--gradient-primary)", borderRadius: "var(--radius-md)", color: "white" }}
             >
               {deal.brand.logo ? (
                 <Image
@@ -307,39 +273,25 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
                   alt={deal.brand.companyName}
                   fill
                   unoptimized
-                  style={{ objectFit: "cover" }}
+                  className="object-cover"
                 />
               ) : (
                 deal.brand.companyName?.[0]?.toUpperCase() || "B"
               )}
             </div>
             <div>
-              <h3 style={{ fontSize: "16px", fontWeight: 700 }}>
+              <h3 className="text-base font-bold">
                 {deal.campaign.title}
               </h3>
               <p
-                style={{
-                  fontSize: "14px",
-                  color: "var(--color-text-secondary)",
-                }}
+                className="text-sm text-secondary"
               >
                 {deal.brand.companyName}
               </p>
             </div>
           </div>
           <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "6px 12px",
-              background: `${status.color}20`,
-              borderRadius: "var(--radius-full)",
-              color: status.color,
-              fontSize: "12px",
-              fontWeight: 600,
-              alignSelf: "flex-start",
-            }}
+            className="flex items-center gap-2 text-xs font-semibold" style={{ padding: "6px 12px", background: `${status.color}20`, borderRadius: "var(--radius-full)", color: status.color, alignSelf: "flex-start" }}
           >
             <span>{status.icon}</span>
             <span>{status.label}</span>
@@ -347,36 +299,22 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
         </div>
 
         <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "16px",
-          }}
+          className="flex justify-between items-center flex-wrap gap-4"
         >
           <div
-            style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}
+            className="flex gap-4 flex-wrap"
           >
             <div>
               <div
-                style={{
-                  fontSize: "12px",
-                  color: "var(--color-text-muted)",
-                }}
+                className="text-xs text-muted"
               >
                 Deliverables
               </div>
               <div
-                style={{
-                  display: "flex",
-                  gap: "8px",
-                  marginTop: "4px",
-                  flexWrap: "wrap",
-                }}
+                className="flex gap-2 mt-1 flex-wrap"
               >
                 {deal.deliverables.map((d, idx) => (
-                  <span key={d.type + "_" + idx} style={{ fontSize: "14px" }}>
+                  <span key={d.type + "_" + idx} className="text-sm">
                     {getDeliverableIcon(d.type)} x{d.count}
                   </span>
                 ))}
@@ -384,14 +322,11 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
             </div>
             <div>
               <div
-                style={{
-                  fontSize: "12px",
-                  color: "var(--color-text-muted)",
-                }}
+                className="text-xs text-muted"
               >
                 Deadline
               </div>
-              <div style={{ fontSize: "14px", fontWeight: 600 }}>
+              <div className="text-sm font-semibold">
                 {new Date(deal.postingDeadline).toLocaleDateString(
                   "en-IN",
                   {
@@ -402,18 +337,15 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
               </div>
             </div>
           </div>
-          <div style={{ textAlign: "right", minWidth: "80px" }}>
+          <div className="text-right" style={{ minWidth: "80px" }}>
             <div
-              style={{
-                fontSize: "12px",
-                color: "var(--color-text-muted)",
-              }}
+              className="text-xs text-muted"
             >
               Amount
             </div>
             <div
-              style={{ fontSize: "18px", fontWeight: 800 }}
-              className="gradient-text"
+              
+               className="text-lg font-extrabold gradient-text"
             >
               {formatCurrency(deal.amount)}
             </div>
@@ -430,24 +362,16 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
           }}
         >
           <div
-            className="grid-2"
-            style={{ gap: "16px", marginBottom: "16px" }}
+            className="grid-2 gap-4 mb-4"
           >
             <div>
               <h4
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  marginBottom: "8px",
-                }}
+                className="text-sm font-semibold mb-2"
               >
                 Timeline
               </h4>
               <div
-                style={{
-                  fontSize: "13px",
-                  color: "var(--color-text-secondary)",
-                }}
+                className="text-sm text-secondary"
               >
                 <p>Started: {deal.createdAt}</p>
                 <p>Post by: {deal.postingDeadline}</p>
@@ -455,21 +379,14 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
             </div>
             <div>
               <h4
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  marginBottom: "8px",
-                }}
+                className="text-sm font-semibold mb-2"
               >
                 Required Deliverables
               </h4>
               {deal.deliverables.map((d, idx) => (
                 <p
                   key={d.type + "_" + idx}
-                  style={{
-                    fontSize: "13px",
-                    color: "var(--color-text-secondary)",
-                  }}
+                  className="text-sm text-secondary"
                 >
                   {getDeliverableIcon(d.type)}{" "}
                   {d.type.replaceAll("_", " ")} x {d.count}
@@ -479,7 +396,7 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
           </div>
 
           <div
-            style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}
+            className="flex gap-3 flex-wrap"
           >
             {canSubmitContent && (
               <Link
@@ -551,16 +468,11 @@ export default function DealsPage() {
     <DashboardShell user={session.user}>
       {/* Page Header */}
       <div
-        style={{
-          marginBottom: "24px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
+        className="mb-6 flex justify-between items-center"
       >
         <div>
-          <h1 style={{ fontSize: "24px", fontWeight: 800 }}>My Deals</h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+          <h1 className="text-2xl font-extrabold">My Deals</h1>
+          <p className="text-secondary text-sm">
             Manage your active collaborations
           </p>
         </div>
@@ -569,9 +481,9 @@ export default function DealsPage() {
       {loading ? (
         <div>
           {/* Stats skeleton */}
-          <div className="grid-3" style={{ marginBottom: "24px" }}>
+          <div className="grid-3 mb-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="card" style={{ textAlign: "center", padding: "24px" }}>
+              <div key={i} className="card text-center p-6">
                 <div className="skeleton" style={{ height: 36, width: 80, borderRadius: 8, margin: "0 auto 8px" }} />
                 <div className="skeleton" style={{ height: 13, width: 100, borderRadius: 4, margin: "0 auto" }} />
               </div>
@@ -583,57 +495,40 @@ export default function DealsPage() {
       ) : (
         <>
           {/* Stats */}
-          <div className="grid-3" style={{ marginBottom: "24px" }}>
-            <div className="card" style={{ textAlign: "center" }}>
+          <div className="grid-3 mb-6">
+            <div className="card text-center">
               <div
-                style={{
-                  fontSize: "32px",
-                  fontWeight: 800,
-                  color: "var(--color-accent-cyan)",
-                }}
+                className="font-extrabold" style={{ fontSize: "32px", color: "var(--color-accent-cyan)" }}
               >
                 {dealStats.active}
               </div>
               <div
-                style={{
-                  color: "var(--color-text-secondary)",
-                  fontSize: "14px",
-                }}
+                className="text-secondary text-sm"
               >
                 Active Deals
               </div>
             </div>
-            <div className="card" style={{ textAlign: "center" }}>
+            <div className="card text-center">
               <div
-                style={{
-                  fontSize: "32px",
-                  fontWeight: 800,
-                  color: "var(--color-success)",
-                }}
+                className="font-extrabold" style={{ fontSize: "32px", color: "var(--color-success)" }}
               >
                 {dealStats.completed}
               </div>
               <div
-                style={{
-                  color: "var(--color-text-secondary)",
-                  fontSize: "14px",
-                }}
+                className="text-secondary text-sm"
               >
                 Completed
               </div>
             </div>
-            <div className="card" style={{ textAlign: "center" }}>
+            <div className="card text-center">
               <div
-                style={{ fontSize: "32px", fontWeight: 800 }}
-                className="gradient-text"
+                 style={{ fontSize: "32px" }}
+                 className="font-extrabold gradient-text"
               >
                 {formatCurrency(dealStats.totalEarnings || 0)}
               </div>
               <div
-                style={{
-                  color: "var(--color-text-secondary)",
-                  fontSize: "14px",
-                }}
+                className="text-secondary text-sm"
               >
                 Total Earnings
               </div>
@@ -642,13 +537,7 @@ export default function DealsPage() {
 
           {/* Filter */}
           <div
-            className="scrollable-tabs"
-            style={{
-              display: "flex",
-              gap: "8px",
-              marginBottom: "24px",
-              paddingBottom: "8px",
-            }}
+            className="scrollable-tabs flex gap-2 mb-6" style={{ paddingBottom: "8px" }}
           >
             {[
               { key: "all", label: "All Deals" },
@@ -678,7 +567,7 @@ export default function DealsPage() {
 
           {/* Deals List */}
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+            className="flex flex-col gap-4"
           >
             {filteredDeals.map((deal) => (
               <DealListItem
@@ -701,13 +590,7 @@ export default function DealsPage() {
       )}
       {/* Pagination */}
       {totalPages > 1 && (
-        <div style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "16px",
-          padding: "24px 0",
-        }}>
+        <div className="flex justify-center items-center gap-4" style={{ padding: "24px 0" }}>
           <Button
             variant="secondary"
             disabled={currentPage <= 1}
@@ -716,7 +599,7 @@ export default function DealsPage() {
           >
             ← Previous
           </Button>
-          <span style={{ fontSize: "14px", color: "var(--color-text-secondary)" }}>
+          <span className="text-sm text-secondary">
             Page {currentPage} of {totalPages}
           </span>
           <Button

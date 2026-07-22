@@ -98,12 +98,12 @@ export default async function AdminUsersPage({
           <h1 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "6px" }}>
             User Management
           </h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+          <p className="text-secondary text-sm">
             Search, review, ban, and reactivate platform accounts.
           </p>
         </div>
         <div className="card" style={{ padding: "12px 16px", minWidth: "180px" }}>
-          <div style={{ color: "var(--color-text-muted)", fontSize: "12px" }}>
+          <div className="text-muted text-xs">
             Matching users
           </div>
           <div style={{ fontSize: "22px", fontWeight: 900 }}>{total}</div>
@@ -135,7 +135,7 @@ export default async function AdminUsersPage({
         </Button>
       </form>
 
-      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+      <div className="card overflow-hidden" style={{ padding: 0 }}>
         {users.length === 0 ? (
           <EmptyState
             emoji="👤"
@@ -144,27 +144,18 @@ export default async function AdminUsersPage({
           />
         ) : (
           <div className="admin-table-wrap">
-            <table style={{ width: "100%", minWidth: "960px", borderCollapse: "collapse" }}>
+            <table className="w-full" style={{ minWidth: "960px", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: "var(--color-bg-secondary)" }}>
                   {["User", "Role", "Status", "Tax", "Trust", "Joined", "Action"].map(
                     (heading) => (
                       <th
                         key={heading}
-                        style={{
-                          padding: "14px 18px",
-                          textAlign: (
+                        className="border-b-card text-muted text-xs font-extrabold" style={{ padding: "14px 18px", textAlign: (
                             {
-                              Action: "right",
-                              Trust: "center"
+                              Action: "right", Trust: "center"
                             } as const
-                          )[heading as "Action" | "Trust"] || "left",
-                          borderBottom: "1px solid var(--color-border)",
-                          color: "var(--color-text-muted)",
-                          fontSize: "12px",
-                          fontWeight: 800,
-                          textTransform: "uppercase",
-                        }}
+                          )[heading as "Action" | "Trust"] || "left", textTransform: "uppercase" }}
                       >
                         {heading}
                       </th>
@@ -186,23 +177,11 @@ export default async function AdminUsersPage({
                   const isBanned = user.status === "BANNED";
 
                   return (
-                    <tr key={user.id} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                      <td style={{ padding: "16px 18px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <tr key={user.id} className="border-b-card">
+                      <td className="p-card">
+                        <div className="flex items-center gap-3">
                           <div
-                            style={{
-                              width: "42px",
-                              height: "42px",
-                              borderRadius: "50%",
-                              background: "var(--gradient-primary)",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              color: "white",
-                              fontWeight: 900,
-                              position: "relative",
-                              overflow: "hidden",
-                            }}
+                            className="flex items-center justify-center relative overflow-hidden" style={{ width: "42px", height: "42px", borderRadius: "50%", background: "var(--gradient-primary)", color: "white", fontWeight: 900 }}
                           >
                             {avatar ? (
                               <Image
@@ -210,24 +189,24 @@ export default async function AdminUsersPage({
                                 alt=""
                                 fill
                                 unoptimized
-                                style={{ objectFit: "cover" }}
+                                className="object-cover"
                               />
                             ) : (
                               name.charAt(0).toUpperCase()
                             )}
                           </div>
                           <div style={{ minWidth: 0 }}>
-                            <div style={{ fontWeight: 800 }}>{name}</div>
-                            <div style={{ color: "var(--color-text-muted)", fontSize: "12px" }}>
+                            <div className="font-extrabold">{name}</div>
+                            <div className="text-muted text-xs">
                               {user.email}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td style={{ padding: "16px 18px" }}>
+                      <td className="p-card">
                         <span className="badge badge-primary">{user.userType}</span>
                       </td>
-                      <td style={{ padding: "16px 18px" }}>
+                      <td className="p-card">
                         <span
                           className="badge"
                           style={{
@@ -239,7 +218,7 @@ export default async function AdminUsersPage({
                           {user.status.toLowerCase().replaceAll("_", " ")}
                         </span>
                       </td>
-                      <td style={{ padding: "16px 18px" }}>
+                      <td className="p-card">
                         <span
                           className="badge"
                           style={{
@@ -251,33 +230,28 @@ export default async function AdminUsersPage({
                           {taxStatusLabel(user)}
                         </span>
                         {user.taxCompliance?.gstinLast4 && (
-                          <div style={{ color: "var(--color-text-muted)", fontSize: "11px", marginTop: "4px" }}>
+                          <div className="text-muted mt-1" style={{ fontSize: "11px" }}>
                             GST ****{user.taxCompliance.gstinLast4}
                           </div>
                         )}
                       </td>
-                      <td style={{ padding: "16px 18px", textAlign: "center", fontWeight: 900 }}>
+                      <td className="p-card text-center" style={{ fontWeight: 900 }}>
                         {user.trustScore}
-                        <span style={{ color: "var(--color-text-muted)", fontSize: "11px" }}>
+                        <span className="text-muted" style={{ fontSize: "11px" }}>
                           /900
                         </span>
                       </td>
-                      <td style={{ padding: "16px 18px", color: "var(--color-text-muted)", fontSize: "13px" }}>
+                      <td className="p-card text-muted text-sm">
                         {new Date(user.createdAt).toLocaleDateString("en-IN")}
                       </td>
-                      <td style={{ padding: "16px 18px", textAlign: "right" }}>
-                        <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px" }}>
+                      <td className="p-card text-right">
+                        <div className="flex justify-end items-center gap-2">
                           {user.userType !== "ADMIN" && (
-            <form action={awardBadgeAction} style={{ display: "inline-flex", gap: "4px" }}>
+            <form action={awardBadgeAction} className="inline-flex gap-1">
               <input type="hidden" name="userId" value={user.id} />
               <Select
                 name="badgeId"
-                style={{
-                  padding: "2px 6px",
-                  fontSize: "12px",
-                  width: "140px",
-                  height: "30px",
-                }}
+                className="text-xs" style={{ padding: "2px 6px", width: "140px", height: "30px" }}
                 defaultValue=""
                 required
               >
@@ -333,16 +307,9 @@ export default async function AdminUsersPage({
       </div>
 
       <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginTop: "16px",
-          color: "var(--color-text-muted)",
-          fontSize: "13px",
-        }}
+        className="flex justify-between items-center mt-4 text-muted text-sm"
       >
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div className="flex gap-2">
           <Link
             href={`/admin/users?page=${page - 1}&search=${encodeURIComponent(query)}&type=${userType}&status=${status}`}
             className={`btn btn-secondary btn-sm`}

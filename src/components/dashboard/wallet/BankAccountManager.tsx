@@ -215,14 +215,9 @@ export default function BankAccountManager({
   return (
     <div className="card">
       <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "16px",
-        }}
+        className="flex justify-between items-center mb-4"
       >
-        <h3 style={{ fontSize: "18px", fontWeight: 700 }}>
+        <h3 className="text-lg font-bold">
           Saved Bank Accounts
         </h3>
         <Button
@@ -236,16 +231,7 @@ export default function BankAccountManager({
       {/* Inline notice */}
       {notice && (
         <div
-          style={{
-            marginBottom: "12px",
-            padding: "10px 14px",
-            borderRadius: "var(--radius-md)",
-            fontSize: "13px",
-            fontWeight: 600,
-            background: notice.type === "success" ? "rgba(16, 185, 129, 0.1)" : "rgba(244, 63, 94, 0.1)",
-            color: notice.type === "success" ? "var(--color-accent-emerald)" : "var(--color-accent-rose)",
-            border: `1px solid ${notice.type === "success" ? "rgba(16, 185, 129, 0.25)" : "rgba(244, 63, 94, 0.25)"}`,
-          }}
+          className="mb-3 text-sm font-semibold" style={{ padding: "10px 14px", borderRadius: "var(--radius-md)", background: notice.type === "success" ? "rgba(16, 185, 129, 0.1)" : "rgba(244, 63, 94, 0.1)", color: notice.type === "success" ? "var(--color-accent-emerald)" : "var(--color-accent-rose)", border: `1px solid ${notice.type === "success" ? "rgba(16, 185, 129, 0.25)" : "rgba(244, 63, 94, 0.25)"}` }}
         >
           {notice.message}
         </div>
@@ -254,18 +240,12 @@ export default function BankAccountManager({
       {/* Inline delete confirmation */}
       {deleteConfirmId && (
         <div
-          style={{
-            marginBottom: "12px",
-            padding: "12px 14px",
-            borderRadius: "var(--radius-md)",
-            background: "rgba(244, 63, 94, 0.08)",
-            border: "1px solid rgba(244, 63, 94, 0.3)",
-          }}
+          className="mb-3" style={{ padding: "12px 14px", borderRadius: "var(--radius-md)", background: "rgba(244, 63, 94, 0.08)", border: "1px solid rgba(244, 63, 94, 0.3)" }}
         >
-          <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-accent-rose)", marginBottom: "10px" }}>
+          <p className="text-sm font-semibold" style={{ color: "var(--color-accent-rose)", marginBottom: "10px" }}>
             ⚠️ Are you sure you want to delete this bank account? This cannot be undone.
           </p>
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div className="flex gap-2">
             <Button variant="danger" onClick={handleDeleteConfirm}>
               Yes, Delete
             </Button>
@@ -279,15 +259,10 @@ export default function BankAccountManager({
       {showForm && (
         <form
           onSubmit={handleAddAccount}
-          style={{
-            background: "var(--color-bg-tertiary)",
-            padding: "16px",
-            borderRadius: "8px",
-            marginBottom: "20px",
-          }}
+          className="p-4 mb-5" style={{ background: "var(--color-bg-tertiary)", borderRadius: "8px" }}
         >
-          <div style={{ marginBottom: "16px", display: "flex", gap: "16px" }}>
-            <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "14px", fontWeight: 600 }}>
+          <div className="mb-4 flex gap-4">
+            <label className="flex items-center cursor-pointer text-sm font-semibold" style={{ gap: "6px" }}>
               <input
                 type="radio"
                 name="payoutType"
@@ -295,7 +270,7 @@ export default function BankAccountManager({
                 onChange={() => setPayoutType("bank")}
               />{" "}Bank Account
             </label>
-            <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "14px", fontWeight: 600 }}>
+            <label className="flex items-center cursor-pointer text-sm font-semibold" style={{ gap: "6px" }}>
               <input
                 type="radio"
                 name="payoutType"
@@ -377,7 +352,7 @@ export default function BankAccountManager({
                 fullWidth
               />
             )}
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingTop: "22px" }}>
+            <div className="flex items-center gap-2" style={{ paddingTop: "22px" }}>
               <input
                 type="checkbox"
                 id="bank-is-default"
@@ -386,17 +361,13 @@ export default function BankAccountManager({
                   setNewAccount({ ...newAccount, isDefault: e.target.checked })
                 }
               />
-              <label htmlFor="bank-is-default" style={{ fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>
+              <label htmlFor="bank-is-default" className="text-sm font-semibold cursor-pointer">
                 Set as default payout method
               </label>
             </div>
           </div>
           <div
-            style={{
-              marginTop: "16px",
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
+            className="mt-4 flex justify-end"
           >
             <Button
               type="submit"
@@ -409,46 +380,35 @@ export default function BankAccountManager({
         </form>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <div className="flex flex-col gap-3">
         {accounts.length === 0 && !showForm && (
           <EmptyState emoji="🏦" title="No Bank Accounts" description="Add a bank account to enable withdrawals." compact />
         )}
         {accounts.map((acc) => (
           <div
             key={acc.id}
-            style={{
-              padding: "16px",
-              border: acc.isDefault
+            className="p-4 flex justify-between items-center" style={{ border: acc.isDefault
                 ? "1px solid rgba(99, 102, 241, 0.5)"
-                : "1px solid var(--color-border)",
-              borderRadius: "8px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              background: acc.isDefault
+                : "1px solid var(--color-border)", borderRadius: "8px", background: acc.isDefault
                 ? "rgba(99, 102, 241, 0.05)"
-                : "transparent",
-            }}
+                : "transparent" }}
           >
             <div>
-              <div style={{ fontWeight: 600, display: "flex", alignItems: "center", gap: "8px" }}>
+              <div className="font-semibold flex items-center gap-2">
                 {acc.bankName === "UPI" ? `UPI: ${acc.upiId}` : `${acc.bankName} — ${acc.accountName}`}
                 {acc.isDefault && (
-                  <span style={{ fontSize: "11px", fontWeight: 800, padding: "2px 8px", borderRadius: "999px", background: "rgba(99, 102, 241, 0.15)", color: "var(--color-accent-indigo)" }}>
+                  <span className="font-extrabold" style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "999px", background: "rgba(99, 102, 241, 0.15)", color: "var(--color-accent-indigo)" }}>
                     Default
                   </span>
                 )}
               </div>
               <div
-                style={{
-                  fontSize: "13px",
-                  color: "var(--color-text-secondary)",
-                }}
+                className="text-sm text-secondary"
               >
                 {getBankAccountDetailsText(acc)}
               </div>
             </div>
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div className="flex gap-2">
               {onSelectAccount && (
                 <Button
                   variant="secondary"
@@ -463,7 +423,7 @@ export default function BankAccountManager({
                   variant="ghost"
                   aria-label={`Set ${acc.bankName === "UPI" ? `UPI: ${acc.upiId}` : acc.bankName} as default`}
                   onClick={() => handleSetDefault(acc.id)}
-                  style={{ fontSize: "12px" }}
+                  className="text-xs"
                 >
                   Set Default
                 </Button>

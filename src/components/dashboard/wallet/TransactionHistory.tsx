@@ -310,14 +310,9 @@ export default function TransactionHistory() {
     }
     if (error) {
       return (
-        <div style={{ padding: "48px 24px", textAlign: "center" }}>
+        <div className="text-center" style={{ padding: "48px 24px" }}>
           <div
-            style={{
-              color: "var(--color-accent-rose)",
-              marginBottom: "16px",
-              fontSize: "14px",
-              fontWeight: 600,
-            }}
+            className="mb-4 text-sm font-semibold" style={{ color: "var(--color-accent-rose)" }}
           >
             ⚠️ {error instanceof Error ? error.message : "Unable to load transactions right now."}
           </div>
@@ -325,7 +320,7 @@ export default function TransactionHistory() {
             type="button"
             variant="secondary"
             onClick={() => fetchTransactions()}
-            style={{ fontSize: "13px", padding: "8px 16px" }}
+            className="text-sm" style={{ padding: "8px 16px" }}
           >
             Try Again
           </Button>
@@ -344,25 +339,20 @@ export default function TransactionHistory() {
     }
     return (
       <div className="overflow-x-auto">
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="w-full" style={{ borderCollapse: "collapse" }}>
           <thead>
             <tr
-              style={{
-                borderBottom: "1px solid var(--color-border)",
-                textAlign: "left",
-                fontSize: "13px",
-                color: "var(--color-text-secondary)",
-              }}
+              className="border-b-card text-left text-sm text-secondary"
             >
-              <th style={{ padding: "16px 24px", fontWeight: 600 }}>Type</th>
-              <th style={{ padding: "16px 24px", fontWeight: 600 }}>
+              <th className="font-semibold" style={{ padding: "16px 24px" }}>Type</th>
+              <th className="font-semibold" style={{ padding: "16px 24px" }}>
                 Amount
               </th>
-              <th style={{ padding: "16px 24px", fontWeight: 600 }}>
+              <th className="font-semibold" style={{ padding: "16px 24px" }}>
                 Status
               </th>
-              <th style={{ padding: "16px 24px", fontWeight: 600 }}>Date</th>
-              <th style={{ padding: "16px 24px", fontWeight: 600 }}>
+              <th className="font-semibold" style={{ padding: "16px 24px" }}>Date</th>
+              <th className="font-semibold" style={{ padding: "16px 24px" }}>
                 Details
               </th>
             </tr>
@@ -384,75 +374,40 @@ export default function TransactionHistory() {
               return (
                 <tr
                   key={tx.id}
-                  style={{
-                    borderBottom: "1px solid var(--color-border)",
-                    fontSize: "14px",
-                  }}
+                  className="border-b-card text-sm"
                 >
                   <td style={{ padding: "16px 24px" }}>
                     <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
+                      className="flex items-center gap-2"
                     >
                       <div
-                        style={{
-                          minWidth: "40px",
-                          height: "32px",
-                          borderRadius: "8px",
-                          background: "rgba(255,255,255,0.05)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: typeInfo.color,
-                          fontSize: "10px",
-                          fontWeight: 700,
-                        }}
+                        className="flex items-center justify-center font-bold" style={{ minWidth: "40px", height: "32px", borderRadius: "8px", background: "rgba(255,255,255,0.05)", color: typeInfo.color, fontSize: "10px" }}
                       >
                         {typeInfo.icon}
                       </div>
-                      <span style={{ fontWeight: 500 }}>{tx.type}</span>
+                      <span className="font-medium">{tx.type}</span>
                     </div>
                   </td>
                   <td
-                    style={{
-                      padding: "16px 24px",
-                      fontWeight: 600,
-                      color: typeInfo.color,
-                    }}
+                    className="font-semibold" style={{ padding: "16px 24px", color: typeInfo.color }}
                   >
                     {isOutflow ? "-" : "+"}
                     {formatCurrency(tx.amount)}
                   </td>
                   <td style={{ padding: "16px 24px" }}>
                     <span
-                      style={{
-                        padding: "4px 10px",
-                        borderRadius: "12px",
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        background: statusColor.bg,
-                        color: statusColor.text,
-                      }}
+                      className="text-xs font-semibold" style={{ padding: "4px 10px", borderRadius: "12px", background: statusColor.bg, color: statusColor.text }}
                     >
                       {tx.status}
                     </span>
                   </td>
                   <td
-                    style={{
-                      padding: "16px 24px",
-                      color: "var(--color-text-secondary)",
-                    }}
+                    className="text-secondary" style={{ padding: "16px 24px" }}
                   >
                     {formatDateTime(tx.createdAt)}
                   </td>
                   <td
-                    style={{
-                      padding: "16px 24px",
-                      color: "var(--color-text-secondary)",
-                    }}
+                    className="text-secondary" style={{ padding: "16px 24px" }}
                   >
                     {tx.description || "-"}
                   </td>
@@ -466,7 +421,7 @@ export default function TransactionHistory() {
   };
 
   return (
-    <div className="card" style={{ padding: "0", overflow: "hidden" }}>
+    <div className="card p-0 overflow-hidden">
       {/* Period picker modal */}
       {pickerTarget && (
         <PeriodPickerModal
@@ -479,29 +434,21 @@ export default function TransactionHistory() {
         />
       )}
       <div
-        style={{
-          padding: "24px",
-          borderBottom: "1px solid var(--color-border)",
-        }}
+        className="p-6 border-b-card"
       >
         <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "16px",
-          }}
+          className="flex justify-between items-center mb-4"
         >
-          <h3 style={{ fontSize: "18px", fontWeight: 700 }}>
+          <h3 className="text-lg font-bold">
             Transaction History
           </h3>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+          <div className="flex gap-2 flex-wrap items-center">
             <Button
               variant="secondary"
               onClick={() => setPickerTarget("csv")}
               disabled={csvLoading}
               title="Download CSV for a specific period"
-              style={{ fontSize: "12px" }}
+              className="text-xs"
             >
               {csvLoading ? "⏳…" : "⬇ CSV"}
             </Button>
@@ -509,7 +456,7 @@ export default function TransactionHistory() {
               variant="secondary"
               onClick={() => setPickerTarget("print")}
               title="Print ledger for a specific period"
-              style={{ fontSize: "12px" }}
+              className="text-xs"
             >
               🖨 Print
             </Button>
@@ -517,7 +464,7 @@ export default function TransactionHistory() {
             <Select
               name="type"
               aria-label="Filter by transaction type"
-              style={{ padding: "8px", fontSize: "13px", width: "auto" }}
+              className="p-2 text-sm" style={{ width: "auto" }}
               value={filters.type}
               onChange={handleFilterChange}
             >
@@ -534,7 +481,7 @@ export default function TransactionHistory() {
             <Select
               name="status"
               aria-label="Filter by transaction status"
-              style={{ padding: "8px", fontSize: "13px", width: "auto" }}
+              className="p-2 text-sm" style={{ width: "auto" }}
               value={filters.status}
               onChange={handleFilterChange}
             >
@@ -549,7 +496,7 @@ export default function TransactionHistory() {
               type="date"
               name="startDate"
               aria-label="Filter from date"
-              style={{ padding: "8px", fontSize: "13px", width: "auto" }}
+              className="p-2 text-sm" style={{ width: "auto" }}
               value={filters.startDate}
               onChange={handleFilterChange}
             />
@@ -557,7 +504,7 @@ export default function TransactionHistory() {
               type="date"
               name="endDate"
               aria-label="Filter to date"
-              style={{ padding: "8px", fontSize: "13px", width: "auto" }}
+              className="p-2 text-sm" style={{ width: "auto" }}
               value={filters.endDate}
               onChange={handleFilterChange}
             />
@@ -570,13 +517,7 @@ export default function TransactionHistory() {
       {totalPages > 1 && (
         <nav
           aria-label="Transaction history pagination"
-          style={{
-            padding: "16px 24px",
-            borderTop: "1px solid var(--color-border)",
-            display: "flex",
-            justifyContent: "center",
-            gap: "8px",
-          }}
+          className="flex justify-center gap-2" style={{ padding: "16px 24px", borderTop: "1px solid var(--color-border)" }}
         >
           <Button
             variant="secondary"
@@ -589,7 +530,7 @@ export default function TransactionHistory() {
           <span
             aria-current="page"
             aria-live="polite"
-            style={{ display: "flex", alignItems: "center", fontSize: "14px" }}
+            className="flex items-center text-sm"
           >
             Page {page} of {totalPages}
           </span>

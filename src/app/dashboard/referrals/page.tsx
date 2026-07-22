@@ -88,46 +88,22 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           onClick={handleBackdropClick}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 1000,
-            background: "rgba(0,0,0,0.7)",
-            backdropFilter: "blur(8px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "20px",
-          }}
+          className="fixed flex items-center justify-center" style={{ inset: 0, zIndex: 1000, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", padding: "20px" }}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.92, y: 24 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 24 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            style={{
-              background: "linear-gradient(160deg, rgba(20,20,35,0.98) 0%, rgba(12,12,24,0.98) 100%)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: "28px",
-              padding: "clamp(24px,5vw,40px)",
-              width: "100%",
-              maxWidth: "480px",
-              boxShadow: "0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.15)",
-              position: "relative",
-              overflow: "hidden",
-            }}
+            className="w-full relative overflow-hidden" style={{ background: "linear-gradient(160deg, rgba(20,20,35,0.98) 0%, rgba(12,12,24,0.98) 100%)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "28px", padding: "clamp(24px,5vw,40px)", maxWidth: "480px", boxShadow: "0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.15)" }}
           >
             {/* Glow accent */}
-            <div style={{
-              position: "absolute", top: -80, left: "50%", transform: "translateX(-50%)",
-              width: "300px", height: "200px",
-              background: "rgba(99,102,241,0.2)", filter: "blur(80px)", pointerEvents: "none",
-            }} />
+            <div className="absolute" style={{ top: -80, left: "50%", transform: "translateX(-50%)", width: "300px", height: "200px", background: "rgba(99,102,241,0.2)", filter: "blur(80px)", pointerEvents: "none" }} />
 
             {/* Header */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "28px", position: "relative" }}>
+            <div className="flex items-center justify-between relative" style={{ marginBottom: "28px" }}>
               <div>
-                <div style={{ fontSize: "11px", fontWeight: 800, color: "#6366f1", textTransform: "uppercase", letterSpacing: "3px", marginBottom: "6px" }}>
+                <div className="font-extrabold" style={{ fontSize: "11px", color: "#6366f1", textTransform: "uppercase", letterSpacing: "3px", marginBottom: "6px" }}>
                   Share &amp; Earn
                 </div>
                 <h2 style={{ fontSize: "22px", fontWeight: 900, color: "white", margin: 0 }}>
@@ -138,29 +114,19 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
                 variant="ghost"
                 onClick={onClose}
                 aria-label="Close share modal"
-                style={{
-                  width: "36px", height: "36px", padding: 0,
-                  fontSize: "18px", flexShrink: 0,
-                }}
+                className="text-lg flex-shrink-0" style={{ width: "36px", height: "36px", padding: 0 }}
               >
                 ×
               </Button>
             </div>
 
             {/* Referral link */}
-            <div style={{
-              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: "16px", padding: "14px 16px", marginBottom: "24px",
-              display: "flex", alignItems: "center", gap: "12px", minWidth: 0,
-            }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "4px" }}>
+            <div className="mb-6 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "16px", padding: "14px 16px", minWidth: 0 }}>
+              <div className="flex-1" style={{ minWidth: 0 }}>
+                <div className="font-bold text-muted mb-1" style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1.5px" }}>
                   Your Referral Link
                 </div>
-                <div style={{
-                  fontSize: "13px", fontWeight: 600, color: "var(--color-text-secondary)",
-                  fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                }}>
+                <div className="text-sm font-semibold text-secondary overflow-hidden" style={{ fontFamily: "monospace", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {referralLink}
                 </div>
               </div>
@@ -168,13 +134,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                 onClick={handleCopyLink}
                 aria-label="Copy referral link"
-                style={{
-                  background: linkCopied ? "#10b981" : "var(--color-primary)",
-                  color: "white", border: "none", borderRadius: "10px",
-                  padding: "8px 16px", fontSize: "12px", fontWeight: 700,
-                  cursor: "pointer", flexShrink: 0, transition: "background 0.2s",
-                  display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap",
-                }}
+                className="text-xs font-bold cursor-pointer flex-shrink-0 flex items-center" style={{ background: linkCopied ? "#10b981" : "var(--color-primary)", color: "white", border: "none", borderRadius: "10px", padding: "8px 16px", transition: "background 0.2s", gap: "6px", whiteSpace: "nowrap" }}
               >
                 {linkCopied ? (
                   <>
@@ -196,7 +156,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
             </div>
 
             {/* Share channels */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", marginBottom: "16px" }}>
+            <div className="grid gap-3 mb-4" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
               {channels.map((ch) => (
                 <motion.a
                   key={ch.id}
@@ -205,24 +165,12 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
                   rel="noopener noreferrer"
                   whileHover={{ y: -3, scale: 1.03 }}
                   whileTap={{ scale: 0.96 }}
-                  style={{
-                    background: ch.bg,
-                    border: `1px solid ${ch.color}33`,
-                    borderRadius: "16px",
-                    padding: "16px 8px",
-                    textAlign: "center",
-                    textDecoration: "none",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: "8px",
-                    cursor: "pointer",
-                  }}
+                  className="text-center flex flex-col items-center gap-2 cursor-pointer" style={{ background: ch.bg, border: `1px solid ${ch.color}33`, borderRadius: "16px", padding: "16px 8px", textDecoration: "none" }}
                 >
                   <span style={{ fontSize: ch.id === "twitter" ? "18px" : "22px", fontWeight: 900, color: ch.color, lineHeight: 1 }}>
                     {ch.icon}
                   </span>
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-text-secondary)", whiteSpace: "nowrap" }}>
+                  <span className="font-bold text-secondary" style={{ fontSize: "11px", whiteSpace: "nowrap" }}>
                     {ch.label}
                   </span>
                 </motion.a>
@@ -234,13 +182,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
               <motion.button
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                 onClick={handleNativeShare}
-                style={{
-                  width: "100%", background: "rgba(99,102,241,0.12)",
-                  border: "1px solid rgba(99,102,241,0.3)", borderRadius: "14px",
-                  padding: "14px", color: "#a5b4fc", fontSize: "14px", fontWeight: 700,
-                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                  gap: "8px",
-                }}
+                className="w-full text-sm font-bold cursor-pointer flex items-center justify-center gap-2" style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.3)", borderRadius: "14px", padding: "14px", color: "#a5b4fc" }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
@@ -320,47 +262,25 @@ export default function ReferralsPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ textAlign: "center", marginBottom: "48px" }}
+          className="text-center" style={{ marginBottom: "48px" }}
         >
-          <h1 style={{
-            fontSize: "42px",
-            fontWeight: 900,
-            background: "linear-gradient(135deg, #10b981, #06b6d4, #3b82f6)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            letterSpacing: "-1.5px",
-            marginBottom: "12px",
-          }}>
+          <h1 className="mb-3" style={{ fontSize: "42px", fontWeight: 900, background: "linear-gradient(135deg, #10b981, #06b6d4, #3b82f6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: "-1.5px" }}>
             🤝 Partner Network
           </h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "18px", maxWidth: "600px", margin: "0 auto" }}>
+          <p className="text-secondary text-lg" style={{ maxWidth: "600px", margin: "0 auto" }}>
             Expand the Decisional ecosystem and build a lifetime of passive rewards.
           </p>
         </motion.div>
 
         {/* Tabs */}
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: "40px" }}>
-          <div className="scrollable-tabs" style={{
-            background: "rgba(255,255,255,0.03)",
-            padding: "6px",
-            borderRadius: "16px",
-            display: "flex",
-            gap: "8px",
-            border: "1px solid rgba(255,255,255,0.08)",
-          }}>
+        <div className="flex justify-center" style={{ marginBottom: "40px" }}>
+          <div className="scrollable-tabs flex gap-2" style={{ background: "rgba(255,255,255,0.03)", padding: "6px", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.08)" }}>
             {(["overview", "history"] as const).map((tab) => (
               <Button
                 key={tab}
                 variant={activeTab === tab ? "primary" : "ghost"}
                 onClick={() => setActiveTab(tab)}
-                style={{
-                  padding: "12px 32px",
-                  fontWeight: 800,
-                  fontSize: "14px",
-                  textTransform: "uppercase",
-                  letterSpacing: "1px",
-                  boxShadow: activeTab === tab ? "0 10px 20px rgba(99,102,241,0.3)" : "none",
-                }}
+                className="font-extrabold text-sm" style={{ padding: "12px 32px", textTransform: "uppercase", letterSpacing: "1px", boxShadow: activeTab === tab ? "0 10px 20px rgba(99,102,241,0.3)" : "none" }}
               >
                 {tab}
               </Button>
@@ -379,59 +299,25 @@ export default function ReferralsPage() {
             >
               {/* Code Card */}
               <motion.div
-                style={{
-                  padding: "clamp(24px,5vw,48px)",
-                  background: "rgba(255,255,255,0.03)",
-                  backdropFilter: "blur(20px)",
-                  borderRadius: "32px",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  marginBottom: "48px",
-                  textAlign: "center",
-                  position: "relative",
-                  overflow: "hidden",
-                  boxShadow: "0 40px 80px rgba(0,0,0,0.3)",
-                }}
+                className="text-center relative overflow-hidden" style={{ padding: "clamp(24px,5vw,48px)", background: "rgba(255,255,255,0.03)", backdropFilter: "blur(20px)", borderRadius: "32px", border: "1px solid rgba(255,255,255,0.08)", marginBottom: "48px", boxShadow: "0 40px 80px rgba(0,0,0,0.3)" }}
               >
-                <div style={{
-                  position: "absolute", top: -60, right: -60,
-                  width: "250px", height: "250px",
-                  background: "rgba(16,185,129,0.1)", filter: "blur(100px)",
-                  borderRadius: "50%", pointerEvents: "none",
-                }} />
+                <div className="absolute" style={{ top: -60, right: -60, width: "250px", height: "250px", background: "rgba(16,185,129,0.1)", filter: "blur(100px)", borderRadius: "50%", pointerEvents: "none" }} />
 
-                <div style={{ fontSize: "12px", fontWeight: 800, color: "#10b981", textTransform: "uppercase", letterSpacing: "3px", marginBottom: "20px" }}>
+                <div className="text-xs font-extrabold mb-5" style={{ color: "#10b981", textTransform: "uppercase", letterSpacing: "3px" }}>
                   Your Network Identifier
                 </div>
 
                 {/* Code box */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", marginBottom: "32px" }}>
-                  <div style={{
-                    display: "flex", alignItems: "center", gap: "16px",
-                    background: "var(--color-bg-secondary)",
-                    border: "2px dashed var(--color-primary)",
-                    borderRadius: "20px", padding: "14px 24px",
-                    maxWidth: "100%", justifyContent: "space-between",
-                  }}>
-                    <span style={{
-                      fontSize: "clamp(18px,4.5vw,32px)", fontWeight: 800,
-                      fontFamily: "Space Grotesk, monospace",
-                      color: "var(--color-text-primary)", letterSpacing: "1.5px", wordBreak: "break-all",
-                    }}>
+                <div className="flex flex-col items-center gap-4 mb-8">
+                  <div className="flex items-center gap-4 justify-between" style={{ background: "var(--color-bg-secondary)", border: "2px dashed var(--color-primary)", borderRadius: "20px", padding: "14px 24px", maxWidth: "100%" }}>
+                    <span className="font-extrabold" style={{ fontSize: "clamp(18px,4.5vw,32px)", fontFamily: "Space Grotesk, monospace", color: "var(--color-text-primary)", letterSpacing: "1.5px", wordBreak: "break-all" }}>
                       {stats.referralCode}
                     </span>
                     <motion.button
                       whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                       onClick={copyCode}
                       aria-label="Copy referral code"
-                      style={{
-                        background: copied ? "#10b981" : "var(--color-primary)",
-                        color: "white", border: "none",
-                        width: "44px", height: "44px", borderRadius: "12px",
-                        cursor: "pointer", display: "flex", alignItems: "center",
-                        justifyContent: "center", flexShrink: 0,
-                        boxShadow: "0 4px 12px rgba(99,102,241,0.2)",
-                        transition: "all 0.2s ease",
-                      }}
+                      className="cursor-pointer flex items-center justify-center flex-shrink-0" style={{ background: copied ? "#10b981" : "var(--color-primary)", color: "white", border: "none", width: "44px", height: "44px", borderRadius: "12px", boxShadow: "0 4px 12px rgba(99,102,241,0.2)", transition: "all 0.2s ease" }}
                     >
                       {copied ? (
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -449,7 +335,7 @@ export default function ReferralsPage() {
                     <motion.span
                       initial={{ opacity: 0, y: -5 }}
                       animate={{ opacity: 1, y: 0 }}
-                      style={{ fontSize: "13px", color: "#10b981", fontWeight: 700 }}
+                      className="text-sm font-bold" style={{ color: "#10b981" }}
                     >
                       Copied to clipboard!
                     </motion.span>
@@ -463,14 +349,7 @@ export default function ReferralsPage() {
                   onClick={() => setShareOpen(true)}
                   id="share-referral-btn"
                   aria-label="Share referral link"
-                  style={{
-                    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                    color: "white", border: "none", borderRadius: "16px",
-                    padding: "14px 32px", fontSize: "15px", fontWeight: 800,
-                    cursor: "pointer", display: "inline-flex", alignItems: "center",
-                    gap: "10px", boxShadow: "0 8px 24px rgba(99,102,241,0.3)",
-                    letterSpacing: "0.3px", marginBottom: "32px",
-                  }}
+                  className="font-extrabold cursor-pointer inline-flex items-center mb-8" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white", border: "none", borderRadius: "16px", padding: "14px 32px", fontSize: "15px", gap: "10px", boxShadow: "0 8px 24px rgba(99,102,241,0.3)", letterSpacing: "0.3px" }}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="18" cy="5" r="3" />
@@ -483,7 +362,7 @@ export default function ReferralsPage() {
                 </motion.button>
 
                 {/* Stats */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "20px" }}>
+                <div className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
                   <StatBox label="Current Rank" value={stats.tier.label} color="#10b981" icon="🎖️" />
                   <StatBox
                     label={stats.tier.revenueShare > 0 ? "Network Share" : "Fee Bonus"}
@@ -496,21 +375,21 @@ export default function ReferralsPage() {
 
               {/* Progress & Tiers */}
               <div style={{ marginBottom: "64px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
+                <div className="flex justify-between items-end mb-5 flex-wrap gap-3">
                   <h3 style={{ fontSize: "22px", fontWeight: 900, color: "white" }}>Milestone Progress 🚀</h3>
-                  <div style={{ fontSize: "15px", fontWeight: 700, color: "var(--color-text-secondary)" }}>
-                    <span style={{ color: "#10b981", fontSize: "20px" }}>{stats.activeReferrals}</span> / {nextTierMin} ACTIVE PARTNERS
+                  <div className="font-bold text-secondary" style={{ fontSize: "15px" }}>
+                    <span className="text-xl" style={{ color: "#10b981" }}>{stats.activeReferrals}</span> / {nextTierMin} ACTIVE PARTNERS
                   </div>
                 </div>
-                <div style={{ height: "14px", background: "rgba(255,255,255,0.05)", borderRadius: "20px", overflow: "hidden", marginBottom: "32px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                <div className="overflow-hidden mb-8" style={{ height: "14px", background: "rgba(255,255,255,0.05)", borderRadius: "20px", border: "1px solid rgba(255,255,255,0.05)" }}>
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 1.5, ease: "circOut" }}
-                    style={{ height: "100%", background: "linear-gradient(90deg, #10b981, #06b6d4, #3b82f6)", boxShadow: "0 0 20px rgba(16,185,129,0.4)" }}
+                    className="h-full" style={{ background: "linear-gradient(90deg, #10b981, #06b6d4, #3b82f6)", boxShadow: "0 0 20px rgba(16,185,129,0.4)" }}
                   />
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "16px" }}>
+                <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))" }}>
                   <TierCard name="BRONZE"   percent="1%"     min="10"   active={stats.tier.label === "Bronze"}   color="#cd7f32" delay={0.1} />
                   <TierCard name="SILVER"   percent="1.5%"   min="50"   active={stats.tier.label === "Silver"}   color="#c0c0c0" delay={0.2} />
                   <TierCard name="GOLD"     percent="2%"     min="100"  active={stats.tier.label === "Gold"}     color="#ffd700" delay={0.3} />
@@ -521,8 +400,8 @@ export default function ReferralsPage() {
 
               {/* Steps */}
               <div style={{ background: "rgba(255,255,255,0.02)", padding: "40px", borderRadius: "32px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                <h3 style={{ fontSize: "22px", fontWeight: 900, marginBottom: "32px", textAlign: "center" }}>Partnership Roadmap 🗺️</h3>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "24px" }}>
+                <h3 className="mb-8 text-center" style={{ fontSize: "22px", fontWeight: 900 }}>Partnership Roadmap 🗺️</h3>
+                <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))" }}>
                   <StepCard num="01" title="Broadcast"  desc="Deploy your unique code across your socials and network."       icon="📢" />
                   <StepCard num="02" title="Activation" desc="Referrals join and complete their first verified brand deal."    icon="⚡" />
                   <StepCard num="03" title="Monetize"   desc="Unlock scaling GMV shares and permanent fee discounts."         icon="💎" />
@@ -565,9 +444,9 @@ interface StatBoxProps {
 }
 function StatBox({ label, value, color, icon }: StatBoxProps) {
   return (
-    <div style={{ background: "rgba(0,0,0,0.2)", padding: "24px", borderRadius: "20px", border: `1px solid ${color}22`, textAlign: "center" }}>
-      <div style={{ fontSize: "24px", marginBottom: "8px" }}>{icon}</div>
-      <div style={{ fontSize: "22px", fontWeight: 900, color: "white", marginBottom: "4px" }}>{value}</div>
+    <div className="p-6 text-center" style={{ background: "rgba(0,0,0,0.2)", borderRadius: "20px", border: `1px solid ${color}22` }}>
+      <div className="text-2xl mb-2">{icon}</div>
+      <div className="mb-1" style={{ fontSize: "22px", fontWeight: 900, color: "white" }}>{value}</div>
       <div style={{ fontSize: "11px", fontWeight: 800, color, textTransform: "uppercase", letterSpacing: "1px" }}>{label}</div>
     </div>
   );
@@ -586,16 +465,11 @@ function TierCard({ name, percent, min, active, color, delay }: TierCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
       transition={{ delay }} whileHover={{ y: -5 }}
-      style={{
-        background: active ? `linear-gradient(135deg, ${color}33, ${color}11)` : "rgba(255,255,255,0.02)",
-        border: active ? `1px solid ${color}` : "1px solid rgba(255,255,255,0.05)",
-        padding: "24px 16px", borderRadius: "20px", textAlign: "center",
-        boxShadow: active ? `0 10px 30px ${color}22` : "none",
-      }}
+      className="text-center" style={{ background: active ? `linear-gradient(135deg, ${color}33, ${color}11)` : "rgba(255,255,255,0.02)", border: active ? `1px solid ${color}` : "1px solid rgba(255,255,255,0.05)", padding: "24px 16px", borderRadius: "20px", boxShadow: active ? `0 10px 30px ${color}22` : "none" }}
     >
-      <div style={{ fontSize: "12px", fontWeight: 800, color: active ? "white" : "var(--color-text-muted)", marginBottom: "8px" }}>{name}</div>
-      <div style={{ fontSize: "22px", fontWeight: 900, color: active ? color : "white", marginBottom: "4px" }}>{percent}</div>
-      <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--color-text-muted)" }}>{min}+ ACTIVE</div>
+      <div className="text-xs font-extrabold mb-2" style={{ color: active ? "white" : "var(--color-text-muted)" }}>{name}</div>
+      <div className="mb-1" style={{ fontSize: "22px", fontWeight: 900, color: active ? color : "white" }}>{percent}</div>
+      <div className="font-bold text-muted" style={{ fontSize: "10px" }}>{min}+ ACTIVE</div>
     </motion.div>
   );
 }
@@ -608,11 +482,11 @@ interface StepCardProps {
 }
 function StepCard({ num, title, desc, icon }: StepCardProps) {
   return (
-    <div style={{ padding: "24px", background: "rgba(0,0,0,0.2)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)", position: "relative" }}>
-      <div style={{ position: "absolute", top: "12px", right: "20px", fontSize: "32px", fontWeight: 900, color: "rgba(255,255,255,0.03)" }}>{num}</div>
-      <div style={{ fontSize: "32px", marginBottom: "16px" }}>{icon}</div>
-      <div style={{ fontSize: "18px", fontWeight: 800, color: "white", marginBottom: "8px" }}>{title}</div>
-      <div style={{ fontSize: "14px", color: "var(--color-text-secondary)", lineHeight: "1.5" }}>{desc}</div>
+    <div className="p-6 relative" style={{ background: "rgba(0,0,0,0.2)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)" }}>
+      <div className="absolute" style={{ top: "12px", right: "20px", fontSize: "32px", fontWeight: 900, color: "rgba(255,255,255,0.03)" }}>{num}</div>
+      <div className="mb-4" style={{ fontSize: "32px" }}>{icon}</div>
+      <div className="text-lg font-extrabold mb-2" style={{ color: "white" }}>{title}</div>
+      <div className="text-sm text-secondary" style={{ lineHeight: "1.5" }}>{desc}</div>
     </div>
   );
 }

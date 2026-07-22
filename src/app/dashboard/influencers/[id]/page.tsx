@@ -92,24 +92,24 @@ export default function InfluencerProfilePage() {
 
   if (loading)
     return (
-      <div style={{ padding: "40px", textAlign: "center" }}>
+      <div className="text-center" style={{ padding: "40px" }}>
         Loading profile...
       </div>
     );
   if (!session)
     return (
-      <div style={{ padding: "40px", textAlign: "center" }}>
+      <div className="text-center" style={{ padding: "40px" }}>
         Loading session...
       </div>
     );
   if (session.user?.userType !== "BRAND" && session.user?.userType !== "ADMIN") {
     return (
       <DashboardShell user={session.user}>
-        <div className="card" style={{ maxWidth: "680px", margin: "40px auto", textAlign: "center" }}>
-          <h1 style={{ fontSize: "24px", fontWeight: 800, marginBottom: "8px" }}>
+        <div className="card text-center" style={{ maxWidth: "680px", margin: "40px auto" }}>
+          <h1 className="text-2xl font-extrabold mb-2">
             Brand access required
           </h1>
-          <p style={{ color: "var(--color-text-secondary)", marginBottom: "20px" }}>
+          <p className="text-secondary mb-5">
             Creator profiles are available for brand campaign planning.
           </p>
           <Link href="/dashboard/campaigns" className="btn btn-primary">
@@ -122,7 +122,7 @@ export default function InfluencerProfilePage() {
   if (!profile)
     return (
       <DashboardShell user={session.user}>
-        <div style={{ padding: "40px", textAlign: "center" }}>
+        <div className="text-center" style={{ padding: "40px" }}>
           Influencer not found.
         </div>
       </DashboardShell>
@@ -147,84 +147,43 @@ export default function InfluencerProfilePage() {
   return (
     <DashboardShell user={session.user}>
       <div
-      style={{
-        maxWidth: "900px",
-        margin: "0 auto",
-        display: "flex",
-        flexDirection: "column",
-        gap: "24px",
-      }}
+      className="flex flex-col gap-6" style={{ maxWidth: "900px", margin: "0 auto" }}
     >
       {/* Header / Bio */}
       <div
-        className="card"
-        style={{
-          padding: "32px",
-          display: "flex",
-          gap: "24px",
-          flexWrap: "wrap",
-        }}
+        className="card flex gap-6 flex-wrap" style={{ padding: "32px" }}
       >
         <div
-          style={{
-            width: "120px",
-            height: "120px",
-            borderRadius: "50%",
-            background: "var(--gradient-primary)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#fff",
-            fontSize: "48px",
-            fontWeight: 800,
-            flexShrink: 0,
-          }}
+          className="flex items-center justify-center font-extrabold flex-shrink-0" style={{ width: "120px", height: "120px", borderRadius: "50%", background: "var(--gradient-primary)", color: "#fff", fontSize: "48px" }}
         >
           {profile.displayName?.[0] || "I"}
         </div>
-        <div style={{ flex: 1, minWidth: "300px" }}>
+        <div className="flex-1" style={{ minWidth: "300px" }}>
           <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-            }}
+            className="flex justify-between items-start"
           >
             <div>
               <h1
-                style={{ fontSize: "32px", fontWeight: 800, margin: "0 0 8px" }}
+                className="font-extrabold" style={{ fontSize: "32px", margin: "0 0 8px" }}
               >
                 {profile.displayName}
               </h1>
               <div
-                style={{
-                  fontSize: "14px",
-                  color: "var(--color-text-secondary)",
-                  marginBottom: "12px",
-                }}
+                className="text-sm text-secondary mb-3"
               >
                 {profile.city
                   ? `📍 ${profile.city}, ${profile.state || ""}`
                   : "📍 Global Creator"}
               </div>
             </div>
-            <div style={{ textAlign: "center" }}>
+            <div className="text-center">
               <div
-                style={{
-                  fontSize: "24px",
-                  fontWeight: 800,
-                  color: "var(--color-primary)",
-                }}
+                className="text-2xl font-extrabold text-primary"
               >
                 {profile.trustScore}%
               </div>
               <div
-                style={{
-                  fontSize: "11px",
-                  color: "var(--color-text-muted)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
+                className="text-muted" style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.5px" }}
               >
                 Trust Score
               </div>
@@ -232,32 +191,15 @@ export default function InfluencerProfilePage() {
           </div>
 
           <p
-            style={{
-              fontSize: "15px",
-              color: "var(--color-text-primary)",
-              lineHeight: 1.6,
-              marginBottom: "20px",
-            }}
+            className="mb-5" style={{ fontSize: "15px", color: "var(--color-text-primary)", lineHeight: 1.6 }}
           >
             {profile.bio || "This creator hasn't added a bio yet."}
           </p>
 
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          <div className="flex gap-2 flex-wrap">
             {profile.isFeatured && (
               <span
-                style={{
-                  padding: "4px 12px",
-                  background: "rgba(245, 158, 11, 0.15)",
-                  color: "#f59e0b",
-                  border: "1px solid rgba(245, 158, 11, 0.25)",
-                  borderRadius: "16px",
-                  fontSize: "12px",
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px"
-                }}
+                className="text-xs font-extrabold inline-flex items-center gap-1" style={{ padding: "4px 12px", background: "rgba(245, 158, 11, 0.15)", color: "#f59e0b", border: "1px solid rgba(245, 158, 11, 0.25)", borderRadius: "16px", textTransform: "uppercase" }}
               >
                 ⭐ Featured Creator
               </span>
@@ -265,13 +207,7 @@ export default function InfluencerProfilePage() {
             {profile.categories.split(",").map((cat) => (
               <span
                 key={cat}
-                style={{
-                  padding: "4px 12px",
-                  background: "var(--color-bg-tertiary)",
-                  borderRadius: "16px",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                }}
+                className="text-xs font-semibold" style={{ padding: "4px 12px", background: "var(--color-bg-tertiary)", borderRadius: "16px" }}
               >
                 #{cat.trim()}
               </span>
@@ -281,66 +217,46 @@ export default function InfluencerProfilePage() {
       </div>
 
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: "24px",
-        }}
+        className="grid gap-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}
       >
         {/* Stats */}
-        <div className="card stagger-children" style={{ padding: "24px" }}>
+        <div className="card stagger-children p-6">
           <h3
-            style={{ fontSize: "16px", fontWeight: 700, marginBottom: "20px" }}
+            className="text-base font-bold mb-5"
           >
             Audience Reach
           </h3>
 
           <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              paddingBottom: "16px",
-              borderBottom: "1px solid var(--color-border)",
-              marginBottom: "16px",
-            }}
+            className="flex justify-between border-b-card mb-4" style={{ paddingBottom: "16px" }}
           >
             <div>
               <div
-                style={{
-                  fontSize: "13px",
-                  color: "var(--color-text-secondary)",
-                }}
+                className="text-sm text-secondary"
               >
                 Instagram Followers
               </div>
-              <div style={{ fontSize: "20px", fontWeight: 700 }}>
+              <div className="text-xl font-bold">
                 {profile.instagramFollowers
                   ? profile.instagramFollowers.toLocaleString("en-IN")
                   : "N/A"}
               </div>
               {profile.instagramHandle && (
                 <div
-                  style={{ fontSize: "12px", color: "var(--color-primary)" }}
+                  className="text-xs text-primary"
                 >
                   @{profile.instagramHandle}
                 </div>
               )}
             </div>
-            <div style={{ textAlign: "right" }}>
+            <div className="text-right">
               <div
-                style={{
-                  fontSize: "13px",
-                  color: "var(--color-text-secondary)",
-                }}
+                className="text-sm text-secondary"
               >
                 Engagement
               </div>
               <div
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  color: "var(--color-accent-emerald)",
-                }}
+                className="text-base font-semibold" style={{ color: "var(--color-accent-emerald)" }}
               >
                 {profile.instagramEngagementRate
                   ? `${profile.instagramEngagementRate}%`
@@ -350,52 +266,33 @@ export default function InfluencerProfilePage() {
           </div>
 
           <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              paddingBottom: "16px",
-              borderBottom: "1px solid var(--color-border)",
-              marginBottom: "16px",
-            }}
+            className="flex justify-between border-b-card mb-4" style={{ paddingBottom: "16px" }}
           >
             <div>
               <div
-                style={{
-                  fontSize: "13px",
-                  color: "var(--color-text-secondary)",
-                }}
+                className="text-sm text-secondary"
               >
                 YouTube Subs
               </div>
-              <div style={{ fontSize: "20px", fontWeight: 700 }}>
+              <div className="text-xl font-bold">
                 {youtubeSubsLabel}
               </div>
               {profile.youtubeHandle && (
                 <div
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--color-accent-rose)",
-                  }}
+                  className="text-xs" style={{ color: "var(--color-accent-rose)" }}
                 >
                   {profile.youtubeHandle}
                 </div>
               )}
             </div>
-            <div style={{ textAlign: "right" }}>
+            <div className="text-right">
               <div
-                style={{
-                  fontSize: "13px",
-                  color: "var(--color-text-secondary)",
-                }}
+                className="text-sm text-secondary"
               >
                 Engagement
               </div>
               <div
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  color: "var(--color-accent-emerald)",
-                }}
+                className="text-base font-semibold" style={{ color: "var(--color-accent-emerald)" }}
               >
                 {profile.youtubeEngagementRate
                   ? `${profile.youtubeEngagementRate}%`
@@ -404,30 +301,24 @@ export default function InfluencerProfilePage() {
             </div>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div className="flex justify-between">
             <div>
               <div
-                style={{
-                  fontSize: "13px",
-                  color: "var(--color-text-secondary)",
-                }}
+                className="text-sm text-secondary"
               >
                 Completed Deals
               </div>
-              <div style={{ fontSize: "20px", fontWeight: 700 }}>
+              <div className="text-xl font-bold">
                 {profile.totalCompletedDeals}
               </div>
             </div>
-            <div style={{ textAlign: "right" }}>
+            <div className="text-right">
               <div
-                style={{
-                  fontSize: "13px",
-                  color: "var(--color-text-secondary)",
-                }}
+                className="text-sm text-secondary"
               >
                 Rating
               </div>
-              <div style={{ fontSize: "18px", fontWeight: 700 }}>
+              <div className="text-lg font-bold">
                 {profile.averageRating > 0
                   ? `⭐ ${profile.averageRating.toFixed(1)}`
                   : "No reviews"}
@@ -438,64 +329,39 @@ export default function InfluencerProfilePage() {
 
         {/* Invite & Budget Check */}
         <div
-          className="card"
-          style={{
-            padding: "24px",
-            background: "var(--color-bg-secondary)",
-            border: "1px solid var(--color-border)",
-          }}
+          className="card p-6" style={{ background: "var(--color-bg-secondary)", border: "1px solid var(--color-border)" }}
         >
           <h3
-            style={{ fontSize: "16px", fontWeight: 700, marginBottom: "20px" }}
+            className="text-base font-bold mb-5"
           >
             Work Together
           </h3>
 
           <div
-            style={{
-              background: "var(--color-bg-primary)",
-              padding: "16px",
-              borderRadius: "var(--radius-md)",
-              marginBottom: "24px",
-            }}
+            className="p-4 mb-6" style={{ background: "var(--color-bg-primary)", borderRadius: "var(--radius-md)" }}
           >
             <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: "8px",
-              }}
+              className="flex justify-between mb-2"
             >
               <span
-                style={{
-                  fontSize: "13px",
-                  color: "var(--color-text-secondary)",
-                }}
+                className="text-sm text-secondary"
               >
                 Estimated Rate / Post
               </span>
-              <span style={{ fontSize: "16px", fontWeight: 800 }}>
+              <span className="text-base font-extrabold">
                 {minRateStr}
               </span>
             </div>
             {profile.maxRate && (
               <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  borderTop: "1px dashed var(--color-border)",
-                  paddingTop: "8px",
-                }}
+                className="flex justify-between" style={{ borderTop: "1px dashed var(--color-border)", paddingTop: "8px" }}
               >
                 <span
-                  style={{
-                    fontSize: "13px",
-                    color: "var(--color-text-secondary)",
-                  }}
+                  className="text-sm text-secondary"
                 >
                   Premium Service Code
                 </span>
-                <span style={{ fontSize: "14px", fontWeight: 600 }}>
+                <span className="text-sm font-semibold">
                   Up to ₹{(profile.maxRate / 100).toLocaleString("en-IN")}
                 </span>
               </div>
@@ -503,30 +369,19 @@ export default function InfluencerProfilePage() {
           </div>
 
           {isBrandOrIndividual && wallet && (
-            <div style={{ marginBottom: "24px" }}>
+            <div className="mb-6">
               <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "8px",
-                }}
+                className="flex justify-between mb-2"
               >
                 <span
-                  style={{
-                    fontSize: "13px",
-                    color: "var(--color-text-secondary)",
-                  }}
+                  className="text-sm text-secondary"
                 >
                   Your Available Balance
                 </span>
                 <span
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    color: canAfford
+                  className="text-sm font-bold" style={{ color: canAfford
                       ? "var(--color-accent-emerald)"
-                      : "var(--color-accent-rose)",
-                  }}
+                      : "var(--color-accent-rose)" }}
                 >
                   {availableBalanceStr}
                 </span>
@@ -542,17 +397,11 @@ export default function InfluencerProfilePage() {
 
           {isBrandOrIndividual ? (
             <div
-              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+              className="flex flex-col gap-3"
             >
               <Link
                 href={`/dashboard/campaigns/create?invite=${profile?.id || id}`}
-                className="btn btn-primary"
-                style={{
-                  textAlign: "center",
-                  textDecoration: "none",
-                  padding: "14px",
-                  fontSize: "15px",
-                }}
+                className="btn btn-primary text-center" style={{ textDecoration: "none", padding: "14px", fontSize: "15px" }}
               >
                 Create Campaign & Invite
               </Link>
@@ -560,14 +409,7 @@ export default function InfluencerProfilePage() {
               {!canAfford && (
                 <Link
                   href="/dashboard/wallet"
-                  style={{
-                    display: "block",
-                    textAlign: "center",
-                    fontSize: "14px",
-                    color: "var(--color-primary)",
-                    fontWeight: 600,
-                    textDecoration: "none",
-                  }}
+                  className="block text-center text-sm text-primary font-semibold" style={{ textDecoration: "none" }}
                 >
                   Deposit to Wallet
                 </Link>
@@ -575,14 +417,7 @@ export default function InfluencerProfilePage() {
             </div>
           ) : (
             <div
-              style={{
-                padding: "16px",
-                textAlign: "center",
-                background: "var(--color-bg-tertiary)",
-                borderRadius: "var(--radius-md)",
-                fontSize: "14px",
-                color: "var(--color-text-secondary)",
-              }}
+              className="p-4 text-center text-sm text-secondary" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
             >
               Log in as a Brand to invite this creator to campaigns.
             </div>

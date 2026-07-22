@@ -42,12 +42,7 @@ export default function Navbar() {
     <>
       <nav className={`navbar glass ${isScrolled ? "navbar-scrolled" : ""}`}>
         <div
-          className="container"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
+          className="container flex items-center justify-between"
         >
           <Logo />
 
@@ -56,8 +51,7 @@ export default function Navbar() {
               <Link
                 key={link.label}
                 href={link.href}
-                className="btn-ghost"
-                style={{ padding: "8px 14px", fontSize: "14px" }}
+                className="btn-ghost text-sm" style={{ padding: "8px 14px" }}
               >
                 {link.label}
               </Link>
@@ -110,17 +104,15 @@ export default function Navbar() {
         <div className="mobile-auth">
           <Link
             href="/login"
-            className="btn btn-secondary"
+            className="btn btn-secondary text-center justify-center"
             onClick={closeMobile}
-            style={{ textAlign: "center", justifyContent: "center" }}
           >
             Login
           </Link>
           <Link
             href="/register"
-            className="btn btn-primary"
+            className="btn btn-primary text-center justify-center"
             onClick={closeMobile}
-            style={{ textAlign: "center", justifyContent: "center" }}
           >
             Get Started Free
           </Link>

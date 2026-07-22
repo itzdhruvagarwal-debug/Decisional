@@ -75,20 +75,13 @@ export default function BadgesPage() {
     <DashboardShell user={session.user}>
       <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+        <div className="text-center mb-8">
           <h1
-            style={{
-              fontSize: "32px",
-              fontWeight: 800,
-              background: "linear-gradient(135deg, #f59e0b, #ef4444)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              marginBottom: "8px",
-            }}
+            className="font-extrabold mb-2" style={{ fontSize: "32px", background: "linear-gradient(135deg, #f59e0b, #ef4444)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
           >
             🏆 Badges & Achievements
           </h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "16px" }}>
+          <p className="text-secondary text-base">
             Collect badges, earn XP, and level up your profile!
           </p>
         </div>
@@ -98,13 +91,7 @@ export default function BadgesPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "20px",
-              marginBottom: "40px",
-              flexWrap: "wrap",
-            }}
+            className="flex justify-center gap-5 flex-wrap" style={{ marginBottom: "40px" }}
           >
             <StatCard
               label="Current Level"
@@ -129,29 +116,17 @@ export default function BadgesPage() {
 
         {/* Categories Filter */}
         <div
-          className="scrollable-tabs"
-          style={{
-            display: "flex",
-            gap: "10px",
-            marginBottom: "16px",
-            paddingBottom: "8px",
-          }}
+          className="scrollable-tabs flex mb-4" style={{ gap: "10px", paddingBottom: "8px" }}
         >
           {categories.map((cat) => (
             <Button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               variant={activeCategory === cat ? "primary" : "ghost"}
-              style={{
-                padding: "8px 20px",
-                border: activeCategory === cat ? "none" : "1px solid var(--color-border)",
-                fontWeight: 600,
-                fontSize: "13px",
-                boxShadow:
+              className="font-semibold text-sm" style={{ padding: "8px 20px", border: activeCategory === cat ? "none" : "1px solid var(--color-border)", boxShadow:
                   activeCategory === cat
                     ? "0 4px 12px rgba(99, 102, 241, 0.3)"
-                    : "none",
-              }}
+                    : "none" }}
             >
               {cat.charAt(0) + cat.slice(1).toLowerCase()}
             </Button>
@@ -160,29 +135,17 @@ export default function BadgesPage() {
 
         {/* Rarity Filter */}
         <div
-          className="scrollable-tabs"
-          style={{
-            display: "flex",
-            gap: "10px",
-            marginBottom: "32px",
-            paddingBottom: "8px",
-          }}
+          className="scrollable-tabs flex mb-8" style={{ gap: "10px", paddingBottom: "8px" }}
         >
           {rarities.map((rarity) => (
             <Button
               key={rarity}
               onClick={() => setActiveRarity(rarity)}
               variant={activeRarity === rarity ? "primary" : "ghost"}
-              style={{
-                padding: "8px 20px",
-                border: activeRarity === rarity ? "none" : "1px solid var(--color-border)",
-                fontWeight: 600,
-                fontSize: "13px",
-                boxShadow:
+              className="font-semibold text-sm" style={{ padding: "8px 20px", border: activeRarity === rarity ? "none" : "1px solid var(--color-border)", boxShadow:
                   activeRarity === rarity
                     ? "0 4px 12px rgba(99, 102, 241, 0.3)"
-                    : "none",
-              }}
+                    : "none" }}
             >
               {rarity.charAt(0) + rarity.slice(1).toLowerCase()}
             </Button>
@@ -191,7 +154,7 @@ export default function BadgesPage() {
 
         {/* Loading / Error States */}
         {loading && (
-          <div style={{ padding: "60px", textAlign: "center" }}>
+          <div className="text-center" style={{ padding: "60px" }}>
             <div
               className="loading"
               style={{ width: "40px", height: "40px", margin: "0 auto" }}
@@ -201,17 +164,13 @@ export default function BadgesPage() {
 
         {error && (
           <div
-            style={{
-              textAlign: "center",
-              padding: "40px",
-              color: "var(--color-accent-rose)",
-            }}
+            className="text-center" style={{ padding: "40px", color: "var(--color-accent-rose)" }}
           >
             {error}
             <Button
               onClick={() => globalThis.location.reload()}
               variant="secondary"
-              style={{ marginTop: "16px" }}
+              className="mt-4"
             >
               Try Again
             </Button>
@@ -221,11 +180,7 @@ export default function BadgesPage() {
         {/* Badges Grid */}
         {!loading && !error && (
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: "20px",
-            }}
+            className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}
           >
             <AnimatePresence mode="popLayout">
               {filteredBadges.length === 0 ? (
@@ -245,25 +200,11 @@ export default function BadgesPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ delay: index * 0.05 }}
-                    className="card hover-lift"
-                    style={{
-                      padding: "24px",
-                      borderRadius: "16px",
-                      border: badge.earned
+                    className="card hover-lift p-6 flex flex-col items-center text-center relative" style={{ borderRadius: "16px", border: badge.earned
                         ? "1px solid rgba(16, 185, 129, 0.3)"
-                        : "1px solid var(--color-border)",
-                      background: badge.earned
+                        : "1px solid var(--color-border)", background: badge.earned
                         ? "linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(99, 102, 241, 0.05))"
-                        : "var(--color-bg-secondary)",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      textAlign: "center",
-                      position: "relative",
-                      opacity: badge.earned ? 1 : 0.7,
-                      filter: badge.earned ? "none" : "grayscale(0.8)",
-                      transition: "all 0.3s",
-                    }}
+                        : "var(--color-bg-secondary)", opacity: badge.earned ? 1 : 0.7, filter: badge.earned ? "none" : "grayscale(0.8)", transition: "all 0.3s" }}
                     onMouseEnter={(e) => {
                       if (!badge.earned)
                         e.currentTarget.style.filter = "grayscale(0)";
@@ -276,73 +217,39 @@ export default function BadgesPage() {
                     }}
                   >
                     <div
-                      style={{
-                        fontSize: "48px",
-                        marginBottom: "16px",
-                        filter: badge.earned
+                      className="mb-4" style={{ fontSize: "48px", filter: badge.earned
                           ? "drop-shadow(0 4px 8px rgba(0,0,0,0.2))"
-                          : "none",
-                        transform: badge.earned ? "scale(1.1)" : "scale(1)",
-                      }}
+                          : "none", transform: badge.earned ? "scale(1.1)" : "scale(1)" }}
                     >
                       {badge.icon}
                     </div>
 
                     {badge.earned && (
                       <span
-                        style={{
-                          position: "absolute",
-                          top: "12px",
-                          right: "12px",
-                          fontSize: "10px",
-                          fontWeight: 800,
-                          padding: "4px 8px",
-                          borderRadius: "20px",
-                          background: "var(--color-accent-emerald)",
-                          color: "white",
-                          boxShadow: "0 2px 4px rgba(16, 185, 129, 0.3)",
-                        }}
+                        className="absolute font-extrabold" style={{ top: "12px", right: "12px", fontSize: "10px", padding: "4px 8px", borderRadius: "20px", background: "var(--color-accent-emerald)", color: "white", boxShadow: "0 2px 4px rgba(16, 185, 129, 0.3)" }}
                       >
                         UNLOCKED
                       </span>
                     )}
 
                     <h3
-                      style={{
-                        fontSize: "18px",
-                        fontWeight: 700,
-                        marginBottom: "8px",
-                        color: badge.earned
+                      className="text-lg font-bold mb-2" style={{ color: badge.earned
                           ? "var(--color-text-primary)"
-                          : "var(--color-text-secondary)",
-                      }}
+                          : "var(--color-text-secondary)" }}
                     >
                       {badge.name}
                     </h3>
 
                     <p
-                      style={{
-                        fontSize: "13px",
-                        color: "var(--color-text-secondary)",
-                        marginBottom: badge.hasProgress && !badge.earned ? "12px" : "16px",
-                        lineHeight: 1.5,
-                        flex: 1,
-                      }}
+                      className="text-sm text-secondary flex-1" style={{ marginBottom: badge.hasProgress && !badge.earned ? "12px" : "16px", lineHeight: 1.5 }}
                     >
                       {badge.description}
                     </p>
 
                     {!badge.earned && badge.hasProgress && (
-                      <div style={{ width: "100%", marginBottom: "16px" }}>
+                      <div className="w-full mb-4">
                         <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            fontSize: "11px",
-                            fontWeight: 700,
-                            color: "var(--color-text-secondary)",
-                            marginBottom: "6px",
-                          }}
+                          className="flex justify-between font-bold text-secondary" style={{ fontSize: "11px", marginBottom: "6px" }}
                         >
                           <span>Progress</span>
                           <span style={{ fontFamily: "monospace" }}>
@@ -350,54 +257,25 @@ export default function BadgesPage() {
                           </span>
                         </div>
                         <div
-                          style={{
-                            width: "100%",
-                            height: "6px",
-                            borderRadius: "3px",
-                            background: "rgba(255, 255, 255, 0.1)",
-                            overflow: "hidden",
-                          }}
+                          className="w-full overflow-hidden" style={{ height: "6px", borderRadius: "3px", background: "rgba(255, 255, 255, 0.1)" }}
                         >
                           <div
-                            style={{
-                              width: `${Math.min(100, Math.max(0, ((badge.currentProgress || 0) / (badge.targetProgress || 1)) * 100))}%`,
-                              height: "100%",
-                              background: "linear-gradient(90deg, #f59e0b, #ef4444)",
-                              borderRadius: "3px",
-                              transition: "width 0.5s ease-out",
-                            }}
+                            className="h-full" style={{ width: `${Math.min(100, Math.max(0, ((badge.currentProgress || 0) / (badge.targetProgress || 1)) * 100))}%`, background: "linear-gradient(90deg, #f59e0b, #ef4444)", borderRadius: "3px", transition: "width 0.5s ease-out" }}
                           />
                         </div>
                       </div>
                     )}
 
                     <div
-                      style={{
-                        width: "100%",
-                        paddingTop: "16px",
-                        borderTop: "1px solid var(--color-border)",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        fontSize: "12px",
-                      }}
+                      className="w-full flex justify-between items-center text-xs" style={{ paddingTop: "16px", borderTop: "1px solid var(--color-border)" }}
                     >
                       <span
-                        style={{
-                          fontWeight: 600,
-                          color: "var(--color-text-muted)",
-                        }}
+                        className="font-semibold text-muted"
                       >
                         {badge.category}
                       </span>
                       <span
-                        style={{
-                          fontWeight: 700,
-                          color: "var(--color-primary)",
-                          background: "rgba(99, 102, 241, 0.1)",
-                          padding: "2px 8px",
-                          borderRadius: "6px",
-                        }}
+                        className="font-bold text-primary" style={{ background: "rgba(99, 102, 241, 0.1)", padding: "2px 8px", borderRadius: "6px" }}
                       >
                         +{badge.xpReward} XP
                       </span>
@@ -429,36 +307,15 @@ function StatCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      style={{
-        flex: 1,
-        minWidth: "160px",
-        padding: "24px",
-        borderRadius: "16px",
-        background: `linear-gradient(135deg, ${color}11, ${color}05)`,
-        border: `1px solid ${color}33`,
-        textAlign: "center",
-        boxShadow: `0 4px 12px ${color}11`,
-      }}
+      className="flex-1 p-6 text-center" style={{ minWidth: "160px", borderRadius: "16px", background: `linear-gradient(135deg, ${color}11, ${color}05)`, border: `1px solid ${color}33`, boxShadow: `0 4px 12px ${color}11` }}
     >
       <div
-        style={{
-          fontSize: "32px",
-          fontWeight: 800,
-          color: color,
-          marginBottom: "4px",
-          lineHeight: 1,
-        }}
+        className="font-extrabold mb-1" style={{ fontSize: "32px", color: color, lineHeight: 1 }}
       >
         {value}
       </div>
       <div
-        style={{
-          fontSize: "12px",
-          fontWeight: 700,
-          color: "var(--color-text-secondary)",
-          textTransform: "uppercase",
-          letterSpacing: "1px",
-        }}
+        className="text-xs font-bold text-secondary" style={{ textTransform: "uppercase", letterSpacing: "1px" }}
       >
         {label}
       </div>

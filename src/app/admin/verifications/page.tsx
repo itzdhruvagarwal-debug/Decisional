@@ -9,11 +9,11 @@ export default async function VerifiedQueuePage() {
 
   return (
     <div className="admin-page admin-page-narrow">
-      <header style={{ marginBottom: "32px" }}>
-        <h1 className="gradient-text" style={{ fontSize: "28px", fontWeight: 900, marginBottom: "8px" }}>
+      <header className="mb-8">
+        <h1 className="gradient-text mb-2" style={{ fontSize: "28px", fontWeight: 900 }}>
           Verification Queue
         </h1>
-        <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+        <p className="text-secondary text-sm">
           Manage and review pending KYC requests from influencers and brands.
         </p>
       </header>

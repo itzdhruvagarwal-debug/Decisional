@@ -8,20 +8,20 @@ export default function RefundPage() {
   const lastUpdated = "June 20, 2026";
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="flex flex-col" style={{ minHeight: "100vh" }}>
       <Navbar />
 
-      <main style={{ flex: 1, paddingTop: "80px" }}>
+      <main className="flex-1" style={{ paddingTop: "80px" }}>
         <section className="section">
           <div className="container" style={{ maxWidth: "880px" }}>
-            <h1 className="section-title gradient-text" style={{ fontSize: "40px", fontWeight: 900, marginBottom: "12px" }}>
+            <h1 className="section-title gradient-text mb-3" style={{ fontSize: "40px", fontWeight: 900 }}>
               Refund and Cancellation Policy
             </h1>
-            <p className="text-secondary" style={{ marginBottom: "40px", fontWeight: 600 }}>
+            <p className="text-secondary font-semibold" style={{ marginBottom: "40px" }}>
               Last updated: {lastUpdated}
             </p>
 
-            <div style={{ lineHeight: 1.8, color: "var(--color-text-secondary)", fontSize: "15px", display: "grid", gap: "32px" }}>
+            <div className="text-secondary grid gap-8" style={{ lineHeight: 1.8, fontSize: "15px" }}>
               <section>
                 <h2 style={headingStyle}>1. How protected payments work</h2>
                 <p>
@@ -130,10 +130,10 @@ export default function RefundPage() {
                 </p>
               </section>
 
-              <section style={{ padding: "28px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-border)", textAlign: "center" }}>
-                <p style={{ fontSize: "14px", color: "var(--color-text-muted)" }}>
+              <section className="text-center" style={{ padding: "28px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-border)" }}>
+                <p className="text-sm text-muted">
                   Need a refund review or dispute?
-                  <Link href="/dashboard/disputes" style={{ color: "var(--color-primary)", marginLeft: "5px", textDecoration: "none", fontWeight: 700 }}>
+                  <Link href="/dashboard/disputes" className="text-primary font-bold" style={{ marginLeft: "5px", textDecoration: "none" }}>
                     Open Dispute Center
                   </Link>
                 </p>

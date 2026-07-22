@@ -66,17 +66,7 @@ function StatusPill({ status }: Readonly<{ status: string }>) {
   const ready = status === "READY";
   return (
     <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        borderRadius: "999px",
-        padding: "6px 10px",
-        fontSize: "12px",
-        fontWeight: 800,
-        color: ready ? "var(--color-accent-emerald)" : "var(--color-accent-rose)",
-        background: ready ? "rgba(16, 185, 129, 0.12)" : "rgba(244, 63, 94, 0.12)",
-        border: `1px solid ${ready ? "rgba(16, 185, 129, 0.25)" : "rgba(244, 63, 94, 0.25)"}`,
-      }}
+      className="inline-flex items-center text-xs font-extrabold" style={{ borderRadius: "999px", padding: "6px 10px", color: ready ? "var(--color-accent-emerald)" : "var(--color-accent-rose)", background: ready ? "rgba(16, 185, 129, 0.12)" : "rgba(244, 63, 94, 0.12)", border: `1px solid ${ready ? "rgba(16, 185, 129, 0.25)" : "rgba(244, 63, 94, 0.25)"}` }}
     >
       {ready ? "Ready" : "Action required"}
     </span>
@@ -209,7 +199,7 @@ export default function IndiaTaxCompliancePanel() {
 
   if (loading) {
     return (
-      <div className="card" style={{ padding: "40px", textAlign: "center" }}>
+      <div className="card text-center" style={{ padding: "40px" }}>
         Loading India tax compliance...
       </div>
     );
@@ -220,56 +210,56 @@ export default function IndiaTaxCompliancePanel() {
   const status = summary?.status || "ACTION_REQUIRED";
 
   return (
-    <div style={{ display: "grid", gap: "20px", maxWidth: "960px" }}>
+    <div className="grid gap-5" style={{ maxWidth: "960px" }}>
       <section className="card" style={{ padding: "20px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", flexWrap: "wrap", marginBottom: "16px" }}>
+        <div className="flex justify-between gap-4 flex-wrap mb-4">
           <div>
-            <h2 style={{ fontSize: "20px", fontWeight: 900, marginBottom: "6px" }}>
+            <h2 className="text-xl" style={{ fontWeight: 900, marginBottom: "6px" }}>
               India Tax Compliance
             </h2>
-            <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+            <p className="text-secondary text-sm">
               PAN, GST, ITR, TDS, and invoice readiness for India operations.
             </p>
           </div>
           <StatusPill status={status} />
         </div>
 
-        <div className="grid-2" style={{ gap: "12px", marginBottom: "16px" }}>
+        <div className="grid-2 gap-3 mb-4">
           <div style={{ padding: "14px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
-            <div style={{ fontSize: "12px", color: "var(--color-text-muted)", marginBottom: "4px" }}>PAN</div>
-            <div style={{ fontWeight: 800 }}>
+            <div className="text-xs text-muted mb-1">PAN</div>
+            <div className="font-extrabold">
               {compliance?.panNumberMasked || (data?.verifiedPanDocument ? "Document verified, number needed" : "Missing")}
             </div>
           </div>
           <div style={{ padding: "14px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
-            <div style={{ fontSize: "12px", color: "var(--color-text-muted)", marginBottom: "4px" }}>GSTIN</div>
-            <div style={{ fontWeight: 800 }}>
+            <div className="text-xs text-muted mb-1">GSTIN</div>
+            <div className="font-extrabold">
               {compliance?.gstinMasked || compliance?.gstRegistrationType || "Not declared"}
             </div>
           </div>
           <div style={{ padding: "14px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
-            <div style={{ fontSize: "12px", color: "var(--color-text-muted)", marginBottom: "4px" }}>ITR acknowledgement</div>
-            <div style={{ fontWeight: 800 }}>
+            <div className="text-xs text-muted mb-1">ITR acknowledgement</div>
+            <div className="font-extrabold">
               {compliance?.itrAcknowledgementMasked || "Not provided"}
             </div>
           </div>
           <div style={{ padding: "14px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
-            <div style={{ fontSize: "12px", color: "var(--color-text-muted)", marginBottom: "4px" }}>E-invoice</div>
-            <div style={{ fontWeight: 800 }}>
+            <div className="text-xs text-muted mb-1">E-invoice</div>
+            <div className="font-extrabold">
               {compliance?.eInvoiceApplicable ? "Applicable" : "Not marked"}
             </div>
           </div>
         </div>
 
         {(summary?.blocking.length || summary?.advisories.length) ? (
-          <div style={{ display: "grid", gap: "8px", marginBottom: "4px" }}>
+          <div className="grid gap-2 mb-1">
             {summary.blocking.map((item) => (
-              <div key={item} style={{ color: "var(--color-accent-rose)", fontSize: "13px", fontWeight: 700 }}>
+              <div key={item} className="text-sm font-bold" style={{ color: "var(--color-accent-rose)" }}>
                 {item}
               </div>
             ))}
             {summary.advisories.map((item) => (
-              <div key={item} style={{ color: "var(--color-text-secondary)", fontSize: "13px" }}>
+              <div key={item} className="text-secondary text-sm">
                 {item}
               </div>
             ))}
@@ -278,22 +268,22 @@ export default function IndiaTaxCompliancePanel() {
       </section>
 
       <form className="card" style={{ padding: "20px" }} onSubmit={handleSubmit}>
-        <h3 style={{ fontSize: "18px", fontWeight: 900, marginBottom: "16px" }}>
+        <h3 className="text-lg mb-4" style={{ fontWeight: 900 }}>
           Update Tax Details
         </h3>
 
         {error && (
-          <div role="alert" aria-live="assertive" style={{ color: "var(--color-accent-rose)", marginBottom: "14px", fontSize: "13px", fontWeight: 700 }}>
+          <div role="alert" aria-live="assertive" className="text-sm font-bold" style={{ color: "var(--color-accent-rose)", marginBottom: "14px" }}>
             {error}
           </div>
         )}
         {success && (
-          <div role="status" aria-live="polite" style={{ color: "var(--color-accent-emerald)", marginBottom: "14px", fontSize: "13px", fontWeight: 700 }}>
+          <div role="status" aria-live="polite" className="text-sm font-bold" style={{ color: "var(--color-accent-emerald)", marginBottom: "14px" }}>
             {success}
           </div>
         )}
 
-        <div className="grid-2" style={{ gap: "16px" }}>
+        <div className="grid-2 gap-4">
           <Input
             id="tax-pan"
             label="PAN number"
@@ -370,7 +360,7 @@ export default function IndiaTaxCompliancePanel() {
           />
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "18px" }}>
+        <div className="flex justify-end" style={{ marginTop: "18px" }}>
           <Button type="submit" disabled={saving}>
             {saving ? "Saving..." : "Save tax details"}
           </Button>

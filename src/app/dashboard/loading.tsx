@@ -9,12 +9,11 @@ export default function Loading() {
     <div className="dashboard-app-shell">
       {/* Sidebar skeleton */}
       <aside
-        className="sidebar"
-        style={{ padding: "16px 10px", display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}
+        className="sidebar flex flex-col flex-shrink-0" style={{ padding: "16px 10px", gap: 8 }}
         aria-hidden="true"
       >
         {/* Logo area */}
-        <div style={{ padding: "8px 6px 16px", borderBottom: "1px solid var(--color-border)", marginBottom: 8 }}>
+        <div className="border-b-card" style={{ padding: "8px 6px 16px", marginBottom: 8 }}>
           <div className="skeleton" style={{ height: 32, width: 120, borderRadius: 8 }} />
         </div>
         {/* Nav links */}
@@ -31,13 +30,7 @@ export default function Loading() {
       <main className="flex-1 flex flex-col" style={{ minWidth: 0 }}>
         {/* Topbar skeleton */}
         <header
-          className="glass flex items-center justify-between"
-          style={{
-            height: 64,
-            borderBottom: "1px solid var(--color-border)",
-            padding: "0 24px",
-            backdropFilter: "blur(20px)",
-          }}
+          className="glass flex items-center justify-between border-b-card" style={{ height: 64, padding: "0 24px", backdropFilter: "blur(20px)" }}
           aria-hidden="true"
         >
           <div>

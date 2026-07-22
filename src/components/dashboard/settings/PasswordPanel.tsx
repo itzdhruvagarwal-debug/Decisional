@@ -171,11 +171,7 @@ export default function PasswordPanel({
     return (
         <div className="card">
             <h3
-                style={{
-                    fontSize: "20px",
-                    fontWeight: 700,
-                    marginBottom: "24px",
-                }}
+                className="text-xl font-bold mb-6"
             >
                 Change Password
             </h3>
@@ -184,14 +180,7 @@ export default function PasswordPanel({
                 <div
                     role="status"
                     aria-live="polite"
-                    style={{
-                        padding: "12px",
-                        background: "rgba(16, 185, 129, 0.1)",
-                        color: "var(--color-success)",
-                        borderRadius: "var(--radius-sm)",
-                        marginBottom: "16px",
-                        border: "1px solid rgba(16, 185, 129, 0.2)",
-                    }}
+                    className="p-3 mb-4" style={{ background: "rgba(16, 185, 129, 0.1)", color: "var(--color-success)", borderRadius: "var(--radius-sm)", border: "1px solid rgba(16, 185, 129, 0.2)" }}
                 >
                     {passwordSuccess}
                 </div>
@@ -201,14 +190,7 @@ export default function PasswordPanel({
                 <div
                     role="alert"
                     aria-live="assertive"
-                    style={{
-                        padding: "12px",
-                        background: "rgba(239, 68, 68, 0.1)",
-                        color: "var(--color-error)",
-                        borderRadius: "var(--radius-sm)",
-                        marginBottom: "16px",
-                        border: "1px solid rgba(239, 68, 68, 0.2)",
-                    }}
+                    className="p-3 mb-4" style={{ background: "rgba(239, 68, 68, 0.1)", color: "var(--color-error)", borderRadius: "var(--radius-sm)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
                 >
                     {passwordError}
                 </div>
@@ -236,9 +218,9 @@ export default function PasswordPanel({
 
                 {(!forgotPasswordState.active || forgotPasswordState.step === 'otp') && (
                     <>
-                        <div style={{ marginBottom: "20px" }}>
+                        <div className="mb-5">
                             <label className="label" htmlFor="new-password-input">New Password</label>
-                            <div style={{ position: "relative" }}>
+                            <div className="relative">
                                 <Input
                                     id="new-password-input"
                                     type={showPassword.new ? "text" : "password"}
@@ -261,26 +243,16 @@ export default function PasswordPanel({
                                             new: !showPassword.new,
                                         })
                                     }
-                                    style={{
-                                        position: "absolute",
-                                        right: "12px",
-                                        top: "50%",
-                                        transform: "translateY(-50%)",
-                                        background: "none",
-                                        border: "none",
-                                        cursor: "pointer",
-                                        fontSize: "16px",
-                                        opacity: 0.7,
-                                    }}
+                                    className="absolute cursor-pointer text-base" style={{ right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", opacity: 0.7 }}
                                 >
                                     {showPassword.new ? "👁️" : "🙈"}
                                 </Button>
                             </div>
                         </div>
 
-                        <div style={{ marginBottom: "24px" }}>
+                        <div className="mb-6">
                             <label className="label" htmlFor="confirm-password-input">Confirm New Password</label>
-                            <div style={{ position: "relative" }}>
+                            <div className="relative">
                                 <Input
                                     id="confirm-password-input"
                                     type={showPassword.confirm ? "text" : "password"}
@@ -303,17 +275,7 @@ export default function PasswordPanel({
                                             confirm: !showPassword.confirm,
                                         })
                                     }
-                                    style={{
-                                        position: "absolute",
-                                        right: "12px",
-                                        top: "50%",
-                                        transform: "translateY(-50%)",
-                                        background: "none",
-                                        border: "none",
-                                        cursor: "pointer",
-                                        fontSize: "16px",
-                                        opacity: 0.7,
-                                    }}
+                                    className="absolute cursor-pointer text-base" style={{ right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", opacity: 0.7 }}
                                 >
                                     {showPassword.confirm ? "👁️" : "🙈"}
                                 </Button>
@@ -321,13 +283,13 @@ export default function PasswordPanel({
                         </div>
 
                         {passwordConfirmPending ? (
-                            <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "12px", background: "rgba(244, 63, 94, 0.08)", borderRadius: "var(--radius-md)", border: "1px solid rgba(244, 63, 94, 0.3)" }}>
-                                <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-accent-rose)" }}>⚠️ Are you sure you want to update your password?</p>
-                                <div style={{ display: "flex", gap: "8px" }}>
-                                    <Button type="submit" variant="danger" style={{ flex: 1 }} disabled={isSaving}>
+                            <div className="flex flex-col gap-2 p-3" style={{ background: "rgba(244, 63, 94, 0.08)", borderRadius: "var(--radius-md)", border: "1px solid rgba(244, 63, 94, 0.3)" }}>
+                                <p className="text-sm font-semibold" style={{ color: "var(--color-accent-rose)" }}>⚠️ Are you sure you want to update your password?</p>
+                                <div className="flex gap-2">
+                                    <Button type="submit" variant="danger" className="flex-1" disabled={isSaving}>
                                         {isSaving ? <span className="loading" /> : "Yes, Update Password"}
                                     </Button>
-                                    <Button type="button" variant="secondary" style={{ flex: 1 }} onClick={() => setPasswordConfirmPending(false)}>
+                                    <Button type="button" variant="secondary" className="flex-1" onClick={() => setPasswordConfirmPending(false)}>
                                         Cancel
                                     </Button>
                                 </div>
@@ -337,7 +299,7 @@ export default function PasswordPanel({
                                 type="submit"
                                 variant="primary"
                                 disabled={isSaving}
-                                style={{ width: "100%" }}
+                                className="w-full"
                             >
                                 {isSaving ? <span className="loading" /> : "Update Password"}
                             </Button>
@@ -378,15 +340,15 @@ function ForgotPasswordSection({
 }: ForgotPasswordSectionProps) {
   if (!forgotPasswordState.active) return null;
   return (
-    <div style={{ marginBottom: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+    <div className="mb-5 flex flex-col" style={{ gap: "10px" }}>
       {forgotPasswordState.step === 'method' && (
         <>
-          <p style={{ fontSize: "14px", color: "var(--color-text-secondary)" }}>Choose where to send the OTP:</p>
-          <div style={{ display: "flex", gap: "12px" }}>
-            <Button type="button" variant="secondary" onClick={() => handleSendForgotPasswordOtp('email')} disabled={isSaving || !user?.email} style={{ flex: 1 }}>{user?.email ? "Send to Email" : "No Email Added"}</Button>
-            <Button type="button" variant="secondary" onClick={() => handleSendForgotPasswordOtp('phone')} disabled={isSaving || !user?.phone} style={{ flex: 1 }}>{user?.phone ? "Send to Phone" : "No Phone Added"}</Button>
+          <p className="text-sm text-secondary">Choose where to send the OTP:</p>
+          <div className="flex gap-3">
+            <Button type="button" variant="secondary" onClick={() => handleSendForgotPasswordOtp('email')} disabled={isSaving || !user?.email} className="flex-1">{user?.email ? "Send to Email" : "No Email Added"}</Button>
+            <Button type="button" variant="secondary" onClick={() => handleSendForgotPasswordOtp('phone')} disabled={isSaving || !user?.phone} className="flex-1">{user?.phone ? "Send to Phone" : "No Phone Added"}</Button>
           </div>
-          <Button type="button" style={{ background: "none", border: "none", color: "var(--color-text-muted)", fontSize: "14px", cursor: "pointer", textDecoration: "underline" }} onClick={() => setForgotPasswordState({ active: false, step: 'method', method: null, otp: '' })}>Cancel</Button>
+          <Button type="button" className="text-muted text-sm cursor-pointer" style={{ background: "none", border: "none", textDecoration: "underline" }} onClick={() => setForgotPasswordState({ active: false, step: 'method', method: null, otp: '' })}>Cancel</Button>
         </>
       )}
       {forgotPasswordState.step === 'otp' && (
@@ -402,7 +364,7 @@ function ForgotPasswordSection({
             autoComplete="one-time-code"
             fullWidth
           />
-          <Button type="button" style={{ background: "none", border: "none", color: "var(--color-text-muted)", fontSize: "14px", cursor: "pointer", textDecoration: "underline", alignSelf: "flex-start" }} onClick={() => setForgotPasswordState({ active: false, step: 'method', method: null, otp: '' })}>Cancel Reset</Button>
+          <Button type="button" className="text-muted text-sm cursor-pointer" style={{ background: "none", border: "none", textDecoration: "underline", alignSelf: "flex-start" }} onClick={() => setForgotPasswordState({ active: false, step: 'method', method: null, otp: '' })}>Cancel Reset</Button>
         </>
       )}
     </div>
@@ -432,26 +394,18 @@ function CurrentPasswordSection({
   setCurrentPassword,
 }: CurrentPasswordSectionProps) {
   return (
-    <div style={{ marginBottom: "20px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+    <div className="mb-5">
+      <div className="flex justify-between items-center mb-2">
         <label className="label" htmlFor="current-password-input" style={{ marginBottom: 0 }}>Current Password</label>
         <Button
           type="button"
           onClick={() => setForgotPasswordState({ active: true, step: 'method', method: null, otp: '' })}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--color-primary-light)",
-            fontSize: "13px",
-            fontWeight: 600,
-            cursor: "pointer",
-            padding: 0
-          }}
+          className="text-sm font-semibold cursor-pointer" style={{ background: "none", border: "none", color: "var(--color-primary-light)", padding: 0 }}
         >
           Forgot Password?
         </Button>
       </div>
-      <div style={{ position: "relative" }}>
+      <div className="relative">
         <Input
           id="current-password-input"
           type={showPassword.current ? "text" : "password"}
@@ -469,17 +423,7 @@ function CurrentPasswordSection({
               current: !prev.current,
             }))
           }
-          style={{
-            position: "absolute",
-            right: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            fontSize: "16px",
-            opacity: 0.7,
-          }}
+          className="absolute cursor-pointer text-base" style={{ right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", opacity: 0.7 }}
         >
           {showPassword.current ? "👁️" : "🙈"}
         </Button>

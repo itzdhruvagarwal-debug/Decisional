@@ -27,13 +27,13 @@ const contactRows = [
 
 export default function ContactPage() {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="flex flex-col" style={{ minHeight: "100vh" }}>
       <Navbar />
 
-      <main style={{ flex: 1, paddingTop: "80px" }}>
+      <main className="flex-1" style={{ paddingTop: "80px" }}>
         <section className="section">
           <div className="container" style={{ maxWidth: "1040px" }}>
-            <div style={{ textAlign: "center", marginBottom: "56px" }}>
+            <div className="text-center" style={{ marginBottom: "56px" }}>
               <h1 className="section-title">
                 Contact <span className="gradient-text">Decisional</span>
               </h1>
@@ -42,14 +42,14 @@ export default function ContactPage() {
               </p>
             </div>
 
-            <div className="grid-2" style={{ gap: "32px", alignItems: "start" }}>
-              <div style={{ display: "grid", gap: "18px" }}>
+            <div className="grid-2 gap-8" style={{ alignItems: "start" }}>
+              <div className="grid" style={{ gap: "18px" }}>
                 {contactRows.map((row) => (
                   <article key={row.title} className="card">
-                    <h2 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "10px" }}>
+                    <h2 className="text-xl font-extrabold" style={{ marginBottom: "10px" }}>
                       {row.title}
                     </h2>
-                    <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.7, marginBottom: "12px" }}>
+                    <p className="text-secondary mb-3" style={{ lineHeight: 1.7 }}>
                       {row.body}
                     </p>
                     <a href={row.href} style={linkStyle}>
@@ -60,26 +60,26 @@ export default function ContactPage() {
               </div>
 
               <div className="card">
-                <h2 style={{ fontSize: "24px", fontWeight: 800, marginBottom: "16px" }}>
+                <h2 className="text-2xl font-extrabold mb-4">
                   Fastest support path
                 </h2>
-                <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.7, marginBottom: "20px" }}>
+                <p className="text-secondary mb-5" style={{ lineHeight: 1.7 }}>
                   Logged-in users should use the dashboard so we can attach the right account,
                   campaign, deal, payout, or dispute record to the request.
                 </p>
-                <div style={{ display: "grid", gap: "12px" }}>
-                  <Link href="/dashboard/messages" className="btn btn-primary" style={{ justifyContent: "center" }}>
+                <div className="grid gap-3">
+                  <Link href="/dashboard/messages" className="btn btn-primary justify-center">
                     Open Dashboard Messages
                   </Link>
-                  <Link href="/dashboard/disputes" className="btn btn-secondary" style={{ justifyContent: "center" }}>
+                  <Link href="/dashboard/disputes" className="btn btn-secondary justify-center">
                     Open Dispute Center
                   </Link>
                 </div>
-                <div style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid var(--color-border)" }}>
-                  <h3 style={{ fontSize: "16px", fontWeight: 800, marginBottom: "8px" }}>
+                <div className="mt-6" style={{ paddingTop: "20px", borderTop: "1px solid var(--color-border)" }}>
+                  <h3 className="text-base font-extrabold mb-2">
                     Response windows
                   </h3>
-                  <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
+                  <p className="text-secondary" style={{ lineHeight: 1.7 }}>
                     Support: 1 to 2 business days. Payment or security escalations are prioritized.
                     Legal notices should be sent by email and include account identifiers where relevant.
                   </p>

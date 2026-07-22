@@ -214,53 +214,22 @@ export default function ProfileTab({
         <div className="grid-2">
             <div className="card">
                 <div
-                    style={{
-                        display: "inline-block",
-                        padding: "4px 12px",
-                        borderRadius: "20px",
-                        background: getUserTypeColor(user.userType),
-                        color: "white",
-                        fontSize: "11px",
-                        fontWeight: "800",
-                        marginBottom: "16px",
-                        letterSpacing: "1px",
-                    }}
+                    className="mb-4" style={{ display: "inline-block", padding: "4px 12px", borderRadius: "20px", background: getUserTypeColor(user.userType), color: "white", fontSize: "11px", fontWeight: "800", letterSpacing: "1px" }}
                 >
                     {user.userType} PROFILE
                 </div>
 
                 <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        marginBottom: "24px",
-                    }}
+                    className="flex justify-center mb-6"
                 >
                     <button
                         type="button"
                         onClick={() => profileImageInputRef.current?.click()}
                         aria-label="Change profile image"
-                        style={{
-                            position: "relative",
-                            cursor: "pointer",
-                            border: "none",
-                            background: "none",
-                            padding: 0,
-                        }}
+                        className="relative cursor-pointer" style={{ border: "none", background: "none", padding: 0 }}
                     >
                         <div
-                            style={{
-                                width: "100px",
-                                height: "100px",
-                                borderRadius: "50%",
-                                overflow: "hidden",
-                                border: "4px solid var(--color-bg-tertiary)",
-                                background: "#f0f0f0",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                position: "relative",
-                            }}
+                            className="overflow-hidden flex items-center justify-center relative" style={{ width: "100px", height: "100px", borderRadius: "50%", border: "4px solid var(--color-bg-tertiary)", background: "#f0f0f0" }}
                         >
                             {profile.profileImage ? (
                                 <Image
@@ -268,9 +237,7 @@ export default function ProfileTab({
                                     alt="Profile"
                                     fill
                                     unoptimized
-                                    style={{
-                                        objectFit: "cover",
-                                    }}
+                                    className="object-cover"
                                 />
                             ) : (
                                 <div style={{ fontSize: "40px" }}>
@@ -280,14 +247,7 @@ export default function ProfileTab({
 
                             {isUploading && (
                                 <div
-                                    style={{
-                                        position: "absolute",
-                                        inset: 0,
-                                        background: "rgba(0,0,0,0.5)",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                    }}
+                                    className="absolute flex items-center justify-center" style={{ inset: 0, background: "rgba(0,0,0,0.5)" }}
                                 >
                                     <span
                                         className="loading"
@@ -297,21 +257,7 @@ export default function ProfileTab({
                             )}
                         </div>
                         <div
-                            style={{
-                                position: "absolute",
-                                bottom: "0",
-                                right: "0",
-                                background: "var(--color-primary)",
-                                color: "white",
-                                borderRadius: "50%",
-                                width: "32px",
-                                height: "32px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "14px",
-                                border: "2px solid var(--color-bg-primary)",
-                            }}
+                            className="absolute flex items-center justify-center text-sm" style={{ bottom: "0", right: "0", background: "var(--color-primary)", color: "white", borderRadius: "50%", width: "32px", height: "32px", border: "2px solid var(--color-bg-primary)" }}
                         >
                             📸
                         </div>
@@ -319,72 +265,46 @@ export default function ProfileTab({
                     <input
                         type="file"
                         ref={profileImageInputRef}
-                        style={{ display: "none" }}
+                        className="hidden"
                         accept="image/*"
                         onChange={handleProfileImageUpload}
                     />
                 </div>
 
                 <h3
-                    style={{
-                        fontSize: "16px",
-                        fontWeight: 700,
-                        marginBottom: "20px",
-                    }}
+                    className="text-base font-bold mb-5"
                 >
                     Basic Information
                 </h3>
 
                 <div
-                    style={{
-                        padding: "16px",
-                        background: "var(--color-bg-tertiary)",
-                        borderRadius: "var(--radius-md)",
-                        marginBottom: "24px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                    }}
+                    className="p-4 mb-6 flex justify-between items-center" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
                 >
                     <div>
                         <div
-                            style={{
-                                fontSize: "12px",
-                                color: "var(--color-text-secondary)",
-                                textTransform: "uppercase",
-                                letterSpacing: "1px",
-                            }}
+                            className="text-xs text-secondary" style={{ textTransform: "uppercase", letterSpacing: "1px" }}
                         >
                             Your Referral Code
                         </div>
                         <div
-                            style={{
-                                fontSize: "20px",
-                                fontWeight: 800,
-                                fontFamily: "monospace",
-                            }}
+                            className="text-xl font-extrabold" style={{ fontFamily: "monospace" }}
                         >
                             {referralCode || "..."}
                         </div>
                     </div>
-                    <div style={{ textAlign: "right" }}>
+                    <div className="text-right">
                         <div
-                            style={{
-                                fontSize: "12px",
-                                color: "var(--color-text-secondary)",
-                                textTransform: "uppercase",
-                                letterSpacing: "1px",
-                            }}
+                            className="text-xs text-secondary" style={{ textTransform: "uppercase", letterSpacing: "1px" }}
                         >
                             Badges Earned
                         </div>
-                        <div style={{ fontSize: "20px", fontWeight: 800 }}>
+                        <div className="text-xl font-extrabold">
                             {badgesCount} 🎖️
                         </div>
                         <div style={{ fontSize: "11px" }}>
                             <Link
                                 href="/dashboard/badges"
-                                style={{ color: "var(--color-primary)" }}
+                                className="text-primary"
                             >
                                 View All
                             </Link>
@@ -392,7 +312,7 @@ export default function ProfileTab({
                     </div>
                 </div>
 
-                <div style={{ marginBottom: "20px" }}>
+                <div className="mb-5">
                     <Input
                         label={isBrand(user.userType) ? "Company Name" : "Display Name"}
                         type="text"
@@ -404,7 +324,7 @@ export default function ProfileTab({
                     />
                 </div>
 
-                <div style={{ marginBottom: "20px" }}>
+                <div className="mb-5">
                     <Textarea
                         label={isBrand(user.userType) ? "Description" : "Bio"}
                         rows={4}
@@ -421,11 +341,7 @@ export default function ProfileTab({
                         fullWidth
                     />
                     <p
-                        style={{
-                            fontSize: "12px",
-                            color: "var(--color-text-muted)",
-                            marginTop: "4px",
-                        }}
+                        className="text-xs text-muted mt-1"
                     >
                         {profile.bio.length}/{isBrand(user.userType) ? 1000 : 300}{" "}
                         characters
@@ -434,8 +350,7 @@ export default function ProfileTab({
 
                 {isBrand(user.userType) && (
                     <div
-                        className="grid-2"
-                        style={{ gap: "16px", marginBottom: "20px" }}
+                        className="grid-2 gap-4 mb-5"
                     >
                         <Input
                             id="profile-website-input"
@@ -462,7 +377,7 @@ export default function ProfileTab({
                     </div>
                 )}
 
-                <div className="grid-2" style={{ gap: "16px" }}>
+                <div className="grid-2 gap-4">
                     <div>
                         <Input
                             id="profile-city-input"
@@ -501,8 +416,7 @@ export default function ProfileTab({
                 </div>
 
                 <div
-                    className="grid-2"
-                    style={{ gap: "16px", marginTop: "16px" }}
+                    className="grid-2 gap-4 mt-4"
                 >
                     <Input
                         id="profile-address-input"
@@ -529,7 +443,7 @@ export default function ProfileTab({
                 </div>
 
                 {isInfluencer(user.userType) && (
-                    <div className="grid-2" style={{ gap: "16px", marginTop: "16px" }}>
+                    <div className="grid-2 gap-4 mt-4">
                         <Select
                             id="profile-gender-select"
                             label="Gender"
@@ -562,23 +476,15 @@ export default function ProfileTab({
             {isInfluencer(user.userType) && (
                 <div className="card">
                     <h3
-                        style={{
-                            fontSize: "16px",
-                            fontWeight: 700,
-                            marginBottom: "20px",
-                        }}
+                        className="text-base font-bold mb-5"
                     >
                         Categories & Languages
                     </h3>
 
-                    <div style={{ marginBottom: "20px" }}>
+                    <div className="mb-5">
                         <div className="label">Categories (Select up to 5)</div>
                         <div
-                            style={{
-                                display: "flex",
-                                flexWrap: "wrap",
-                                gap: "8px",
-                            }}
+                            className="flex flex-wrap gap-2"
                         >
                             {localCategories.map((category) => (
                                 <Button
@@ -586,18 +492,11 @@ export default function ProfileTab({
                                     type="button"
                                     variant="ghost"
                                     onClick={() => toggleCategory(category)}
-                                    className="badge"
-                                    style={{
-                                        cursor: "pointer",
-                                        background: profile.categories.includes(category)
+                                    className="badge cursor-pointer" style={{ background: profile.categories.includes(category)
                                             ? "var(--color-primary)"
-                                            : "var(--color-bg-tertiary)",
-                                        color: profile.categories.includes(category)
+                                            : "var(--color-bg-tertiary)", color: profile.categories.includes(category)
                                             ? "white"
-                                            : "var(--color-text-secondary)",
-                                        border: "none",
-                                        padding: "8px 12px",
-                                    }}
+                                            : "var(--color-text-secondary)", border: "none", padding: "8px 12px" }}
                                 >
                                     {category}
                                 </Button>
@@ -605,7 +504,7 @@ export default function ProfileTab({
                         </div>
                     </div>
 
-                    <div style={{ marginBottom: "20px", display: "flex", gap: "8px", alignItems: "center" }}>
+                    <div className="mb-5 flex gap-2 items-center">
                         <Input
                             type="text"
                             placeholder="Add custom category..."
@@ -641,11 +540,7 @@ export default function ProfileTab({
                     <div>
                         <div className="label">Languages</div>
                         <div
-                            style={{
-                                display: "flex",
-                                flexWrap: "wrap",
-                                gap: "8px",
-                            }}
+                            className="flex flex-wrap gap-2"
                         >
                             {localLanguages.map((language) => (
                                 <Button
@@ -653,18 +548,11 @@ export default function ProfileTab({
                                     type="button"
                                     variant="ghost"
                                     onClick={() => toggleLanguage(language)}
-                                    className="badge"
-                                    style={{
-                                        cursor: "pointer",
-                                        background: profile.languages.includes(language)
+                                    className="badge cursor-pointer" style={{ background: profile.languages.includes(language)
                                             ? "var(--color-primary)"
-                                            : "var(--color-bg-tertiary)",
-                                        color: profile.languages.includes(language)
+                                            : "var(--color-bg-tertiary)", color: profile.languages.includes(language)
                                             ? "white"
-                                            : "var(--color-text-secondary)",
-                                        border: "none",
-                                        padding: "8px 12px",
-                                    }}
+                                            : "var(--color-text-secondary)", border: "none", padding: "8px 12px" }}
                                 >
                                     {language}
                                 </Button>
@@ -672,7 +560,7 @@ export default function ProfileTab({
                         </div>
                     </div>
 
-                    <div style={{ marginTop: "12px", display: "flex", gap: "8px", alignItems: "center" }}>
+                    <div className="mt-3 flex gap-2 items-center">
                         <Input
                             type="text"
                             placeholder="Add custom language..."

@@ -24,11 +24,7 @@ export default function SecurityTab({
 }: Readonly<SecurityTabProps>) {
     return (
         <div
-            style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: "24px",
-            }}
+            className="grid gap-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}
         >
             <ContactVerificationPanel
                 user={user}
@@ -45,7 +41,7 @@ export default function SecurityTab({
                 showToast={showToast}
             />
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            <div className="flex flex-col gap-6">
                 <TwoFactorAuthPanel
                     isSaving={isSaving}
                     setIsSaving={setIsSaving}

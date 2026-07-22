@@ -84,36 +84,15 @@ export function EnterpriseWatermark() {
     return (
         <div
             id="enterprise-security-watermark"
-            style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                pointerEvents: "none",
-                zIndex: 99999, // Way above everything
-                overflow: "hidden",
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: 0.03, // Barely visible to the naked eye but catches screenshot scrapers
-                userSelect: "none",
-            }}
+            className="fixed flex flex-wrap items-center justify-center" style={{ top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 99999, // Way above everything
+                overflow: "hidden", opacity: 0.03, // Barely visible to the naked eye but catches screenshot scrapers
+                userSelect: "none" }}
         >
             {/* Generate a grid of repeating watermarks identifying the internal user */}
             {Array.from({ length: 30 }).map((_, i) => (
                 <div
                     key={`watermark-${userEmail}-${i}`}
-                    style={{
-                        transform: "rotate(-35deg)",
-                        padding: "40px",
-                        fontSize: "14px",
-                        fontFamily: "monospace",
-                        color: "var(--color-text)",
-                        whiteSpace: "pre-line",
-                        textAlign: "center"
-                    }}
+                    className="text-sm text-center" style={{ transform: "rotate(-35deg)", padding: "40px", fontFamily: "monospace", color: "var(--color-text)", whiteSpace: "pre-line" }}
                 >
                     {session.user.email} <br />
                     {session.user.id.slice(-8)} <br />

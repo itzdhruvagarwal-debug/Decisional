@@ -82,29 +82,22 @@ export default function DisputePage({
     <>
     <ToastContainer toasts={toasts} onClose={removeToast} />
     <div
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "var(--color-bg-secondary)",
-      }}
+      className="flex justify-center items-center" style={{ minHeight: "100vh", background: "var(--color-bg-secondary)" }}
     >
       <div
-        className="card"
-        style={{ width: "100%", maxWidth: "600px", padding: "32px" }}
+        className="card w-full" style={{ maxWidth: "600px", padding: "32px" }}
       >
-        <div style={{ marginBottom: "24px" }}>
+        <div className="mb-6">
           <Link
             href={`/dashboard/deals/${dealId}`}
-            style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}
+            className="text-secondary text-sm"
           >
             ← Back to Deal
           </Link>
-          <h1 style={{ fontSize: "24px", fontWeight: 800, marginTop: "8px" }}>
+          <h1 className="text-2xl font-extrabold mt-2">
             🚨 Raise a Dispute
           </h1>
-          <p style={{ color: "var(--color-text-secondary)" }}>
+          <p className="text-secondary">
             We're here to help. Select the issue type and describe the problem.
             Our automated system (Tier 1) will attempt to resolve it
             immediately.
@@ -128,7 +121,7 @@ export default function DisputePage({
               <option value="OTHER">Other</option>
             </Select>
 
-          <div style={{ marginBottom: "24px" }}>
+          <div className="mb-6">
             <Textarea
               label="Description"
               id="description-textarea"
@@ -139,27 +132,22 @@ export default function DisputePage({
               required
               fullWidth
             />
-            <p style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+            <p className="text-xs text-muted">
               {description.trim().length}/50 minimum characters
             </p>
           </div>
 
-          <div style={{ display: "flex", gap: "16px" }}>
+          <div className="flex gap-4">
             <Link
               href={`/dashboard/deals/${dealId}`}
-              className="btn btn-secondary"
-              style={{ flex: 1, textAlign: "center" }}
+              className="btn btn-secondary flex-1 text-center"
             >
               Cancel
             </Link>
             <Button
               type="submit"
               variant="danger"
-              style={{
-                flex: 1,
-                background: "var(--color-error)",
-                borderColor: "var(--color-error)",
-              }}
+              className="flex-1" style={{ background: "var(--color-error)", borderColor: "var(--color-error)" }}
               disabled={isSubmitting || description.trim().length < 50}
             >
               {isSubmitting ? "Submitting..." : "Raise Dispute"}

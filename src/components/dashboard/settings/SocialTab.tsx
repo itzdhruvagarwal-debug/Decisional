@@ -153,44 +153,27 @@ export default function SocialTab({
             {/* Instagram Card */}
             <div className="card">
                 <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        marginBottom: "20px",
-                    }}
+                    className="flex items-center gap-3 mb-5"
                 >
                     <div
-                        style={{
-                            width: "48px",
-                            height: "48px",
-                            background:
-                                "linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)",
-                            borderRadius: "var(--radius-md)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "24px",
-                        }}
+                        className="flex items-center justify-center text-2xl" style={{ width: "48px", height: "48px", background:
+                                "linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)", borderRadius: "var(--radius-md)" }}
                     >
                         📸
                     </div>
-                    <div style={{ flex: 1 }}>
-                        <h3 style={{ fontSize: "16px", fontWeight: 700, marginBottom: "4px" }}>
+                    <div className="flex-1">
+                        <h3 className="text-base font-bold mb-1">
                             Instagram
                         </h3>
                         <div
-                            style={{
-                                fontSize: "12px",
-                                color: socialConnections?.instagram?.connected ? "#10b981" : "var(--color-text-muted)",
-                            }}
+                            className="text-xs" style={{ color: socialConnections?.instagram?.connected ? "#10b981" : "var(--color-text-muted)" }}
                         >
                             {socialConnections?.instagram?.connected ? "✅ Connected" : "❌ Not Connected"}
                         </div>
                     </div>
                 </div>
 
-                <div style={{ marginBottom: "16px" }}>
+                <div className="mb-4">
                     <Input
                         id="instagram-handle-input"
                         label="Instagram Handle"
@@ -207,7 +190,7 @@ export default function SocialTab({
                 {!socialConnections?.instagram?.connected ? (
                     <Button
                         variant="primary"
-                        style={{ width: "100%" }}
+                        className="w-full"
                         aria-label="Connect Instagram account"
                         onClick={handleInstagramConnect}
                         disabled={isSaving}
@@ -216,47 +199,36 @@ export default function SocialTab({
                     </Button>
                 ) : (
                     <div
-                        style={{
-                            padding: "16px",
-                            background: "var(--color-bg-tertiary)",
-                            borderRadius: "var(--radius-md)",
-                        }}
+                        className="p-4" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
                     >
                         <div
-                            className="grid-2"
-                            style={{ gap: "16px", marginBottom: "16px" }}
+                            className="grid-2 gap-4 mb-4"
                         >
-                            <div style={{ textAlign: "center" }}>
-                                <div style={{ fontSize: "24px", fontWeight: 800 }}>
+                            <div className="text-center">
+                                <div className="text-2xl font-extrabold">
                                     {((profile.instagramFollowers || 0) / 1000).toFixed(0)}K
                                 </div>
                                 <div
-                                    style={{
-                                        fontSize: "12px",
-                                        color: "var(--color-text-muted)",
-                                    }}
+                                    className="text-xs text-muted"
                                 >
                                     Followers
                                 </div>
                             </div>
-                            <div style={{ textAlign: "center" }}>
-                                <div style={{ fontSize: "24px", fontWeight: 800 }}>
+                            <div className="text-center">
+                                <div className="text-2xl font-extrabold">
                                     {profile.instagramEngagementRate || 0}%
                                 </div>
                                 <div
-                                    style={{
-                                        fontSize: "12px",
-                                        color: "var(--color-text-muted)",
-                                    }}
+                                    className="text-xs text-muted"
                                 >
                                     Engagement
                                 </div>
                             </div>
                         </div>
-                        <div style={{ display: "flex", gap: "8px" }}>
+                        <div className="flex gap-2">
                             <Button
                                 variant="secondary"
-                                style={{ flex: 1, fontSize: "12px", padding: "8px" }}
+                                className="flex-1 text-xs p-2"
                                 aria-label="Sync Instagram statistics"
                                 onClick={() => verifySocial("instagram")}
                                 disabled={isSaving}
@@ -265,7 +237,7 @@ export default function SocialTab({
                             </Button>
                             <Button
                                 variant="secondary"
-                                style={{ fontSize: "12px", padding: "8px" }}
+                                className="text-xs p-2"
                                 aria-label="Disconnect Instagram account"
                                 onClick={handleInstagramDisconnect}
                                 disabled={isSaving}
@@ -280,43 +252,26 @@ export default function SocialTab({
             {/* YouTube Card */}
             <div className="card">
                 <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        marginBottom: "20px",
-                    }}
+                    className="flex items-center gap-3 mb-5"
                 >
                     <div
-                        style={{
-                            width: "48px",
-                            height: "48px",
-                            background: "#FF0000",
-                            borderRadius: "var(--radius-md)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "24px",
-                        }}
+                        className="flex items-center justify-center text-2xl" style={{ width: "48px", height: "48px", background: "#FF0000", borderRadius: "var(--radius-md)" }}
                     >
                         🎥
                     </div>
-                    <div style={{ flex: 1 }}>
-                        <h3 style={{ fontSize: "16px", fontWeight: 700, marginBottom: "4px" }}>
+                    <div className="flex-1">
+                        <h3 className="text-base font-bold mb-1">
                             YouTube
                         </h3>
                         <div
-                            style={{
-                                fontSize: "12px",
-                                color: socialConnections?.youtube?.connected ? "#10b981" : "var(--color-text-muted)",
-                            }}
+                            className="text-xs" style={{ color: socialConnections?.youtube?.connected ? "#10b981" : "var(--color-text-muted)" }}
                         >
                             {socialConnections?.youtube?.connected ? "✅ Connected" : "❌ Not Connected"}
                         </div>
                     </div>
                 </div>
 
-                <div style={{ marginBottom: "16px" }}>
+                <div className="mb-4">
                     <Input
                         id="youtube-handle-input"
                         label="YouTube Channel ID or Handle"
@@ -332,38 +287,27 @@ export default function SocialTab({
 
                 {socialConnections?.youtube?.connected || profile.youtubeHandle ? (
                     <div
-                        style={{
-                            padding: "16px",
-                            background: "var(--color-bg-tertiary)",
-                            borderRadius: "var(--radius-md)",
-                        }}
+                        className="p-4" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
                     >
                         <div
-                            className="grid-2"
-                            style={{ gap: "16px", marginBottom: "16px" }}
+                            className="grid-2 gap-4 mb-4"
                         >
-                            <div style={{ textAlign: "center" }}>
-                                <div style={{ fontSize: "24px", fontWeight: 800 }}>
+                            <div className="text-center">
+                                <div className="text-2xl font-extrabold">
                                     {profile.youtubeSubscribers === -1 ? "Hidden" : `${((profile.youtubeSubscribers || 0) / 1000).toFixed(0)}K`}
                                 </div>
                                 <div
-                                    style={{
-                                        fontSize: "12px",
-                                        color: "var(--color-text-muted)",
-                                    }}
+                                    className="text-xs text-muted"
                                 >
                                     Subscribers
                                 </div>
                             </div>
-                            <div style={{ textAlign: "center" }}>
-                                <div style={{ fontSize: "24px", fontWeight: 800 }}>
+                            <div className="text-center">
+                                <div className="text-2xl font-extrabold">
                                     {profile.youtubeEngagementRate || 0}%
                                 </div>
                                 <div
-                                    style={{
-                                        fontSize: "12px",
-                                        color: "var(--color-text-muted)",
-                                    }}
+                                    className="text-xs text-muted"
                                 >
                                     Engagement
                                 </div>
@@ -371,18 +315,18 @@ export default function SocialTab({
                         </div>
                         <Button
                             variant="secondary"
-                            style={{ width: "100%", fontSize: "12px", padding: "8px" }}
+                            className="w-full text-xs p-2"
                             aria-label="Verify and sync YouTube channel statistics"
                             onClick={() => verifySocial("youtube")}
                             disabled={isSaving}
                         >
                             Verify &amp; Sync Stats
                         </Button>
-                        <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+                        <div className="flex gap-2 mt-2">
                             {socialConnections?.youtube?.connected ? (
                                 <Button
                                     variant="secondary"
-                                    style={{ flex: 1, fontSize: "12px", padding: "8px" }}
+                                    className="flex-1 text-xs p-2"
                                     aria-label="Disconnect YouTube channel"
                                     onClick={handleYouTubeDisconnect}
                                     disabled={isSaving}
@@ -392,7 +336,7 @@ export default function SocialTab({
                             ) : (
                                 <Button
                                     variant="primary"
-                                    style={{ flex: 1, fontSize: "12px", padding: "8px" }}
+                                    className="flex-1 text-xs p-2"
                                     aria-label="Connect YouTube channel"
                                     onClick={handleYouTubeConnect}
                                     disabled={isSaving}
@@ -406,7 +350,7 @@ export default function SocialTab({
                     <Button
                         type="button"
                         variant="primary"
-                        style={{ width: "100%" }}
+                        className="w-full"
                         aria-label="Connect YouTube channel"
                         onClick={handleYouTubeConnect}
                         disabled={isSaving}

@@ -119,7 +119,7 @@ function getFeatureIcon(iconKey: string) {
 function renderStars(rating: number) {
   const starKeys = ["star-1", "star-2", "star-3", "star-4", "star-5"];
   return (
-    <div style={{ display: "flex", justifyContent: "center", gap: "4px", color: "var(--color-accent-amber)", marginBottom: "16px" }}>
+    <div className="flex justify-center gap-1 mb-4" style={{ color: "var(--color-accent-amber)" }}>
       {starKeys.slice(0, rating).map((key) => (
         <svg key={key} width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -135,42 +135,17 @@ function HeroProductMockup() {
 
   return (
     <div
-      className="animate-fade-in"
-      style={{
-        marginTop: "48px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "16px",
-        width: "100%",
-        maxWidth: "840px",
-        marginInline: "auto",
-      }}
+      className="animate-fade-in flex flex-col items-center gap-4 w-full" style={{ marginTop: "48px", maxWidth: "840px", marginInline: "auto" }}
     >
       {/* Mockup View Selector */}
       <div
-        style={{
-          display: "inline-flex",
-          background: "var(--color-bg-secondary)",
-          borderRadius: "var(--radius-full)",
-          padding: "4px",
-          border: "1px solid var(--color-border)",
-        }}
+        className="inline-flex" style={{ background: "var(--color-bg-secondary)", borderRadius: "var(--radius-full)", padding: "4px", border: "1px solid var(--color-border)" }}
       >
         <Button
           type="button"
           variant="ghost"
           onClick={() => setView("influencer")}
-          style={{
-            background: view === "influencer" ? "var(--color-bg-tertiary)" : "transparent",
-            color: view === "influencer" ? "white" : "var(--color-text-secondary)",
-            border: "none",
-            borderRadius: "var(--radius-full)",
-            padding: "8px 16px",
-            fontSize: "13px",
-            fontWeight: 600,
-            transition: "all var(--transition-fast)",
-          }}
+          className="text-sm font-semibold" style={{ background: view === "influencer" ? "var(--color-bg-tertiary)" : "transparent", color: view === "influencer" ? "white" : "var(--color-text-secondary)", border: "none", borderRadius: "var(--radius-full)", padding: "8px 16px", transition: "all var(--transition-fast)" }}
         >
           Influencer View
         </Button>
@@ -178,16 +153,7 @@ function HeroProductMockup() {
           type="button"
           variant="ghost"
           onClick={() => setView("brand")}
-          style={{
-            background: view === "brand" ? "var(--color-bg-tertiary)" : "transparent",
-            color: view === "brand" ? "white" : "var(--color-text-secondary)",
-            border: "none",
-            borderRadius: "var(--radius-full)",
-            padding: "8px 16px",
-            fontSize: "13px",
-            fontWeight: 600,
-            transition: "all var(--transition-fast)",
-          }}
+          className="text-sm font-semibold" style={{ background: view === "brand" ? "var(--color-bg-tertiary)" : "transparent", color: view === "brand" ? "white" : "var(--color-text-secondary)", border: "none", borderRadius: "var(--radius-full)", padding: "8px 16px", transition: "all var(--transition-fast)" }}
         >
           Brand View
         </Button>
@@ -195,62 +161,21 @@ function HeroProductMockup() {
 
       {/* Main Glassmorphic Container */}
       <div
-        style={{
-          width: "100%",
-          background: "rgba(255, 255, 255, 0.02)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          borderRadius: "var(--radius-xl)",
-          border: "1px solid rgba(255, 255, 255, 0.08)",
-          padding: "24px",
-          boxShadow: "0 24px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
-          textAlign: "left",
-          position: "relative",
-          overflow: "hidden",
-        }}
+        className="w-full p-6 text-left relative overflow-hidden" style={{ background: "rgba(255, 255, 255, 0.02)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderRadius: "var(--radius-xl)", border: "1px solid rgba(255, 255, 255, 0.08)", boxShadow: "0 24px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)" }}
       >
         {/* Glow Effects */}
         <div
-          style={{
-            position: "absolute",
-            top: "-50px",
-            right: "-50px",
-            width: "150px",
-            height: "150px",
-            background: "var(--color-primary)",
-            filter: "blur(80px)",
-            opacity: 0.15,
-            borderRadius: "50%",
-            pointerEvents: "none",
-          }}
+          className="absolute" style={{ top: "-50px", right: "-50px", width: "150px", height: "150px", background: "var(--color-primary)", filter: "blur(80px)", opacity: 0.15, borderRadius: "50%", pointerEvents: "none" }}
         />
         <div
-          style={{
-            position: "absolute",
-            bottom: "-50px",
-            left: "-50px",
-            width: "150px",
-            height: "150px",
-            background: "var(--color-secondary)",
-            filter: "blur(80px)",
-            opacity: 0.15,
-            borderRadius: "50%",
-            pointerEvents: "none",
-          }}
+          className="absolute" style={{ bottom: "-50px", left: "-50px", width: "150px", height: "150px", background: "var(--color-secondary)", filter: "blur(80px)", opacity: 0.15, borderRadius: "50%", pointerEvents: "none" }}
         />
 
         {/* Mockup Header */}
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
-            paddingBottom: "16px",
-            marginBottom: "20px",
-          }}
+          className="flex items-center justify-between mb-5" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.06)", paddingBottom: "16px" }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className="flex items-center gap-2">
             <span
               style={{
                 width: "10px",
@@ -260,125 +185,125 @@ function HeroProductMockup() {
                 boxShadow: "0 0 8px var(--color-success)",
               }}
             />
-            <span style={{ fontSize: "14px", fontWeight: 700, color: "white" }}>
+            <span className="text-sm font-bold" style={{ color: "white" }}>
               {view === "influencer" ? "Influencer Workspace" : "Brand Campaign Control"}
             </span>
           </div>
-          <span style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+          <span className="text-xs text-muted">
             Live Escrow Protection Active 🔒
           </span>
         </div>
 
         {view === "influencer" ? (
           /* ============ INFLUENCER DASHBOARD MOCK ============ */
-          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <div className="flex flex-col gap-5">
             {/* Top Stats Row */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "16px" }}>
+            <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
               <div style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.04)", padding: "12px 16px", borderRadius: "var(--radius-lg)" }}>
-                <span style={{ fontSize: "11px", color: "var(--color-text-muted)", display: "block" }}>Wallet Balance</span>
-                <span style={{ fontSize: "20px", fontWeight: 800, color: "white" }}>₹42,850</span>
+                <span className="text-muted block" style={{ fontSize: "11px" }}>Wallet Balance</span>
+                <span className="text-xl font-extrabold" style={{ color: "white" }}>₹42,850</span>
               </div>
               <div style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.04)", padding: "12px 16px", borderRadius: "var(--radius-lg)" }}>
-                <span style={{ fontSize: "11px", color: "var(--color-text-muted)", display: "block" }}>Trust Score</span>
-                <span style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-accent-emerald)" }}>98% <span style={{ fontSize: "12px", fontWeight: 400 }}>(Excellent)</span></span>
+                <span className="text-muted block" style={{ fontSize: "11px" }}>Trust Score</span>
+                <span className="text-xl font-extrabold" style={{ color: "var(--color-accent-emerald)" }}>98% <span className="text-xs font-normal">(Excellent)</span></span>
               </div>
               <div style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.04)", padding: "12px 16px", borderRadius: "var(--radius-lg)" }}>
-                <span style={{ fontSize: "11px", color: "var(--color-text-muted)", display: "block" }}>Gamification Tier</span>
-                <span style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-accent-amber)" }}>Gold IV 🏆</span>
+                <span className="text-muted block" style={{ fontSize: "11px" }}>Gamification Tier</span>
+                <span className="text-xl font-extrabold" style={{ color: "var(--color-accent-amber)" }}>Gold IV 🏆</span>
               </div>
             </div>
 
             {/* Active Deal Status */}
-            <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)", padding: "16px", borderRadius: "var(--radius-lg)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
+            <div className="p-4" style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)", borderRadius: "var(--radius-lg)" }}>
+              <div className="flex justify-between mb-3">
                 <div>
-                  <h4 style={{ fontSize: "14px", fontWeight: 700, color: "white", marginBottom: "4px" }}>Nike India: Air Max Launch</h4>
-                  <span style={{ fontSize: "12px", color: "var(--color-text-secondary)" }}>Deliverable: 1 Instagram Reel + 1 Story</span>
+                  <h4 className="text-sm font-bold mb-1" style={{ color: "white" }}>Nike India: Air Max Launch</h4>
+                  <span className="text-xs text-secondary">Deliverable: 1 Instagram Reel + 1 Story</span>
                 </div>
-                <div style={{ display: "inline-flex", background: "rgba(16, 185, 129, 0.1)", color: "var(--color-accent-emerald)", fontSize: "12px", padding: "4px 8px", borderRadius: "var(--radius-sm)", height: "fit-content", fontWeight: 600 }}>
+                <div className="inline-flex text-xs font-semibold" style={{ background: "rgba(16, 185, 129, 0.1)", color: "var(--color-accent-emerald)", padding: "4px 8px", borderRadius: "var(--radius-sm)", height: "fit-content" }}>
                   ₹25,000 in Escrow
                 </div>
               </div>
 
               {/* Status Stepper */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "20px", position: "relative" }}>
+              <div className="flex items-center justify-between relative" style={{ marginTop: "20px" }}>
                 {/* Stepper Background Line */}
-                <div style={{ position: "absolute", left: "20px", right: "20px", height: "2px", background: "rgba(255, 255, 255, 0.1)", zIndex: 0 }} />
+                <div className="absolute" style={{ left: "20px", right: "20px", height: "2px", background: "rgba(255, 255, 255, 0.1)", zIndex: 0 }} />
                 
                 {/* Stepper Active Line */}
-                <div style={{ position: "absolute", left: "20px", width: "50%", height: "2px", background: "var(--color-primary)", zIndex: 0 }} />
+                <div className="absolute" style={{ left: "20px", width: "50%", height: "2px", background: "var(--color-primary)", zIndex: 0 }} />
 
                 {/* Step 1: Signed */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", zIndex: 1, position: "relative" }}>
-                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--color-primary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", color: "white", fontWeight: 700 }}>✓</div>
-                  <span style={{ fontSize: "10px", color: "white", fontWeight: 600 }}>Signed</span>
+                <div className="flex flex-col items-center relative" style={{ gap: "6px", zIndex: 1 }}>
+                  <div className="flex items-center justify-center text-xs font-bold" style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--color-primary)", color: "white" }}>✓</div>
+                  <span className="font-semibold" style={{ fontSize: "10px", color: "white" }}>Signed</span>
                 </div>
 
                 {/* Step 2: Escrow Verified */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", zIndex: 1, position: "relative" }}>
-                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--color-primary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", color: "white", fontWeight: 700 }}>✓</div>
-                  <span style={{ fontSize: "10px", color: "white", fontWeight: 600 }}>Escrowed</span>
+                <div className="flex flex-col items-center relative" style={{ gap: "6px", zIndex: 1 }}>
+                  <div className="flex items-center justify-center text-xs font-bold" style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--color-primary)", color: "white" }}>✓</div>
+                  <span className="font-semibold" style={{ fontSize: "10px", color: "white" }}>Escrowed</span>
                 </div>
 
                 {/* Step 3: Submission Under Review */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", zIndex: 1, position: "relative" }}>
-                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--color-bg-tertiary)", border: "2px solid var(--color-primary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", color: "white", animation: "pulse 2s infinite" }}>●</div>
-                  <span style={{ fontSize: "10px", color: "white", fontWeight: 600 }}>Reviewing</span>
+                <div className="flex flex-col items-center relative" style={{ gap: "6px", zIndex: 1 }}>
+                  <div className="flex items-center justify-center text-xs" style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--color-bg-tertiary)", border: "2px solid var(--color-primary)", color: "white", animation: "pulse 2s infinite" }}>●</div>
+                  <span className="font-semibold" style={{ fontSize: "10px", color: "white" }}>Reviewing</span>
                 </div>
 
                 {/* Step 4: Complete & Disbursed */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", zIndex: 1, position: "relative" }}>
-                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--color-bg-tertiary)", border: "1px solid rgba(255, 255, 255, 0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", color: "var(--color-text-muted)" }}>🔒</div>
-                  <span style={{ fontSize: "10px", color: "var(--color-text-muted)" }}>Payout</span>
+                <div className="flex flex-col items-center relative" style={{ gap: "6px", zIndex: 1 }}>
+                  <div className="flex items-center justify-center text-muted" style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--color-bg-tertiary)", border: "1px solid rgba(255, 255, 255, 0.2)", fontSize: "10px" }}>🔒</div>
+                  <span className="text-muted" style={{ fontSize: "10px" }}>Payout</span>
                 </div>
               </div>
             </div>
           </div>
         ) : (
           /* ============ BRAND DASHBOARD MOCK ============ */
-          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <div className="flex flex-col gap-5">
             {/* Top Stats Row */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "16px" }}>
+            <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
               <div style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.04)", padding: "12px 16px", borderRadius: "var(--radius-lg)" }}>
-                <span style={{ fontSize: "11px", color: "var(--color-text-muted)", display: "block" }}>Active Campaigns</span>
-                <span style={{ fontSize: "20px", fontWeight: 800, color: "white" }}>3 Campaigns</span>
+                <span className="text-muted block" style={{ fontSize: "11px" }}>Active Campaigns</span>
+                <span className="text-xl font-extrabold" style={{ color: "white" }}>3 Campaigns</span>
               </div>
               <div style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.04)", padding: "12px 16px", borderRadius: "var(--radius-lg)" }}>
-                <span style={{ fontSize: "11px", color: "var(--color-text-muted)", display: "block" }}>Secured Escrow</span>
-                <span style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-accent-cyan)" }}>₹1,85,000</span>
+                <span className="text-muted block" style={{ fontSize: "11px" }}>Secured Escrow</span>
+                <span className="text-xl font-extrabold" style={{ color: "var(--color-accent-cyan)" }}>₹1,85,000</span>
               </div>
               <div style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.04)", padding: "12px 16px", borderRadius: "var(--radius-lg)" }}>
-                <span style={{ fontSize: "11px", color: "var(--color-text-muted)", display: "block" }}>ROI Index</span>
-                <span style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-accent-emerald)" }}>3.8x Profit</span>
+                <span className="text-muted block" style={{ fontSize: "11px" }}>ROI Index</span>
+                <span className="text-xl font-extrabold" style={{ color: "var(--color-accent-emerald)" }}>3.8x Profit</span>
               </div>
             </div>
 
             {/* Campaign Submissions */}
-            <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)", padding: "16px", borderRadius: "var(--radius-lg)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                <h4 style={{ fontSize: "14px", fontWeight: 700, color: "white" }}>Submissions Awaiting Approval (1)</h4>
-                <span style={{ fontSize: "11px", color: "var(--color-accent-amber)", display: "flex", alignItems: "center", gap: "4px" }}>
+            <div className="p-4" style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)", borderRadius: "var(--radius-lg)" }}>
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="text-sm font-bold" style={{ color: "white" }}>Submissions Awaiting Approval (1)</h4>
+                <span className="flex items-center gap-1" style={{ fontSize: "11px", color: "var(--color-accent-amber)" }}>
                   <span style={{ width: "6px", height: "6px", background: "var(--color-accent-amber)", borderRadius: "50%", animation: "pulse 1.5s infinite" }} />{" "}
                   48h Review Timer Running
                 </span>
               </div>
 
               {/* Creator Submission list item */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.04)", padding: "12px", borderRadius: "var(--radius-md)", flexWrap: "wrap", gap: "10px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "var(--color-primary)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: "12px" }}>
+              <div className="flex items-center justify-between p-3 flex-wrap" style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.04)", borderRadius: "var(--radius-md)", gap: "10px" }}>
+                <div className="flex items-center" style={{ gap: "10px" }}>
+                  <div className="flex items-center justify-center font-extrabold text-xs" style={{ width: "32px", height: "32px", borderRadius: "50%", background: "var(--color-primary)", color: "white" }}>
                     AM
                   </div>
                   <div>
-                    <span style={{ fontSize: "13px", fontWeight: 600, color: "white", display: "block" }}>Ananya Mehta</span>
-                    <span style={{ fontSize: "11px", color: "var(--color-text-secondary)" }}>Instagram post content ready for review</span>
+                    <span className="text-sm font-semibold block" style={{ color: "white" }}>Ananya Mehta</span>
+                    <span className="text-secondary" style={{ fontSize: "11px" }}>Instagram post content ready for review</span>
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div className="flex gap-2">
                   <Button type="button" variant="secondary" style={{ background: "transparent", border: "1px solid rgba(255, 255, 255, 0.1)", color: "white", fontSize: "11px", padding: "6px 12px", borderRadius: "var(--radius-sm)" }}>
                     View Draft
                   </Button>
-                  <Button type="button" variant="primary" style={{ background: "var(--gradient-primary)", border: "none", color: "white", fontSize: "11px", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontWeight: 600, boxShadow: "var(--shadow-glow-primary)" }}>
+                  <Button type="button" variant="primary" className="font-semibold" style={{ background: "var(--gradient-primary)", border: "none", color: "white", fontSize: "11px", padding: "6px 12px", borderRadius: "var(--radius-sm)", boxShadow: "var(--shadow-glow-primary)" }}>
                     Approve
                   </Button>
                 </div>
@@ -403,71 +328,31 @@ export default function HomePage() {
 
       {/* ==================== HERO ==================== */}
       <section
-        style={{
-          paddingTop: "120px",
-          paddingBottom: "80px",
-          position: "relative",
-          overflow: "hidden",
-        }}
+        className="relative overflow-hidden" style={{ paddingTop: "120px", paddingBottom: "80px" }}
       >
         {/* Hero Background — CSS background-image avoids Next/Image fill position issues */}
         <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 0,
-            backgroundImage: "url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2574&auto=format&fit=crop')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            opacity: 0.18,
-            filter: "blur(4px)",
-            transform: "scale(1.05)",
-          }}
+          className="absolute" style={{ inset: 0, zIndex: 0, backgroundImage: "url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2574&auto=format&fit=crop')", backgroundSize: "cover", backgroundPosition: "center", opacity: 0.18, filter: "blur(4px)", transform: "scale(1.05)" }}
         />
         {/* Gradient Overlay */}
         <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 0,
-            background:
-              "radial-gradient(circle at center, rgba(10, 10, 20, 0.6) 0%, var(--color-bg-primary) 95%)",
-          }}
+          className="absolute" style={{ inset: 0, zIndex: 0, background:
+              "radial-gradient(circle at center, rgba(10, 10, 20, 0.6) 0%, var(--color-bg-primary) 95%)" }}
         />
 
-        <div className="container" style={{ position: "relative", zIndex: 1 }}>
+        <div className="container relative" style={{ zIndex: 1 }}>
           <div
-            style={{ textAlign: "center", maxWidth: "900px", margin: "0 auto" }}
+            className="text-center" style={{ maxWidth: "900px", margin: "0 auto" }}
           >
             {/* Badge — fully inline-styled for guaranteed rendering */}
             <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "28px",
-                background: "rgba(99, 102, 241, 0.15)",
-                border: "1px solid rgba(129, 140, 248, 0.5)",
-                borderRadius: "9999px",
-                padding: "6px 20px",
-                fontSize: "11px",
-                fontWeight: 700,
-                color: "#a5b4fc",
-                letterSpacing: "1px",
-                textTransform: "uppercase",
-              }}
+              className="inline-flex items-center gap-2 font-bold" style={{ marginBottom: "28px", background: "rgba(99, 102, 241, 0.15)", border: "1px solid rgba(129, 140, 248, 0.5)", borderRadius: "9999px", padding: "6px 20px", fontSize: "11px", color: "#a5b4fc", letterSpacing: "1px", textTransform: "uppercase" }}
             >
               🇮🇳 India-first creator collaboration workspace
             </div>
 
             <h1
-              style={{
-                fontSize: "clamp(40px, 6vw, 76px)",
-                fontWeight: 900,
-                lineHeight: 1.06,
-                marginBottom: "24px",
-                letterSpacing: "-1px",
-              }}
+              className="mb-6" style={{ fontSize: "clamp(40px, 6vw, 76px)", fontWeight: 900, lineHeight: 1.06, letterSpacing: "-1px" }}
             >
               <span
                 style={{
@@ -481,14 +366,7 @@ export default function HomePage() {
                 Decisional
               </span>
               <span
-                style={{
-                  display: "block",
-                  fontSize: "0.48em",
-                  marginTop: "14px",
-                  fontWeight: 600,
-                  color: "rgba(240, 240, 245, 0.9)",
-                  letterSpacing: "0",
-                }}
+                className="block font-semibold" style={{ fontSize: "0.48em", marginTop: "14px", color: "rgba(240, 240, 245, 0.9)", letterSpacing: "0" }}
               >
                 Turning Signals into Decisions
               </span>
@@ -510,53 +388,17 @@ export default function HomePage() {
 
             {/* CTA buttons */}
             <div
-              style={{
-                display: "flex",
-                gap: "16px",
-                justifyContent: "center",
-                flexWrap: "wrap",
-                marginBottom: "20px",
-              }}
+              className="flex gap-4 justify-center flex-wrap mb-5"
             >
               <Link
                 href="/register?type=influencer"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                  padding: "14px 28px",
-                  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-                  color: "white",
-                  borderRadius: "12px",
-                  fontWeight: 700,
-                  fontSize: "15px",
-                  textDecoration: "none",
-                  boxShadow: "0 4px 20px rgba(99, 102, 241, 0.4)",
-                  border: "1px solid rgba(129, 140, 248, 0.3)",
-                  transition: "transform 0.2s, box-shadow 0.2s",
-                }}
+                className="inline-flex items-center justify-center gap-2 font-bold" style={{ padding: "14px 28px", background: "linear-gradient(135deg, #6366f1, #4f46e5)", color: "white", borderRadius: "12px", fontSize: "15px", textDecoration: "none", boxShadow: "0 4px 20px rgba(99, 102, 241, 0.4)", border: "1px solid rgba(129, 140, 248, 0.3)", transition: "transform 0.2s, box-shadow 0.2s" }}
               >
                 I&apos;m an Influencer
               </Link>
               <Link
                 href="/register?type=brand"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                  padding: "14px 28px",
-                  background: "rgba(255, 255, 255, 0.06)",
-                  color: "white",
-                  borderRadius: "12px",
-                  fontWeight: 700,
-                  fontSize: "15px",
-                  textDecoration: "none",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  backdropFilter: "blur(8px)",
-                  transition: "transform 0.2s, background 0.2s",
-                }}
+                className="inline-flex items-center justify-center gap-2 font-bold" style={{ padding: "14px 28px", background: "rgba(255, 255, 255, 0.06)", color: "white", borderRadius: "12px", fontSize: "15px", textDecoration: "none", border: "1px solid rgba(255, 255, 255, 0.15)", backdropFilter: "blur(8px)", transition: "transform 0.2s, background 0.2s" }}
               >
                 I&apos;m a Brand
               </Link>
@@ -564,13 +406,7 @@ export default function HomePage() {
 
             {/* PWA download buttons */}
             <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "center",
-                flexWrap: "wrap",
-                marginBottom: "20px",
-              }}
+              className="flex gap-3 justify-center flex-wrap mb-5"
             >
               <PWAInstallButton
                 platform="ios"
@@ -586,24 +422,12 @@ export default function HomePage() {
 
             {/* Security trust badges */}
             <div
-              style={{
-                display: "flex",
-                gap: "24px",
-                justifyContent: "center",
-                flexWrap: "wrap",
-                marginBottom: "8px",
-              }}
+              className="flex gap-6 justify-center flex-wrap mb-2"
             >
               {["🔒 Secure sessions", "💳 Protected payments", "📱 Installable PWA"].map((item) => (
                 <span
                   key={item}
-                  style={{
-                    fontSize: "13px",
-                    color: "rgba(107, 107, 128, 0.9)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  }}
+                  className="text-sm flex items-center" style={{ color: "rgba(107, 107, 128, 0.9)", gap: "6px" }}
                 >
                   {item}
                 </span>
@@ -615,50 +439,20 @@ export default function HomePage() {
 
             {/* Social Proof Brand Strip */}
             <div
-              className="animate-fade-in"
-              style={{
-                marginTop: "48px",
-                width: "100%",
-                textAlign: "center",
-                animationDelay: "1.1s",
-              }}
+              className="animate-fade-in w-full text-center" style={{ marginTop: "48px", animationDelay: "1.1s" }}
             >
               <p
-                style={{
-                  fontSize: "12px",
-                  color: "var(--color-text-muted)",
-                  textTransform: "uppercase",
-                  letterSpacing: "1.5px",
-                  marginBottom: "16px",
-                  fontWeight: 600,
-                }}
+                className="text-xs text-muted mb-4 font-semibold" style={{ textTransform: "uppercase", letterSpacing: "1.5px" }}
               >
                 Trusted by India&apos;s fastest growing brands
               </p>
               <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: "24px",
-                  flexWrap: "wrap",
-                  opacity: 0.6,
-                }}
+                className="flex justify-center items-center gap-6 flex-wrap" style={{ opacity: 0.6 }}
               >
                 {["FitForma", "Myntra", "Mamaearth", "Nykaa", "Boat", "Lenskart"].map((brand) => (
                   <div
                     key={brand}
-                    style={{
-                      background: "rgba(255, 255, 255, 0.02)",
-                      border: "1px solid rgba(255, 255, 255, 0.05)",
-                      borderRadius: "var(--radius-sm)",
-                      padding: "6px 14px",
-                      fontSize: "13px",
-                      fontWeight: 700,
-                      color: "var(--color-text-primary)",
-                      letterSpacing: "0.5px",
-                      boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-                    }}
+                    className="text-sm font-bold" style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.05)", borderRadius: "var(--radius-sm)", padding: "6px 14px", color: "var(--color-text-primary)", letterSpacing: "0.5px", boxShadow: "0 2px 10px rgba(0,0,0,0.1)" }}
                   >
                     {brand}
                   </div>
@@ -671,28 +465,12 @@ export default function HomePage() {
         <Button
           type="button"
           variant="ghost"
-          className="hide-mobile"
-          style={{
-            background: "none",
-            border: "none",
-            padding: 0,
-            position: "absolute",
-            bottom: "32px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "8px",
-            animation: "float 3s ease-in-out infinite",
-            opacity: 0.5,
-            cursor: "pointer",
-          }}
+          className="hide-mobile absolute flex flex-col items-center gap-2 cursor-pointer" style={{ background: "none", border: "none", padding: 0, bottom: "32px", left: "50%", transform: "translateX(-50%)", animation: "float 3s ease-in-out infinite", opacity: 0.5 }}
           onClick={() => {
             document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
           }}
         >
-          <span style={{ fontSize: "11px", letterSpacing: "1.5px", textTransform: "uppercase", color: "var(--color-text-muted)", fontWeight: 600 }}>Explore</span>
+          <span className="text-muted font-semibold" style={{ fontSize: "11px", letterSpacing: "1.5px", textTransform: "uppercase" }}>Explore</span>
           <svg
             width="20"
             height="20"
@@ -712,8 +490,7 @@ export default function HomePage() {
       {/* ==================== FEATURES ==================== */}
       <section
         id="features"
-        className="section mesh-bg"
-        style={{ position: "relative" }}
+        className="section mesh-bg relative"
       >
         <div className="container">
           <RevealOnScroll>
@@ -731,24 +508,15 @@ export default function HomePage() {
           <div className="grid-3">
             {homeFeatures.map((feature, index) => (
               <RevealOnScroll key={feature.title} delay={index * 0.08}>
-                <div className="card hover-lift" style={{ height: "100%" }}>
+                <div className="card hover-lift h-full">
                   <div className="feature-icon">{getFeatureIcon(feature.icon)}</div>
                   <h3
-                    style={{
-                      fontSize: "18px",
-                      fontWeight: 700,
-                      marginBottom: "10px",
-                      letterSpacing: "-0.01em",
-                    }}
+                    className="text-lg font-bold" style={{ marginBottom: "10px", letterSpacing: "-0.01em" }}
                   >
                     {feature.title}
                   </h3>
                   <p
-                    style={{
-                      color: "var(--color-text-secondary)",
-                      fontSize: "14px",
-                      lineHeight: 1.7,
-                    }}
+                    className="text-secondary text-sm" style={{ lineHeight: 1.7 }}
                   >
                     {feature.description}
                   </p>
@@ -783,40 +551,22 @@ export default function HomePage() {
           {/* Tab Switcher */}
           <RevealOnScroll delay={0.15}>
             <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "4px",
-                marginBottom: "48px",
-                background: "var(--color-bg-tertiary)",
-                borderRadius: "var(--radius-full)",
-                padding: "4px",
-                maxWidth: "320px",
-                margin: "0 auto 48px",
-              }}
+              className="flex justify-center gap-1" style={{ marginBottom: "48px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-full)", padding: "4px", maxWidth: "320px", margin: "0 auto 48px" }}
             >
               <Button
                 type="button"
                 variant="ghost"
                 onClick={() => setActiveTab("influencer")}
-                style={{
-                  flex: 1,
-                  background:
+                className="flex-1 text-sm" style={{ background:
                     activeTab === "influencer"
                       ? "var(--gradient-primary)"
-                      : "transparent",
-                  color:
+                      : "transparent", color:
                     activeTab === "influencer"
                       ? "white"
-                      : "var(--color-text-secondary)",
-                  boxShadow:
+                      : "var(--color-text-secondary)", boxShadow:
                     activeTab === "influencer"
                       ? "var(--shadow-glow-primary)"
-                      : "none",
-                  borderRadius: "var(--radius-full)",
-                  padding: "10px 20px",
-                  fontSize: "13px",
-                }}
+                      : "none", borderRadius: "var(--radius-full)", padding: "10px 20px" }}
               >
                 For Influencers
               </Button>
@@ -824,24 +574,16 @@ export default function HomePage() {
                 type="button"
                 variant="ghost"
                 onClick={() => setActiveTab("brand")}
-                style={{
-                  flex: 1,
-                  background:
+                className="flex-1 text-sm" style={{ background:
                     activeTab === "brand"
                       ? "var(--gradient-primary)"
-                      : "transparent",
-                  color:
+                      : "transparent", color:
                     activeTab === "brand"
                       ? "white"
-                      : "var(--color-text-secondary)",
-                  boxShadow:
+                      : "var(--color-text-secondary)", boxShadow:
                     activeTab === "brand"
                       ? "var(--shadow-glow-primary)"
-                      : "none",
-                  borderRadius: "var(--radius-full)",
-                  padding: "10px 20px",
-                  fontSize: "13px",
-                }}
+                      : "none", borderRadius: "var(--radius-full)", padding: "10px 20px" }}
               >
                 For Brands
               </Button>
@@ -850,13 +592,7 @@ export default function HomePage() {
 
           {/* Steps */}
           <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "16px",
-              maxWidth: "700px",
-              margin: "0 auto",
-            }}
+            className="flex flex-col gap-4" style={{ maxWidth: "700px", margin: "0 auto" }}
           >
             {homeSteps.map((step, index) => {
               const currentStep =
@@ -867,46 +603,21 @@ export default function HomePage() {
                   delay={index * 0.1}
                 >
                   <div
-                    className="card hover-lift step-card"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "20px",
-                    }}
+                    className="card hover-lift step-card flex items-center gap-5"
                   >
                     <div
-                      style={{
-                        width: "56px",
-                        height: "56px",
-                        background: "var(--gradient-primary)",
-                        borderRadius: "var(--radius-full)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "22px",
-                        fontWeight: 800,
-                        flexShrink: 0,
-                        boxShadow: "var(--shadow-glow-primary)",
-                      }}
+                      className="flex items-center justify-center font-extrabold flex-shrink-0" style={{ width: "56px", height: "56px", background: "var(--gradient-primary)", borderRadius: "var(--radius-full)", fontSize: "22px", boxShadow: "var(--shadow-glow-primary)" }}
                     >
                       {currentStep.step}
                     </div>
-                    <div style={{ flex: 1 }}>
+                    <div className="flex-1">
                       <h3
-                        style={{
-                          fontSize: "17px",
-                          fontWeight: 700,
-                          marginBottom: "4px",
-                        }}
+                        className="font-bold mb-1" style={{ fontSize: "17px" }}
                       >
                         {currentStep.title}
                       </h3>
                       <p
-                        style={{
-                          color: "var(--color-text-secondary)",
-                          fontSize: "14px",
-                          lineHeight: 1.6,
-                        }}
+                        className="text-secondary text-sm" style={{ lineHeight: 1.6 }}
                       >
                         {currentStep.description}
                       </p>
@@ -937,38 +648,24 @@ export default function HomePage() {
             {homeTestimonials.map((testimonial, index) => (
               <RevealOnScroll key={testimonial.name} delay={index * 0.1}>
                 <div
-                  className="card hover-lift"
-                  style={{ textAlign: "center", height: "100%" }}
+                  className="card hover-lift text-center h-full"
                 >
                   <div
-                    className="avatar avatar-xl"
-                    style={{
-                      margin: "0 auto 16px",
-                      border: "2px solid var(--color-primary)",
-                      position: "relative",
-                      width: "80px",
-                      height: "80px",
-                      overflow: "hidden",
-                      borderRadius: "50%",
-                    }}
+                    className="avatar avatar-xl relative overflow-hidden" style={{ margin: "0 auto 16px", border: "2px solid var(--color-primary)", width: "80px", height: "80px", borderRadius: "50%" }}
                   >
                     <Image
                       src={testimonial.avatar}
                       alt={testimonial.name}
                       width={80}
                       height={80}
-                      style={{ objectFit: "cover", width: "100%", height: "100%", borderRadius: "50%" }}
+                      className="object-cover w-full h-full" style={{ borderRadius: "50%" }}
                     />
                   </div>
-                  <h4 style={{ fontSize: "16px", fontWeight: 700 }}>
+                  <h4 className="text-base font-bold">
                     {testimonial.name}
                   </h4>
                   <p
-                    style={{
-                      fontSize: "12px",
-                      color: "var(--color-text-muted)",
-                      marginBottom: "6px",
-                    }}
+                    className="text-xs text-muted" style={{ marginBottom: "6px" }}
                   >
                     {testimonial.role}
                     {testimonial.followers &&
@@ -980,12 +677,7 @@ export default function HomePage() {
                   {renderStars(testimonial.rating)}
 
                   <p
-                    style={{
-                      color: "var(--color-text-secondary)",
-                      fontSize: "14px",
-                      lineHeight: 1.7,
-                      fontStyle: "italic",
-                    }}
+                    className="text-secondary text-sm" style={{ lineHeight: 1.7, fontStyle: "italic" }}
                   >
                     &quot;{testimonial.quote}&quot;
                   </p>
@@ -1022,43 +714,26 @@ export default function HomePage() {
           >
             <RevealOnScroll delay={0.15}>
               <div
-                className="card hover-lift"
-                style={{ textAlign: "center", height: "100%", display: "flex", flexDirection: "column" }}
+                className="card hover-lift text-center h-full flex flex-col"
               >
-                <div style={{ flex: 1 }}>
+                <div className="flex-1">
                   <h3
-                    style={{
-                      fontSize: "22px",
-                      fontWeight: 800,
-                      marginBottom: "8px",
-                    }}
+                    className="font-extrabold mb-2" style={{ fontSize: "22px" }}
                   >
                     For Influencers
                   </h3>
                   <div
-                    style={{
-                      fontSize: "clamp(40px, 5vw, 48px)",
-                      fontWeight: 900,
-                      marginBottom: "4px",
-                    }}
+                    className="mb-1" style={{ fontSize: "clamp(40px, 5vw, 48px)", fontWeight: 900 }}
                   >
                     <span className="gradient-text">FREE</span>
                   </div>
                   <p
-                    style={{
-                      color: "var(--color-text-muted)",
-                      marginBottom: "24px",
-                      fontSize: "14px",
-                    }}
+                    className="text-muted mb-6 text-sm"
                   >
                     to join & apply
                   </p>
                   <ul
-                    style={{
-                      listStyle: "none",
-                      textAlign: "left",
-                      marginBottom: "24px",
-                    }}
+                    className="text-left mb-6" style={{ listStyle: "none" }}
                   >
                     {[
                       "Profile, portfolio, and verification",
@@ -1069,15 +744,7 @@ export default function HomePage() {
                     ].map((item) => (
                       <li
                         key={item}
-                        style={{
-                          padding: "12px 0",
-                          borderBottom: "1px solid var(--color-border)",
-                          color: "var(--color-text-secondary)",
-                          fontSize: "14px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                        }}
+                        className="border-b-card text-secondary text-sm flex items-center" style={{ padding: "12px 0", gap: "10px" }}
                       >
                         <svg
                           width="16"
@@ -1088,7 +755,7 @@ export default function HomePage() {
                           strokeWidth="3"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          style={{ color: "var(--color-primary-light)", flexShrink: 0 }}
+                          className="flex-shrink-0" style={{ color: "var(--color-primary-light)" }}
                         >
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
@@ -1099,8 +766,7 @@ export default function HomePage() {
                 </div>
                 <Link
                   href="/register?type=influencer"
-                  className="btn btn-secondary"
-                  style={{ width: "100%", marginTop: "16px" }}
+                  className="btn btn-secondary w-full mt-4"
                 >
                   Join as Influencer
                 </Link>
@@ -1109,54 +775,31 @@ export default function HomePage() {
 
             <RevealOnScroll delay={0.25}>
               <div
-                className="card card-gradient pricing-popular hover-lift"
-                style={{
-                  textAlign: "center",
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                }}
+                className="card card-gradient pricing-popular hover-lift text-center h-full flex flex-col"
               >
-                <div style={{ flex: 1 }}>
+                <div className="flex-1">
                   <div
-                    className="badge badge-primary"
-                    style={{ marginBottom: "16px" }}
+                    className="badge badge-primary mb-4"
                   >
                     Popular for teams
                   </div>
                   <h3
-                    style={{
-                      fontSize: "22px",
-                      fontWeight: 800,
-                      marginBottom: "8px",
-                    }}
+                    className="font-extrabold mb-2" style={{ fontSize: "22px" }}
                   >
                     For Brands
                   </h3>
                   <div
-                    style={{
-                      fontSize: "clamp(40px, 5vw, 48px)",
-                      fontWeight: 900,
-                      marginBottom: "4px",
-                    }}
+                    className="mb-1" style={{ fontSize: "clamp(40px, 5vw, 48px)", fontWeight: 900 }}
                   >
                     <span className="gradient-text">10%</span>
                   </div>
                   <p
-                    style={{
-                      color: "var(--color-text-muted)",
-                      marginBottom: "24px",
-                      fontSize: "14px",
-                    }}
+                    className="text-muted mb-6 text-sm"
                   >
                     of campaign budget
                   </p>
                   <ul
-                    style={{
-                      listStyle: "none",
-                      textAlign: "left",
-                      marginBottom: "24px",
-                    }}
+                    className="text-left mb-6" style={{ listStyle: "none" }}
                   >
                     {[
                       "Verified creator discovery",
@@ -1167,15 +810,7 @@ export default function HomePage() {
                     ].map((item) => (
                       <li
                         key={item}
-                        style={{
-                          padding: "12px 0",
-                          borderBottom: "1px solid var(--color-border)",
-                          color: "var(--color-text-secondary)",
-                          fontSize: "14px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                        }}
+                        className="border-b-card text-secondary text-sm flex items-center" style={{ padding: "12px 0", gap: "10px" }}
                       >
                         <svg
                           width="16"
@@ -1186,7 +821,7 @@ export default function HomePage() {
                           strokeWidth="3"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          style={{ color: "var(--color-accent-emerald)", flexShrink: 0 }}
+                          className="flex-shrink-0" style={{ color: "var(--color-accent-emerald)" }}
                         >
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
@@ -1197,8 +832,7 @@ export default function HomePage() {
                 </div>
                 <Link
                   href="/register?type=brand"
-                  className="btn btn-primary"
-                  style={{ width: "100%", marginTop: "16px" }}
+                  className="btn btn-primary w-full mt-4"
                 >
                   Start Your Campaign
                 </Link>
@@ -1211,60 +845,31 @@ export default function HomePage() {
       {/* ==================== CTA ==================== */}
       <RevealOnScroll>
         <section
-          className="section"
-          style={{
-            background: "var(--gradient-primary)",
-            textAlign: "center",
-            position: "relative",
-            overflow: "hidden",
-          }}
+          className="section text-center relative overflow-hidden" style={{ background: "var(--gradient-primary)" }}
         >
           {/* Background pattern */}
           <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              backgroundImage:
-                "radial-gradient(circle at 20% 80%, rgba(255,255,255,0.06) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04) 0%, transparent 50%)",
-            }}
+            className="absolute" style={{ inset: 0, backgroundImage:
+                "radial-gradient(circle at 20% 80%, rgba(255,255,255,0.06) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04) 0%, transparent 50%)" }}
           />
 
           <div
-            className="container"
-            style={{ position: "relative", zIndex: 1 }}
+            className="container relative" style={{ zIndex: 1 }}
           >
             <h2
-              style={{
-                fontSize: "clamp(28px, 4vw, 40px)",
-                fontWeight: 900,
-                marginBottom: "16px",
-                letterSpacing: 0,
-              }}
+              className="mb-4" style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 900, letterSpacing: 0 }}
             >
               Ready to Get Started?
             </h2>
             <p
-              style={{
-                fontSize: "clamp(15px, 2vw, 18px)",
-                opacity: 0.9,
-                marginBottom: "32px",
-                maxWidth: "500px",
-                margin: "0 auto 32px",
-                lineHeight: 1.7,
-              }}
+              className="mb-8" style={{ fontSize: "clamp(15px, 2vw, 18px)", opacity: 0.9, maxWidth: "500px", margin: "0 auto 32px", lineHeight: 1.7 }}
             >
               Create a free account, install the PWA, and manage campaigns from
               web, iOS home screen, or Android home screen.
             </p>
             <Link
               href="/register"
-              className="btn btn-lg"
-              style={{
-                background: "white",
-                color: "var(--color-primary-dark)",
-                fontWeight: 700,
-                boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
-              }}
+              className="btn btn-lg font-bold" style={{ background: "white", color: "var(--color-primary-dark)", boxShadow: "0 4px 24px rgba(0,0,0,0.2)" }}
             >
               Create Free Account
             </Link>

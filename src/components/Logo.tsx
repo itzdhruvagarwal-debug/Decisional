@@ -4,25 +4,11 @@ export default function Logo() {
   return (
     <Link
       href="/"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "12px",
-        textDecoration: "none",
-      }}
+      className="flex items-center gap-3" style={{ textDecoration: "none" }}
     >
       <div
-        style={{
-          background:
-            "linear-gradient(135deg, var(--color-primary), var(--color-secondary))",
-          borderRadius: "12px",
-          padding: "8px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "white",
-          boxShadow: "0 4px 15px rgba(99, 102, 241, 0.3)",
-        }}
+        className="p-2 flex items-center justify-center" style={{ background:
+            "linear-gradient(135deg, var(--color-primary), var(--color-secondary))", borderRadius: "12px", color: "white", boxShadow: "0 4px 15px rgba(99, 102, 241, 0.3)" }}
       >
         {/* Decisional Logo — Signal-to-Decision icon */}
         <svg
@@ -43,22 +29,15 @@ export default function Logo() {
         </svg>
       </div>
       <div
-        style={{ display: "flex", flexDirection: "column", lineHeight: 1.1 }}
+        className="flex flex-col" style={{ lineHeight: 1.1 }}
       >
         <span
-          className="gradient-text"
-          style={{ fontSize: "24px", fontWeight: 800, letterSpacing: 0 }}
+          className="gradient-text text-2xl font-extrabold" style={{ letterSpacing: 0 }}
         >
           Decisional
         </span>
         <span
-          style={{
-            fontSize: "10px",
-            color: "var(--color-text-secondary)",
-            fontWeight: 600,
-            letterSpacing: "1.5px",
-            textTransform: "uppercase",
-          }}
+          className="text-secondary font-semibold" style={{ fontSize: "10px", letterSpacing: "1.5px", textTransform: "uppercase" }}
         >
           From Noise to Decisions
         </span>

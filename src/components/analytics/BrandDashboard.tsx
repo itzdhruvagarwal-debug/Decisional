@@ -223,28 +223,13 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
 
             <div>
               <div
-                style={{
-                  fontSize: "11px",
-                  color: "var(--color-text-muted)",
-                  marginBottom: "8px",
-                  textTransform: "uppercase",
-                  letterSpacing: 0,
-                }}
+                className="text-muted mb-2" style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: 0 }}
               >
                 Share your code
               </div>
-              <div style={{ display: "flex", gap: "8px" }}>
+              <div className="flex gap-2">
                 <code
-                  style={{
-                    flex: 1,
-                    padding: "10px 14px",
-                    background: "var(--color-bg-tertiary)",
-                    borderRadius: "var(--radius-sm)",
-                    fontSize: "14px",
-                    fontFamily: "monospace",
-                    textAlign: "center",
-                    letterSpacing: 0,
-                  }}
+                  className="flex-1 text-sm text-center" style={{ padding: "10px 14px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)", fontFamily: "monospace", letterSpacing: 0 }}
                 >
                   {data.referralStats?.referralCode || "Loading..."}
                 </code>
@@ -266,28 +251,16 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
 
         {/* CTA Card */}
         <div
-          className="card col-span-2"
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1))",
-            border: "1px solid rgba(99, 102, 241, 0.2)",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
+          className="card col-span-2 flex flex-col justify-center" style={{ background:
+              "linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1))", border: "1px solid rgba(99, 102, 241, 0.2)" }}
         >
           <h3
-            style={{ fontSize: "20px", fontWeight: 800, marginBottom: "8px" }}
+            className="text-xl font-extrabold mb-2"
           >
             Invite Brands & Influencers
           </h3>
           <p
-            style={{
-              color: "var(--color-text-secondary)",
-              marginBottom: "20px",
-              fontSize: "14px",
-              lineHeight: 1.7,
-            }}
+            className="text-secondary mb-5 text-sm" style={{ lineHeight: 1.7 }}
           >
             Level up your tier to unlock up to 2% lifetime GMV revenue share and
             exclusive platform fee discounts for every deal completed by your
@@ -304,75 +277,39 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
       {/* Recent Campaigns Table */}
       <div className="card">
         <div className="section-header-row">
-          <h3 style={{ fontSize: "16px", fontWeight: 700 }}>
+          <h3 className="text-base font-bold">
             Recent Campaigns
           </h3>
           <Link
             href="/dashboard/campaigns"
-            style={{
-              fontSize: "13px",
-              color: "var(--color-primary-light)",
-              fontWeight: 500,
-            }}
+            className="text-sm font-medium" style={{ color: "var(--color-primary-light)" }}
           >
             View All
           </Link>
         </div>
         <div className="overflow-x-auto">
           <table
-            style={{
-              width: "100%",
-              textAlign: "left",
-              borderCollapse: "collapse",
-            }}
+            className="w-full text-left" style={{ borderCollapse: "collapse" }}
           >
             <thead>
-              <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+              <tr className="border-b-card">
                 <th
-                  style={{
-                    padding: "10px 12px",
-                    fontSize: "12px",
-                    color: "var(--color-text-muted)",
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    letterSpacing: 0,
-                  }}
+                  className="text-xs text-muted font-semibold" style={{ padding: "10px 12px", textTransform: "uppercase", letterSpacing: 0 }}
                 >
                   Campaign
                 </th>
                 <th
-                  style={{
-                    padding: "10px 12px",
-                    fontSize: "12px",
-                    color: "var(--color-text-muted)",
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    letterSpacing: 0,
-                  }}
+                  className="text-xs text-muted font-semibold" style={{ padding: "10px 12px", textTransform: "uppercase", letterSpacing: 0 }}
                 >
                   Status
                 </th>
                 <th
-                  style={{
-                    padding: "10px 12px",
-                    fontSize: "12px",
-                    color: "var(--color-text-muted)",
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    letterSpacing: 0,
-                  }}
+                  className="text-xs text-muted font-semibold" style={{ padding: "10px 12px", textTransform: "uppercase", letterSpacing: 0 }}
                 >
                   Budget
                 </th>
                 <th
-                  style={{
-                    padding: "10px 12px",
-                    fontSize: "12px",
-                    color: "var(--color-text-muted)",
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    letterSpacing: 0,
-                  }}
+                  className="text-xs text-muted font-semibold" style={{ padding: "10px 12px", textTransform: "uppercase", letterSpacing: 0 }}
                 >
                   Deals
                 </th>
@@ -382,17 +319,10 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
               {recentCampaigns.map((c) => (
                 <tr
                   key={c.id}
-                  style={{
-                    borderBottom: "1px solid var(--color-border)",
-                    transition: "background var(--transition-fast)",
-                  }}
+                  className="border-b-card" style={{ transition: "background var(--transition-fast)" }}
                 >
                   <td
-                    style={{
-                      padding: "14px 12px",
-                      fontSize: "14px",
-                      fontWeight: 600,
-                    }}
+                    className="text-sm font-semibold" style={{ padding: "14px 12px" }}
                   >
                     {c.title}
                   </td>
@@ -402,20 +332,12 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
                     </span>
                   </td>
                   <td
-                    style={{
-                      padding: "14px 12px",
-                      fontSize: "14px",
-                      color: "var(--color-text-secondary)",
-                    }}
+                    className="text-sm text-secondary" style={{ padding: "14px 12px" }}
                   >
                     Rs {(c.budget / 100).toLocaleString()}
                   </td>
                   <td
-                    style={{
-                      padding: "14px 12px",
-                      fontSize: "14px",
-                      color: "var(--color-text-secondary)",
-                    }}
+                    className="text-sm text-secondary" style={{ padding: "14px 12px" }}
                   >
                     {c.dealsCount}
                   </td>
@@ -489,42 +411,23 @@ function StatCard({
   return (
     <div className="card hover-lift">
       <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          marginBottom: "14px",
-          color: accentColor,
-        }}
+        className="flex items-center" style={{ gap: "10px", marginBottom: "14px", color: accentColor }}
       >
         {BRAND_STAT_ICONS[icon]}
         <span
-          style={{
-            color: "var(--color-text-secondary)",
-            fontSize: "13px",
-            fontWeight: 500,
-          }}
+          className="text-secondary text-sm font-medium"
         >
           {label}
         </span>
       </div>
       <div
-        style={{
-          fontSize: "28px",
-          fontWeight: 800,
-          color: accentColor,
-          lineHeight: 1.2,
-        }}
+        className="font-extrabold" style={{ fontSize: "28px", color: accentColor, lineHeight: 1.2 }}
       >
         {value}
       </div>
       {subvalue && (
         <div
-          style={{
-            fontSize: "12px",
-            color: "var(--color-text-muted)",
-            marginTop: "6px",
-          }}
+          className="text-xs text-muted" style={{ marginTop: "6px" }}
         >
           {subvalue}
         </div>

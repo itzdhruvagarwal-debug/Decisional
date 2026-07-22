@@ -518,7 +518,7 @@ function SidebarComponent({
           </div>
           <div>
             <div className="text-sm font-semibold">{user?.name || "User"}</div>
-            <div className="text-xs text-capitalize" style={{ color: "var(--color-text-muted)" }}>
+            <div className="text-xs text-capitalize text-muted">
               {user?.userType?.toLowerCase()}
             </div>
           </div>
@@ -574,7 +574,7 @@ function SidebarComponent({
             <div className="text-xl font-extrabold">
               <span className="gradient-text">Level {user?.level || 1}</span>
             </div>
-            <div className="xp-bar" style={{ height: "6px", marginTop: "8px" }}>
+            <div className="xp-bar mt-2" style={{ height: "6px" }}>
               <div
                 className="xp-bar-fill"
                 style={{ width: `${Math.min(((user?.xp || 0) % 1000) / 10, 100)}%` }}
@@ -712,7 +712,7 @@ function TopbarComponent({
 
         {/* Profile, desktop only */}
         <div className="hide-mobile topbar-profile-pill">
-          <div className="avatar" style={{ width: "32px", height: "32px", fontSize: "13px" }}>
+          <div className="avatar text-sm" style={{ width: "32px", height: "32px" }}>
             {user?.name?.[0] || "U"}
           </div>
           <div>

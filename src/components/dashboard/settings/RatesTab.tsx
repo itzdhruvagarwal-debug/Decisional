@@ -12,28 +12,19 @@ export default function RatesTab({ profile, setProfile }: Readonly<RatesTabProps
     return (
         <div className="card" style={{ maxWidth: "600px" }}>
             <h3
-                style={{
-                    fontSize: "16px",
-                    fontWeight: 700,
-                    marginBottom: "20px",
-                }}
+                className="text-base font-bold mb-5"
             >
                 Your Rate Card
             </h3>
             <p
-                style={{
-                    fontSize: "14px",
-                    color: "var(--color-text-secondary)",
-                    marginBottom: "24px",
-                }}
+                className="text-sm text-secondary mb-6"
             >
                 Set your expected rates for brand collaborations. This helps match
                 you with the right campaigns.
             </p>
 
             <div
-                className="grid-2"
-                style={{ gap: "16px", marginBottom: "24px" }}
+                className="grid-2 gap-4 mb-6"
             >
                 <Input
                     id="min-general-rate"
@@ -69,12 +60,11 @@ export default function RatesTab({ profile, setProfile }: Readonly<RatesTabProps
                 />
             </div>
 
-            <h4 style={{ fontSize: "14px", fontWeight: 700, marginBottom: "12px", borderTop: "1px solid var(--color-border)", paddingTop: "16px" }}>
+            <h4 className="text-sm font-bold mb-3" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "16px" }}>
                 Instagram Collaboration Rates
             </h4>
             <div
-                className="grid-2"
-                style={{ gap: "16px", marginBottom: "24px" }}
+                className="grid-2 gap-4 mb-6"
             >
                 <Input
                     id="min-instagram-rate"
@@ -106,12 +96,11 @@ export default function RatesTab({ profile, setProfile }: Readonly<RatesTabProps
                 />
             </div>
 
-            <h4 style={{ fontSize: "14px", fontWeight: 700, marginBottom: "12px", borderTop: "1px solid var(--color-border)", paddingTop: "16px" }}>
+            <h4 className="text-sm font-bold mb-3" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "16px" }}>
                 YouTube Collaboration Rates
             </h4>
             <div
-                className="grid-2"
-                style={{ gap: "16px", marginBottom: "24px" }}
+                className="grid-2 gap-4 mb-6"
             >
                 <Input
                     id="min-youtube-rate"
@@ -144,17 +133,10 @@ export default function RatesTab({ profile, setProfile }: Readonly<RatesTabProps
             </div>
 
             <div
-                style={{
-                    padding: "16px",
-                    background: "var(--color-bg-tertiary)",
-                    borderRadius: "var(--radius-md)",
-                }}
+                className="p-4" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
             >
                 <p
-                    style={{
-                        fontSize: "14px",
-                        color: "var(--color-text-secondary)",
-                    }}
+                    className="text-sm text-secondary"
                 >
                     💡 <strong>Tip:</strong> Based on your followers (
                     {((profile.instagramFollowers || 0) / 1000).toFixed(0)}K), similar

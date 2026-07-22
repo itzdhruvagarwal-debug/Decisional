@@ -66,22 +66,22 @@ export default async function VerificationDetailPage({
 
   return (
     <div className="admin-page admin-page-narrow">
-      <header style={{ marginBottom: "32px" }}>
-        <h1 className="gradient-text" style={{ fontSize: "28px", fontWeight: 900, marginBottom: "8px" }}>
+      <header className="mb-8">
+        <h1 className="gradient-text mb-2" style={{ fontSize: "28px", fontWeight: 900 }}>
           Review: {name}
         </h1>
-        <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+        <p className="text-secondary text-sm">
           Critical KYC and Trust Verification Review Process
         </p>
       </header>
 
-      <div className="grid-2" style={{ gap: "24px", alignItems: "start" }}>
+      <div className="grid-2 gap-6" style={{ alignItems: "start" }}>
         {/* Profile Info */}
         <section className="card">
-          <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
+          <h2 className="text-lg font-bold mb-5 flex items-center gap-2">
             👤 Profile Detail
           </h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div className="flex flex-col gap-3">
             {[
               { label: "Internal ID", value: user.id, color: "inherit" },
               { label: "Email Address", value: user.email, color: "inherit" },
@@ -90,23 +90,11 @@ export default async function VerificationDetailPage({
               { label: "Registration", value: activeSince, color: "inherit" },
               { label: "Trust Score", value: user.trustScore, color: user.trustScore >= 50 ? "var(--color-accent-emerald)" : "var(--color-accent-amber)" },
             ].map((item) => (
-              <div key={item.label} style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px",
-                background: "var(--color-bg-tertiary)",
-                borderRadius: "var(--radius-md)",
-                border: "1px solid var(--color-border)"
-              }}>
-                <span style={{ fontSize: "12px", color: "var(--color-text-secondary)", fontWeight: 600, textTransform: "uppercase" }}>
+              <div key={item.label} className="flex justify-between items-center p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
+                <span className="text-xs text-secondary font-semibold" style={{ textTransform: "uppercase" }}>
                   {item.label}
                 </span>
-                <span style={{
-                  fontSize: "14px",
-                  fontWeight: 700,
-                  color: item.color
-                }}>
+                <span className="text-sm font-bold" style={{ color: item.color }}>
                   {item.value}
                 </span>
               </div>
@@ -115,10 +103,10 @@ export default async function VerificationDetailPage({
         </section>
 
         <section className="card">
-          <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
+          <h2 className="text-lg font-bold mb-5 flex items-center gap-2">
             India Tax Readiness
           </h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div className="flex flex-col gap-3">
             {[
               {
                 label: "PAN",
@@ -151,19 +139,11 @@ export default async function VerificationDetailPage({
                 value: user.taxCompliance?.status || "ACTION_REQUIRED",
               },
             ].map((item) => (
-              <div key={item.label} style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px",
-                background: "var(--color-bg-tertiary)",
-                borderRadius: "var(--radius-md)",
-                border: "1px solid var(--color-border)"
-              }}>
-                <span style={{ fontSize: "12px", color: "var(--color-text-secondary)", fontWeight: 600, textTransform: "uppercase" }}>
+              <div key={item.label} className="flex justify-between items-center p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
+                <span className="text-xs text-secondary font-semibold" style={{ textTransform: "uppercase" }}>
                   {item.label}
                 </span>
-                <span style={{ fontSize: "14px", fontWeight: 700 }}>
+                <span className="text-sm font-bold">
                   {item.value}
                 </span>
               </div>
@@ -173,7 +153,7 @@ export default async function VerificationDetailPage({
 
         {/* Docs */}
         <section className="card">
-          <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
+          <h2 className="text-lg font-bold mb-5 flex items-center gap-2">
             🛡️ Proof Documents
           </h2>
           {docsWithRefreshedUrls.length === 0 ? (
@@ -184,26 +164,21 @@ export default async function VerificationDetailPage({
               compact
             />
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div className="flex flex-col gap-4">
               {docsWithRefreshedUrls.map((doc) => (
                 <div
                   key={doc.id}
-                  style={{
-                    padding: "16px",
-                    background: "var(--color-bg-tertiary)",
-                    borderRadius: "var(--radius-lg)",
-                    border: "1px solid var(--color-border)",
-                  }}
+                  className="p-4" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-border)" }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+                  <div className="flex justify-between items-start mb-3">
                     <div>
-                      <div style={{ fontWeight: 800, fontSize: "14px", color: "var(--color-text-primary)", display: "flex", alignItems: "center", gap: "8px", textTransform: "uppercase" }}>
+                      <div className="font-extrabold text-sm flex items-center gap-2" style={{ color: "var(--color-text-primary)", textTransform: "uppercase" }}>
                         {doc.type.replaceAll("_", " ")}
                         <span className={`badge ${getDocBadgeClass(doc.status)}`}>
                           {doc.status}
                         </span>
                       </div>
-                      <div style={{ fontSize: "11px", color: "var(--color-text-muted)", marginTop: "4px" }}>
+                      <div className="text-muted mt-1" style={{ fontSize: "11px" }}>
                         ID: {doc.id.slice(0, 8)}... • {new Date(doc.createdAt).toLocaleDateString()}
                       </div>
                     </div>
@@ -221,9 +196,9 @@ export default async function VerificationDetailPage({
                   </div>
 
                   {doc.status === "PENDING" && (
-                    <div style={{ display: "flex", gap: "10px", marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--color-border)" }}>
-                      <form action={approveDocument.bind(null, doc.id, user.id)} style={{ flex: 1 }}>
-                        <Button variant="success" size="sm" style={{ width: "100%" }}>
+                    <div className="flex mt-4" style={{ gap: "10px", paddingTop: "16px", borderTop: "1px solid var(--color-border)" }}>
+                      <form action={approveDocument.bind(null, doc.id, user.id)} className="flex-1">
+                        <Button variant="success" size="sm" className="w-full">
                           Approve ✅
                         </Button>
                       </form>
@@ -234,13 +209,13 @@ export default async function VerificationDetailPage({
                           const { reason } = verificationRejectSchema.parse({ reason: rawReason });
                           await rejectDocument(doc.id, user.id, reason);
                         }}
-                        style={{ flex: 2, display: "flex", gap: "8px" }}
+                        className="flex gap-2" style={{ flex: 2 }}
                       >
                         <Input
                           name="reason"
                           placeholder="Reason..."
                           required
-                          style={{ flex: 1, padding: "8px 12px", fontSize: "12px" }}
+                          className="flex-1 text-xs" style={{ padding: "8px 12px" }}
                         />
                         <Button type="submit" variant="danger" size="sm">
                           Reject ❌
@@ -256,22 +231,13 @@ export default async function VerificationDetailPage({
       </div>
 
       {/* Global Actions Bar */}
-      <footer style={{
-        marginTop: "40px",
-        padding: "32px",
-        background: "var(--color-bg-secondary)",
-        borderRadius: "var(--radius-xl)",
-        border: "1px solid var(--color-border)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "24px"
-      }}>
+      <footer className="flex flex-col gap-6" style={{ marginTop: "40px", padding: "32px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-xl)", border: "1px solid var(--color-border)" }}>
         <div>
-          <h3 style={{ fontSize: "16px", fontWeight: 700, marginBottom: "4px" }}>Decision Engine</h3>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "13px" }}>Finalize user status. This will trigger system-wide webhooks and emails.</p>
+          <h3 className="text-base font-bold mb-1">Decision Engine</h3>
+          <p className="text-secondary text-sm">Finalize user status. This will trigger system-wide webhooks and emails.</p>
         </div>
 
-        <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center" }}>
+        <div className="flex gap-4 flex-wrap items-center">
           <form action={approveUser.bind(null, user.id)}>
             <Button variant="success" size="lg" style={{ minWidth: "220px" }}>
               ✅ Full Verification Pass
@@ -287,7 +253,7 @@ export default async function VerificationDetailPage({
               const { reason } = verificationRejectSchema.parse({ reason: rawReason });
               await rejectUser(user.id, reason);
             }}
-            style={{ display: "flex", gap: "12px", flex: "1 1 360px", flexWrap: "wrap" }}
+            className="flex gap-3 flex-wrap" style={{ flex: "1 1 360px" }}
           >
             <Input
               name="reason"

@@ -33,7 +33,7 @@ export function Avatar({
   return (
     <div className={classes} style={style} aria-hidden={ariaHidden}>
       {src ? (
-        <Image src={src} alt={name ?? "Avatar"} fill style={{ objectFit: "cover" }} />
+        <Image src={src} alt={name ?? "Avatar"} fill className="object-cover" />
       ) : (
         initial
       )}

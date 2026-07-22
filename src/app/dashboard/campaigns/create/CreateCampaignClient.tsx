@@ -436,23 +436,12 @@ export default function CreateCampaignClient() {
   return (
     <div className="w-full" style={{ maxWidth: "800px", margin: "0 auto", paddingBottom: "64px" }}>
       <h1
-        className="font-black"
-        style={{
-          fontSize: "32px",
-          marginBottom: "8px",
-          background: "var(--gradient-primary)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}
+        className="font-black mb-2" style={{ fontSize: "32px", background: "var(--gradient-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
       >
         {editCampaignId ? "Edit Draft Campaign" : "Create New Campaign"}
       </h1>
       <p
-        className="text-secondary"
-        style={{
-          marginBottom: "32px",
-          fontSize: "16px",
-        }}
+        className="text-secondary mb-8 text-base"
       >
         {editCampaignId
           ? "Update your draft campaign details before launching"
@@ -461,17 +450,7 @@ export default function CreateCampaignClient() {
 
       {invitedInfluencer && (
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            padding: "16px 20px",
-            background: "rgba(99, 102, 241, 0.1)",
-            border: "1px solid rgba(99, 102, 241, 0.2)",
-            borderRadius: "16px",
-            marginBottom: "24px",
-            backdropFilter: "blur(8px)",
-          }}
+          className="flex items-center gap-3 mb-6" style={{ padding: "16px 20px", background: "rgba(99, 102, 241, 0.1)", border: "1px solid rgba(99, 102, 241, 0.2)", borderRadius: "16px", backdropFilter: "blur(8px)" }}
         >
           <div
             style={{
@@ -482,7 +461,7 @@ export default function CreateCampaignClient() {
               boxShadow: "0 0 12px #6366f1",
             }}
           />
-          <span style={{ fontSize: "15px", fontWeight: 500, color: "var(--color-text-primary)" }}>
+          <span className="font-medium" style={{ fontSize: "15px", color: "var(--color-text-primary)" }}>
             Inviting: <strong style={{ color: "#6366f1" }}>@{invitedInfluencer.instagramHandle || invitedInfluencer.youtubeHandle || invitedInfluencer.displayName}</strong> ({invitedInfluencer.displayName})
           </span>
         </div>
@@ -496,14 +475,7 @@ export default function CreateCampaignClient() {
       >
         {error && (
           <div
-            style={{
-              padding: "12px 16px",
-              background: "rgba(244, 63, 94, 0.1)",
-              border: "1px solid rgba(244, 63, 94, 0.2)",
-              borderRadius: "var(--radius-md)",
-              color: "var(--color-accent-rose)",
-              marginBottom: "24px",
-            }}
+            className="mb-6" style={{ padding: "12px 16px", background: "rgba(244, 63, 94, 0.1)", border: "1px solid rgba(244, 63, 94, 0.2)", borderRadius: "var(--radius-md)", color: "var(--color-accent-rose)" }}
           >
             {error}
           </div>
@@ -555,7 +527,7 @@ export default function CreateCampaignClient() {
           />
 
           {/* Target Audience */}
-          <div className="form-group" style={{ marginBottom: "24px" }}>
+          <div className="form-group mb-6">
             <label
               className="label"
               htmlFor="custom-category-input"
@@ -563,31 +535,22 @@ export default function CreateCampaignClient() {
             >
               Target Categories (Select up to 5)
             </label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
+            <div className="flex flex-wrap gap-2 mb-3">
               {categories.map((cat) => (
                 <Button
                   key={cat}
                   type="button"
                   onClick={() => handleCategoryToggle(cat)}
                   variant={formData.targetCategories.includes(cat) ? "primary" : "ghost"}
-                  style={{
-                    cursor: "pointer",
-                    background: formData.targetCategories.includes(cat)
+                  className="cursor-pointer text-sm" style={{ background: formData.targetCategories.includes(cat)
                       ? "var(--gradient-primary)"
-                      : "var(--color-bg-tertiary)",
-                    color: formData.targetCategories.includes(cat)
+                      : "var(--color-bg-tertiary)", color: formData.targetCategories.includes(cat)
                       ? "white"
-                      : "var(--color-text-secondary)",
-                    border: formData.targetCategories.includes(cat)
+                      : "var(--color-text-secondary)", border: formData.targetCategories.includes(cat)
                       ? "none"
-                      : "1px solid var(--color-border)",
-                    boxShadow: formData.targetCategories.includes(cat)
+                      : "1px solid var(--color-border)", boxShadow: formData.targetCategories.includes(cat)
                       ? "0 4px 16px rgba(99, 102, 241, 0.4)"
-                      : "none",
-                    padding: "8px 16px",
-                    fontSize: "13px",
-                    transition: "all 0.3s ease",
-                  }}
+                      : "none", padding: "8px 16px", transition: "all 0.3s ease" }}
                 >
                   {cat}
                 </Button>
@@ -713,7 +676,7 @@ export default function CreateCampaignClient() {
             />
           </div>
 
-          <div className="mb-4" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+          <div className="mb-4 grid gap-4" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
             <Input
               label="Min Followers Req."
               id="min-followers"
@@ -776,11 +739,7 @@ export default function CreateCampaignClient() {
               required
               min={formData.requiresProduct ? 0 : 1000}
               fullWidth
-              style={{
-                background: "var(--color-bg-tertiary)",
-                cursor: "not-allowed",
-                color: "var(--color-text-secondary)",
-              }}
+              className="text-secondary" style={{ background: "var(--color-bg-tertiary)", cursor: "not-allowed" }}
             />
             <Input
               label="Budget Per Influencer (Approx Rs)"
@@ -792,11 +751,7 @@ export default function CreateCampaignClient() {
               required
               min={formData.requiresProduct ? 0 : 500}
               fullWidth
-              style={{
-                background: "var(--color-bg-tertiary)",
-                cursor: "not-allowed",
-                color: "var(--color-text-secondary)",
-              }}
+              className="text-secondary" style={{ background: "var(--color-bg-tertiary)", cursor: "not-allowed" }}
             />
           </div>
 
@@ -849,20 +804,12 @@ export default function CreateCampaignClient() {
             >
               <div>
                 <h3
-                  style={{
-                    color: "var(--color-text-primary)",
-                    fontSize: "16px",
-                    fontWeight: 600,
-                  }}
+                  className="text-base font-semibold" style={{ color: "var(--color-text-primary)" }}
                 >
                   Product Seeding (Barter / Logistics)
                 </h3>
                 <p
-                  style={{
-                    color: "var(--color-text-secondary)",
-                    fontSize: "13px",
-                    marginTop: "4px",
-                  }}
+                  className="text-secondary text-sm mt-1"
                 >
                   Do you need to ship a physical product to the influencer?
                 </p>
@@ -881,7 +828,7 @@ export default function CreateCampaignClient() {
             </div>
 
             {formData.requiresProduct && (
-              <div style={{ marginTop: "16px" }}>
+              <div className="mt-4">
                 <div className="grid-2 gap-4 mb-3">
                   <Input
                     label="Product Name"
@@ -933,11 +880,7 @@ export default function CreateCampaignClient() {
                 type="button"
                 variant="ghost"
                 onClick={handleAddDeliverable}
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  padding: "4px 8px"
-                }}
+                className="text-sm font-semibold" style={{ padding: "4px 8px" }}
               >
                 + Add Deliverable
               </Button>
@@ -996,7 +939,7 @@ export default function CreateCampaignClient() {
                     placeholder="Rate (Rs)"
                     style={{ width: "110px" }}
                   />
-                  <span style={{ fontSize: "10px", color: "var(--color-text-muted)", whiteSpace: "nowrap" }}>
+                  <span className="text-muted" style={{ fontSize: "10px", whiteSpace: "nowrap" }}>
                     Rec: ₹{getRecommendedRate(item.type, formData.minFollowers).toLocaleString("en-IN")}
                   </span>
                 </div>
@@ -1006,11 +949,7 @@ export default function CreateCampaignClient() {
                     type="button"
                     variant="ghost"
                     onClick={() => handleRemoveDeliverable(index)}
-                    style={{
-                      color: "var(--color-accent-rose)",
-                      fontSize: "18px",
-                      padding: "0 8px"
-                    }}
+                    className="text-lg" style={{ color: "var(--color-accent-rose)", padding: "0 8px" }}
                   >
                     x
                   </Button>

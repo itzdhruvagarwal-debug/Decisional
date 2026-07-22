@@ -74,7 +74,7 @@ export default function ApplicationsPage() {
 
   if (!session) {
     return (
-      <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
+      <div className="flex items-center justify-center" style={{ minHeight: "100vh" }}>
         <span className="loading" />
       </div>
     );
@@ -83,13 +83,13 @@ export default function ApplicationsPage() {
   let applicationsList;
   if (loading) {
     applicationsList = (
-      <div style={{ display: "flex", justifyContent: "center", padding: "64px" }}>
+      <div className="flex justify-center" style={{ padding: "64px" }}>
         <span className="loading" style={{ width: "40px", height: "40px" }} />
       </div>
     );
   } else if (error) {
     applicationsList = (
-      <div style={{ padding: "48px", textAlign: "center", color: "var(--color-accent-rose)" }}>
+      <div className="text-center" style={{ padding: "48px", color: "var(--color-accent-rose)" }}>
         ⚠️ {error}
       </div>
     );
@@ -105,41 +105,27 @@ export default function ApplicationsPage() {
     );
   } else {
     applicationsList = (
-      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+      <div className="card overflow-hidden" style={{ padding: 0 }}>
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+          <table className="w-full text-left" style={{ borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid var(--color-border)", background: "var(--color-bg-tertiary)" }}>
-                <th style={{ padding: "16px", fontSize: "12px", fontWeight: 700, color: "var(--color-text-secondary)" }}>CAMPAIGN</th>
-                <th style={{ padding: "16px", fontSize: "12px", fontWeight: 700, color: "var(--color-text-secondary)" }}>PROPOSED RATE</th>
-                <th style={{ padding: "16px", fontSize: "12px", fontWeight: 700, color: "var(--color-text-secondary)" }}>SUBMITTED ON</th>
-                <th style={{ padding: "16px", fontSize: "12px", fontWeight: 700, color: "var(--color-text-secondary)" }}>STATUS</th>
-                <th style={{ padding: "16px", fontSize: "12px", fontWeight: 700, color: "var(--color-text-secondary)", textAlign: "right" }}>ACTION</th>
+              <tr className="border-b-card" style={{ background: "var(--color-bg-tertiary)" }}>
+                <th className="p-4 text-xs font-bold text-secondary">CAMPAIGN</th>
+                <th className="p-4 text-xs font-bold text-secondary">PROPOSED RATE</th>
+                <th className="p-4 text-xs font-bold text-secondary">SUBMITTED ON</th>
+                <th className="p-4 text-xs font-bold text-secondary">STATUS</th>
+                <th className="p-4 text-xs font-bold text-secondary text-right">ACTION</th>
               </tr>
             </thead>
             <tbody>
               {applications.map((app) => {
                 const statusStyle = getStatusStyle(app.status);
                 return (
-                  <tr key={app.id} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                    <td style={{ padding: "16px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <tr key={app.id} className="border-b-card">
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
                         <div
-                          style={{
-                            width: "36px",
-                            height: "36px",
-                            borderRadius: "var(--radius-sm)",
-                            background: "var(--gradient-card)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "12px",
-                            fontWeight: 700,
-                            color: "white",
-                            flexShrink: 0,
-                            overflow: "hidden",
-                            position: "relative",
-                          }}
+                          className="flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden relative" style={{ width: "36px", height: "36px", borderRadius: "var(--radius-sm)", background: "var(--gradient-card)", color: "white" }}
                         >
                           {app.campaign.brand?.logo ? (
                             <Image
@@ -147,46 +133,38 @@ export default function ApplicationsPage() {
                               alt=""
                               fill
                               unoptimized
-                              style={{ objectFit: "cover" }}
+                              className="object-cover"
                             />
                           ) : (
                             (app.campaign.brand?.companyName || "DC").slice(0, 2).toUpperCase()
                           )}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 700, fontSize: "14px" }}>
+                          <div className="font-bold text-sm">
                             {app.campaign.title}
                           </div>
-                          <div style={{ fontSize: "12px", color: "var(--color-text-secondary)" }}>
+                          <div className="text-xs text-secondary">
                             by {app.campaign.brand?.companyName || "Unknown Brand"}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td style={{ padding: "16px", fontWeight: 700 }}>{formatCurrency(app.proposedRate)}</td>
-                    <td style={{ padding: "16px", color: "var(--color-text-secondary)", fontSize: "13px" }}>
+                    <td className="p-4 font-bold">{formatCurrency(app.proposedRate)}</td>
+                    <td className="p-4 text-secondary text-sm">
                       {new Date(app.createdAt).toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",
                       })}
                     </td>
-                    <td style={{ padding: "16px" }}>
+                    <td className="p-4">
                       <span
-                        style={{
-                          display: "inline-flex",
-                          border: "1px solid",
-                          borderRadius: "8px",
-                          padding: "4px 10px",
-                          fontSize: "12px",
-                          fontWeight: 800,
-                          ...statusStyle,
-                        }}
+                        className="inline-flex text-xs font-extrabold" style={{ border: "1px solid", borderRadius: "8px", padding: "4px 10px", ...statusStyle }}
                       >
                         {app.status}
                       </span>
                     </td>
-                    <td style={{ padding: "16px", textAlign: "right" }}>
+                    <td className="p-4 text-right">
                       <Link href={`/dashboard/campaigns/${app.campaign.id}`} className="btn btn-ghost btn-sm">
                         View Campaign
                       </Link>
@@ -205,24 +183,16 @@ export default function ApplicationsPage() {
     <DashboardShell user={session.user}>
       <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "40px 20px" }}>
         {/* Header */}
-        <div style={{ marginBottom: "32px" }}>
-          <h1 style={{ fontSize: "32px", fontWeight: 800 }}>My Applications</h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "14px", marginTop: "4px" }}>
+        <div className="mb-8">
+          <h1 className="font-extrabold" style={{ fontSize: "32px" }}>My Applications</h1>
+          <p className="text-secondary text-sm mt-1">
             Track the status of your pitches and proposals submitted to campaigns.
           </p>
         </div>
 
         {error && (
           <div
-            className="card"
-            style={{
-              padding: "16px",
-              background: "rgba(244, 63, 94, 0.08)",
-              border: "1px solid rgba(244, 63, 94, 0.2)",
-              borderRadius: "var(--radius-md)",
-              color: "var(--color-accent-rose)",
-              marginBottom: "24px",
-            }}
+            className="card p-4 mb-6" style={{ background: "rgba(244, 63, 94, 0.08)", border: "1px solid rgba(244, 63, 94, 0.2)", borderRadius: "var(--radius-md)", color: "var(--color-accent-rose)" }}
           >
             {error}
           </div>

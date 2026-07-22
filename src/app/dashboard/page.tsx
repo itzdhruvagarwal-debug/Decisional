@@ -42,37 +42,18 @@ function DashboardErrorFallback({ user }: Readonly<{ user: Session["user"] }>) {
   return (
     <DashboardShell user={user}>
       <div
-        style={{
-          padding: "80px 40px",
-          textAlign: "center",
-          background: "rgba(244, 63, 94, 0.05)",
-          borderRadius: "var(--radius-xl)",
-          border: "1px dashed var(--color-accent-rose)",
-          margin: "40px auto",
-          maxWidth: "600px",
-        }}
+        className="text-center" style={{ padding: "80px 40px", background: "rgba(244, 63, 94, 0.05)", borderRadius: "var(--radius-xl)", border: "1px dashed var(--color-accent-rose)", margin: "40px auto", maxWidth: "600px" }}
       >
-        <div style={{ fontSize: "48px", marginBottom: "20px" }} aria-hidden="true">
+        <div className="mb-5" style={{ fontSize: "48px" }} aria-hidden="true">
           !
         </div>
         <h2
-          className="gradient-text"
-          style={{
-            fontSize: "24px",
-            fontWeight: 900,
-            marginBottom: "12px",
-            background: "linear-gradient(135deg, #f43f5e, #fb923c)",
-          }}
+          className="gradient-text text-2xl mb-3" style={{ fontWeight: 900, background: "linear-gradient(135deg, #f43f5e, #fb923c)" }}
         >
           Dashboard Interrupted
         </h2>
         <p
-          style={{
-            color: "var(--color-text-secondary)",
-            fontSize: "15px",
-            marginBottom: "32px",
-            lineHeight: 1.6,
-          }}
+          className="text-secondary mb-8" style={{ fontSize: "15px", lineHeight: 1.6 }}
         >
           The dashboard could not load the latest workspace data. Please
           refresh or try again after a moment.
@@ -96,7 +77,7 @@ function DashboardErrorFallback({ user }: Readonly<{ user: Session["user"] }>) {
 
 function DashboardEmptyState({ dataLoadFailed }: Readonly<{ dataLoadFailed: boolean }>) {
   return (
-    <div style={{ padding: "100px 40px", textAlign: "center" }}>
+    <div className="text-center" style={{ padding: "100px 40px" }}>
       <div
         className="glass"
         style={{
@@ -107,28 +88,18 @@ function DashboardEmptyState({ dataLoadFailed }: Readonly<{ dataLoadFailed: bool
         }}
       >
         <div
-          style={{
-            fontSize: "64px",
-            marginBottom: "24px",
-            filter: "drop-shadow(0 0 20px rgba(99, 102, 241, 0.3))",
-          }}
+          className="mb-6" style={{ fontSize: "64px", filter: "drop-shadow(0 0 20px rgba(99, 102, 241, 0.3))" }}
           aria-hidden="true"
         >
           {dataLoadFailed ? "!" : "..."}
         </div>
         <h2
-          className="gradient-text"
-          style={{ fontSize: "28px", fontWeight: 900, marginBottom: "16px" }}
+          className="gradient-text mb-4" style={{ fontSize: "28px", fontWeight: 900 }}
         >
           {dataLoadFailed ? "Access Interrupted" : "Initializing Workspace"}
         </h2>
         <p
-          style={{
-            color: "var(--color-text-secondary)",
-            fontSize: "15px",
-            lineHeight: 1.6,
-            marginBottom: "36px",
-          }}
+          className="text-secondary" style={{ fontSize: "15px", lineHeight: 1.6, marginBottom: "36px" }}
         >
           {dataLoadFailed
             ? "We could not load your dashboard data. Please refresh or try again after a moment."
@@ -198,12 +169,11 @@ export default async function DashboardPage({
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
           <header style={{ marginBottom: "40px" }}>
             <h1
-              className="gradient-text"
-              style={{ fontSize: "32px", fontWeight: 900, marginBottom: "8px" }}
+              className="gradient-text mb-2" style={{ fontSize: "32px", fontWeight: 900 }}
             >
               Admin Ops Center
             </h1>
-            <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+            <p className="text-secondary text-sm">
               Platform health, financial operations, and ecosystem monitoring.
             </p>
           </header>

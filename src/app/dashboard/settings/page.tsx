@@ -242,12 +242,7 @@ export default function SettingsPage() {
         return (
             <DashboardShell user={session?.user || user}>
                 <div
-                    style={{
-                        display: "flex",
-                        minHeight: "60vh",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}
+                    className="flex items-center justify-center" style={{ minHeight: "60vh" }}
                 >
                     <span className="loading" />
                 </div>
@@ -257,7 +252,7 @@ export default function SettingsPage() {
 
     if (!profile || !user) {
         return (
-            <div style={{ padding: "40px", textAlign: "center" }}>
+            <div className="text-center" style={{ padding: "40px" }}>
                 Failed to load profile
             </div>
         );
@@ -269,16 +264,11 @@ export default function SettingsPage() {
 
             {/* Header */}
             <div
-                style={{
-                    marginBottom: "24px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                }}
+                className="mb-6 flex justify-between items-center"
             >
                 <div>
-                    <h1 style={{ fontSize: "24px", fontWeight: 800 }}>Settings</h1>
-                    <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+                    <h1 className="text-2xl font-extrabold">Settings</h1>
+                    <p className="text-secondary text-sm">
                         Manage your profile and preferences
                     </p>
                 </div>
@@ -298,16 +288,10 @@ export default function SettingsPage() {
             <div className="dashboard-settings-content">
                 {/* Tabs */}
                 <div
-                    className="scrollable-tabs"
+                    
                     role="tablist"
                     aria-label="Settings sections"
-                    style={{
-                        display: "flex",
-                        gap: "8px",
-                        marginBottom: "24px",
-                        borderBottom: "1px solid var(--color-border)",
-                        paddingBottom: "16px",
-                    }}
+                     className="scrollable-tabs flex gap-2 mb-6 border-b-card" style={{ paddingBottom: "16px" }}
                 >
                     {[
                         { id: "profile", label: "👤 Profile" },

@@ -24,16 +24,7 @@ export default function RootError({
       style={{ minHeight: "100vh" }}
     >
       <div
-        className="card animate-fade-in text-center"
-        style={{
-          maxWidth: "480px",
-          width: "100%",
-          padding: "40px 32px",
-          border: "1px solid var(--color-border)",
-          background: "rgba(255, 255, 255, 0.02)",
-          backdropFilter: "blur(8px)",
-          boxShadow: "0 20px 40px -15px rgba(0,0,0,0.5)",
-        }}
+        className="card animate-fade-in text-center w-full" style={{ maxWidth: "480px", padding: "40px 32px", border: "1px solid var(--color-border)", background: "rgba(255, 255, 255, 0.02)", backdropFilter: "blur(8px)", boxShadow: "0 20px 40px -15px rgba(0,0,0,0.5)" }}
       >
         <div
           className="flex items-center justify-center mb-6"
@@ -81,14 +72,14 @@ export default function RootError({
             onClick={() => reset()}
             variant="primary"
             aria-label="Try rendering this page again"
-            style={{ flex: 1 }}
+            className="flex-1"
           >
             Try Again
           </Button>
           <Button
             href="/"
             variant="secondary"
-            style={{ flex: 1 }}
+            className="flex-1"
           >
             Return Home
           </Button>

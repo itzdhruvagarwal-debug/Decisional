@@ -7,23 +7,22 @@ export default function TermsPage() {
   const lastUpdated = "June 20, 2026";
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="flex flex-col" style={{ minHeight: "100vh" }}>
       <Navbar />
 
-      <main style={{ flex: 1, paddingTop: "80px" }}>
+      <main className="flex-1" style={{ paddingTop: "80px" }}>
         <section className="section">
           <div className="container" style={{ maxWidth: "920px" }}>
             <h1
-              className="section-title gradient-text"
-              style={{ fontSize: "40px", fontWeight: 900, marginBottom: "12px" }}
+              className="section-title gradient-text mb-3" style={{ fontSize: "40px", fontWeight: 900 }}
             >
               Terms of Service
             </h1>
-            <p className="text-secondary" style={{ marginBottom: "40px", fontWeight: 600 }}>
+            <p className="text-secondary font-semibold" style={{ marginBottom: "40px" }}>
               Last updated: {lastUpdated}
             </p>
 
-            <div style={{ lineHeight: 1.8, color: "var(--color-text-secondary)", fontSize: "15px", display: "grid", gap: "32px" }}>
+            <div className="text-secondary grid gap-8" style={{ lineHeight: 1.8, fontSize: "15px" }}>
               <section>
                 <h2 style={headingStyle}>1. Agreement</h2>
                 <p>
@@ -42,7 +41,7 @@ export default function TermsPage() {
 
               <section className="card" style={panelStyle}>
                 <h2 style={headingStyle}>2. Roles and eligibility</h2>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px" }}>
+                <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
                   <div style={miniPanelStyle}>
                     <h3 style={subheadingStyle}>Brands</h3>
                     <p>Brands create briefs, fund campaign budgets, review work, approve content, and follow applicable advertising, tax, and platform rules.</p>
@@ -56,7 +55,7 @@ export default function TermsPage() {
                     <p>Admins review verification, disputes, payouts, safety signals, and platform compliance. Admin access is granted only through secure sessions.</p>
                   </div>
                 </div>
-                <p style={{ marginTop: "16px" }}>
+                <p className="mt-4">
                   You must be at least 18 years old and legally able to enter commercial
                   agreements. You are responsible for keeping your account secure and accurate.
                   You must not allow another person to use your account, and businesses must
@@ -101,7 +100,7 @@ export default function TermsPage() {
                   may apply based on role, transaction type, location, verification status, and
                   applicable law. Users are responsible for their own tax filings and declarations.
                 </p>
-                <ul className="list-disc pl-6 space-y-2" style={{ marginTop: "12px" }}>
+                <ul className="list-disc pl-6 space-y-2 mt-3">
                   <li>Payouts may be blocked until PAN, bank, KYC, and tax readiness checks are complete.</li>
                   <li>Where Decisional is required to deduct or report tax, payout records may include TDS, GST, invoice, and Form 26AS/AIS-supporting metadata.</li>
                   <li>GST registration, e-invoicing, reverse charge, place-of-supply, and input-tax-credit treatment can depend on the user, campaign, invoice, and current law.</li>

@@ -402,33 +402,20 @@ function WalletHeader({
 }: WalletHeaderProps) {
   return (
     <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: "32px",
-        flexWrap: "wrap",
-        gap: "16px",
-      }}
+      className="flex justify-between items-center mb-8 flex-wrap gap-4"
     >
       <div>
         <h1
-          style={{
-            fontSize: "32px",
-            fontWeight: 800,
-            background: "var(--gradient-primary)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
+          className="font-extrabold" style={{ fontSize: "32px", background: "var(--gradient-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
         >
           Wallet and Payments
         </h1>
-        <p style={{ color: "var(--color-text-secondary)" }}>
+        <p className="text-secondary">
           Manage earnings, transactions, and payouts.
         </p>
       </div>
 
-      <div style={{ display: "flex", gap: "12px" }}>
+      <div className="flex gap-3">
         {userType === "BRAND" && (
           <Button variant="secondary" aria-label="Add funds to wallet" onClick={() => setShowAddFundsModal(true)}>
             Add Funds
@@ -489,33 +476,33 @@ function WalletSummaryCards({ userType, walletData }: WalletSummaryCardsProps) {
   return (
     <div className="grid-4" style={{ marginBottom: "40px" }}>
       <div className="card" style={{ background: "var(--gradient-primary)", border: "none" }}>
-        <div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "8px" }}>Available Balance</div>
-        <div style={{ fontSize: "32px", fontWeight: 800 }}>{formatCurrency(walletData.balance)}</div>
+        <div className="text-sm mb-2" style={{ opacity: 0.9 }}>Available Balance</div>
+        <div className="font-extrabold" style={{ fontSize: "32px" }}>{formatCurrency(walletData.balance)}</div>
       </div>
 
       <div className="card">
-        <div style={{ fontSize: "14px", color: "var(--color-text-secondary)", marginBottom: "8px" }}>
+        <div className="text-sm text-secondary mb-2">
           {userType === "BRAND" ? "Active Holds" : "Pending"}
         </div>
-        <div style={{ fontSize: "28px", fontWeight: 800, color: "var(--color-accent-amber)" }}>
+        <div className="font-extrabold" style={{ fontSize: "28px", color: "var(--color-accent-amber)" }}>
           {formatCurrency(userType === "BRAND" ? walletData.totalHeld || 0 : walletData.pendingBalance)}
         </div>
       </div>
 
       <div className="card">
-        <div style={{ fontSize: "14px", color: "var(--color-text-secondary)", marginBottom: "8px" }}>
+        <div className="text-sm text-secondary mb-2">
           {userType === "BRAND" ? "Total Spent" : "Total Earned"}
         </div>
-        <div style={{ fontSize: "28px", fontWeight: 800, color: "var(--color-accent-emerald)" }}>
+        <div className="font-extrabold" style={{ fontSize: "28px", color: "var(--color-accent-emerald)" }}>
           {formatCurrency(userType === "BRAND" ? walletData.totalSpent || 0 : walletData.totalEarned)}
         </div>
       </div>
 
       <div className="card">
-        <div style={{ fontSize: "14px", color: "var(--color-text-secondary)", marginBottom: "8px" }}>
+        <div className="text-sm text-secondary mb-2">
           {userType === "BRAND" ? "Total Added" : "Total Withdrawn"}
         </div>
-        <div style={{ fontSize: "28px", fontWeight: 800 }}>
+        <div className="font-extrabold" style={{ fontSize: "28px" }}>
           {formatCurrency(userType === "BRAND" ? walletData.totalDeposited || 0 : walletData.totalWithdrawn)}
         </div>
       </div>
@@ -558,7 +545,7 @@ export default function WalletPage() {
   if (status === "loading" || isLoading) {
     return (
       <DashboardShell user={session?.user || null}>
-        <div style={{ display: "flex", minHeight: "60vh", alignItems: "center", justifyContent: "center" }}>
+        <div className="flex items-center justify-center" style={{ minHeight: "60vh" }}>
           <span className="loading" />
         </div>
       </DashboardShell>
@@ -603,15 +590,10 @@ export default function WalletPage() {
         <WalletSummaryCards userType={userType} walletData={walletData} />
 
         <div
-          className="scrollable-tabs"
+          
           role="tablist"
           aria-label="Wallet sections"
-          style={{
-            borderBottom: "1px solid var(--color-border)",
-            marginBottom: "24px",
-            display: "flex",
-            gap: "24px",
-          }}
+           className="scrollable-tabs border-b-card mb-6 flex gap-6"
         >
           {[
             "overview",
@@ -645,7 +627,7 @@ export default function WalletPage() {
 
         {activeTab === "overview" && (
           <div className="card">
-            <h3 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "16px" }}>
+            <h3 className="text-lg font-bold mb-4">
               Recent Transactions
             </h3>
             <TransactionHistory />
@@ -663,10 +645,10 @@ export default function WalletPage() {
         {activeTab === "payment-methods" && (
           <div style={{ maxWidth: "800px" }}>
             <div className="card">
-              <h3 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "8px" }}>
+              <h3 className="text-lg font-bold mb-2">
                 Payment Methods
               </h3>
-              <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+              <p className="text-secondary text-sm">
                 You can save methods through Razorpay checkout for faster top-ups.
               </p>
             </div>
@@ -676,8 +658,8 @@ export default function WalletPage() {
 
       {showWithdrawModal && (
         <div className="modal-overlay">
-          <div className="card" style={{ width: "100%", maxWidth: "500px" }}>
-            <h2 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "24px" }}>
+          <div className="card w-full" style={{ maxWidth: "500px" }}>
+            <h2 className="text-xl font-extrabold mb-6">
               Request Withdrawal
             </h2>
 
@@ -721,7 +703,7 @@ export default function WalletPage() {
                       aria-label="Change selected bank account"
                       onClick={() => setSelectedAccount(null)}
                       variant="ghost"
-                      style={{ fontSize: "12px", color: "var(--color-accent-rose)" }}
+                      className="text-xs" style={{ color: "var(--color-accent-rose)" }}
                     >
                       Change
                     </Button>
@@ -761,8 +743,8 @@ export default function WalletPage() {
 
       {showAddFundsModal && (
         <div className="modal-overlay">
-          <div className="card" style={{ width: "100%", maxWidth: "400px" }}>
-            <h2 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "24px" }}>
+          <div className="card w-full" style={{ maxWidth: "400px" }}>
+            <h2 className="text-xl font-extrabold mb-6">
               Add Funds
             </h2>
             <form onSubmit={handleAddFunds}>

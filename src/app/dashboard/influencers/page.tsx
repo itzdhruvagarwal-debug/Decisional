@@ -114,11 +114,11 @@ export default function DiscoverInfluencersPage() {
   ) {
     return (
       <DashboardShell user={session.user}>
-        <div className="card" style={{ maxWidth: "680px", margin: "40px auto", textAlign: "center" }}>
-          <h1 style={{ fontSize: "24px", fontWeight: 800, marginBottom: "8px" }}>
+        <div className="card text-center" style={{ maxWidth: "680px", margin: "40px auto" }}>
+          <h1 className="text-2xl font-extrabold mb-2">
             Brand access required
           </h1>
-          <p style={{ color: "var(--color-text-secondary)", marginBottom: "20px" }}>
+          <p className="text-secondary mb-5">
             Influencer discovery is available for brand accounts. Browse campaigns instead.
           </p>
           <Link href="/dashboard/campaigns" className="btn btn-primary">
@@ -135,25 +135,12 @@ export default function DiscoverInfluencersPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ textAlign: "center", marginBottom: "48px" }}
+          className="text-center" style={{ marginBottom: "48px" }}
         >
-          <h1 style={{
-            fontSize: "42px",
-            fontWeight: 900,
-            background: "linear-gradient(135deg, #8b5cf6, #3b82f6, #06b6d4)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            letterSpacing: 0,
-            marginBottom: "12px"
-          }}>
+          <h1 className="mb-3" style={{ fontSize: "42px", fontWeight: 900, background: "linear-gradient(135deg, #8b5cf6, #3b82f6, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 0 }}>
             Discover Top Creators
           </h1>
-          <p style={{
-            color: "var(--color-text-secondary)",
-            fontSize: "18px",
-            maxWidth: "600px",
-            margin: "0 auto"
-          }}>
+          <p className="text-secondary text-lg" style={{ maxWidth: "600px", margin: "0 auto" }}>
             Find verified creators by category, reach, and trust score.
           </p>
         </motion.div>
@@ -162,17 +149,7 @@ export default function DiscoverInfluencersPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           onSubmit={handleSearch}
-          style={{
-            padding: "clamp(16px, 4vw, 32px)",
-            marginBottom: "48px",
-            display: "flex",
-            gap: "20px",
-            flexWrap: "wrap",
-            background: "var(--color-bg-card)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-lg)",
-            boxShadow: "var(--shadow-sm)"
-          }}
+          className="flex gap-5 flex-wrap" style={{ padding: "clamp(16px, 4vw, 32px)", marginBottom: "48px", background: "var(--color-bg-card)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-sm)" }}
         >
           <div style={{ flex: "1 1 min(280px, 100%)" }}>
             <Input
@@ -277,16 +254,11 @@ export default function DiscoverInfluencersPage() {
               fullWidth
             />
           </div>
-          <div style={{ display: "flex", alignItems: "flex-end", flex: "1 1 auto" }}>
+          <div className="flex items-end" style={{ flex: "1 1 auto" }}>
             <Button
               type="submit"
               variant="primary"
-              style={{
-                height: "52px",
-                padding: "0 32px",
-                fontWeight: 800,
-                fontSize: "15px",
-              }}
+              className="font-extrabold" style={{ height: "52px", padding: "0 32px", fontSize: "15px" }}
             >
               Search
             </Button>
@@ -302,7 +274,7 @@ export default function DiscoverInfluencersPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  style={{ textAlign: "center", padding: "80px", color: "var(--color-text-secondary)" }}
+                  className="text-center text-secondary" style={{ padding: "80px" }}
                 >
                   <div className="loader" style={{
                     width: "48px",
@@ -313,7 +285,7 @@ export default function DiscoverInfluencersPage() {
                     margin: "0 auto 24px",
                     animation: "spin 1s linear infinite",
                   }} />
-                  <p style={{ fontSize: "16px", fontWeight: 600, letterSpacing: 0 }}>Loading creator data...</p>
+                  <p className="text-base font-semibold" style={{ letterSpacing: 0 }}>Loading creator data...</p>
                 </motion.div>
               );
             }
@@ -350,156 +322,69 @@ export default function DiscoverInfluencersPage() {
                     show: { opacity: 1, y: 0 }
                   }}
                   whileHover={{ y: -10, transition: { duration: 0.2 } }}
-                  style={{
-                    background: inf.isFeatured
+                  className="flex flex-col h-full relative overflow-hidden" style={{ background: inf.isFeatured
                       ? "linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, var(--color-bg-card) 100%)"
-                      : "var(--color-bg-card)",
-                    backdropFilter: "blur(10px)",
-                    borderRadius: "var(--radius-lg)",
-                    border: inf.isFeatured
+                      : "var(--color-bg-card)", backdropFilter: "blur(10px)", borderRadius: "var(--radius-lg)", border: inf.isFeatured
                       ? "1px solid rgba(245, 158, 11, 0.4)"
-                      : "1px solid var(--color-border)",
-                    boxShadow: inf.isFeatured
+                      : "1px solid var(--color-border)", boxShadow: inf.isFeatured
                       ? "0 10px 30px rgba(245, 158, 11, 0.12), var(--shadow-sm)"
-                      : "var(--shadow-sm)",
-                    padding: "32px",
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                    position: "relative",
-                    overflow: "hidden"
-                  }}
+                      : "var(--shadow-sm)", padding: "32px" }}
                 >
                   {/* Subtle Background Accent */}
-                  <div style={{
-                    position: "absolute",
-                    top: "-20px",
-                    right: "-20px",
-                    width: "100px",
-                    height: "100px",
-                    background: "var(--gradient-primary)",
-                    opacity: 0.05,
-                    filter: "blur(40px)",
-                    borderRadius: "8px",
-                    pointerEvents: "none"
-                  }} />
+                  <div className="absolute" style={{ top: "-20px", right: "-20px", width: "100px", height: "100px", background: "var(--gradient-primary)", opacity: 0.05, filter: "blur(40px)", borderRadius: "8px", pointerEvents: "none" }} />
 
-                  <div style={{ display: "flex", gap: "20px", alignItems: "center", marginBottom: "24px" }}>
-                    <div style={{
-                      width: "72px",
-                      height: "72px",
-                      borderRadius: "8px",
-                      background: "var(--gradient-primary)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "28px",
-                      fontWeight: 900,
-                      flexShrink: 0,
-                      boxShadow: "0 10px 20px rgba(0,0,0,0.2)"
-                    }}>
+                  <div className="flex gap-5 items-center mb-6">
+                    <div className="flex items-center justify-center flex-shrink-0" style={{ width: "72px", height: "72px", borderRadius: "8px", background: "var(--gradient-primary)", fontSize: "28px", fontWeight: 900, boxShadow: "0 10px 20px rgba(0,0,0,0.2)" }}>
                       {inf.displayName?.[0] || "I"}
                     </div>
                     <div>
-                      <h3 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 6px", color: "var(--color-text-primary)" }}>
+                      <h3 className="text-lg font-extrabold" style={{ margin: "0 0 6px", color: "var(--color-text-primary)" }}>
                         {inf.displayName}
                       </h3>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "var(--color-text-muted)" }}>
+                      <div className="flex items-center text-sm text-muted" style={{ gap: "6px" }}>
                         <span>Location:</span>
                         <span>{inf.city || "Global"}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "20px" }}>
+                  <div className="flex gap-2 flex-wrap mb-5">
                     {inf.isFeatured && (
-                      <span style={{
-                        fontSize: "11px",
-                        fontWeight: 800,
-                        padding: "4px 10px",
-                        borderRadius: "8px",
-                        background: "rgba(245, 158, 11, 0.15)",
-                        color: "#f59e0b",
-                        border: "1px solid rgba(245, 158, 11, 0.25)",
-                        textTransform: "uppercase",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "4px"
-                      }}>
+                      <span className="font-extrabold inline-flex items-center gap-1" style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "8px", background: "rgba(245, 158, 11, 0.15)", color: "#f59e0b", border: "1px solid rgba(245, 158, 11, 0.25)", textTransform: "uppercase" }}>
                         ⭐ Featured
                       </span>
                     )}
-                    <span style={{
-                      fontSize: "11px",
-                      fontWeight: 800,
-                      padding: "4px 10px",
-                      borderRadius: "8px",
-                      background: "rgba(16, 185, 129, 0.15)",
-                      color: "#10b981",
-                      textTransform: "uppercase"
-                    }}>
+                    <span className="font-extrabold" style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "8px", background: "rgba(16, 185, 129, 0.15)", color: "#10b981", textTransform: "uppercase" }}>
                       TRUST: {inf.trustScore}%
                     </span>
-                    <span style={{
-                      fontSize: "11px",
-                      fontWeight: 800,
-                      padding: "4px 10px",
-                      borderRadius: "8px",
-                      background: "rgba(59, 130, 246, 0.15)",
-                      color: "#3b82f6",
-                      textTransform: "uppercase"
-                    }}>
+                    <span className="font-extrabold" style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "8px", background: "rgba(59, 130, 246, 0.15)", color: "#3b82f6", textTransform: "uppercase" }}>
                       {inf.categories.split(',')[0]}
                     </span>
                   </div>
 
-                  <p style={{
-                    fontSize: "14px",
-                    color: "var(--color-text-secondary)",
-                    lineHeight: "1.6",
-                    marginBottom: "28px",
-                    flex: 1
-                  }}>
+                  <p className="text-sm text-secondary flex-1" style={{ lineHeight: "1.6", marginBottom: "28px" }}>
                     {inf.bio || "High-impact creator focused on quality content delivery and authentic audience engagement."}
                   </p>
 
-                  <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr 1fr",
-                    gap: "12px",
-                    padding: "20px 0",
-                    borderTop: "1px solid rgba(255,255,255,0.05)",
-                    marginBottom: "24px"
-                  }}>
-                    <div style={{ textAlign: "center" }}>
-                      <div style={{ fontSize: "11px", color: "var(--color-text-muted)", fontWeight: 700, marginBottom: "4px", textTransform: "uppercase" }}>Followers</div>
-                      <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--color-text-primary)" }}>{formatNumber(inf.instagramFollowers)}</div>
+                  <div className="grid gap-3 mb-6" style={{ gridTemplateColumns: "1fr 1fr 1fr", padding: "20px 0", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                    <div className="text-center">
+                      <div className="text-muted font-bold mb-1" style={{ fontSize: "11px", textTransform: "uppercase" }}>Followers</div>
+                      <div className="font-extrabold" style={{ fontSize: "15px", color: "var(--color-text-primary)" }}>{formatNumber(inf.instagramFollowers)}</div>
                     </div>
-                    <div style={{ textAlign: "center" }}>
-                      <div style={{ fontSize: "11px", color: "var(--color-text-muted)", fontWeight: 700, marginBottom: "4px", textTransform: "uppercase" }}>Subs</div>
-                      <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--color-text-primary)" }}>{inf.youtubeSubscribers === -1 ? 'Hidden' : formatNumber(inf.youtubeSubscribers)}</div>
+                    <div className="text-center">
+                      <div className="text-muted font-bold mb-1" style={{ fontSize: "11px", textTransform: "uppercase" }}>Subs</div>
+                      <div className="font-extrabold" style={{ fontSize: "15px", color: "var(--color-text-primary)" }}>{inf.youtubeSubscribers === -1 ? 'Hidden' : formatNumber(inf.youtubeSubscribers)}</div>
                     </div>
-                    <div style={{ textAlign: "center" }}>
-                      <div style={{ fontSize: "11px", color: "var(--color-text-muted)", fontWeight: 700, marginBottom: "4px", textTransform: "uppercase" }}>Deals</div>
-                      <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--color-text-primary)" }}>{inf.totalCompletedDeals || 0}</div>
+                    <div className="text-center">
+                      <div className="text-muted font-bold mb-1" style={{ fontSize: "11px", textTransform: "uppercase" }}>Deals</div>
+                      <div className="font-extrabold" style={{ fontSize: "15px", color: "var(--color-text-primary)" }}>{inf.totalCompletedDeals || 0}</div>
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", gap: "10px", marginTop: "auto" }}>
+                  <div className="flex" style={{ gap: "10px", marginTop: "auto" }}>
                     <Link
                       href={`/dashboard/influencers/${inf.id}`}
-                      style={{
-                        flex: 1,
-                        background: "var(--color-bg-secondary)",
-                        textAlign: "center",
-                        padding: "12px 8px",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        fontWeight: 700,
-                        textDecoration: "none",
-                        border: "1px solid rgba(255,255,255,0.05)",
-                        transition: "all 0.3s"
-                      }}
+                      className="flex-1 text-center text-sm font-bold" style={{ background: "var(--color-bg-secondary)", padding: "12px 8px", borderRadius: "8px", textDecoration: "none", border: "1px solid rgba(255,255,255,0.05)", transition: "all 0.3s" }}
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.08)";
                       }}
@@ -511,18 +396,7 @@ export default function DiscoverInfluencersPage() {
                     </Link>
                     <Link
                       href={`/dashboard/campaigns/create?invite=${inf.id}`}
-                      style={{
-                        flex: 1,
-                        background: "var(--gradient-primary)",
-                        textAlign: "center",
-                        padding: "12px 8px",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        fontWeight: 700,
-                        textDecoration: "none",
-                        transition: "all 0.3s",
-                        boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)"
-                      }}
+                      className="flex-1 text-center text-sm font-bold" style={{ background: "var(--gradient-primary)", padding: "12px 8px", borderRadius: "8px", textDecoration: "none", transition: "all 0.3s", boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)" }}
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLAnchorElement).style.opacity = "0.9";
                       }}

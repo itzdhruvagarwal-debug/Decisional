@@ -34,22 +34,7 @@ export function Toast({ toast, onClose }: Readonly<ToastProps>) {
       role="alert"
       aria-live="assertive"
       aria-atomic="true"
-      style={{
-        padding: "12px 20px",
-        borderRadius: "10px",
-        color: "#fff",
-        fontSize: "14px",
-        fontWeight: 500,
-        background: bg,
-        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-        backdropFilter: "blur(12px)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        animation: "slideInRight 0.3s ease-out",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        width: "100%",
-      }}
+      className="text-sm font-medium flex items-center justify-between w-full" style={{ padding: "12px 20px", borderRadius: "10px", color: "#fff", background: bg, boxShadow: "0 8px 32px rgba(0,0,0,0.3)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", animation: "slideInRight 0.3s ease-out" }}
     >
       <span>
         {icon}
@@ -58,17 +43,7 @@ export function Toast({ toast, onClose }: Readonly<ToastProps>) {
       <button
         onClick={() => onClose(toast.id)}
         aria-label={`Dismiss ${toast.type} notification`}
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          color: "#fff",
-          marginLeft: "8px",
-          opacity: 0.7,
-          fontSize: "14px",
-          padding: "0 4px",
-          lineHeight: 1,
-        }}
+        className="cursor-pointer text-sm" style={{ background: "none", border: "none", color: "#fff", marginLeft: "8px", opacity: 0.7, padding: "0 4px", lineHeight: 1 }}
       >
         ✕
       </button>
@@ -81,16 +56,7 @@ export function ToastContainer({ toasts, onClose }: Readonly<{ toasts: ToastItem
   return (
     <div
       aria-label="Notifications"
-      style={{
-        position: "fixed",
-        top: 24,
-        right: 24,
-        zIndex: 9999,
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-        maxWidth: "400px",
-      }}
+      className="fixed flex flex-col gap-2" style={{ top: 24, right: 24, zIndex: 9999, maxWidth: "400px" }}
     >
       {toasts.map(t => (
         <Toast key={t.id} toast={t} onClose={onClose} />

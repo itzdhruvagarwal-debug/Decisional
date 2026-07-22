@@ -19,17 +19,17 @@ export default async function AdminApplicationsPage() {
 
   return (
     <div className="admin-page admin-page-narrow">
-      <header style={{ marginBottom: "32px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+      <header className="mb-8">
+        <div className="flex justify-between items-start flex-wrap gap-4">
           <div>
-            <h1 className="gradient-text" style={{ fontSize: "28px", fontWeight: 900, marginBottom: "8px" }}>
+            <h1 className="gradient-text mb-2" style={{ fontSize: "28px", fontWeight: 900 }}>
               🚩 Flagged Applications
             </h1>
-            <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+            <p className="text-secondary text-sm">
               Review campaign pitches flagged by the automated security risk engine.
             </p>
           </div>
-          <Link href="/admin" className="btn btn-secondary" style={{ fontSize: "13px", padding: "8px 16px" }}>
+          <Link href="/admin" className="btn btn-secondary text-sm" style={{ padding: "8px 16px" }}>
             ← Admin Dashboard
           </Link>
         </div>
@@ -37,30 +37,21 @@ export default async function AdminApplicationsPage() {
 
       {/* Summary stats */}
       <div
-        className="card"
-        style={{
-          padding: "16px 24px",
-          marginBottom: "24px",
-          display: "flex",
-          gap: "32px",
-          flexWrap: "wrap",
-          background: "linear-gradient(135deg, rgba(239,68,68,0.04), rgba(245,158,11,0.04))",
-          border: "1px solid rgba(239,68,68,0.15)",
-        }}
+        className="card mb-6 flex gap-8 flex-wrap" style={{ padding: "16px 24px", background: "linear-gradient(135deg, rgba(239,68,68,0.04), rgba(245,158,11,0.04))", border: "1px solid rgba(239,68,68,0.15)" }}
       >
         <div>
-          <div style={{ fontSize: "11px", color: "var(--color-text-muted)", textTransform: "uppercase", fontWeight: 700 }}>
+          <div className="text-muted font-bold" style={{ fontSize: "11px", textTransform: "uppercase" }}>
             Total Flagged
           </div>
-          <div style={{ fontSize: "24px", fontWeight: 900, color: "var(--color-error)" }}>
+          <div className="text-2xl" style={{ fontWeight: 900, color: "var(--color-error)" }}>
             {flaggedApps.length}
           </div>
         </div>
         <div>
-          <div style={{ fontSize: "11px", color: "var(--color-text-muted)", textTransform: "uppercase", fontWeight: 700 }}>
+          <div className="text-muted font-bold" style={{ fontSize: "11px", textTransform: "uppercase" }}>
             Total Value at Risk
           </div>
-          <div style={{ fontSize: "24px", fontWeight: 900, color: "var(--color-warning)" }}>
+          <div className="text-2xl" style={{ fontWeight: 900, color: "var(--color-warning)" }}>
             {formatCurrency(
               flaggedApps.reduce((sum, app) => sum + (app.proposedRate || 0), 0)
             )}
@@ -75,7 +66,7 @@ export default async function AdminApplicationsPage() {
           description="All applications have passed the security risk check."
         />
       ) : (
-        <div style={{ display: "grid", gap: "16px" }}>
+        <div className="grid gap-4">
           {flaggedApps.map((app: FlaggedApp) => {
             const approveAction = approveFlaggedApplication.bind(null, app.id);
             const rejectAction = async (formData: FormData) => {
@@ -95,40 +86,20 @@ export default async function AdminApplicationsPage() {
             return (
               <div
                 key={app.id}
-                className="card"
-                style={{
-                  padding: "24px",
-                  border: "1px solid rgba(239, 68, 68, 0.2)",
-                  background: "rgba(239, 68, 68, 0.02)",
-                }}
+                className="card p-6" style={{ border: "1px solid rgba(239, 68, 68, 0.2)", background: "rgba(239, 68, 68, 0.02)" }}
               >
                 {/* Header row */}
                 <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    flexWrap: "wrap",
-                    gap: "16px",
-                    marginBottom: "16px",
-                  }}
+                  className="flex justify-between flex-wrap gap-4 mb-4"
                 >
                   <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                    <div className="flex items-center gap-2 mb-1">
                       <span
-                        style={{
-                          fontSize: "10px",
-                          fontWeight: 700,
-                          padding: "2px 8px",
-                          borderRadius: "var(--radius-sm)",
-                          background: "rgba(239,68,68,0.15)",
-                          color: "var(--color-error)",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                        }}
+                        className="font-bold" style={{ fontSize: "10px", padding: "2px 8px", borderRadius: "var(--radius-sm)", background: "rgba(239,68,68,0.15)", color: "var(--color-error)", textTransform: "uppercase", letterSpacing: "0.05em" }}
                       >
                         FLAGGED
                       </span>
-                      <span style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
+                      <span className="text-muted" style={{ fontSize: "11px" }}>
                         {new Date(app.createdAt).toLocaleDateString("en-IN", {
                           day: "numeric",
                           month: "short",
@@ -136,16 +107,16 @@ export default async function AdminApplicationsPage() {
                         })}
                       </span>
                     </div>
-                    <h3 style={{ fontWeight: 800, fontSize: "17px", color: "var(--color-text-primary)", marginBottom: "4px" }}>
+                    <h3 className="font-extrabold mb-1" style={{ fontSize: "17px", color: "var(--color-text-primary)" }}>
                       {app.campaign.title}
                     </h3>
-                    <p style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}>
+                    <p className="text-sm text-secondary">
                       Brand: <strong>{app.campaign.brand?.companyName || "Unknown"}</strong>
                     </p>
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>Proposed Rate</div>
-                    <div style={{ fontWeight: 900, fontSize: "20px", color: "var(--color-accent-emerald)" }}>
+                  <div className="text-right">
+                    <div className="text-muted" style={{ fontSize: "11px" }}>Proposed Rate</div>
+                    <div className="text-xl" style={{ fontWeight: 900, color: "var(--color-accent-emerald)" }}>
                       {formatCurrency(app.proposedRate || 0)}
                     </div>
                   </div>
@@ -153,24 +124,13 @@ export default async function AdminApplicationsPage() {
 
                 {/* Influencer info */}
                 <div
-                  style={{
-                    padding: "12px 16px",
-                    background: "var(--color-bg-tertiary)",
-                    borderRadius: "var(--radius-md)",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    flexWrap: "wrap",
-                    gap: "12px",
-                    marginBottom: "16px",
-                    border: "1px solid var(--color-border)",
-                  }}
+                  className="flex justify-between items-center flex-wrap gap-3 mb-4" style={{ padding: "12px 16px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}
                 >
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: "14px", marginBottom: "2px" }}>
+                    <div className="font-bold text-sm" style={{ marginBottom: "2px" }}>
                       👤 {app.influencer.displayName}
                     </div>
-                    <div style={{ fontSize: "12px", color: "var(--color-text-secondary)", display: "flex", gap: "16px", flexWrap: "wrap" }}>
+                    <div className="text-xs text-secondary flex gap-4 flex-wrap">
                       <span>{app.influencer.user.email}</span>
                       <span>
                         Trust Score:{" "}
@@ -186,8 +146,7 @@ export default async function AdminApplicationsPage() {
                   </div>
                   <Link
                     href={`/admin/users?search=${encodeURIComponent(app.influencer.user.email)}`}
-                    className="btn btn-secondary"
-                    style={{ fontSize: "12px", padding: "6px 14px" }}
+                    className="btn btn-secondary text-xs" style={{ padding: "6px 14px" }}
                   >
                     View User Profile
                   </Link>
@@ -195,37 +154,29 @@ export default async function AdminApplicationsPage() {
 
                 {/* Action buttons */}
                 <div
-                  style={{
-                    borderTop: "1px solid var(--color-border)",
-                    paddingTop: "16px",
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    gap: "12px",
-                    flexWrap: "wrap",
-                  }}
+                  className="flex justify-end items-center gap-3 flex-wrap" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "16px" }}
                 >
                   <form action={approveAction}>
                     <Button
                       type="submit"
                       variant="success"
-                      style={{ padding: "8px 20px", fontSize: "13px" }}
+                      className="text-sm" style={{ padding: "8px 20px" }}
                     >
                       ✓ Approve Application
                     </Button>
                   </form>
 
-                  <form action={rejectAction} style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                  <form action={rejectAction} className="flex gap-2 items-center">
                     <Input
                       type="text"
                       name="reason"
                       placeholder="Rejection reason (optional)..."
-                      style={{ padding: "6px 12px", fontSize: "13px", width: "220px" }}
+                      className="text-sm" style={{ padding: "6px 12px", width: "220px" }}
                     />
                     <Button
                       type="submit"
                       variant="danger"
-                      style={{ padding: "8px 16px", fontSize: "13px" }}
+                      className="text-sm" style={{ padding: "8px 16px" }}
                     >
                       ✕ Reject
                     </Button>

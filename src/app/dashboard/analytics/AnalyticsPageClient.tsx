@@ -53,27 +53,20 @@ export default function AnalyticsPageClient({
   return (
     <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
       <div
-        style={{
-          marginBottom: "32px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "16px",
-        }}
+        className="mb-8 flex justify-between items-center flex-wrap gap-4"
       >
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: 800 }}>
+          <h1 className="font-extrabold" style={{ fontSize: "28px" }}>
             {userType === "INFLUENCER" ? "Performance Analytics" : "Campaign Analytics"}
           </h1>
-          <p style={{ color: "var(--color-text-secondary)" }}>
+          <p className="text-secondary">
             {userType === "INFLUENCER"
               ? "Track your earnings, reach, and impact"
               : "Monitor your spend, ROI, and campaign success"}
           </p>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div className="flex items-center gap-3">
           <Select
             id="analytics-fy-select"
             label="Financial Year:"
@@ -93,7 +86,7 @@ export default function AnalyticsPageClient({
         </div>
       </div>
 
-      <div style={{ marginBottom: "32px" }}>
+      <div className="mb-8">
         <WeeklyChallenges />
       </div>
 

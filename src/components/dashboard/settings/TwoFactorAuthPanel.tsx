@@ -41,20 +41,20 @@ export default function TwoFactorAuthPanel({
     };
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        <div className="flex flex-col gap-6">
             {/* Recovery Codes Display — shown once after 2FA setup */}
             {recoveryCodes.length > 0 && (
                 <div className="card" style={{ border: "2px solid var(--color-accent-amber)", background: "rgba(245, 158, 11, 0.06)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                        <h3 style={{ fontSize: "16px", fontWeight: 800, color: "var(--color-accent-amber)" }}>🔑 Save Your Recovery Codes</h3>
-                        <Button variant="ghost" onClick={() => setRecoveryCodes([])} style={{ fontSize: "12px" }}>I've saved them ✓</Button>
+                    <div className="flex justify-between items-center mb-3">
+                        <h3 className="text-base font-extrabold" style={{ color: "var(--color-accent-amber)" }}>🔑 Save Your Recovery Codes</h3>
+                        <Button variant="ghost" onClick={() => setRecoveryCodes([])} className="text-xs">I've saved them ✓</Button>
                     </div>
-                    <p style={{ fontSize: "13px", color: "var(--color-text-secondary)", marginBottom: "12px" }}>
+                    <p className="text-sm text-secondary mb-3">
                         These codes can be used to access your account if you lose your authenticator. Each code can only be used once. Store them somewhere safe — they won't be shown again.
                     </p>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "12px" }}>
+                    <div className="grid gap-2 mb-3" style={{ gridTemplateColumns: "1fr 1fr" }}>
                         {recoveryCodes.map((code) => (
-                            <div key={code} style={{ fontFamily: "monospace", fontSize: "14px", fontWeight: 700, padding: "8px 12px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)", border: "1px solid var(--color-border)", letterSpacing: "0.1em" }}>
+                            <div key={code} className="text-sm font-bold" style={{ fontFamily: "monospace", padding: "8px 12px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)", border: "1px solid var(--color-border)", letterSpacing: "0.1em" }}>
                                 {code}
                             </div>
                         ))}
@@ -72,28 +72,16 @@ export default function TwoFactorAuthPanel({
             {/* Two-Factor Authentication */}
             <div className="card">
                 <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        marginBottom: "16px",
-                    }}
+                    className="flex justify-between items-start mb-4"
                 >
                     <div>
                         <h3
-                            style={{
-                                fontSize: "18px",
-                                fontWeight: 700,
-                                marginBottom: "4px",
-                            }}
+                            className="text-lg font-bold mb-1"
                         >
                             Two-Factor Authentication
                         </h3>
                         <p
-                            style={{
-                                fontSize: "13px",
-                                color: "var(--color-text-secondary)",
-                            }}
+                            className="text-sm text-secondary"
                         >
                             Add an extra layer of security to your account.
                         </p>
@@ -108,7 +96,7 @@ export default function TwoFactorAuthPanel({
                 {!is2FAEnabled && !is2FASetupVisible && (
                     <Button
                         variant="secondary"
-                        style={{ width: "100%" }}
+                        className="w-full"
                         onClick={async () => {
                             setIsSaving(true);
                             const res = await fetch("/api/user/2fa/setup", {
@@ -130,27 +118,13 @@ export default function TwoFactorAuthPanel({
 
                 {is2FASetupVisible && qrCodeData && !is2FAEnabled && (
                     <div
-                        style={{
-                            marginTop: "16px",
-                            padding: "16px",
-                            background: "var(--color-bg-tertiary)",
-                            borderRadius: "var(--radius-md)",
-                        }}
+                        className="mt-4 p-4" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
                     >
-                        <p style={{ fontSize: "14px", marginBottom: "12px" }}>
+                        <p className="text-sm mb-3">
                             1. Scan this QR code with your authenticator app (e.g. Google Authenticator, Authy):
                         </p>
                         <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "center",
-                                marginBottom: "16px",
-                                background: "white",
-                                padding: "16px",
-                                borderRadius: "8px",
-                                width: "fit-content",
-                                margin: "0 auto 16px auto",
-                            }}
+                            className="flex justify-center mb-4 p-4" style={{ background: "white", borderRadius: "8px", width: "fit-content", margin: "0 auto 16px auto" }}
                         >
                             <Image
                                 src={qrCodeData.qrCodeUrl}
@@ -161,19 +135,14 @@ export default function TwoFactorAuthPanel({
                             />
                         </div>
                         <p
-                            style={{
-                                fontSize: "12px",
-                                color: "var(--color-text-muted)",
-                                textAlign: "center",
-                                marginBottom: "16px",
-                            }}
+                            className="text-xs text-muted text-center mb-4"
                         >
                             Or enter code manually: {qrCodeData.secret}
                         </p>
-                        <p style={{ fontSize: "14px", marginBottom: "8px" }}>
+                        <p className="text-sm mb-2">
                             2. Enter the 6-digit code from your app to verify setup:
                         </p>
-                        <div style={{ display: "flex", gap: "8px" }}>
+                        <div className="flex gap-2">
                             <Input
                                 id="2fa-setup-code"
                                 type="text"
@@ -226,22 +195,13 @@ export default function TwoFactorAuthPanel({
 
                     {is2FAEnabled && (
                         <div
-                            style={{
-                                marginTop: "16px",
-                                padding: "16px",
-                                background: "var(--color-bg-tertiary)",
-                                borderRadius: "var(--radius-md)",
-                            }}
+                            className="mt-4 p-4" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
                         >
-                            <p style={{ fontSize: "14px", marginBottom: "12px" }}>
+                            <p className="text-sm mb-3">
                                 To disable 2FA, please enter your current password:
                             </p>
                             <div
-                                style={{
-                                    display: "flex",
-                                    gap: "8px",
-                                    flexDirection: "column",
-                                }}
+                                className="flex gap-2 flex-col"
                             >
                                 <Input
                                     id="disable-2fa-password"

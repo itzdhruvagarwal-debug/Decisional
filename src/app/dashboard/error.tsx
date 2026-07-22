@@ -22,16 +22,7 @@ export default function DashboardError({
     <div
       role="alert"
       aria-live="assertive"
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        flexDirection: "column",
-        gap: "24px",
-        background: "var(--color-bg-primary)",
-        color: "var(--color-text-primary)",
-      }}
+      className="flex justify-center items-center flex-col gap-6" style={{ height: "100vh", background: "var(--color-bg-primary)", color: "var(--color-text-primary)" }}
     >
       <h2>Something went wrong!</h2>
       <Button
@@ -41,11 +32,7 @@ export default function DashboardError({
           // Attempt to recover by trying to re-render the segment
           () => reset()
         }
-        style={{
-          padding: "12px 24px",
-          borderRadius: "8px",
-          fontSize: "16px",
-        }}
+        className="text-base" style={{ padding: "12px 24px", borderRadius: "8px" }}
       >
         Try again
       </Button>

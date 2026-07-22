@@ -42,27 +42,18 @@ export default function LoginActivityPanel({ showToast: _showToast }: Readonly<L
 
     return (
         <div className="card">
-            <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "16px",
-            }}>
-                <h3 style={{ fontSize: "18px", fontWeight: 700 }}>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold">
                     Recent Login Activity
                 </h3>
                 {loginActivity.length > 3 && (
-                    <span style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+                    <span className="text-xs text-muted">
                         {loginActivity.length} total sessions
                     </span>
                 )}
             </div>
             <div
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "12px",
-                }}
+                className="flex flex-col gap-3"
             >
                 {loginActivity.length === 0 ? (
                     <EmptyState emoji="🔒" title="No Login Activity" description="No recent login sessions found." compact />
@@ -70,39 +61,24 @@ export default function LoginActivityPanel({ showToast: _showToast }: Readonly<L
                     visibleLogins.map((login) => (
                         <div
                             key={`${login.device}-${login.time}`}
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                padding: "12px",
-                                background: "var(--color-bg-tertiary)",
-                                borderRadius: "var(--radius-sm)",
-                                border: login.active
+                            className="flex justify-between items-center p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)", border: login.active
                                     ? "1px solid var(--color-primary)"
-                                    : "1px solid transparent",
-                            }}
+                                    : "1px solid transparent" }}
                         >
                             <div
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "12px",
-                                }}
+                                className="flex items-center gap-3"
                             >
-                                <div style={{ fontSize: "20px" }}>
+                                <div className="text-xl">
                                     {login.device.includes("Android") ||
                                         login.device.includes("iPhone")
                                         ? "📱"
                                         : "💻"}
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: "13px", fontWeight: 600 }}>
+                                    <div className="text-sm font-semibold">
                                         {login.device}{" "}
                                         <span
-                                            style={{
-                                                fontWeight: 400,
-                                                color: "var(--color-text-muted)",
-                                            }}
+                                            className="font-normal text-muted"
                                         >
                                             • {login.location}
                                         </span>
@@ -122,14 +98,7 @@ export default function LoginActivityPanel({ showToast: _showToast }: Readonly<L
                             </div>
                             {login.active && (
                                 <div
-                                    style={{
-                                        fontSize: "10px",
-                                        fontWeight: 700,
-                                        color: "var(--color-accent-emerald)",
-                                        background: "rgba(16, 185, 129, 0.1)",
-                                        padding: "2px 6px",
-                                        borderRadius: "4px",
-                                    }}
+                                    className="font-bold" style={{ fontSize: "10px", color: "var(--color-accent-emerald)", background: "rgba(16, 185, 129, 0.1)", padding: "2px 6px", borderRadius: "4px" }}
                                 >
                                     ACTIVE
                                 </div>
@@ -142,23 +111,7 @@ export default function LoginActivityPanel({ showToast: _showToast }: Readonly<L
                 <Button
                     variant="secondary"
                     onClick={() => setShowAllLogins(!showAllLogins)}
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "6px",
-                        width: "100%",
-                        marginTop: "12px",
-                        padding: "10px",
-                        background: "var(--color-bg-tertiary)",
-                        border: "1px solid var(--color-border)",
-                        borderRadius: "var(--radius-sm)",
-                        color: "var(--color-primary-light)",
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                    }}
+                    className="flex items-center justify-center w-full mt-3 text-sm font-semibold cursor-pointer" style={{ gap: "6px", padding: "10px", background: "var(--color-bg-tertiary)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)", color: "var(--color-primary-light)", transition: "all 0.2s ease" }}
                 >
                     {showAllLogins ? "▲ Show Less" : `▼ View All (${loginActivity.length})`}
                 </Button>

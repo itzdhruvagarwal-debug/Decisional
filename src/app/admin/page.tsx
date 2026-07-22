@@ -22,11 +22,11 @@ export default async function VerifiedQueuePage() {
     <div className="admin-page">
       {/* 1. Verification Queue Section */}
       <section style={{ marginBottom: "48px" }}>
-        <header style={{ marginBottom: "24px" }}>
+        <header className="mb-6">
           <h1 className="gradient-text" style={{ fontSize: "26px", fontWeight: 900, marginBottom: "6px" }}>
             Verification Queue
           </h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+          <p className="text-secondary text-sm">
             Manage and review pending KYC requests from influencers and brands.
           </p>
         </header>
@@ -36,11 +36,11 @@ export default async function VerifiedQueuePage() {
 
       {/* 2. Flagged Applications Section */}
       <section>
-        <header style={{ marginBottom: "24px" }}>
+        <header className="mb-6">
           <h1 className="gradient-text" style={{ fontSize: "26px", fontWeight: 900, marginBottom: "6px" }}>
             Flagged Applications Review
           </h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "14px" }}>
+          <p className="text-secondary text-sm">
             Review campaign pitches flagged by the security risk engine.
           </p>
         </header>
@@ -53,7 +53,7 @@ export default async function VerifiedQueuePage() {
             compact
           />
         ) : (
-          <div style={{ display: "grid", gap: "16px" }}>
+          <div className="grid gap-4">
             {flaggedApps.map((app: FlaggedAppElement) => {
               const approveAction = approveFlaggedApplication.bind(null, app.id);
               const rejectAction = async (formData: FormData) => {
@@ -66,64 +66,52 @@ export default async function VerifiedQueuePage() {
               return (
                 <div
                   key={app.id}
-                  className="card"
-                  style={{
-                    padding: "24px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "16px",
-                    border: "1px solid rgba(239, 68, 68, 0.2)",
-                    background: "rgba(239, 68, 68, 0.02)",
-                  }}
+                  className="card p-6 flex flex-col gap-4" style={{ border: "1px solid rgba(239, 68, 68, 0.2)", background: "rgba(239, 68, 68, 0.02)" }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
+                  <div className="flex justify-between flex-wrap gap-4">
                     <div>
-                      <h4 style={{ fontWeight: 800, fontSize: "16px", color: "var(--color-text-primary)", marginBottom: "4px" }}>
+                      <h4 className="font-extrabold text-base mb-1" style={{ color: "var(--color-text-primary)" }}>
                         {app.campaign.title}
                       </h4>
-                      <p style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}>
+                      <p className="text-sm text-secondary">
                         Brand: <strong>{app.campaign.brand?.companyName || "Unknown Brand"}</strong>
                       </p>
                     </div>
 
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>Proposed Rate</div>
-                      <div style={{ fontWeight: 800, fontSize: "16px", color: "var(--color-accent-emerald)" }}>
+                    <div className="text-right">
+                      <div className="text-muted" style={{ fontSize: "11px" }}>Proposed Rate</div>
+                      <div className="font-extrabold text-base" style={{ color: "var(--color-accent-emerald)" }}>
                         {formatCurrency(app.proposedRate || 0)}
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ borderTop: "1px solid var(--color-border)", paddingTop: "16px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
+                  <div className="flex justify-between items-center flex-wrap gap-4" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "16px" }}>
                     <div>
-                      <div style={{ fontSize: "13px", color: "var(--color-text-primary)", fontWeight: 700 }}>
+                      <div className="text-sm font-bold" style={{ color: "var(--color-text-primary)" }}>
                         Influencer: {app.influencer.displayName}
                       </div>
-                      <div style={{ fontSize: "12px", color: "var(--color-text-secondary)", display: "flex", gap: "12px", marginTop: "2px" }}>
+                      <div className="text-xs text-secondary flex gap-3" style={{ marginTop: "2px" }}>
                         <span>Email: {app.influencer.user.email}</span>
                         <span>Trust Score: <strong style={{ color: "var(--color-accent-amber)" }}>{app.influencer.user.trustScore}</strong></span>
                       </div>
                     </div>
 
-                    <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                    <div className="flex gap-3 items-center">
                       <form action={approveAction}>
-                        <Button type="submit" variant="success" style={{ padding: "8px 16px", fontSize: "13px" }}>
+                        <Button type="submit" variant="success" className="text-sm" style={{ padding: "8px 16px" }}>
                           Approve Application
                         </Button>
                       </form>
 
-                      <form action={rejectAction} style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                      <form action={rejectAction} className="flex gap-2 items-center">
                         <Input
                           type="text"
                           name="reason"
                           placeholder="Rejection reason..."
-                          style={{
-                            padding: "6px 12px",
-                            fontSize: "13px",
-                            width: "180px",
-                          }}
+                          className="text-sm" style={{ padding: "6px 12px", width: "180px" }}
                         />
-                        <Button type="submit" variant="danger" style={{ padding: "8px 16px", fontSize: "13px" }}>
+                        <Button type="submit" variant="danger" className="text-sm" style={{ padding: "8px 16px" }}>
                           Reject
                         </Button>
                       </form>
