@@ -653,7 +653,7 @@ export default function CampaignDetailClient({
 
   if (loading) {
     return (
-      <div className="flex justify-center" style={{ padding: "64px" }}>
+      <div className="flex justify-center p-10">
         <span className="loading" style={{ width: "40px", height: "40px" }} />
       </div>
     );
@@ -685,7 +685,7 @@ export default function CampaignDetailClient({
   );
 
   return (
-    <div className="campaign-detail-page grid gap-4" style={{ maxWidth: "980px", margin: "0 auto" }}>
+    <div className="campaign-detail-page grid gap-4 max-w-980" style={{ margin: "0 auto" }}>
       <Link href="/dashboard/campaigns" className="campaign-detail-back text-sm text-secondary">
         Back to campaigns
       </Link>

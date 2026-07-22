@@ -154,7 +154,7 @@ export default function BadgesPage() {
 
         {/* Loading / Error States */}
         {loading && (
-          <div className="text-center" style={{ padding: "60px" }}>
+          <div className="text-center p-10">
             <div
               className="loading"
               style={{ width: "40px", height: "40px", margin: "0 auto" }}
@@ -217,7 +217,7 @@ export default function BadgesPage() {
                     }}
                   >
                     <div
-                      className="mb-4" style={{ fontSize: "48px", filter: badge.earned
+                      className="mb-4 text-3xl" style={{ filter: badge.earned
                           ? "drop-shadow(0 4px 8px rgba(0,0,0,0.2))"
                           : "none", transform: badge.earned ? "scale(1.1)" : "scale(1)" }}
                     >

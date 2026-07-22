@@ -180,7 +180,7 @@ export default function PasswordPanel({
                 <div
                     role="status"
                     aria-live="polite"
-                    className="p-3 mb-4 bg-emerald-subtle rounded-sm" style={{ color: "var(--color-success)", border: "1px solid rgba(16, 185, 129, 0.2)" }}
+                    className="p-3 mb-4 bg-emerald-subtle rounded-sm text-emerald" style={{ border: "1px solid rgba(16, 185, 129, 0.2)" }}
                 >
                     {passwordSuccess}
                 </div>
@@ -190,7 +190,7 @@ export default function PasswordPanel({
                 <div
                     role="alert"
                     aria-live="assertive"
-                    className="p-3 mb-4 rounded-sm" style={{ background: "rgba(239, 68, 68, 0.1)", color: "var(--color-error)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
+                    className="p-3 mb-4 rounded-sm text-rose" style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
                 >
                     {passwordError}
                 </div>
@@ -400,7 +400,7 @@ function CurrentPasswordSection({
         <Button
           type="button"
           onClick={() => setForgotPasswordState({ active: true, step: 'method', method: null, otp: '' })}
-          className="text-sm font-semibold cursor-pointer border-none text-primary-light" style={{ background: "none", padding: 0 }}
+          className="text-sm font-semibold cursor-pointer border-none text-primary-light p-0" style={{ background: "none" }}
         >
           Forgot Password?
         </Button>

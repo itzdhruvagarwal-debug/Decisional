@@ -89,7 +89,7 @@ export default async function AdminDisputeListPage({
         {activeDisputes.map((dispute) => (
           <div
             key={dispute.id}
-            className="card flex justify-between items-center gap-4 flex-wrap bg-secondary border-card rounded-lg" style={{ padding: "16px 24px" }}
+            className="card flex justify-between items-center gap-4 flex-wrap bg-secondary border-card rounded-lg px-6-py-4"
           >
             <div>
               <div
@@ -125,7 +125,7 @@ export default async function AdminDisputeListPage({
             </div>
             <Link
               href={`/admin/disputes/${dispute.id}`}
-              className="btn btn-primary text-sm" style={{ padding: "8px 16px" }}
+              className="btn btn-primary text-sm px-4-py-2"
             >
               {showHistory ? "View Details" : "Resolve"}
             </Link>
@@ -152,15 +152,13 @@ export default async function AdminDisputeListPage({
       <div className="flex gap-2 mb-6">
         <Link
           href="/admin/disputes"
-          className={`btn ${showHistory ? "btn-secondary" : "btn-primary"} text-sm`}
-          style={{ padding: "8px 16px" }}
+          className={`btn ${showHistory ? "btn-secondary" : "btn-primary"} text-sm px-4-py-2`}
         >
           Active Disputes
         </Link>
         <Link
           href="/admin/disputes?history=true"
-          className={`btn ${showHistory ? "btn-primary" : "btn-secondary"} text-sm`}
-          style={{ padding: "8px 16px" }}
+          className={`btn ${showHistory ? "btn-primary" : "btn-secondary"} text-sm px-4-py-2`}
         >
           Dispute History
         </Link>

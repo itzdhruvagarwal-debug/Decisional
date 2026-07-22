@@ -135,7 +135,7 @@ function HeroProductMockup() {
 
   return (
     <div
-      className="animate-fade-in flex flex-col items-center gap-4 w-full" style={{ marginTop: "48px", maxWidth: "840px", marginInline: "auto" }}
+      className="animate-fade-in flex flex-col items-center gap-4 w-full max-w-840" style={{ marginTop: "48px", marginInline: "auto" }}
     >
       {/* Mockup View Selector */}
       <div
@@ -145,7 +145,7 @@ function HeroProductMockup() {
           type="button"
           variant="ghost"
           onClick={() => setView("influencer")}
-          className="text-sm font-semibold border-none" style={{ background: view === "influencer" ? "var(--color-bg-tertiary)" : "transparent", color: view === "influencer" ? "white" : "var(--color-text-secondary)", borderRadius: "var(--radius-full)", padding: "8px 16px", transition: "all var(--transition-fast)" }}
+          className="text-sm font-semibold border-none px-4-py-2" style={{ background: view === "influencer" ? "var(--color-bg-tertiary)" : "transparent", color: view === "influencer" ? "white" : "var(--color-text-secondary)", borderRadius: "var(--radius-full)", transition: "all var(--transition-fast)" }}
         >
           Influencer View
         </Button>
@@ -153,7 +153,7 @@ function HeroProductMockup() {
           type="button"
           variant="ghost"
           onClick={() => setView("brand")}
-          className="text-sm font-semibold border-none" style={{ background: view === "brand" ? "var(--color-bg-tertiary)" : "transparent", color: view === "brand" ? "white" : "var(--color-text-secondary)", borderRadius: "var(--radius-full)", padding: "8px 16px", transition: "all var(--transition-fast)" }}
+          className="text-sm font-semibold border-none px-4-py-2" style={{ background: view === "brand" ? "var(--color-bg-tertiary)" : "transparent", color: view === "brand" ? "white" : "var(--color-text-secondary)", borderRadius: "var(--radius-full)", transition: "all var(--transition-fast)" }}
         >
           Brand View
         </Button>
@@ -173,7 +173,7 @@ function HeroProductMockup() {
 
         {/* Mockup Header */}
         <div
-          className="flex items-center justify-between mb-5" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.06)", paddingBottom: "16px" }}
+          className="flex items-center justify-between mb-5 pb-4" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.06)" }}
         >
           <div className="flex items-center gap-2">
             <span
@@ -294,10 +294,10 @@ function HeroProductMockup() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button type="button" variant="secondary" className="text-xs rounded-sm" style={{ background: "transparent", border: "1px solid rgba(255, 255, 255, 0.1)", color: "white", padding: "6px 12px" }}>
+                  <Button type="button" variant="secondary" className="text-xs rounded-sm px-3-py-1" style={{ background: "transparent", border: "1px solid rgba(255, 255, 255, 0.1)", color: "white" }}>
                     View Draft
                   </Button>
-                  <Button type="button" variant="primary" className="font-semibold border-none text-xs rounded-sm" style={{ background: "var(--gradient-primary)", color: "white", padding: "6px 12px", boxShadow: "var(--shadow-glow-primary)" }}>
+                  <Button type="button" variant="primary" className="font-semibold border-none text-xs rounded-sm px-3-py-1" style={{ background: "var(--gradient-primary)", color: "white", boxShadow: "var(--shadow-glow-primary)" }}>
                     Approve
                   </Button>
                 </div>
@@ -317,12 +317,12 @@ export default function HomePage() {
   );
 
   return (
-    <div style={{ minHeight: "100vh" }}>
+    <div className="min-h-screen">
       <Navbar />
 
       {/* ==================== HERO ==================== */}
       <section
-        className="relative overflow-hidden" style={{ paddingTop: "120px", paddingBottom: "80px" }}
+        className="relative overflow-hidden pt-30 pb-20"
       >
         {/* Hero Background — CSS background-image avoids Next/Image fill position issues */}
         <div
@@ -336,11 +336,11 @@ export default function HomePage() {
 
         <div className="container relative" style={{ zIndex: 1 }}>
           <div
-            className="text-center" style={{ maxWidth: "900px", margin: "0 auto" }}
+            className="text-center max-w-900" style={{ margin: "0 auto" }}
           >
             {/* Badge — fully inline-styled for guaranteed rendering */}
             <div
-              className="inline-flex items-center gap-2 font-bold rounded-full text-xs uppercase" style={{ marginBottom: "28px", background: "rgba(99, 102, 241, 0.15)", border: "1px solid rgba(129, 140, 248, 0.5)", padding: "6px 20px", color: "#a5b4fc", letterSpacing: "1px" }}
+              className="inline-flex items-center gap-2 font-bold rounded-full text-xs uppercase mb-6" style={{ background: "rgba(99, 102, 241, 0.15)", border: "1px solid rgba(129, 140, 248, 0.5)", padding: "6px 20px", color: "#a5b4fc", letterSpacing: "1px" }}
             >
               🇮🇳 India-first creator collaboration workspace
             </div>
@@ -367,13 +367,7 @@ export default function HomePage() {
             </h1>
 
             <p
-              style={{
-                fontSize: "clamp(15px, 2vw, 19px)",
-                color: "rgba(161, 161, 181, 0.9)",
-                maxWidth: "600px",
-                margin: "0 auto 40px",
-                lineHeight: 1.7,
-              }}
+              className="max-w-600" style={{ fontSize: "clamp(15px, 2vw, 19px)", color: "rgba(161, 161, 181, 0.9)", margin: "0 auto 40px", lineHeight: 1.7 }}
             >
               Run influencer campaigns with verified profiles, signed
               deliverables, payment protection, content approvals, and dispute
@@ -386,13 +380,13 @@ export default function HomePage() {
             >
               <Link
                 href="/register?type=influencer"
-                className="inline-flex items-center justify-center gap-2 font-bold rounded-lg text-sm" style={{ padding: "14px 28px", background: "linear-gradient(135deg, #6366f1, #4f46e5)", color: "white", textDecoration: "none", boxShadow: "0 4px 20px rgba(99, 102, 241, 0.4)", border: "1px solid rgba(129, 140, 248, 0.3)", transition: "transform 0.2s, box-shadow 0.2s" }}
+                className="inline-flex items-center justify-center gap-2 font-bold rounded-lg text-sm no-underline" style={{ padding: "14px 28px", background: "linear-gradient(135deg, #6366f1, #4f46e5)", color: "white", boxShadow: "0 4px 20px rgba(99, 102, 241, 0.4)", border: "1px solid rgba(129, 140, 248, 0.3)", transition: "transform 0.2s, box-shadow 0.2s" }}
               >
                 I&apos;m an Influencer
               </Link>
               <Link
                 href="/register?type=brand"
-                className="inline-flex items-center justify-center gap-2 font-bold rounded-lg text-sm" style={{ padding: "14px 28px", background: "rgba(255, 255, 255, 0.06)", color: "white", textDecoration: "none", border: "1px solid rgba(255, 255, 255, 0.15)", backdropFilter: "blur(8px)", transition: "transform 0.2s, background 0.2s" }}
+                className="inline-flex items-center justify-center gap-2 font-bold rounded-lg text-sm no-underline" style={{ padding: "14px 28px", background: "rgba(255, 255, 255, 0.06)", color: "white", border: "1px solid rgba(255, 255, 255, 0.15)", backdropFilter: "blur(8px)", transition: "transform 0.2s, background 0.2s" }}
               >
                 I&apos;m a Brand
               </Link>
@@ -446,7 +440,7 @@ export default function HomePage() {
                 {["FitForma", "Myntra", "Mamaearth", "Nykaa", "Boat", "Lenskart"].map((brand) => (
                   <div
                     key={brand}
-                    className="text-sm font-bold bg-glass rounded-sm" style={{ border: "1px solid rgba(255, 255, 255, 0.05)", padding: "6px 14px", color: "var(--color-text-primary)", letterSpacing: "0.5px", boxShadow: "0 2px 10px rgba(0,0,0,0.1)" }}
+                    className="text-sm font-bold bg-glass rounded-sm text-primary" style={{ border: "1px solid rgba(255, 255, 255, 0.05)", padding: "6px 14px", letterSpacing: "0.5px", boxShadow: "0 2px 10px rgba(0,0,0,0.1)" }}
                   >
                     {brand}
                   </div>
@@ -459,7 +453,7 @@ export default function HomePage() {
         <Button
           type="button"
           variant="ghost"
-          className="hide-mobile absolute flex flex-col items-center gap-2 cursor-pointer border-none" style={{ background: "none", padding: 0, bottom: "32px", left: "50%", transform: "translateX(-50%)", animation: "float 3s ease-in-out infinite", opacity: 0.5 }}
+          className="hide-mobile absolute flex flex-col items-center gap-2 cursor-pointer border-none p-0" style={{ background: "none", bottom: "32px", left: "50%", transform: "translateX(-50%)", animation: "float 3s ease-in-out infinite", opacity: 0.5 }}
           onClick={() => {
             document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
           }}
@@ -542,7 +536,7 @@ export default function HomePage() {
           {/* Tab Switcher */}
           <RevealOnScroll delay={0.15}>
             <div
-              className="flex justify-center gap-1 bg-tertiary p-1" style={{ marginBottom: "48px", borderRadius: "var(--radius-full)", maxWidth: "320px", margin: "0 auto 48px" }}
+              className="flex justify-center gap-1 bg-tertiary p-1 mb-10" style={{ borderRadius: "var(--radius-full)", maxWidth: "320px", margin: "0 auto 48px" }}
             >
               <Button
                 type="button"
@@ -608,7 +602,7 @@ export default function HomePage() {
                         {currentStep.title}
                       </h3>
                       <p
-                        className="text-secondary text-sm" style={{ lineHeight: 1.6 }}
+                        className="text-secondary text-sm leading-relaxed"
                       >
                         {currentStep.description}
                       </p>

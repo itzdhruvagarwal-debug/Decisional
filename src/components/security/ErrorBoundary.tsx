@@ -102,7 +102,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
             Something went wrong
           </h3>
           <p
-            className="text-sm" style={{ color: "var(--color-text-secondary, #aaa)", maxWidth: "360px", margin: 0, lineHeight: 1.6 }}
+            className="text-sm leading-relaxed" style={{ color: "var(--color-text-secondary, #aaa)", maxWidth: "360px", margin: 0 }}
           >
             An unexpected error occurred in this section.
             {this.state.errorId && (

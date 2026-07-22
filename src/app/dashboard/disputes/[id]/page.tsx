@@ -540,12 +540,12 @@ export default function DisputeDetailPage({
 
   return (
     <div
-      className="flex flex-col" style={{ minHeight: "100vh" }}
+      className="flex flex-col min-h-screen"
     >
       <ToastContainer toasts={toasts} onClose={removeToast} />
       {/* Header */}
       <header
-        className="glass border-b-card flex items-center gap-4 flex-wrap" style={{ padding: "16px 24px" }}
+        className="glass border-b-card flex items-center gap-4 flex-wrap px-6-py-4"
       >
         <Link
           href="/dashboard/disputes"
@@ -793,7 +793,7 @@ export default function DisputeDetailPage({
           </div>
         )}
 
-        <div className="grid-2" style={{ alignItems: "start" }}>
+        <div className="grid-2 items-start">
           {/* Left Column: Details */}
           <div>
             <div className="card mb-6">
@@ -852,7 +852,7 @@ export default function DisputeDetailPage({
                 className="card mb-6" style={{ border: "1px solid var(--color-success)" }}
               >
                 <h2
-                  className="text-lg font-bold mb-4" style={{ color: "var(--color-success)" }}
+                  className="text-lg font-bold mb-4 text-emerald"
                 >
                   ✅ Resolution
                 </h2>

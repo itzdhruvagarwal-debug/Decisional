@@ -42,9 +42,9 @@ function DashboardErrorFallback({ user }: Readonly<{ user: Session["user"] }>) {
   return (
     <DashboardShell user={user}>
       <div
-        className="text-center rounded-xl" style={{ padding: "80px 40px", background: "rgba(244, 63, 94, 0.05)", border: "1px dashed var(--color-accent-rose)", margin: "40px auto", maxWidth: "600px" }}
+        className="text-center rounded-xl max-w-600" style={{ padding: "80px 40px", background: "rgba(244, 63, 94, 0.05)", border: "1px dashed var(--color-accent-rose)", margin: "40px auto" }}
       >
-        <div className="mb-5" style={{ fontSize: "48px" }} aria-hidden="true">
+        <div className="mb-5 text-3xl" aria-hidden="true">
           !
         </div>
         <h2
@@ -53,19 +53,14 @@ function DashboardErrorFallback({ user }: Readonly<{ user: Session["user"] }>) {
           Dashboard Interrupted
         </h2>
         <p
-          className="text-secondary mb-8 text-sm" style={{ lineHeight: 1.6 }}
+          className="text-secondary mb-8 text-sm leading-relaxed"
         >
           The dashboard could not load the latest workspace data. Please
           refresh or try again after a moment.
         </p>
         <a
           href="/dashboard"
-          className="btn btn-danger"
-          style={{
-            padding: "12px 32px",
-            display: "inline-block",
-            textDecoration: "none",
-          }}
+          className="btn btn-danger no-underline" style={{ padding: "12px 32px", display: "inline-block" }}
           aria-label="Reload dashboard"
         >
           Reload Dashboard
@@ -99,7 +94,7 @@ function DashboardEmptyState({ dataLoadFailed }: Readonly<{ dataLoadFailed: bool
           {dataLoadFailed ? "Access Interrupted" : "Initializing Workspace"}
         </h2>
         <p
-          className="text-secondary text-sm" style={{ lineHeight: 1.6, marginBottom: "36px" }}
+          className="text-secondary text-sm leading-relaxed mb-8"
         >
           {dataLoadFailed
             ? "We could not load your dashboard data. Please refresh or try again after a moment."
@@ -107,12 +102,7 @@ function DashboardEmptyState({ dataLoadFailed }: Readonly<{ dataLoadFailed: bool
         </p>
         <a
           href="/dashboard"
-          className="btn btn-primary btn-lg"
-          style={{
-            padding: "14px 40px",
-            display: "inline-block",
-            textDecoration: "none",
-          }}
+          className="btn btn-primary btn-lg no-underline" style={{ padding: "14px 40px", display: "inline-block" }}
           aria-label={
             dataLoadFailed
               ? "Retry dashboard data load"

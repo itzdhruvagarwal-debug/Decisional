@@ -60,14 +60,14 @@ function InactivityWarningModal({
         </h2>
 
         <p
-          className="text-sm mb-2" style={{ color: "var(--color-text-secondary, #aaa)", lineHeight: 1.6 }}
+          className="text-sm mb-2 leading-relaxed" style={{ color: "var(--color-text-secondary, #aaa)" }}
         >
           For your security, you&apos;ll be automatically signed out due to
           inactivity in:
         </p>
 
         <div
-          className="font-extrabold text-3xl" style={{ color: secondsRemaining <= 60 ? "#f43f5e" : "#f59e0b", letterSpacing: 0, marginBottom: "28px", fontVariantNumeric: "tabular-nums", transition: "color 0.3s" }}
+          className="font-extrabold text-3xl mb-6" style={{ color: secondsRemaining <= 60 ? "#f43f5e" : "#f59e0b", letterSpacing: 0, fontVariantNumeric: "tabular-nums", transition: "color 0.3s" }}
         >
           {timeStr}
         </div>

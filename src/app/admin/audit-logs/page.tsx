@@ -35,7 +35,7 @@ export default async function AdminAuditLogsPage() {
 
   return (
     <div className="admin-page">
-      <div className="admin-toolbar" style={{ marginBottom: "28px" }}>
+      <div className="admin-toolbar mb-6">
         <div>
           <h1 className="text-3xl font-extrabold mb-1">
             Audit Logs
@@ -53,9 +53,9 @@ export default async function AdminAuditLogsPage() {
           description="No activity has been logged yet."
         />
       ) : (
-        <div className="card overflow-hidden" style={{ padding: 0 }}>
+        <div className="card overflow-hidden p-0">
           <div className="admin-table-wrap">
-            <table className="w-full" style={{ borderCollapse: "collapse" }}>
+            <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-secondary">
                   {["Actor ID", "Action Type", "Entity Type", "Entity ID", "Timestamp", "Details"].map(
@@ -95,7 +95,7 @@ export default async function AdminAuditLogsPage() {
                         {new Date(log.timestamp).toLocaleString("en-IN")}
                       </td>
                       <td className="p-card">
-                        <div className="text-sm overflow-hidden" style={{ color: "var(--color-text-primary)", maxWidth: "240px", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : ""}>
+                        <div className="text-sm overflow-hidden text-primary whitespace-nowrap" style={{ maxWidth: "240px", textOverflow: "ellipsis" }} title={log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : ""}>
                           {log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : "-"}
                         </div>
                       </td>

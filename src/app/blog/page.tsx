@@ -57,19 +57,19 @@ export default function BlogPage() {
   };
 
   return (
-    <div className="flex flex-col" style={{ minHeight: "100vh", background: "var(--color-bg-primary)" }}>
+    <div className="flex flex-col min-h-screen bg-primary">
       <Navbar />
 
-      <main className="flex-1 flex items-center justify-center" style={{ paddingTop: "120px", paddingBottom: "80px" }}>
+      <main className="flex-1 flex items-center justify-center pt-30 pb-20">
         <section className="section w-full relative">
           {/* Subtle glowing radial background for depth */}
           <div
             className="absolute" style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%)", zIndex: 0, pointerEvents: "none" }}
           />
 
-          <div className="container relative text-center" style={{ zIndex: 1, maxWidth: "640px" }}>
+          <div className="container relative text-center max-w-640" style={{ zIndex: 1 }}>
             <div
-              className="badge badge-primary animate-fade-in mb-6 text-xs font-extrabold uppercase" style={{ padding: "8px 16px", letterSpacing: "1px" }}
+              className="badge badge-primary animate-fade-in mb-6 text-xs font-extrabold uppercase px-4-py-2" style={{ letterSpacing: "1px" }}
             >
               Knowledge Base
             </div>

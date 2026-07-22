@@ -22,13 +22,7 @@ export default function GlobalError({
         <title>System Error - Decisional</title>
       </head>
       <body
-        className="flex items-center justify-center p-6"
-        style={{
-          background: "var(--color-bg-primary)",
-          color: "var(--color-text-primary)",
-          minHeight: "100vh",
-          fontFamily: "'Inter', sans-serif"
-        }}
+        className="flex items-center justify-center p-6 bg-primary text-primary min-h-screen" style={{ fontFamily: "'Inter', sans-serif" }}
       >
         {/* Abstract Background Elements */}
         <div className="fixed" style={{ top: "10%", left: "5%", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(244, 63, 94, 0.08) 0%, transparent 70%)", zIndex: 0 }} />

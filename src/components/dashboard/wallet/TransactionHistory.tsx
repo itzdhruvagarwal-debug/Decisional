@@ -320,7 +320,7 @@ export default function TransactionHistory() {
             type="button"
             variant="secondary"
             onClick={() => fetchTransactions()}
-            className="text-sm" style={{ padding: "8px 16px" }}
+            className="text-sm px-4-py-2"
           >
             Try Again
           </Button>
@@ -339,20 +339,20 @@ export default function TransactionHistory() {
     }
     return (
       <div className="overflow-x-auto">
-        <table className="w-full" style={{ borderCollapse: "collapse" }}>
+        <table className="w-full border-collapse">
           <thead>
             <tr
               className="border-b-card text-left text-sm text-secondary"
             >
-              <th className="font-semibold" style={{ padding: "16px 24px" }}>Type</th>
-              <th className="font-semibold" style={{ padding: "16px 24px" }}>
+              <th className="font-semibold px-6-py-4">Type</th>
+              <th className="font-semibold px-6-py-4">
                 Amount
               </th>
-              <th className="font-semibold" style={{ padding: "16px 24px" }}>
+              <th className="font-semibold px-6-py-4">
                 Status
               </th>
-              <th className="font-semibold" style={{ padding: "16px 24px" }}>Date</th>
-              <th className="font-semibold" style={{ padding: "16px 24px" }}>
+              <th className="font-semibold px-6-py-4">Date</th>
+              <th className="font-semibold px-6-py-4">
                 Details
               </th>
             </tr>
@@ -376,7 +376,7 @@ export default function TransactionHistory() {
                   key={tx.id}
                   className="border-b-card text-sm"
                 >
-                  <td style={{ padding: "16px 24px" }}>
+                  <td className="px-6-py-4">
                     <div
                       className="flex items-center gap-2"
                     >
@@ -389,12 +389,12 @@ export default function TransactionHistory() {
                     </div>
                   </td>
                   <td
-                    className="font-semibold" style={{ padding: "16px 24px", color: typeInfo.color }}
+                    className="font-semibold px-6-py-4" style={{ color: typeInfo.color }}
                   >
                     {isOutflow ? "-" : "+"}
                     {formatCurrency(tx.amount)}
                   </td>
-                  <td style={{ padding: "16px 24px" }}>
+                  <td className="px-6-py-4">
                     <span
                       className="text-xs font-semibold rounded-lg" style={{ padding: "4px 10px", background: statusColor.bg, color: statusColor.text }}
                     >
@@ -402,12 +402,12 @@ export default function TransactionHistory() {
                     </span>
                   </td>
                   <td
-                    className="text-secondary" style={{ padding: "16px 24px" }}
+                    className="text-secondary px-6-py-4"
                   >
                     {formatDateTime(tx.createdAt)}
                   </td>
                   <td
-                    className="text-secondary" style={{ padding: "16px 24px" }}
+                    className="text-secondary px-6-py-4"
                   >
                     {tx.description || "-"}
                   </td>
@@ -517,7 +517,7 @@ export default function TransactionHistory() {
       {totalPages > 1 && (
         <nav
           aria-label="Transaction history pagination"
-          className="flex justify-center gap-2 border-top" style={{ padding: "16px 24px" }}
+          className="flex justify-center gap-2 border-top px-6-py-4"
         >
           <Button
             variant="secondary"

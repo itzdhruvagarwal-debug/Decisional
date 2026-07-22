@@ -203,7 +203,7 @@ export default function ContactVerificationPanel({
                 } finally {
                     setIsSaving(false);
                 }
-            }} className="text-xs" style={{ padding: '6px 12px' }}>
+            }} className="text-xs px-3-py-1">
                 Verify Email
             </Button>
         );
@@ -278,7 +278,7 @@ export default function ContactVerificationPanel({
             <Button variant="secondary" disabled={isSaving} onClick={() => {
                 setPendingContact('');
                 setVerifyContactState({ type: 'phone', step: 'input' });
-            }} className="text-xs" style={{ padding: '6px 12px' }}>
+            }} className="text-xs px-3-py-1">
                 Add & Verify
             </Button>
         );

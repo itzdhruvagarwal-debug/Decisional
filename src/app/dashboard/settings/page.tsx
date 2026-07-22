@@ -242,7 +242,7 @@ export default function SettingsPage() {
         return (
             <DashboardShell user={session?.user || user}>
                 <div
-                    className="flex items-center justify-center" style={{ minHeight: "60vh" }}
+                    className="flex items-center justify-center min-h-60vh"
                 >
                     <span className="loading" />
                 </div>
@@ -291,7 +291,7 @@ export default function SettingsPage() {
                     
                     role="tablist"
                     aria-label="Settings sections"
-                     className="scrollable-tabs flex gap-2 mb-6 border-b-card" style={{ paddingBottom: "16px" }}
+                     className="scrollable-tabs flex gap-2 mb-6 border-b-card pb-4"
                 >
                     {[
                         { id: "profile", label: "👤 Profile" },
@@ -312,7 +312,7 @@ export default function SettingsPage() {
                             aria-selected={activeTab === tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             variant={activeTab === tab.id ? "primary" : "ghost"}
-                            style={{ whiteSpace: "nowrap" }}
+                            className="whitespace-nowrap"
                         >
                             {tab.label}
                         </Button>

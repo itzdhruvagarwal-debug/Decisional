@@ -114,7 +114,7 @@ export default function DiscoverInfluencersPage() {
   ) {
     return (
       <DashboardShell user={session.user}>
-        <div className="card text-center" style={{ maxWidth: "680px", margin: "40px auto" }}>
+        <div className="card text-center max-w-680" style={{ margin: "40px auto" }}>
           <h1 className="text-2xl font-extrabold mb-2">
             Brand access required
           </h1>
@@ -135,12 +135,12 @@ export default function DiscoverInfluencersPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center" style={{ marginBottom: "48px" }}
+          className="text-center mb-10"
         >
           <h1 className="mb-3 font-extrabold" style={{ fontSize: "42px", background: "linear-gradient(135deg, #8b5cf6, #3b82f6, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 0 }}>
             Discover Top Creators
           </h1>
-          <p className="text-secondary text-lg" style={{ maxWidth: "600px", margin: "0 auto" }}>
+          <p className="text-secondary text-lg max-w-600" style={{ margin: "0 auto" }}>
             Find verified creators by category, reach, and trust score.
           </p>
         </motion.div>
@@ -149,7 +149,7 @@ export default function DiscoverInfluencersPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           onSubmit={handleSearch}
-          className="flex gap-5 flex-wrap border-card rounded-lg" style={{ padding: "clamp(16px, 4vw, 32px)", marginBottom: "48px", background: "var(--color-bg-card)", boxShadow: "var(--shadow-sm)" }}
+          className="flex gap-5 flex-wrap border-card rounded-lg mb-10" style={{ padding: "clamp(16px, 4vw, 32px)", background: "var(--color-bg-card)", boxShadow: "var(--shadow-sm)" }}
         >
           <div style={{ flex: "1 1 min(280px, 100%)" }}>
             <Input
@@ -330,7 +330,7 @@ export default function DiscoverInfluencersPage() {
                       {inf.displayName?.[0] || "I"}
                     </div>
                     <div>
-                      <h3 className="text-lg font-extrabold" style={{ margin: "0 0 6px", color: "var(--color-text-primary)" }}>
+                      <h3 className="text-lg font-extrabold text-primary" style={{ margin: "0 0 6px" }}>
                         {inf.displayName}
                       </h3>
                       <div className="flex items-center text-sm text-muted" style={{ gap: "6px" }}>
@@ -354,29 +354,29 @@ export default function DiscoverInfluencersPage() {
                     </span>
                   </div>
 
-                  <p className="text-sm text-secondary flex-1" style={{ lineHeight: "1.6", marginBottom: "28px" }}>
+                  <p className="text-sm text-secondary flex-1 mb-6" style={{ lineHeight: "1.6" }}>
                     {inf.bio || "High-impact creator focused on quality content delivery and authentic audience engagement."}
                   </p>
 
                   <div className="grid gap-3 mb-6" style={{ gridTemplateColumns: "1fr 1fr 1fr", padding: "20px 0", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                     <div className="text-center">
                       <div className="text-muted font-bold mb-1 text-xs uppercase">Followers</div>
-                      <div className="font-extrabold text-sm" style={{ color: "var(--color-text-primary)" }}>{formatNumber(inf.instagramFollowers)}</div>
+                      <div className="font-extrabold text-sm text-primary">{formatNumber(inf.instagramFollowers)}</div>
                     </div>
                     <div className="text-center">
                       <div className="text-muted font-bold mb-1 text-xs uppercase">Subs</div>
-                      <div className="font-extrabold text-sm" style={{ color: "var(--color-text-primary)" }}>{inf.youtubeSubscribers === -1 ? 'Hidden' : formatNumber(inf.youtubeSubscribers)}</div>
+                      <div className="font-extrabold text-sm text-primary">{inf.youtubeSubscribers === -1 ? 'Hidden' : formatNumber(inf.youtubeSubscribers)}</div>
                     </div>
                     <div className="text-center">
                       <div className="text-muted font-bold mb-1 text-xs uppercase">Deals</div>
-                      <div className="font-extrabold text-sm" style={{ color: "var(--color-text-primary)" }}>{inf.totalCompletedDeals || 0}</div>
+                      <div className="font-extrabold text-sm text-primary">{inf.totalCompletedDeals || 0}</div>
                     </div>
                   </div>
 
                   <div className="flex" style={{ gap: "10px", marginTop: "auto" }}>
                     <Link
                       href={`/dashboard/influencers/${inf.id}`}
-                      className="flex-1 text-center text-sm font-bold bg-secondary rounded-md" style={{ padding: "12px 8px", textDecoration: "none", border: "1px solid rgba(255,255,255,0.05)", transition: "all 0.3s" }}
+                      className="flex-1 text-center text-sm font-bold bg-secondary rounded-md no-underline" style={{ padding: "12px 8px", border: "1px solid rgba(255,255,255,0.05)", transition: "all 0.3s" }}
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.08)";
                       }}
@@ -388,7 +388,7 @@ export default function DiscoverInfluencersPage() {
                     </Link>
                     <Link
                       href={`/dashboard/campaigns/create?invite=${inf.id}`}
-                      className="flex-1 text-center text-sm font-bold rounded-md" style={{ background: "var(--gradient-primary)", padding: "12px 8px", textDecoration: "none", transition: "all 0.3s", boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)" }}
+                      className="flex-1 text-center text-sm font-bold rounded-md no-underline" style={{ background: "var(--gradient-primary)", padding: "12px 8px", transition: "all 0.3s", boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)" }}
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLAnchorElement).style.opacity = "0.9";
                       }}

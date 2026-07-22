@@ -74,7 +74,7 @@ export default function ApplicationsPage() {
 
   if (!session) {
     return (
-      <div className="flex items-center justify-center" style={{ minHeight: "100vh" }}>
+      <div className="flex items-center justify-center min-h-screen">
         <span className="loading" />
       </div>
     );
@@ -83,13 +83,13 @@ export default function ApplicationsPage() {
   let applicationsList;
   if (loading) {
     applicationsList = (
-      <div className="flex justify-center" style={{ padding: "64px" }}>
+      <div className="flex justify-center p-10">
         <span className="loading" style={{ width: "40px", height: "40px" }} />
       </div>
     );
   } else if (error) {
     applicationsList = (
-      <div className="text-center text-rose" style={{ padding: "48px" }}>
+      <div className="text-center text-rose p-10">
         ⚠️ {error}
       </div>
     );
@@ -105,9 +105,9 @@ export default function ApplicationsPage() {
     );
   } else {
     applicationsList = (
-      <div className="card overflow-hidden" style={{ padding: 0 }}>
+      <div className="card overflow-hidden p-0">
         <div style={{ overflowX: "auto" }}>
-          <table className="w-full text-left" style={{ borderCollapse: "collapse" }}>
+          <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b-card bg-tertiary">
                 <th className="p-4 text-xs font-bold text-secondary">CAMPAIGN</th>

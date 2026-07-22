@@ -648,7 +648,7 @@ function ConversationsSidebar({ state }: ConversationsSidebarProps) {
                   className="flex justify-between mb-1" style={{ alignItems: "baseline" }}
                 >
                   <span
-                    className="font-extrabold text-sm overflow-hidden" style={{ color: "var(--color-text-primary)", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "140px" }}
+                    className="font-extrabold text-sm overflow-hidden text-primary whitespace-nowrap" style={{ textOverflow: "ellipsis", maxWidth: "140px" }}
                   >
                     {conv.name}
                   </span>
@@ -664,10 +664,10 @@ function ConversationsSidebar({ state }: ConversationsSidebarProps) {
                   className="flex justify-between items-center"
                 >
                   <span
-                    className="text-sm overflow-hidden" style={{ color:
+                    className="text-sm overflow-hidden whitespace-nowrap" style={{ color:
                         conv.unread > 0
                           ? "var(--color-text-primary)"
-                          : "var(--color-text-muted)", fontWeight: conv.unread > 0 ? 600 : 400, textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "160px" }}
+                          : "var(--color-text-muted)", fontWeight: conv.unread > 0 ? 600 : 400, textOverflow: "ellipsis", maxWidth: "160px" }}
                   >
                     {conv.isTyping ? "Typing..." : conv.lastMessage || "Start a conversation"}
                   </span>
@@ -707,7 +707,7 @@ function ChatHeader({ state }: ChatPanelProps) {
 
   return (
     <div
-      className="border-b-card flex items-center gap-3" style={{ padding: "16px 24px", background: "rgba(18, 18, 31, 0.8)", backdropFilter: "blur(20px)" }}
+      className="border-b-card flex items-center gap-3 px-6-py-4" style={{ background: "rgba(18, 18, 31, 0.8)", backdropFilter: "blur(20px)" }}
     >
       <Button
         variant="ghost"
@@ -874,11 +874,11 @@ function ChatInputArea({ state }: ChatPanelProps) {
 
   return (
     <div
-      className="flex flex-col gap-2 border-top" style={{ padding: "16px 24px", background: "var(--color-bg-primary)", alignItems: isChatUserBlocked ? "center" : "stretch", justifyContent: isChatUserBlocked ? "center" : "initial" }}
+      className="flex flex-col gap-2 border-top px-6-py-4 bg-primary" style={{ alignItems: isChatUserBlocked ? "center" : "stretch", justifyContent: isChatUserBlocked ? "center" : "initial" }}
     >
       {isChatUserBlocked ? (
         <div
-          className="font-semibold text-sm text-rose" style={{ padding: "8px 16px", background: "rgba(239, 68, 68, 0.1)", borderRadius: "6px", border: "1px solid rgba(239, 68, 68, 0.2)" }}
+          className="font-semibold text-sm text-rose px-4-py-2" style={{ background: "rgba(239, 68, 68, 0.1)", borderRadius: "6px", border: "1px solid rgba(239, 68, 68, 0.2)" }}
         >
           🚫 You cannot message this user because a block relationship exists.
         </div>
@@ -944,7 +944,7 @@ function ChatPanel({ state }: ChatPanelProps) {
         <div
           className="flex-1 flex items-center justify-center flex-col gap-4 text-secondary bg-tertiary"
         >
-          <div style={{ fontSize: "48px", opacity: 0.5 }}>💬</div>
+          <div className="text-3xl" style={{ opacity: 0.5 }}>💬</div>
           <p>Select a conversation to start messaging</p>
         </div>
       )}
@@ -1044,7 +1044,7 @@ function MessagesContent() {
     <DashboardShell user={session.user}>
       <ToastContainer toasts={toasts} onClose={removeToast} />
       <div
-        className="card flex overflow-hidden" style={{ height: "calc(100vh - 120px)", padding: 0, background: "var(--color-bg-primary)" }}
+        className="card flex overflow-hidden p-0 bg-primary" style={{ height: "calc(100vh - 120px)" }}
       >
         <ConversationsSidebar state={state} />
         <ChatPanel state={state} />

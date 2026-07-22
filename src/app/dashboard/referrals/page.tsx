@@ -101,7 +101,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
             <div className="absolute" style={{ top: -80, left: "50%", transform: "translateX(-50%)", width: "300px", height: "200px", background: "rgba(99,102,241,0.2)", filter: "blur(80px)", pointerEvents: "none" }} />
 
             {/* Header */}
-            <div className="flex items-center justify-between relative" style={{ marginBottom: "28px" }}>
+            <div className="flex items-center justify-between relative mb-6">
               <div>
                 <div className="font-extrabold text-xs uppercase mb-1" style={{ color: "#6366f1", letterSpacing: "3px" }}>
                   Share &amp; Earn
@@ -114,7 +114,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
                 variant="ghost"
                 onClick={onClose}
                 aria-label="Close share modal"
-                className="text-lg flex-shrink-0" style={{ width: "36px", height: "36px", padding: 0 }}
+                className="text-lg flex-shrink-0 p-0" style={{ width: "36px", height: "36px" }}
               >
                 ×
               </Button>
@@ -126,7 +126,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
                 <div className="font-bold text-muted mb-1 uppercase" style={{ fontSize: "10px", letterSpacing: "1.5px" }}>
                   Your Referral Link
                 </div>
-                <div className="text-sm font-semibold text-secondary overflow-hidden" style={{ fontFamily: "monospace", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div className="text-sm font-semibold text-secondary overflow-hidden whitespace-nowrap" style={{ fontFamily: "monospace", textOverflow: "ellipsis" }}>
                   {referralLink}
                 </div>
               </div>
@@ -134,7 +134,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                 onClick={handleCopyLink}
                 aria-label="Copy referral link"
-                className="text-xs font-bold cursor-pointer flex-shrink-0 flex items-center border-none" style={{ background: linkCopied ? "#10b981" : "var(--color-primary)", color: "white", borderRadius: "10px", padding: "8px 16px", transition: "background 0.2s", gap: "6px", whiteSpace: "nowrap" }}
+                className="text-xs font-bold cursor-pointer flex-shrink-0 flex items-center border-none px-4-py-2 whitespace-nowrap" style={{ background: linkCopied ? "#10b981" : "var(--color-primary)", color: "white", borderRadius: "10px", transition: "background 0.2s", gap: "6px" }}
               >
                 {linkCopied ? (
                   <>
@@ -165,12 +165,12 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
                   rel="noopener noreferrer"
                   whileHover={{ y: -3, scale: 1.03 }}
                   whileTap={{ scale: 0.96 }}
-                  className="text-center flex flex-col items-center gap-2 cursor-pointer rounded-xl" style={{ background: ch.bg, border: `1px solid ${ch.color}33`, padding: "16px 8px", textDecoration: "none" }}
+                  className="text-center flex flex-col items-center gap-2 cursor-pointer rounded-xl no-underline" style={{ background: ch.bg, border: `1px solid ${ch.color}33`, padding: "16px 8px" }}
                 >
                   <span className="font-extrabold leading-none" style={{ fontSize: ch.id === "twitter" ? "18px" : "22px", color: ch.color }}>
                     {ch.icon}
                   </span>
-                  <span className="font-bold text-secondary text-xs" style={{ whiteSpace: "nowrap" }}>
+                  <span className="font-bold text-secondary text-xs whitespace-nowrap">
                     {ch.label}
                   </span>
                 </motion.a>
@@ -262,12 +262,12 @@ export default function ReferralsPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center" style={{ marginBottom: "48px" }}
+          className="text-center mb-10"
         >
           <h1 className="mb-3 font-extrabold" style={{ fontSize: "42px", background: "linear-gradient(135deg, #10b981, #06b6d4, #3b82f6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: "-1.5px" }}>
             🤝 Partner Network
           </h1>
-          <p className="text-secondary text-lg" style={{ maxWidth: "600px", margin: "0 auto" }}>
+          <p className="text-secondary text-lg max-w-600" style={{ margin: "0 auto" }}>
             Expand the Decisional ecosystem and build a lifetime of passive rewards.
           </p>
         </motion.div>
@@ -299,7 +299,7 @@ export default function ReferralsPage() {
             >
               {/* Code Card */}
               <motion.div
-                className="text-center relative overflow-hidden" style={{ padding: "clamp(24px,5vw,48px)", background: "rgba(255,255,255,0.03)", backdropFilter: "blur(20px)", borderRadius: "32px", border: "1px solid rgba(255,255,255,0.08)", marginBottom: "48px", boxShadow: "0 40px 80px rgba(0,0,0,0.3)" }}
+                className="text-center relative overflow-hidden mb-10" style={{ padding: "clamp(24px,5vw,48px)", background: "rgba(255,255,255,0.03)", backdropFilter: "blur(20px)", borderRadius: "32px", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 40px 80px rgba(0,0,0,0.3)" }}
               >
                 <div className="absolute rounded-full" style={{ top: -60, right: -60, width: "250px", height: "250px", background: "rgba(16,185,129,0.1)", filter: "blur(100px)", pointerEvents: "none" }} />
 
@@ -310,7 +310,7 @@ export default function ReferralsPage() {
                 {/* Code box */}
                 <div className="flex flex-col items-center gap-4 mb-8">
                   <div className="flex items-center gap-4 justify-between bg-secondary rounded-2xl" style={{ border: "2px dashed var(--color-primary)", padding: "14px 24px", maxWidth: "100%" }}>
-                    <span className="font-extrabold" style={{ fontSize: "clamp(18px,4.5vw,32px)", fontFamily: "Space Grotesk, monospace", color: "var(--color-text-primary)", letterSpacing: "1.5px", wordBreak: "break-all" }}>
+                    <span className="font-extrabold text-primary break-all" style={{ fontSize: "clamp(18px,4.5vw,32px)", fontFamily: "Space Grotesk, monospace", letterSpacing: "1.5px" }}>
                       {stats.referralCode}
                     </span>
                     <motion.button

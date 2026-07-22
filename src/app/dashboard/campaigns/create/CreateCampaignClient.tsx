@@ -455,7 +455,7 @@ export default function CreateCampaignClient() {
           <div
             className="rounded-full" style={{ width: "8px", height: "8px", background: "#6366f1", boxShadow: "0 0 12px #6366f1" }}
           />
-          <span className="font-medium text-sm" style={{ color: "var(--color-text-primary)" }}>
+          <span className="font-medium text-sm text-primary">
             Inviting: <strong style={{ color: "#6366f1" }}>@{invitedInfluencer.instagramHandle || invitedInfluencer.youtubeHandle || invitedInfluencer.displayName}</strong> ({invitedInfluencer.displayName})
           </span>
         </div>
@@ -520,9 +520,8 @@ export default function CreateCampaignClient() {
           {/* Target Audience */}
           <div className="form-group mb-6">
             <label
-              className="label"
+              className="label text-primary"
               htmlFor="custom-category-input"
-              style={{ color: "var(--color-text-primary)" }}
             >
               Target Categories (Select up to 5)
             </label>
@@ -533,7 +532,7 @@ export default function CreateCampaignClient() {
                   type="button"
                   onClick={() => handleCategoryToggle(cat)}
                   variant={formData.targetCategories.includes(cat) ? "primary" : "ghost"}
-                  className="cursor-pointer text-sm" style={{ background: formData.targetCategories.includes(cat)
+                  className="cursor-pointer text-sm px-4-py-2" style={{ background: formData.targetCategories.includes(cat)
                       ? "var(--gradient-primary)"
                       : "var(--color-bg-tertiary)", color: formData.targetCategories.includes(cat)
                       ? "white"
@@ -541,7 +540,7 @@ export default function CreateCampaignClient() {
                       ? "none"
                       : "1px solid var(--color-border)", boxShadow: formData.targetCategories.includes(cat)
                       ? "0 4px 16px rgba(99, 102, 241, 0.4)"
-                      : "none", padding: "8px 16px", transition: "all 0.3s ease" }}
+                      : "none", transition: "all 0.3s ease" }}
                 >
                   {cat}
                 </Button>
@@ -790,7 +789,7 @@ export default function CreateCampaignClient() {
             >
               <div>
                 <h3
-                  className="text-base font-semibold" style={{ color: "var(--color-text-primary)" }}
+                  className="text-base font-semibold text-primary"
                 >
                   Product Seeding (Barter / Logistics)
                 </h3>
@@ -925,7 +924,7 @@ export default function CreateCampaignClient() {
                     placeholder="Rate (Rs)"
                     style={{ width: "110px" }}
                   />
-                  <span className="text-muted" style={{ fontSize: "10px", whiteSpace: "nowrap" }}>
+                  <span className="text-muted whitespace-nowrap" style={{ fontSize: "10px" }}>
                     Rec: ₹{getRecommendedRate(item.type, formData.minFollowers).toLocaleString("en-IN")}
                   </span>
                 </div>

@@ -174,7 +174,7 @@ export default function PayoutsAdminPage() {
   const renderContent = () => {
     if (loading) {
       return (
-        <div className="card text-center" style={{ padding: "48px" }}>
+        <div className="card text-center p-10">
           Loading payouts...
         </div>
       );
@@ -193,9 +193,9 @@ export default function PayoutsAdminPage() {
     }
 
     return (
-      <div className="card overflow-hidden" style={{ padding: 0 }}>
+      <div className="card overflow-hidden p-0">
         <div className="admin-table-wrap">
-          <table className="w-full" style={{ minWidth: "980px", borderCollapse: "collapse" }}>
+          <table className="w-full border-collapse" style={{ minWidth: "980px" }}>
             <thead className="bg-tertiary">
               <tr>
                 {["User", "Amount", "Destination", "Risk", "Requested", "Actions"].map(

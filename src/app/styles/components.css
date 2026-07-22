@@ -1072,6 +1072,40 @@ input:checked+.slider:before {
 .leading-normal { line-height: 1.5; }
 .leading-relaxed { line-height: 1.8; }
 
+/* Page Layout Max-Widths */
+.max-w-600 { max-width: 600px; }
+.max-w-640 { max-width: 640px; }
+.max-w-680 { max-width: 680px; }
+.max-w-720 { max-width: 720px; }
+.max-w-840 { max-width: 840px; }
+.max-w-860 { max-width: 860px; }
+.max-w-880 { max-width: 880px; }
+.max-w-900 { max-width: 900px; }
+.max-w-920 { max-width: 920px; }
+.max-w-980 { max-width: 980px; }
+.max-w-1040 { max-width: 1040px; }
+.max-w-1280 { max-width: 1280px; }
+
+.min-h-60vh { min-height: 60vh; }
+.pt-20 { padding-top: 80px; }
+.pt-30 { padding-top: 120px; }
+.pb-20 { padding-bottom: 80px; }
+
+/* Text & Table Utilities */
+.border-collapse { border-collapse: collapse; }
+.no-underline { text-decoration: none !important; }
+.whitespace-nowrap { white-space: nowrap; }
+.break-all { word-break: break-all; }
+.truncate { text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+
+/* Badge & Button Padding Combos */
+.px-3-py-1 { padding: 6px 12px; }
+.px-4-py-2 { padding: 8px 16px; }
+.px-4-py-3 { padding: 10px 16px; }
+.px-6-py-3 { padding: 12px 24px; }
+.px-6-py-4 { padding: 16px 24px; }
+
+
 
 
 

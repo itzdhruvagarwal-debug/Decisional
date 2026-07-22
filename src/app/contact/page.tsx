@@ -27,13 +27,13 @@ const contactRows = [
 
 export default function ContactPage() {
   return (
-    <div className="flex flex-col" style={{ minHeight: "100vh" }}>
+    <div className="flex flex-col min-h-screen">
       <Navbar />
 
-      <main className="flex-1" style={{ paddingTop: "80px" }}>
+      <main className="flex-1 pt-20">
         <section className="section">
-          <div className="container" style={{ maxWidth: "1040px" }}>
-            <div className="text-center" style={{ marginBottom: "56px" }}>
+          <div className="container max-w-1040">
+            <div className="text-center mb-10">
               <h1 className="section-title">
                 Contact <span className="gradient-text">Decisional</span>
               </h1>
@@ -42,7 +42,7 @@ export default function ContactPage() {
               </p>
             </div>
 
-            <div className="grid-2 gap-8" style={{ alignItems: "start" }}>
+            <div className="grid-2 gap-8 items-start">
               <div className="grid" style={{ gap: "18px" }}>
                 {contactRows.map((row) => (
                   <article key={row.title} className="card">

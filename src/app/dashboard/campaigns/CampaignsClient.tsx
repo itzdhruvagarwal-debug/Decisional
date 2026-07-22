@@ -203,7 +203,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
   let content;
   if (loading) {
     content = (
-      <div className="flex justify-center" style={{ padding: "48px" }}>
+      <div className="flex justify-center p-10">
         <span className="loading" style={{ width: "40px", height: "40px" }} />
       </div>
     );
@@ -373,14 +373,10 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
                 setSelectedCategory(category);
                 setPage(1);
               }}
-              style={{
-                whiteSpace: "nowrap",
-                background:
+              className="whitespace-nowrap" style={{ background:
                   selectedCategory === category
                     ? "var(--gradient-primary)"
-                    : "var(--color-bg-tertiary)",
-                color: selectedCategory === category ? "white" : "inherit",
-              }}
+                    : "var(--color-bg-tertiary)", color: selectedCategory === category ? "white" : "inherit" }}
             >
               {category}
             </Button>

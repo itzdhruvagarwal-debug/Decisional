@@ -21,9 +21,9 @@ export default async function VerifiedQueuePage() {
   return (
     <div className="admin-page">
       {/* 1. Verification Queue Section */}
-      <section style={{ marginBottom: "48px" }}>
+      <section className="mb-10">
         <header className="mb-6">
-          <h1 className="gradient-text font-extrabold mb-1" style={{ fontSize: "26px" }}>
+          <h1 className="gradient-text font-extrabold mb-1 text-2xl">
             Verification Queue
           </h1>
           <p className="text-secondary text-sm">
@@ -37,7 +37,7 @@ export default async function VerifiedQueuePage() {
       {/* 2. Flagged Applications Section */}
       <section>
         <header className="mb-6">
-          <h1 className="gradient-text font-extrabold mb-1" style={{ fontSize: "26px" }}>
+          <h1 className="gradient-text font-extrabold mb-1 text-2xl">
             Flagged Applications Review
           </h1>
           <p className="text-secondary text-sm">
@@ -70,7 +70,7 @@ export default async function VerifiedQueuePage() {
                 >
                   <div className="flex justify-between flex-wrap gap-4">
                     <div>
-                      <h4 className="font-extrabold text-base mb-1" style={{ color: "var(--color-text-primary)" }}>
+                      <h4 className="font-extrabold text-base mb-1 text-primary">
                         {app.campaign.title}
                       </h4>
                       <p className="text-sm text-secondary">
@@ -88,10 +88,10 @@ export default async function VerifiedQueuePage() {
 
                   <div className="flex justify-between items-center flex-wrap gap-4 border-top" style={{ paddingTop: "16px" }}>
                     <div>
-                      <div className="text-sm font-bold" style={{ color: "var(--color-text-primary)" }}>
+                      <div className="text-sm font-bold text-primary">
                         Influencer: {app.influencer.displayName}
                       </div>
-                      <div className="text-xs text-secondary flex gap-3" style={{ marginTop: "2px" }}>
+                      <div className="text-xs text-secondary flex gap-3 mt-1">
                         <span>Email: {app.influencer.user.email}</span>
                         <span>Trust Score: <strong className="text-amber">{app.influencer.user.trustScore}</strong></span>
                       </div>
@@ -99,7 +99,7 @@ export default async function VerifiedQueuePage() {
 
                     <div className="flex gap-3 items-center">
                       <form action={approveAction}>
-                        <Button type="submit" variant="success" className="text-sm" style={{ padding: "8px 16px" }}>
+                        <Button type="submit" variant="success" className="text-sm px-4-py-2">
                           Approve Application
                         </Button>
                       </form>
@@ -109,9 +109,9 @@ export default async function VerifiedQueuePage() {
                           type="text"
                           name="reason"
                           placeholder="Rejection reason..."
-                          className="text-sm" style={{ padding: "6px 12px", width: "180px" }}
+                          className="text-sm px-3-py-1" style={{ width: "180px" }}
                         />
-                        <Button type="submit" variant="danger" className="text-sm" style={{ padding: "8px 16px" }}>
+                        <Button type="submit" variant="danger" className="text-sm px-4-py-2">
                           Reject
                         </Button>
                       </form>

@@ -64,7 +64,7 @@ export default function ReferralList() {
               key={f}
               variant="ghost"
               onClick={() => setFilter(f)}
-              className="text-xs font-semibold rounded-md border-none" style={{ padding: "6px 12px", background:
+              className="text-xs font-semibold rounded-md border-none px-3-py-1" style={{ background:
                   filter === f ? "var(--color-primary)" : "var(--color-bg-tertiary)", color: filter === f ? "white" : "var(--color-text-secondary)" }}
             >
               {f}
@@ -74,7 +74,7 @@ export default function ReferralList() {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full" style={{ borderCollapse: "collapse" }}>
+        <table className="w-full border-collapse">
           <thead>
             <tr
               className="p-4 font-semibold text-secondary bg-secondary"
@@ -111,7 +111,7 @@ export default function ReferralList() {
                     </div>
                     <div>
                       <div
-                        className="font-semibold" style={{ color: "var(--color-text-primary)" }}
+                        className="font-semibold text-primary"
                       >
                         {ref.name}
                       </div>

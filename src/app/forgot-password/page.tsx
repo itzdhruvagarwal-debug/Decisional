@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div
-      className="flex items-center justify-center p-6 relative overflow-hidden" style={{ minHeight: "100vh" }}
+      className="flex items-center justify-center p-6 relative overflow-hidden min-h-screen"
     >
       {/* Background Effects (Same as Login) */}
       <div
@@ -109,7 +109,7 @@ export default function ForgotPasswordPage() {
 
         {resetLink && (
           <div
-            className="mb-6 p-3 text-xs rounded-md" style={{ background: "#f3f4f6", wordBreak: "break-all", border: "1px dashed #ccc" }}
+            className="mb-6 p-3 text-xs rounded-md break-all" style={{ background: "#f3f4f6", border: "1px dashed #ccc" }}
           >
             <strong>DEV LINK:</strong>{" "}
             <a

@@ -98,7 +98,7 @@ export default function SupportPage() {
 
   return (
     <DashboardShell user={session?.user}>
-      <div style={{ maxWidth: "680px", margin: "0 auto", padding: "24px 16px" }}>
+      <div className="max-w-680" style={{ margin: "0 auto", padding: "24px 16px" }}>
         <header className="mb-8 text-center">
           <h1 className="font-extrabold mb-2 gradient-text text-3xl">
             Support & Feedback Hub
@@ -159,7 +159,7 @@ export default function SupportPage() {
             {screenshotUrl ? (
               <div className="flex items-center gap-3 p-3 bg-tertiary rounded-md border-card">
                 <Image src={screenshotUrl} alt="Uploaded screenshot" width={48} height={48} unoptimized className="object-cover rounded-sm" />
-                <div className="flex-1 overflow-hidden text-sm" style={{ textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div className="flex-1 overflow-hidden text-sm whitespace-nowrap" style={{ textOverflow: "ellipsis" }}>
                   Screenshot uploaded successfully
                 </div>
                 <Button
@@ -167,7 +167,7 @@ export default function SupportPage() {
                   aria-label="Remove uploaded screenshot"
                   onClick={() => setScreenshotUrl("")}
                   variant="ghost"
-                  className="font-semibold" style={{ color: "var(--color-error)" }}
+                  className="font-semibold text-rose"
                 >
                   Remove
                 </Button>
@@ -197,13 +197,13 @@ export default function SupportPage() {
           </div>
 
           {errorMsg && (
-            <div role="alert" aria-live="assertive" className="p-3 text-sm rounded-sm" style={{ color: "var(--color-error)", background: "rgba(225,29,72,0.1)" }}>
+            <div role="alert" aria-live="assertive" className="p-3 text-sm rounded-sm text-rose" style={{ background: "rgba(225,29,72,0.1)" }}>
               {errorMsg}
             </div>
           )}
 
           {statusMsg && (
-            <div role="status" aria-live="polite" className="p-3 text-sm rounded-sm" style={{ color: "var(--color-success)", background: "rgba(16,185,129,0.1)" }}>
+            <div role="status" aria-live="polite" className="p-3 text-sm rounded-sm text-emerald" style={{ background: "rgba(16,185,129,0.1)" }}>
               {statusMsg}
             </div>
           )}
@@ -213,7 +213,7 @@ export default function SupportPage() {
               <span className="text-3xl">🏆</span>
               <div>
                 <h4 className="font-extrabold" style={{ color: "var(--color-warning)" }}>New Badge Earned!</h4>
-                <p className="text-sm" style={{ color: "var(--color-text-primary)", marginTop: "2px" }}>
+                <p className="text-sm text-primary mt-1">
                   You earned the <strong>{badgeAwarded === "bug_reporter" ? "Bug Reporter" : "Feedback Giver"}</strong> badge! Check it in your Badges tab.
                 </p>
               </div>

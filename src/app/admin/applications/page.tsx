@@ -29,7 +29,7 @@ export default async function AdminApplicationsPage() {
               Review campaign pitches flagged by the automated security risk engine.
             </p>
           </div>
-          <Link href="/admin" className="btn btn-secondary text-sm" style={{ padding: "8px 16px" }}>
+          <Link href="/admin" className="btn btn-secondary text-sm px-4-py-2">
             ← Admin Dashboard
           </Link>
         </div>
@@ -37,13 +37,13 @@ export default async function AdminApplicationsPage() {
 
       {/* Summary stats */}
       <div
-        className="card mb-6 flex gap-8 flex-wrap" style={{ padding: "16px 24px", background: "linear-gradient(135deg, rgba(239,68,68,0.04), rgba(245,158,11,0.04))", border: "1px solid rgba(239,68,68,0.15)" }}
+        className="card mb-6 flex gap-8 flex-wrap px-6-py-4" style={{ background: "linear-gradient(135deg, rgba(239,68,68,0.04), rgba(245,158,11,0.04))", border: "1px solid rgba(239,68,68,0.15)" }}
       >
         <div>
           <div className="text-muted font-bold text-xs uppercase">
             Total Flagged
           </div>
-          <div className="text-2xl font-extrabold" style={{ color: "var(--color-error)" }}>
+          <div className="text-2xl font-extrabold text-rose">
             {flaggedApps.length}
           </div>
         </div>
@@ -95,7 +95,7 @@ export default async function AdminApplicationsPage() {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span
-                        className="font-bold rounded-sm uppercase" style={{ fontSize: "10px", padding: "2px 8px", background: "rgba(239,68,68,0.15)", color: "var(--color-error)", letterSpacing: "0.05em" }}
+                        className="font-bold rounded-sm uppercase text-rose" style={{ fontSize: "10px", padding: "2px 8px", background: "rgba(239,68,68,0.15)", letterSpacing: "0.05em" }}
                       >
                         FLAGGED
                       </span>
@@ -107,7 +107,7 @@ export default async function AdminApplicationsPage() {
                         })}
                       </span>
                     </div>
-                    <h3 className="font-extrabold mb-1" style={{ fontSize: "17px", color: "var(--color-text-primary)" }}>
+                    <h3 className="font-extrabold mb-1 text-primary" style={{ fontSize: "17px" }}>
                       {app.campaign.title}
                     </h3>
                     <p className="text-sm text-secondary">
@@ -171,12 +171,12 @@ export default async function AdminApplicationsPage() {
                       type="text"
                       name="reason"
                       placeholder="Rejection reason (optional)..."
-                      className="text-sm" style={{ padding: "6px 12px", width: "220px" }}
+                      className="text-sm px-3-py-1" style={{ width: "220px" }}
                     />
                     <Button
                       type="submit"
                       variant="danger"
-                      className="text-sm" style={{ padding: "8px 16px" }}
+                      className="text-sm px-4-py-2"
                     >
                       ✕ Reject
                     </Button>

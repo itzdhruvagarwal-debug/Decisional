@@ -105,7 +105,7 @@ export default function InfluencerProfilePage() {
   if (session.user?.userType !== "BRAND" && session.user?.userType !== "ADMIN") {
     return (
       <DashboardShell user={session.user}>
-        <div className="card text-center" style={{ maxWidth: "680px", margin: "40px auto" }}>
+        <div className="card text-center max-w-680" style={{ margin: "40px auto" }}>
           <h1 className="text-2xl font-extrabold mb-2">
             Brand access required
           </h1>
@@ -147,14 +147,14 @@ export default function InfluencerProfilePage() {
   return (
     <DashboardShell user={session.user}>
       <div
-      className="flex flex-col gap-6" style={{ maxWidth: "900px", margin: "0 auto" }}
+      className="flex flex-col gap-6 max-w-900" style={{ margin: "0 auto" }}
     >
       {/* Header / Bio */}
       <div
         className="card flex gap-6 flex-wrap p-8"
       >
         <div
-          className="flex items-center justify-center font-extrabold flex-shrink-0 rounded-full" style={{ width: "120px", height: "120px", background: "var(--gradient-primary)", color: "#fff", fontSize: "48px" }}
+          className="flex items-center justify-center font-extrabold flex-shrink-0 rounded-full text-3xl" style={{ width: "120px", height: "120px", background: "var(--gradient-primary)", color: "#fff" }}
         >
           {profile.displayName?.[0] || "I"}
         </div>
@@ -191,7 +191,7 @@ export default function InfluencerProfilePage() {
           </div>
 
           <p
-            className="mb-5 text-sm" style={{ color: "var(--color-text-primary)", lineHeight: 1.6 }}
+            className="mb-5 text-sm text-primary leading-relaxed"
           >
             {profile.bio || "This creator hasn't added a bio yet."}
           </p>
@@ -228,7 +228,7 @@ export default function InfluencerProfilePage() {
           </h3>
 
           <div
-            className="flex justify-between border-b-card mb-4" style={{ paddingBottom: "16px" }}
+            className="flex justify-between border-b-card mb-4 pb-4"
           >
             <div>
               <div
@@ -266,7 +266,7 @@ export default function InfluencerProfilePage() {
           </div>
 
           <div
-            className="flex justify-between border-b-card mb-4" style={{ paddingBottom: "16px" }}
+            className="flex justify-between border-b-card mb-4 pb-4"
           >
             <div>
               <div
@@ -338,7 +338,7 @@ export default function InfluencerProfilePage() {
           </h3>
 
           <div
-            className="p-4 mb-6 rounded-md" style={{ background: "var(--color-bg-primary)" }}
+            className="p-4 mb-6 rounded-md bg-primary"
           >
             <div
               className="flex justify-between mb-2"
@@ -401,7 +401,7 @@ export default function InfluencerProfilePage() {
             >
               <Link
                 href={`/dashboard/campaigns/create?invite=${profile?.id || id}`}
-                className="btn btn-primary text-center text-sm" style={{ textDecoration: "none", padding: "14px" }}
+                className="btn btn-primary text-center text-sm no-underline" style={{ padding: "14px" }}
               >
                 Create Campaign & Invite
               </Link>
@@ -409,7 +409,7 @@ export default function InfluencerProfilePage() {
               {!canAfford && (
                 <Link
                   href="/dashboard/wallet"
-                  className="block text-center text-sm text-primary font-semibold" style={{ textDecoration: "none" }}
+                  className="block text-center text-sm text-primary font-semibold no-underline"
                 >
                   Deposit to Wallet
                 </Link>

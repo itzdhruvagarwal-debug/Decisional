@@ -77,7 +77,7 @@ export default function DeleteAccountPanel({
     return (
         <div className="card" style={{ border: "1px solid rgba(239, 68, 68, 0.2)" }}>
             <h3
-                className="text-xl font-bold mb-3" style={{ color: "var(--color-error)" }}
+                className="text-xl font-bold mb-3 text-rose"
             >
                 ⚠️ Danger Zone: Delete Account
             </h3>
@@ -91,7 +91,7 @@ export default function DeleteAccountPanel({
                 <div
                     role="alert"
                     aria-live="assertive"
-                    className="p-3 mb-4 rounded-sm" style={{ background: "rgba(239, 68, 68, 0.1)", color: "var(--color-error)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
+                    className="p-3 mb-4 rounded-sm text-rose" style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
                 >
                     {error}
                 </div>
@@ -133,7 +133,7 @@ export default function DeleteAccountPanel({
 
                     <div>
                         <label className="label" htmlFor="delete-confirm-input">
-                            Type <strong style={{ color: "var(--color-error)" }}>DELETE</strong> to confirm
+                            Type <strong className="text-rose">DELETE</strong> to confirm
                         </label>
                         <Input
                             id="delete-confirm-input"

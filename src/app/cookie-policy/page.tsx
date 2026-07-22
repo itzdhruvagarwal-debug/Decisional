@@ -7,12 +7,12 @@ export default function CookiePage() {
   const lastUpdated = "June 20, 2026";
 
   return (
-    <div className="flex flex-col" style={{ minHeight: "100vh" }}>
+    <div className="flex flex-col min-h-screen">
       <Navbar />
 
-      <main className="flex-1" style={{ paddingTop: "80px" }}>
+      <main className="flex-1 pt-20">
         <section className="section">
-          <div className="container" style={{ maxWidth: "860px" }}>
+          <div className="container max-w-860">
             <h1 className="section-title gradient-text mb-3 text-3xl font-extrabold">
               Cookie Policy
             </h1>

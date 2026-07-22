@@ -29,18 +29,18 @@ const legalPages = [
 
 export default function LegalPage() {
   return (
-    <div className="flex flex-col" style={{ minHeight: "100vh" }}>
+    <div className="flex flex-col min-h-screen">
       <Navbar />
 
-      <main className="flex-1" style={{ paddingTop: "80px" }}>
+      <main className="flex-1 pt-20">
         <section className="section">
-          <div className="container" style={{ maxWidth: "980px" }}>
+          <div className="container max-w-980">
             <h1
               className="section-title gradient-text mb-3 text-3xl font-extrabold"
             >
               Legal Center
             </h1>
-            <p className="text-secondary font-semibold" style={{ maxWidth: "720px", marginBottom: "36px" }}>
+            <p className="text-secondary font-semibold max-w-720 mb-8">
               Core policies for Decisional users, including India-focused marketplace,
               payment, privacy, tax-readiness, and dispute workflows.
             </p>
@@ -50,9 +50,9 @@ export default function LegalPage() {
                 <Link
                   key={page.href}
                   href={page.href}
-                  className="card grid border-card" style={{ padding: "22px", color: "inherit", textDecoration: "none", background: "rgba(255,255,255,0.02)", gap: "10px" }}
+                  className="card grid border-card text-inherit no-underline" style={{ padding: "22px", background: "rgba(255,255,255,0.02)", gap: "10px" }}
                 >
-                  <h2 className="text-lg" style={{ fontWeight: 850, color: "var(--color-text-primary)" }}>
+                  <h2 className="text-lg text-primary" style={{ fontWeight: 850 }}>
                     {page.title}
                   </h2>
                   <p className="text-secondary text-sm" style={{ lineHeight: 1.65 }}>

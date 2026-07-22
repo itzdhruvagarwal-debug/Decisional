@@ -75,7 +75,7 @@ export default async function VerificationDetailPage({
         </p>
       </header>
 
-      <div className="grid-2 gap-6" style={{ alignItems: "start" }}>
+      <div className="grid-2 gap-6 items-start">
         {/* Profile Info */}
         <section className="card">
           <h2 className="text-lg font-bold mb-5 flex items-center gap-2">
@@ -172,7 +172,7 @@ export default async function VerificationDetailPage({
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <div className="font-extrabold text-sm flex items-center gap-2 uppercase" style={{ color: "var(--color-text-primary)" }}>
+                      <div className="font-extrabold text-sm flex items-center gap-2 uppercase text-primary">
                         {doc.type.replaceAll("_", " ")}
                         <span className={`badge ${getDocBadgeClass(doc.status)}`}>
                           {doc.status}
@@ -187,8 +187,7 @@ export default async function VerificationDetailPage({
                         href={doc.documentUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn btn-sm btn-secondary"
-                        style={{ padding: "6px 12px" }}
+                        className="btn btn-sm btn-secondary px-3-py-1"
                       >
                         Review Attachment ↗
                       </a>

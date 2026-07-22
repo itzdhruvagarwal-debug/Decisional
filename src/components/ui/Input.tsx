@@ -27,7 +27,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         />
         {error && (
           <span 
-            className="input-error-message text-xs" style={{ color: "var(--color-accent-rose, #f43f5e)", marginTop: "2px" }}
+            className="input-error-message text-xs mt-1" style={{ color: "var(--color-accent-rose, #f43f5e)" }}
           >
             {error}
           </span>

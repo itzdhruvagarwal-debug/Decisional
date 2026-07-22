@@ -8,12 +8,12 @@ export default function RefundPage() {
   const lastUpdated = "June 20, 2026";
 
   return (
-    <div className="flex flex-col" style={{ minHeight: "100vh" }}>
+    <div className="flex flex-col min-h-screen">
       <Navbar />
 
-      <main className="flex-1" style={{ paddingTop: "80px" }}>
+      <main className="flex-1 pt-20">
         <section className="section">
-          <div className="container" style={{ maxWidth: "880px" }}>
+          <div className="container max-w-880">
             <h1 className="section-title gradient-text mb-3 text-3xl font-extrabold">
               Refund and Cancellation Policy
             </h1>
@@ -130,10 +130,10 @@ export default function RefundPage() {
                 </p>
               </section>
 
-              <section className="text-center bg-secondary rounded-lg border-card" style={{ padding: "28px" }}>
+              <section className="text-center bg-secondary rounded-lg border-card p-6">
                 <p className="text-sm text-muted">
                   Need a refund review or dispute?
-                  <Link href="/dashboard/disputes" className="text-primary font-bold" style={{ marginLeft: "5px", textDecoration: "none" }}>
+                  <Link href="/dashboard/disputes" className="text-primary font-bold no-underline" style={{ marginLeft: "5px" }}>
                     Open Dispute Center
                   </Link>
                 </p>

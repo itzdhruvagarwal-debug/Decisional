@@ -289,7 +289,7 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
         </div>
         <div className="overflow-x-auto">
           <table
-            className="w-full text-left" style={{ borderCollapse: "collapse" }}
+            className="w-full text-left border-collapse"
           >
             <thead>
               <tr className="border-b-card">

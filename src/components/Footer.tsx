@@ -36,7 +36,7 @@ export default function Footer() {
     >
       <div className="container">
         <div
-          className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "40px", marginBottom: "48px" }}
+          className="grid mb-10" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "40px" }}
         >
           <div style={{ gridColumn: "span 1" }}>
             <Logo />
@@ -57,7 +57,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="flex items-center justify-center text-xs font-extrabold cursor-pointer rounded-sm bg-tertiary border-card" style={{ width: "36px", height: "36px", transition: "all var(--transition-fast)", color: "inherit", textDecoration: "none" }}
+                  className="flex items-center justify-center text-xs font-extrabold cursor-pointer rounded-sm bg-tertiary border-card text-inherit no-underline" style={{ width: "36px", height: "36px", transition: "all var(--transition-fast)" }}
                 >
                   {social.label}
                 </a>
@@ -105,7 +105,7 @@ function FooterColumn({
       >
         {title}
       </h4>
-      <ul style={{ listStyle: "none", padding: 0 }}>
+      <ul className="p-0" style={{ listStyle: "none" }}>
         {links.map((item) => (
           <li key={item.label} style={{ marginBottom: "10px" }}>
             <Link

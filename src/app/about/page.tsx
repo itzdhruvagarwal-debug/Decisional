@@ -26,12 +26,12 @@ const values = [
 
 export default function AboutPage() {
   return (
-    <div className="flex flex-col" style={{ minHeight: "100vh" }}>
+    <div className="flex flex-col min-h-screen">
       <Navbar />
 
-      <main className="flex-1" style={{ paddingTop: "80px" }}>
+      <main className="flex-1 pt-20">
         <section className="section bg-secondary">
-          <div className="container text-center" style={{ maxWidth: "840px" }}>
+          <div className="container text-center max-w-840">
             <h1 className="section-title">
               Decisional helps brands and creators run trusted collaborations
             </h1>

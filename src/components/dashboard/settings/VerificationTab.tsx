@@ -292,10 +292,10 @@ function DigiLockerCardComponent({
                         <span style={{ fontSize: "22px" }}>🏛️</span>
                         <div>
                             <div className="font-bold text-sm">Instant Verification via DigiLocker</div>
-                            <div className="text-xs text-muted" style={{ marginTop: "2px" }}>Government of India</div>
+                            <div className="text-xs text-muted mt-1">Government of India</div>
                         </div>
                     </div>
-                    <div className="text-sm text-secondary" style={{ lineHeight: 1.6 }}>
+                    <div className="text-sm text-secondary leading-relaxed">
                         Connect your DigiLocker account to automatically verify your Aadhaar and PAN — no uploads needed. Documents are fetched directly from the government database.
                     </div>
                     <div className="text-muted text-xs" style={{ marginTop: "6px" }}>
@@ -308,7 +308,7 @@ function DigiLockerCardComponent({
                     aria-busy={isConnectingDigiLocker}
                     onClick={handleDigiLockerConnect}
                     disabled={isConnectingDigiLocker}
-                    className="border-none" style={{ background: "linear-gradient(135deg, #16a34a, #22c55e)", whiteSpace: "nowrap", minWidth: "180px" }}
+                    className="border-none whitespace-nowrap" style={{ background: "linear-gradient(135deg, #16a34a, #22c55e)", minWidth: "180px" }}
                 >
                     {isConnectingDigiLocker ? "Connecting..." : "🔗 Connect DigiLocker"}
                 </Button>
@@ -542,7 +542,7 @@ export default function VerificationTab({
     if (!verificationData) {
         return (
             <div
-                className="flex justify-center" style={{ padding: "60px" }}
+                className="flex justify-center p-10"
             >
                 <span
                     className="loading"
@@ -583,7 +583,7 @@ export default function VerificationTab({
 
     return (
         <div
-            className="flex flex-col gap-6" style={{ maxWidth: "900px" }}
+            className="flex flex-col gap-6 max-w-900"
         >
             <TierStatusCardComponent
                 tier={tier}
@@ -627,7 +627,7 @@ export default function VerificationTab({
 
             {/* Security note */}
             <div
-                className="text-xs text-muted bg-secondary rounded-md border-card" style={{ padding: "12px 16px", lineHeight: 1.6 }}
+                className="text-xs text-muted bg-secondary rounded-md border-card leading-relaxed" style={{ padding: "12px 16px" }}
             >
                 🛡️ <strong>Security:</strong> All documents are encrypted and reviewed by our compliance team within 1–2 business days. They are never shared with third parties without your consent.
             </div>
@@ -697,7 +697,7 @@ function TierStatusCardComponent({
                                 }
                             </div>
                             <div
-                                className="text-sm text-secondary" style={{ marginTop: "2px" }}
+                                className="text-sm text-secondary mt-1"
                             >
                                 {tierDesc}
                             </div>
@@ -711,14 +711,14 @@ function TierStatusCardComponent({
                         Monthly Limit
                     </div>
                     <div
-                        className="font-extrabold" style={{ fontSize: "26px", color: isUnlimited
+                        className="font-extrabold text-2xl" style={{ color: isUnlimited
                                 ? "#10b981"
                                 : "var(--color-text-primary)" }}
                     >
                         {getMonthlyLimitText(isUnlimited, tier, tierLimit)}
                     </div>
                     <div
-                        className="text-muted text-xs" style={{ marginTop: "2px" }}
+                        className="text-muted text-xs mt-1"
                     >
                         per month
                     </div>

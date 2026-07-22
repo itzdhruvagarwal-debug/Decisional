@@ -4,7 +4,7 @@ export default function Logo() {
   return (
     <Link
       href="/"
-      className="flex items-center gap-3" style={{ textDecoration: "none" }}
+      className="flex items-center gap-3 no-underline"
     >
       <div
         className="p-2 flex items-center justify-center rounded-lg" style={{ background:

@@ -32,9 +32,9 @@ export default function PricingPage() {
       <Navbar />
 
       <main
-        className="overflow-hidden relative" style={{ paddingTop: "120px", paddingBottom: "80px" }}
+        className="overflow-hidden relative pt-30 pb-20"
       >
-        <div style={{ maxWidth: "1040px", margin: "0 auto", padding: "0 20px" }}>
+        <div className="max-w-1040" style={{ margin: "0 auto", padding: "0 20px" }}>
           <div className="text-center" style={{ marginBottom: "52px" }}>
             <motion.h1
               initial={{ opacity: 0, y: -20 }}
@@ -48,7 +48,7 @@ export default function PricingPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="text-secondary text-lg" style={{ lineHeight: 1.7, maxWidth: "720px", margin: "0 auto" }}
+              className="text-secondary text-lg max-w-720" style={{ lineHeight: 1.7, margin: "0 auto" }}
             >
               Join for free. Decisional earns when a protected collaboration is
               successfully completed, verified, and paid out.
@@ -99,7 +99,7 @@ export default function PricingPage() {
           </div>
 
           <section style={{ maxWidth: "820px", margin: "0 auto" }}>
-            <div className="text-center" style={{ marginBottom: "36px" }}>
+            <div className="text-center mb-8">
               <h2 className="font-bold text-3xl">
                 Frequently Asked Questions
               </h2>
@@ -144,7 +144,7 @@ export default function PricingPage() {
             </p>
             <Link
               href="/contact"
-              className="text-primary font-bold" style={{ textDecoration: "none" }}
+              className="text-primary font-bold no-underline"
             >
               Contact support
             </Link>
@@ -206,7 +206,7 @@ function PricingCard({
         className="text-center p-5 bg-tertiary rounded-xl border-card" style={{ marginBottom: "30px" }}
       >
         <div
-          className="font-extrabold" style={{ fontSize: "clamp(34px, 8vw, 42px)", color: "var(--color-text-primary)" }}
+          className="font-extrabold text-primary" style={{ fontSize: "clamp(34px, 8vw, 42px)" }}
         >
           {price}
         </div>
@@ -218,7 +218,7 @@ function PricingCard({
       </div>
 
       <ul
-        className="flex-1 flex flex-col gap-3" style={{ marginBottom: "30px", listStyle: "none", padding: 0 }}
+        className="flex-1 flex flex-col gap-3 p-0" style={{ marginBottom: "30px", listStyle: "none" }}
       >
         {features.map((feature) => (
           <li

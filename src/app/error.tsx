@@ -20,8 +20,7 @@ export default function RootError({
     <div
       role="alert"
       aria-live="assertive"
-      className="flex items-center justify-center p-6"
-      style={{ minHeight: "100vh" }}
+      className="flex items-center justify-center p-6 min-h-screen"
     >
       <div
         className="card animate-fade-in text-center w-full border-card bg-glass" style={{ maxWidth: "480px", padding: "40px 32px", backdropFilter: "blur(8px)", boxShadow: "0 20px 40px -15px rgba(0,0,0,0.5)" }}
@@ -43,15 +42,7 @@ export default function RootError({
 
         {error.digest && (
           <div
-            className="text-xs text-muted mb-6"
-            style={{
-              background: "rgba(255,255,255,0.03)",
-              padding: "10px 14px",
-              borderRadius: "var(--radius-sm, 6px)",
-              fontFamily: "monospace",
-              border: "1px solid var(--color-border, rgba(255,255,255,0.08))",
-              wordBreak: "break-all",
-            }}
+            className="text-xs text-muted mb-6 break-all" style={{ background: "rgba(255,255,255,0.03)", padding: "10px 14px", borderRadius: "var(--radius-sm, 6px)", fontFamily: "monospace", border: "1px solid var(--color-border, rgba(255,255,255,0.08))" }}
           >
             Ref: {error.digest}
           </div>

@@ -226,7 +226,7 @@ export default function ProfileTab({
                         type="button"
                         onClick={() => profileImageInputRef.current?.click()}
                         aria-label="Change profile image"
-                        className="relative cursor-pointer border-none" style={{ background: "none", padding: 0 }}
+                        className="relative cursor-pointer border-none p-0" style={{ background: "none" }}
                     >
                         <div
                             className="overflow-hidden flex items-center justify-center relative rounded-full" style={{ width: "100px", height: "100px", border: "4px solid var(--color-bg-tertiary)", background: "#f0f0f0" }}

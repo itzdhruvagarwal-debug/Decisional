@@ -49,10 +49,10 @@ export default function DisputesPage() {
       <div className="animate-fade-in">
         {/* Page Header */}
         <div
-          className="flex justify-between items-center flex-wrap gap-3" style={{ marginBottom: "28px" }}
+          className="flex justify-between items-center flex-wrap gap-3 mb-6"
         >
           <div>
-            <h1 className="font-extrabold" style={{ fontSize: "26px" }}>
+            <h1 className="font-extrabold text-2xl">
               ⚖️ Disputes & Resolution
             </h1>
             <p className="text-secondary text-sm mt-1">
@@ -68,7 +68,7 @@ export default function DisputesPage() {
         {(() => {
           if (isLoading) {
             return (
-              <div className="text-center" style={{ padding: "60px" }}>
+              <div className="text-center p-10">
                 <span className="loading" style={{ width: "36px", height: "36px" }} />
               </div>
             );
@@ -90,7 +90,7 @@ export default function DisputesPage() {
               <Link
                 key={dispute.id}
                 href={`/dashboard/disputes/${dispute.id}`}
-                style={{ textDecoration: "none", color: "inherit" }}
+                className="no-underline text-inherit"
               >
                 <div className="card hover-lift cursor-pointer">
                   {/* Top Row: Status + meta */}
@@ -137,7 +137,7 @@ export default function DisputesPage() {
 
                   {/* Description Excerpt */}
                   <div
-                    className="text-sm text-secondary bg-tertiary rounded-md" style={{ padding: "12px 14px", lineHeight: 1.6, borderLeft: `3px solid ${getStatusColor(dispute.status)}` }}
+                    className="text-sm text-secondary bg-tertiary rounded-md leading-relaxed" style={{ padding: "12px 14px", borderLeft: `3px solid ${getStatusColor(dispute.status)}` }}
                   >
                     "{dispute.description.length > 120
                       ? dispute.description.slice(0, 120) + "..."

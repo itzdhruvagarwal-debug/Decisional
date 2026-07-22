@@ -342,7 +342,7 @@ function DealProgress({ status }: Readonly<DealProgressProps>) {
         })}
         {status === "CANCELLED" && (
           <div
-            className="p-3 font-semibold text-center rounded-md" style={{ background: "rgba(239, 68, 68, 0.1)", color: "var(--color-error)" }}
+            className="p-3 font-semibold text-center rounded-md text-rose" style={{ background: "rgba(239, 68, 68, 0.1)" }}
           >
             Deal Cancelled
           </div>
@@ -427,11 +427,11 @@ function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissionsCard
                             <span className="text-sm font-semibold">
                               {item.type.replace(/_\d+$/, '').replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase())}
                             </span>
-                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary" style={{ wordBreak: "break-all" }}>
+                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary break-all">
                               View Link
                             </a>
                             {item.feedback && (
-                              <span className="text-xs" style={{ color: "var(--color-warning)", marginTop: "2px" }}>
+                              <span className="text-xs mt-1" style={{ color: "var(--color-warning)" }}>
                                 Feedback: {item.feedback}
                               </span>
                             )}
@@ -1386,10 +1386,10 @@ export default function DealDetailPage() {
   } = computeDealDisplay(deal, contractTerms);
   return (
     <DashboardShell user={session.user}>
-      <div className="deal-detail-page grid gap-6" style={{ maxWidth: "1280px", margin: "0 auto" }}>
+      <div className="deal-detail-page grid gap-6 max-w-1280" style={{ margin: "0 auto" }}>
         <ToastContainer toasts={toasts} onClose={removeToast} />
         <header
-          className="glass deal-detail-header border-b-card" style={{ position: "sticky", top: 0, zIndex: 40, padding: "16px 24px" }}
+          className="glass deal-detail-header border-b-card px-6-py-4" style={{ position: "sticky", top: 0, zIndex: 40 }}
         >
           <Link
             href="/dashboard/deals"
@@ -1405,7 +1405,7 @@ export default function DealDetailPage() {
                 {deal.campaign.title}
               </h1>
               <div
-                className="flex items-center gap-2 mt-2 text-sm font-semibold" style={{ padding: "6px 12px", background: `${status.color}20`, borderRadius: "var(--radius-full)", width: "fit-content", color: status.color }}
+                className="flex items-center gap-2 mt-2 text-sm font-semibold px-3-py-1" style={{ background: `${status.color}20`, borderRadius: "var(--radius-full)", width: "fit-content", color: status.color }}
               >
                 {status.label}
               </div>
@@ -1537,7 +1537,7 @@ export default function DealDetailPage() {
                     <div
                       className="mt-3 p-3 text-sm text-secondary bg-tertiary rounded-md"
                     >
-                      <div className="font-bold" style={{ color: "var(--color-text-primary)" }}>
+                      <div className="font-bold text-primary">
                         {deal.shippingAddress.fullName}
                       </div>
                       <div>{deal.shippingAddress.phone}</div>
@@ -1774,7 +1774,7 @@ export default function DealDetailPage() {
                   <div className="flex flex-col">
                     <span className="font-semibold text-sm">{item.label}</span>
                     {url ? (
-                      <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary" style={{ wordBreak: "break-all", marginTop: "2px" }}>
+                      <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary break-all mt-1">
                         View Submission Link
                       </a>
                     ) : (
@@ -1899,7 +1899,7 @@ export default function DealDetailPage() {
                         setTimeout(() => fileInputRef.current?.click(), 50);
                       }}
                       disabled={isUploadingContent}
-                      style={{ whiteSpace: "nowrap" }}
+                      className="whitespace-nowrap"
                     >
                       {isUploadingContent && uploadingField === item.type ? "Uploading..." : "Upload"}
                     </Button>
@@ -2030,7 +2030,7 @@ export default function DealDetailPage() {
       {/* ── Star Rating & Review Section ── */}
       {deal.status === "COMPLETED" && !reviewSubmitted && (
         <div
-          className="card rounded-lg border-card" style={{ padding: "28px", background: "linear-gradient(135deg, rgba(16,185,129,0.05), rgba(59,130,246,0.05))" }}
+          className="card rounded-lg border-card p-6" style={{ background: "linear-gradient(135deg, rgba(16,185,129,0.05), rgba(59,130,246,0.05))" }}
         >
           <h3 className="text-lg font-bold mb-4">⭐ Rate This Deal</h3>
           <p className="text-sm text-secondary mb-4">How was your experience? Your review helps build trust on the platform.</p>
@@ -2065,7 +2065,7 @@ export default function DealDetailPage() {
             value={reviewComment}
             onChange={(e) => setReviewComment(e.target.value)}
             rows={3}
-            className="w-full text-sm mb-4 rounded-md border-card" style={{ padding: "12px 16px", background: "var(--color-bg-primary)", resize: "vertical" }}
+            className="w-full text-sm mb-4 rounded-md border-card bg-primary" style={{ padding: "12px 16px", resize: "vertical" }}
           />
           <Button
             variant="primary"

@@ -46,7 +46,7 @@ export default async function AdminViolationsPage() {
 
   return (
     <div className="admin-page">
-      <div className="admin-toolbar" style={{ marginBottom: "28px" }}>
+      <div className="admin-toolbar mb-6">
         <div>
           <h1 className="text-3xl font-extrabold mb-1">
             User Violations
@@ -64,9 +64,9 @@ export default async function AdminViolationsPage() {
           description="No violations have been recorded yet."
         />
       ) : (
-        <div className="card overflow-hidden" style={{ padding: 0 }}>
+        <div className="card overflow-hidden p-0">
           <div className="admin-table-wrap">
-            <table className="w-full" style={{ borderCollapse: "collapse" }}>
+            <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-secondary">
                   {["User", "Type", "Severity", "Action", "Description", "Date", "Expires"].map(
@@ -94,7 +94,7 @@ export default async function AdminViolationsPage() {
                     <tr key={violation.id} className="border-b-card">
                       <td className="p-card">
                         <div className="font-extrabold">{name}</div>
-                        <div className="text-muted text-xs" style={{ marginTop: "2px" }}>
+                        <div className="text-muted text-xs mt-1">
                           {violation.user.email} ({violation.user.userType})
                         </div>
                       </td>
@@ -115,8 +115,8 @@ export default async function AdminViolationsPage() {
                           {violation.action}
                         </span>
                       </td>
-                      <td className="p-card text-sm" style={{ color: "var(--color-text-primary)" }}>
-                        <div className="overflow-hidden" style={{ maxWidth: "240px", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={violation.description}>
+                      <td className="p-card text-sm text-primary">
+                        <div className="overflow-hidden whitespace-nowrap" style={{ maxWidth: "240px", textOverflow: "ellipsis" }} title={violation.description}>
                           {violation.description}
                         </div>
                       </td>

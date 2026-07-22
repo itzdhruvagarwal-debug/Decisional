@@ -173,7 +173,7 @@ export default async function AdminDisputeDetailPage({
               compact
             />
           ) : (
-            <ul style={{ padding: 0 }}>
+            <ul className="p-0">
               {dispute.evidence.map((ev) => (
                 <li
                   key={ev.id}
@@ -248,7 +248,7 @@ export default async function AdminDisputeDetailPage({
               "Admin Decision: Refund to Brand",
             )}
           >
-            <Button type="submit" variant="danger" style={{ padding: "12px 24px" }}>
+            <Button type="submit" variant="danger" className="px-6-py-3">
               Start Refund (To Brand)
             </Button>
           </form>
@@ -264,7 +264,7 @@ export default async function AdminDisputeDetailPage({
             <Button
               type="submit"
               variant="success"
-              style={{ padding: "12px 24px" }}
+              className="px-6-py-3"
             >
               Release Funds (To Influencer)
             </Button>

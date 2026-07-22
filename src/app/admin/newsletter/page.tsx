@@ -26,7 +26,7 @@ export default async function AdminNewsletterPage() {
 
   return (
     <div className="admin-page">
-      <div className="admin-toolbar" style={{ marginBottom: "28px" }}>
+      <div className="admin-toolbar mb-6">
         <div>
           <h1 className="text-3xl font-extrabold mb-1">
             Send Newsletter
@@ -37,14 +37,14 @@ export default async function AdminNewsletterPage() {
         </div>
       </div>
 
-      <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", marginBottom: "28px" }}>
+      <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
         <div className="card" style={{ padding: "18px 20px" }}>
           <div className="text-muted text-xs mb-1">Total Subscribers</div>
           <div className="text-3xl font-extrabold text-primary-light">{stats.total}</div>
         </div>
         <div className="card" style={{ padding: "18px 20px" }}>
           <div className="text-muted text-xs mb-1">Verified Subscribers</div>
-          <div className="text-3xl font-extrabold" style={{ color: "var(--color-success)" }}>{stats.verified}</div>
+          <div className="text-3xl font-extrabold text-emerald">{stats.verified}</div>
         </div>
         <div className="card" style={{ padding: "18px 20px" }}>
           <div className="text-muted text-xs mb-1">Pending Verification</div>
@@ -52,7 +52,7 @@ export default async function AdminNewsletterPage() {
         </div>
       </div>
 
-      <div className="card" style={{ padding: "28px" }}>
+      <div className="card p-6">
         <form action="/api/admin/newsletter" method="POST">
           <div className="mb-5">
             <Input

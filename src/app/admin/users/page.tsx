@@ -135,7 +135,7 @@ export default async function AdminUsersPage({
         </Button>
       </form>
 
-      <div className="card overflow-hidden" style={{ padding: 0 }}>
+      <div className="card overflow-hidden p-0">
         {users.length === 0 ? (
           <EmptyState
             emoji="👤"
@@ -144,7 +144,7 @@ export default async function AdminUsersPage({
           />
         ) : (
           <div className="admin-table-wrap">
-            <table className="w-full" style={{ minWidth: "960px", borderCollapse: "collapse" }}>
+            <table className="w-full border-collapse" style={{ minWidth: "960px" }}>
               <thead>
                 <tr className="bg-secondary">
                   {["User", "Role", "Status", "Tax", "Trust", "Joined", "Action"].map(

@@ -43,8 +43,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div
-          className="flex items-center justify-center"
-          style={{ minHeight: "100vh" }}
+          className="flex items-center justify-center min-h-screen"
         >
           <span className="loading" />
         </div>

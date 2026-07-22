@@ -24,7 +24,7 @@ export default async function AdminFinancialPage() {
   const data = await AdminAnalyticsService.getFinancialOverview();
 
   return (
-    <div className="admin-page" style={{ color: "var(--color-text-primary)" }}>
+    <div className="admin-page text-primary">
       {/* Header */}
       <div className="mb-8">
         <h1 className="gradient-text text-3xl font-extrabold mb-1">
@@ -53,7 +53,7 @@ export default async function AdminFinancialPage() {
           <div className="text-xs font-bold text-muted mb-2 uppercase">
             Net Profit (Revenue - Gateway Fees)
           </div>
-          <div className="text-2xl font-extrabold" style={{ color: "var(--color-success)" }}>{formatCurrency(data.overview.netProfit)}</div>
+          <div className="text-2xl font-extrabold text-emerald">{formatCurrency(data.overview.netProfit)}</div>
           <div className="text-xs text-secondary mt-1">
             Gross Revenue: {formatCurrency(data.overview.platformRevenue)}
           </div>
@@ -150,7 +150,7 @@ export default async function AdminFinancialPage() {
             </div>
             <div>
               <div className="text-xs text-muted">Completed Deals</div>
-              <div className="text-xl font-bold mt-1" style={{ color: "var(--color-success)" }}>{data.deals.completed}</div>
+              <div className="text-xl font-bold mt-1 text-emerald">{data.deals.completed}</div>
             </div>
             <div>
               <div className="text-xs text-muted">Active/Pending Deals</div>
@@ -195,7 +195,7 @@ export default async function AdminFinancialPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-secondary">Payment/Transaction Success Rate</span>
-              <span className="font-bold" style={{ color: "var(--color-success)" }}>{data.payments.successRate}%</span>
+              <span className="font-bold text-emerald">{data.payments.successRate}%</span>
             </div>
           </div>
         </div>
@@ -211,14 +211,14 @@ export default async function AdminFinancialPage() {
           <a
             href="/api/admin/reports/revenue?format=csv"
             download
-            className="btn btn-primary inline-flex items-center gap-2" style={{ textDecoration: "none" }}
+            className="btn btn-primary inline-flex items-center gap-2 no-underline"
           >
             📊 Download Revenue Report (CSV)
           </a>
           <a
             href="/api/admin/reports/tds?format=csv"
             download
-            className="btn btn-secondary inline-flex items-center gap-2" style={{ textDecoration: "none" }}
+            className="btn btn-secondary inline-flex items-center gap-2 no-underline"
           >
             📜 Download TDS Report (CSV)
           </a>

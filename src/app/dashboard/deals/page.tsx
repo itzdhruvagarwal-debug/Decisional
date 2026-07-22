@@ -244,7 +244,7 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
 
   return (
     <div
-      className="card overflow-hidden" style={{ padding: 0, border:
+      className="card overflow-hidden p-0" style={{ border:
           selectedDeal === deal.id
             ? "1px solid var(--color-primary)"
             : "1px solid transparent" }}
@@ -291,7 +291,7 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
             </div>
           </div>
           <div
-            className="flex items-center gap-2 text-xs font-semibold" style={{ padding: "6px 12px", background: `${status.color}20`, borderRadius: "var(--radius-full)", color: status.color, alignSelf: "flex-start" }}
+            className="flex items-center gap-2 text-xs font-semibold px-3-py-1" style={{ background: `${status.color}20`, borderRadius: "var(--radius-full)", color: status.color, alignSelf: "flex-start" }}
           >
             <span>{status.icon}</span>
             <span>{status.label}</span>
@@ -506,7 +506,7 @@ export default function DealsPage() {
             </div>
             <div className="card text-center">
               <div
-                className="font-extrabold text-3xl" style={{ color: "var(--color-success)" }}
+                className="font-extrabold text-3xl text-emerald"
               >
                 {dealStats.completed}
               </div>
@@ -553,7 +553,7 @@ export default function DealsPage() {
                   setStatusFilter(f.key);
                   setCurrentPage(1);
                 }}
-                style={{ whiteSpace: "nowrap" }}
+                className="whitespace-nowrap"
               >
                 {f.label}
               </Button>

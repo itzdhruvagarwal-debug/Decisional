@@ -545,7 +545,7 @@ export default function WalletPage() {
   if (status === "loading" || isLoading) {
     return (
       <DashboardShell user={session?.user || null}>
-        <div className="flex items-center justify-center" style={{ minHeight: "60vh" }}>
+        <div className="flex items-center justify-center min-h-60vh">
           <span className="loading" />
         </div>
       </DashboardShell>

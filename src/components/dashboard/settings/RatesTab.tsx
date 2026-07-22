@@ -10,7 +10,7 @@ interface RatesTabProps {
 
 export default function RatesTab({ profile, setProfile }: Readonly<RatesTabProps>) {
     return (
-        <div className="card" style={{ maxWidth: "600px" }}>
+        <div className="card max-w-600">
             <h3
                 className="text-base font-bold mb-5"
             >

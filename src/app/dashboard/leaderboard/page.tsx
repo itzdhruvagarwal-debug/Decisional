@@ -108,7 +108,7 @@ export default function LeaderboardPage() {
         <Button
           onClick={() => globalThis.location.reload()}
           variant="primary"
-          className="mt-4" style={{ padding: "8px 16px" }}
+          className="mt-4 px-4-py-2"
         >
           Retry
         </Button>
@@ -211,7 +211,7 @@ export default function LeaderboardPage() {
   if (!session) {
     return (
       <DashboardShell user={null}>
-        <div className="flex items-center justify-center" style={{ minHeight: "60vh" }}>
+        <div className="flex items-center justify-center min-h-60vh">
           <span className="loading" />
         </div>
       </DashboardShell>
@@ -220,7 +220,7 @@ export default function LeaderboardPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+      <div className="max-w-900" style={{ margin: "0 auto" }}>
         {/* Header */}
         <div className="text-center mb-8">
           <h1
@@ -262,7 +262,7 @@ export default function LeaderboardPage() {
                 key={f}
                 onClick={() => setFilter(f)}
                 variant={filter === f ? (f === "weekly" ? "warning" : "primary") : "ghost"}
-                className="font-semibold text-sm" style={{ padding: "8px 16px", borderRadius: "10px", transition: "all 0.2s", color: filter === f ? "white" : "var(--color-text-secondary)" }}
+                className="font-semibold text-sm px-4-py-2" style={{ borderRadius: "10px", transition: "all 0.2s", color: filter === f ? "white" : "var(--color-text-secondary)" }}
               >
                 {f === "weekly" ? "🔥 This Week" : "🏛️ All-Time"}
               </Button>
@@ -363,7 +363,7 @@ export default function LeaderboardPage() {
               className="flex items-center gap-4 mb-6 flex-wrap p-5 rounded-xl" style={{ background:
                   "linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.15))", border: "2px solid #f59e0b" }}
             >
-              <div style={{ fontSize: "48px" }}>🔥</div>
+              <div className="text-3xl">🔥</div>
               <div>
                 <div
                   className="font-bold text-xs text-amber uppercase" style={{ letterSpacing: "1px" }}
@@ -371,7 +371,7 @@ export default function LeaderboardPage() {
                   🏆 HOT CREATOR OF THE WEEK
                 </div>
                 <div
-                  className="text-xl font-extrabold mt-1" style={{ color: "var(--color-text-primary)" }}
+                  className="text-xl font-extrabold mt-1 text-primary"
                 >
                   {influencers[0].name}
                 </div>
@@ -388,7 +388,7 @@ export default function LeaderboardPage() {
         <div className="flex flex-col gap-2">
           {/* Header Row */}
           <div
-            className="grid font-bold text-secondary text-xs uppercase" style={{ gridTemplateColumns: "40px 1fr 100px 80px", padding: "8px 16px", letterSpacing: "1px" }}
+            className="grid font-bold text-secondary text-xs uppercase px-4-py-2" style={{ gridTemplateColumns: "40px 1fr 100px 80px", letterSpacing: "1px" }}
           >
             <span>#</span>
             <span>Name</span>

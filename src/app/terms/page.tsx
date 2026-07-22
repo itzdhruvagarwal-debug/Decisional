@@ -7,12 +7,12 @@ export default function TermsPage() {
   const lastUpdated = "June 20, 2026";
 
   return (
-    <div className="flex flex-col" style={{ minHeight: "100vh" }}>
+    <div className="flex flex-col min-h-screen">
       <Navbar />
 
-      <main className="flex-1" style={{ paddingTop: "80px" }}>
+      <main className="flex-1 pt-20">
         <section className="section">
-          <div className="container" style={{ maxWidth: "920px" }}>
+          <div className="container max-w-920">
             <h1
               className="section-title gradient-text mb-3 text-3xl font-extrabold"
             >
@@ -179,7 +179,7 @@ export default function TermsPage() {
                 </p>
               </section>
 
-              <section className="bg-secondary rounded-lg border-card" style={{ padding: "28px" }}>
+              <section className="bg-secondary rounded-lg border-card p-6">
                 <h2 style={headingStyle}>11. Contact</h2>
                 <p>
                   For Terms questions, legal notices, or compliance escalation, email{" "}
