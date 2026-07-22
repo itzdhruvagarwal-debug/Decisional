@@ -9,6 +9,11 @@ import {
 import { getSignedUrl } from "@/lib/storage";
 import EmptyState from "@/components/ui/EmptyState";
 import { Button, Input } from "@/components/ui";
+import { z } from "zod";
+
+export const verificationRejectSchema = z.object({
+  reason: z.string().min(5, "Reason must be at least 5 characters").max(100),
+});
 
 export const dynamic = "force-dynamic";
 
@@ -225,8 +230,8 @@ export default async function VerificationDetailPage({
                       <form
                         action={async (formData) => {
                           "use server";
-                          const reason = formData.get("reason") as string;
-                          if (!reason) return;
+                          const rawReason = formData.get("reason") as string;
+                          const { reason } = verificationRejectSchema.parse({ reason: rawReason });
                           await rejectDocument(doc.id, user.id, reason);
                         }}
                         style={{ flex: 2, display: "flex", gap: "8px" }}
@@ -278,8 +283,8 @@ export default async function VerificationDetailPage({
           <form
             action={async (formData) => {
               "use server";
-              const reason = formData.get("reason") as string;
-              if (!reason) return;
+              const rawReason = formData.get("reason") as string;
+              const { reason } = verificationRejectSchema.parse({ reason: rawReason });
               await rejectUser(user.id, reason);
             }}
             style={{ display: "flex", gap: "12px", flex: "1 1 360px", flexWrap: "wrap" }}

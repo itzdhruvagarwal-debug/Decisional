@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { resolveDispute } from "../../dispute-actions";
 import EmptyState from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui";
+import { z } from "zod";
+
+export const disputeVerdictSchema = z.enum(["REFUND_BRAND", "RELEASE_INFLUENCER"]);
 
 export const dynamic = "force-dynamic";
 

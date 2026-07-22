@@ -2,6 +2,12 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
 import { Button, Input, Textarea } from "@/components/ui";
+import { z } from "zod";
+
+export const newsletterSchema = z.object({
+  subject: z.string().min(5, "Subject must be at least 5 characters").max(100),
+  content: z.string().min(10, "Content must be at least 10 characters"),
+});
 
 export const dynamic = "force-dynamic";
 

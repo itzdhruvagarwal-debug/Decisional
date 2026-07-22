@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 import VerificationQueue from "@/components/admin/VerificationQueue";
 import EmptyState from "@/components/ui/EmptyState";
 import { Button, Input } from "@/components/ui";
+import { z } from "zod";
 
 type FlaggedAppElement = Prisma.PromiseReturnType<typeof AdminService.getFlaggedApplications>[number];
 
@@ -57,7 +58,8 @@ export default async function VerifiedQueuePage() {
               const approveAction = approveFlaggedApplication.bind(null, app.id);
               const rejectAction = async (formData: FormData) => {
                 "use server";
-                const reason = formData.get("reason") as string || "Security check failed";
+                const rawReason = formData.get("reason") as string || "";
+                const reason = z.string().max(200, "Reason must be less than 200 characters").default("Security check failed").parse(rawReason);
                 await rejectFlaggedApplication(app.id, reason);
               };
 

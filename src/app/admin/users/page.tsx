@@ -5,6 +5,18 @@ import { AdminService } from "@/services/admin.service";
 import { Prisma } from "@prisma/client";
 import EmptyState from "@/components/ui/EmptyState";
 import { Button, Input, Select } from "@/components/ui";
+import { z } from "zod";
+
+export const adminUserFilterSchema = z.object({
+  search: z.string().optional(),
+  type: z.enum(["ALL", "INFLUENCER", "BRAND"]),
+  status: z.enum(["ALL", "ACTIVE", "PENDING_VERIFICATION", "SUSPENDED", "BANNED", "FLAGGED"]),
+});
+
+export const awardBadgeSchema = z.object({
+  badgeId: z.enum(["beta_tester", "mystery_badge", "bug_reporter", "feedback_giver"]),
+  userId: z.string().uuid(),
+});
 
 export type AdminUserListElement = Prisma.PromiseReturnType<typeof AdminService.listUsers>["users"][number];
 

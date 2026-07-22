@@ -6,6 +6,15 @@ import { fetcher } from "@/lib/fetcher";
 import { formatCurrency } from "@/lib/utils-client";
 import EmptyState from "@/components/ui/EmptyState";
 import { Button, Textarea } from "@/components/ui";
+import { z } from "zod";
+
+export const payoutDecisionSchema = z.object({
+  action: z.enum(["APPROVE", "REJECT"]),
+  note: z.string().max(250),
+}).refine(data => data.action !== "REJECT" || data.note.trim().length >= 5, {
+  message: "Rejection reason must be at least 5 characters.",
+  path: ["note"]
+});
 
 interface Withdrawal {
   id: string;
@@ -121,11 +130,17 @@ export default function PayoutsAdminPage() {
     event.preventDefault();
     if (!draft) return;
 
-    const note = draft.note.trim();
-    if (draft.action === "REJECT" && note.length < 5) {
-      setActionError("Rejection reason must be at least 5 characters.");
+    const validation = payoutDecisionSchema.safeParse({
+      action: draft.action,
+      note: draft.note,
+    });
+
+    if (!validation.success) {
+      setActionError(validation.error.issues[0]?.message || "Invalid inputs");
       return;
     }
+
+    const note = draft.note.trim();
 
     setProcessing(draft.withdrawal.id);
     setActionError("");

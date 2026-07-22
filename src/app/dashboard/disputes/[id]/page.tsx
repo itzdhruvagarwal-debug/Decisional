@@ -8,6 +8,17 @@ import { fetcher } from "@/lib/fetcher";
 import Link from "next/link";
 import { ToastContainer, type ToastItem, type ToastType } from "@/components/ui/toast";
 import { Button, Card, Input, Select, Textarea } from "@/components/ui";
+import { z } from "zod";
+
+export const disputeEscalationSchema = z.object({
+  reason: z.string().min(10, "Reason must be at least 10 characters").max(500),
+});
+
+export const disputeEvidenceSchema = z.object({
+  type: z.enum(["CONTRACT", "DELIVERABLE", "CHAT_LOG", "PAYMENT_PROOF", "OTHER"]),
+  url: z.string().url("Please enter a valid URL"),
+  description: z.string().min(5, "Description must be at least 5 characters").max(500),
+});
 
 interface Finding {
   check: string;
@@ -486,7 +497,18 @@ export default function DisputeDetailPage({
 
   const handleAddEvidence = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!dispute || !evidenceUrl || !evidenceDesc) return;
+    if (!dispute) return;
+
+    const validation = disputeEvidenceSchema.safeParse({
+      type: evidenceType,
+      url: evidenceUrl,
+      description: evidenceDesc,
+    });
+
+    if (!validation.success) {
+      showToast("error", validation.error.issues[0]?.message || "Invalid evidence details");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -524,6 +546,13 @@ export default function DisputeDetailPage({
     action: "accept_resolution" | "reject_resolution" | "escalate",
   ) => {
     if (!dispute) return;
+    if (action === "escalate") {
+      const validation = disputeEscalationSchema.safeParse({ reason: escalateReason });
+      if (!validation.success) {
+        showToast("error", validation.error.issues[0]?.message || "Invalid escalation reason");
+        return;
+      }
+    }
     setActionLoading(action);
     try {
       const res = await fetch("/api/disputes", {

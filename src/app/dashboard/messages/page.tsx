@@ -13,6 +13,16 @@ import EmptyState from "@/components/ui/EmptyState";
 import Modal from "@/components/ui/Modal";
 import { Button, Input, Select, Textarea } from "@/components/ui";
 import { logger } from "@/lib/logger-client";
+import { z } from "zod";
+
+export const reportUserSchema = z.object({
+  reason: z.string().min(5, "Please select a valid report reason"),
+  description: z.string().min(10, "Please describe the issue in at least 10 characters").max(1000),
+});
+
+export const sendMessageSchema = z.object({
+  content: z.string().min(1, "Message content cannot be empty").max(2000, "Message cannot exceed 2000 characters"),
+});
 
 
 
@@ -340,8 +350,15 @@ function useMessages() {
   }, [publishTyping, selectedConversation]);
 
   const handleSend = async () => {
-    const trimmedMessage = newMessage.trim();
-    if (!trimmedMessage || !selectedConversation) return;
+    if (!selectedConversation) return;
+
+    const validation = sendMessageSchema.safeParse({ content: newMessage });
+    if (!validation.success) {
+      showToast("error", validation.error.issues[0]?.message || "Message cannot be empty");
+      return;
+    }
+
+    const trimmedMessage = validation.data.content.trim();
 
     // Front-end filter check
     const filterResult = checkMessageForContacts(trimmedMessage);
@@ -477,8 +494,14 @@ function useMessages() {
   const handleReportUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedConversation) return;
-    if (!reportReason.trim()) {
-      showToast("error", "Please provide a reason for reporting");
+
+    const validation = reportUserSchema.safeParse({
+      reason: reportReason,
+      description: reportDescription,
+    });
+
+    if (!validation.success) {
+      showToast("error", validation.error.issues[0]?.message || "Invalid report details");
       return;
     }
 

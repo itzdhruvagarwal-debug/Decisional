@@ -9,6 +9,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import EmptyState from "@/components/ui/EmptyState";
 import { Button, Input, Select } from "@/components/ui";
+import { z } from "zod";
+
+export const discoverFiltersSchema = z.object({
+  search: z.string().max(100).optional(),
+  category: z.string().max(50).optional(),
+  platform: z.string().max(20).optional(),
+  minFollowers: z.string().max(20).optional(),
+  minEngagementRate: z.string().max(10).optional(),
+  city: z.string().max(100).optional(),
+  minRate: z.string().max(20).optional(),
+  maxRate: z.string().max(20).optional(),
+});
 
 interface Influencer {
   id: string;
@@ -44,15 +56,28 @@ export default function DiscoverInfluencersPage() {
 
   const canDiscover = session?.user?.userType === "BRAND" || session?.user?.userType === "ADMIN";
 
+  const validation = discoverFiltersSchema.safeParse({
+    search: search || undefined,
+    category: category || undefined,
+    platform: platform || undefined,
+    minFollowers: minFollowers || undefined,
+    minEngagementRate: minEngagementRate || undefined,
+    city: city || undefined,
+    minRate: minRate || undefined,
+    maxRate: maxRate || undefined,
+  });
+
+  const validData = validation.success ? validation.data : {};
+
   const queryParams = new URLSearchParams();
-  if (search) queryParams.append("search", search);
-  if (category) queryParams.append("category", category);
-  if (minFollowers) queryParams.append("minFollowers", minFollowers);
-  if (minEngagementRate) queryParams.append("minEngagementRate", minEngagementRate);
-  if (minRate) queryParams.append("minRate", minRate);
-  if (maxRate) queryParams.append("maxRate", maxRate);
-  if (city) queryParams.append("city", city);
-  if (platform) queryParams.append("platform", platform);
+  if (validData.search) queryParams.append("search", validData.search);
+  if (validData.category) queryParams.append("category", validData.category);
+  if (validData.minFollowers) queryParams.append("minFollowers", validData.minFollowers);
+  if (validData.minEngagementRate) queryParams.append("minEngagementRate", validData.minEngagementRate); // minEngagementRate mapping
+  if (validData.minRate) queryParams.append("minRate", validData.minRate);
+  if (validData.maxRate) queryParams.append("maxRate", validData.maxRate);
+  if (validData.city) queryParams.append("city", validData.city);
+  if (validData.platform) queryParams.append("platform", validData.platform);
 
   const { data: payload, isLoading: loading } = useSWR<{ influencers?: Influencer[]; data?: { influencers?: Influencer[] } }>(
     canDiscover ? `/api/influencers?${queryParams.toString()}` : null,
