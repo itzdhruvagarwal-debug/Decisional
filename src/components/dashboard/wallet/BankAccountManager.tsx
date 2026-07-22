@@ -231,7 +231,7 @@ export default function BankAccountManager({
       {/* Inline notice */}
       {notice && (
         <div
-          className="mb-3 text-sm font-semibold rounded-md" style={{ padding: "10px 14px", background: notice.type === "success" ? "rgba(16, 185, 129, 0.1)" : "rgba(244, 63, 94, 0.1)", color: notice.type === "success" ? "var(--color-accent-emerald)" : "var(--color-accent-rose)", border: `1px solid ${notice.type === "success" ? "rgba(16, 185, 129, 0.25)" : "rgba(244, 63, 94, 0.25)"}` }}
+          className="mb-3 text-sm font-semibold rounded-md px-3-py-2-5" style={{ background: notice.type === "success" ? "rgba(16, 185, 129, 0.1)" : "rgba(244, 63, 94, 0.1)", color: notice.type === "success" ? "var(--color-accent-emerald)" : "var(--color-accent-rose)", border: `1px solid ${notice.type === "success" ? "rgba(16, 185, 129, 0.25)" : "rgba(244, 63, 94, 0.25)"}` }}
         >
           {notice.message}
         </div>
@@ -242,7 +242,7 @@ export default function BankAccountManager({
         <div
           className="mb-3 rounded-md" style={{ padding: "12px 14px", background: "rgba(244, 63, 94, 0.08)", border: "1px solid rgba(244, 63, 94, 0.3)" }}
         >
-          <p className="text-sm font-semibold text-rose" style={{ marginBottom: "10px" }}>
+          <p className="text-sm font-semibold text-rose mb-2">
             ⚠️ Are you sure you want to delete this bank account? This cannot be undone.
           </p>
           <div className="flex gap-2">
@@ -262,7 +262,7 @@ export default function BankAccountManager({
           className="p-4 mb-5 bg-tertiary rounded-md"
         >
           <div className="mb-4 flex gap-4">
-            <label className="flex items-center cursor-pointer text-sm font-semibold" style={{ gap: "6px" }}>
+            <label className="flex items-center cursor-pointer text-sm font-semibold gap-1-5">
               <input
                 type="radio"
                 name="payoutType"
@@ -270,7 +270,7 @@ export default function BankAccountManager({
                 onChange={() => setPayoutType("bank")}
               />{" "}Bank Account
             </label>
-            <label className="flex items-center cursor-pointer text-sm font-semibold" style={{ gap: "6px" }}>
+            <label className="flex items-center cursor-pointer text-sm font-semibold gap-1-5">
               <input
                 type="radio"
                 name="payoutType"
@@ -397,7 +397,7 @@ export default function BankAccountManager({
               <div className="font-semibold flex items-center gap-2">
                 {acc.bankName === "UPI" ? `UPI: ${acc.upiId}` : `${acc.bankName} — ${acc.accountName}`}
                 {acc.isDefault && (
-                  <span className="font-extrabold text-xs" style={{ padding: "2px 8px", borderRadius: "999px", background: "rgba(99, 102, 241, 0.15)", color: "var(--color-accent-indigo)" }}>
+                  <span className="font-extrabold text-xs px-2-py-05 rounded-full" style={{ background: "rgba(99, 102, 241, 0.15)", color: "var(--color-accent-indigo)" }}>
                     Default
                   </span>
                 )}

@@ -83,7 +83,7 @@ export default async function AdminAuditLogsPage() {
                       </td>
                       <td className="p-card">
                         <span
-                          className="badge font-extrabold text-xs rounded-lg uppercase" style={{ background: badgeStyle.background, color: badgeStyle.color, padding: "4px 8px" }}
+                          className="badge font-extrabold text-xs rounded-lg uppercase px-2-py-1" style={{ background: badgeStyle.background, color: badgeStyle.color }}
                         >
                           {log.entityType}
                         </span>

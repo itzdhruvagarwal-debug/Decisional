@@ -51,7 +51,7 @@ export default async function AdminApplicationsPage() {
           <div className="text-muted font-bold text-xs uppercase">
             Total Value at Risk
           </div>
-          <div className="text-2xl font-extrabold" style={{ color: "var(--color-warning)" }}>
+          <div className="text-2xl font-extrabold text-amber">
             {formatCurrency(
               flaggedApps.reduce((sum, app) => sum + (app.proposedRate || 0), 0)
             )}
@@ -95,7 +95,7 @@ export default async function AdminApplicationsPage() {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span
-                        className="font-bold rounded-sm uppercase text-rose" style={{ fontSize: "10px", padding: "2px 8px", background: "rgba(239,68,68,0.15)", letterSpacing: "0.05em" }}
+                        className="font-bold rounded-sm uppercase text-rose text-2xs px-2-py-05 tracking-wider" style={{ background: "rgba(239,68,68,0.15)" }}
                       >
                         FLAGGED
                       </span>
@@ -107,7 +107,7 @@ export default async function AdminApplicationsPage() {
                         })}
                       </span>
                     </div>
-                    <h3 className="font-extrabold mb-1 text-primary" style={{ fontSize: "17px" }}>
+                    <h3 className="font-extrabold mb-1 text-primary text-base">
                       {app.campaign.title}
                     </h3>
                     <p className="text-sm text-secondary">
@@ -124,7 +124,7 @@ export default async function AdminApplicationsPage() {
 
                 {/* Influencer info */}
                 <div
-                  className="flex justify-between items-center flex-wrap gap-3 mb-4 bg-tertiary rounded-md border-card" style={{ padding: "12px 16px" }}
+                  className="flex justify-between items-center flex-wrap gap-3 mb-4 bg-tertiary rounded-md border-card px-4-py-3"
                 >
                   <div>
                     <div className="font-bold text-sm" style={{ marginBottom: "2px" }}>
@@ -154,13 +154,13 @@ export default async function AdminApplicationsPage() {
 
                 {/* Action buttons */}
                 <div
-                  className="flex justify-end items-center gap-3 flex-wrap border-top" style={{ paddingTop: "16px" }}
+                  className="flex justify-end items-center gap-3 flex-wrap border-top pt-4"
                 >
                   <form action={approveAction}>
                     <Button
                       type="submit"
                       variant="success"
-                      className="text-sm" style={{ padding: "8px 20px" }}
+                      className="text-sm px-4-py-2"
                     >
                       ✓ Approve Application
                     </Button>

@@ -104,8 +104,8 @@ export default function ReferralList() {
                     className="flex items-center gap-3"
                   >
                     <div
-                      className="flex items-center justify-center font-bold text-sm rounded-full" style={{ width: "36px", height: "36px", background:
-                          "linear-gradient(135deg, var(--color-primary), var(--color-accent-purple))", color: "white" }}
+                      className="flex items-center justify-center font-bold text-sm rounded-full text-white" style={{ width: "36px", height: "36px", background:
+                          "linear-gradient(135deg, var(--color-primary), var(--color-accent-purple))" }}
                     >
                       {ref.name.charAt(0).toUpperCase()}
                     </div>
@@ -125,7 +125,7 @@ export default function ReferralList() {
                 </td>
                 <td className="p-4">
                   <span
-                    className="font-bold rounded-2xl text-xs uppercase" style={{ padding: "4px 10px", background:
+                    className="font-bold rounded-2xl text-xs uppercase px-2-py-1" style={{ background:
                         ref.type === "BRAND"
                           ? "rgba(6, 182, 212, 0.15)"
                           : "rgba(236, 72, 153, 0.15)", color:
@@ -147,7 +147,7 @@ export default function ReferralList() {
                 </td>
                 <td className="p-4 text-center">
                   <span
-                    className="inline-flex items-center text-xs font-semibold rounded-lg" style={{ gap: "6px", padding: "4px 10px", background:
+                    className="inline-flex items-center text-xs font-semibold rounded-lg gap-1-5 px-2-py-1" style={{ background:
                         ref.status === "ACTIVE"
                           ? "rgba(16, 185, 129, 0.15)"
                           : "rgba(245, 158, 11, 0.15)", color:

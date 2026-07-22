@@ -107,12 +107,12 @@ export default async function AdminDisputeListPage({
                 className="mt-2 flex gap-2 text-xs"
               >
                 <span
-                  className="font-bold rounded-sm" style={{ padding: "2px 6px", background: showHistory ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)", color: showHistory ? "#10b981" : "#ef4444" }}
+                  className="font-bold rounded-sm px-2-py-05" style={{ background: showHistory ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)", color: showHistory ? "#10b981" : "#ef4444" }}
                 >
                   {dispute.status}
                 </span>
                 <span
-                  className="text-secondary rounded-sm bg-glass-card" style={{ padding: "2px 6px" }}
+                  className="text-secondary rounded-sm bg-glass-card px-2-py-05"
                 >
                   {dispute.type}
                 </span>

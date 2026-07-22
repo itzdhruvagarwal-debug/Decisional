@@ -163,7 +163,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
           variant="ghost"
           onClick={onClose}
           aria-label="Close period picker"
-          className="cursor-pointer flex-shrink-0 border-none leading-none p-1" style={{ background: "none", color: "var(--color-text-secondary,#9ca3af)", fontSize: "22px" }}
+          className="cursor-pointer flex-shrink-0 border-none leading-none p-1 bg-none text-2xl" style={{ color: "var(--color-text-secondary,#9ca3af)" }}
         >✕</Button>
       </div>
 
@@ -257,11 +257,11 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
       )}
 
       {/* ── Footer ── */}
-      <div className="mt-6 flex justify-end" style={{ gap: "10px" }}>
+      <div className="mt-6 flex justify-end gap-2-5">
         <Button
           onClick={onClose}
           variant="secondary"
-          className="text-sm font-semibold cursor-pointer rounded-lg" style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.12)", background: "transparent", color: "var(--color-text-secondary,#9ca3af)" }}
+          className="text-sm font-semibold cursor-pointer rounded-lg bg-none" style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.12)", color: "var(--color-text-secondary,#9ca3af)" }}
         >
           Cancel
         </Button>
@@ -269,7 +269,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
           disabled={!valid || !!isLoading}
           aria-busy={!!isLoading}
           onClick={() => valid && onConfirm(resolve())}
-          className="text-sm font-bold flex items-center gap-2 rounded-lg border-none" style={{ padding: "11px 28px", background: valid && !isLoading ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "rgba(99,102,241,0.4)", color: "#fff", cursor: valid && !isLoading ? "pointer" : "not-allowed", transition: "all .2s" }}
+          className="text-sm font-bold flex items-center gap-2 rounded-lg border-none text-white" style={{ padding: "11px 28px", background: valid && !isLoading ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "rgba(99,102,241,0.4)", cursor: valid && !isLoading ? "pointer" : "not-allowed", transition: "all .2s" }}
         >
           {isLoading ? <>⏳ Generating…</> : <>{icon} Download</>}
         </Button>

@@ -195,7 +195,7 @@ export default async function VerificationDetailPage({
                   </div>
 
                   {doc.status === "PENDING" && (
-                    <div className="flex mt-4 border-top" style={{ gap: "10px", paddingTop: "16px" }}>
+                    <div className="flex mt-4 border-top gap-2-5 pt-4">
                       <form action={approveDocument.bind(null, doc.id, user.id)} className="flex-1">
                         <Button variant="success" size="sm" className="w-full">
                           Approve ✅
@@ -214,7 +214,7 @@ export default async function VerificationDetailPage({
                           name="reason"
                           placeholder="Reason..."
                           required
-                          className="flex-1 text-xs" style={{ padding: "8px 12px" }}
+                          className="flex-1 text-xs px-3-py-2"
                         />
                         <Button type="submit" variant="danger" size="sm">
                           Reject ❌

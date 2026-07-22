@@ -86,7 +86,7 @@ export default async function VerifiedQueuePage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center flex-wrap gap-4 border-top" style={{ paddingTop: "16px" }}>
+                  <div className="flex justify-between items-center flex-wrap gap-4 border-top pt-4">
                     <div>
                       <div className="text-sm font-bold text-primary">
                         Influencer: {app.influencer.displayName}

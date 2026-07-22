@@ -54,7 +54,7 @@ export default function TwoFactorAuthPanel({
                     </p>
                     <div className="grid gap-2 mb-3" style={{ gridTemplateColumns: "1fr 1fr" }}>
                         {recoveryCodes.map((code) => (
-                            <div key={code} className="text-sm font-bold bg-tertiary rounded-sm border-card" style={{ fontFamily: "monospace", padding: "8px 12px", letterSpacing: "0.1em" }}>
+                            <div key={code} className="text-sm font-bold bg-tertiary rounded-sm border-card font-mono px-3-py-2 tracking-widest">
                                 {code}
                             </div>
                         ))}

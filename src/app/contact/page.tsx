@@ -46,10 +46,10 @@ export default function ContactPage() {
               <div className="grid" style={{ gap: "18px" }}>
                 {contactRows.map((row) => (
                   <article key={row.title} className="card">
-                    <h2 className="text-xl font-extrabold" style={{ marginBottom: "10px" }}>
+                    <h2 className="text-xl font-extrabold mb-2">
                       {row.title}
                     </h2>
-                    <p className="text-secondary mb-3" style={{ lineHeight: 1.7 }}>
+                    <p className="text-secondary mb-3 leading-relaxed">
                       {row.body}
                     </p>
                     <a href={row.href} style={linkStyle}>
@@ -63,7 +63,7 @@ export default function ContactPage() {
                 <h2 className="text-2xl font-extrabold mb-4">
                   Fastest support path
                 </h2>
-                <p className="text-secondary mb-5" style={{ lineHeight: 1.7 }}>
+                <p className="text-secondary mb-5 leading-relaxed">
                   Logged-in users should use the dashboard so we can attach the right account,
                   campaign, deal, payout, or dispute record to the request.
                 </p>
@@ -79,7 +79,7 @@ export default function ContactPage() {
                   <h3 className="text-base font-extrabold mb-2">
                     Response windows
                   </h3>
-                  <p className="text-secondary" style={{ lineHeight: 1.7 }}>
+                  <p className="text-secondary leading-relaxed">
                     Support: 1 to 2 business days. Payment or security escalations are prioritized.
                     Legal notices should be sent by email and include account identifiers where relevant.
                   </p>

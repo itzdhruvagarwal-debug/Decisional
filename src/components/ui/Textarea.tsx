@@ -16,14 +16,14 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         className="input-wrapper flex flex-col gap-2" style={{ width: fullWidth ? "100%" : "auto", ...style }}
       >
         {label && (
-          <label className="label" htmlFor={textareaId} style={{ marginBottom: 0 }}>
+          <label className="label mb-0" htmlFor={textareaId}>
             {label}
           </label>
         )}
         <textarea
           id={textareaId}
-          className={`input ${error ? "input-error" : ""} ${className}`}
-          style={{ resize: "vertical", minHeight: "100px" }}
+          className={`input resize-y ${error ? "input-error" : ""} ${className}`}
+          style={{ minHeight: "100px" }}
           ref={ref}
           {...props}
         />

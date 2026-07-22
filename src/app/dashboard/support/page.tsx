@@ -98,7 +98,7 @@ export default function SupportPage() {
 
   return (
     <DashboardShell user={session?.user}>
-      <div className="max-w-680" style={{ margin: "0 auto", padding: "24px 16px" }}>
+      <div className="max-w-680 mx-auto" style={{ padding: "24px 16px" }}>
         <header className="mb-8 text-center">
           <h1 className="font-extrabold mb-2 gradient-text text-3xl">
             Support & Feedback Hub
@@ -203,7 +203,7 @@ export default function SupportPage() {
           )}
 
           {statusMsg && (
-            <div role="status" aria-live="polite" className="p-3 text-sm rounded-sm text-emerald" style={{ background: "rgba(16,185,129,0.1)" }}>
+            <div role="status" aria-live="polite" className="p-3 text-sm rounded-sm text-emerald bg-emerald-subtle">
               {statusMsg}
             </div>
           )}
@@ -212,7 +212,7 @@ export default function SupportPage() {
             <div className="flex items-center gap-4 p-4 rounded-md" style={{ background: "linear-gradient(135deg, rgba(234,179,8,0.15), rgba(249,115,22,0.15))", border: "1px solid rgba(234,179,8,0.3)" }}>
               <span className="text-3xl">🏆</span>
               <div>
-                <h4 className="font-extrabold" style={{ color: "var(--color-warning)" }}>New Badge Earned!</h4>
+                <h4 className="font-extrabold text-amber">New Badge Earned!</h4>
                 <p className="text-sm text-primary mt-1">
                   You earned the <strong>{badgeAwarded === "bug_reporter" ? "Bug Reporter" : "Feedback Giver"}</strong> badge! Check it in your Badges tab.
                 </p>
@@ -224,7 +224,7 @@ export default function SupportPage() {
             type="submit"
             disabled={loading || uploadingScreenshot}
             variant="primary"
-            className="justify-center font-bold" style={{ padding: "14px" }}
+            className="justify-center font-bold p-3.5"
           >
             {loading ? "Submitting..." : "Submit to Support"}
           </Button>

@@ -190,7 +190,7 @@ export default function PasswordPanel({
                 <div
                     role="alert"
                     aria-live="assertive"
-                    className="p-3 mb-4 rounded-sm text-rose" style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
+                    className="p-3 mb-4 rounded-sm text-rose bg-rose-subtle" style={{ border: "1px solid rgba(239, 68, 68, 0.2)" }}
                 >
                     {passwordError}
                 </div>
@@ -243,7 +243,7 @@ export default function PasswordPanel({
                                             new: !showPassword.new,
                                         })
                                     }
-                                    className="absolute cursor-pointer text-base border-none" style={{ right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", opacity: 0.7 }}
+                                    className="absolute cursor-pointer text-base border-none bg-none" style={{ right: "12px", top: "50%", transform: "translateY(-50%)", opacity: 0.7 }}
                                 >
                                     {showPassword.new ? "👁️" : "🙈"}
                                 </Button>
@@ -275,7 +275,7 @@ export default function PasswordPanel({
                                             confirm: !showPassword.confirm,
                                         })
                                     }
-                                    className="absolute cursor-pointer text-base border-none" style={{ right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", opacity: 0.7 }}
+                                    className="absolute cursor-pointer text-base border-none bg-none" style={{ right: "12px", top: "50%", transform: "translateY(-50%)", opacity: 0.7 }}
                                 >
                                     {showPassword.confirm ? "👁️" : "🙈"}
                                 </Button>
@@ -340,7 +340,7 @@ function ForgotPasswordSection({
 }: ForgotPasswordSectionProps) {
   if (!forgotPasswordState.active) return null;
   return (
-    <div className="mb-5 flex flex-col" style={{ gap: "10px" }}>
+    <div className="mb-5 flex flex-col gap-2-5">
       {forgotPasswordState.step === 'method' && (
         <>
           <p className="text-sm text-secondary">Choose where to send the OTP:</p>
@@ -348,7 +348,7 @@ function ForgotPasswordSection({
             <Button type="button" variant="secondary" onClick={() => handleSendForgotPasswordOtp('email')} disabled={isSaving || !user?.email} className="flex-1">{user?.email ? "Send to Email" : "No Email Added"}</Button>
             <Button type="button" variant="secondary" onClick={() => handleSendForgotPasswordOtp('phone')} disabled={isSaving || !user?.phone} className="flex-1">{user?.phone ? "Send to Phone" : "No Phone Added"}</Button>
           </div>
-          <Button type="button" className="text-muted text-sm cursor-pointer border-none" style={{ background: "none", textDecoration: "underline" }} onClick={() => setForgotPasswordState({ active: false, step: 'method', method: null, otp: '' })}>Cancel</Button>
+          <Button type="button" className="text-muted text-sm cursor-pointer border-none bg-none" style={{ textDecoration: "underline" }} onClick={() => setForgotPasswordState({ active: false, step: 'method', method: null, otp: '' })}>Cancel</Button>
         </>
       )}
       {forgotPasswordState.step === 'otp' && (
@@ -364,7 +364,7 @@ function ForgotPasswordSection({
             autoComplete="one-time-code"
             fullWidth
           />
-          <Button type="button" className="text-muted text-sm cursor-pointer border-none" style={{ background: "none", textDecoration: "underline", alignSelf: "flex-start" }} onClick={() => setForgotPasswordState({ active: false, step: 'method', method: null, otp: '' })}>Cancel Reset</Button>
+          <Button type="button" className="text-muted text-sm cursor-pointer border-none bg-none" style={{ textDecoration: "underline", alignSelf: "flex-start" }} onClick={() => setForgotPasswordState({ active: false, step: 'method', method: null, otp: '' })}>Cancel Reset</Button>
         </>
       )}
     </div>
@@ -396,11 +396,11 @@ function CurrentPasswordSection({
   return (
     <div className="mb-5">
       <div className="flex justify-between items-center mb-2">
-        <label className="label" htmlFor="current-password-input" style={{ marginBottom: 0 }}>Current Password</label>
+        <label className="label mb-0" htmlFor="current-password-input">Current Password</label>
         <Button
           type="button"
           onClick={() => setForgotPasswordState({ active: true, step: 'method', method: null, otp: '' })}
-          className="text-sm font-semibold cursor-pointer border-none text-primary-light p-0" style={{ background: "none" }}
+          className="text-sm font-semibold cursor-pointer border-none text-primary-light p-0 bg-none"
         >
           Forgot Password?
         </Button>
@@ -423,7 +423,7 @@ function CurrentPasswordSection({
               current: !prev.current,
             }))
           }
-          className="absolute cursor-pointer text-base border-none" style={{ right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", opacity: 0.7 }}
+          className="absolute cursor-pointer text-base border-none bg-none" style={{ right: "12px", top: "50%", transform: "translateY(-50%)", opacity: 0.7 }}
         >
           {showPassword.current ? "👁️" : "🙈"}
         </Button>

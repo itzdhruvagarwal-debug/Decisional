@@ -406,7 +406,7 @@ function WalletHeader({
     >
       <div>
         <h1
-          className="font-extrabold text-3xl" style={{ background: "var(--gradient-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+          className="font-extrabold text-3xl bg-gradient-primary" style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
         >
           Wallet and Payments
         </h1>
@@ -475,7 +475,7 @@ interface WalletSummaryCardsProps {
 function WalletSummaryCards({ userType, walletData }: WalletSummaryCardsProps) {
   return (
     <div className="grid-4 mb-10">
-      <div className="card border-none" style={{ background: "var(--gradient-primary)" }}>
+      <div className="card border-none bg-gradient-primary">
         <div className="text-sm mb-2" style={{ opacity: 0.9 }}>Available Balance</div>
         <div className="font-extrabold text-3xl">{formatCurrency(walletData.balance)}</div>
       </div>
@@ -631,13 +631,13 @@ export default function WalletPage() {
         {activeTab === "transactions" && <TransactionHistory />}
 
         {activeTab === "accounts" && (
-          <div style={{ maxWidth: "800px" }}>
+          <div className="max-w-800">
             <BankAccountManager />
           </div>
         )}
 
         {activeTab === "payment-methods" && (
-          <div style={{ maxWidth: "800px" }}>
+          <div className="max-w-800">
             <div className="card">
               <h3 className="text-lg font-bold mb-2">
                 Payment Methods

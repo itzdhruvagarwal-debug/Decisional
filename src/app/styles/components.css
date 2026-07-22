@@ -1105,6 +1105,43 @@ input:checked+.slider:before {
 .px-6-py-3 { padding: 12px 24px; }
 .px-6-py-4 { padding: 16px 24px; }
 
+/* Colors & Fonts */
+.text-white { color: #ffffff !important; }
+.font-mono { font-family: 'Courier New', Courier, monospace; }
+
+/* Spacing & Gaps */
+.gap-1-5 { gap: 6px; }
+.gap-2-5 { gap: 10px; }
+.text-2xs { font-size: 10px; }
+.max-w-800 { max-width: 800px; }
+
+/* Gradients & Backgrounds */
+.bg-gradient-primary { background: var(--gradient-primary); }
+.bg-none { background: none !important; }
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Utilities & Behaviors */
+.tracking-normal { letter-spacing: 0; }
+.pointer-events-none { pointer-events: none; }
+.backdrop-blur { backdrop-filter: blur(8px); }
+.backdrop-blur-lg { backdrop-filter: blur(20px); }
+.resize-y { resize: vertical; }
+.list-none { list-style: none; }
+.overflow-y-auto { overflow-y: auto; }
+.inline-block { display: inline-block; }
+
+/* Compact Padding Combos */
+.px-2-py-05 { padding: 2px 6px; }
+.px-2-py-1 { padding: 4px 8px; }
+.px-3-py-2 { padding: 8px 12px; }
+.px-3-py-2-5 { padding: 10px 14px; }
+.px-4-py-3 { padding: 12px 16px; }
+
+
 
 
 

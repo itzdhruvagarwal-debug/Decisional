@@ -34,7 +34,7 @@ export default function PricingPage() {
       <main
         className="overflow-hidden relative pt-30 pb-20"
       >
-        <div className="max-w-1040" style={{ margin: "0 auto", padding: "0 20px" }}>
+        <div className="max-w-1040 mx-auto" style={{ padding: "0 20px" }}>
           <div className="text-center" style={{ marginBottom: "52px" }}>
             <motion.h1
               initial={{ opacity: 0, y: -20 }}
@@ -48,7 +48,7 @@ export default function PricingPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="text-secondary text-lg max-w-720" style={{ lineHeight: 1.7, margin: "0 auto" }}
+              className="text-secondary text-lg max-w-720 leading-relaxed mx-auto"
             >
               Join for free. Decisional earns when a protected collaboration is
               successfully completed, verified, and paid out.
@@ -98,7 +98,7 @@ export default function PricingPage() {
             />
           </div>
 
-          <section style={{ maxWidth: "820px", margin: "0 auto" }}>
+          <section className="mx-auto" style={{ maxWidth: "820px" }}>
             <div className="text-center mb-8">
               <h2 className="font-bold text-3xl">
                 Frequently Asked Questions
@@ -179,7 +179,7 @@ function PricingCard({
     >
       {isPopular && (
         <div
-          className="absolute font-extrabold text-xs uppercase" style={{ top: 0, right: 0, background: color, color: "#05030f", padding: "6px 16px", borderRadius: "0 0 0 14px", letterSpacing: 0 }}
+          className="absolute font-extrabold text-xs uppercase tracking-normal" style={{ top: 0, right: 0, background: color, color: "#05030f", padding: "6px 16px", borderRadius: "0 0 0 14px" }}
         >
           Most Popular
         </div>
@@ -196,7 +196,7 @@ function PricingCard({
           {title}
         </h3>
         <p
-          className="text-secondary text-sm" style={{ lineHeight: 1.7 }}
+          className="text-secondary text-sm leading-relaxed"
         >
           {description}
         </p>
@@ -211,14 +211,14 @@ function PricingCard({
           {price}
         </div>
         <div
-          className="text-xs font-bold text-secondary uppercase" style={{ letterSpacing: 0 }}
+          className="text-xs font-bold text-secondary uppercase tracking-normal"
         >
           {subtitle}
         </div>
       </div>
 
       <ul
-        className="flex-1 flex flex-col gap-3 p-0" style={{ marginBottom: "30px", listStyle: "none" }}
+        className="flex-1 flex flex-col gap-3 p-0 list-none" style={{ marginBottom: "30px" }}
       >
         {features.map((feature) => (
           <li
@@ -263,7 +263,7 @@ function FAQItem({ question, answer, delay }: Readonly<FAQItemProps>) {
     >
       <details   className="cursor-pointer group">
         <summary
-          className="font-semibold flex justify-between items-center gap-4 p-5" style={{ listStyle: "none" }}
+          className="font-semibold flex justify-between items-center gap-4 p-5 list-none"
         >
           <span>{question}</span>
           <svg

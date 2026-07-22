@@ -41,14 +41,14 @@ export default function Footer() {
           <div style={{ gridColumn: "span 1" }}>
             <Logo />
             <p
-              className="text-secondary text-sm" style={{ lineHeight: 1.7, maxWidth: "280px" }}
+              className="text-secondary text-sm leading-relaxed" style={{ maxWidth: "280px" }}
             >
               Decisional helps Indian brands and influencers run trusted
               collaborations with verified profiles, protected payments, and
               clearer delivery workflows.
             </p>
             <div
-              className="flex gap-3" style={{ marginTop: "20px" }}
+              className="flex gap-3 mt-5"
             >
               {socialLinks.map((social) => (
                 <a
@@ -105,9 +105,9 @@ function FooterColumn({
       >
         {title}
       </h4>
-      <ul className="p-0" style={{ listStyle: "none" }}>
+      <ul className="p-0 list-none">
         {links.map((item) => (
-          <li key={item.label} style={{ marginBottom: "10px" }}>
+          <li key={item.label} className="mb-2">
             <Link
               href={item.href}
               className="text-secondary text-sm" style={{ transition: "color var(--transition-fast)" }}

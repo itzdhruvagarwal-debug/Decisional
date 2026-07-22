@@ -60,7 +60,7 @@ function DashboardErrorFallback({ user }: Readonly<{ user: Session["user"] }>) {
         </p>
         <a
           href="/dashboard"
-          className="btn btn-danger no-underline" style={{ padding: "12px 32px", display: "inline-block" }}
+          className="btn btn-danger no-underline inline-block" style={{ padding: "12px 32px" }}
           aria-label="Reload dashboard"
         >
           Reload Dashboard
@@ -74,13 +74,7 @@ function DashboardEmptyState({ dataLoadFailed }: Readonly<{ dataLoadFailed: bool
   return (
     <div className="text-center" style={{ padding: "100px 40px" }}>
       <div
-        className="glass"
-        style={{
-          maxWidth: "560px",
-          margin: "0 auto",
-          padding: "60px 40px",
-          borderRadius: "var(--radius-2xl)",
-        }}
+        className="glass mx-auto" style={{ maxWidth: "560px", padding: "60px 40px", borderRadius: "var(--radius-2xl)" }}
       >
         <div
           className="mb-6" style={{ fontSize: "64px", filter: "drop-shadow(0 0 20px rgba(99, 102, 241, 0.3))" }}
@@ -102,7 +96,7 @@ function DashboardEmptyState({ dataLoadFailed }: Readonly<{ dataLoadFailed: bool
         </p>
         <a
           href="/dashboard"
-          className="btn btn-primary btn-lg no-underline" style={{ padding: "14px 40px", display: "inline-block" }}
+          className="btn btn-primary btn-lg no-underline inline-block" style={{ padding: "14px 40px" }}
           aria-label={
             dataLoadFailed
               ? "Retry dashboard data load"
@@ -156,7 +150,7 @@ export default async function DashboardPage({
   const renderDashboardContent = () => {
     if (isAdmin && adminData) {
       return (
-        <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
+        <div className="mx-auto" style={{ maxWidth: "1400px" }}>
           <header className="mb-10">
             <h1
               className="gradient-text mb-2 text-3xl font-extrabold"

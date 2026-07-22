@@ -95,7 +95,7 @@ export default function ForgotPasswordPage() {
           <div
             role={status === "error" ? "alert" : "status"}
             aria-live={status === "error" ? "assertive" : "polite"}
-            className="text-sm mb-6 rounded-md" style={{ padding: "12px 16px", background:
+            className="text-sm mb-6 rounded-md px-4-py-3" style={{ background:
                 status === "success"
                   ? "rgba(16, 185, 129, 0.1)"
                   : "rgba(244, 63, 94, 0.1)", border: `1px solid ${status === "success" ? "var(--color-accent-emerald)" : "var(--color-accent-rose)"}`, color:

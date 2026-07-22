@@ -381,7 +381,7 @@ export default function TransactionHistory() {
                       className="flex items-center gap-2"
                     >
                       <div
-                        className="flex items-center justify-center font-bold rounded-md" style={{ minWidth: "40px", height: "32px", background: "rgba(255,255,255,0.05)", color: typeInfo.color, fontSize: "10px" }}
+                        className="flex items-center justify-center font-bold rounded-md text-2xs" style={{ minWidth: "40px", height: "32px", background: "rgba(255,255,255,0.05)", color: typeInfo.color }}
                       >
                         {typeInfo.icon}
                       </div>
@@ -396,7 +396,7 @@ export default function TransactionHistory() {
                   </td>
                   <td className="px-6-py-4">
                     <span
-                      className="text-xs font-semibold rounded-lg" style={{ padding: "4px 10px", background: statusColor.bg, color: statusColor.text }}
+                      className="text-xs font-semibold rounded-lg px-2-py-1" style={{ background: statusColor.bg, color: statusColor.text }}
                     >
                       {tx.status}
                     </span>

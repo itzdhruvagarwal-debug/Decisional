@@ -99,7 +99,7 @@ export default function DisputesPage() {
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span
-                        className="badge text-xs" style={{ background: getStatusColor(dispute.status), color: "white" }}
+                        className="badge text-xs text-white" style={{ background: getStatusColor(dispute.status) }}
                       >
                         {getStatusLabel(dispute.status)}
                       </span>
@@ -115,20 +115,20 @@ export default function DisputesPage() {
                       </span>
                     </div>
                     <span
-                      className="text-xs font-semibold text-amber rounded-md" style={{ background: "rgba(245,158,11,0.1)", padding: "4px 10px" }}
+                      className="text-xs font-semibold text-amber rounded-md px-2-py-1" style={{ background: "rgba(245,158,11,0.1)" }}
                     >
                       {dispute.type} Issue
                     </span>
                   </div>
 
                   {/* Campaign Title */}
-                  <h3 className="font-bold mb-1" style={{ fontSize: "17px" }}>
+                  <h3 className="font-bold mb-1 text-base">
                     {dispute.deal.campaign.title}
                   </h3>
 
                   {/* Deal Info */}
                   <div
-                    className="flex flex-wrap gap-3 text-sm text-secondary" style={{ marginBottom: "14px" }}
+                    className="flex flex-wrap gap-3 text-sm text-secondary mb-3"
                   >
                     <span>💳 ₹{(dispute.deal.amount / 100).toLocaleString("en-IN")}</span>
                     <span>🎬 {dispute.deal.influencer?.displayName}</span>

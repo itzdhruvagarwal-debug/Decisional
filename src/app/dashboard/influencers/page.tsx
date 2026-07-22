@@ -131,16 +131,16 @@ export default function DiscoverInfluencersPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "40px 20px" }}>
+      <div className="mx-auto" style={{ maxWidth: "1200px", padding: "40px 20px" }}>
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
-          <h1 className="mb-3 font-extrabold" style={{ fontSize: "42px", background: "linear-gradient(135deg, #8b5cf6, #3b82f6, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 0 }}>
+          <h1 className="mb-3 font-extrabold tracking-normal" style={{ fontSize: "42px", background: "linear-gradient(135deg, #8b5cf6, #3b82f6, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
             Discover Top Creators
           </h1>
-          <p className="text-secondary text-lg max-w-600" style={{ margin: "0 auto" }}>
+          <p className="text-secondary text-lg max-w-600 mx-auto">
             Find verified creators by category, reach, and trust score.
           </p>
         </motion.div>
@@ -277,7 +277,7 @@ export default function DiscoverInfluencersPage() {
                   className="text-center text-secondary" style={{ padding: "80px" }}
                 >
                   <div className="loader rounded-md" style={{ width: "48px", height: "48px", border: "4px solid var(--color-border)", borderTopColor: "var(--color-primary)", margin: "0 auto 24px", animation: "spin 1s linear infinite" }} />
-                  <p className="text-base font-semibold" style={{ letterSpacing: 0 }}>Loading creator data...</p>
+                  <p className="text-base font-semibold tracking-normal">Loading creator data...</p>
                 </motion.div>
               );
             }
@@ -323,17 +323,17 @@ export default function DiscoverInfluencersPage() {
                       : "var(--shadow-sm)" }}
                 >
                   {/* Subtle Background Accent */}
-                  <div className="absolute rounded-md" style={{ top: "-20px", right: "-20px", width: "100px", height: "100px", background: "var(--gradient-primary)", opacity: 0.05, filter: "blur(40px)", pointerEvents: "none" }} />
+                  <div className="absolute rounded-md bg-gradient-primary pointer-events-none" style={{ top: "-20px", right: "-20px", width: "100px", height: "100px", opacity: 0.05, filter: "blur(40px)" }} />
 
                   <div className="flex gap-5 items-center mb-6">
-                    <div className="flex items-center justify-center flex-shrink-0 rounded-md text-3xl font-extrabold" style={{ width: "72px", height: "72px", background: "var(--gradient-primary)", boxShadow: "0 10px 20px rgba(0,0,0,0.2)" }}>
+                    <div className="flex items-center justify-center flex-shrink-0 rounded-md text-3xl font-extrabold bg-gradient-primary" style={{ width: "72px", height: "72px", boxShadow: "0 10px 20px rgba(0,0,0,0.2)" }}>
                       {inf.displayName?.[0] || "I"}
                     </div>
                     <div>
                       <h3 className="text-lg font-extrabold text-primary" style={{ margin: "0 0 6px" }}>
                         {inf.displayName}
                       </h3>
-                      <div className="flex items-center text-sm text-muted" style={{ gap: "6px" }}>
+                      <div className="flex items-center text-sm text-muted gap-1-5">
                         <span>Location:</span>
                         <span>{inf.city || "Global"}</span>
                       </div>
@@ -342,14 +342,14 @@ export default function DiscoverInfluencersPage() {
 
                   <div className="flex gap-2 flex-wrap mb-5">
                     {inf.isFeatured && (
-                      <span className="font-extrabold inline-flex items-center gap-1 text-xs rounded-md text-amber uppercase" style={{ padding: "4px 10px", background: "rgba(245, 158, 11, 0.15)", border: "1px solid rgba(245, 158, 11, 0.25)" }}>
+                      <span className="font-extrabold inline-flex items-center gap-1 text-xs rounded-md text-amber uppercase px-2-py-1" style={{ background: "rgba(245, 158, 11, 0.15)", border: "1px solid rgba(245, 158, 11, 0.25)" }}>
                         ⭐ Featured
                       </span>
                     )}
-                    <span className="font-extrabold text-xs rounded-md text-emerald uppercase" style={{ padding: "4px 10px", background: "rgba(16, 185, 129, 0.15)" }}>
+                    <span className="font-extrabold text-xs rounded-md text-emerald uppercase px-2-py-1" style={{ background: "rgba(16, 185, 129, 0.15)" }}>
                       TRUST: {inf.trustScore}%
                     </span>
-                    <span className="font-extrabold text-xs rounded-md uppercase" style={{ padding: "4px 10px", background: "rgba(59, 130, 246, 0.15)", color: "#3b82f6" }}>
+                    <span className="font-extrabold text-xs rounded-md uppercase px-2-py-1" style={{ background: "rgba(59, 130, 246, 0.15)", color: "#3b82f6" }}>
                       {inf.categories.split(',')[0]}
                     </span>
                   </div>
@@ -373,7 +373,7 @@ export default function DiscoverInfluencersPage() {
                     </div>
                   </div>
 
-                  <div className="flex" style={{ gap: "10px", marginTop: "auto" }}>
+                  <div className="flex gap-2-5" style={{ marginTop: "auto" }}>
                     <Link
                       href={`/dashboard/influencers/${inf.id}`}
                       className="flex-1 text-center text-sm font-bold bg-secondary rounded-md no-underline" style={{ padding: "12px 8px", border: "1px solid rgba(255,255,255,0.05)", transition: "all 0.3s" }}
@@ -388,7 +388,7 @@ export default function DiscoverInfluencersPage() {
                     </Link>
                     <Link
                       href={`/dashboard/campaigns/create?invite=${inf.id}`}
-                      className="flex-1 text-center text-sm font-bold rounded-md no-underline" style={{ background: "var(--gradient-primary)", padding: "12px 8px", transition: "all 0.3s", boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)" }}
+                      className="flex-1 text-center text-sm font-bold rounded-md no-underline bg-gradient-primary" style={{ padding: "12px 8px", transition: "all 0.3s", boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)" }}
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLAnchorElement).style.opacity = "0.9";
                       }}

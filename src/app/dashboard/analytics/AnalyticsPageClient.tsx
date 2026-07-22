@@ -51,7 +51,7 @@ export default function AnalyticsPageClient({
   };
 
   return (
-    <div className="max-w-1280" style={{ margin: "0 auto" }}>
+    <div className="max-w-1280 mx-auto">
       <div
         className="mb-8 flex justify-between items-center flex-wrap gap-4"
       >

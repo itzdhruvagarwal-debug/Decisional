@@ -125,7 +125,7 @@ export default function ApplicationsPage() {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div
-                          className="flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden relative rounded-sm" style={{ width: "36px", height: "36px", background: "var(--gradient-card)", color: "white" }}
+                          className="flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden relative rounded-sm text-white" style={{ width: "36px", height: "36px", background: "var(--gradient-card)" }}
                         >
                           {app.campaign.brand?.logo ? (
                             <Image
@@ -181,7 +181,7 @@ export default function ApplicationsPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "40px 20px" }}>
+      <div className="mx-auto" style={{ maxWidth: "1000px", padding: "40px 20px" }}>
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-extrabold text-3xl">My Applications</h1>

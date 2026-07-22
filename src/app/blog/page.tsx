@@ -64,12 +64,12 @@ export default function BlogPage() {
         <section className="section w-full relative">
           {/* Subtle glowing radial background for depth */}
           <div
-            className="absolute" style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%)", zIndex: 0, pointerEvents: "none" }}
+            className="absolute pointer-events-none" style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%)", zIndex: 0 }}
           />
 
           <div className="container relative text-center max-w-640" style={{ zIndex: 1 }}>
             <div
-              className="badge badge-primary animate-fade-in mb-6 text-xs font-extrabold uppercase px-4-py-2" style={{ letterSpacing: "1px" }}
+              className="badge badge-primary animate-fade-in mb-6 text-xs font-extrabold uppercase px-4-py-2 tracking-wider"
             >
               Knowledge Base
             </div>
@@ -82,7 +82,7 @@ export default function BlogPage() {
             </h1>
 
             <p
-              className="section-subtitle animate-fade-in text-secondary mb-10" style={{ fontSize: "17px", lineHeight: 1.75, animationDelay: "0.1s" }}
+              className="section-subtitle animate-fade-in text-secondary mb-10 text-base" style={{ lineHeight: 1.75, animationDelay: "0.1s" }}
             >
               We are finalizing operational playbooks and compliance guides for Indian influencer marketing. Expect deep-dives on TDS compliance under Section 194-O, GST invoicing rules, and fake-engagement audit checklists.
             </p>
@@ -107,7 +107,7 @@ export default function BlogPage() {
 
               <form
                 onSubmit={handleSubmit}
-                className="flex flex-wrap justify-center" style={{ gap: "10px" }}
+                className="flex flex-wrap justify-center gap-2-5"
               >
                 <Input
                   type="email"

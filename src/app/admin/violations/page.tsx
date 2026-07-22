@@ -103,14 +103,14 @@ export default async function AdminViolationsPage() {
                       </td>
                       <td className="p-card">
                         <span
-                          className="badge font-extrabold text-xs rounded-lg uppercase" style={{ background: severityStyle.background, color: severityStyle.color, padding: "4px 8px" }}
+                          className="badge font-extrabold text-xs rounded-lg uppercase px-2-py-1" style={{ background: severityStyle.background, color: severityStyle.color }}
                         >
                           {violation.severity}
                         </span>
                       </td>
                       <td className="p-card">
                         <span
-                          className="badge font-extrabold text-xs uppercase" style={{ background: actionStyle.background, color: actionStyle.color, padding: "4px 8px", borderRadius: "6px" }}
+                          className="badge font-extrabold text-xs uppercase px-2-py-1 rounded-md" style={{ background: actionStyle.background, color: actionStyle.color }}
                         >
                           {violation.action}
                         </span>

@@ -434,9 +434,9 @@ export default function CreateCampaignClient() {
   }
 
   return (
-    <div className="w-full" style={{ maxWidth: "800px", margin: "0 auto", paddingBottom: "64px" }}>
+    <div className="w-full max-w-800 mx-auto" style={{ paddingBottom: "64px" }}>
       <h1
-        className="font-black mb-2 text-3xl" style={{ background: "var(--gradient-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+        className="font-black mb-2 text-3xl bg-gradient-primary" style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
       >
         {editCampaignId ? "Edit Draft Campaign" : "Create New Campaign"}
       </h1>
@@ -450,7 +450,7 @@ export default function CreateCampaignClient() {
 
       {invitedInfluencer && (
         <div
-          className="flex items-center gap-3 mb-6 bg-indigo-subtle rounded-xl" style={{ padding: "16px 20px", border: "1px solid rgba(99, 102, 241, 0.2)", backdropFilter: "blur(8px)" }}
+          className="flex items-center gap-3 mb-6 bg-indigo-subtle rounded-xl backdrop-blur" style={{ padding: "16px 20px", border: "1px solid rgba(99, 102, 241, 0.2)" }}
         >
           <div
             className="rounded-full" style={{ width: "8px", height: "8px", background: "#6366f1", boxShadow: "0 0 12px #6366f1" }}
@@ -466,7 +466,7 @@ export default function CreateCampaignClient() {
       >
         {error && (
           <div
-            className="mb-6 bg-rose-subtle rounded-md text-rose" style={{ padding: "12px 16px", border: "1px solid rgba(244, 63, 94, 0.2)" }}
+            className="mb-6 bg-rose-subtle rounded-md text-rose px-4-py-3" style={{ border: "1px solid rgba(244, 63, 94, 0.2)" }}
           >
             {error}
           </div>
@@ -865,7 +865,7 @@ export default function CreateCampaignClient() {
                 type="button"
                 variant="ghost"
                 onClick={handleAddDeliverable}
-                className="text-sm font-semibold" style={{ padding: "4px 8px" }}
+                className="text-sm font-semibold px-2-py-1"
               >
                 + Add Deliverable
               </Button>
@@ -924,7 +924,7 @@ export default function CreateCampaignClient() {
                     placeholder="Rate (Rs)"
                     style={{ width: "110px" }}
                   />
-                  <span className="text-muted whitespace-nowrap" style={{ fontSize: "10px" }}>
+                  <span className="text-muted whitespace-nowrap text-2xs">
                     Rec: ₹{getRecommendedRate(item.type, formData.minFollowers).toLocaleString("en-IN")}
                   </span>
                 </div>

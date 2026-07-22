@@ -29,7 +29,7 @@ export default function GlobalError({
 
         <div className="glass col-span-2 text-center w-full relative rounded-xl" style={{ maxWidth: "500px", padding: "48px 32px", border: "1px solid rgba(244, 63, 94, 0.2)", zIndex: 1 }}>
           <div
-            className="flex items-center justify-center mb-8 bg-rose-subtle text-rose rounded-full text-3xl" style={{ width: "80px", height: "80px", margin: "0 auto", border: "1px solid rgba(244, 63, 94, 0.2)", boxShadow: "0 0 30px rgba(244, 63, 94, 0.1)" }}
+            className="flex items-center justify-center mb-8 bg-rose-subtle text-rose rounded-full text-3xl mx-auto" style={{ width: "80px", height: "80px", border: "1px solid rgba(244, 63, 94, 0.2)", boxShadow: "0 0 30px rgba(244, 63, 94, 0.1)" }}
           >
             ⚠️
           </div>
@@ -46,7 +46,7 @@ export default function GlobalError({
           </p>
 
           {error.digest && (
-            <div className="text-xs text-muted mb-8 p-3 rounded-md border-card" style={{ background: "rgba(255,255,255,0.03)", fontFamily: "monospace" }}>
+            <div className="text-xs text-muted mb-8 p-3 rounded-md border-card font-mono" style={{ background: "rgba(255,255,255,0.03)" }}>
               Digest: {error.digest}
             </div>
           )}

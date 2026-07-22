@@ -197,7 +197,7 @@ export default function InfluencerDashboard({
                 <h3 className="level-perks-title">
                   ✨ Level {overview.level} Perks & Benefits
                 </h3>
-                <span className="badge badge-primary text-xs font-bold uppercase" style={{ padding: "4px 10px" }}>
+                <span className="badge badge-primary text-xs font-bold uppercase px-2-py-1">
                   {calculateLevel(overview.xp).name}
                 </span>
               </div>
@@ -413,12 +413,12 @@ export default function InfluencerDashboard({
           >
             <div>
               <div
-                className="text-muted mb-1 text-xs uppercase" style={{ letterSpacing: 0 }}
+                className="text-muted mb-1 text-xs uppercase tracking-normal"
               >
                 Your Referral Code
               </div>
               <code
-                className="text-lg font-extrabold" style={{ fontFamily: "monospace", letterSpacing: 0 }}
+                className="text-lg font-extrabold font-mono tracking-normal"
               >
                 {data.gamification?.referralStats?.referralCode || "..."}
               </code>
@@ -520,7 +520,7 @@ function StatCard({
   return (
     <div className="card hover-lift">
       <div
-        className="flex items-center" style={{ gap: "10px", marginBottom: "14px", color: accentColor }}
+        className="flex items-center gap-2-5 mb-3" style={{ color: accentColor }}
       >
         {STAT_ICONS[icon]}
         <span
@@ -535,7 +535,7 @@ function StatCard({
         {value}
       </div>
       <div
-        className="text-xs text-muted" style={{ marginTop: "6px" }}
+        className="text-xs text-muted mt-1"
       >
         {subvalue}
       </div>

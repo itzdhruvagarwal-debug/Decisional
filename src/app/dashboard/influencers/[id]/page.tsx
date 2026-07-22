@@ -147,14 +147,14 @@ export default function InfluencerProfilePage() {
   return (
     <DashboardShell user={session.user}>
       <div
-      className="flex flex-col gap-6 max-w-900" style={{ margin: "0 auto" }}
+      className="flex flex-col gap-6 max-w-900 mx-auto"
     >
       {/* Header / Bio */}
       <div
         className="card flex gap-6 flex-wrap p-8"
       >
         <div
-          className="flex items-center justify-center font-extrabold flex-shrink-0 rounded-full text-3xl" style={{ width: "120px", height: "120px", background: "var(--gradient-primary)", color: "#fff" }}
+          className="flex items-center justify-center font-extrabold flex-shrink-0 rounded-full text-3xl bg-gradient-primary text-white" style={{ width: "120px", height: "120px" }}
         >
           {profile.displayName?.[0] || "I"}
         </div>
@@ -199,7 +199,7 @@ export default function InfluencerProfilePage() {
           <div className="flex gap-2 flex-wrap">
             {profile.isFeatured && (
               <span
-                className="text-xs font-extrabold inline-flex items-center gap-1 text-amber rounded-xl uppercase" style={{ padding: "4px 12px", background: "rgba(245, 158, 11, 0.15)", border: "1px solid rgba(245, 158, 11, 0.25)" }}
+                className="text-xs font-extrabold inline-flex items-center gap-1 text-amber rounded-xl uppercase px-2-py-1" style={{ background: "rgba(245, 158, 11, 0.15)", border: "1px solid rgba(245, 158, 11, 0.25)" }}
               >
                 ⭐ Featured Creator
               </span>
@@ -207,7 +207,7 @@ export default function InfluencerProfilePage() {
             {profile.categories.split(",").map((cat) => (
               <span
                 key={cat}
-                className="text-xs font-semibold bg-tertiary rounded-xl" style={{ padding: "4px 12px" }}
+                className="text-xs font-semibold bg-tertiary rounded-xl px-2-py-1"
               >
                 #{cat.trim()}
               </span>
@@ -401,7 +401,7 @@ export default function InfluencerProfilePage() {
             >
               <Link
                 href={`/dashboard/campaigns/create?invite=${profile?.id || id}`}
-                className="btn btn-primary text-center text-sm no-underline" style={{ padding: "14px" }}
+                className="btn btn-primary text-center text-sm no-underline p-3.5"
               >
                 Create Campaign & Invite
               </Link>

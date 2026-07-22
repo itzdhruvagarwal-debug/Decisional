@@ -223,13 +223,13 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
 
             <div>
               <div
-                className="text-muted mb-2 text-xs uppercase" style={{ letterSpacing: 0 }}
+                className="text-muted mb-2 text-xs uppercase tracking-normal"
               >
                 Share your code
               </div>
               <div className="flex gap-2">
                 <code
-                  className="flex-1 text-sm text-center bg-tertiary rounded-sm" style={{ padding: "10px 14px", fontFamily: "monospace", letterSpacing: 0 }}
+                  className="flex-1 text-sm text-center bg-tertiary rounded-sm px-3-py-2-5 font-mono tracking-normal"
                 >
                   {data.referralStats?.referralCode || "Loading..."}
                 </code>
@@ -260,7 +260,7 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
             Invite Brands & Influencers
           </h3>
           <p
-            className="text-secondary mb-5 text-sm" style={{ lineHeight: 1.7 }}
+            className="text-secondary mb-5 text-sm leading-relaxed"
           >
             Level up your tier to unlock up to 2% lifetime GMV revenue share and
             exclusive platform fee discounts for every deal completed by your
@@ -294,22 +294,22 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
             <thead>
               <tr className="border-b-card">
                 <th
-                  className="text-xs text-muted font-semibold uppercase" style={{ padding: "10px 12px", letterSpacing: 0 }}
+                  className="text-xs text-muted font-semibold uppercase px-3-py-2-5 tracking-normal"
                 >
                   Campaign
                 </th>
                 <th
-                  className="text-xs text-muted font-semibold uppercase" style={{ padding: "10px 12px", letterSpacing: 0 }}
+                  className="text-xs text-muted font-semibold uppercase px-3-py-2-5 tracking-normal"
                 >
                   Status
                 </th>
                 <th
-                  className="text-xs text-muted font-semibold uppercase" style={{ padding: "10px 12px", letterSpacing: 0 }}
+                  className="text-xs text-muted font-semibold uppercase px-3-py-2-5 tracking-normal"
                 >
                   Budget
                 </th>
                 <th
-                  className="text-xs text-muted font-semibold uppercase" style={{ padding: "10px 12px", letterSpacing: 0 }}
+                  className="text-xs text-muted font-semibold uppercase px-3-py-2-5 tracking-normal"
                 >
                   Deals
                 </th>
@@ -411,7 +411,7 @@ function StatCard({
   return (
     <div className="card hover-lift">
       <div
-        className="flex items-center" style={{ gap: "10px", marginBottom: "14px", color: accentColor }}
+        className="flex items-center gap-2-5 mb-3" style={{ color: accentColor }}
       >
         {BRAND_STAT_ICONS[icon]}
         <span
@@ -427,7 +427,7 @@ function StatCard({
       </div>
       {subvalue && (
         <div
-          className="text-xs text-muted" style={{ marginTop: "6px" }}
+          className="text-xs text-muted mt-1"
         >
           {subvalue}
         </div>

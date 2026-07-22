@@ -84,7 +84,7 @@ export function EnterpriseWatermark() {
     return (
         <div
             id="enterprise-security-watermark"
-            className="fixed flex flex-wrap items-center justify-center" style={{ top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 99999, // Way above everything
+            className="fixed flex flex-wrap items-center justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999, // Way above everything
                 overflow: "hidden", opacity: 0.03, // Barely visible to the naked eye but catches screenshot scrapers
                 userSelect: "none" }}
         >
@@ -92,7 +92,7 @@ export function EnterpriseWatermark() {
             {Array.from({ length: 30 }).map((_, i) => (
                 <div
                     key={`watermark-${userEmail}-${i}`}
-                    className="text-sm text-center p-10" style={{ transform: "rotate(-35deg)", fontFamily: "monospace", color: "var(--color-text)", whiteSpace: "pre-line" }}
+                    className="text-sm text-center p-10 font-mono" style={{ transform: "rotate(-35deg)", color: "var(--color-text)", whiteSpace: "pre-line" }}
                 >
                     {session.user.email} <br />
                     {session.user.id.slice(-8)} <br />

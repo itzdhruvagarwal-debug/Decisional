@@ -34,7 +34,7 @@ export function Toast({ toast, onClose }: Readonly<ToastProps>) {
       role="alert"
       aria-live="assertive"
       aria-atomic="true"
-      className="text-sm font-medium flex items-center justify-between w-full" style={{ padding: "12px 20px", borderRadius: "10px", color: "#fff", background: bg, boxShadow: "0 8px 32px rgba(0,0,0,0.3)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", animation: "slideInRight 0.3s ease-out" }}
+      className="text-sm font-medium flex items-center justify-between w-full rounded-lg text-white" style={{ padding: "12px 20px", background: bg, boxShadow: "0 8px 32px rgba(0,0,0,0.3)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", animation: "slideInRight 0.3s ease-out" }}
     >
       <span>
         {icon}
@@ -43,7 +43,7 @@ export function Toast({ toast, onClose }: Readonly<ToastProps>) {
       <button
         onClick={() => onClose(toast.id)}
         aria-label={`Dismiss ${toast.type} notification`}
-        className="cursor-pointer text-sm border-none leading-none" style={{ background: "none", color: "#fff", marginLeft: "8px", opacity: 0.7, padding: "0 4px" }}
+        className="cursor-pointer text-sm border-none leading-none bg-none text-white" style={{ marginLeft: "8px", opacity: 0.7, padding: "0 4px" }}
       >
         ✕
       </button>

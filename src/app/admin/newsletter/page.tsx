@@ -48,7 +48,7 @@ export default async function AdminNewsletterPage() {
         </div>
         <div className="card" style={{ padding: "18px 20px" }}>
           <div className="text-muted text-xs mb-1">Pending Verification</div>
-          <div className="text-3xl font-extrabold" style={{ color: "var(--color-warning)" }}>{stats.unverified}</div>
+          <div className="text-3xl font-extrabold text-amber">{stats.unverified}</div>
         </div>
       </div>
 
@@ -73,17 +73,17 @@ export default async function AdminNewsletterPage() {
               label="Content (HTML supported)"
               required
               rows={12}
-              className="text-sm" style={{ fontFamily: "var(--font-mono, monospace)", minHeight: "220px", resize: "vertical" }}
+              className="text-sm resize-y" style={{ fontFamily: "var(--font-mono, monospace)", minHeight: "220px" }}
               placeholder="Enter your newsletter content here. You can use HTML tags for formatting."
               fullWidth
             />
-            <p className="text-muted text-xs" style={{ marginTop: "6px" }}>
+            <p className="text-muted text-xs mt-1">
               Tip: Use &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;a&gt;, &lt;ul&gt;, &lt;li&gt; for basic formatting.
             </p>
           </div>
 
           <div className="card-gradient mb-6 rounded-md" style={{ padding: "16px 20px", border: "1px dashed rgba(245, 158, 11, 0.4)", background: "rgba(245, 158, 11, 0.05)" }}>
-            <p className="text-sm font-semibold text-amber" style={{ lineHeight: "1.5" }}>
+            <p className="text-sm font-semibold text-amber leading-normal">
               ⚠️ Warning: This will send an email to {stats.verified} verified subscribers immediately. Make sure to test your content before sending.
             </p>
           </div>

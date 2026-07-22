@@ -38,7 +38,7 @@ function StatusBadge({ doc }: Readonly<StatusBadgeProps>) {
     if (!doc)
         return (
             <span
-                className="text-muted text-xs bg-tertiary rounded-2xl" style={{ padding: "2px 8px" }}
+                className="text-muted text-xs bg-tertiary rounded-2xl px-2-py-05"
             >
                 Not uploaded
             </span>
@@ -55,7 +55,7 @@ function StatusBadge({ doc }: Readonly<StatusBadgeProps>) {
     };
     return (
         <span
-            className="font-semibold text-xs rounded-2xl" style={{ color: colors[doc.status] || "#999", background: `${colors[doc.status]}18`, padding: "2px 8px" }}
+            className="font-semibold text-xs rounded-2xl px-2-py-05" style={{ color: colors[doc.status] || "#999", background: `${colors[doc.status]}18` }}
         >
             {icons[doc.status]} {doc.status}
         </span>
@@ -91,7 +91,7 @@ function UploadBtn({
             aria-busy={isUploading && uploadingDocType === type}
             onClick={() => onUpload(type)}
             disabled={isUploading}
-            className="text-xs" style={{ padding: "4px 10px" }}
+            className="text-xs px-2-py-1"
         >
             {getUploadButtonText(isUploading, uploadingDocType, type, !!doc)}
         </Button>
@@ -127,13 +127,13 @@ function DocRow({
 }: Readonly<DocRowProps>) {
     return (
         <div
-            className="flex items-center justify-between rounded-md" style={{ padding: "12px 16px", background:
+            className="flex items-center justify-between rounded-md px-4-py-3" style={{ background:
                     doc?.status === "VERIFIED"
                         ? "rgba(16,185,129,0.07)"
                         : "var(--color-bg-tertiary)", border: getDocRowBorder(doc?.status) }}
         >
             <div
-                className="flex items-center" style={{ gap: "10px" }}
+                className="flex items-center gap-2-5"
             >
                 <span className="text-lg">{icon}</span>
                 <div>
@@ -156,7 +156,7 @@ function DocRow({
                 </div>
             </div>
             <div
-                className="flex flex-col items-end" style={{ gap: "6px" }}
+                className="flex flex-col items-end gap-1-5"
             >
                 <StatusBadge doc={doc} />
                 <UploadBtn
@@ -288,8 +288,8 @@ function DigiLockerCardComponent({
         >
             <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div className="flex-1" style={{ minWidth: "200px" }}>
-                    <div className="flex items-center mb-2" style={{ gap: "10px" }}>
-                        <span style={{ fontSize: "22px" }}>🏛️</span>
+                    <div className="flex items-center mb-2 gap-2-5">
+                        <span className="text-2xl">🏛️</span>
                         <div>
                             <div className="font-bold text-sm">Instant Verification via DigiLocker</div>
                             <div className="text-xs text-muted mt-1">Government of India</div>
@@ -298,7 +298,7 @@ function DigiLockerCardComponent({
                     <div className="text-sm text-secondary leading-relaxed">
                         Connect your DigiLocker account to automatically verify your Aadhaar and PAN — no uploads needed. Documents are fetched directly from the government database.
                     </div>
-                    <div className="text-muted text-xs" style={{ marginTop: "6px" }}>
+                    <div className="text-muted text-xs mt-1">
                         🔒 Your data is accessed read-only and encrypted at rest. Alternatively, upload documents manually below.
                     </div>
                 </div>
@@ -335,10 +335,10 @@ function Tier1CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "isBrand
             }}
         >
             <div
-                className="flex items-center justify-between flex-wrap" style={{ marginBottom: "14px", gap: "10px" }}
+                className="flex items-center justify-between flex-wrap mb-3 gap-2-5"
             >
                 <div
-                    className="flex items-center" style={{ gap: "10px" }}
+                    className="flex items-center gap-2-5"
                 >
                     <div
                         className="flex items-center justify-center rounded-full" style={{ width: "30px", height: "30px", background: "rgba(99,102,241,0.12)" }}
@@ -363,20 +363,20 @@ function Tier1CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "isBrand
                 </div>
                 {tier >= 1 ? (
                     <span
-                        className="font-bold text-xs text-emerald rounded-2xl" style={{ padding: "3px 10px", background: "rgba(16,185,129,0.1)" }}
+                        className="font-bold text-xs text-emerald rounded-2xl px-2-py-1 bg-emerald-subtle"
                     >
                         ✅ Unlocked
                     </span>
                 ) : (
                     <span
-                        className="font-bold text-xs rounded-2xl" style={{ color: "#6366f1", padding: "3px 10px", background: "rgba(99,102,241,0.1)" }}
+                        className="font-bold text-xs rounded-2xl px-2-py-1" style={{ color: "#6366f1", background: "rgba(99,102,241,0.1)" }}
                     >
                         🔒 Required to start
                     </span>
                 )}
             </div>
             <div
-                className="flex flex-col" style={{ gap: "10px" }}
+                className="flex flex-col gap-2-5"
             >
                 {renderDocRow("AADHAAR", "Aadhaar Card", "🪪", "Front & back photo of your Aadhaar (address proof)")}
                 {renderDocRow("SELFIE", "Selfie with Aadhaar", "🤳", "Clear selfie holding your Aadhaar card (liveness check)")}
@@ -398,10 +398,10 @@ function Tier2CardComponent({ tier, isBrand, renderDocRow }: TierCardProps) {
             }}
         >
             <div
-                className="flex items-center justify-between flex-wrap" style={{ marginBottom: "14px", gap: "10px" }}
+                className="flex items-center justify-between flex-wrap mb-3 gap-2-5"
             >
                 <div
-                    className="flex items-center" style={{ gap: "10px" }}
+                    className="flex items-center gap-2-5"
                 >
                     <div
                         className="flex items-center justify-center rounded-full" style={{ width: "30px", height: "30px", background: "rgba(245,158,11,0.12)" }}
@@ -429,20 +429,20 @@ function Tier2CardComponent({ tier, isBrand, renderDocRow }: TierCardProps) {
                 </div>
                 {tier >= 2 ? (
                     <span
-                        className="font-bold text-xs text-emerald rounded-2xl" style={{ padding: "3px 10px", background: "rgba(16,185,129,0.1)" }}
+                        className="font-bold text-xs text-emerald rounded-2xl px-2-py-1 bg-emerald-subtle"
                     >
                         ✅ {isBrand ? "Unlocked" : "Unlimited — All campaigns"}
                     </span>
                 ) : (
                     <span
-                        className="font-bold text-xs text-amber rounded-2xl" style={{ padding: "3px 10px", background: "rgba(245,158,11,0.1)" }}
+                        className="font-bold text-xs text-amber rounded-2xl px-2-py-1" style={{ background: "rgba(245,158,11,0.1)" }}
                     >
                         {getTierUpgradeActionText(tier, isBrand)}
                     </span>
                 )}
             </div>
             <div
-                className="flex flex-col" style={{ gap: "10px" }}
+                className="flex flex-col gap-2-5"
             >
                 {renderDocRow("PAN_CARD", "PAN Card", "🪪", "Clear photo of your PAN card — required for transactions above ₹50,000")}
                 {renderDocRow("BANK_STATEMENT", "Bank Statement", "📄", "Latest 3-month bank statement (PDF or scanned image)")}
@@ -464,10 +464,10 @@ function Tier3CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "isBrand
             }}
         >
             <div
-                className="flex items-center justify-between flex-wrap" style={{ marginBottom: "14px", gap: "10px" }}
+                className="flex items-center justify-between flex-wrap mb-3 gap-2-5"
             >
                 <div
-                    className="flex items-center" style={{ gap: "10px" }}
+                    className="flex items-center gap-2-5"
                 >
                     <div
                         className="flex items-center justify-center rounded-full" style={{ width: "30px", height: "30px", background: "rgba(16,185,129,0.12)" }}
@@ -492,13 +492,13 @@ function Tier3CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "isBrand
                 </div>
                 {tier >= 3 ? (
                     <span
-                        className="font-bold text-xs text-emerald rounded-2xl" style={{ padding: "3px 10px", background: "rgba(16,185,129,0.1)" }}
+                        className="font-bold text-xs text-emerald rounded-2xl px-2-py-1 bg-emerald-subtle"
                     >
                         ✅ Unlimited
                     </span>
                 ) : (
                     <span
-                        className="font-bold text-xs text-emerald rounded-2xl" style={{ padding: "3px 10px", background: "rgba(16,185,129,0.1)" }}
+                        className="font-bold text-xs text-emerald rounded-2xl px-2-py-1 bg-emerald-subtle"
                     >
                         {tier < 2
                             ? "🔒 Complete Tier 2 first"
@@ -507,12 +507,12 @@ function Tier3CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "isBrand
                 )}
             </div>
             <div
-                className="text-xs text-secondary mb-3 rounded-sm" style={{ padding: "8px 12px", background: "rgba(16,185,129,0.06)" }}
+                className="text-xs text-secondary mb-3 rounded-sm px-3-py-2" style={{ background: "rgba(16,185,129,0.06)" }}
             >
                 💡 You only need <strong>one</strong> of the documents below to unlock the unlimited tier.
             </div>
             <div
-                className="flex flex-col" style={{ gap: "10px" }}
+                className="flex flex-col gap-2-5"
             >
                 {renderDocRow("GST_CERTIFICATE", "GST Registration Certificate", "📜", "GST certificate for your business entity")}
                 {renderDocRow("MSME_CERTIFICATE", "MSME / Udyam Certificate", "🏭", "Udyam/MSME registration certificate from Government portal")}
@@ -627,7 +627,7 @@ export default function VerificationTab({
 
             {/* Security note */}
             <div
-                className="text-xs text-muted bg-secondary rounded-md border-card leading-relaxed" style={{ padding: "12px 16px" }}
+                className="text-xs text-muted bg-secondary rounded-md border-card leading-relaxed px-4-py-3"
             >
                 🛡️ <strong>Security:</strong> All documents are encrypted and reviewed by our compliance team within 1–2 business days. They are never shared with third parties without your consent.
             </div>
@@ -673,7 +673,7 @@ function TierStatusCardComponent({
             >
                 <div>
                     <div
-                        className="font-bold text-xs mb-1 uppercase" style={{ letterSpacing: "1px", color: tierColors[tier] }}
+                        className="font-bold text-xs mb-1 uppercase tracking-wider" style={{ color: tierColors[tier] }}
                     >
                         Your Verification Tier
                     </div>
@@ -681,7 +681,7 @@ function TierStatusCardComponent({
                         className="flex items-center gap-3"
                     >
                         <div
-                            className="flex items-center justify-center rounded-full" style={{ width: "52px", height: "52px", background: `linear-gradient(135deg, ${tierColors[tier]}, ${tierColors[tier]}88)`, fontSize: "22px", color: "white" }}
+                            className="flex items-center justify-center rounded-full text-2xl text-white" style={{ width: "52px", height: "52px", background: `linear-gradient(135deg, ${tierColors[tier]}, ${tierColors[tier]}88)` }}
                         >
                             {getTierIcon(tier)}
                         </div>
@@ -706,7 +706,7 @@ function TierStatusCardComponent({
                 </div>
                 <div className="text-right">
                     <div
-                        className="text-muted mb-1 text-xs uppercase" style={{ letterSpacing: "1px" }}
+                        className="text-muted mb-1 text-xs uppercase tracking-wider"
                     >
                         Monthly Limit
                     </div>
@@ -739,10 +739,10 @@ function TierStatusCardComponent({
                     </span>
                 </div>
                 <div
-                    className="overflow-hidden bg-tertiary" style={{ height: "6px", borderRadius: "999px" }}
+                    className="overflow-hidden bg-tertiary rounded-full" style={{ height: "6px" }}
                 >
                     <div
-                        className="h-full" style={{ width: `${Math.min(100, Math.max(0, (trustScore / 900) * 100))}%`, background: `linear-gradient(90deg, ${tierColors[tier]}, #10b981)`, borderRadius: "999px", transition: "width 0.6s" }}
+                        className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, (trustScore / 900) * 100))}%`, background: `linear-gradient(90deg, ${tierColors[tier]}, #10b981)`, transition: "width 0.6s" }}
                     />
                 </div>
             </div>
@@ -762,7 +762,7 @@ function Step1MandatoryCardComponent({
     return (
         <div className="card">
             <div
-                className="flex items-center" style={{ gap: "10px", marginBottom: "14px" }}
+                className="flex items-center gap-2-5 mb-3"
             >
                 <div
                     className="flex items-center justify-center rounded-full" style={{ width: "30px", height: "30px", background: "rgba(99,102,241,0.12)" }}
@@ -781,7 +781,7 @@ function Step1MandatoryCardComponent({
                 </div>
             </div>
             <div
-                className="flex flex-col" style={{ gap: "10px" }}
+                className="flex flex-col gap-2-5"
             >
                 {[
                     {
@@ -797,12 +797,12 @@ function Step1MandatoryCardComponent({
                 ].map((item) => (
                     <div
                         key={item.label}
-                        className="flex items-center justify-between rounded-md" style={{ padding: "12px 16px", background: item.verified
+                        className="flex items-center justify-between rounded-md px-4-py-3" style={{ background: item.verified
                                 ? "rgba(16,185,129,0.07)"
                                 : "var(--color-bg-tertiary)", border: `1px solid ${item.verified ? "rgba(16,185,129,0.3)" : "var(--color-border)"}` }}
                     >
                         <div
-                            className="flex items-center" style={{ gap: "10px" }}
+                            className="flex items-center gap-2-5"
                         >
                             <span className="text-lg">
                                 {item.icon}
@@ -830,7 +830,7 @@ function Step1MandatoryCardComponent({
                             </span>
                         ) : (
                             <span
-                                className="text-xs font-semibold text-amber rounded-2xl" style={{ padding: "4px 10px", background: "rgba(245,158,11,0.1)" }}
+                                className="text-xs font-semibold text-amber rounded-2xl px-2-py-1" style={{ background: "rgba(245,158,11,0.1)" }}
                             >
                                 ⚠ Pending
                             </span>

@@ -41,7 +41,7 @@ function InactivityWarningModal({
     <dialog
       open
       aria-labelledby="inactivity-title"
-      className="fixed flex items-center justify-center p-6 border-none" style={{ inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}
+      className="fixed flex items-center justify-center p-6 border-none inset-0 backdrop-blur" style={{ zIndex: 9999, background: "rgba(0,0,0,0.75)" }}
     >
       <div
         className="w-full text-center rounded-xl" style={{ background: "var(--color-surface, #111)", border: "1px solid rgba(245, 158, 11, 0.3)", padding: "36px 32px", maxWidth: "400px", boxShadow: "0 24px 60px rgba(0,0,0,0.6)", animation: "slideDown 0.25s ease-out" }}
@@ -67,7 +67,7 @@ function InactivityWarningModal({
         </p>
 
         <div
-          className="font-extrabold text-3xl mb-6" style={{ color: secondsRemaining <= 60 ? "#f43f5e" : "#f59e0b", letterSpacing: 0, fontVariantNumeric: "tabular-nums", transition: "color 0.3s" }}
+          className="font-extrabold text-3xl mb-6 tracking-normal" style={{ color: secondsRemaining <= 60 ? "#f43f5e" : "#f59e0b", fontVariantNumeric: "tabular-nums", transition: "color 0.3s" }}
         >
           {timeStr}
         </div>

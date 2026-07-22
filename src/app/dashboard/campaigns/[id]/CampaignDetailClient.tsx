@@ -250,7 +250,7 @@ function ApplicationsList({
           >
             <div style={{ minWidth: 0 }}>
               <div
-                className="flex items-center flex-wrap mb-2" style={{ gap: "10px" }}
+                className="flex items-center flex-wrap mb-2 gap-2-5"
               >
                 <strong>{application.influencer.displayName}</strong>
                 <span className="badge">{application.status}</span>
@@ -270,12 +270,12 @@ function ApplicationsList({
                 )}
               </div>
               <p
-                className="text-secondary text-sm leading-normal" style={{ marginBottom: "10px" }}
+                className="text-secondary text-sm leading-normal mb-2"
               >
                 {application.proposal}
               </p>
               <div
-                className="flex flex-wrap text-muted text-xs" style={{ gap: "10px" }}
+                className="flex flex-wrap text-muted text-xs gap-2-5"
               >
                 <span>
                   Followers:{" "}
@@ -661,7 +661,7 @@ export default function CampaignDetailClient({
 
   if (error || !campaign) {
     return (
-      <div className="card text-center" style={{ maxWidth: "760px", margin: "0 auto" }}>
+      <div className="card text-center mx-auto" style={{ maxWidth: "760px" }}>
         <h2 className="mb-2">{error || "Campaign not found"}</h2>
         <Link href="/dashboard/campaigns" className="btn btn-secondary">
           Back to Campaigns
@@ -685,7 +685,7 @@ export default function CampaignDetailClient({
   );
 
   return (
-    <div className="campaign-detail-page grid gap-4 max-w-980" style={{ margin: "0 auto" }}>
+    <div className="campaign-detail-page grid gap-4 max-w-980 mx-auto">
       <Link href="/dashboard/campaigns" className="campaign-detail-back text-sm text-secondary">
         Back to campaigns
       </Link>
@@ -701,7 +701,7 @@ export default function CampaignDetailClient({
               )}
             </div>
             <h1 className="font-extrabold text-3xl">{campaign.title}</h1>
-            <p className="text-secondary" style={{ marginTop: "6px" }}>
+            <p className="text-secondary mt-1">
               {campaign.brand?.companyName || "Unknown Brand"}
               {campaign.brand?.isGstVerified ? " · Verified" : ""}
               {campaign.brand?.averageRating ? ` · ${campaign.brand.averageRating.toFixed(1)} rating` : ""}
@@ -729,7 +729,7 @@ export default function CampaignDetailClient({
               <Button
                 href={`/api/reports/brand/campaign/${campaign.id}/roi?format=csv`}
                 variant="secondary"
-                className="inline-flex items-center" style={{ gap: "6px" }}
+                className="inline-flex items-center gap-1-5"
               >
                 📊 Download ROI Report (CSV)
               </Button>
@@ -750,25 +750,25 @@ export default function CampaignDetailClient({
         </div>
 
         <div className="campaign-detail-stats grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))" }}>
-          <div className="campaign-detail-stat" style={{ margin: 0 }}>
+          <div className="campaign-detail-stat m-0">
             <div className="text-xs text-muted">Per Influencer</div>
             <div className="text-xl font-bold">
               {formatCurrency(campaign.perInfluencerBudget || campaign.totalBudget)}
             </div>
           </div>
           {user?.userType === "INFLUENCER" && recommendedPayout > 0 && (
-            <div className="campaign-detail-stat" style={{ margin: 0, border: "1px solid #10b981", background: "rgba(16, 185, 129, 0.08)" }}>
+            <div className="campaign-detail-stat m-0" style={{ border: "1px solid #10b981", background: "rgba(16, 185, 129, 0.08)" }}>
               <div className="text-xs font-semibold text-emerald">💡 Recommended Payout</div>
               <div className="text-xl font-extrabold text-emerald">
                 ₹{recommendedPayout.toLocaleString("en-IN")}
               </div>
             </div>
           )}
-          <div className="campaign-detail-stat" style={{ margin: 0 }}>
+          <div className="campaign-detail-stat m-0">
             <div className="text-xs text-muted">Applications</div>
             <div className="text-xl font-bold">{applicationsCount}</div>
           </div>
-          <div className="campaign-detail-stat" style={{ margin: 0 }}>
+          <div className="campaign-detail-stat m-0">
             <div className="text-xs text-muted">Slots Filled</div>
             <div className="text-xl font-bold">
               {typeof campaign.maxInfluencers === "number"
@@ -776,7 +776,7 @@ export default function CampaignDetailClient({
                 : `${campaign.acceptedCount} (Unlimited)`}
             </div>
           </div>
-          <div className="campaign-detail-stat" style={{ margin: 0 }}>
+          <div className="campaign-detail-stat m-0">
             <div className="text-xs text-muted">Followers Needed</div>
             <div className="text-xl font-bold">
               {campaign.maxFollowers
@@ -789,18 +789,13 @@ export default function CampaignDetailClient({
 
       {notice && (
         <div
-          className="card"
-          style={{
-            padding: "12px 16px",
-            borderColor:
+          className="card px-4-py-3" style={{ borderColor:
               notice.type === "success"
                 ? "rgba(34, 197, 94, 0.35)"
-                : "rgba(239, 68, 68, 0.35)",
-            color:
+                : "rgba(239, 68, 68, 0.35)", color:
               notice.type === "success"
                 ? "var(--color-success)"
-                : "var(--color-error)",
-          }}
+                : "var(--color-error)" }}
         >
           {notice.message}
         </div>
@@ -872,7 +867,7 @@ export default function CampaignDetailClient({
 
       <section className="card">
         <h3 className="mb-2">Targeting</h3>
-        <div className="grid" style={{ gap: "10px" }}>
+        <div className="grid gap-2-5">
           <div>
             <strong>Categories:</strong>{" "}
             {campaign.targetCategories.length > 0
@@ -894,7 +889,7 @@ export default function CampaignDetailClient({
 
       <section className="card">
         <h3 className="mb-2">Timeline</h3>
-        <div className="grid text-secondary" style={{ gap: "6px" }}>
+        <div className="grid text-secondary gap-1-5">
           <div>Apply by: {formatDate(campaign.applicationDeadline)}</div>
           <div>Content due: {formatDate(campaign.contentDeadline)}</div>
           <div>Posting due: {formatDate(campaign.postingDeadline)}</div>
@@ -903,7 +898,7 @@ export default function CampaignDetailClient({
 
       {showApplyModal && (
         <div
-          className="fixed flex items-center justify-center p-4" style={{ inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 60 }}
+          className="fixed flex items-center justify-center p-4 inset-0" style={{ background: "rgba(0,0,0,0.75)", zIndex: 60 }}
         >
           <div className="card w-full" style={{ maxWidth: "560px" }}>
             <h3 className="mb-3">Apply for Campaign</h3>
@@ -937,7 +932,7 @@ export default function CampaignDetailClient({
               </span>
             )}
 
-            <div className="flex mt-4" style={{ gap: "10px" }}>
+            <div className="flex mt-4 gap-2-5">
               <Button
                 variant="secondary"
                 onClick={() => setShowApplyModal(false)}

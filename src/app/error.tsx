@@ -23,10 +23,10 @@ export default function RootError({
       className="flex items-center justify-center p-6 min-h-screen"
     >
       <div
-        className="card animate-fade-in text-center w-full border-card bg-glass" style={{ maxWidth: "480px", padding: "40px 32px", backdropFilter: "blur(8px)", boxShadow: "0 20px 40px -15px rgba(0,0,0,0.5)" }}
+        className="card animate-fade-in text-center w-full border-card bg-glass backdrop-blur" style={{ maxWidth: "480px", padding: "40px 32px", boxShadow: "0 20px 40px -15px rgba(0,0,0,0.5)" }}
       >
         <div
-          className="flex items-center justify-center mb-6 bg-rose-subtle rounded-full text-3xl" style={{ width: "64px", height: "64px", color: "var(--color-accent-rose, #f43f5e)", margin: "0 auto", border: "1px solid rgba(244, 63, 94, 0.2)" }}
+          className="flex items-center justify-center mb-6 bg-rose-subtle rounded-full text-3xl mx-auto" style={{ width: "64px", height: "64px", color: "var(--color-accent-rose, #f43f5e)", border: "1px solid rgba(244, 63, 94, 0.2)" }}
         >
           ⚠️
         </div>
@@ -42,7 +42,7 @@ export default function RootError({
 
         {error.digest && (
           <div
-            className="text-xs text-muted mb-6 break-all" style={{ background: "rgba(255,255,255,0.03)", padding: "10px 14px", borderRadius: "var(--radius-sm, 6px)", fontFamily: "monospace", border: "1px solid var(--color-border, rgba(255,255,255,0.08))" }}
+            className="text-xs text-muted mb-6 break-all px-3-py-2-5 font-mono" style={{ background: "rgba(255,255,255,0.03)", borderRadius: "var(--radius-sm, 6px)", border: "1px solid var(--color-border, rgba(255,255,255,0.08))" }}
           >
             Ref: {error.digest}
           </div>

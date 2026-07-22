@@ -66,7 +66,7 @@ function StatusPill({ status }: Readonly<{ status: string }>) {
   const ready = status === "READY";
   return (
     <span
-      className="inline-flex items-center text-xs font-extrabold" style={{ borderRadius: "999px", padding: "6px 10px", color: ready ? "var(--color-accent-emerald)" : "var(--color-accent-rose)", background: ready ? "rgba(16, 185, 129, 0.12)" : "rgba(244, 63, 94, 0.12)", border: `1px solid ${ready ? "rgba(16, 185, 129, 0.25)" : "rgba(244, 63, 94, 0.25)"}` }}
+      className="inline-flex items-center text-xs font-extrabold rounded-full" style={{ padding: "6px 10px", color: ready ? "var(--color-accent-emerald)" : "var(--color-accent-rose)", background: ready ? "rgba(16, 185, 129, 0.12)" : "rgba(244, 63, 94, 0.12)", border: `1px solid ${ready ? "rgba(16, 185, 129, 0.25)" : "rgba(244, 63, 94, 0.25)"}` }}
     >
       {ready ? "Ready" : "Action required"}
     </span>
@@ -225,25 +225,25 @@ export default function IndiaTaxCompliancePanel() {
         </div>
 
         <div className="grid-2 gap-3 mb-4">
-          <div className="bg-tertiary rounded-md border-card" style={{ padding: "14px" }}>
+          <div className="bg-tertiary rounded-md border-card p-3.5">
             <div className="text-xs text-muted mb-1">PAN</div>
             <div className="font-extrabold">
               {compliance?.panNumberMasked || (data?.verifiedPanDocument ? "Document verified, number needed" : "Missing")}
             </div>
           </div>
-          <div className="bg-tertiary rounded-md border-card" style={{ padding: "14px" }}>
+          <div className="bg-tertiary rounded-md border-card p-3.5">
             <div className="text-xs text-muted mb-1">GSTIN</div>
             <div className="font-extrabold">
               {compliance?.gstinMasked || compliance?.gstRegistrationType || "Not declared"}
             </div>
           </div>
-          <div className="bg-tertiary rounded-md border-card" style={{ padding: "14px" }}>
+          <div className="bg-tertiary rounded-md border-card p-3.5">
             <div className="text-xs text-muted mb-1">ITR acknowledgement</div>
             <div className="font-extrabold">
               {compliance?.itrAcknowledgementMasked || "Not provided"}
             </div>
           </div>
-          <div className="bg-tertiary rounded-md border-card" style={{ padding: "14px" }}>
+          <div className="bg-tertiary rounded-md border-card p-3.5">
             <div className="text-xs text-muted mb-1">E-invoice</div>
             <div className="font-extrabold">
               {compliance?.eInvoiceApplicable ? "Applicable" : "Not marked"}
@@ -273,12 +273,12 @@ export default function IndiaTaxCompliancePanel() {
         </h3>
 
         {error && (
-          <div role="alert" aria-live="assertive" className="text-sm font-bold text-rose" style={{ marginBottom: "14px" }}>
+          <div role="alert" aria-live="assertive" className="text-sm font-bold text-rose mb-3">
             {error}
           </div>
         )}
         {success && (
-          <div role="status" aria-live="polite" className="text-sm font-bold text-emerald" style={{ marginBottom: "14px" }}>
+          <div role="status" aria-live="polite" className="text-sm font-bold text-emerald mb-3">
             {success}
           </div>
         )}

@@ -95,7 +95,7 @@ export default function LoginActivityPanel({ showToast: _showToast }: Readonly<L
                             </div>
                             {login.active && (
                                 <div
-                                    className="font-bold text-emerald bg-emerald-subtle rounded-sm" style={{ fontSize: "10px", padding: "2px 6px" }}
+                                    className="font-bold text-emerald bg-emerald-subtle rounded-sm text-2xs px-2-py-05"
                                 >
                                     ACTIVE
                                 </div>
@@ -108,7 +108,7 @@ export default function LoginActivityPanel({ showToast: _showToast }: Readonly<L
                 <Button
                     variant="secondary"
                     onClick={() => setShowAllLogins(!showAllLogins)}
-                    className="flex items-center justify-center w-full mt-3 text-sm font-semibold cursor-pointer bg-tertiary border-card rounded-sm text-primary-light" style={{ gap: "6px", padding: "10px", transition: "all 0.2s ease" }}
+                    className="flex items-center justify-center w-full mt-3 text-sm font-semibold cursor-pointer bg-tertiary border-card rounded-sm text-primary-light gap-1-5" style={{ padding: "10px", transition: "all 0.2s ease" }}
                 >
                     {showAllLogins ? "▲ Show Less" : `▼ View All (${loginActivity.length})`}
                 </Button>

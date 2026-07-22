@@ -173,25 +173,25 @@ function DealSkeleton() {
       <div className="flex gap-4 items-center mb-4">
         <div className="skeleton flex-shrink-0 rounded-md" style={{ width: 48, height: 48 }} />
         <div className="flex-1">
-          <div className="skeleton" style={{ height: 16, width: "60%", borderRadius: 6, marginBottom: 8 }} />
-          <div className="skeleton" style={{ height: 13, width: "40%", borderRadius: 6 }} />
+          <div className="skeleton rounded-md" style={{ height: 16, width: "60%", marginBottom: 8 }} />
+          <div className="skeleton rounded-md" style={{ height: 13, width: "40%" }} />
         </div>
-        <div className="skeleton" style={{ height: 28, width: 100, borderRadius: "var(--radius-full)" }} />
+        <div className="skeleton rounded-full" style={{ height: 28, width: 100 }} />
       </div>
       <div className="flex justify-between items-center flex-wrap" style={{ gap: 16 }}>
         <div className="flex flex-1" style={{ gap: 24 }}>
           <div>
-            <div className="skeleton" style={{ height: 11, width: 70, borderRadius: 4, marginBottom: 6 }} />
-            <div className="skeleton" style={{ height: 14, width: 90, borderRadius: 4 }} />
+            <div className="skeleton rounded-sm" style={{ height: 11, width: 70, marginBottom: 6 }} />
+            <div className="skeleton rounded-sm" style={{ height: 14, width: 90 }} />
           </div>
           <div>
-            <div className="skeleton" style={{ height: 11, width: 50, borderRadius: 4, marginBottom: 6 }} />
-            <div className="skeleton" style={{ height: 14, width: 60, borderRadius: 4 }} />
+            <div className="skeleton rounded-sm" style={{ height: 11, width: 50, marginBottom: 6 }} />
+            <div className="skeleton rounded-sm" style={{ height: 14, width: 60 }} />
           </div>
         </div>
         <div className="text-right">
-          <div className="skeleton" style={{ height: 11, width: 50, borderRadius: 4, marginBottom: 6, marginLeft: "auto" }} />
-          <div className="skeleton" style={{ height: 22, width: 90, borderRadius: 4, marginLeft: "auto" }} />
+          <div className="skeleton rounded-sm" style={{ height: 11, width: 50, marginBottom: 6, marginLeft: "auto" }} />
+          <div className="skeleton rounded-sm" style={{ height: 22, width: 90, marginLeft: "auto" }} />
         </div>
       </div>
     </div>
@@ -265,7 +265,7 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
             className="flex gap-4 items-center"
           >
             <div
-              className="flex items-center justify-center font-bold text-lg flex-shrink-0 overflow-hidden rounded-md" style={{ width: "48px", height: "48px", background: "var(--gradient-primary)", color: "white" }}
+              className="flex items-center justify-center font-bold text-lg flex-shrink-0 overflow-hidden rounded-md bg-gradient-primary text-white" style={{ width: "48px", height: "48px" }}
             >
               {deal.brand.logo ? (
                 <Image
@@ -291,7 +291,7 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
             </div>
           </div>
           <div
-            className="flex items-center gap-2 text-xs font-semibold px-3-py-1" style={{ background: `${status.color}20`, borderRadius: "var(--radius-full)", color: status.color, alignSelf: "flex-start" }}
+            className="flex items-center gap-2 text-xs font-semibold px-3-py-1 rounded-full" style={{ background: `${status.color}20`, color: status.color, alignSelf: "flex-start" }}
           >
             <span>{status.icon}</span>
             <span>{status.label}</span>
@@ -481,7 +481,7 @@ export default function DealsPage() {
             {[1, 2, 3].map((i) => (
               <div key={i} className="card text-center p-6">
                 <div className="skeleton" style={{ height: 36, width: 80, borderRadius: 8, margin: "0 auto 8px" }} />
-                <div className="skeleton" style={{ height: 13, width: 100, borderRadius: 4, margin: "0 auto" }} />
+                <div className="skeleton rounded-sm mx-auto" style={{ height: 13, width: 100 }} />
               </div>
             ))}
           </div>

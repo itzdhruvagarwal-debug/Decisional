@@ -139,13 +139,13 @@ function HeroProductMockup() {
     >
       {/* Mockup View Selector */}
       <div
-        className="inline-flex bg-secondary p-1 border-card" style={{ borderRadius: "var(--radius-full)" }}
+        className="inline-flex bg-secondary p-1 border-card rounded-full"
       >
         <Button
           type="button"
           variant="ghost"
           onClick={() => setView("influencer")}
-          className="text-sm font-semibold border-none px-4-py-2" style={{ background: view === "influencer" ? "var(--color-bg-tertiary)" : "transparent", color: view === "influencer" ? "white" : "var(--color-text-secondary)", borderRadius: "var(--radius-full)", transition: "all var(--transition-fast)" }}
+          className="text-sm font-semibold border-none px-4-py-2 rounded-full" style={{ background: view === "influencer" ? "var(--color-bg-tertiary)" : "transparent", color: view === "influencer" ? "white" : "var(--color-text-secondary)", transition: "all var(--transition-fast)" }}
         >
           Influencer View
         </Button>
@@ -153,7 +153,7 @@ function HeroProductMockup() {
           type="button"
           variant="ghost"
           onClick={() => setView("brand")}
-          className="text-sm font-semibold border-none px-4-py-2" style={{ background: view === "brand" ? "var(--color-bg-tertiary)" : "transparent", color: view === "brand" ? "white" : "var(--color-text-secondary)", borderRadius: "var(--radius-full)", transition: "all var(--transition-fast)" }}
+          className="text-sm font-semibold border-none px-4-py-2 rounded-full" style={{ background: view === "brand" ? "var(--color-bg-tertiary)" : "transparent", color: view === "brand" ? "white" : "var(--color-text-secondary)", transition: "all var(--transition-fast)" }}
         >
           Brand View
         </Button>
@@ -161,14 +161,14 @@ function HeroProductMockup() {
 
       {/* Main Glassmorphic Container */}
       <div
-        className="w-full p-6 text-left relative overflow-hidden bg-glass rounded-xl" style={{ backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.08)", boxShadow: "0 24px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)" }}
+        className="w-full p-6 text-left relative overflow-hidden bg-glass rounded-xl backdrop-blur-lg" style={{ WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.08)", boxShadow: "0 24px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)" }}
       >
         {/* Glow Effects */}
         <div
-          className="absolute rounded-full" style={{ top: "-50px", right: "-50px", width: "150px", height: "150px", background: "var(--color-primary)", filter: "blur(80px)", opacity: 0.15, pointerEvents: "none" }}
+          className="absolute rounded-full pointer-events-none" style={{ top: "-50px", right: "-50px", width: "150px", height: "150px", background: "var(--color-primary)", filter: "blur(80px)", opacity: 0.15 }}
         />
         <div
-          className="absolute rounded-full" style={{ bottom: "-50px", left: "-50px", width: "150px", height: "150px", background: "var(--color-secondary)", filter: "blur(80px)", opacity: 0.15, pointerEvents: "none" }}
+          className="absolute rounded-full pointer-events-none" style={{ bottom: "-50px", left: "-50px", width: "150px", height: "150px", background: "var(--color-secondary)", filter: "blur(80px)", opacity: 0.15 }}
         />
 
         {/* Mockup Header */}
@@ -179,7 +179,7 @@ function HeroProductMockup() {
             <span
               className="rounded-full" style={{ width: "10px", height: "10px", background: "var(--color-success)", boxShadow: "0 0 8px var(--color-success)" }}
             />
-            <span className="text-sm font-bold" style={{ color: "white" }}>
+            <span className="text-sm font-bold text-white">
               {view === "influencer" ? "Influencer Workspace" : "Brand Campaign Control"}
             </span>
           </div>
@@ -193,15 +193,15 @@ function HeroProductMockup() {
           <div className="flex flex-col gap-5">
             {/* Top Stats Row */}
             <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
-              <div className="bg-glass rounded-lg" style={{ border: "1px solid rgba(255, 255, 255, 0.04)", padding: "12px 16px" }}>
+              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
                 <span className="text-muted block text-xs">Wallet Balance</span>
-                <span className="text-xl font-extrabold" style={{ color: "white" }}>₹42,850</span>
+                <span className="text-xl font-extrabold text-white">₹42,850</span>
               </div>
-              <div className="bg-glass rounded-lg" style={{ border: "1px solid rgba(255, 255, 255, 0.04)", padding: "12px 16px" }}>
+              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
                 <span className="text-muted block text-xs">Trust Score</span>
                 <span className="text-xl font-extrabold text-emerald">98% <span className="text-xs font-normal">(Excellent)</span></span>
               </div>
-              <div className="bg-glass rounded-lg" style={{ border: "1px solid rgba(255, 255, 255, 0.04)", padding: "12px 16px" }}>
+              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
                 <span className="text-muted block text-xs">Gamification Tier</span>
                 <span className="text-xl font-extrabold text-amber">Gold IV 🏆</span>
               </div>
@@ -211,16 +211,16 @@ function HeroProductMockup() {
             <div className="p-4 bg-glass rounded-lg" style={{ border: "1px solid rgba(255, 255, 255, 0.06)" }}>
               <div className="flex justify-between mb-3">
                 <div>
-                  <h4 className="text-sm font-bold mb-1" style={{ color: "white" }}>Nike India: Air Max Launch</h4>
+                  <h4 className="text-sm font-bold mb-1 text-white">Nike India: Air Max Launch</h4>
                   <span className="text-xs text-secondary">Deliverable: 1 Instagram Reel + 1 Story</span>
                 </div>
-                <div className="inline-flex text-xs font-semibold bg-emerald-subtle text-emerald rounded-sm" style={{ padding: "4px 8px", height: "fit-content" }}>
+                <div className="inline-flex text-xs font-semibold bg-emerald-subtle text-emerald rounded-sm px-2-py-1" style={{ height: "fit-content" }}>
                   ₹25,000 in Escrow
                 </div>
               </div>
 
               {/* Status Stepper */}
-              <div className="flex items-center justify-between relative" style={{ marginTop: "20px" }}>
+              <div className="flex items-center justify-between relative mt-5">
                 {/* Stepper Background Line */}
                 <div className="absolute" style={{ left: "20px", right: "20px", height: "2px", background: "rgba(255, 255, 255, 0.1)", zIndex: 0 }} />
                 
@@ -228,27 +228,27 @@ function HeroProductMockup() {
                 <div className="absolute" style={{ left: "20px", width: "50%", height: "2px", background: "var(--color-primary)", zIndex: 0 }} />
 
                 {/* Step 1: Signed */}
-                <div className="flex flex-col items-center relative" style={{ gap: "6px", zIndex: 1 }}>
-                  <div className="flex items-center justify-center text-xs font-bold rounded-full" style={{ width: "24px", height: "24px", background: "var(--color-primary)", color: "white" }}>✓</div>
-                  <span className="font-semibold" style={{ fontSize: "10px", color: "white" }}>Signed</span>
+                <div className="flex flex-col items-center relative gap-1-5" style={{ zIndex: 1 }}>
+                  <div className="flex items-center justify-center text-xs font-bold rounded-full text-white" style={{ width: "24px", height: "24px", background: "var(--color-primary)" }}>✓</div>
+                  <span className="font-semibold text-2xs text-white">Signed</span>
                 </div>
 
                 {/* Step 2: Escrow Verified */}
-                <div className="flex flex-col items-center relative" style={{ gap: "6px", zIndex: 1 }}>
-                  <div className="flex items-center justify-center text-xs font-bold rounded-full" style={{ width: "24px", height: "24px", background: "var(--color-primary)", color: "white" }}>✓</div>
-                  <span className="font-semibold" style={{ fontSize: "10px", color: "white" }}>Escrowed</span>
+                <div className="flex flex-col items-center relative gap-1-5" style={{ zIndex: 1 }}>
+                  <div className="flex items-center justify-center text-xs font-bold rounded-full text-white" style={{ width: "24px", height: "24px", background: "var(--color-primary)" }}>✓</div>
+                  <span className="font-semibold text-2xs text-white">Escrowed</span>
                 </div>
 
                 {/* Step 3: Submission Under Review */}
-                <div className="flex flex-col items-center relative" style={{ gap: "6px", zIndex: 1 }}>
-                  <div className="flex items-center justify-center text-xs rounded-full bg-tertiary" style={{ width: "24px", height: "24px", border: "2px solid var(--color-primary)", color: "white", animation: "pulse 2s infinite" }}>●</div>
-                  <span className="font-semibold" style={{ fontSize: "10px", color: "white" }}>Reviewing</span>
+                <div className="flex flex-col items-center relative gap-1-5" style={{ zIndex: 1 }}>
+                  <div className="flex items-center justify-center text-xs rounded-full bg-tertiary text-white" style={{ width: "24px", height: "24px", border: "2px solid var(--color-primary)", animation: "pulse 2s infinite" }}>●</div>
+                  <span className="font-semibold text-2xs text-white">Reviewing</span>
                 </div>
 
                 {/* Step 4: Complete & Disbursed */}
-                <div className="flex flex-col items-center relative" style={{ gap: "6px", zIndex: 1 }}>
-                  <div className="flex items-center justify-center text-muted rounded-full bg-tertiary" style={{ width: "24px", height: "24px", border: "1px solid rgba(255, 255, 255, 0.2)", fontSize: "10px" }}>🔒</div>
-                  <span className="text-muted" style={{ fontSize: "10px" }}>Payout</span>
+                <div className="flex flex-col items-center relative gap-1-5" style={{ zIndex: 1 }}>
+                  <div className="flex items-center justify-center text-muted rounded-full bg-tertiary text-2xs" style={{ width: "24px", height: "24px", border: "1px solid rgba(255, 255, 255, 0.2)" }}>🔒</div>
+                  <span className="text-muted text-2xs">Payout</span>
                 </div>
               </div>
             </div>
@@ -258,15 +258,15 @@ function HeroProductMockup() {
           <div className="flex flex-col gap-5">
             {/* Top Stats Row */}
             <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
-              <div className="bg-glass rounded-lg" style={{ border: "1px solid rgba(255, 255, 255, 0.04)", padding: "12px 16px" }}>
+              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
                 <span className="text-muted block text-xs">Active Campaigns</span>
-                <span className="text-xl font-extrabold" style={{ color: "white" }}>3 Campaigns</span>
+                <span className="text-xl font-extrabold text-white">3 Campaigns</span>
               </div>
-              <div className="bg-glass rounded-lg" style={{ border: "1px solid rgba(255, 255, 255, 0.04)", padding: "12px 16px" }}>
+              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
                 <span className="text-muted block text-xs">Secured Escrow</span>
                 <span className="text-xl font-extrabold" style={{ color: "var(--color-accent-cyan)" }}>₹1,85,000</span>
               </div>
-              <div className="bg-glass rounded-lg" style={{ border: "1px solid rgba(255, 255, 255, 0.04)", padding: "12px 16px" }}>
+              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
                 <span className="text-muted block text-xs">ROI Index</span>
                 <span className="text-xl font-extrabold text-emerald">3.8x Profit</span>
               </div>
@@ -275,7 +275,7 @@ function HeroProductMockup() {
             {/* Campaign Submissions */}
             <div className="p-4 bg-glass rounded-lg" style={{ border: "1px solid rgba(255, 255, 255, 0.06)" }}>
               <div className="flex justify-between items-center mb-3">
-                <h4 className="text-sm font-bold" style={{ color: "white" }}>Submissions Awaiting Approval (1)</h4>
+                <h4 className="text-sm font-bold text-white">Submissions Awaiting Approval (1)</h4>
                 <span className="flex items-center gap-1 text-xs text-amber">
                   <span className="rounded-full" style={{ width: "6px", height: "6px", background: "var(--color-accent-amber)", animation: "pulse 1.5s infinite" }} />{" "}
                   48h Review Timer Running
@@ -283,21 +283,21 @@ function HeroProductMockup() {
               </div>
 
               {/* Creator Submission list item */}
-              <div className="flex items-center justify-between p-3 flex-wrap bg-glass rounded-md" style={{ border: "1px solid rgba(255, 255, 255, 0.04)", gap: "10px" }}>
-                <div className="flex items-center" style={{ gap: "10px" }}>
-                  <div className="flex items-center justify-center font-extrabold text-xs rounded-full" style={{ width: "32px", height: "32px", background: "var(--color-primary)", color: "white" }}>
+              <div className="flex items-center justify-between p-3 flex-wrap bg-glass rounded-md gap-2-5" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
+                <div className="flex items-center gap-2-5">
+                  <div className="flex items-center justify-center font-extrabold text-xs rounded-full text-white" style={{ width: "32px", height: "32px", background: "var(--color-primary)" }}>
                     AM
                   </div>
                   <div>
-                    <span className="text-sm font-semibold block" style={{ color: "white" }}>Ananya Mehta</span>
+                    <span className="text-sm font-semibold block text-white">Ananya Mehta</span>
                     <span className="text-secondary text-xs">Instagram post content ready for review</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button type="button" variant="secondary" className="text-xs rounded-sm px-3-py-1" style={{ background: "transparent", border: "1px solid rgba(255, 255, 255, 0.1)", color: "white" }}>
+                  <Button type="button" variant="secondary" className="text-xs rounded-sm px-3-py-1 bg-none text-white" style={{ border: "1px solid rgba(255, 255, 255, 0.1)" }}>
                     View Draft
                   </Button>
-                  <Button type="button" variant="primary" className="font-semibold border-none text-xs rounded-sm px-3-py-1" style={{ background: "var(--gradient-primary)", color: "white", boxShadow: "var(--shadow-glow-primary)" }}>
+                  <Button type="button" variant="primary" className="font-semibold border-none text-xs rounded-sm px-3-py-1 bg-gradient-primary text-white" style={{ boxShadow: "var(--shadow-glow-primary)" }}>
                     Approve
                   </Button>
                 </div>
@@ -326,21 +326,21 @@ export default function HomePage() {
       >
         {/* Hero Background — CSS background-image avoids Next/Image fill position issues */}
         <div
-          className="absolute" style={{ inset: 0, zIndex: 0, backgroundImage: "url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2574&auto=format&fit=crop')", backgroundSize: "cover", backgroundPosition: "center", opacity: 0.18, filter: "blur(4px)", transform: "scale(1.05)" }}
+          className="absolute inset-0" style={{ zIndex: 0, backgroundImage: "url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2574&auto=format&fit=crop')", backgroundSize: "cover", backgroundPosition: "center", opacity: 0.18, filter: "blur(4px)", transform: "scale(1.05)" }}
         />
         {/* Gradient Overlay */}
         <div
-          className="absolute" style={{ inset: 0, zIndex: 0, background:
+          className="absolute inset-0" style={{ zIndex: 0, background:
               "radial-gradient(circle at center, rgba(10, 10, 20, 0.6) 0%, var(--color-bg-primary) 95%)" }}
         />
 
         <div className="container relative" style={{ zIndex: 1 }}>
           <div
-            className="text-center max-w-900" style={{ margin: "0 auto" }}
+            className="text-center max-w-900 mx-auto"
           >
             {/* Badge — fully inline-styled for guaranteed rendering */}
             <div
-              className="inline-flex items-center gap-2 font-bold rounded-full text-xs uppercase mb-6" style={{ background: "rgba(99, 102, 241, 0.15)", border: "1px solid rgba(129, 140, 248, 0.5)", padding: "6px 20px", color: "#a5b4fc", letterSpacing: "1px" }}
+              className="inline-flex items-center gap-2 font-bold rounded-full text-xs uppercase mb-6 tracking-wider" style={{ background: "rgba(99, 102, 241, 0.15)", border: "1px solid rgba(129, 140, 248, 0.5)", padding: "6px 20px", color: "#a5b4fc" }}
             >
               🇮🇳 India-first creator collaboration workspace
             </div>
@@ -349,13 +349,7 @@ export default function HomePage() {
               className="mb-6 font-extrabold" style={{ fontSize: "clamp(40px, 6vw, 76px)", lineHeight: 1.06, letterSpacing: "-1px" }}
             >
               <span
-                style={{
-                  background: "linear-gradient(135deg, #818cf8 0%, #ec4899 55%, #06b6d4 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  display: "inline-block",
-                }}
+                className="inline-block" style={{ background: "linear-gradient(135deg, #818cf8 0%, #ec4899 55%, #06b6d4 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
               >
                 Decisional
               </span>
@@ -367,7 +361,7 @@ export default function HomePage() {
             </h1>
 
             <p
-              className="max-w-600" style={{ fontSize: "clamp(15px, 2vw, 19px)", color: "rgba(161, 161, 181, 0.9)", margin: "0 auto 40px", lineHeight: 1.7 }}
+              className="max-w-600 leading-relaxed" style={{ fontSize: "clamp(15px, 2vw, 19px)", color: "rgba(161, 161, 181, 0.9)", margin: "0 auto 40px" }}
             >
               Run influencer campaigns with verified profiles, signed
               deliverables, payment protection, content approvals, and dispute
@@ -380,13 +374,13 @@ export default function HomePage() {
             >
               <Link
                 href="/register?type=influencer"
-                className="inline-flex items-center justify-center gap-2 font-bold rounded-lg text-sm no-underline" style={{ padding: "14px 28px", background: "linear-gradient(135deg, #6366f1, #4f46e5)", color: "white", boxShadow: "0 4px 20px rgba(99, 102, 241, 0.4)", border: "1px solid rgba(129, 140, 248, 0.3)", transition: "transform 0.2s, box-shadow 0.2s" }}
+                className="inline-flex items-center justify-center gap-2 font-bold rounded-lg text-sm no-underline text-white" style={{ padding: "14px 28px", background: "linear-gradient(135deg, #6366f1, #4f46e5)", boxShadow: "0 4px 20px rgba(99, 102, 241, 0.4)", border: "1px solid rgba(129, 140, 248, 0.3)", transition: "transform 0.2s, box-shadow 0.2s" }}
               >
                 I&apos;m an Influencer
               </Link>
               <Link
                 href="/register?type=brand"
-                className="inline-flex items-center justify-center gap-2 font-bold rounded-lg text-sm no-underline" style={{ padding: "14px 28px", background: "rgba(255, 255, 255, 0.06)", color: "white", border: "1px solid rgba(255, 255, 255, 0.15)", backdropFilter: "blur(8px)", transition: "transform 0.2s, background 0.2s" }}
+                className="inline-flex items-center justify-center gap-2 font-bold rounded-lg text-sm no-underline text-white backdrop-blur" style={{ padding: "14px 28px", background: "rgba(255, 255, 255, 0.06)", border: "1px solid rgba(255, 255, 255, 0.15)", transition: "transform 0.2s, background 0.2s" }}
               >
                 I&apos;m a Brand
               </Link>
@@ -415,7 +409,7 @@ export default function HomePage() {
               {["🔒 Secure sessions", "💳 Protected payments", "📱 Installable PWA"].map((item) => (
                 <span
                   key={item}
-                  className="text-sm flex items-center" style={{ color: "rgba(107, 107, 128, 0.9)", gap: "6px" }}
+                  className="text-sm flex items-center gap-1-5" style={{ color: "rgba(107, 107, 128, 0.9)" }}
                 >
                   {item}
                 </span>
@@ -430,7 +424,7 @@ export default function HomePage() {
               className="animate-fade-in w-full text-center" style={{ marginTop: "48px", animationDelay: "1.1s" }}
             >
               <p
-                className="text-xs text-muted mb-4 font-semibold uppercase" style={{ letterSpacing: "1.5px" }}
+                className="text-xs text-muted mb-4 font-semibold uppercase tracking-wider"
               >
                 Trusted by India&apos;s fastest growing brands
               </p>
@@ -453,12 +447,12 @@ export default function HomePage() {
         <Button
           type="button"
           variant="ghost"
-          className="hide-mobile absolute flex flex-col items-center gap-2 cursor-pointer border-none p-0" style={{ background: "none", bottom: "32px", left: "50%", transform: "translateX(-50%)", animation: "float 3s ease-in-out infinite", opacity: 0.5 }}
+          className="hide-mobile absolute flex flex-col items-center gap-2 cursor-pointer border-none p-0 bg-none" style={{ bottom: "32px", left: "50%", transform: "translateX(-50%)", animation: "float 3s ease-in-out infinite", opacity: 0.5 }}
           onClick={() => {
             document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
           }}
         >
-          <span className="text-muted font-semibold text-xs uppercase" style={{ letterSpacing: "1.5px" }}>Explore</span>
+          <span className="text-muted font-semibold text-xs uppercase tracking-wider">Explore</span>
           <svg
             width="20"
             height="20"
@@ -499,12 +493,12 @@ export default function HomePage() {
                 <div className="card hover-lift h-full">
                   <div className="feature-icon">{getFeatureIcon(feature.icon)}</div>
                   <h3
-                    className="text-lg font-bold" style={{ marginBottom: "10px", letterSpacing: "-0.01em" }}
+                    className="text-lg font-bold mb-2" style={{ letterSpacing: "-0.01em" }}
                   >
                     {feature.title}
                   </h3>
                   <p
-                    className="text-secondary text-sm" style={{ lineHeight: 1.7 }}
+                    className="text-secondary text-sm leading-relaxed"
                   >
                     {feature.description}
                   </p>
@@ -536,13 +530,13 @@ export default function HomePage() {
           {/* Tab Switcher */}
           <RevealOnScroll delay={0.15}>
             <div
-              className="flex justify-center gap-1 bg-tertiary p-1 mb-10" style={{ borderRadius: "var(--radius-full)", maxWidth: "320px", margin: "0 auto 48px" }}
+              className="flex justify-center gap-1 bg-tertiary p-1 mb-10 rounded-full" style={{ maxWidth: "320px", margin: "0 auto 48px" }}
             >
               <Button
                 type="button"
                 variant="ghost"
                 onClick={() => setActiveTab("influencer")}
-                className="flex-1 text-sm" style={{ background:
+                className="flex-1 text-sm rounded-full" style={{ background:
                     activeTab === "influencer"
                       ? "var(--gradient-primary)"
                       : "transparent", color:
@@ -551,7 +545,7 @@ export default function HomePage() {
                       : "var(--color-text-secondary)", boxShadow:
                     activeTab === "influencer"
                       ? "var(--shadow-glow-primary)"
-                      : "none", borderRadius: "var(--radius-full)", padding: "10px 20px" }}
+                      : "none", padding: "10px 20px" }}
               >
                 For Influencers
               </Button>
@@ -559,7 +553,7 @@ export default function HomePage() {
                 type="button"
                 variant="ghost"
                 onClick={() => setActiveTab("brand")}
-                className="flex-1 text-sm" style={{ background:
+                className="flex-1 text-sm rounded-full" style={{ background:
                     activeTab === "brand"
                       ? "var(--gradient-primary)"
                       : "transparent", color:
@@ -568,7 +562,7 @@ export default function HomePage() {
                       : "var(--color-text-secondary)", boxShadow:
                     activeTab === "brand"
                       ? "var(--shadow-glow-primary)"
-                      : "none", borderRadius: "var(--radius-full)", padding: "10px 20px" }}
+                      : "none", padding: "10px 20px" }}
               >
                 For Brands
               </Button>
@@ -577,7 +571,7 @@ export default function HomePage() {
 
           {/* Steps */}
           <div
-            className="flex flex-col gap-4" style={{ maxWidth: "700px", margin: "0 auto" }}
+            className="flex flex-col gap-4 mx-auto" style={{ maxWidth: "700px" }}
           >
             {homeSteps.map((step, index) => {
               const currentStep =
@@ -591,13 +585,13 @@ export default function HomePage() {
                     className="card hover-lift step-card flex items-center gap-5"
                   >
                     <div
-                      className="flex items-center justify-center font-extrabold flex-shrink-0" style={{ width: "56px", height: "56px", background: "var(--gradient-primary)", borderRadius: "var(--radius-full)", fontSize: "22px", boxShadow: "var(--shadow-glow-primary)" }}
+                      className="flex items-center justify-center font-extrabold flex-shrink-0 bg-gradient-primary rounded-full text-2xl" style={{ width: "56px", height: "56px", boxShadow: "var(--shadow-glow-primary)" }}
                     >
                       {currentStep.step}
                     </div>
                     <div className="flex-1">
                       <h3
-                        className="font-bold mb-1" style={{ fontSize: "17px" }}
+                        className="font-bold mb-1 text-base"
                       >
                         {currentStep.title}
                       </h3>
@@ -662,7 +656,7 @@ export default function HomePage() {
                   {renderStars(testimonial.rating)}
 
                   <p
-                    className="text-secondary text-sm" style={{ lineHeight: 1.7, fontStyle: "italic" }}
+                    className="text-secondary text-sm leading-relaxed" style={{ fontStyle: "italic" }}
                   >
                     &quot;{testimonial.quote}&quot;
                   </p>
@@ -691,8 +685,7 @@ export default function HomePage() {
           </RevealOnScroll>
 
           <div
-            className="grid-2"
-            style={{ maxWidth: "800px", margin: "0 auto" }}
+            className="grid-2 max-w-800 mx-auto"
           >
             <RevealOnScroll delay={0.15}>
               <div
@@ -700,7 +693,7 @@ export default function HomePage() {
               >
                 <div className="flex-1">
                   <h3
-                    className="font-extrabold mb-2" style={{ fontSize: "22px" }}
+                    className="font-extrabold mb-2 text-2xl"
                   >
                     For Influencers
                   </h3>
@@ -715,7 +708,7 @@ export default function HomePage() {
                     to join & apply
                   </p>
                   <ul
-                    className="text-left mb-6" style={{ listStyle: "none" }}
+                    className="text-left mb-6 list-none"
                   >
                     {[
                       "Profile, portfolio, and verification",
@@ -726,7 +719,7 @@ export default function HomePage() {
                     ].map((item) => (
                       <li
                         key={item}
-                        className="border-b-card text-secondary text-sm flex items-center" style={{ padding: "12px 0", gap: "10px" }}
+                        className="border-b-card text-secondary text-sm flex items-center gap-2-5" style={{ padding: "12px 0" }}
                       >
                         <svg
                           width="16"
@@ -766,7 +759,7 @@ export default function HomePage() {
                     Popular for teams
                   </div>
                   <h3
-                    className="font-extrabold mb-2" style={{ fontSize: "22px" }}
+                    className="font-extrabold mb-2 text-2xl"
                   >
                     For Brands
                   </h3>
@@ -781,7 +774,7 @@ export default function HomePage() {
                     of campaign budget
                   </p>
                   <ul
-                    className="text-left mb-6" style={{ listStyle: "none" }}
+                    className="text-left mb-6 list-none"
                   >
                     {[
                       "Verified creator discovery",
@@ -792,7 +785,7 @@ export default function HomePage() {
                     ].map((item) => (
                       <li
                         key={item}
-                        className="border-b-card text-secondary text-sm flex items-center" style={{ padding: "12px 0", gap: "10px" }}
+                        className="border-b-card text-secondary text-sm flex items-center gap-2-5" style={{ padding: "12px 0" }}
                       >
                         <svg
                           width="16"
@@ -827,11 +820,11 @@ export default function HomePage() {
       {/* ==================== CTA ==================== */}
       <RevealOnScroll>
         <section
-          className="section text-center relative overflow-hidden" style={{ background: "var(--gradient-primary)" }}
+          className="section text-center relative overflow-hidden bg-gradient-primary"
         >
           {/* Background pattern */}
           <div
-            className="absolute" style={{ inset: 0, backgroundImage:
+            className="absolute inset-0" style={{ backgroundImage:
                 "radial-gradient(circle at 20% 80%, rgba(255,255,255,0.06) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04) 0%, transparent 50%)" }}
           />
 
@@ -839,12 +832,12 @@ export default function HomePage() {
             className="container relative" style={{ zIndex: 1 }}
           >
             <h2
-              className="mb-4 font-extrabold" style={{ fontSize: "clamp(28px, 4vw, 40px)", letterSpacing: 0 }}
+              className="mb-4 font-extrabold tracking-normal" style={{ fontSize: "clamp(28px, 4vw, 40px)" }}
             >
               Ready to Get Started?
             </h2>
             <p
-              className="mb-8" style={{ fontSize: "clamp(15px, 2vw, 18px)", opacity: 0.9, maxWidth: "500px", margin: "0 auto 32px", lineHeight: 1.7 }}
+              className="mb-8 leading-relaxed" style={{ fontSize: "clamp(15px, 2vw, 18px)", opacity: 0.9, maxWidth: "500px", margin: "0 auto 32px" }}
             >
               Create a free account, install the PWA, and manage campaigns from
               web, iOS home screen, or Android home screen.

@@ -259,11 +259,11 @@ export default function PayoutsAdminPage() {
                     </td>
                     <td className="p-4">
                       <span
-                        className="inline-flex text-xs font-extrabold" style={{ border: "1px solid", borderRadius: "999px", padding: "4px 9px", ...statusStyle }}
+                        className="inline-flex text-xs font-extrabold rounded-full" style={{ border: "1px solid", padding: "4px 9px", ...statusStyle }}
                       >
                         {withdrawal.status}
                       </span>
-                      <div className="text-muted text-xs" style={{ marginTop: "6px" }}>
+                      <div className="text-muted text-xs mt-1">
                         Risk {withdrawal.riskScore}
                         {withdrawal.isManualReview ? " / manual" : ""}
                       </div>
@@ -322,12 +322,7 @@ export default function PayoutsAdminPage() {
         </div>
 
         <div
-          className="card"
-          style={{
-            padding: "12px 16px",
-            minWidth: "220px",
-            borderColor: "rgba(99, 102, 241, 0.22)",
-          }}
+          className="card px-4-py-3" style={{ minWidth: "220px", borderColor: "rgba(99, 102, 241, 0.22)" }}
         >
           <div className="text-muted text-xs">
             Current view
@@ -338,7 +333,7 @@ export default function PayoutsAdminPage() {
         </div>
       </div>
 
-      <div className="admin-filter-row" style={{ marginBottom: "18px" }}>
+      <div className="admin-filter-row mb-4">
         {filters.map((status) => (
           <Button
             key={status}
@@ -377,7 +372,7 @@ export default function PayoutsAdminPage() {
             <h2 className="text-xl mb-2 font-extrabold">
               {draft.action === "APPROVE" ? "Approve payout" : "Reject payout"}
             </h2>
-            <p className="text-secondary text-sm" style={{ marginBottom: "18px" }}>
+            <p className="text-secondary text-sm mb-4">
               {formatCurrency(draft.withdrawal.amount)} for{" "}
               {getUserName(draft.withdrawal.wallet.user)}
             </p>
@@ -402,16 +397,16 @@ export default function PayoutsAdminPage() {
                     setDraft({ ...draft, note: event.target.value })
                   }
                   placeholder="Explain why this payout is rejected"
-                  style={{ resize: "vertical", minHeight: "104px", marginBottom: "18px" }}
+                  className="resize-y mb-4" style={{ minHeight: "104px" }}
                 />
               </>
             ) : (
-              <div className="text-sm text-secondary" style={{ marginBottom: "18px" }}>
+              <div className="text-sm text-secondary mb-4">
                 This will automatically trigger the Razorpay API to execute the transfer to the user&apos;s bank account.
               </div>
             )}
 
-            <div className="flex justify-end flex-wrap" style={{ gap: "10px" }}>
+            <div className="flex justify-end flex-wrap gap-2-5">
               <Button
                 type="button"
                 variant="secondary"

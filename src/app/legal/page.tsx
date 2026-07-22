@@ -50,7 +50,7 @@ export default function LegalPage() {
                 <Link
                   key={page.href}
                   href={page.href}
-                  className="card grid border-card text-inherit no-underline" style={{ padding: "22px", background: "rgba(255,255,255,0.02)", gap: "10px" }}
+                  className="card grid border-card text-inherit no-underline gap-2-5" style={{ padding: "22px", background: "rgba(255,255,255,0.02)" }}
                 >
                   <h2 className="text-lg text-primary" style={{ fontWeight: 850 }}>
                     {page.title}

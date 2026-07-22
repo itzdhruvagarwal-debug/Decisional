@@ -68,7 +68,7 @@ export default function AboutPage() {
                   <h3 className="mb-4 text-3xl" style={{ lineHeight: 1.2 }}>
                     Brief. Escrow. Verify. Release.
                   </h3>
-                  <p className="text-secondary" style={{ lineHeight: 1.7 }}>
+                  <p className="text-secondary leading-relaxed">
                     Every deal has a visible trail: who agreed, what was promised, when work was submitted, how it was approved, and how payment moved.
                   </p>
                 </div>
@@ -86,10 +86,10 @@ export default function AboutPage() {
                   <div className="text-xs font-extrabold mb-3 text-primary-light uppercase">
                     {item.label}
                   </div>
-                  <h3 className="text-xl font-extrabold" style={{ marginBottom: "10px" }}>
+                  <h3 className="text-xl font-extrabold mb-2">
                     {item.title}
                   </h3>
-                  <p className="text-secondary" style={{ lineHeight: 1.7 }}>
+                  <p className="text-secondary leading-relaxed">
                     {item.description}
                   </p>
                 </article>

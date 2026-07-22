@@ -557,13 +557,13 @@ export default function DisputeDetailPage({
           Dispute #{dispute.id.slice(-6)}
         </h1>
         <span
-          className="badge text-xs font-semibold rounded-lg" style={{ background: getStatusColor(dispute.status), color: "white", padding: "4px 12px" }}
+          className="badge text-xs font-semibold rounded-lg text-white px-2-py-1" style={{ background: getStatusColor(dispute.status) }}
         >
           {dispute.status.replaceAll("_", " ")}
         </span>
         {dispute.tier > 1 && (
           <span
-            className="badge badge-warning text-xs rounded-lg" style={{ padding: "4px 12px" }}
+            className="badge badge-warning text-xs rounded-lg px-2-py-1"
           >
             Tier {dispute.tier}
           </span>
@@ -571,7 +571,7 @@ export default function DisputeDetailPage({
       </header>
 
       <main
-        className="p-6 w-full" style={{ maxWidth: "1200px", margin: "0 auto" }}
+        className="p-6 w-full mx-auto" style={{ maxWidth: "1200px" }}
       >
         {/* AI Mediator Analysis Card */}
         {analysis && (
@@ -609,7 +609,7 @@ export default function DisputeDetailPage({
                 }
                 return (
                   <span
-                    className="font-bold rounded-lg text-xs" style={{ padding: "4px 12px", background: confBg, color: confColor }}
+                    className="font-bold rounded-lg text-xs px-2-py-1" style={{ background: confBg, color: confColor }}
                   >
                     {analysis.confidence} CONFIDENCE
                   </span>
@@ -734,12 +734,12 @@ export default function DisputeDetailPage({
                   FINDINGS
                 </div>
                 <div
-                  className="flex flex-col" style={{ gap: "6px" }}
+                  className="flex flex-col gap-1-5"
                 >
                   {analysis.findings.map((f, idx) => (
                     <div
                       key={f.check + "_" + idx}
-                      className="flex items-center gap-2 bg-tertiary" style={{ padding: "8px 12px", borderRadius: "6px", borderLeft: `3px solid ${getFindingColor(f.result)}` }}
+                      className="flex items-center gap-2 bg-tertiary px-3-py-2 rounded-md" style={{ borderLeft: `3px solid ${getFindingColor(f.result)}` }}
                     >
                       <span>{getFindingIcon(f.result)}</span>
                       <div className="flex-1">
@@ -766,7 +766,7 @@ export default function DisputeDetailPage({
             {/* Action Buttons */}
             {canTakeAction && dispute.status !== "RESOLVED" && (
               <div
-                className="flex gap-3 flex-wrap border-top" style={{ paddingTop: "16px" }}
+                className="flex gap-3 flex-wrap border-top pt-4"
               >
                 <Button
                   variant="primary"
@@ -816,7 +816,7 @@ export default function DisputeDetailPage({
                 >
                   Description
                 </div>
-                <p className="text-sm" style={{ lineHeight: "1.5" }}>
+                <p className="text-sm leading-normal">
                   {dispute.description}
                 </p>
               </div>

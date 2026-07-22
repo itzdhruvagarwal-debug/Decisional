@@ -47,7 +47,7 @@ function DealHistoryList({
       {deals.map((d) => (
         <div
           key={d.id}
-          className="flex justify-between items-center bg-tertiary rounded-md border-card" style={{ padding: "10px 12px" }}
+          className="flex justify-between items-center bg-tertiary rounded-md border-card px-3-py-2-5"
         >
           <div>
             <div className="text-sm font-semibold">{d.campaign?.title || "Campaign"}</div>

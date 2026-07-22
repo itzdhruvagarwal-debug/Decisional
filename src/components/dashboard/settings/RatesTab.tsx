@@ -60,7 +60,7 @@ export default function RatesTab({ profile, setProfile }: Readonly<RatesTabProps
                 />
             </div>
 
-            <h4 className="text-sm font-bold mb-3 border-top" style={{ paddingTop: "16px" }}>
+            <h4 className="text-sm font-bold mb-3 border-top pt-4">
                 Instagram Collaboration Rates
             </h4>
             <div
@@ -96,7 +96,7 @@ export default function RatesTab({ profile, setProfile }: Readonly<RatesTabProps
                 />
             </div>
 
-            <h4 className="text-sm font-bold mb-3 border-top" style={{ paddingTop: "16px" }}>
+            <h4 className="text-sm font-bold mb-3 border-top pt-4">
                 YouTube Collaboration Rates
             </h4>
             <div

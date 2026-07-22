@@ -102,15 +102,15 @@ export default async function AdminUsersPage({
             Search, review, ban, and reactivate platform accounts.
           </p>
         </div>
-        <div className="card" style={{ padding: "12px 16px", minWidth: "180px" }}>
+        <div className="card px-4-py-3" style={{ minWidth: "180px" }}>
           <div className="text-muted text-xs">
             Matching users
           </div>
-          <div className="font-extrabold" style={{ fontSize: "22px" }}>{total}</div>
+          <div className="font-extrabold text-2xl">{total}</div>
         </div>
       </div>
 
-      <form className="card admin-filter-row" style={{ padding: "14px", marginBottom: "18px" }}>
+      <form className="card admin-filter-row p-3.5 mb-4">
         <Input
           name="search"
           placeholder="Search name, email, or phone"
@@ -181,7 +181,7 @@ export default async function AdminUsersPage({
                       <td className="p-card">
                         <div className="flex items-center gap-3">
                           <div
-                            className="flex items-center justify-center relative overflow-hidden rounded-full font-extrabold" style={{ width: "42px", height: "42px", background: "var(--gradient-primary)", color: "white" }}
+                            className="flex items-center justify-center relative overflow-hidden rounded-full font-extrabold bg-gradient-primary text-white" style={{ width: "42px", height: "42px" }}
                           >
                             {avatar ? (
                               <Image
@@ -208,14 +208,14 @@ export default async function AdminUsersPage({
                       </td>
                       <td className="p-card">
                         <span
-                          className="badge capitalize" style={{ background: statusColor(user.status), color: "white" }}
+                          className="badge capitalize text-white" style={{ background: statusColor(user.status) }}
                         >
                           {user.status.toLowerCase().replaceAll("_", " ")}
                         </span>
                       </td>
                       <td className="p-card">
                         <span
-                          className="badge capitalize" style={{ background: taxStatusColor(user), color: "white" }}
+                          className="badge capitalize text-white" style={{ background: taxStatusColor(user) }}
                         >
                           {taxStatusLabel(user)}
                         </span>
@@ -241,7 +241,7 @@ export default async function AdminUsersPage({
               <input type="hidden" name="userId" value={user.id} />
               <Select
                 name="badgeId"
-                className="text-xs" style={{ padding: "2px 6px", width: "140px", height: "30px" }}
+                className="text-xs px-2-py-05" style={{ width: "140px", height: "30px" }}
                 defaultValue=""
                 required
               >

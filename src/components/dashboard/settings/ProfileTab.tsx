@@ -214,7 +214,7 @@ export default function ProfileTab({
         <div className="grid-2">
             <div className="card">
                 <div
-                    className="mb-4 rounded-2xl text-xs" style={{ display: "inline-block", padding: "4px 12px", background: getUserTypeColor(user.userType), color: "white", fontWeight: "800", letterSpacing: "1px" }}
+                    className="mb-4 rounded-2xl text-xs inline-block px-2-py-1 text-white tracking-wider" style={{ background: getUserTypeColor(user.userType), fontWeight: "800" }}
                 >
                     {user.userType} PROFILE
                 </div>
@@ -226,7 +226,7 @@ export default function ProfileTab({
                         type="button"
                         onClick={() => profileImageInputRef.current?.click()}
                         aria-label="Change profile image"
-                        className="relative cursor-pointer border-none p-0" style={{ background: "none" }}
+                        className="relative cursor-pointer border-none p-0 bg-none"
                     >
                         <div
                             className="overflow-hidden flex items-center justify-center relative rounded-full" style={{ width: "100px", height: "100px", border: "4px solid var(--color-bg-tertiary)", background: "#f0f0f0" }}
@@ -247,7 +247,7 @@ export default function ProfileTab({
 
                             {isUploading && (
                                 <div
-                                    className="absolute flex items-center justify-center" style={{ inset: 0, background: "rgba(0,0,0,0.5)" }}
+                                    className="absolute flex items-center justify-center inset-0" style={{ background: "rgba(0,0,0,0.5)" }}
                                 >
                                     <span
                                         className="loading"
@@ -257,7 +257,7 @@ export default function ProfileTab({
                             )}
                         </div>
                         <div
-                            className="absolute flex items-center justify-center text-sm rounded-full" style={{ bottom: "0", right: "0", background: "var(--color-primary)", color: "white", width: "32px", height: "32px", border: "2px solid var(--color-bg-primary)" }}
+                            className="absolute flex items-center justify-center text-sm rounded-full text-white" style={{ bottom: "0", right: "0", background: "var(--color-primary)", width: "32px", height: "32px", border: "2px solid var(--color-bg-primary)" }}
                         >
                             📸
                         </div>
@@ -282,19 +282,19 @@ export default function ProfileTab({
                 >
                     <div>
                         <div
-                            className="text-xs text-secondary uppercase" style={{ letterSpacing: "1px" }}
+                            className="text-xs text-secondary uppercase tracking-wider"
                         >
                             Your Referral Code
                         </div>
                         <div
-                            className="text-xl font-extrabold" style={{ fontFamily: "monospace" }}
+                            className="text-xl font-extrabold font-mono"
                         >
                             {referralCode || "..."}
                         </div>
                     </div>
                     <div className="text-right">
                         <div
-                            className="text-xs text-secondary uppercase" style={{ letterSpacing: "1px" }}
+                            className="text-xs text-secondary uppercase tracking-wider"
                         >
                             Badges Earned
                         </div>
@@ -337,7 +337,7 @@ export default function ProfileTab({
                         onChange={(e) =>
                             setProfile({ ...profile, bio: e.target.value })
                         }
-                        style={{ resize: "vertical" }}
+                        className="resize-y"
                         fullWidth
                     />
                     <p
@@ -492,11 +492,11 @@ export default function ProfileTab({
                                     type="button"
                                     variant="ghost"
                                     onClick={() => toggleCategory(category)}
-                                    className="badge cursor-pointer border-none" style={{ background: profile.categories.includes(category)
+                                    className="badge cursor-pointer border-none px-3-py-2" style={{ background: profile.categories.includes(category)
                                             ? "var(--color-primary)"
                                             : "var(--color-bg-tertiary)", color: profile.categories.includes(category)
                                             ? "white"
-                                            : "var(--color-text-secondary)", padding: "8px 12px" }}
+                                            : "var(--color-text-secondary)" }}
                                 >
                                     {category}
                                 </Button>
@@ -548,11 +548,11 @@ export default function ProfileTab({
                                     type="button"
                                     variant="ghost"
                                     onClick={() => toggleLanguage(language)}
-                                    className="badge cursor-pointer border-none" style={{ background: profile.languages.includes(language)
+                                    className="badge cursor-pointer border-none px-3-py-2" style={{ background: profile.languages.includes(language)
                                             ? "var(--color-primary)"
                                             : "var(--color-bg-tertiary)", color: profile.languages.includes(language)
                                             ? "white"
-                                            : "var(--color-text-secondary)", padding: "8px 12px" }}
+                                            : "var(--color-text-secondary)" }}
                                 >
                                     {language}
                                 </Button>

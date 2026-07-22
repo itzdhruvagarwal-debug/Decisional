@@ -591,7 +591,7 @@ function ConversationsSidebar({ state }: ConversationsSidebarProps) {
       >
         <h1 className="text-xl font-extrabold">Messages</h1>
       </div>
-      <div className="flex-1" style={{ overflowY: "auto" }}>
+      <div className="flex-1 overflow-y-auto">
         {(() => {
           if (loadingConversations) {
             return (
@@ -629,7 +629,7 @@ function ConversationsSidebar({ state }: ConversationsSidebarProps) {
               }}
             >
               <div
-                className="flex items-center justify-center font-bold flex-shrink-0" style={{ width: "48px", height: "48px", background: "var(--gradient-card)", borderRadius: "var(--radius-full)", color: "white" }}
+                className="flex items-center justify-center font-bold flex-shrink-0 rounded-full text-white" style={{ width: "48px", height: "48px", background: "var(--gradient-card)" }}
               >
                 {conv.avatar ? (
                   <Image
@@ -673,7 +673,7 @@ function ConversationsSidebar({ state }: ConversationsSidebarProps) {
                   </span>
                   {conv.unread > 0 && (
                     <span
-                      className="font-bold" style={{ background: "var(--color-primary)", color: "white", fontSize: "10px", borderRadius: "var(--radius-full)", padding: "2px 6px" }}
+                      className="font-bold text-white text-2xs rounded-full px-2-py-05" style={{ background: "var(--color-primary)" }}
                     >
                       {conv.unread}
                     </span>
@@ -707,7 +707,7 @@ function ChatHeader({ state }: ChatPanelProps) {
 
   return (
     <div
-      className="border-b-card flex items-center gap-3 px-6-py-4" style={{ background: "rgba(18, 18, 31, 0.8)", backdropFilter: "blur(20px)" }}
+      className="border-b-card flex items-center gap-3 px-6-py-4 backdrop-blur-lg" style={{ background: "rgba(18, 18, 31, 0.8)" }}
     >
       <Button
         variant="ghost"
@@ -719,7 +719,7 @@ function ChatHeader({ state }: ChatPanelProps) {
         ←
       </Button>
       <div
-        className="flex items-center justify-center font-bold" style={{ width: "40px", height: "40px", background: "var(--gradient-card)", borderRadius: "var(--radius-full)", color: "white" }}
+        className="flex items-center justify-center font-bold rounded-full text-white" style={{ width: "40px", height: "40px", background: "var(--gradient-card)" }}
       >
         {selectedChat.avatar ? (
           <Image
@@ -776,7 +776,7 @@ function MessageList({ state }: ChatPanelProps) {
       aria-label="Chat messages"
       aria-live="polite"
       aria-relevant="additions"
-      className="flex-1 p-6 flex flex-col gap-4 bg-tertiary" style={{ overflowY: "auto" }}
+      className="flex-1 p-6 flex flex-col gap-4 bg-tertiary overflow-y-auto"
     >
       {loadingMessages ? (
         <div className="text-center p-5">
@@ -789,24 +789,15 @@ function MessageList({ state }: ChatPanelProps) {
             className="flex" style={{ justifyContent: msg.isMe ? "flex-end" : "flex-start" }}
           >
             <div
-              style={{
-                maxWidth: "75%",
-                padding: "12px 16px",
-                borderRadius: msg.isMe
+              className="px-4-py-3" style={{ maxWidth: "75%", borderRadius: msg.isMe
                   ? "16px 16px 4px 16px"
-                  : "16px 16px 16px 4px",
-                background: msg.isMe
+                  : "16px 16px 16px 4px", background: msg.isMe
                   ? "var(--color-primary)"
-                  : "var(--color-bg-secondary)",
-                color: msg.isMe
+                  : "var(--color-bg-secondary)", color: msg.isMe
                   ? "white"
-                  : "var(--color-text-primary)",
-                boxShadow: "var(--shadow-sm)",
-                border: msg.isMe
+                  : "var(--color-text-primary)", boxShadow: "var(--shadow-sm)", border: msg.isMe
                   ? "none"
-                  : "1px solid var(--color-border)",
-                opacity: msg.isBlocked ? 0.9 : 1,
-              }}
+                  : "1px solid var(--color-border)", opacity: msg.isBlocked ? 0.9 : 1 }}
             >
               {msg.isBlocked ? (
                 <div
@@ -823,7 +814,7 @@ function MessageList({ state }: ChatPanelProps) {
                     {msg.content}
                   </p>
                   <div
-                    className="text-center" style={{ fontSize: "10px", color: msg.isMe
+                    className="text-center text-2xs" style={{ color: msg.isMe
                         ? "rgba(255,255,255,0.7)"
                         : "var(--color-text-muted)" }}
                   >
@@ -837,7 +828,7 @@ function MessageList({ state }: ChatPanelProps) {
                 </p>
               )}
               <div
-                className="mt-1 text-right" style={{ fontSize: "10px", color: msg.isMe
+                className="mt-1 text-right text-2xs" style={{ color: msg.isMe
                     ? "rgba(255,255,255,0.7)"
                     : "var(--color-text-muted)" }}
               >
@@ -851,7 +842,7 @@ function MessageList({ state }: ChatPanelProps) {
       {isPeerTyping && (
         <div className="flex justify-start">
           <div
-            className="text-secondary text-sm rounded-xl bg-secondary border-card" style={{ padding: "10px 14px", boxShadow: "var(--shadow-sm)" }}
+            className="text-secondary text-sm rounded-xl bg-secondary border-card px-3-py-2-5" style={{ boxShadow: "var(--shadow-sm)" }}
           >
             Typing...
           </div>
@@ -878,7 +869,7 @@ function ChatInputArea({ state }: ChatPanelProps) {
     >
       {isChatUserBlocked ? (
         <div
-          className="font-semibold text-sm text-rose px-4-py-2" style={{ background: "rgba(239, 68, 68, 0.1)", borderRadius: "6px", border: "1px solid rgba(239, 68, 68, 0.2)" }}
+          className="font-semibold text-sm text-rose px-4-py-2 bg-rose-subtle rounded-md" style={{ border: "1px solid rgba(239, 68, 68, 0.2)" }}
         >
           🚫 You cannot message this user because a block relationship exists.
         </div>

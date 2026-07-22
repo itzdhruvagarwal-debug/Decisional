@@ -82,7 +82,7 @@ export default function DeleteAccountPanel({
                 ⚠️ Danger Zone: Delete Account
             </h3>
             <p
-                className="text-sm text-secondary mb-5" style={{ lineHeight: "1.5" }}
+                className="text-sm text-secondary mb-5 leading-normal"
             >
                 Permanently delete your account. This action is irreversible. All your personal data will be anonymized in compliance with DPDP Act 2023. Financial transactions and tax records will be retained for audit compliance.
             </p>
@@ -91,7 +91,7 @@ export default function DeleteAccountPanel({
                 <div
                     role="alert"
                     aria-live="assertive"
-                    className="p-3 mb-4 rounded-sm text-rose" style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
+                    className="p-3 mb-4 rounded-sm text-rose bg-rose-subtle" style={{ border: "1px solid rgba(239, 68, 68, 0.2)" }}
                 >
                     {error}
                 </div>

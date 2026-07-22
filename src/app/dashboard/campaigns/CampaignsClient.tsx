@@ -256,7 +256,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
             </p>
 
             <div
-              className="campaign-card-tags flex flex-wrap" style={{ gap: "6px", margin: "10px 0 14px" }}
+              className="campaign-card-tags flex flex-wrap gap-1-5" style={{ margin: "10px 0 14px" }}
             >
               {campaign.deliverables.slice(0, 2).map((item, index) => (
                 <span key={`${campaign.id}-del-${index}`} className="badge badge-primary">
@@ -271,7 +271,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
             </div>
 
             <div
-              className="campaign-card-metrics grid gap-2" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: "14px" }}
+              className="campaign-card-metrics grid gap-2 mb-3" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
             >
               <div>
                 <div className="text-xs text-muted">
@@ -302,7 +302,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
             </div>
 
             <div
-              className="campaign-card-footer flex items-center justify-between" style={{ gap: "10px" }}
+              className="campaign-card-footer flex items-center justify-between gap-2-5"
             >
               <span className="text-xs text-secondary">
                 Post by {new Date(campaign.postingDeadline).toLocaleDateString("en-IN")}
@@ -337,7 +337,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
         </div>
 
         <div
-          className="flex gap-3 flex-wrap" style={{ marginTop: "20px" }}
+          className="flex gap-3 flex-wrap mt-5"
         >
           <Input
             type="text"

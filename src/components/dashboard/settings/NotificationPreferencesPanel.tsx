@@ -40,7 +40,7 @@ export default function NotificationPreferencesPanel({
   onSave,
 }: Readonly<NotificationPreferencesPanelProps>) {
   return (
-    <div className="card" style={{ maxWidth: "800px" }}>
+    <div className="card max-w-800">
       <h3
         className="text-xl font-bold mb-6"
       >
@@ -133,7 +133,7 @@ function Toggle({
   return (
     <label
       aria-label={label}
-      className="relative" style={{ display: "inline-block", width: "44px", height: "24px", flex: "0 0 auto" }}
+      className="relative inline-block" style={{ width: "44px", height: "24px", flex: "0 0 auto" }}
     >
       <input
         type="checkbox"

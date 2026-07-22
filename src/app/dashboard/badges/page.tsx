@@ -73,7 +73,7 @@ export default function BadgesPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+      <div className="mx-auto" style={{ maxWidth: "1000px" }}>
         {/* Header */}
         <div className="text-center mb-8">
           <h1
@@ -116,14 +116,14 @@ export default function BadgesPage() {
 
         {/* Categories Filter */}
         <div
-          className="scrollable-tabs flex mb-4" style={{ gap: "10px", paddingBottom: "8px" }}
+          className="scrollable-tabs flex mb-4 gap-2-5" style={{ paddingBottom: "8px" }}
         >
           {categories.map((cat) => (
             <Button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               variant={activeCategory === cat ? "primary" : "ghost"}
-              className="font-semibold text-sm" style={{ padding: "8px 20px", border: activeCategory === cat ? "none" : "1px solid var(--color-border)", boxShadow:
+              className="font-semibold text-sm px-4-py-2" style={{ border: activeCategory === cat ? "none" : "1px solid var(--color-border)", boxShadow:
                   activeCategory === cat
                     ? "0 4px 12px rgba(99, 102, 241, 0.3)"
                     : "none" }}
@@ -135,14 +135,14 @@ export default function BadgesPage() {
 
         {/* Rarity Filter */}
         <div
-          className="scrollable-tabs flex mb-8" style={{ gap: "10px", paddingBottom: "8px" }}
+          className="scrollable-tabs flex mb-8 gap-2-5" style={{ paddingBottom: "8px" }}
         >
           {rarities.map((rarity) => (
             <Button
               key={rarity}
               onClick={() => setActiveRarity(rarity)}
               variant={activeRarity === rarity ? "primary" : "ghost"}
-              className="font-semibold text-sm" style={{ padding: "8px 20px", border: activeRarity === rarity ? "none" : "1px solid var(--color-border)", boxShadow:
+              className="font-semibold text-sm px-4-py-2" style={{ border: activeRarity === rarity ? "none" : "1px solid var(--color-border)", boxShadow:
                   activeRarity === rarity
                     ? "0 4px 12px rgba(99, 102, 241, 0.3)"
                     : "none" }}
@@ -156,8 +156,7 @@ export default function BadgesPage() {
         {loading && (
           <div className="text-center p-10">
             <div
-              className="loading"
-              style={{ width: "40px", height: "40px", margin: "0 auto" }}
+              className="loading mx-auto" style={{ width: "40px", height: "40px" }}
             />
           </div>
         )}
@@ -226,7 +225,7 @@ export default function BadgesPage() {
 
                     {badge.earned && (
                       <span
-                        className="absolute font-extrabold rounded-2xl" style={{ top: "12px", right: "12px", fontSize: "10px", padding: "4px 8px", background: "var(--color-accent-emerald)", color: "white", boxShadow: "0 2px 4px rgba(16, 185, 129, 0.3)" }}
+                        className="absolute font-extrabold rounded-2xl text-2xs px-2-py-1 text-white" style={{ top: "12px", right: "12px", background: "var(--color-accent-emerald)", boxShadow: "0 2px 4px rgba(16, 185, 129, 0.3)" }}
                       >
                         UNLOCKED
                       </span>
@@ -252,7 +251,7 @@ export default function BadgesPage() {
                           className="flex justify-between font-bold text-secondary text-xs mb-1"
                         >
                           <span>Progress</span>
-                          <span style={{ fontFamily: "monospace" }}>
+                          <span className="font-mono">
                             {badge.id.startsWith("earn_") ? `₹${(badge.currentProgress || 0).toLocaleString()}` : (badge.currentProgress || 0)} / {badge.id.startsWith("earn_") ? `₹${(badge.targetProgress || 1).toLocaleString()}` : (badge.targetProgress || 1)}
                           </span>
                         </div>
@@ -267,7 +266,7 @@ export default function BadgesPage() {
                     )}
 
                     <div
-                      className="w-full flex justify-between items-center text-xs border-top" style={{ paddingTop: "16px" }}
+                      className="w-full flex justify-between items-center text-xs border-top pt-4"
                     >
                       <span
                         className="font-semibold text-muted"
@@ -275,7 +274,7 @@ export default function BadgesPage() {
                         {badge.category}
                       </span>
                       <span
-                        className="font-bold text-primary bg-indigo-subtle" style={{ padding: "2px 8px", borderRadius: "6px" }}
+                        className="font-bold text-primary bg-indigo-subtle px-2-py-05 rounded-md"
                       >
                         +{badge.xpReward} XP
                       </span>
@@ -315,7 +314,7 @@ function StatCard({
         {value}
       </div>
       <div
-        className="text-xs font-bold text-secondary uppercase" style={{ letterSpacing: "1px" }}
+        className="text-xs font-bold text-secondary uppercase tracking-wider"
       >
         {label}
       </div>

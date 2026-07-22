@@ -15,7 +15,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         className="input-wrapper flex flex-col gap-2" style={{ width: fullWidth ? "100%" : "auto", ...style }}
       >
         {label && (
-          <label className="label" htmlFor={inputId} style={{ marginBottom: 0 }}>
+          <label className="label mb-0" htmlFor={inputId}>
             {label}
           </label>
         )}

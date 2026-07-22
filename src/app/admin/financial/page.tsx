@@ -87,11 +87,11 @@ export default async function AdminFinancialPage() {
         <div className="card p-6">
           <h3 className="text-lg font-extrabold mb-5">🏦 Treasury & Wallet Liabilities</h3>
           <div className="flex flex-col gap-4">
-            <div className="flex justify-between border-b-card" style={{ paddingBottom: "12px" }}>
+            <div className="flex justify-between border-b-card pb-3">
               <span className="text-secondary">Total Outstanding Liability (Wallet Balances)</span>
               <span className="font-bold text-rose">{formatCurrency(data.wallets.totalBalance)}</span>
             </div>
-            <div className="flex justify-between border-b-card" style={{ paddingBottom: "12px" }}>
+            <div className="flex justify-between border-b-card pb-3">
               <span className="text-secondary">Total Earned by Users</span>
               <span className="font-bold">{formatCurrency(data.wallets.totalEarned)}</span>
             </div>
@@ -106,7 +106,7 @@ export default async function AdminFinancialPage() {
         <div className="card p-6">
           <h3 className="text-lg font-extrabold mb-5">⏳ Pending Escrows & Withdrawals</h3>
           <div className="flex flex-col gap-4">
-            <div className="flex justify-between border-b-card" style={{ paddingBottom: "12px" }}>
+            <div className="flex justify-between border-b-card pb-3">
               <span className="text-secondary">Pending Escrow Payouts (Active Deals)</span>
               <span className="font-bold">
                 {formatCurrency(data.payments.pendingPayouts)}{" "}
@@ -115,7 +115,7 @@ export default async function AdminFinancialPage() {
                 </span>
               </span>
             </div>
-            <div className="flex justify-between border-b-card" style={{ paddingBottom: "12px" }}>
+            <div className="flex justify-between border-b-card pb-3">
               <span className="text-secondary">Pending Bank Withdrawals</span>
               <span className="font-bold text-amber">
                 {formatCurrency(data.withdrawals.pendingAmount)}{" "}
@@ -175,7 +175,7 @@ export default async function AdminFinancialPage() {
         <div className="card p-6">
           <h3 className="text-lg font-extrabold mb-5">🔄 Refunds & Gateway Performance</h3>
           <div className="flex flex-col gap-4">
-            <div className="flex justify-between border-b-card" style={{ paddingBottom: "12px" }}>
+            <div className="flex justify-between border-b-card pb-3">
               <span className="text-secondary">Total Refunded Amount</span>
               <span className="font-bold">
                 {formatCurrency(data.refunds.totalAmount)}{" "}
@@ -184,7 +184,7 @@ export default async function AdminFinancialPage() {
                 </span>
               </span>
             </div>
-            <div className="flex justify-between border-b-card" style={{ paddingBottom: "12px" }}>
+            <div className="flex justify-between border-b-card pb-3">
               <span className="text-secondary">Refunds Issued (Last 30 Days)</span>
               <span className="font-bold">
                 {formatCurrency(data.refunds.last30DaysAmount)}{" "}

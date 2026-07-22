@@ -342,7 +342,7 @@ function DealProgress({ status }: Readonly<DealProgressProps>) {
         })}
         {status === "CANCELLED" && (
           <div
-            className="p-3 font-semibold text-center rounded-md text-rose" style={{ background: "rgba(239, 68, 68, 0.1)" }}
+            className="p-3 font-semibold text-center rounded-md text-rose bg-rose-subtle"
           >
             Deal Cancelled
           </div>
@@ -404,7 +404,7 @@ function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissionsCard
                   Version {sub.version}
                 </span>
                 <span
-                  className="text-xs rounded-sm" style={{ padding: "4px 8px", background: subBg, color: "white" }}
+                  className="text-xs rounded-sm px-2-py-1 text-white" style={{ background: subBg }}
                 >
                   {sub.status}
                 </span>
@@ -431,12 +431,12 @@ function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissionsCard
                               View Link
                             </a>
                             {item.feedback && (
-                              <span className="text-xs mt-1" style={{ color: "var(--color-warning)" }}>
+                              <span className="text-xs mt-1 text-amber">
                                 Feedback: {item.feedback}
                               </span>
                             )}
                           </div>
-                          <span className="text-xs rounded-sm" style={{ padding: "2px 6px", background: itemBg, color: "white" }}>
+                          <span className="text-xs rounded-sm px-2-py-05 text-white" style={{ background: itemBg }}>
                             {item.status}
                           </span>
                         </div>
@@ -514,14 +514,14 @@ function EngagementCard({
   return (
     <div className="card mb-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold" style={{ marginBottom: 0 }}>📊 Post Performance</h2>
+        <h2 className="text-lg font-bold mb-0">📊 Post Performance</h2>
         <span className="text-sm font-semibold" style={{ color: trendColors[engagement.trend] }}>
           {trendLabels[engagement.trend]}
         </span>
       </div>
 
       {disclaimer && (
-        <div className="text-xs rounded-sm" style={{ color: "var(--color-warning)", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", padding: "8px 12px", marginBottom: "14px" }}>
+        <div className="text-xs rounded-sm text-amber px-3-py-2 mb-3" style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}>
           {disclaimer}
         </div>
       )}
@@ -552,9 +552,9 @@ function EngagementCard({
       </div>
 
       {isClient && roi && (
-        <div className="rounded-sm" style={{ padding: "14px", background: "linear-gradient(135deg, rgba(99,102,241,0.08), rgba(16,185,129,0.05))", border: "1px solid rgba(99,102,241,0.2)" }}>
-          <div className="text-sm font-bold" style={{ marginBottom: "10px" }}>💰 ROI Summary</div>
-          <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px" }}>
+        <div className="rounded-sm p-3.5" style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.08), rgba(16,185,129,0.05))", border: "1px solid rgba(99,102,241,0.2)" }}>
+          <div className="text-sm font-bold mb-2">💰 ROI Summary</div>
+          <div className="grid gap-2-5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))" }}>
             {([
               ["Est. Value", `₹${(roi.estimatedValue / 100).toLocaleString("en-IN")}`],
               ["ROI", `${roi.roiPercentage >= 0 ? "+" : ""}${roi.roiPercentage}%`],
@@ -562,7 +562,7 @@ function EngagementCard({
               ["Cost/Eng.", `₹${(roi.costPerEngagement / 100).toFixed(2)}`],
             ] as [string, string][]).map(([label, val]) => (
               <div key={label} className="p-2 bg-secondary rounded-sm">
-                <div className="text-muted" style={{ fontSize: "10px", marginBottom: "2px" }}>{label}</div>
+                <div className="text-muted text-2xs" style={{ marginBottom: "2px" }}>{label}</div>
                 <div className="text-sm font-extrabold" style={{ color: roi.roiPercentage >= 0 ? "var(--color-success)" : "var(--color-error)" }}>{val}</div>
               </div>
             ))}
@@ -1195,7 +1195,7 @@ function DealContractCard({
       {hasContractTerms ? (
         <>
           <div
-            className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", marginBottom: "18px" }}
+            className="grid gap-3 mb-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}
           >
             {([
               ["Creator payout", formatCurrency(creatorPayout)],
@@ -1214,13 +1214,13 @@ function DealContractCard({
           </div>
 
           {contractDeliverables.length > 0 && (
-            <div style={{ marginBottom: "18px" }}>
+            <div className="mb-4">
               <div className="text-sm text-muted mb-2">Deliverables</div>
               <div className="grid gap-2">
                 {contractDeliverables.map((item, index) => (
                   <div
                     key={`${item.type}-${index}`}
-                    className="text-sm bg-tertiary rounded-sm leading-normal" style={{ padding: "10px 12px" }}
+                    className="text-sm bg-tertiary rounded-sm leading-normal px-3-py-2-5"
                   >
                     <strong>{item.count || 1}x {item.type || "Deliverable"}</strong>
                     <span className="text-secondary">
@@ -1246,7 +1246,7 @@ function DealContractCard({
 
           <div className="mb-4">
             <div className="text-sm text-muted mb-2">Timeline</div>
-            <div className="grid text-sm text-secondary" style={{ gap: "6px" }}>
+            <div className="grid text-sm text-secondary gap-1-5">
               <div>Submit by: <strong>{formatContractDate(contractTerms.submissionDeadline)}</strong></div>
               <div>Post by: <strong>{formatContractDate(contractTerms.postingDeadline)}</strong></div>
               <div>Brand review window: <strong>{typeof contractTerms.reviewPeriodHours === "number" ? contractTerms.reviewPeriodHours : 48} hours</strong></div>
@@ -1261,7 +1261,7 @@ function DealContractCard({
               {influencerObligations.length > 0 && (
                 <div>
                   <div className="text-sm text-muted mb-2">Influencer obligations</div>
-                  <ul className="grid text-secondary text-sm" style={{ paddingLeft: "18px", gap: "6px" }}>
+                  <ul className="grid text-secondary text-sm gap-1-5" style={{ paddingLeft: "18px" }}>
                     {influencerObligations.slice(0, 4).map((item) => (
                       <li key={item}>{item}</li>
                     ))}
@@ -1271,7 +1271,7 @@ function DealContractCard({
               {brandObligations.length > 0 && (
                 <div>
                   <div className="text-sm text-muted mb-2">Brand obligations</div>
-                  <ul className="grid text-secondary text-sm" style={{ paddingLeft: "18px", gap: "6px" }}>
+                  <ul className="grid text-secondary text-sm gap-1-5" style={{ paddingLeft: "18px" }}>
                     {brandObligations.slice(0, 4).map((item) => (
                       <li key={item}>{item}</li>
                     ))}
@@ -1386,7 +1386,7 @@ export default function DealDetailPage() {
   } = computeDealDisplay(deal, contractTerms);
   return (
     <DashboardShell user={session.user}>
-      <div className="deal-detail-page grid gap-6 max-w-1280" style={{ margin: "0 auto" }}>
+      <div className="deal-detail-page grid gap-6 max-w-1280 mx-auto">
         <ToastContainer toasts={toasts} onClose={removeToast} />
         <header
           className="glass deal-detail-header border-b-card px-6-py-4" style={{ position: "sticky", top: 0, zIndex: 40 }}
@@ -1405,7 +1405,7 @@ export default function DealDetailPage() {
                 {deal.campaign.title}
               </h1>
               <div
-                className="flex items-center gap-2 mt-2 text-sm font-semibold px-3-py-1" style={{ background: `${status.color}20`, borderRadius: "var(--radius-full)", width: "fit-content", color: status.color }}
+                className="flex items-center gap-2 mt-2 text-sm font-semibold px-3-py-1 rounded-full" style={{ background: `${status.color}20`, width: "fit-content", color: status.color }}
               >
                 {status.label}
               </div>
@@ -1548,7 +1548,7 @@ export default function DealDetailPage() {
                       </div>
                     </div>
                   )}
-                  <div className="grid" style={{ gap: "10px", marginTop: "14px" }}>
+                  <div className="grid gap-2-5" style={{ marginTop: "14px" }}>
                       {isInfluencer &&
                       ["ADDRESS_PENDING", "READY_TO_DISPATCH"].includes(
                         deal.productFulfillmentStatus || "",
@@ -1608,7 +1608,7 @@ export default function DealDetailPage() {
                       Post Deadline
                     </span>
                     <span
-                      className="font-semibold" style={{ color: "var(--color-warning)" }}
+                      className="font-semibold text-amber"
                     >
                       {new Date(deal.postingDeadline).toLocaleDateString()}
                     </span>
@@ -1758,7 +1758,7 @@ export default function DealDetailPage() {
         title="Review Content"
         maxWidth="520px"
       >
-        <div className="mb-5 flex flex-col gap-4" style={{ maxHeight: "400px", overflowY: "auto", paddingRight: "4px" }}>
+        <div className="mb-5 flex flex-col gap-4 overflow-y-auto" style={{ maxHeight: "400px", paddingRight: "4px" }}>
           {getFlatDeliverablesList(deal).map((item) => {
             const latestSub = deal?.contentSubmissions?.[0];
             const submittedUrlObj = latestSub?.contentUrls && Array.isArray(latestSub.contentUrls)
@@ -1792,7 +1792,7 @@ export default function DealDetailPage() {
                         ...itemizedReviews,
                         [item.type]: { ...itemReview, status: "APPROVED" }
                       })}
-                      className="text-xs" style={{ padding: "4px 8px", background: itemReview.status === "APPROVED" ? "var(--color-success)" : "var(--color-bg-tertiary)", color: itemReview.status === "APPROVED" ? "white" : "inherit" }}
+                      className="text-xs px-2-py-1" style={{ background: itemReview.status === "APPROVED" ? "var(--color-success)" : "var(--color-bg-tertiary)", color: itemReview.status === "APPROVED" ? "white" : "inherit" }}
                     >
                       Approve
                     </Button>
@@ -1805,7 +1805,7 @@ export default function DealDetailPage() {
                         ...itemizedReviews,
                         [item.type]: { ...itemReview, status: "REVISION_REQUESTED" }
                       })}
-                      className="text-xs" style={{ padding: "4px 8px", background: itemReview.status === "REVISION_REQUESTED" ? "var(--color-warning)" : "var(--color-bg-tertiary)", color: itemReview.status === "REVISION_REQUESTED" ? "white" : "inherit" }}
+                      className="text-xs px-2-py-1" style={{ background: itemReview.status === "REVISION_REQUESTED" ? "var(--color-warning)" : "var(--color-bg-tertiary)", color: itemReview.status === "REVISION_REQUESTED" ? "white" : "inherit" }}
                     >
                       Revision
                     </Button>
@@ -1857,7 +1857,7 @@ export default function DealDetailPage() {
         title="Submit Content"
         maxWidth="550px"
       >
-        <div className="mb-5 flex flex-col gap-4" style={{ maxHeight: "350px", overflowY: "auto", paddingRight: "4px" }}>
+        <div className="mb-5 flex flex-col gap-4 overflow-y-auto" style={{ maxHeight: "350px", paddingRight: "4px" }}>
           {getFlatDeliverablesList(deal).map((item) => {
             const latestSub = deal?.contentSubmissions?.[0];
             const existing = latestSub?.contentUrls && Array.isArray(latestSub.contentUrls)
@@ -2044,7 +2044,7 @@ export default function DealDetailPage() {
                 onMouseLeave={() => setHoverRating(0)}
                 aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
                 aria-pressed={(hoverRating || reviewRating) >= star ? "true" : "false"}
-                className="cursor-pointer border-none text-3xl" style={{ background: "none", transition: "transform 0.15s ease", transform: (hoverRating || reviewRating) >= star ? "scale(1.15)" : "scale(1)", filter: (hoverRating || reviewRating) >= star ? "none" : "grayscale(1) opacity(0.3)" }}
+                className="cursor-pointer border-none text-3xl bg-none" style={{ transition: "transform 0.15s ease", transform: (hoverRating || reviewRating) >= star ? "scale(1.15)" : "scale(1)", filter: (hoverRating || reviewRating) >= star ? "none" : "grayscale(1) opacity(0.3)" }}
               >
                 ⭐
               </Button>
@@ -2065,7 +2065,7 @@ export default function DealDetailPage() {
             value={reviewComment}
             onChange={(e) => setReviewComment(e.target.value)}
             rows={3}
-            className="w-full text-sm mb-4 rounded-md border-card bg-primary" style={{ padding: "12px 16px", resize: "vertical" }}
+            className="w-full text-sm mb-4 rounded-md border-card bg-primary px-4-py-3 resize-y"
           />
           <Button
             variant="primary"
@@ -2105,7 +2105,7 @@ export default function DealDetailPage() {
           <span className="text-2xl">✅</span>
           <div>
             <strong>Review Submitted</strong>
-            <p className="text-sm text-secondary" style={{ margin: 0 }}>
+            <p className="text-sm text-secondary m-0">
               {"⭐".repeat(reviewRating)} — Thank you for your feedback!
             </p>
           </div>
