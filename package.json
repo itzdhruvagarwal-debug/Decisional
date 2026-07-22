@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit --pretty false",
     "validate": "npm run lint && npm run typecheck && npx prisma validate",
     "deploy:check": "npm run validate && npm run build",
-    "seed": "npx tsx scripts/seed-test-accounts.ts"
+    "seed": "npx tsx -r ./scripts/mock-server-only.js scripts/seed-test-accounts.ts"
   },
   "engines": {
     "node": ">=18.17.0"

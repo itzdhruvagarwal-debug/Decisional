@@ -11,6 +11,7 @@ import bcrypt from "bcryptjs";
 import { DocumentType } from "@prisma/client";
 import prisma from "../src/lib/db";
 import { seedTreasury } from "./seed-treasury";
+import { seedBadges } from "./seed-badges";
 
 // Load from environment variable, or decode from Base64 fallback.
 // Using Base64 avoids static analysis tools flagging a plaintext credential literal.
@@ -245,6 +246,9 @@ async function main() {
   // Seed Tax and Bank details for Influencer
   await seedTaxCompliance(influencer.id, false);
   await seedBankAccount(influencer.id, "Test Influencer", "ICICI Bank");
+
+  // Seed badges definitions
+  await seedBadges();
 
   console.log("\n Seed complete!");
   console.log("------------------------------------------------------");

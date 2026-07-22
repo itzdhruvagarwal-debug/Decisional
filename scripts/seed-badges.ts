@@ -10,7 +10,7 @@
 import prisma from "../src/lib/db";
 import { BADGES } from "../src/lib/badges";
 
-async function seedBadges() {
+export async function seedBadges() {
   console.log("Starting badge seed...");
 
   let created = 0;
@@ -52,12 +52,14 @@ async function seedBadges() {
   console.log(`\nBadge seed complete: ${created} created, ${updated} updated`);
 }
 
-seedBadges()
-  .then(() => {
-    console.log("Done!");
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error("Error seeding badges:", error);
-    process.exit(1);
-  });
+if (require.main === module) {
+  seedBadges()
+    .then(() => {
+      console.log("Done!");
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error("Error seeding badges:", error);
+      process.exit(1);
+    });
+}
