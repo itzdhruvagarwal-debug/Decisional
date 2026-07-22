@@ -1,4 +1,3 @@
-import React from "react";
 import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { AdminService } from "@/services/admin.service";
