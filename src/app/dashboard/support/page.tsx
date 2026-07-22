@@ -7,6 +7,9 @@ import DashboardShell from "@/components/dashboard/DashboardShell";
 import { Button, Input, Select, Textarea } from "@/components/ui";
 
 import { createSupportSchema } from "@/lib/validations/campaign";
+import { z } from "zod";
+
+export type SupportFormValues = z.infer<typeof createSupportSchema>;
 
 export default function SupportPage() {
   const { data: session } = useSession();

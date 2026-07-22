@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
 import { resetPasswordSchema } from "@/lib/validations/auth";
+import { z } from "zod";
+
+export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 
 function ResetPasswordForm() {
   const router = useRouter();

@@ -5,6 +5,9 @@ import EmptyState from "@/components/ui/EmptyState";
 import { logger } from "@/lib/logger-client";
 import { Button, Input } from "@/components/ui";
 import { bankAccountSchema } from "@/lib/validations/auth";
+import { z } from "zod";
+
+export type BankAccountValues = z.infer<typeof bankAccountSchema>;
 
 interface BankAccount {
   id: string;

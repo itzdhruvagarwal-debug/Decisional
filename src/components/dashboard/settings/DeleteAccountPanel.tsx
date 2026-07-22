@@ -6,6 +6,9 @@ import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { Button, Input } from "@/components/ui";
 import { deleteAccountSchema } from "@/lib/validations/auth";
+import { z } from "zod";
+
+export type DeleteAccountValues = z.infer<typeof deleteAccountSchema>;
 
 interface DeleteAccountPanelProps {
     isSaving: boolean;

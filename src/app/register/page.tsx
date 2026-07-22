@@ -9,6 +9,9 @@ import { Suspense, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Input } from "@/components/ui";
 import { registerSchema } from "@/lib/validations/auth";
+import { z } from "zod";
+
+export type RegisterFormValues = z.infer<typeof registerSchema>;
 
 type UserType = "INFLUENCER" | "BRAND";
 

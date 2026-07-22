@@ -8,6 +8,9 @@ import { fetcher } from "@/lib/fetcher";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Input, Select, Textarea, Card } from "@/components/ui";
 import { createCampaignSchema } from "@/lib/validations/campaign";
+import { z } from "zod";
+
+export type CreateCampaignValues = z.infer<typeof createCampaignSchema>;
 
 export interface CampaignFormData {
   title: string;

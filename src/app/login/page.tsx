@@ -5,6 +5,10 @@ import { logger } from "@/lib/logger-client";
 import Link from "next/link";
 import Image from "next/image";
 import { loginSchema } from "@/lib/validations/auth";
+import { z } from "zod";
+
+export type LoginFormValues = z.infer<typeof loginSchema>;
+
 import Logo from "../../components/Logo";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";

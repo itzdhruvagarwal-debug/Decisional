@@ -9,6 +9,9 @@ import { ToastContainer, type ToastItem, type ToastType } from "@/components/ui/
 import { Button, Select, Textarea } from "@/components/ui";
 
 import { createDisputeSchema } from "@/lib/validations/campaign";
+import { z } from "zod";
+
+export type DisputeFormValues = z.infer<typeof createDisputeSchema>;
 
 export default function DisputePage({
   params,
