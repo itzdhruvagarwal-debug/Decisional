@@ -69,7 +69,7 @@ export default function DisputesPage() {
           if (isLoading) {
             return (
               <div className="text-center p-10">
-                <span className="loading" style={{ width: "36px", height: "36px" }} />
+                <span className="loading w-36 h-36" />
               </div>
             );
           }
@@ -145,7 +145,7 @@ export default function DisputesPage() {
                   </div>
 
                   {/* View Details CTA */}
-                  <div className="flex justify-end" style={{ marginTop: "14px" }}>
+                  <div className="flex justify-end mt-3-5">
                     <span
                       className="text-sm font-semibold text-primary"
                     >

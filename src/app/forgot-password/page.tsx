@@ -75,7 +75,7 @@ export default function ForgotPasswordPage() {
       />
 
       <div
-        className="card w-full relative p-10" style={{ maxWidth: "420px", zIndex: 1 }}
+        className="card w-full relative p-10 z-1" style={{ maxWidth: "420px" }}
       >
         <Link
           href="/login"

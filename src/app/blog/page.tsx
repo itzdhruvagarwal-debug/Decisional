@@ -64,10 +64,10 @@ export default function BlogPage() {
         <section className="section w-full relative">
           {/* Subtle glowing radial background for depth */}
           <div
-            className="absolute pointer-events-none" style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%)", zIndex: 0 }}
+            className="absolute pointer-events-none z-0" style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%)" }}
           />
 
-          <div className="container relative text-center max-w-640" style={{ zIndex: 1 }}>
+          <div className="container relative text-center max-w-640 z-1">
             <div
               className="badge badge-primary animate-fade-in mb-6 text-xs font-extrabold uppercase px-4-py-2 tracking-wider"
             >
@@ -116,7 +116,7 @@ export default function BlogPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
-                  className="flex-1" style={{ minWidth: "200px" }}
+                  className="flex-1 min-w-200"
                 />
                 <Button type="submit" variant="primary" disabled={loading}>
                   {loading ? "Subscribing..." : "Notify Me"}

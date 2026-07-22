@@ -116,7 +116,7 @@ export default async function AdminViolationsPage() {
                         </span>
                       </td>
                       <td className="p-card text-sm text-primary">
-                        <div className="overflow-hidden whitespace-nowrap" style={{ maxWidth: "240px", textOverflow: "ellipsis" }} title={violation.description}>
+                        <div className="overflow-hidden whitespace-nowrap max-w-240 text-ellipsis" title={violation.description}>
                           {violation.description}
                         </div>
                       </td>

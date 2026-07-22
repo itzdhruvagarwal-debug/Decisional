@@ -84,7 +84,7 @@ function InactivityWarningModal({
             variant="primary"
             onClick={onExtend}
             autoFocus
-            className="p-3" style={{ flex: 2 }}
+            className="p-3 flex-2"
           >
             Stay Signed In
           </Button>

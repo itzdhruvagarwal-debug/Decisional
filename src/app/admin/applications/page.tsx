@@ -127,7 +127,7 @@ export default async function AdminApplicationsPage() {
                   className="flex justify-between items-center flex-wrap gap-3 mb-4 bg-tertiary rounded-md border-card px-4-py-3"
                 >
                   <div>
-                    <div className="font-bold text-sm" style={{ marginBottom: "2px" }}>
+                    <div className="font-bold text-sm mb-0-5">
                       👤 {app.influencer.displayName}
                     </div>
                     <div className="text-xs text-secondary flex gap-4 flex-wrap">

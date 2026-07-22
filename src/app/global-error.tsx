@@ -25,11 +25,11 @@ export default function GlobalError({
         className="flex items-center justify-center p-6 bg-primary text-primary min-h-screen" style={{ fontFamily: "'Inter', sans-serif" }}
       >
         {/* Abstract Background Elements */}
-        <div className="fixed" style={{ top: "10%", left: "5%", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(244, 63, 94, 0.08) 0%, transparent 70%)", zIndex: 0 }} />
+        <div className="fixed z-0" style={{ top: "10%", left: "5%", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(244, 63, 94, 0.08) 0%, transparent 70%)" }} />
 
-        <div className="glass col-span-2 text-center w-full relative rounded-xl" style={{ maxWidth: "500px", padding: "48px 32px", border: "1px solid rgba(244, 63, 94, 0.2)", zIndex: 1 }}>
+        <div className="glass col-span-2 text-center w-full relative rounded-xl z-1" style={{ maxWidth: "500px", padding: "48px 32px", border: "1px solid rgba(244, 63, 94, 0.2)" }}>
           <div
-            className="flex items-center justify-center mb-8 bg-rose-subtle text-rose rounded-full text-3xl mx-auto" style={{ width: "80px", height: "80px", border: "1px solid rgba(244, 63, 94, 0.2)", boxShadow: "0 0 30px rgba(244, 63, 94, 0.1)" }}
+            className="flex items-center justify-center mb-8 bg-rose-subtle text-rose rounded-full text-3xl mx-auto w-80" style={{ height: "80px", border: "1px solid rgba(244, 63, 94, 0.2)", boxShadow: "0 0 30px rgba(244, 63, 94, 0.1)" }}
           >
             ⚠️
           </div>

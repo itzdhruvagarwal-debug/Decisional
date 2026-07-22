@@ -276,7 +276,7 @@ export default function DiscoverInfluencersPage() {
                   exit={{ opacity: 0 }}
                   className="text-center text-secondary" style={{ padding: "80px" }}
                 >
-                  <div className="loader rounded-md" style={{ width: "48px", height: "48px", border: "4px solid var(--color-border)", borderTopColor: "var(--color-primary)", margin: "0 auto 24px", animation: "spin 1s linear infinite" }} />
+                  <div className="loader rounded-md w-48 h-48" style={{ border: "4px solid var(--color-border)", borderTopColor: "var(--color-primary)", margin: "0 auto 24px", animation: "spin 1s linear infinite" }} />
                   <p className="text-base font-semibold tracking-normal">Loading creator data...</p>
                 </motion.div>
               );
@@ -354,7 +354,7 @@ export default function DiscoverInfluencersPage() {
                     </span>
                   </div>
 
-                  <p className="text-sm text-secondary flex-1 mb-6" style={{ lineHeight: "1.6" }}>
+                  <p className="text-sm text-secondary flex-1 mb-6 leading-1-6">
                     {inf.bio || "High-impact creator focused on quality content delivery and authentic audience engagement."}
                   </p>
 

@@ -57,7 +57,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="flex items-center justify-center text-xs font-extrabold cursor-pointer rounded-sm bg-tertiary border-card text-inherit no-underline" style={{ width: "36px", height: "36px", transition: "all var(--transition-fast)" }}
+                  className="flex items-center justify-center text-xs font-extrabold cursor-pointer rounded-sm bg-tertiary border-card text-inherit no-underline w-36 h-36" style={{ transition: "all var(--transition-fast)" }}
                 >
                   {social.label}
                 </a>

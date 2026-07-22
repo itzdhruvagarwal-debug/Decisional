@@ -354,7 +354,7 @@ export default function InfluencerProfilePage() {
             </div>
             {profile.maxRate && (
               <div
-                className="flex justify-between" style={{ borderTop: "1px dashed var(--color-border)", paddingTop: "8px" }}
+                className="flex justify-between pt-2" style={{ borderTop: "1px dashed var(--color-border)" }}
               >
                 <span
                   className="text-sm text-secondary"

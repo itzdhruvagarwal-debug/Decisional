@@ -168,7 +168,7 @@ export default function ContactVerificationPanel({
         if (verifyContactState.type === 'email' && verifyContactState.step === 'code') {
             return (
                 <div className="flex gap-2">
-                    <Input type="text" id="email-verify-code" placeholder="OTP" aria-label="Email verification code" className="text-xs px-2-py-1" style={{ width: '80px' }} value={contactVerifyCode} onChange={(e) => setContactVerifyCode(e.target.value)} />
+                    <Input type="text" id="email-verify-code" placeholder="OTP" aria-label="Email verification code" className="text-xs px-2-py-1 w-80" value={contactVerifyCode} onChange={(e) => setContactVerifyCode(e.target.value)} />
                     <Button variant="primary" onClick={async () => {
                         const res = await fetch('/api/user/verify-contact', { method: 'POST', body: JSON.stringify({ type: 'email', code: contactVerifyCode }) });
                         if (res.ok) {
@@ -223,7 +223,7 @@ export default function ContactVerificationPanel({
         if (verifyContactState.type === 'phone' && verifyContactState.step === 'code') {
             return (
                 <div className="flex gap-2">
-                    <Input type="text" id="phone-verify-code" placeholder="OTP" aria-label="Phone verification code" className="text-xs px-2-py-1" style={{ width: '80px' }} value={contactVerifyCode} onChange={(e) => setContactVerifyCode(e.target.value)} />
+                    <Input type="text" id="phone-verify-code" placeholder="OTP" aria-label="Phone verification code" className="text-xs px-2-py-1 w-80" value={contactVerifyCode} onChange={(e) => setContactVerifyCode(e.target.value)} />
                     <Button variant="primary" onClick={async () => {
                         const res = await fetch('/api/user/verify-contact', { method: 'POST', body: JSON.stringify({ type: 'phone', code: contactVerifyCode }) });
                         if (res.ok) {

@@ -464,7 +464,7 @@ export default function TransactionHistory() {
             <Select
               name="type"
               aria-label="Filter by transaction type"
-              className="p-2 text-sm" style={{ width: "auto" }}
+              className="p-2 text-sm w-auto"
               value={filters.type}
               onChange={handleFilterChange}
             >
@@ -481,7 +481,7 @@ export default function TransactionHistory() {
             <Select
               name="status"
               aria-label="Filter by transaction status"
-              className="p-2 text-sm" style={{ width: "auto" }}
+              className="p-2 text-sm w-auto"
               value={filters.status}
               onChange={handleFilterChange}
             >
@@ -496,7 +496,7 @@ export default function TransactionHistory() {
               type="date"
               name="startDate"
               aria-label="Filter from date"
-              className="p-2 text-sm" style={{ width: "auto" }}
+              className="p-2 text-sm w-auto"
               value={filters.startDate}
               onChange={handleFilterChange}
             />
@@ -504,7 +504,7 @@ export default function TransactionHistory() {
               type="date"
               name="endDate"
               aria-label="Filter to date"
-              className="p-2 text-sm" style={{ width: "auto" }}
+              className="p-2 text-sm w-auto"
               value={filters.endDate}
               onChange={handleFilterChange}
             />

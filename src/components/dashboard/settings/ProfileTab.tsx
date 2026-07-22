@@ -257,7 +257,7 @@ export default function ProfileTab({
                             )}
                         </div>
                         <div
-                            className="absolute flex items-center justify-center text-sm rounded-full text-white" style={{ bottom: "0", right: "0", background: "var(--color-primary)", width: "32px", height: "32px", border: "2px solid var(--color-bg-primary)" }}
+                            className="absolute flex items-center justify-center text-sm rounded-full text-white bg-color-primary w-32 h-32" style={{ bottom: "0", right: "0", border: "2px solid var(--color-bg-primary)" }}
                         >
                             📸
                         </div>
@@ -520,7 +520,7 @@ export default function ProfileTab({
                                     }
                                 }
                             }}
-                            style={{ maxWidth: "200px" }}
+                            className="max-w-200"
                         />
                         <Button
                             type="button"
@@ -576,7 +576,7 @@ export default function ProfileTab({
                                     }
                                 }
                             }}
-                            style={{ maxWidth: "200px" }}
+                            className="max-w-200"
                         />
                         <Button
                             type="button"

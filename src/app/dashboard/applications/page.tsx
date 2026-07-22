@@ -84,7 +84,7 @@ export default function ApplicationsPage() {
   if (loading) {
     applicationsList = (
       <div className="flex justify-center p-10">
-        <span className="loading" style={{ width: "40px", height: "40px" }} />
+        <span className="loading w-40 h-40" />
       </div>
     );
   } else if (error) {
@@ -106,7 +106,7 @@ export default function ApplicationsPage() {
   } else {
     applicationsList = (
       <div className="card overflow-hidden p-0">
-        <div style={{ overflowX: "auto" }}>
+        <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b-card bg-tertiary">
@@ -125,7 +125,7 @@ export default function ApplicationsPage() {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div
-                          className="flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden relative rounded-sm text-white" style={{ width: "36px", height: "36px", background: "var(--gradient-card)" }}
+                          className="flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden relative rounded-sm text-white w-36 h-36 bg-gradient-card"
                         >
                           {app.campaign.brand?.logo ? (
                             <Image
@@ -181,7 +181,7 @@ export default function ApplicationsPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <div className="mx-auto" style={{ maxWidth: "1000px", padding: "40px 20px" }}>
+      <div className="mx-auto max-w-1000" style={{ padding: "40px 20px" }}>
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-extrabold text-3xl">My Applications</h1>

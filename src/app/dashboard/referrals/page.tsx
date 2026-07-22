@@ -114,19 +114,19 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
                 variant="ghost"
                 onClick={onClose}
                 aria-label="Close share modal"
-                className="text-lg flex-shrink-0 p-0" style={{ width: "36px", height: "36px" }}
+                className="text-lg flex-shrink-0 p-0 w-36 h-36"
               >
                 ×
               </Button>
             </div>
 
             {/* Referral link */}
-            <div className="mb-6 flex items-center gap-3 rounded-xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", padding: "14px 16px", minWidth: 0 }}>
-              <div className="flex-1" style={{ minWidth: 0 }}>
+            <div className="mb-6 flex items-center gap-3 rounded-xl min-w-0" style={{ background: "rgba(255, 255, 255, 0.04)", border: "1px solid rgba(255, 255, 255, 0.08)", padding: "14px 16px" }}>
+              <div className="flex-1 min-w-0">
                 <div className="font-bold text-muted mb-1 uppercase text-2xs tracking-wider">
                   Your Referral Link
                 </div>
-                <div className="text-sm font-semibold text-secondary overflow-hidden whitespace-nowrap font-mono" style={{ textOverflow: "ellipsis" }}>
+                <div className="text-sm font-semibold text-secondary overflow-hidden whitespace-nowrap font-mono text-ellipsis">
                   {referralLink}
                 </div>
               </div>
@@ -182,7 +182,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
               <motion.button
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                 onClick={handleNativeShare}
-                className="w-full text-sm font-bold cursor-pointer flex items-center justify-center gap-2 p-3.5" style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.3)", borderRadius: "14px", color: "#a5b4fc" }}
+                className="w-full text-sm font-bold cursor-pointer flex items-center justify-center gap-2 p-3.5 rounded-lg" style={{ background: "rgba(99, 102, 241, 0.12)", border: "1px solid rgba(99, 102, 241, 0.3)", color: "#a5b4fc" }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
@@ -257,7 +257,7 @@ export default function ReferralsPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <div className="mx-auto" style={{ maxWidth: "1000px", padding: "40px 20px" }}>
+      <div className="mx-auto max-w-1000" style={{ padding: "40px 20px" }}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -299,7 +299,7 @@ export default function ReferralsPage() {
             >
               {/* Code Card */}
               <motion.div
-                className="text-center relative overflow-hidden mb-10 backdrop-blur-lg" style={{ padding: "clamp(24px,5vw,48px)", background: "rgba(255,255,255,0.03)", borderRadius: "32px", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 40px 80px rgba(0,0,0,0.3)" }}
+                className="text-center relative overflow-hidden mb-10 backdrop-blur-lg rounded-3xl" style={{ padding: "clamp(24px, 5vw, 48px)", background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.08)", boxShadow: "0 40px 80px rgba(0, 0, 0, 0.3)" }}
               >
                 <div className="absolute rounded-full bg-emerald-subtle pointer-events-none" style={{ top: -60, right: -60, width: "250px", height: "250px", filter: "blur(100px)" }} />
 
@@ -399,7 +399,7 @@ export default function ReferralsPage() {
               </div>
 
               {/* Steps */}
-              <div className="p-10" style={{ background: "rgba(255,255,255,0.02)", borderRadius: "32px", border: "1px solid rgba(255,255,255,0.05)" }}>
+              <div className="p-10 rounded-3xl" style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
                 <h3 className="mb-8 text-center font-extrabold text-2xl">Partnership Roadmap 🗺️</h3>
                 <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))" }}>
                   <StepCard num="01" title="Broadcast"  desc="Deploy your unique code across your socials and network."       icon="📢" />
@@ -415,7 +415,7 @@ export default function ReferralsPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.4 }}
-              className="p-8" style={{ background: "rgba(255,255,255,0.02)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)" }}
+              className="p-8 rounded-3xl" style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.05)" }}
             >
               <ReferralList />
             </motion.div>
@@ -447,7 +447,7 @@ function StatBox({ label, value, color, icon }: StatBoxProps) {
     <div className="p-6 text-center rounded-2xl" style={{ background: "rgba(0,0,0,0.2)", border: `1px solid ${color}22` }}>
       <div className="text-2xl mb-2">{icon}</div>
       <div className="mb-1 font-extrabold text-2xl text-white">{value}</div>
-      <div className="text-xs uppercase tracking-wider" style={{ fontWeight: 800, color }}>{label}</div>
+      <div className="text-xs uppercase tracking-wider font-extrabold" style={{ color }}>{label}</div>
     </div>
   );
 }
@@ -482,7 +482,7 @@ interface StepCardProps {
 }
 function StepCard({ num, title, desc, icon }: StepCardProps) {
   return (
-    <div className="p-6 relative" style={{ background: "rgba(0,0,0,0.2)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)" }}>
+    <div className="p-6 relative rounded-3xl" style={{ background: "rgba(0, 0, 0, 0.2)", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
       <div className="absolute text-3xl font-extrabold" style={{ top: "12px", right: "20px", color: "rgba(255,255,255,0.03)" }}>{num}</div>
       <div className="mb-4 text-3xl">{icon}</div>
       <div className="text-lg font-extrabold mb-2 text-white">{title}</div>

@@ -159,7 +159,7 @@ export default function SupportPage() {
             {screenshotUrl ? (
               <div className="flex items-center gap-3 p-3 bg-tertiary rounded-md border-card">
                 <Image src={screenshotUrl} alt="Uploaded screenshot" width={48} height={48} unoptimized className="object-cover rounded-sm" />
-                <div className="flex-1 overflow-hidden text-sm whitespace-nowrap" style={{ textOverflow: "ellipsis" }}>
+                <div className="flex-1 overflow-hidden text-sm whitespace-nowrap text-ellipsis">
                   Screenshot uploaded successfully
                 </div>
                 <Button

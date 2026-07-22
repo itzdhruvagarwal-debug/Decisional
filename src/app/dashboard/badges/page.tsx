@@ -73,7 +73,7 @@ export default function BadgesPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <div className="mx-auto" style={{ maxWidth: "1000px" }}>
+      <div className="mx-auto max-w-1000">
         {/* Header */}
         <div className="text-center mb-8">
           <h1
@@ -116,7 +116,7 @@ export default function BadgesPage() {
 
         {/* Categories Filter */}
         <div
-          className="scrollable-tabs flex mb-4 gap-2-5" style={{ paddingBottom: "8px" }}
+          className="scrollable-tabs flex mb-4 gap-2-5 pb-2"
         >
           {categories.map((cat) => (
             <Button
@@ -135,7 +135,7 @@ export default function BadgesPage() {
 
         {/* Rarity Filter */}
         <div
-          className="scrollable-tabs flex mb-8 gap-2-5" style={{ paddingBottom: "8px" }}
+          className="scrollable-tabs flex mb-8 gap-2-5 pb-2"
         >
           {rarities.map((rarity) => (
             <Button
@@ -156,7 +156,7 @@ export default function BadgesPage() {
         {loading && (
           <div className="text-center p-10">
             <div
-              className="loading mx-auto" style={{ width: "40px", height: "40px" }}
+              className="loading mx-auto w-40 h-40"
             />
           </div>
         )}
@@ -256,7 +256,7 @@ export default function BadgesPage() {
                           </span>
                         </div>
                         <div
-                          className="w-full overflow-hidden" style={{ height: "6px", borderRadius: "3px", background: "rgba(255, 255, 255, 0.1)" }}
+                          className="w-full overflow-hidden h-6" style={{ borderRadius: "3px", background: "rgba(255, 255, 255, 0.1)" }}
                         >
                           <div
                             className="h-full" style={{ width: `${Math.min(100, Math.max(0, ((badge.currentProgress || 0) / (badge.targetProgress || 1)) * 100))}%`, background: "linear-gradient(90deg, #f59e0b, #ef4444)", borderRadius: "3px", transition: "width 0.5s ease-out" }}

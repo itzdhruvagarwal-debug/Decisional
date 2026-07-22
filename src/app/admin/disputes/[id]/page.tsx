@@ -209,7 +209,7 @@ export default async function AdminDisputeDetailPage({
         <div className="card">
           <h2 className="mb-4">
             📊 Influencer Deal History{" "}
-            <span className="text-sm font-normal text-secondary" style={{ marginLeft: "8px" }}>
+            <span className="text-sm font-normal text-secondary ml-2">
               (last 10 deals, excl. this dispute)
             </span>
           </h2>
@@ -220,7 +220,7 @@ export default async function AdminDisputeDetailPage({
         <div className="card">
           <h2 className="mb-4">
             🏢 Brand Deal History{" "}
-            <span className="text-sm font-normal text-secondary" style={{ marginLeft: "8px" }}>
+            <span className="text-sm font-normal text-secondary ml-2">
               (last 10 deals, excl. this dispute)
             </span>
           </h2>

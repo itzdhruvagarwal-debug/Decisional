@@ -156,7 +156,7 @@ export default function ReferralList() {
                           : "var(--color-accent-amber)" }}
                   >
                     <span
-                      className="rounded-full" style={{ width: "6px", height: "6px", background: "currentColor" }}
+                      className="rounded-full h-6" style={{ width: "6px", background: "currentColor" }}
                     ></span>
                     {ref.status}
                   </span>

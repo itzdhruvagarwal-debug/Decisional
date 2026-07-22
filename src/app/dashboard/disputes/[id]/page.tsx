@@ -150,7 +150,7 @@ function DisputeTimeline({ dispute }: Readonly<DisputeTimelineProps>) {
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3 py-2 border-bottom">
           <div
-            className="flex-shrink-0 rounded-full" style={{ width: "8px", height: "8px", background: "var(--color-primary)" }}
+            className="flex-shrink-0 rounded-full bg-color-primary" style={{ width: "8px", height: "8px" }}
           />
           <div className="flex-1">
             <div className="text-sm font-semibold">
@@ -642,7 +642,7 @@ export default function DisputeDetailPage({
               >
                 EXPLANATION
               </div>
-              <p className="text-sm" style={{ lineHeight: "1.6" }}>
+              <p className="text-sm leading-1-6">
                 {analysis.explanation}
               </p>
             </div>

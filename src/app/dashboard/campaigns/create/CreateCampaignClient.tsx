@@ -462,7 +462,7 @@ export default function CreateCampaignClient() {
       )}
 
       <Card
-        className="p-8" style={{ borderRadius: "24px" }}
+        className="p-8 rounded-3xl"
       >
         {error && (
           <div
@@ -729,7 +729,7 @@ export default function CreateCampaignClient() {
               required
               min={formData.requiresProduct ? 0 : 1000}
               fullWidth
-              className="text-secondary bg-tertiary" style={{ cursor: "not-allowed" }}
+              className="text-secondary bg-tertiary cursor-not-allowed"
             />
             <Input
               label="Budget Per Influencer (Approx Rs)"
@@ -741,7 +741,7 @@ export default function CreateCampaignClient() {
               required
               min={formData.requiresProduct ? 0 : 500}
               fullWidth
-              className="text-secondary bg-tertiary" style={{ cursor: "not-allowed" }}
+              className="text-secondary bg-tertiary cursor-not-allowed"
             />
           </div>
 
@@ -881,7 +881,7 @@ export default function CreateCampaignClient() {
                   onChange={(e) =>
                     handleDeliverableChange(index, "type", e.target.value)
                   }
-                  style={{ flex: 2 }}
+                  className="flex-2"
                 >
                   {deliverableTypes.map((t) => (
                     <option key={t.value} value={t.value}>
@@ -902,7 +902,7 @@ export default function CreateCampaignClient() {
                   }
                   min={1}
                   max={10}
-                  style={{ width: "80px" }}
+                  className="w-80"
                 />
                 
                 <span className="text-secondary text-sm">

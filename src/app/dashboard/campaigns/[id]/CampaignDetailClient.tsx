@@ -248,7 +248,7 @@ function ApplicationsList({
             key={application.id}
             className="grid gap-4 p-4 bg-tertiary rounded-md border-card" style={{ gridTemplateColumns: "minmax(0, 1fr) auto" }}
           >
-            <div style={{ minWidth: 0 }}>
+            <div className="min-w-0">
               <div
                 className="flex items-center flex-wrap mb-2 gap-2-5"
               >
@@ -654,7 +654,7 @@ export default function CampaignDetailClient({
   if (loading) {
     return (
       <div className="flex justify-center p-10">
-        <span className="loading" style={{ width: "40px", height: "40px" }} />
+        <span className="loading w-40 h-40" />
       </div>
     );
   }
@@ -740,7 +740,7 @@ export default function CampaignDetailClient({
               </Button>
             )}
             {user?.userType === "INFLUENCER" && hasApplied && (
-              <Button variant="secondary" disabled style={{ opacity: 0.7, cursor: "not-allowed" }}>
+              <Button variant="secondary" disabled className="cursor-not-allowed" style={{ opacity: 0.7 }}>
                 Applied ({applicationStatus || "PENDING"})
               </Button>
             )}
@@ -828,14 +828,14 @@ export default function CampaignDetailClient({
 
       <section className="card">
         <h3 className="mb-2">Description</h3>
-        <p className="text-secondary" style={{ whiteSpace: "pre-line" }}>
+        <p className="text-secondary whitespace-pre-line">
           {campaign.description || "No description provided."}
         </p>
       </section>
 
       <section className="card">
         <h3 className="mb-2">Requirements</h3>
-        <p className="text-secondary" style={{ whiteSpace: "pre-line" }}>
+        <p className="text-secondary whitespace-pre-line">
           {campaign.requirements || "No requirements provided."}
         </p>
       </section>
@@ -843,7 +843,7 @@ export default function CampaignDetailClient({
       {campaign.guidelines && (
         <section className="card">
           <h3 className="mb-2">Guidelines</h3>
-          <p className="text-secondary" style={{ whiteSpace: "pre-line" }}>
+          <p className="text-secondary whitespace-pre-line">
             {campaign.guidelines}
           </p>
         </section>

@@ -1146,3 +1146,32 @@ input:checked+.slider:before {
 
 
 
+
+/* Extra rounded */
+.rounded-3xl { border-radius: 24px; }
+.grid-auto-250 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.grid-auto-200 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.bg-color-primary { background: var(--color-primary); }
+.ml-auto { margin-left: auto; }
+.w-15 { width: 60px; }
+.h-9 { height: 36px; }
+.h-10 { height: 40px; }
+.h-16 { height: 64px; }
+.h-5 { height: 20px; }
+.h-4-5 { height: 18px; }
+.h-5-5 { height: 22px; }
+.h-7 { height: 28px; }
+.h-3 { height: 12px; }
+.h-3-5 { height: 14px; }
+.w-9 { width: 36px; }
+.w-20 { width: 80px; }
+.w-25 { width: 100px; }
+.w-35 { width: 140px; }
+.w-40-px { width: 160px; }
+.mb-1-5 { margin-bottom: 6px; }
+.mb-2-5 { margin-bottom: 10px; }
+.mb-3-5 { margin-bottom: 14px; }
+.mb-4-5 { margin-bottom: 18px; }
+.mt-1-5 { margin-top: 6px; }
+.mt-3-5 { margin-top: 14px; }
+.px-4-5-py-3-5 { padding: 14px 18px; }

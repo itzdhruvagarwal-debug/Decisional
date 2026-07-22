@@ -174,24 +174,24 @@ function DealSkeleton() {
         <div className="skeleton flex-shrink-0 rounded-md" style={{ width: 48, height: 48 }} />
         <div className="flex-1">
           <div className="skeleton rounded-md" style={{ height: 16, width: "60%", marginBottom: 8 }} />
-          <div className="skeleton rounded-md" style={{ height: 13, width: "40%" }} />
+          <div className="skeleton rounded-md h-3" style={{ width: "40%" }} />
         </div>
-        <div className="skeleton rounded-full" style={{ height: 28, width: 100 }} />
+        <div className="skeleton rounded-full h-7 w-25" />
       </div>
-      <div className="flex justify-between items-center flex-wrap" style={{ gap: 16 }}>
+      <div className="flex justify-between items-center flex-wrap gap-4">
         <div className="flex flex-1" style={{ gap: 24 }}>
           <div>
-            <div className="skeleton rounded-sm" style={{ height: 11, width: 70, marginBottom: 6 }} />
-            <div className="skeleton rounded-sm" style={{ height: 14, width: 90 }} />
+            <div className="skeleton rounded-sm h-3 mb-1-5" style={{ width: 70 }} />
+            <div className="skeleton rounded-sm h-3-5" style={{ width: 90 }} />
           </div>
           <div>
-            <div className="skeleton rounded-sm" style={{ height: 11, width: 50, marginBottom: 6 }} />
-            <div className="skeleton rounded-sm" style={{ height: 14, width: 60 }} />
+            <div className="skeleton rounded-sm h-3 mb-1-5" style={{ width: 50 }} />
+            <div className="skeleton rounded-sm h-3-5 w-15" />
           </div>
         </div>
         <div className="text-right">
-          <div className="skeleton rounded-sm" style={{ height: 11, width: 50, marginBottom: 6, marginLeft: "auto" }} />
-          <div className="skeleton rounded-sm" style={{ height: 22, width: 90, marginLeft: "auto" }} />
+          <div className="skeleton rounded-sm h-3 mb-1-5 ml-auto" style={{ width: 50 }} />
+          <div className="skeleton rounded-sm h-5-5 ml-auto" style={{ width: 90 }} />
         </div>
       </div>
     </div>
@@ -265,7 +265,7 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
             className="flex gap-4 items-center"
           >
             <div
-              className="flex items-center justify-center font-bold text-lg flex-shrink-0 overflow-hidden rounded-md bg-gradient-primary text-white" style={{ width: "48px", height: "48px" }}
+              className="flex items-center justify-center font-bold text-lg flex-shrink-0 overflow-hidden rounded-md bg-gradient-primary text-white w-48 h-48"
             >
               {deal.brand.logo ? (
                 <Image
@@ -480,8 +480,8 @@ export default function DealsPage() {
           <div className="grid-3 mb-6">
             {[1, 2, 3].map((i) => (
               <div key={i} className="card text-center p-6">
-                <div className="skeleton" style={{ height: 36, width: 80, borderRadius: 8, margin: "0 auto 8px" }} />
-                <div className="skeleton rounded-sm mx-auto" style={{ height: 13, width: 100 }} />
+                <div className="skeleton h-9 w-20 rounded-md" style={{ margin: "0 auto 8px" }} />
+                <div className="skeleton rounded-sm mx-auto h-3 w-25" />
               </div>
             ))}
           </div>
@@ -494,7 +494,7 @@ export default function DealsPage() {
           <div className="grid-3 mb-6">
             <div className="card text-center">
               <div
-                className="font-extrabold text-3xl" style={{ color: "var(--color-accent-cyan)" }}
+                className="font-extrabold text-3xl text-cyan"
               >
                 {dealStats.active}
               </div>
@@ -532,7 +532,7 @@ export default function DealsPage() {
 
           {/* Filter */}
           <div
-            className="scrollable-tabs flex gap-2 mb-6" style={{ paddingBottom: "8px" }}
+            className="scrollable-tabs flex gap-2 mb-6 pb-2"
           >
             {[
               { key: "all", label: "All Deals" },
@@ -590,7 +590,7 @@ export default function DealsPage() {
             variant="secondary"
             disabled={currentPage <= 1}
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            style={{ minWidth: "100px" }}
+            className="min-w-100"
           >
             ← Previous
           </Button>
@@ -601,7 +601,7 @@ export default function DealsPage() {
             variant="secondary"
             disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage((p) => p + 1)}
-            style={{ minWidth: "100px" }}
+            className="min-w-100"
           >
             Next →
           </Button>

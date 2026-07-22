@@ -255,7 +255,7 @@ export default function SocialTab({
                     className="flex items-center gap-3 mb-5"
                 >
                     <div
-                        className="flex items-center justify-center text-2xl rounded-md" style={{ width: "48px", height: "48px", background: "#FF0000" }}
+                        className="flex items-center justify-center text-2xl rounded-md w-48 h-48" style={{ background: "#FF0000" }}
                     >
                         🎥
                     </div>

@@ -153,7 +153,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
       {/* ── Custom Header ── */}
       <div className="flex items-center mb-5" style={{ padding: "0 0 20px 0", borderBottom: "1px solid rgba(255,255,255,0.07)", gap: "14px" }}>
         <div style={css.iconBox}>{icon}</div>
-        <div className="flex-1" style={{ minWidth: 0 }}>
+        <div className="flex-1 min-w-0">
           <div className="text-base font-bold" style={{ color: "var(--color-text-primary,#fff)" }}>{title}</div>
           <div className="text-xs" style={{ color: "var(--color-text-secondary,#9ca3af)", marginTop: "3px" }}>
             Select the period for this {type === "report" ? "report" : "export"}

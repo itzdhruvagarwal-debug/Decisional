@@ -322,7 +322,7 @@ export default function PayoutsAdminPage() {
         </div>
 
         <div
-          className="card px-4-py-3" style={{ minWidth: "220px", borderColor: "rgba(99, 102, 241, 0.22)" }}
+          className="card px-4-py-3 min-w-220" style={{ borderColor: "rgba(99, 102, 241, 0.22)" }}
         >
           <div className="text-muted text-xs">
             Current view
@@ -340,7 +340,7 @@ export default function PayoutsAdminPage() {
             type="button"
             variant={filter === status ? "primary" : "secondary"}
             onClick={() => setFilter(status)}
-            style={{ minHeight: "40px", padding: "8px 14px" }}
+            className="min-h-40" style={{ padding: "8px 14px" }}
           >
             {status}
           </Button>
@@ -350,7 +350,7 @@ export default function PayoutsAdminPage() {
           type="button"
           variant="ghost"
           onClick={() => { fetchWithdrawals(); }}
-          style={{ minHeight: "40px", padding: "8px 14px" }}
+          className="min-h-40" style={{ padding: "8px 14px" }}
         >
           Refresh
         </Button>

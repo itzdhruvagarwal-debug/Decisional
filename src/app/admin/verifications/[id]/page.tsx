@@ -208,7 +208,7 @@ export default async function VerificationDetailPage({
                           const { reason } = verificationRejectSchema.parse({ reason: rawReason });
                           await rejectDocument(doc.id, user.id, reason);
                         }}
-                        className="flex gap-2" style={{ flex: 2 }}
+                        className="flex gap-2 flex-2"
                       >
                         <Input
                           name="reason"
@@ -238,12 +238,12 @@ export default async function VerificationDetailPage({
 
         <div className="flex gap-4 flex-wrap items-center">
           <form action={approveUser.bind(null, user.id)}>
-            <Button variant="success" size="lg" style={{ minWidth: "220px" }}>
+            <Button variant="success" size="lg" className="min-w-220">
               ✅ Full Verification Pass
             </Button>
           </form>
 
-          <div style={{ height: "40px", width: "1px", background: "var(--color-border)" }} />
+          <div className="h-40" style={{ width: "1px", background: "var(--color-border)" }} />
 
           <form
             action={async (formData) => {
@@ -260,7 +260,7 @@ export default async function VerificationDetailPage({
               required
               style={{ flex: "1 1 260px", height: "52px" }}
             />
-            <Button type="submit" variant="danger" size="lg" style={{ minWidth: "180px" }}>
+            <Button type="submit" variant="danger" size="lg" className="min-w-180">
               ❌ Hard Reject
             </Button>
           </form>

@@ -203,7 +203,7 @@ function PricingCard({
       </div>
 
       <div
-        className="text-center p-5 bg-tertiary rounded-xl border-card" style={{ marginBottom: "30px" }}
+        className="text-center p-5 bg-tertiary rounded-xl border-card mb-7-5"
       >
         <div
           className="font-extrabold text-primary" style={{ fontSize: "clamp(34px, 8vw, 42px)" }}
@@ -218,7 +218,7 @@ function PricingCard({
       </div>
 
       <ul
-        className="flex-1 flex flex-col gap-3 p-0 list-none" style={{ marginBottom: "30px" }}
+        className="flex-1 flex flex-col gap-3 p-0 list-none mb-7-5"
       >
         {features.map((feature) => (
           <li
@@ -283,7 +283,7 @@ function FAQItem({ question, answer, delay }: Readonly<FAQItemProps>) {
           </svg>
         </summary>
         <div
-          className="text-secondary text-sm" style={{ padding: "0 20px 20px", lineHeight: "1.6" }}
+          className="text-secondary text-sm leading-1-6" style={{ padding: "0 20px 20px" }}
         >
           {answer}
         </div>

@@ -109,7 +109,7 @@ export default async function VerifiedQueuePage() {
                           type="text"
                           name="reason"
                           placeholder="Rejection reason..."
-                          className="text-sm px-3-py-1" style={{ width: "180px" }}
+                          className="text-sm px-3-py-1 w-180"
                         />
                         <Button type="submit" variant="danger" className="text-sm px-4-py-2">
                           Reject

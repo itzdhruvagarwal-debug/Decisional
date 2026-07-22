@@ -597,8 +597,7 @@ function ConversationsSidebar({ state }: ConversationsSidebarProps) {
             return (
               <div className="text-center p-5">
                 <span
-                  className="loading"
-                  style={{ width: "24px", height: "24px" }}
+                  className="loading w-24 h-24"
                 />
               </div>
             );
@@ -629,7 +628,7 @@ function ConversationsSidebar({ state }: ConversationsSidebarProps) {
               }}
             >
               <div
-                className="flex items-center justify-center font-bold flex-shrink-0 rounded-full text-white" style={{ width: "48px", height: "48px", background: "var(--gradient-card)" }}
+                className="flex items-center justify-center font-bold flex-shrink-0 rounded-full text-white w-48 h-48 bg-gradient-card"
               >
                 {conv.avatar ? (
                   <Image
@@ -643,12 +642,12 @@ function ConversationsSidebar({ state }: ConversationsSidebarProps) {
                   (conv.name || "U").charAt(0).toUpperCase()
                 )}
               </div>
-              <div className="flex-1 text-left" style={{ minWidth: 0 }}>
+              <div className="flex-1 text-left min-w-0">
                 <div
                   className="flex justify-between mb-1" style={{ alignItems: "baseline" }}
                 >
                   <span
-                    className="font-extrabold text-sm overflow-hidden text-primary whitespace-nowrap" style={{ textOverflow: "ellipsis", maxWidth: "140px" }}
+                    className="font-extrabold text-sm overflow-hidden text-primary whitespace-nowrap text-ellipsis" style={{ maxWidth: "140px" }}
                   >
                     {conv.name}
                   </span>
@@ -673,7 +672,7 @@ function ConversationsSidebar({ state }: ConversationsSidebarProps) {
                   </span>
                   {conv.unread > 0 && (
                     <span
-                      className="font-bold text-white text-2xs rounded-full px-2-py-05" style={{ background: "var(--color-primary)" }}
+                      className="font-bold text-white text-2xs rounded-full px-2-py-05 bg-color-primary"
                     >
                       {conv.unread}
                     </span>
@@ -719,7 +718,7 @@ function ChatHeader({ state }: ChatPanelProps) {
         ←
       </Button>
       <div
-        className="flex items-center justify-center font-bold rounded-full text-white" style={{ width: "40px", height: "40px", background: "var(--gradient-card)" }}
+        className="flex items-center justify-center font-bold rounded-full text-white w-40 h-40 bg-gradient-card"
       >
         {selectedChat.avatar ? (
           <Image
@@ -741,7 +740,7 @@ function ChatHeader({ state }: ChatPanelProps) {
           {isPeerTyping ? "Typing..." : selectedChat.userType}
         </div>
       </div>
-      <div className="flex gap-2 items-center" style={{ marginLeft: "auto" }}>
+      <div className="flex gap-2 items-center ml-auto">
         <Button
           variant="secondary"
           size="sm"

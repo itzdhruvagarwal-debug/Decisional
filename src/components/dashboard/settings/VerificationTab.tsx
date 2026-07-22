@@ -287,7 +287,7 @@ function DigiLockerCardComponent({
             }}
         >
             <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div className="flex-1" style={{ minWidth: "200px" }}>
+                <div className="flex-1 min-w-200">
                     <div className="flex items-center mb-2 gap-2-5">
                         <span className="text-2xl">🏛️</span>
                         <div>
@@ -308,7 +308,7 @@ function DigiLockerCardComponent({
                     aria-busy={isConnectingDigiLocker}
                     onClick={handleDigiLockerConnect}
                     disabled={isConnectingDigiLocker}
-                    className="border-none whitespace-nowrap" style={{ background: "linear-gradient(135deg, #16a34a, #22c55e)", minWidth: "180px" }}
+                    className="border-none whitespace-nowrap min-w-180" style={{ background: "linear-gradient(135deg, #16a34a, #22c55e)" }}
                 >
                     {isConnectingDigiLocker ? "Connecting..." : "🔗 Connect DigiLocker"}
                 </Button>
@@ -341,7 +341,7 @@ function Tier1CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "isBrand
                     className="flex items-center gap-2-5"
                 >
                     <div
-                        className="flex items-center justify-center rounded-full" style={{ width: "30px", height: "30px", background: "rgba(99,102,241,0.12)" }}
+                        className="flex items-center justify-center rounded-full w-30 h-30" style={{ background: "rgba(99, 102, 241, 0.12)" }}
                     >
                         🪪
                     </div>
@@ -404,7 +404,7 @@ function Tier2CardComponent({ tier, isBrand, renderDocRow }: TierCardProps) {
                     className="flex items-center gap-2-5"
                 >
                     <div
-                        className="flex items-center justify-center rounded-full" style={{ width: "30px", height: "30px", background: "rgba(245,158,11,0.12)" }}
+                        className="flex items-center justify-center rounded-full w-30 h-30" style={{ background: "rgba(245, 158, 11, 0.12)" }}
                     >
                         🏦
                     </div>
@@ -470,7 +470,7 @@ function Tier3CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "isBrand
                     className="flex items-center gap-2-5"
                 >
                     <div
-                        className="flex items-center justify-center rounded-full" style={{ width: "30px", height: "30px", background: "rgba(16,185,129,0.12)" }}
+                        className="flex items-center justify-center rounded-full w-30 h-30" style={{ background: "rgba(16, 185, 129, 0.12)" }}
                     >
                         🏢
                     </div>
@@ -545,8 +545,7 @@ export default function VerificationTab({
                 className="flex justify-center p-10"
             >
                 <span
-                    className="loading"
-                    style={{ width: "32px", height: "32px" }}
+                    className="loading w-32 h-32"
                 />
             </div>
         );
@@ -739,7 +738,7 @@ function TierStatusCardComponent({
                     </span>
                 </div>
                 <div
-                    className="overflow-hidden bg-tertiary rounded-full" style={{ height: "6px" }}
+                    className="overflow-hidden bg-tertiary rounded-full h-6"
                 >
                     <div
                         className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, (trustScore / 900) * 100))}%`, background: `linear-gradient(90deg, ${tierColors[tier]}, #10b981)`, transition: "width 0.6s" }}
@@ -765,7 +764,7 @@ function Step1MandatoryCardComponent({
                 className="flex items-center gap-2-5 mb-3"
             >
                 <div
-                    className="flex items-center justify-center rounded-full" style={{ width: "30px", height: "30px", background: "rgba(99,102,241,0.12)" }}
+                    className="flex items-center justify-center rounded-full w-30 h-30" style={{ background: "rgba(99, 102, 241, 0.12)" }}
                 >
                     🔑
                 </div>

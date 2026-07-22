@@ -21,7 +21,7 @@ export function Pagination({ page, totalPages, setPage, marginTop = "12px" }: Re
         onClick={() => setPage((p) => Math.max(1, p - 1))}
         disabled={page === 1}
         aria-label="Go to previous page"
-        style={{ minWidth: "90px" }}
+        className="min-w-90"
       >
         Previous
       </Button>
@@ -37,7 +37,7 @@ export function Pagination({ page, totalPages, setPage, marginTop = "12px" }: Re
         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
         disabled={page === totalPages}
         aria-label="Go to next page"
-        style={{ minWidth: "90px" }}
+        className="min-w-90"
       >
         Next
       </Button>

@@ -102,7 +102,7 @@ export default async function AdminUsersPage({
             Search, review, ban, and reactivate platform accounts.
           </p>
         </div>
-        <div className="card px-4-py-3" style={{ minWidth: "180px" }}>
+        <div className="card px-4-py-3 min-w-180">
           <div className="text-muted text-xs">
             Matching users
           </div>
@@ -117,7 +117,7 @@ export default async function AdminUsersPage({
           defaultValue={query}
           style={{ minWidth: "260px", flex: "1 1 320px" }}
         />
-        <Select name="type" defaultValue={userType} style={{ width: "180px" }}>
+        <Select name="type" defaultValue={userType} className="w-180">
           <option value="ALL">All roles</option>
           <option value="INFLUENCER">Influencers</option>
           <option value="BRAND">Brands</option>
@@ -195,7 +195,7 @@ export default async function AdminUsersPage({
                               name.charAt(0).toUpperCase()
                             )}
                           </div>
-                          <div style={{ minWidth: 0 }}>
+                          <div className="min-w-0">
                             <div className="font-extrabold">{name}</div>
                             <div className="text-muted text-xs">
                               {user.email}
@@ -241,7 +241,7 @@ export default async function AdminUsersPage({
               <input type="hidden" name="userId" value={user.id} />
               <Select
                 name="badgeId"
-                className="text-xs px-2-py-05" style={{ width: "140px", height: "30px" }}
+                className="text-xs px-2-py-05 h-30" style={{ width: "140px" }}
                 defaultValue=""
                 required
               >
@@ -255,7 +255,7 @@ export default async function AdminUsersPage({
                 variant="primary"
                 size="sm"
                 type="submit"
-                style={{ height: "30px", padding: "0 8px" }}
+                className="h-30" style={{ padding: "0 8px" }}
               >
                 Grant
               </Button>
@@ -265,20 +265,20 @@ export default async function AdminUsersPage({
                             <>
                               {user.status === "FLAGGED" && (
                                 <form action={unbanUser.bind(null, user.id)}>
-                                  <Button variant="success" size="sm" type="submit" style={{ height: "30px" }}>
+                                  <Button variant="success" size="sm" type="submit" className="h-30">
                                     Approve (Activate)
                                   </Button>
                                 </form>
                               )}
                               {isBanned ? (
                                 <form action={unbanUser.bind(null, user.id)}>
-                                  <Button variant="secondary" size="sm" type="submit" style={{ height: "30px" }}>
+                                  <Button variant="secondary" size="sm" type="submit" className="h-30">
                                     Unban
                                   </Button>
                                 </form>
                               ) : (
                                 <form action={banUser.bind(null, user.id)}>
-                                  <Button variant="danger" size="sm" type="submit" style={{ height: "30px" }}>
+                                  <Button variant="danger" size="sm" type="submit" className="h-30">
                                     Ban
                                   </Button>
                                 </form>

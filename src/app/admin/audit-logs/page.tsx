@@ -95,7 +95,7 @@ export default async function AdminAuditLogsPage() {
                         {new Date(log.timestamp).toLocaleString("en-IN")}
                       </td>
                       <td className="p-card">
-                        <div className="text-sm overflow-hidden text-primary whitespace-nowrap" style={{ maxWidth: "240px", textOverflow: "ellipsis" }} title={log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : ""}>
+                        <div className="text-sm overflow-hidden text-primary whitespace-nowrap max-w-240 text-ellipsis" title={log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : ""}>
                           {log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : "-"}
                         </div>
                       </td>

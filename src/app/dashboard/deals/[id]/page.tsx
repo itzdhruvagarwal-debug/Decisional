@@ -562,7 +562,7 @@ function EngagementCard({
               ["Cost/Eng.", `₹${(roi.costPerEngagement / 100).toFixed(2)}`],
             ] as [string, string][]).map(([label, val]) => (
               <div key={label} className="p-2 bg-secondary rounded-sm">
-                <div className="text-muted text-2xs" style={{ marginBottom: "2px" }}>{label}</div>
+                <div className="text-muted text-2xs mb-0-5">{label}</div>
                 <div className="text-sm font-extrabold" style={{ color: roi.roiPercentage >= 0 ? "var(--color-success)" : "var(--color-error)" }}>{val}</div>
               </div>
             ))}
@@ -1261,7 +1261,7 @@ function DealContractCard({
               {influencerObligations.length > 0 && (
                 <div>
                   <div className="text-sm text-muted mb-2">Influencer obligations</div>
-                  <ul className="grid text-secondary text-sm gap-1-5" style={{ paddingLeft: "18px" }}>
+                  <ul className="grid text-secondary text-sm gap-1-5 pl-4-5">
                     {influencerObligations.slice(0, 4).map((item) => (
                       <li key={item}>{item}</li>
                     ))}
@@ -1271,7 +1271,7 @@ function DealContractCard({
               {brandObligations.length > 0 && (
                 <div>
                   <div className="text-sm text-muted mb-2">Brand obligations</div>
-                  <ul className="grid text-secondary text-sm gap-1-5" style={{ paddingLeft: "18px" }}>
+                  <ul className="grid text-secondary text-sm gap-1-5 pl-4-5">
                     {brandObligations.slice(0, 4).map((item) => (
                       <li key={item}>{item}</li>
                     ))}
@@ -1485,7 +1485,7 @@ export default function DealDetailPage() {
                     />
                     <PaymentRow label="Gateway fee" value={formatCurrency(gatewayFee)} />
                     <div
-                      className="mt-2 flex justify-between text-base border-top" style={{ paddingTop: "8px" }}
+                      className="mt-2 flex justify-between text-base border-top pt-2"
                     >
                       <span className="font-semibold">Brand payable</span>
                       <span className="gradient-text font-extrabold">
@@ -1498,7 +1498,7 @@ export default function DealDetailPage() {
                     <PaymentRow label="Deal amount" value={formatCurrency(deal.amount)} />
                     <PaymentRow label="Platform fee" value="Paid by brand" />
                     <div
-                      className="mt-2 flex justify-between text-base border-top" style={{ paddingTop: "8px" }}
+                      className="mt-2 flex justify-between text-base border-top pt-2"
                     >
                       <span className="font-semibold">You receive</span>
                       <span className="gradient-text font-extrabold">
@@ -1548,7 +1548,7 @@ export default function DealDetailPage() {
                       </div>
                     </div>
                   )}
-                  <div className="grid gap-2-5" style={{ marginTop: "14px" }}>
+                  <div className="grid gap-2-5 mt-3-5">
                       {isInfluencer &&
                       ["ADDRESS_PENDING", "READY_TO_DISPATCH"].includes(
                         deal.productFulfillmentStatus || "",
@@ -1626,7 +1626,7 @@ export default function DealDetailPage() {
                   className="flex items-center gap-3"
                 >
                   <div
-                    className="flex items-center justify-center font-bold overflow-hidden rounded-md" style={{ width: "48px", height: "48px", background: "var(--gradient-card)" }}
+                    className="flex items-center justify-center font-bold overflow-hidden rounded-md w-48 h-48 bg-gradient-card"
                   >
                     {deal.brand?.logo ? (
                       <Image
@@ -1778,7 +1778,7 @@ export default function DealDetailPage() {
                         View Submission Link
                       </a>
                     ) : (
-                      <span className="text-xs text-muted" style={{ fontStyle: "italic" }}>No link submitted</span>
+                      <span className="text-xs text-muted italic">No link submitted</span>
                     )}
                   </div>
                   
@@ -2053,7 +2053,7 @@ export default function DealDetailPage() {
               <span
                 role="status"
                 aria-live="polite"
-                className="text-sm font-semibold text-secondary" style={{ alignSelf: "center", marginLeft: "8px" }}
+                className="text-sm font-semibold text-secondary ml-2" style={{ alignSelf: "center" }}
               >
                 {ratingLabelMap[reviewRating] || "Excellent"}
               </span>
@@ -2092,7 +2092,7 @@ export default function DealDetailPage() {
                 setIsSubmitting(false);
               }
             }}
-            style={{ minWidth: "160px" }}
+            className="min-w-160"
           >
             {isSubmitting ? <span className="loading" /> : "Submit Review"}
           </Button>

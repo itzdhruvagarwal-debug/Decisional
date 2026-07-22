@@ -204,7 +204,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
   if (loading) {
     content = (
       <div className="flex justify-center p-10">
-        <span className="loading" style={{ width: "40px", height: "40px" }} />
+        <span className="loading w-40 h-40" />
       </div>
     );
   } else if (error) {
@@ -238,7 +238,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
                   campaign.brand.companyName.slice(0, 2).toUpperCase()
                 )}
               </div>
-              <div className="flex-1" style={{ minWidth: 0 }}>
+              <div className="flex-1 min-w-0">
                 <div className="campaign-card-brand-name">
                   {campaign.brand.companyName}
                 </div>
@@ -344,7 +344,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
             placeholder="Search campaigns..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ minWidth: "220px" }}
+            className="min-w-220"
           />
 
           <Select
@@ -353,7 +353,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
               setSortBy(e.target.value);
               setPage(1);
             }}
-            style={{ minWidth: "160px" }}
+            className="min-w-160"
           >
             <option value="newest">Newest</option>
             <option value="budget_high">Budget: High to Low</option>
@@ -363,7 +363,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
         </div>
 
         <div
-          className="flex gap-2 mt-4" style={{ overflowX: "auto" }}
+          className="flex gap-2 mt-4 overflow-x-auto"
         >
           {categories.map((category) => (
             <Button

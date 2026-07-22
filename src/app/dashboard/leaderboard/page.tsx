@@ -235,7 +235,7 @@ export default function LeaderboardPage() {
 
         {/* Filter Controls */}
         <div
-          className="scrollable-tabs flex gap-3 mb-6 items-center" style={{ paddingBottom: "8px" }}
+          className="scrollable-tabs flex gap-3 mb-6 items-center pb-2"
         >
           {/* Influencer/Brand Toggle */}
           <div
@@ -288,7 +288,7 @@ export default function LeaderboardPage() {
             <Select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="px-2-py-1" style={{ width: "180px" }}
+              className="px-2-py-1 w-180"
             >
               <option value="">📂 All Categories</option>
               {categories.map((c) => (
