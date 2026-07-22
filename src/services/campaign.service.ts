@@ -11,7 +11,7 @@ import { calculateTotalAmount } from "@/lib/razorpay";
 import { resolveBrandPlatformFee, type PlatformFeeSnapshot } from "@/lib/platform-fees";
 import { checkAndAwardBadges } from "@/lib/gamification-engine";
 import { checkTrustGate } from "@/lib/trust-engine";
-import { assertAccountCanTransact, calculateProductHandlingFee, assertSufficientBalance } from "@/lib/utils";
+import { assertAccountCanTransact, calculateProductHandlingFee, assertSufficientBalance, normalizeStringArray } from "@/lib/utils";
 import { NotificationService } from "@/services/notification.service";
 import { createActivityLog } from "@/lib/audit";
 import { AppError } from "@/lib/errors";
@@ -25,23 +25,6 @@ export class TierError extends AppError {
     this.name = "TierError";
     this.tierError = tierError;
   }
-}
-
-function normalizeStringArray(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => String(item || "").trim())
-      .filter(Boolean);
-  }
-
-  if (typeof value === "string") {
-    return value
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean);
-  }
-
-  return [];
 }
 
 function safeStringCast(val: unknown): string {

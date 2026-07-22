@@ -6,7 +6,7 @@ import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { formatCurrency, formatDate } from "@/lib/utils-client";
+import { formatCurrency, formatDate, normalizeStringArray } from "@/lib/utils-client";
 import EmptyState from "@/components/ui/EmptyState";
 import { Button, Input, Textarea } from "@/components/ui";
 
@@ -73,21 +73,6 @@ interface CampaignApplication {
     estimatedViews: number;
     estimatedCpvPaise: number;
   };
-}
-
-function normalizeStringArray(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => String(item || "").trim())
-      .filter(Boolean);
-  }
-  if (typeof value === "string") {
-    return value
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean);
-  }
-  return [];
 }
 
 function normalizeDeliverables(value: unknown): CampaignDetail["deliverables"] {

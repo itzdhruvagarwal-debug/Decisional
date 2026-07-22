@@ -5,7 +5,7 @@ import Image from "next/image";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { useEffect, useMemo, useState } from "react";
-import { formatCurrency, formatNumber } from "@/lib/utils-client";
+import { formatCurrency, formatNumber, normalizeStringArray } from "@/lib/utils-client";
 import { Pagination } from "@/components/ui/pagination";
 import EmptyState from "@/components/ui/EmptyState";
 import { Button, Input, Select } from "@/components/ui";
@@ -50,23 +50,6 @@ const deliverableLabels: Record<string, string> = {
   YOUTUBE_VIDEO: "YT Video",
   YOUTUBE_SHORT: "YT Short",
 };
-
-function normalizeStringArray(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => String(item || "").trim())
-      .filter(Boolean);
-  }
-
-  if (typeof value === "string") {
-    return value
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean);
-  }
-
-  return [];
-}
 
 function normalizeDeliverables(
   value: unknown,
