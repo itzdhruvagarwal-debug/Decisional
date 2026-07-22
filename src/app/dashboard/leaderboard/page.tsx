@@ -96,7 +96,7 @@ export default function LeaderboardPage() {
     leaderboardContent = Array.from({ length: 5 }).map((_, idx) => (
       <div
         key={"skeleton-" + idx}
-        className="rounded-lg bg-secondary" style={{ height: "64px", opacity: 0.5, animation: "pulse 2s ease-in-out infinite" }}
+        className="rounded-lg bg-secondary opacity-50" style={{ height: "64px", animation: "pulse 2s ease-in-out infinite" }}
       />
     ));
   } else if (error) {
@@ -224,7 +224,7 @@ export default function LeaderboardPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1
-            className="font-extrabold text-3xl" style={{ background: "linear-gradient(135deg, #f59e0b, #ef4444)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+            className="font-extrabold text-3xl bg-gradient-amber-rose" style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
           >
             🏆 Leaderboard
           </h1>

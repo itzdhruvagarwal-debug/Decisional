@@ -192,7 +192,7 @@ function HeroProductMockup() {
           /* ============ INFLUENCER DASHBOARD MOCK ============ */
           <div className="flex flex-col gap-5">
             {/* Top Stats Row */}
-            <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
+            <div className="grid gap-4 grid-auto-140">
               <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
                 <span className="text-muted block text-xs">Wallet Balance</span>
                 <span className="text-xl font-extrabold text-white">₹42,850</span>
@@ -257,7 +257,7 @@ function HeroProductMockup() {
           /* ============ BRAND DASHBOARD MOCK ============ */
           <div className="flex flex-col gap-5">
             {/* Top Stats Row */}
-            <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
+            <div className="grid gap-4 grid-auto-140">
               <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
                 <span className="text-muted block text-xs">Active Campaigns</span>
                 <span className="text-xl font-extrabold text-white">3 Campaigns</span>
@@ -330,7 +330,7 @@ export default function HomePage() {
         />
         {/* Gradient Overlay */}
         <div
-          className="absolute inset-0" style={{ zIndex: 0, background:
+          className="absolute inset-0 z-0" style={{ background:
               "radial-gradient(circle at center, rgba(10, 10, 20, 0.6) 0%, var(--color-bg-primary) 95%)" }}
         />
 
@@ -340,7 +340,7 @@ export default function HomePage() {
           >
             {/* Badge — fully inline-styled for guaranteed rendering */}
             <div
-              className="inline-flex items-center gap-2 font-bold rounded-full text-xs uppercase mb-6 tracking-wider" style={{ background: "rgba(99, 102, 241, 0.15)", border: "1px solid rgba(129, 140, 248, 0.5)", padding: "6px 20px", color: "#a5b4fc" }}
+              className="inline-flex items-center gap-2 font-bold rounded-full text-xs uppercase mb-6 tracking-wider bg-indigo-15 text-indigo-light" style={{ border: "1px solid rgba(129, 140, 248, 0.5)", padding: "6px 20px" }}
             >
               🇮🇳 India-first creator collaboration workspace
             </div>
@@ -447,7 +447,7 @@ export default function HomePage() {
         <Button
           type="button"
           variant="ghost"
-          className="hide-mobile absolute flex flex-col items-center gap-2 cursor-pointer border-none p-0 bg-none" style={{ bottom: "32px", left: "50%", transform: "translateX(-50%)", animation: "float 3s ease-in-out infinite", opacity: 0.5 }}
+          className="hide-mobile absolute flex flex-col items-center gap-2 cursor-pointer border-none p-0 bg-none opacity-50" style={{ bottom: "32px", left: "50%", transform: "translateX(-50%)", animation: "float 3s ease-in-out infinite" }}
           onClick={() => {
             document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
           }}
@@ -837,7 +837,7 @@ export default function HomePage() {
               Ready to Get Started?
             </h2>
             <p
-              className="mb-8 leading-relaxed" style={{ fontSize: "clamp(15px, 2vw, 18px)", opacity: 0.9, maxWidth: "500px", margin: "0 auto 32px" }}
+              className="mb-8 leading-relaxed opacity-90" style={{ fontSize: "clamp(15px, 2vw, 18px)", maxWidth: "500px", margin: "0 auto 32px" }}
             >
               Create a free account, install the PWA, and manage campaigns from
               web, iOS home screen, or Android home screen.

@@ -740,7 +740,7 @@ export default function CampaignDetailClient({
               </Button>
             )}
             {user?.userType === "INFLUENCER" && hasApplied && (
-              <Button variant="secondary" disabled className="cursor-not-allowed" style={{ opacity: 0.7 }}>
+              <Button variant="secondary" disabled className="cursor-not-allowed opacity-70">
                 Applied ({applicationStatus || "PENDING"})
               </Button>
             )}
@@ -749,7 +749,7 @@ export default function CampaignDetailClient({
           </div>
         </div>
 
-        <div className="campaign-detail-stats grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))" }}>
+        <div className="campaign-detail-stats grid gap-3 grid-auto-160">
           <div className="campaign-detail-stat m-0">
             <div className="text-xs text-muted">Per Influencer</div>
             <div className="text-xl font-bold">

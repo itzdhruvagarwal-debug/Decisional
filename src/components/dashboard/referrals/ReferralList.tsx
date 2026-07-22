@@ -104,7 +104,7 @@ export default function ReferralList() {
                     className="flex items-center gap-3"
                   >
                     <div
-                      className="flex items-center justify-center font-bold text-sm rounded-full text-white" style={{ width: "36px", height: "36px", background:
+                      className="flex items-center justify-center font-bold text-sm rounded-full text-white w-36 h-36" style={{ background:
                           "linear-gradient(135deg, var(--color-primary), var(--color-accent-purple))" }}
                     >
                       {ref.name.charAt(0).toUpperCase()}

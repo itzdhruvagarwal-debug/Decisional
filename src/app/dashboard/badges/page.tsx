@@ -77,7 +77,7 @@ export default function BadgesPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1
-            className="font-extrabold mb-2 text-3xl" style={{ background: "linear-gradient(135deg, #f59e0b, #ef4444)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+            className="font-extrabold mb-2 text-3xl bg-gradient-amber-rose" style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
           >
             🏆 Badges & Achievements
           </h1>
@@ -179,7 +179,7 @@ export default function BadgesPage() {
         {/* Badges Grid */}
         {!loading && !error && (
           <div
-            className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}
+            className="grid gap-5 grid-auto-280"
           >
             <AnimatePresence mode="popLayout">
               {filteredBadges.length === 0 ? (

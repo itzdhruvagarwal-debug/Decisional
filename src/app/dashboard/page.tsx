@@ -48,7 +48,7 @@ function DashboardErrorFallback({ user }: Readonly<{ user: Session["user"] }>) {
           !
         </div>
         <h2
-          className="gradient-text text-2xl mb-3 font-extrabold" style={{ background: "linear-gradient(135deg, #f43f5e, #fb923c)" }}
+          className="gradient-text text-2xl mb-3 font-extrabold bg-gradient-rose-orange"
         >
           Dashboard Interrupted
         </h2>

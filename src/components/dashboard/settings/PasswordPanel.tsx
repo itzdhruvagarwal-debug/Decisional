@@ -243,7 +243,7 @@ export default function PasswordPanel({
                                             new: !showPassword.new,
                                         })
                                     }
-                                    className="absolute cursor-pointer text-base border-none bg-none" style={{ right: "12px", top: "50%", transform: "translateY(-50%)", opacity: 0.7 }}
+                                    className="absolute cursor-pointer text-base border-none bg-none opacity-70" style={{ right: "12px", top: "50%", transform: "translateY(-50%)" }}
                                 >
                                     {showPassword.new ? "👁️" : "🙈"}
                                 </Button>
@@ -275,7 +275,7 @@ export default function PasswordPanel({
                                             confirm: !showPassword.confirm,
                                         })
                                     }
-                                    className="absolute cursor-pointer text-base border-none bg-none" style={{ right: "12px", top: "50%", transform: "translateY(-50%)", opacity: 0.7 }}
+                                    className="absolute cursor-pointer text-base border-none bg-none opacity-70" style={{ right: "12px", top: "50%", transform: "translateY(-50%)" }}
                                 >
                                     {showPassword.confirm ? "👁️" : "🙈"}
                                 </Button>
@@ -423,7 +423,7 @@ function CurrentPasswordSection({
               current: !prev.current,
             }))
           }
-          className="absolute cursor-pointer text-base border-none bg-none" style={{ right: "12px", top: "50%", transform: "translateY(-50%)", opacity: 0.7 }}
+          className="absolute cursor-pointer text-base border-none bg-none opacity-70" style={{ right: "12px", top: "50%", transform: "translateY(-50%)" }}
         >
           {showPassword.current ? "👁️" : "🙈"}
         </Button>

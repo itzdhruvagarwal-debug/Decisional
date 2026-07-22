@@ -456,7 +456,7 @@ export default function CreateCampaignClient() {
             className="rounded-full" style={{ width: "8px", height: "8px", background: "#6366f1", boxShadow: "0 0 12px #6366f1" }}
           />
           <span className="font-medium text-sm text-primary">
-            Inviting: <strong style={{ color: "#6366f1" }}>@{invitedInfluencer.instagramHandle || invitedInfluencer.youtubeHandle || invitedInfluencer.displayName}</strong> ({invitedInfluencer.displayName})
+            Inviting: <strong className="text-indigo">@{invitedInfluencer.instagramHandle || invitedInfluencer.youtubeHandle || invitedInfluencer.displayName}</strong> ({invitedInfluencer.displayName})
           </span>
         </div>
       )}
@@ -554,9 +554,7 @@ export default function CreateCampaignClient() {
                 placeholder="Enter custom category..."
                 value={customCategory}
                 onChange={(e) => setCustomCategory(e.target.value)}
-                style={{
-                  maxWidth: "200px"
-                }}
+                className="max-w-200"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -592,12 +590,9 @@ export default function CreateCampaignClient() {
             onChange={(e) =>
               setFormData({ ...formData, applicationDeadline: e.target.value })
             }
-            className="mb-4"
+            className="mb-4 color-scheme-dark"
             error={fieldErrors.applicationDeadline}
             fullWidth
-            style={{
-              colorScheme: "dark",
-            }}
           />
 
           <div className="grid-2 gap-4 mb-4">
@@ -666,7 +661,7 @@ export default function CreateCampaignClient() {
             />
           </div>
 
-          <div className="mb-4 grid gap-4" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+          <div className="mb-4 grid gap-4 grid-cols-3">
             <Input
               label="Min Followers Req."
               id="min-followers"
@@ -757,9 +752,7 @@ export default function CreateCampaignClient() {
               required
               error={fieldErrors.contentDeadline}
               fullWidth
-              style={{
-                colorScheme: "dark",
-              }}
+              className="color-scheme-dark"
             />
             <Input
               label="Posting Deadline"
@@ -772,9 +765,7 @@ export default function CreateCampaignClient() {
               required
               error={fieldErrors.postingDeadline}
               fullWidth
-              style={{
-                colorScheme: "dark",
-              }}
+              className="color-scheme-dark"
             />
           </div>
 

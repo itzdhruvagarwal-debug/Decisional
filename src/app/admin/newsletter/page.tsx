@@ -37,7 +37,7 @@ export default async function AdminNewsletterPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
+      <div className="grid gap-4 mb-6 grid-auto-240">
         <div className="card" style={{ padding: "18px 20px" }}>
           <div className="text-muted text-xs mb-1">Total Subscribers</div>
           <div className="text-3xl font-extrabold text-primary-light">{stats.total}</div>

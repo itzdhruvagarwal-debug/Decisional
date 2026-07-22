@@ -29,7 +29,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         />
         {error && (
           <span
-            className="input-error-message text-xs mt-1" style={{ color: "var(--color-accent-rose, #f43f5e)" }}
+            className="input-error-message text-xs mt-1 text-rose"
           >
             {error}
           </span>

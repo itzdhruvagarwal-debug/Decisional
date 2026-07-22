@@ -258,7 +258,7 @@ export default async function VerificationDetailPage({
               name="reason"
               placeholder="Final rejection context..."
               required
-              style={{ flex: "1 1 260px", height: "52px" }}
+              className="h-13" style={{ flex: "1 1 260px" }}
             />
             <Button type="submit" variant="danger" size="lg" className="min-w-180">
               ❌ Hard Reject

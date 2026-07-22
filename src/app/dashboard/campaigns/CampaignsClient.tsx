@@ -226,7 +226,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
   } else {
     content = (
       <div
-        className="campaign-card-grid grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}
+        className="campaign-card-grid grid gap-4 grid-auto-280"
       >
         {filteredCampaigns.map((campaign) => (
           <article key={campaign.id} className="card campaign-card" style={{ padding: "18px" }}>
@@ -271,7 +271,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
             </div>
 
             <div
-              className="campaign-card-metrics grid gap-2 mb-3" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
+              className="campaign-card-metrics grid gap-2 mb-3 grid-cols-3"
             >
               <div>
                 <div className="text-xs text-muted">

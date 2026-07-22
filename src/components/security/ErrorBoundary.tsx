@@ -97,7 +97,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
         >
           <div className="text-3xl">⚠️</div>
           <h3
-            className="text-lg font-bold m-0" style={{ color: "var(--color-text, #fff)" }}
+            className="text-lg font-bold m-0 text-text-primary"
           >
             Something went wrong
           </h3>

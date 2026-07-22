@@ -47,14 +47,14 @@ function InactivityWarningModal({
         className="w-full text-center rounded-xl" style={{ background: "var(--color-surface, #111)", border: "1px solid rgba(245, 158, 11, 0.3)", padding: "36px 32px", maxWidth: "400px", boxShadow: "0 24px 60px rgba(0,0,0,0.6)", animation: "slideDown 0.25s ease-out" }}
       >
         <div
-          className="flex items-center justify-center rounded-full text-3xl" style={{ width: "64px", height: "64px", background: "rgba(245, 158, 11, 0.12)", border: "2px solid rgba(245, 158, 11, 0.4)", margin: "0 auto 20px" }}
+          className="flex items-center justify-center rounded-full text-3xl bg-amber-12" style={{ width: "64px", height: "64px", border: "2px solid rgba(245, 158, 11, 0.4)", margin: "0 auto 20px" }}
         >
           !
         </div>
 
         <h2
           id="inactivity-title"
-          className="text-xl font-bold mb-3" style={{ color: "var(--color-text, #fff)" }}
+          className="text-xl font-bold mb-3 text-text-primary"
         >
           Session Expiring Soon
         </h2>

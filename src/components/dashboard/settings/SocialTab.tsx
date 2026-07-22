@@ -156,7 +156,7 @@ export default function SocialTab({
                     className="flex items-center gap-3 mb-5"
                 >
                     <div
-                        className="flex items-center justify-center text-2xl rounded-md" style={{ width: "48px", height: "48px", background:
+                        className="flex items-center justify-center text-2xl rounded-md w-48 h-48" style={{ background:
                                 "linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)" }}
                     >
                         📸

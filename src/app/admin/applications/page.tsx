@@ -86,7 +86,7 @@ export default async function AdminApplicationsPage() {
             return (
               <div
                 key={app.id}
-                className="card p-6" style={{ border: "1px solid rgba(239, 68, 68, 0.2)", background: "rgba(239, 68, 68, 0.02)" }}
+                className="card p-6 bg-rose-02" style={{ border: "1px solid rgba(239, 68, 68, 0.2)" }}
               >
                 {/* Header row */}
                 <div

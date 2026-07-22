@@ -45,12 +45,12 @@ export default function LegalPage() {
               payment, privacy, tax-readiness, and dispute workflows.
             </p>
 
-            <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "18px" }}>
+            <div className="grid grid-auto-240" style={{ gap: "18px" }}>
               {legalPages.map((page) => (
                 <Link
                   key={page.href}
                   href={page.href}
-                  className="card grid border-card text-inherit no-underline gap-2-5" style={{ padding: "22px", background: "rgba(255,255,255,0.02)" }}
+                  className="card grid border-card text-inherit no-underline gap-2-5 bg-glass" style={{ padding: "22px" }}
                 >
                   <h2 className="text-lg text-primary" style={{ fontWeight: 850 }}>
                     {page.title}

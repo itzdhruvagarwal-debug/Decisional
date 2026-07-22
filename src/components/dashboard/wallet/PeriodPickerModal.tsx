@@ -154,8 +154,8 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
       <div className="flex items-center mb-5" style={{ padding: "0 0 20px 0", borderBottom: "1px solid rgba(255,255,255,0.07)", gap: "14px" }}>
         <div style={css.iconBox}>{icon}</div>
         <div className="flex-1 min-w-0">
-          <div className="text-base font-bold" style={{ color: "var(--color-text-primary,#fff)" }}>{title}</div>
-          <div className="text-xs" style={{ color: "var(--color-text-secondary,#9ca3af)", marginTop: "3px" }}>
+          <div className="text-base font-bold text-text-primary">{title}</div>
+          <div className="text-xs text-secondary-muted" style={{ marginTop: "3px" }}>
             Select the period for this {type === "report" ? "report" : "export"}
           </div>
         </div>
@@ -163,7 +163,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
           variant="ghost"
           onClick={onClose}
           aria-label="Close period picker"
-          className="cursor-pointer flex-shrink-0 border-none leading-none p-1 bg-none text-2xl" style={{ color: "var(--color-text-secondary,#9ca3af)" }}
+          className="cursor-pointer flex-shrink-0 border-none leading-none p-1 bg-none text-2xl text-secondary-muted"
         >✕</Button>
       </div>
 
@@ -182,7 +182,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
           </Select>
           <div style={css.infoBox}>
             📅 Report period:{" "}
-            <strong style={{ color: "var(--color-text-primary,#fff)" }}>
+            <strong className="text-text-primary">
               1 Apr {fy.split("-")[0]} – 31 Mar 20{fy.split("-")[1]}
             </strong>
           </div>
@@ -213,7 +213,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
               <span style={css.sectionLabel}>Custom Range</span>
               <div className="grid gap-3 mb-4" style={{ gridTemplateColumns: "1fr 1fr" }}>
                 <div>
-                  <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary,#9ca3af)" }}>From</div>
+                  <div className="text-xs mb-1 text-secondary-muted">From</div>
                   <Input
                     type="date" style={css.dateInput}
                     aria-label="Start date"
@@ -224,7 +224,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
                   />
                 </div>
                 <div>
-                  <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary,#9ca3af)" }}>To</div>
+                  <div className="text-xs mb-1 text-secondary-muted">To</div>
                   <Input
                     type="date" style={css.dateInput}
                     aria-label="End date"
@@ -247,9 +247,9 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
             selectedPreset && (
               <div style={css.infoBox}>
                 📅{" "}
-                <strong style={{ color: "var(--color-text-primary,#fff)" }}>{toIso(selectedPreset.start)}</strong>
+                <strong className="text-text-primary">{toIso(selectedPreset.start)}</strong>
                 {" → "}
-                <strong style={{ color: "var(--color-text-primary,#fff)" }}>{toIso(selectedPreset.end)}</strong>
+                <strong className="text-text-primary">{toIso(selectedPreset.end)}</strong>
               </div>
             )
           )}
@@ -261,7 +261,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
         <Button
           onClick={onClose}
           variant="secondary"
-          className="text-sm font-semibold cursor-pointer rounded-lg bg-none" style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.12)", color: "var(--color-text-secondary,#9ca3af)" }}
+          className="text-sm font-semibold cursor-pointer rounded-lg bg-none text-secondary-muted" style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.12)" }}
         >
           Cancel
         </Button>

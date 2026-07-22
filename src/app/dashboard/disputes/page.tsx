@@ -115,7 +115,7 @@ export default function DisputesPage() {
                       </span>
                     </div>
                     <span
-                      className="text-xs font-semibold text-amber rounded-md px-2-py-1" style={{ background: "rgba(245,158,11,0.1)" }}
+                      className="text-xs font-semibold text-amber rounded-md px-2-py-1 bg-amber-subtle"
                     >
                       {dispute.type} Issue
                     </span>

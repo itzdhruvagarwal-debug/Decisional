@@ -36,7 +36,7 @@ export default function Footer() {
     >
       <div className="container">
         <div
-          className="grid mb-10" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "40px" }}
+          className="grid mb-10 grid-auto-180" style={{ gap: "40px" }}
         >
           <div style={{ gridColumn: "span 1" }}>
             <Logo />

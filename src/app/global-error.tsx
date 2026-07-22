@@ -34,9 +34,7 @@ export default function GlobalError({
             ⚠️
           </div>
 
-          <h1 className="gradient-text text-xl font-extrabold mb-4" style={{
-            background: "linear-gradient(135deg, #f43f5e, #fb923c)"
-          }}>
+          <h1 className="gradient-text text-xl font-extrabold mb-4 bg-gradient-rose-orange">
             System Malfunction
           </h1>
 
@@ -46,7 +44,7 @@ export default function GlobalError({
           </p>
 
           {error.digest && (
-            <div className="text-xs text-muted mb-8 p-3 rounded-md border-card font-mono" style={{ background: "rgba(255,255,255,0.03)" }}>
+            <div className="text-xs text-muted mb-8 p-3 rounded-md border-card font-mono bg-glass-light">
               Digest: {error.digest}
             </div>
           )}

@@ -133,7 +133,7 @@ function Toggle({
   return (
     <label
       aria-label={label}
-      className="relative inline-block h-24" style={{ width: "44px", flex: "0 0 auto" }}
+      className="relative inline-block h-24 w-11" style={{ flex: "0 0 auto" }}
     >
       <input
         type="checkbox"

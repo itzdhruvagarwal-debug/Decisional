@@ -199,7 +199,7 @@ export default function InfluencerProfilePage() {
           <div className="flex gap-2 flex-wrap">
             {profile.isFeatured && (
               <span
-                className="text-xs font-extrabold inline-flex items-center gap-1 text-amber rounded-xl uppercase px-2-py-1" style={{ background: "rgba(245, 158, 11, 0.15)", border: "1px solid rgba(245, 158, 11, 0.25)" }}
+                className="text-xs font-extrabold inline-flex items-center gap-1 text-amber rounded-xl uppercase px-2-py-1 bg-amber-15" style={{ border: "1px solid rgba(245, 158, 11, 0.25)" }}
               >
                 ⭐ Featured Creator
               </span>

@@ -647,7 +647,7 @@ function ConversationsSidebar({ state }: ConversationsSidebarProps) {
                   className="flex justify-between mb-1" style={{ alignItems: "baseline" }}
                 >
                   <span
-                    className="font-extrabold text-sm overflow-hidden text-primary whitespace-nowrap text-ellipsis" style={{ maxWidth: "140px" }}
+                    className="font-extrabold text-sm overflow-hidden text-primary whitespace-nowrap text-ellipsis max-w-140"
                   >
                     {conv.name}
                   </span>
@@ -706,7 +706,7 @@ function ChatHeader({ state }: ChatPanelProps) {
 
   return (
     <div
-      className="border-b-card flex items-center gap-3 px-6-py-4 backdrop-blur-lg" style={{ background: "rgba(18, 18, 31, 0.8)" }}
+      className="border-b-card flex items-center gap-3 px-6-py-4 backdrop-blur-lg bg-dark-80"
     >
       <Button
         variant="ghost"
@@ -808,7 +808,7 @@ function MessageList({ state }: ChatPanelProps) {
                     ⚠️ Warning: Message Blocked
                   </div>
                   <p
-                    className="text-sm leading-normal" style={{ filter: "blur(5px)", userSelect: "none", opacity: 0.5 }}
+                    className="text-sm leading-normal select-none opacity-50" style={{ filter: "blur(5px)" }}
                   >
                     {msg.content}
                   </p>
@@ -934,7 +934,7 @@ function ChatPanel({ state }: ChatPanelProps) {
         <div
           className="flex-1 flex items-center justify-center flex-col gap-4 text-secondary bg-tertiary"
         >
-          <div className="text-3xl" style={{ opacity: 0.5 }}>💬</div>
+          <div className="text-3xl opacity-50">💬</div>
           <p>Select a conversation to start messaging</p>
         </div>
       )}

@@ -88,7 +88,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           onClick={handleBackdropClick}
-          className="fixed flex items-center justify-center p-5 inset-0 backdrop-blur" style={{ zIndex: 1000, background: "rgba(0,0,0,0.7)" }}
+          className="fixed flex items-center justify-center p-5 inset-0 backdrop-blur z-1000" style={{ background: "rgba(0,0,0,0.7)" }}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.92, y: 24 }}
@@ -103,7 +103,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
             {/* Header */}
             <div className="flex items-center justify-between relative mb-6">
               <div>
-                <div className="font-extrabold text-xs uppercase mb-1" style={{ color: "#6366f1", letterSpacing: "3px" }}>
+                <div className="font-extrabold text-xs uppercase mb-1 text-indigo tracking-widest">
                   Share &amp; Earn
                 </div>
                 <h2 className="font-extrabold text-2xl text-white m-0">
@@ -121,7 +121,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
             </div>
 
             {/* Referral link */}
-            <div className="mb-6 flex items-center gap-3 rounded-xl min-w-0" style={{ background: "rgba(255, 255, 255, 0.04)", border: "1px solid rgba(255, 255, 255, 0.08)", padding: "14px 16px" }}>
+            <div className="mb-6 flex items-center gap-3 rounded-xl min-w-0 bg-glass-card" style={{ border: "1px solid rgba(255, 255, 255, 0.08)", padding: "14px 16px" }}>
               <div className="flex-1 min-w-0">
                 <div className="font-bold text-muted mb-1 uppercase text-2xs tracking-wider">
                   Your Referral Link
@@ -156,7 +156,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
             </div>
 
             {/* Share channels */}
-            <div className="grid gap-3 mb-4" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+            <div className="grid gap-3 mb-4 grid-cols-3">
               {channels.map((ch) => (
                 <motion.a
                   key={ch.id}
@@ -182,7 +182,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
               <motion.button
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                 onClick={handleNativeShare}
-                className="w-full text-sm font-bold cursor-pointer flex items-center justify-center gap-2 p-3.5 rounded-lg" style={{ background: "rgba(99, 102, 241, 0.12)", border: "1px solid rgba(99, 102, 241, 0.3)", color: "#a5b4fc" }}
+                className="w-full text-sm font-bold cursor-pointer flex items-center justify-center gap-2 p-3.5 rounded-lg bg-indigo-12 text-indigo-light" style={{ border: "1px solid rgba(99, 102, 241, 0.3)" }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
@@ -264,7 +264,7 @@ export default function ReferralsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
-          <h1 className="mb-3 font-extrabold" style={{ fontSize: "42px", background: "linear-gradient(135deg, #10b981, #06b6d4, #3b82f6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: "-1.5px" }}>
+          <h1 className="mb-3 font-extrabold text-5xl" style={{ background: "linear-gradient(135deg, #10b981, #06b6d4, #3b82f6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: "-1.5px" }}>
             🤝 Partner Network
           </h1>
           <p className="text-secondary text-lg max-w-600 mx-auto">
@@ -274,7 +274,7 @@ export default function ReferralsPage() {
 
         {/* Tabs */}
         <div className="flex justify-center mb-10">
-          <div className="scrollable-tabs flex gap-2 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", padding: "6px", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="scrollable-tabs flex gap-2 rounded-xl bg-glass-light" style={{ padding: "6px", border: "1px solid rgba(255,255,255,0.08)" }}>
             {(["overview", "history"] as const).map((tab) => (
               <Button
                 key={tab}
@@ -299,11 +299,11 @@ export default function ReferralsPage() {
             >
               {/* Code Card */}
               <motion.div
-                className="text-center relative overflow-hidden mb-10 backdrop-blur-lg rounded-3xl" style={{ padding: "clamp(24px, 5vw, 48px)", background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.08)", boxShadow: "0 40px 80px rgba(0, 0, 0, 0.3)" }}
+                className="text-center relative overflow-hidden mb-10 backdrop-blur-lg rounded-3xl bg-glass-light" style={{ padding: "clamp(24px, 5vw, 48px)", border: "1px solid rgba(255, 255, 255, 0.08)", boxShadow: "0 40px 80px rgba(0, 0, 0, 0.3)" }}
               >
                 <div className="absolute rounded-full bg-emerald-subtle pointer-events-none" style={{ top: -60, right: -60, width: "250px", height: "250px", filter: "blur(100px)" }} />
 
-                <div className="text-xs font-extrabold mb-5 text-emerald uppercase" style={{ letterSpacing: "3px" }}>
+                <div className="text-xs font-extrabold mb-5 text-emerald uppercase tracking-widest">
                   Your Network Identifier
                 </div>
 
@@ -349,7 +349,7 @@ export default function ReferralsPage() {
                   onClick={() => setShareOpen(true)}
                   id="share-referral-btn"
                   aria-label="Share referral link"
-                  className="font-extrabold cursor-pointer inline-flex items-center mb-8 border-none rounded-xl text-sm text-white gap-2-5" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", padding: "14px 32px", boxShadow: "0 8px 24px rgba(99,102,241,0.3)", letterSpacing: "0.3px" }}
+                  className="font-extrabold cursor-pointer inline-flex items-center mb-8 border-none rounded-xl text-sm text-white gap-2-5 bg-gradient-indigo" style={{ padding: "14px 32px", boxShadow: "0 8px 24px rgba(99,102,241,0.3)", letterSpacing: "0.3px" }}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="18" cy="5" r="3" />
@@ -362,7 +362,7 @@ export default function ReferralsPage() {
                 </motion.button>
 
                 {/* Stats */}
-                <div className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
+                <div className="grid gap-5 grid-auto-180">
                   <StatBox label="Current Rank" value={stats.tier.label} color="#10b981" icon="🎖️" />
                   <StatBox
                     label={stats.tier.revenueShare > 0 ? "Network Share" : "Fee Bonus"}
@@ -381,7 +381,7 @@ export default function ReferralsPage() {
                     <span className="text-xl text-emerald">{stats.activeReferrals}</span> / {nextTierMin} ACTIVE PARTNERS
                   </div>
                 </div>
-                <div className="overflow-hidden mb-8 rounded-2xl" style={{ height: "14px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                <div className="overflow-hidden mb-8 rounded-2xl h-3-5-rem bg-glass-card" style={{ border: "1px solid rgba(255,255,255,0.05)" }}>
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
@@ -389,7 +389,7 @@ export default function ReferralsPage() {
                     className="h-full" style={{ background: "linear-gradient(90deg, #10b981, #06b6d4, #3b82f6)", boxShadow: "0 0 20px rgba(16,185,129,0.4)" }}
                   />
                 </div>
-                <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))" }}>
+                <div className="grid gap-4 grid-auto-160">
                   <TierCard name="BRONZE"   percent="1%"     min="10"   active={stats.tier.label === "Bronze"}   color="#cd7f32" delay={0.1} />
                   <TierCard name="SILVER"   percent="1.5%"   min="50"   active={stats.tier.label === "Silver"}   color="#c0c0c0" delay={0.2} />
                   <TierCard name="GOLD"     percent="2%"     min="100"  active={stats.tier.label === "Gold"}     color="#ffd700" delay={0.3} />
@@ -399,9 +399,9 @@ export default function ReferralsPage() {
               </div>
 
               {/* Steps */}
-              <div className="p-10 rounded-3xl" style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+              <div className="p-10 rounded-3xl bg-glass" style={{ border: "1px solid rgba(255, 255, 255, 0.05)" }}>
                 <h3 className="mb-8 text-center font-extrabold text-2xl">Partnership Roadmap 🗺️</h3>
-                <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))" }}>
+                <div className="grid gap-6 grid-auto-250">
                   <StepCard num="01" title="Broadcast"  desc="Deploy your unique code across your socials and network."       icon="📢" />
                   <StepCard num="02" title="Activation" desc="Referrals join and complete their first verified brand deal."    icon="⚡" />
                   <StepCard num="03" title="Monetize"   desc="Unlock scaling GMV shares and permanent fee discounts."         icon="💎" />
@@ -415,7 +415,7 @@ export default function ReferralsPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.4 }}
-              className="p-8 rounded-3xl" style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.05)" }}
+              className="p-8 rounded-3xl bg-glass" style={{ border: "1px solid rgba(255, 255, 255, 0.05)" }}
             >
               <ReferralList />
             </motion.div>
@@ -482,7 +482,7 @@ interface StepCardProps {
 }
 function StepCard({ num, title, desc, icon }: StepCardProps) {
   return (
-    <div className="p-6 relative rounded-3xl" style={{ background: "rgba(0, 0, 0, 0.2)", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+    <div className="p-6 relative rounded-3xl bg-black-20" style={{ border: "1px solid rgba(255, 255, 255, 0.05)" }}>
       <div className="absolute text-3xl font-extrabold" style={{ top: "12px", right: "20px", color: "rgba(255,255,255,0.03)" }}>{num}</div>
       <div className="mb-4 text-3xl">{icon}</div>
       <div className="text-lg font-extrabold mb-2 text-white">{title}</div>

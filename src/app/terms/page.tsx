@@ -41,7 +41,7 @@ export default function TermsPage() {
 
               <section className="card" style={panelStyle}>
                 <h2 style={headingStyle}>2. Roles and eligibility</h2>
-                <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
+                <div className="grid gap-4 grid-auto-240">
                   <div style={miniPanelStyle}>
                     <h3 style={subheadingStyle}>Brands</h3>
                     <p>Brands create briefs, fund campaign budgets, review work, approve content, and follow applicable advertising, tax, and platform rules.</p>

@@ -308,7 +308,7 @@ function DigiLockerCardComponent({
                     aria-busy={isConnectingDigiLocker}
                     onClick={handleDigiLockerConnect}
                     disabled={isConnectingDigiLocker}
-                    className="border-none whitespace-nowrap min-w-180" style={{ background: "linear-gradient(135deg, #16a34a, #22c55e)" }}
+                    className="border-none whitespace-nowrap min-w-180 bg-gradient-green"
                 >
                     {isConnectingDigiLocker ? "Connecting..." : "🔗 Connect DigiLocker"}
                 </Button>
@@ -341,7 +341,7 @@ function Tier1CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "isBrand
                     className="flex items-center gap-2-5"
                 >
                     <div
-                        className="flex items-center justify-center rounded-full w-30 h-30" style={{ background: "rgba(99, 102, 241, 0.12)" }}
+                        className="flex items-center justify-center rounded-full w-30 h-30 bg-indigo-12"
                     >
                         🪪
                     </div>
@@ -369,7 +369,7 @@ function Tier1CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "isBrand
                     </span>
                 ) : (
                     <span
-                        className="font-bold text-xs rounded-2xl px-2-py-1" style={{ color: "#6366f1", background: "rgba(99,102,241,0.1)" }}
+                        className="font-bold text-xs rounded-2xl px-2-py-1 text-indigo bg-indigo-10"
                     >
                         🔒 Required to start
                     </span>
@@ -404,7 +404,7 @@ function Tier2CardComponent({ tier, isBrand, renderDocRow }: TierCardProps) {
                     className="flex items-center gap-2-5"
                 >
                     <div
-                        className="flex items-center justify-center rounded-full w-30 h-30" style={{ background: "rgba(245, 158, 11, 0.12)" }}
+                        className="flex items-center justify-center rounded-full w-30 h-30 bg-amber-12"
                     >
                         🏦
                     </div>
@@ -435,7 +435,7 @@ function Tier2CardComponent({ tier, isBrand, renderDocRow }: TierCardProps) {
                     </span>
                 ) : (
                     <span
-                        className="font-bold text-xs text-amber rounded-2xl px-2-py-1" style={{ background: "rgba(245,158,11,0.1)" }}
+                        className="font-bold text-xs text-amber rounded-2xl px-2-py-1 bg-amber-subtle"
                     >
                         {getTierUpgradeActionText(tier, isBrand)}
                     </span>
@@ -507,7 +507,7 @@ function Tier3CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "isBrand
                 )}
             </div>
             <div
-                className="text-xs text-secondary mb-3 rounded-sm px-3-py-2" style={{ background: "rgba(16,185,129,0.06)" }}
+                className="text-xs text-secondary mb-3 rounded-sm px-3-py-2 bg-emerald-06"
             >
                 💡 You only need <strong>one</strong> of the documents below to unlock the unlimited tier.
             </div>
@@ -725,7 +725,7 @@ function TierStatusCardComponent({
             </div>
             <div className="mt-4">
                 <div
-                    className="flex justify-between" style={{ marginBottom: "5px" }}
+                    className="flex justify-between mb-1"
                 >
                     <span
                         className="text-xs text-secondary"
@@ -764,7 +764,7 @@ function Step1MandatoryCardComponent({
                 className="flex items-center gap-2-5 mb-3"
             >
                 <div
-                    className="flex items-center justify-center rounded-full w-30 h-30" style={{ background: "rgba(99, 102, 241, 0.12)" }}
+                    className="flex items-center justify-center rounded-full w-30 h-30 bg-indigo-12"
                 >
                     🔑
                 </div>
@@ -829,7 +829,7 @@ function Step1MandatoryCardComponent({
                             </span>
                         ) : (
                             <span
-                                className="text-xs font-semibold text-amber rounded-2xl px-2-py-1" style={{ background: "rgba(245,158,11,0.1)" }}
+                                className="text-xs font-semibold text-amber rounded-2xl px-2-py-1 bg-amber-subtle"
                             >
                                 ⚠ Pending
                             </span>

@@ -397,7 +397,7 @@ export default function BankAccountManager({
               <div className="font-semibold flex items-center gap-2">
                 {acc.bankName === "UPI" ? `UPI: ${acc.upiId}` : `${acc.bankName} — ${acc.accountName}`}
                 {acc.isDefault && (
-                  <span className="font-extrabold text-xs px-2-py-05 rounded-full" style={{ background: "rgba(99, 102, 241, 0.15)", color: "var(--color-accent-indigo)" }}>
+                  <span className="font-extrabold text-xs px-2-py-05 rounded-full bg-indigo-15" style={{ color: "var(--color-accent-indigo)" }}>
                     Default
                   </span>
                 )}

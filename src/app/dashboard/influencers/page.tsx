@@ -137,7 +137,7 @@ export default function DiscoverInfluencersPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
-          <h1 className="mb-3 font-extrabold tracking-normal" style={{ fontSize: "42px", background: "linear-gradient(135deg, #8b5cf6, #3b82f6, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          <h1 className="mb-3 font-extrabold tracking-normal text-5xl" style={{ background: "linear-gradient(135deg, #8b5cf6, #3b82f6, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
             Discover Top Creators
           </h1>
           <p className="text-secondary text-lg max-w-600 mx-auto">
@@ -258,7 +258,7 @@ export default function DiscoverInfluencersPage() {
             <Button
               type="submit"
               variant="primary"
-              className="font-extrabold text-sm" style={{ height: "52px", padding: "0 32px" }}
+              className="font-extrabold text-sm h-13" style={{ padding: "0 32px" }}
             >
               Search
             </Button>
@@ -342,7 +342,7 @@ export default function DiscoverInfluencersPage() {
 
                   <div className="flex gap-2 flex-wrap mb-5">
                     {inf.isFeatured && (
-                      <span className="font-extrabold inline-flex items-center gap-1 text-xs rounded-md text-amber uppercase px-2-py-1" style={{ background: "rgba(245, 158, 11, 0.15)", border: "1px solid rgba(245, 158, 11, 0.25)" }}>
+                      <span className="font-extrabold inline-flex items-center gap-1 text-xs rounded-md text-amber uppercase px-2-py-1 bg-amber-15" style={{ border: "1px solid rgba(245, 158, 11, 0.25)" }}>
                         ⭐ Featured
                       </span>
                     )}

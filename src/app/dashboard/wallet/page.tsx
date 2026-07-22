@@ -476,7 +476,7 @@ function WalletSummaryCards({ userType, walletData }: WalletSummaryCardsProps) {
   return (
     <div className="grid-4 mb-10">
       <div className="card border-none bg-gradient-primary">
-        <div className="text-sm mb-2" style={{ opacity: 0.9 }}>Available Balance</div>
+        <div className="text-sm mb-2 opacity-90">Available Balance</div>
         <div className="font-extrabold text-3xl">{formatCurrency(walletData.balance)}</div>
       </div>
 

@@ -37,7 +37,7 @@ export default async function AdminFinancialPage() {
 
       {/* Overview Metrics Grid */}
       <div
-        className="grid gap-6 mb-8" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}
+        className="grid gap-6 mb-8 grid-auto-240"
       >
         <div className="card p-6" style={{ borderLeft: "4px solid var(--color-primary-light)" }}>
           <div className="text-xs font-bold text-muted mb-2 uppercase">
@@ -81,7 +81,7 @@ export default async function AdminFinancialPage() {
       </div>
 
       <div
-        className="grid gap-6 mb-8" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))" }}
+        className="grid gap-6 mb-8 grid-auto-360"
       >
         {/* Treasury & Wallet Liabilities */}
         <div className="card p-6">
@@ -138,7 +138,7 @@ export default async function AdminFinancialPage() {
       </div>
 
       <div
-        className="grid gap-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))" }}
+        className="grid gap-6 grid-auto-360"
       >
         {/* Deal Operations Stats */}
         <div className="card p-6">
