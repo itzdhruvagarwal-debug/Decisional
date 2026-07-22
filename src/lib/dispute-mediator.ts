@@ -423,8 +423,7 @@ function determineTimelineVerdict(
 function analyzeTimelineDispute(
   dispute: FullDispute,
   deal: FullDeal,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  contract: Record<string, unknown> | null,
+  _contract: Record<string, unknown> | null,
 ): MediatorAnalysis {
   const findings: Finding[] = [];
 
@@ -812,8 +811,7 @@ function analyzeTermsViolationDispute(
 
 function analyzeGenericDispute(
   dispute: FullDispute,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  deal: FullDeal,
+  _deal: FullDeal,
 ): MediatorAnalysis {
   return {
     disputeId: dispute.id,

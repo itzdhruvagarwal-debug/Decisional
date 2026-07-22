@@ -13,8 +13,7 @@ const { combine, timestamp, json, printf, colorize, errors, metadata } = format;
 // Custom format for local development
 const prettyPrint = printf(({ level, message, timestamp, stack, ...meta }) => {
   // Clean up metadata to avoid duplicate timestamp/level inside meta
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { service, ...restMeta } = meta;
+  const { service: _service, ...restMeta } = meta;
   const metaStr = Object.keys(restMeta).length ? JSON.stringify(restMeta) : "";
   return `${timestamp} [${level}]: ${stack || message} ${metaStr}`;
 });
