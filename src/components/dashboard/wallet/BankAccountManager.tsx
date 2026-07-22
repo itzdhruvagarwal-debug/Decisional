@@ -4,6 +4,7 @@ import { fetcher } from "@/lib/fetcher";
 import EmptyState from "@/components/ui/EmptyState";
 import { logger } from "@/lib/logger-client";
 import { Button, Input } from "@/components/ui";
+import { bankAccountSchema } from "@/lib/validations/auth";
 
 interface BankAccount {
   id: string;
@@ -64,6 +65,22 @@ export default function BankAccountManager({
   const handleAddAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+
+    const validation = bankAccountSchema.safeParse({
+      payoutType,
+      accountName: newAccount.accountName,
+      accountNumber: newAccount.accountNumber,
+      ifscCode: newAccount.ifscCode,
+      bankName: newAccount.bankName,
+      upiId: newAccount.upiId,
+    });
+
+    if (!validation.success) {
+      setIsSaving(false);
+      showNotice(validation.error.issues[0]?.message || "Invalid bank account details", "error");
+      return;
+    }
+
     try {
       const payload = payoutType === "upi"
         ? {

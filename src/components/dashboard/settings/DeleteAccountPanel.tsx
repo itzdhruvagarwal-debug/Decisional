@@ -5,6 +5,7 @@ import { logger } from "@/lib/logger-client";
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { Button, Input } from "@/components/ui";
+import { deleteAccountSchema } from "@/lib/validations/auth";
 
 interface DeleteAccountPanelProps {
     isSaving: boolean;
@@ -27,8 +28,14 @@ export default function DeleteAccountPanel({
         e.preventDefault();
         setError("");
 
-        if (confirmText !== "DELETE") {
-            setError("Please type DELETE to confirm");
+        const validation = deleteAccountSchema.safeParse({
+            confirmText,
+            password,
+            reason: reason || undefined,
+        });
+
+        if (!validation.success) {
+            setError(validation.error.issues[0]?.message || "Invalid input details.");
             return;
         }
 

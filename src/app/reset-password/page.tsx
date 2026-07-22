@@ -8,6 +8,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
+import { resetPasswordSchema } from "@/lib/validations/auth";
+
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -20,30 +22,18 @@ function ResetPasswordForm() {
   >("idle");
   const [message, setMessage] = useState("");
 
-  const validatePassword = (value: string): string | null => {
-    if (value.length < 8) return "Password must be at least 8 characters";
-    if (!/[A-Z]/.test(value)) return "Password must contain an uppercase letter";
-    if (!/[a-z]/.test(value)) return "Password must contain a lowercase letter";
-    if (!/\d/.test(value)) return "Password must contain a number";
-    if (!/[^A-Za-z0-9]/.test(value)) {
-      return "Password must contain a special character";
-    }
-    return null;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMessage("");
 
-    if (password !== confirmPassword) {
-      setStatus("error");
-      setMessage("Passwords do not match");
-      return;
-    }
+    const validation = resetPasswordSchema.safeParse({
+      password,
+      confirmPassword,
+    });
 
-    const passwordError = validatePassword(password);
-    if (passwordError) {
+    if (!validation.success) {
       setStatus("error");
-      setMessage(passwordError);
+      setMessage(validation.error.issues[0]?.message || "Invalid password details");
       return;
     }
 

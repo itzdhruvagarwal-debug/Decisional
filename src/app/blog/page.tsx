@@ -5,6 +5,8 @@ import Footer from "@/components/Footer";
 import { useState } from "react";
 import { Button, Input } from "@/components/ui";
 
+import { z } from "zod";
+
 export default function BlogPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,8 +14,18 @@ export default function BlogPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setStatus(null);
+
+    const validation = z.string().email("Please enter a valid email address").safeParse(email.trim());
+    if (!validation.success) {
+      setStatus({
+        type: "error",
+        message: validation.error.issues[0]?.message || "Invalid email address",
+      });
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const res = await fetch("/api/blog/subscribe", {

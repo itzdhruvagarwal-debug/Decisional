@@ -26,3 +26,21 @@ export const createCampaignSchema = z.object({
   applicationDeadline: z.string().min(1, "Application deadline date is required"),
   postingDeadline: z.string().min(1, "Posting deadline date is required"),
 });
+
+export const createDisputeSchema = z.object({
+  type: z.enum(["TIMELINE", "DELIVERABLES", "QUALITY", "COMMUNICATION", "PAYMENT", "OTHER"]),
+  description: z.string().min(50, "Please describe the issue in at least 50 characters.").max(2000, "Description cannot exceed 2000 characters"),
+});
+
+export const createSupportSchema = z.object({
+  type: z.enum(["BUG", "FEEDBACK"]),
+  title: z
+    .string()
+    .min(5, "Title must be at least 5 characters")
+    .max(100, "Title cannot exceed 100 characters"),
+  description: z
+    .string()
+    .min(10, "Description must be at least 10 characters")
+    .max(1000, "Description cannot exceed 1000 characters"),
+  screenshotUrl: z.string().url().or(z.literal("")).optional(),
+});

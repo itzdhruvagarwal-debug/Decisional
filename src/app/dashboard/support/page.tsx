@@ -6,6 +6,8 @@ import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { Button, Input, Select, Textarea } from "@/components/ui";
 
+import { createSupportSchema } from "@/lib/validations/campaign";
+
 export default function SupportPage() {
   const { data: session } = useSession();
   const [type, setType] = useState<"BUG" | "FEEDBACK">("FEEDBACK");
@@ -50,11 +52,23 @@ export default function SupportPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setStatusMsg("");
     setErrorMsg("");
     setBadgeAwarded(null);
 
+    const validation = createSupportSchema.safeParse({
+      type,
+      title: title.trim(),
+      description: description.trim(),
+      screenshotUrl: screenshotUrl || undefined,
+    });
+
+    if (!validation.success) {
+      setErrorMsg(validation.error.issues[0]?.message || "Invalid input details.");
+      return;
+    }
+
+    setLoading(true);
     try {
       const res = await fetch("/api/users/feedback", {
         method: "POST",

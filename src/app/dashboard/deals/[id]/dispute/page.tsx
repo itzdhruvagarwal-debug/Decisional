@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import { ToastContainer, type ToastItem, type ToastType } from "@/components/ui/toast";
 import { Button, Select, Textarea } from "@/components/ui";
 
+import { createDisputeSchema } from "@/lib/validations/campaign";
+
 export default function DisputePage({
   params,
 }: Readonly<{
@@ -34,8 +36,14 @@ export default function DisputePage({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (description.trim().length < 50) {
-      showToast("error", "Please describe the issue in at least 50 characters.");
+
+    const validation = createDisputeSchema.safeParse({
+      type: issueType,
+      description: description.trim(),
+    });
+
+    if (!validation.success) {
+      showToast("error", validation.error.issues[0]?.message || "Invalid dispute details.");
       return;
     }
 

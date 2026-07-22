@@ -14,6 +14,7 @@ import { formatCurrency } from "@/lib/utils-client";
 import PeriodPickerModal, { type PeriodValue } from "@/components/dashboard/wallet/PeriodPickerModal";
 import { ToastContainer, type ToastItem, type ToastType } from "@/components/ui/toast";
 import { Button, Input } from "@/components/ui";
+import { withdrawSchema } from "@/lib/validations/auth";
 
 interface WalletData {
   balance: number;
@@ -163,8 +164,9 @@ function useWallet(session: ReturnType<typeof useSession>["data"], requireFreshS
     }
 
     const withdrawRupees = Number(withdrawAmount);
-    if (!Number.isFinite(withdrawRupees) || withdrawRupees < 500) {
-      showToast("error", "Minimum withdrawal amount is INR 500.");
+    const validation = withdrawSchema.safeParse({ amount: withdrawRupees });
+    if (!validation.success) {
+      showToast("error", validation.error.issues[0]?.message || "Invalid withdrawal amount.");
       return;
     }
 
