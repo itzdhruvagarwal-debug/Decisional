@@ -209,54 +209,20 @@ function LoginContent() {
   };
 
   return (
-    <div
-      className="flex items-center justify-center p-6"
-      style={{
-        minHeight: "100vh",
-        position: "relative",
-        overflowX: "hidden",
-      }}
-    >
+    <div className="flex items-center justify-center p-6 auth-wrapper">
       {/* Realistic Abstract Background */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: 0,
-        }}
-      >
+      <div className="auth-bg-wrapper">
         <Image
           src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
           alt="Abstract Background"
           fill
           unoptimized
-          style={{
-            objectFit: "cover",
-            opacity: 0.4,
-          }}
+          className="auth-bg-image"
         />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(circle at center, rgba(10, 10, 20, 0.8) 0%, rgba(10, 10, 20, 0.95) 100%)",
-          }}
-        />
+        <div className="auth-bg-overlay" />
       </div>
 
-      <div
-        className="card animate-fade-in-scale"
-        style={{
-          width: "min(100%, 420px)",
-          maxWidth: "calc(100vw - 32px)",
-          minWidth: 0,
-          padding: "clamp(24px, 4vw, 40px)",
-          position: "relative",
-          zIndex: 1,
-          border: "1px solid var(--color-border)",
-        }}
-      >
+      <div className="card animate-fade-in-scale auth-card login-card">
         {/* Logo */}
         <div className="flex justify-center mb-6">
           <Logo />
@@ -271,16 +237,7 @@ function LoginContent() {
 
         {/* Session expiry reason banner */}
         {sessionMessage && (
-          <div
-            className="text-center text-primary text-sm mb-4"
-            style={{
-              padding: "12px 16px",
-              background: "rgba(99, 102, 241, 0.08)",
-              border: "1px solid rgba(99, 102, 241, 0.25)",
-              borderRadius: "var(--radius-md)",
-              lineHeight: 1.5,
-            }}
-          >
+          <div className="text-center text-primary text-sm mb-4 auth-banner">
             {sessionMessage}
           </div>
         )}
@@ -289,16 +246,7 @@ function LoginContent() {
           <div
             role="alert"
             aria-live="polite"
-            className="text-center mb-6"
-            style={{
-              padding: "12px 16px",
-              background: "rgba(244, 63, 94, 0.08)",
-              border: "1px solid rgba(244, 63, 94, 0.3)",
-              borderRadius: "var(--radius-md)",
-              color: "var(--color-accent-rose)",
-              fontSize: "14px",
-              animation: "slideDown 0.3s ease-out",
-            }}
+            className="text-center mb-6 auth-error-banner"
           >
             {error}
           </div>
@@ -325,21 +273,19 @@ function LoginContent() {
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <label
-                className="label"
+                className="label mb-0"
                 htmlFor="password"
-                style={{ marginBottom: 0 }}
               >
                 Password
               </label>
               <Link
                 href="/forgot-password"
-                className="text-xs font-semibold"
-                style={{ color: "var(--color-primary-light)" }}
+                className="text-xs font-semibold auth-link"
               >
                 Forgot password?
               </Link>
             </div>
-            <div style={{ position: "relative" }}>
+            <div className="auth-field-relative">
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -358,19 +304,7 @@ function LoginContent() {
                 variant="ghost"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
-                style={{
-                  position: "absolute",
-                  right: "12px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  background: "transparent",
-                  border: "0",
-                  cursor: "pointer",
-                  color: "var(--color-primary-light)",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  zIndex: 10,
-                }}
+                className="auth-field-password-toggle"
               >
                 {showPassword ? "Hide" : "Show"}
               </Button>
@@ -378,10 +312,7 @@ function LoginContent() {
           </div>
 
           {show2FA && (
-            <div
-              className="mb-6"
-              style={{ animation: "slideDown 0.3s ease-out" }}
-            >
+            <div className="mb-6 animate-slide-down">
               <Input
                 id="twoFactorCode"
                 type="text"
@@ -409,7 +340,7 @@ function LoginContent() {
             disabled={isLoading}
             loading={isLoading}
             fullWidth
-            style={{ marginBottom: "24px" }}
+            className="mb-6"
           >
             Sign In
           </Button>
@@ -417,29 +348,17 @@ function LoginContent() {
 
         {googleSignInEnabled && (
           <>
-            <div
-              className="flex items-center text-muted text-sm"
-              style={{ margin: "24px 0" }}
-            >
-              <div
-                style={{ flex: 1, borderBottom: "1px solid var(--color-border)" }}
-              />
-              <span style={{ padding: "0 16px" }}>or continue with</span>
-              <div
-                style={{ flex: 1, borderBottom: "1px solid var(--color-border)" }}
-              />
+            <div className="flex items-center text-muted text-sm auth-divider-row">
+              <div className="auth-divider-line" />
+              <span className="auth-divider-text">or continue with</span>
+              <div className="auth-divider-line" />
             </div>
 
             <Button
               variant="secondary"
               onClick={() => signIn("google", { callbackUrl })}
               fullWidth
-              style={{
-                background: "#fff",
-                color: "#333",
-                marginBottom: "24px",
-                gap: "12px",
-              }}
+              className="auth-google-btn"
               leftIcon={
                 <svg
                   width="20"
@@ -472,14 +391,13 @@ function LoginContent() {
           </>
         )}
 
-        <div className="divider" style={{ marginTop: 0 }} />
+        <div className="divider mt-0" />
 
         <p className="text-center text-secondary text-sm">
           Don&apos;t have an account?{" "}
           <Link
             href="/register"
-            className="font-semibold"
-            style={{ color: "var(--color-primary-light)" }}
+            className="font-semibold auth-link"
           >
             Sign Up
           </Link>

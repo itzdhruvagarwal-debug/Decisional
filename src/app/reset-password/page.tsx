@@ -89,8 +89,7 @@ function ResetPasswordForm() {
         </p>
         <Link
           href="/forgot-password"
-          className="font-semibold"
-          style={{ color: "var(--color-primary-light)" }}
+          className="font-semibold auth-link"
         >
           Request a new link
         </Link>
@@ -111,20 +110,7 @@ function ResetPasswordForm() {
         <div
           role={status === "error" ? "alert" : "status"}
           aria-live={status === "error" ? "assertive" : "polite"}
-          className="text-sm mb-6"
-          style={{
-            padding: "12px 16px",
-            borderRadius: "var(--radius-md)",
-            background:
-              status === "success"
-                ? "rgba(16, 185, 129, 0.1)"
-                : "rgba(244, 63, 94, 0.1)",
-            border: `1px solid ${status === "success" ? "var(--color-accent-emerald)" : "var(--color-accent-rose)"}`,
-            color:
-              status === "success"
-                ? "var(--color-accent-emerald)"
-                : "var(--color-accent-rose)",
-          }}
+          className={`text-sm mb-6 ${status === "success" ? "auth-banner" : "auth-error-banner"}`}
         >
           {message}
         </div>
@@ -173,38 +159,10 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div
-      className="flex items-center justify-center p-6"
-      style={{
-        minHeight: "100vh",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
+    <div className="flex items-center justify-center p-6 auth-wrapper">
       {/* Background Effects */}
-      <div
-        style={{
-          position: "absolute",
-          top: "20%",
-          right: "10%",
-          width: "400px",
-          height: "400px",
-          background:
-            "radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%)",
-          borderRadius: "50%",
-          filter: "blur(80px)",
-        }}
-      />
-      <div
-        className="card"
-        style={{
-          width: "100%",
-          maxWidth: "420px",
-          padding: "40px",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
+      <div className="reset-bg-glow" />
+      <div className="card login-card">
         <Suspense fallback={<div>Loading...</div>}>
           <ResetPasswordForm />
         </Suspense>

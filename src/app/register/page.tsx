@@ -111,89 +111,36 @@ interface UserTypeSelectionProps {
 function UserTypeSelection({ userType, handleUserTypeSelect }: Readonly<UserTypeSelectionProps>) {
   return (
     <>
-      <h1
-        style={{
-          fontSize: "28px",
-          fontWeight: 800,
-          textAlign: "center",
-          marginBottom: "8px",
-        }}
-      >
+      <h1 className="usertype-title">
         Join Decisional
       </h1>
-      <p
-        style={{
-          textAlign: "center",
-          color: "var(--color-text-secondary)",
-          marginBottom: "40px",
-        }}
-      >
+      <p className="usertype-subtitle">
         Choose how you want to use the platform
       </p>
 
-      <div
-        className="grid-2"
-        style={{ gap: "16px", maxWidth: "560px", margin: "0 auto" }}
-      >
+      <div className="usertype-grid">
         {(Object.keys(userTypeInfo) as UserType[]).map((type) => (
           <Button
             key={type}
             onClick={() => handleUserTypeSelect(type)}
-            className="card hover-lift"
-            style={{
-              textAlign: "center",
-              cursor: "pointer",
-              transition: "all var(--transition-normal)",
-              border:
-                userType === type
-                  ? "2px solid var(--color-primary)"
-                  : "1px solid var(--color-border)",
-            }}
+            className={`usertype-card hover-lift ${
+              userType === type ? "usertype-card-selected" : ""
+            }`}
           >
-            <div
-              className="feature-icon"
-              style={{ margin: "0 auto 16px", fontSize: "32px" }}
-            >
+            <div className="usertype-icon-wrapper">
               {userTypeInfo[type].icon}
             </div>
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: 700,
-                marginBottom: "8px",
-              }}
-            >
+            <h3 className="usertype-card-name">
               {userTypeInfo[type].title}
             </h3>
-            <p
-              style={{
-                fontSize: "13px",
-                color: "var(--color-text-secondary)",
-                marginBottom: "16px",
-                minHeight: "40px",
-              }}
-            >
+            <p className="usertype-card-desc">
               {userTypeInfo[type].description}
             </p>
-            <ul
-              style={{
-                listStyle: "none",
-                fontSize: "12px",
-                color: "var(--color-text-muted)",
-                textAlign: "left",
-              }}
-            >
+            <ul className="usertype-benefit-list">
               {userTypeInfo[type].benefits.map((benefit) => (
-                <li key={benefit} style={{ marginBottom: "6px" }}>
+                <li key={benefit} className="usertype-benefit-item">
                   <svg
-                    style={{
-                      color: "var(--color-accent-emerald)",
-                      width: "14px",
-                      height: "14px",
-                      display: "inline-block",
-                      verticalAlign: "middle",
-                      marginRight: "4px",
-                    }}
+                    className="usertype-benefit-icon"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="3"
@@ -211,20 +158,11 @@ function UserTypeSelection({ userType, handleUserTypeSelect }: Readonly<UserType
 
       <div className="divider" />
 
-      <p
-        style={{
-          textAlign: "center",
-          color: "var(--color-text-secondary)",
-          fontSize: "14px",
-        }}
-      >
+      <p className="auth-footer-text">
         Already have an account?{" "}
         <Link
           href="/login"
-          style={{
-            color: "var(--color-primary-light)",
-            fontWeight: 600,
-          }}
+          className="auth-footer-link"
         >
           Sign In
         </Link>
@@ -237,14 +175,7 @@ export default function RegisterPage() {
   return (
     <Suspense
       fallback={
-        <div
-          style={{
-            minHeight: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <div className="auth-fallback">
           <span className="loading" />
         </div>
       }
@@ -612,13 +543,7 @@ function useRegistration(
   };
 }
 
-interface Step2RegistrationFormProps {
-  readonly registration: ReturnType<typeof useRegistration>;
-  readonly setStep: (step: number) => void;
-  readonly userType: "BRAND" | "INFLUENCER";
-  readonly otpButton: (loading: boolean, cooldown: number, disabled?: boolean) => React.CSSProperties;
-  readonly verifiedBadge: React.CSSProperties;
-}
+
 
 interface Step2HeaderProps {
   readonly userType: "BRAND" | "INFLUENCER";
@@ -631,42 +556,20 @@ function Step2Header({ userType, onBack }: Step2HeaderProps) {
       <Button
         variant="ghost"
         onClick={onBack}
-        style={{
-          background: "none",
-          border: "none",
-          color: "var(--color-text-secondary)",
-          fontSize: "14px",
-          cursor: "pointer",
-          marginBottom: "16px",
-          display: "flex",
-          alignItems: "center",
-          gap: "4px",
-        }}
+        className="auth-back-btn"
       >
         Back
       </Button>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          marginBottom: "24px",
-        }}
-      >
-        <div style={{ fontSize: "36px" }}>
+      <div className="auth-header-container">
+        <div className="auth-header-icon">
           {userTypeInfo[userType].icon}
         </div>
         <div>
-          <h1 style={{ fontSize: "24px", fontWeight: 800 }}>
+          <h1 className="auth-header-title">
             Create {userTypeInfo[userType].title} Account
           </h1>
-          <p
-            style={{
-              color: "var(--color-text-secondary)",
-              fontSize: "14px",
-            }}
-          >
+          <p className="auth-header-subtitle">
             Verify your email &amp; phone to get started
           </p>
         </div>
@@ -701,8 +604,8 @@ function PasswordField({
   error,
 }: PasswordFieldProps) {
   return (
-    <div style={{ marginBottom: "20px" }}>
-      <div style={{ position: "relative" }}>
+    <div className="auth-form-group">
+      <div className="auth-field-relative">
         <Input
           id={id}
           label={label}
@@ -712,7 +615,7 @@ function PasswordField({
           onChange={(e) => onChange(e.target.value)}
           required
           minLength={minLength}
-          style={{ paddingRight: "40px" }}
+          className="auth-field-password-input"
           error={error}
           fullWidth
         />
@@ -720,20 +623,7 @@ function PasswordField({
           type="button"
           variant="ghost"
           onClick={() => setShow(!show)}
-          style={{
-            position: "absolute",
-            right: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--color-text-secondary)",
-            padding: "4px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          className="auth-field-password-toggle"
           aria-label={show ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
         >
           {show ? (
@@ -744,13 +634,7 @@ function PasswordField({
         </Button>
       </div>
       {hint && (
-        <p
-          style={{
-            fontSize: "12px",
-            color: "var(--color-text-muted)",
-            marginTop: "4px",
-          }}
-        >
+        <p className="auth-error-msg">
           {hint}
         </p>
       )}
@@ -758,12 +642,16 @@ function PasswordField({
   );
 }
 
+interface Step2RegistrationFormProps {
+  readonly registration: ReturnType<typeof useRegistration>;
+  readonly setStep: (step: number) => void;
+  readonly userType: "BRAND" | "INFLUENCER";
+}
+
 function Step2RegistrationForm({
   registration,
   setStep,
   userType,
-  otpButton,
-  verifiedBadge,
 }: Readonly<Step2RegistrationFormProps>) {
   const {
     formData,
@@ -787,24 +675,13 @@ function Step2RegistrationForm({
       <Step2Header userType={userType} onBack={() => setStep(1)} />
 
       {error && (
-        <div
-          style={{
-            padding: "12px 16px",
-            background: "rgba(244, 63, 94, 0.08)",
-            border: "1px solid rgba(244, 63, 94, 0.3)",
-            borderRadius: "var(--radius-md)",
-            color: "var(--color-accent-rose)",
-            fontSize: "14px",
-            marginBottom: "24px",
-            animation: "slideDown 0.3s ease-out",
-          }}
-        >
+        <div className="text-center mb-6 auth-error-banner">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "20px" }}>
+        <div className="auth-form-group">
           <Input
             id="name"
             label={userType === "BRAND" ? "Brand / Company Name *" : "Full Name *"}
@@ -823,38 +700,14 @@ function Step2RegistrationForm({
         </div>
 
         {/* Email field + OTP */}
-        <EmailOtpField
-          registration={registration}
-          otpButton={otpButton}
-          verifiedBadge={verifiedBadge}
-        />
+        <EmailOtpField registration={registration} />
 
         {/* Phone field + OTP */}
-        <PhoneOtpField
-          registration={registration}
-          otpButton={otpButton}
-          verifiedBadge={verifiedBadge}
-        />
+        <PhoneOtpField registration={registration} />
 
         {/* Verification status banner */}
         {(emailOtpVerified || phoneOtpVerified) && (
-          <div
-            style={{
-              padding: "12px 16px",
-              background:
-                emailOtpVerified && phoneOtpVerified
-                  ? "rgba(16, 185, 129, 0.08)"
-                  : "rgba(245, 158, 11, 0.08)",
-              border: `1px solid ${emailOtpVerified && phoneOtpVerified ? "rgba(16, 185, 129, 0.3)" : "rgba(245, 158, 11, 0.3)"}`,
-              borderRadius: "var(--radius-md)",
-              marginBottom: "20px",
-              fontSize: "13px",
-              color:
-                emailOtpVerified && phoneOtpVerified
-                  ? "#10b981"
-                  : "#f59e0b",
-            }}
-          >
+          <div className={`auth-otp-status-banner ${emailOtpVerified && phoneOtpVerified ? "verified" : "warning"}`}>
             {getVerificationStatusText()}
           </div>
         )}
@@ -886,7 +739,7 @@ function Step2RegistrationForm({
         />
 
         {/* Referral code */}
-        <div style={{ marginBottom: "24px" }}>
+        <div className="auth-form-group mb-6">
           <Input
             id="referralCode"
             label="Referral Code (optional)"
@@ -905,14 +758,8 @@ function Step2RegistrationForm({
         </div>
 
         {/* Terms */}
-        <div style={{ marginBottom: "24px" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "12px",
-            }}
-          >
+        <div className="auth-form-group mb-6">
+          <div className="auth-terms-row">
             <input
               id="agreeToTerms"
               type="checkbox"
@@ -920,41 +767,30 @@ function Step2RegistrationForm({
               onChange={(e) =>
                 setFormData({ ...formData, agreeToTerms: e.target.checked })
               }
-              style={{ marginTop: "4px" }}
+              className="auth-checkbox"
             />
             <label
               htmlFor="agreeToTerms"
-              style={{
-                fontSize: "13px",
-                color: "var(--color-text-secondary)",
-                cursor: "pointer",
-              }}
+              className="text-sm text-secondary cursor-pointer"
             >
               I agree to the{" "}
               <Link
                 href="/terms"
-                style={{ color: "var(--color-primary-light)" }}
+                className="auth-link"
               >
                 Terms of Service
               </Link>{" "}
               and{" "}
               <Link
                 href="/privacy"
-                style={{ color: "var(--color-primary-light)" }}
+                className="auth-link"
               >
                 Privacy Policy
               </Link>
             </label>
           </div>
           {fieldErrors.agreeToTerms && (
-            <span
-              style={{
-                fontSize: "12px",
-                color: "var(--color-accent-rose, #f43f5e)",
-                marginTop: "4px",
-                display: "block",
-              }}
-            >
+            <span className="auth-validation-error">
               {fieldErrors.agreeToTerms}
             </span>
           )}
@@ -967,35 +803,19 @@ function Step2RegistrationForm({
           disabled={
             isLoading || !emailOtpVerified || !phoneOtpVerified
           }
-          style={{
-            width: "100%",
-            padding: "14px",
-            fontSize: "16px",
-            marginBottom: "24px",
-            opacity:
-              !emailOtpVerified || !phoneOtpVerified ? 0.5 : 1,
-          }}
+          className="auth-submit-btn"
         >
           {renderSubmitButtonContent()}
         </Button>
       </form>
 
-      <div className="divider" style={{ marginTop: "12px" }} />
+      <div className="divider mt-3" />
 
-      <p
-        style={{
-          textAlign: "center",
-          color: "var(--color-text-secondary)",
-          fontSize: "14px",
-        }}
-      >
+      <p className="auth-footer-text">
         Already have an account?{" "}
         <Link
           href="/login"
-          style={{
-            color: "var(--color-primary-light)",
-            fontWeight: 600,
-          }}
+          className="auth-footer-link"
         >
           Sign In
         </Link>
@@ -1023,96 +843,26 @@ function RegisterContent() {
     handleUserTypeSelect,
   } = registration;
 
-  // Shared styles
-  const verifiedBadge = {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "4px",
-    background: "rgba(16, 185, 129, 0.1)",
-    color: "#10b981",
-    padding: "6px 12px",
-    borderRadius: "20px",
-    fontSize: "13px",
-    fontWeight: 600,
-  } as const;
-
-  const otpButton = (loading: boolean, cooldown: number, disabled?: boolean) =>
-    ({
-      padding: "10px 16px",
-      fontSize: "13px",
-      fontWeight: 600,
-      border: "none",
-      borderRadius: "var(--radius-md)",
-      cursor: disabled || loading || cooldown > 0 ? "not-allowed" : "pointer",
-      opacity: disabled || loading || cooldown > 0 ? 0.5 : 1,
-      background: "var(--color-primary)",
-      color: "#fff",
-      transition: "all 0.2s ease",
-      whiteSpace: "nowrap" as const,
-    }) as const;
-
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "clamp(16px, 5vw, 24px)",
-        position: "relative",
-        overflowX: "hidden",
-      }}
-    >
+    <div className="flex items-center justify-center p-6 auth-wrapper">
       {/* Realistic Abstract Background */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: 0,
-        }}
-      >
+      <div className="auth-bg-wrapper">
         <Image
           src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
           alt="Abstract Background"
           fill
           unoptimized
-          style={{
-            objectFit: "cover",
-            opacity: 0.4,
-          }}
+          className="auth-bg-image"
         />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(circle at center, rgba(10, 10, 20, 0.8) 0%, rgba(10, 10, 20, 0.95) 100%)",
-          }}
-        />
+        <div className="auth-bg-overlay" />
       </div>
 
       <div
-        className="card animate-fade-in-scale"
-        style={{
-          width: "100%",
-          maxWidth:
-            step === 1
-              ? "min(800px, calc(100vw - 32px))"
-              : "min(520px, calc(100vw - 32px))",
-          minWidth: 0,
-          padding: "clamp(24px, 4vw, 40px)",
-          position: "relative",
-          zIndex: 1,
-          transition: "max-width var(--transition-slow)",
-        }}
+        className={`card animate-fade-in-scale auth-card ${
+          step === 1 ? "register-card-step1" : "register-card-step2"
+        }`}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginBottom: "32px",
-          }}
-        >
+        <div className="auth-logo-row">
           <Logo />
         </div>
 
@@ -1130,8 +880,6 @@ function RegisterContent() {
             registration={registration}
             setStep={setStep}
             userType={userType}
-            otpButton={otpButton}
-            verifiedBadge={verifiedBadge}
           />
         )}
       </div >
@@ -1141,11 +889,9 @@ function RegisterContent() {
 
 interface EmailOtpFieldProps {
   readonly registration: ReturnType<typeof useRegistration>;
-  readonly otpButton: (loading: boolean, cooldown: number, disabled?: boolean) => React.CSSProperties;
-  readonly verifiedBadge: React.CSSProperties;
 }
 
-function EmailOtpField({ registration, otpButton, verifiedBadge }: EmailOtpFieldProps) {
+function EmailOtpField({ registration }: EmailOtpFieldProps) {
   const {
     formData,
     setFormData,
@@ -1164,11 +910,11 @@ function EmailOtpField({ registration, otpButton, verifiedBadge }: EmailOtpField
   } = registration;
 
   return (
-    <div style={{ marginBottom: "20px" }}>
+    <div className="auth-form-group">
       <label className="label" htmlFor="email">
         Email Address *
       </label>
-      <div className="auth-otp-row" style={{ display: "flex", gap: "8px" }}>
+      <div className="auth-otp-row">
         <Input
           id="email"
           type="email"
@@ -1184,7 +930,7 @@ function EmailOtpField({ registration, otpButton, verifiedBadge }: EmailOtpField
           }}
           required
           disabled={emailOtpVerified}
-          style={{ flex: "1 1 220px", minWidth: 0, opacity: emailOtpVerified ? 0.7 : 1 }}
+          className={`flex-grow-220 ${emailOtpVerified ? "auth-input-verified" : ""}`}
           error={registration.fieldErrors?.email}
         />
         {!emailOtpVerified && (
@@ -1193,7 +939,7 @@ function EmailOtpField({ registration, otpButton, verifiedBadge }: EmailOtpField
             type="button"
             onClick={handleSendEmailOtp}
             disabled={emailOtpLoading || emailCooldown > 0}
-            style={otpButton(emailOtpLoading, emailCooldown)}
+            className="otp-button"
           >
             {getEmailOtpButtonText()}
           </Button>
@@ -1201,23 +947,17 @@ function EmailOtpField({ registration, otpButton, verifiedBadge }: EmailOtpField
       </div>
 
       {emailOtpVerified && (
-        <div style={{ marginTop: "8px" }}>
-          <span style={verifiedBadge}>Email Verified</span>
+        <div className="mt-2">
+          <span className="verified-badge">Email Verified</span>
         </div>
       )}
 
       {emailOtpSent && !emailOtpVerified && (
-        <div style={{ marginTop: "10px" }}>
-          <p
-            style={{
-              fontSize: "12px",
-              color: "var(--color-accent-emerald)",
-              marginBottom: "8px",
-            }}
-          >
+        <div className="mt-2">
+          <p className="auth-success-msg">
             OTP sent to {formData.email}
           </p>
-          <div className="auth-otp-row" style={{ display: "flex", gap: "8px" }}>
+          <div className="auth-otp-row">
             <Input
               id="email-otp-input"
               type="text"
@@ -1229,38 +969,20 @@ function EmailOtpField({ registration, otpButton, verifiedBadge }: EmailOtpField
                 )
               }
               maxLength={6}
-              style={{
-                flex: "1 1 180px",
-                minWidth: 0,
-                letterSpacing: 0,
-                fontFamily: "'Courier New', monospace",
-                fontWeight: 700,
-                fontSize: "18px",
-                textAlign: "center",
-              }}
+              className="flex-grow-180 auth-input-otp"
             />
             <Button
               id="verify-email-otp"
               type="button"
               onClick={handleVerifyEmailOtp}
               disabled={emailOtpLoading || emailOtp.length !== 6}
-              style={otpButton(
-                emailOtpLoading,
-                0,
-                emailOtp.length !== 6,
-              )}
+              className="otp-button"
             >
               {emailOtpLoading ? "..." : "Verify"}
             </Button>
           </div>
           {emailOtpError && (
-            <p
-              style={{
-                fontSize: "12px",
-                color: "var(--color-accent-rose)",
-                marginTop: "4px",
-              }}
-            >
+            <p className="auth-error-msg">
               {emailOtpError}
             </p>
           )}
@@ -1268,13 +990,7 @@ function EmailOtpField({ registration, otpButton, verifiedBadge }: EmailOtpField
       )}
 
       {!emailOtpSent && emailOtpError && (
-        <p
-          style={{
-            fontSize: "12px",
-            color: "var(--color-accent-rose)",
-            marginTop: "4px",
-          }}
-        >
+        <p className="auth-error-msg">
           {emailOtpError}
         </p>
       )}
@@ -1284,11 +1000,9 @@ function EmailOtpField({ registration, otpButton, verifiedBadge }: EmailOtpField
 
 interface PhoneOtpFieldProps {
   readonly registration: ReturnType<typeof useRegistration>;
-  readonly otpButton: (loading: boolean, cooldown: number, disabled?: boolean) => React.CSSProperties;
-  readonly verifiedBadge: React.CSSProperties;
 }
 
-function PhoneOtpField({ registration, otpButton, verifiedBadge }: PhoneOtpFieldProps) {
+function PhoneOtpField({ registration }: PhoneOtpFieldProps) {
   const {
     formData,
     setFormData,
@@ -1308,22 +1022,12 @@ function PhoneOtpField({ registration, otpButton, verifiedBadge }: PhoneOtpField
   } = registration;
 
   return (
-    <div style={{ marginBottom: "20px" }}>
+    <div className="auth-form-group">
       <label className="label" htmlFor="phone">
         Phone Number *
       </label>
-      <div className="auth-otp-row auth-phone-row" style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-        <span
-          style={{
-            padding: "10px 12px",
-            background: "var(--color-surface-elevated)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-md)",
-            color: "var(--color-text-secondary)",
-            fontSize: "14px",
-            fontWeight: 500,
-          }}
-        >
+      <div className="auth-otp-row auth-phone-row">
+        <span className="auth-input-phone-prefix">
           +91
         </span>
         <Input
@@ -1343,7 +1047,7 @@ function PhoneOtpField({ registration, otpButton, verifiedBadge }: PhoneOtpField
           required
           disabled={phoneOtpVerified}
           maxLength={10}
-          style={{ flex: "1 1 160px", minWidth: 0, opacity: phoneOtpVerified ? 0.7 : 1 }}
+          className={`flex-grow-160 ${phoneOtpVerified ? "auth-input-verified" : ""}`}
           error={registration.fieldErrors?.phone}
         />
         {!phoneOtpVerified && (
@@ -1352,7 +1056,7 @@ function PhoneOtpField({ registration, otpButton, verifiedBadge }: PhoneOtpField
             type="button"
             onClick={handleSendPhoneOtp}
             disabled={phoneOtpLoading || phoneCooldown > 0}
-            style={otpButton(phoneOtpLoading, phoneCooldown)}
+            className="otp-button"
           >
             {getPhoneOtpButtonText()}
           </Button>
@@ -1360,23 +1064,17 @@ function PhoneOtpField({ registration, otpButton, verifiedBadge }: PhoneOtpField
       </div>
 
       {phoneOtpVerified && (
-        <div style={{ marginTop: "8px" }}>
-          <span style={verifiedBadge}>Phone Verified</span>
+        <div className="mt-2">
+          <span className="verified-badge">Phone Verified</span>
         </div>
       )}
 
       {phoneOtpSent && !phoneOtpVerified && (
-        <div style={{ marginTop: "10px" }}>
-          <p
-            style={{
-              fontSize: "12px",
-              color: "var(--color-accent-emerald)",
-              marginBottom: "8px",
-            }}
-          >
+        <div className="mt-2">
+          <p className="auth-success-msg">
             OTP sent {formatOtpChannel(phoneOtpChannel)} to +91-{formData.phone}
           </p>
-          <div className="auth-otp-row" style={{ display: "flex", gap: "8px" }}>
+          <div className="auth-otp-row">
             <Input
               id="phone-otp-input"
               type="text"
@@ -1388,38 +1086,20 @@ function PhoneOtpField({ registration, otpButton, verifiedBadge }: PhoneOtpField
                 )
               }
               maxLength={6}
-              style={{
-                flex: "1 1 180px",
-                minWidth: 0,
-                letterSpacing: 0,
-                fontFamily: "'Courier New', monospace",
-                fontWeight: 700,
-                fontSize: "18px",
-                textAlign: "center",
-              }}
+              className="flex-grow-180 auth-input-otp"
             />
             <Button
               id="verify-phone-otp"
               type="button"
               onClick={handleVerifyPhoneOtp}
               disabled={phoneOtpLoading || phoneOtp.length !== 6}
-              style={otpButton(
-                phoneOtpLoading,
-                0,
-                phoneOtp.length !== 6,
-              )}
+              className="otp-button"
             >
               {phoneOtpLoading ? "..." : "Verify"}
             </Button>
           </div>
           {phoneOtpError && (
-            <p
-              style={{
-                fontSize: "12px",
-                color: "var(--color-accent-rose)",
-                marginTop: "4px",
-              }}
-            >
+            <p className="auth-error-msg">
               {phoneOtpError}
             </p>
           )}
@@ -1427,13 +1107,7 @@ function PhoneOtpField({ registration, otpButton, verifiedBadge }: PhoneOtpField
       )}
 
       {!phoneOtpSent && phoneOtpError && (
-        <p
-          style={{
-            fontSize: "12px",
-            color: "var(--color-accent-rose)",
-            marginTop: "4px",
-          }}
-        >
+        <p className="auth-error-msg">
           {phoneOtpError}
         </p>
       )}
