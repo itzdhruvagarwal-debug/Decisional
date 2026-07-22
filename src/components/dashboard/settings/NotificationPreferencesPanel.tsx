@@ -95,7 +95,7 @@ function PreferenceGroup({
           return (
             <div
               key={key}
-              className="flex items-center justify-between gap-4 p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)" }}
+              className="flex items-center justify-between gap-4 p-3 bg-tertiary rounded-sm"
             >
               <div>
                 <div className="font-semibold">
@@ -147,7 +147,7 @@ function Toggle({
       />
       <span
         aria-hidden="true"
-        className="absolute" style={{ height: "18px", width: "18px", left: checked ? "23px" : "3px", bottom: "3px", backgroundColor: "white", transition: ".2s", borderRadius: "50%" }}
+        className="absolute rounded-full" style={{ height: "18px", width: "18px", left: checked ? "23px" : "3px", bottom: "3px", backgroundColor: "white", transition: ".2s" }}
       />
     </label>
   );

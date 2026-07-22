@@ -24,20 +24,10 @@ export default function RootError({
       style={{ minHeight: "100vh" }}
     >
       <div
-        className="card animate-fade-in text-center w-full" style={{ maxWidth: "480px", padding: "40px 32px", border: "1px solid var(--color-border)", background: "rgba(255, 255, 255, 0.02)", backdropFilter: "blur(8px)", boxShadow: "0 20px 40px -15px rgba(0,0,0,0.5)" }}
+        className="card animate-fade-in text-center w-full border-card bg-glass" style={{ maxWidth: "480px", padding: "40px 32px", backdropFilter: "blur(8px)", boxShadow: "0 20px 40px -15px rgba(0,0,0,0.5)" }}
       >
         <div
-          className="flex items-center justify-center mb-6"
-          style={{
-            width: "64px",
-            height: "64px",
-            background: "rgba(244, 63, 94, 0.1)",
-            color: "var(--color-accent-rose, #f43f5e)",
-            borderRadius: "50%",
-            fontSize: "32px",
-            margin: "0 auto",
-            border: "1px solid rgba(244, 63, 94, 0.2)",
-          }}
+          className="flex items-center justify-center mb-6 bg-rose-subtle rounded-full text-3xl" style={{ width: "64px", height: "64px", color: "var(--color-accent-rose, #f43f5e)", margin: "0 auto", border: "1px solid rgba(244, 63, 94, 0.2)" }}
         >
           ⚠️
         </div>

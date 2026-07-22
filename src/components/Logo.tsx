@@ -7,8 +7,8 @@ export default function Logo() {
       className="flex items-center gap-3" style={{ textDecoration: "none" }}
     >
       <div
-        className="p-2 flex items-center justify-center" style={{ background:
-            "linear-gradient(135deg, var(--color-primary), var(--color-secondary))", borderRadius: "12px", color: "white", boxShadow: "0 4px 15px rgba(99, 102, 241, 0.3)" }}
+        className="p-2 flex items-center justify-center rounded-lg" style={{ background:
+            "linear-gradient(135deg, var(--color-primary), var(--color-secondary))", color: "white", boxShadow: "0 4px 15px rgba(99, 102, 241, 0.3)" }}
       >
         {/* Decisional Logo — Signal-to-Decision icon */}
         <svg
@@ -37,7 +37,7 @@ export default function Logo() {
           Decisional
         </span>
         <span
-          className="text-secondary font-semibold" style={{ fontSize: "10px", letterSpacing: "1.5px", textTransform: "uppercase" }}
+          className="text-secondary font-semibold uppercase" style={{ fontSize: "10px", letterSpacing: "1.5px" }}
         >
           From Noise to Decisions
         </span>

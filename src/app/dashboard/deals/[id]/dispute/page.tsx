@@ -82,10 +82,10 @@ export default function DisputePage({
     <>
     <ToastContainer toasts={toasts} onClose={removeToast} />
     <div
-      className="flex justify-center items-center" style={{ minHeight: "100vh", background: "var(--color-bg-secondary)" }}
+      className="flex justify-center items-center bg-secondary" style={{ minHeight: "100vh" }}
     >
       <div
-        className="card w-full" style={{ maxWidth: "600px", padding: "32px" }}
+        className="card w-full p-8" style={{ maxWidth: "600px" }}
       >
         <div className="mb-6">
           <Link

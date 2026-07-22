@@ -23,7 +23,7 @@ export default async function VerifiedQueuePage() {
       {/* 1. Verification Queue Section */}
       <section style={{ marginBottom: "48px" }}>
         <header className="mb-6">
-          <h1 className="gradient-text" style={{ fontSize: "26px", fontWeight: 900, marginBottom: "6px" }}>
+          <h1 className="gradient-text font-extrabold mb-1" style={{ fontSize: "26px" }}>
             Verification Queue
           </h1>
           <p className="text-secondary text-sm">
@@ -37,7 +37,7 @@ export default async function VerifiedQueuePage() {
       {/* 2. Flagged Applications Section */}
       <section>
         <header className="mb-6">
-          <h1 className="gradient-text" style={{ fontSize: "26px", fontWeight: 900, marginBottom: "6px" }}>
+          <h1 className="gradient-text font-extrabold mb-1" style={{ fontSize: "26px" }}>
             Flagged Applications Review
           </h1>
           <p className="text-secondary text-sm">
@@ -79,21 +79,21 @@ export default async function VerifiedQueuePage() {
                     </div>
 
                     <div className="text-right">
-                      <div className="text-muted" style={{ fontSize: "11px" }}>Proposed Rate</div>
-                      <div className="font-extrabold text-base" style={{ color: "var(--color-accent-emerald)" }}>
+                      <div className="text-muted text-xs">Proposed Rate</div>
+                      <div className="font-extrabold text-base text-emerald">
                         {formatCurrency(app.proposedRate || 0)}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center flex-wrap gap-4" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "16px" }}>
+                  <div className="flex justify-between items-center flex-wrap gap-4 border-top" style={{ paddingTop: "16px" }}>
                     <div>
                       <div className="text-sm font-bold" style={{ color: "var(--color-text-primary)" }}>
                         Influencer: {app.influencer.displayName}
                       </div>
                       <div className="text-xs text-secondary flex gap-3" style={{ marginTop: "2px" }}>
                         <span>Email: {app.influencer.user.email}</span>
-                        <span>Trust Score: <strong style={{ color: "var(--color-accent-amber)" }}>{app.influencer.user.trustScore}</strong></span>
+                        <span>Trust Score: <strong className="text-amber">{app.influencer.user.trustScore}</strong></span>
                       </div>
                     </div>
 

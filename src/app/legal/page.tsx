@@ -36,7 +36,7 @@ export default function LegalPage() {
         <section className="section">
           <div className="container" style={{ maxWidth: "980px" }}>
             <h1
-              className="section-title gradient-text mb-3" style={{ fontSize: "40px", fontWeight: 900 }}
+              className="section-title gradient-text mb-3 text-3xl font-extrabold"
             >
               Legal Center
             </h1>
@@ -50,7 +50,7 @@ export default function LegalPage() {
                 <Link
                   key={page.href}
                   href={page.href}
-                  className="card grid" style={{ padding: "22px", color: "inherit", textDecoration: "none", border: "1px solid var(--color-border)", background: "rgba(255,255,255,0.02)", gap: "10px" }}
+                  className="card grid border-card" style={{ padding: "22px", color: "inherit", textDecoration: "none", background: "rgba(255,255,255,0.02)", gap: "10px" }}
                 >
                   <h2 className="text-lg" style={{ fontWeight: 850, color: "var(--color-text-primary)" }}>
                     {page.title}

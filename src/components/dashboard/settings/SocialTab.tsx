@@ -156,8 +156,8 @@ export default function SocialTab({
                     className="flex items-center gap-3 mb-5"
                 >
                     <div
-                        className="flex items-center justify-center text-2xl" style={{ width: "48px", height: "48px", background:
-                                "linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)", borderRadius: "var(--radius-md)" }}
+                        className="flex items-center justify-center text-2xl rounded-md" style={{ width: "48px", height: "48px", background:
+                                "linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)" }}
                     >
                         📸
                     </div>
@@ -199,7 +199,7 @@ export default function SocialTab({
                     </Button>
                 ) : (
                     <div
-                        className="p-4" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
+                        className="p-4 bg-tertiary rounded-md"
                     >
                         <div
                             className="grid-2 gap-4 mb-4"
@@ -255,7 +255,7 @@ export default function SocialTab({
                     className="flex items-center gap-3 mb-5"
                 >
                     <div
-                        className="flex items-center justify-center text-2xl" style={{ width: "48px", height: "48px", background: "#FF0000", borderRadius: "var(--radius-md)" }}
+                        className="flex items-center justify-center text-2xl rounded-md" style={{ width: "48px", height: "48px", background: "#FF0000" }}
                     >
                         🎥
                     </div>
@@ -287,7 +287,7 @@ export default function SocialTab({
 
                 {socialConnections?.youtube?.connected || profile.youtubeHandle ? (
                     <div
-                        className="p-4" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
+                        className="p-4 bg-tertiary rounded-md"
                     >
                         <div
                             className="grid-2 gap-4 mb-4"

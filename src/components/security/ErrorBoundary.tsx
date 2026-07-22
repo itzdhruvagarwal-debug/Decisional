@@ -93,9 +93,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
         <div
           role="alert"
           aria-live="assertive"
-          className="text-center flex flex-col items-center justify-center gap-4" style={{ padding: "40px 24px", minHeight: "200px", background: "rgba(244, 63, 94, 0.04)", border: "1px solid rgba(244, 63, 94, 0.15)", borderRadius: "12px", margin: "16px" }}
+          className="text-center flex flex-col items-center justify-center gap-4 rounded-lg" style={{ padding: "40px 24px", minHeight: "200px", background: "rgba(244, 63, 94, 0.04)", border: "1px solid rgba(244, 63, 94, 0.15)", margin: "16px" }}
         >
-          <div style={{ fontSize: "32px" }}>⚠️</div>
+          <div className="text-3xl">⚠️</div>
           <h3
             className="text-lg font-bold" style={{ color: "var(--color-text, #fff)", margin: 0 }}
           >
@@ -110,7 +110,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 {" "}
                 Please reference ID{" "}
                 <code
-                  className="text-xs" style={{ background: "rgba(255,255,255,0.08)", padding: "2px 6px", borderRadius: "4px", fontFamily: "monospace" }}
+                  className="text-xs rounded-sm" style={{ background: "rgba(255,255,255,0.08)", padding: "2px 6px", fontFamily: "monospace" }}
                 >
                   ERR-{this.state.errorId}
                 </code>{" "}

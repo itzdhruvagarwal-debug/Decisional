@@ -199,7 +199,7 @@ export default function IndiaTaxCompliancePanel() {
 
   if (loading) {
     return (
-      <div className="card text-center" style={{ padding: "40px" }}>
+      <div className="card text-center p-10">
         Loading India tax compliance...
       </div>
     );
@@ -211,10 +211,10 @@ export default function IndiaTaxCompliancePanel() {
 
   return (
     <div className="grid gap-5" style={{ maxWidth: "960px" }}>
-      <section className="card" style={{ padding: "20px" }}>
+      <section className="card p-5">
         <div className="flex justify-between gap-4 flex-wrap mb-4">
           <div>
-            <h2 className="text-xl" style={{ fontWeight: 900, marginBottom: "6px" }}>
+            <h2 className="text-xl font-extrabold mb-1">
               India Tax Compliance
             </h2>
             <p className="text-secondary text-sm">
@@ -225,25 +225,25 @@ export default function IndiaTaxCompliancePanel() {
         </div>
 
         <div className="grid-2 gap-3 mb-4">
-          <div style={{ padding: "14px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
+          <div className="bg-tertiary rounded-md border-card" style={{ padding: "14px" }}>
             <div className="text-xs text-muted mb-1">PAN</div>
             <div className="font-extrabold">
               {compliance?.panNumberMasked || (data?.verifiedPanDocument ? "Document verified, number needed" : "Missing")}
             </div>
           </div>
-          <div style={{ padding: "14px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
+          <div className="bg-tertiary rounded-md border-card" style={{ padding: "14px" }}>
             <div className="text-xs text-muted mb-1">GSTIN</div>
             <div className="font-extrabold">
               {compliance?.gstinMasked || compliance?.gstRegistrationType || "Not declared"}
             </div>
           </div>
-          <div style={{ padding: "14px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
+          <div className="bg-tertiary rounded-md border-card" style={{ padding: "14px" }}>
             <div className="text-xs text-muted mb-1">ITR acknowledgement</div>
             <div className="font-extrabold">
               {compliance?.itrAcknowledgementMasked || "Not provided"}
             </div>
           </div>
-          <div style={{ padding: "14px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
+          <div className="bg-tertiary rounded-md border-card" style={{ padding: "14px" }}>
             <div className="text-xs text-muted mb-1">E-invoice</div>
             <div className="font-extrabold">
               {compliance?.eInvoiceApplicable ? "Applicable" : "Not marked"}
@@ -254,7 +254,7 @@ export default function IndiaTaxCompliancePanel() {
         {(summary?.blocking.length || summary?.advisories.length) ? (
           <div className="grid gap-2 mb-1">
             {summary.blocking.map((item) => (
-              <div key={item} className="text-sm font-bold" style={{ color: "var(--color-accent-rose)" }}>
+              <div key={item} className="text-sm font-bold text-rose">
                 {item}
               </div>
             ))}
@@ -267,18 +267,18 @@ export default function IndiaTaxCompliancePanel() {
         ) : null}
       </section>
 
-      <form className="card" style={{ padding: "20px" }} onSubmit={handleSubmit}>
-        <h3 className="text-lg mb-4" style={{ fontWeight: 900 }}>
+      <form className="card p-5" onSubmit={handleSubmit}>
+        <h3 className="text-lg mb-4 font-extrabold">
           Update Tax Details
         </h3>
 
         {error && (
-          <div role="alert" aria-live="assertive" className="text-sm font-bold" style={{ color: "var(--color-accent-rose)", marginBottom: "14px" }}>
+          <div role="alert" aria-live="assertive" className="text-sm font-bold text-rose" style={{ marginBottom: "14px" }}>
             {error}
           </div>
         )}
         {success && (
-          <div role="status" aria-live="polite" className="text-sm font-bold" style={{ color: "var(--color-accent-emerald)", marginBottom: "14px" }}>
+          <div role="status" aria-live="polite" className="text-sm font-bold text-emerald" style={{ marginBottom: "14px" }}>
             {success}
           </div>
         )}

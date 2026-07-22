@@ -66,16 +66,16 @@ export default function ForgotPasswordPage() {
     >
       {/* Background Effects (Same as Login) */}
       <div
-        className="absolute" style={{ top: "20%", left: "10%", width: "400px", height: "400px", background:
-            "radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%)", borderRadius: "50%", filter: "blur(80px)" }}
+        className="absolute rounded-full" style={{ top: "20%", left: "10%", width: "400px", height: "400px", background:
+            "radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%)", filter: "blur(80px)" }}
       />
       <div
-        className="absolute" style={{ bottom: "20%", right: "10%", width: "350px", height: "350px", background:
-            "radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%)", borderRadius: "50%", filter: "blur(80px)" }}
+        className="absolute rounded-full" style={{ bottom: "20%", right: "10%", width: "350px", height: "350px", background:
+            "radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%)", filter: "blur(80px)" }}
       />
 
       <div
-        className="card w-full relative" style={{ maxWidth: "420px", padding: "40px", zIndex: 1 }}
+        className="card w-full relative p-10" style={{ maxWidth: "420px", zIndex: 1 }}
       >
         <Link
           href="/login"
@@ -95,20 +95,13 @@ export default function ForgotPasswordPage() {
           <div
             role={status === "error" ? "alert" : "status"}
             aria-live={status === "error" ? "assertive" : "polite"}
-            className="text-sm mb-6"
-            style={{
-              padding: "12px 16px",
-              borderRadius: "var(--radius-md)",
-              background:
+            className="text-sm mb-6 rounded-md" style={{ padding: "12px 16px", background:
                 status === "success"
                   ? "rgba(16, 185, 129, 0.1)"
-                  : "rgba(244, 63, 94, 0.1)",
-              border: `1px solid ${status === "success" ? "var(--color-accent-emerald)" : "var(--color-accent-rose)"}`,
-              color:
+                  : "rgba(244, 63, 94, 0.1)", border: `1px solid ${status === "success" ? "var(--color-accent-emerald)" : "var(--color-accent-rose)"}`, color:
                 status === "success"
                   ? "var(--color-accent-emerald)"
-                  : "var(--color-accent-rose)",
-            }}
+                  : "var(--color-accent-rose)" }}
           >
             {message}
           </div>
@@ -116,7 +109,7 @@ export default function ForgotPasswordPage() {
 
         {resetLink && (
           <div
-            className="mb-6 p-3 text-xs" style={{ background: "#f3f4f6", borderRadius: "var(--radius-md)", wordBreak: "break-all", border: "1px dashed #ccc" }}
+            className="mb-6 p-3 text-xs rounded-md" style={{ background: "#f3f4f6", wordBreak: "break-all", border: "1px dashed #ccc" }}
           >
             <strong>DEV LINK:</strong>{" "}
             <a

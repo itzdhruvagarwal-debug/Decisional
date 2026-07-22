@@ -61,7 +61,7 @@ export default function LoginActivityPanel({ showToast: _showToast }: Readonly<L
                     visibleLogins.map((login) => (
                         <div
                             key={`${login.device}-${login.time}`}
-                            className="flex justify-between items-center p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)", border: login.active
+                            className="flex justify-between items-center p-3 bg-tertiary rounded-sm" style={{ border: login.active
                                     ? "1px solid var(--color-primary)"
                                     : "1px solid transparent" }}
                         >
@@ -84,12 +84,9 @@ export default function LoginActivityPanel({ showToast: _showToast }: Readonly<L
                                         </span>
                                     </div>
                                     <div
-                                        style={{
-                                            fontSize: "11px",
-                                            color: login.success
+                                        className="text-xs" style={{ color: login.success
                                                 ? "var(--color-text-secondary)"
-                                                : "var(--color-error)",
-                                        }}
+                                                : "var(--color-error)" }}
                                     >
                                         {new Date(login.time).toLocaleString()}{" "}
                                         {login.success ? "" : "(Failed Attempt)"}
@@ -98,7 +95,7 @@ export default function LoginActivityPanel({ showToast: _showToast }: Readonly<L
                             </div>
                             {login.active && (
                                 <div
-                                    className="font-bold" style={{ fontSize: "10px", color: "var(--color-accent-emerald)", background: "rgba(16, 185, 129, 0.1)", padding: "2px 6px", borderRadius: "4px" }}
+                                    className="font-bold text-emerald bg-emerald-subtle rounded-sm" style={{ fontSize: "10px", padding: "2px 6px" }}
                                 >
                                     ACTIVE
                                 </div>
@@ -111,7 +108,7 @@ export default function LoginActivityPanel({ showToast: _showToast }: Readonly<L
                 <Button
                     variant="secondary"
                     onClick={() => setShowAllLogins(!showAllLogins)}
-                    className="flex items-center justify-center w-full mt-3 text-sm font-semibold cursor-pointer" style={{ gap: "6px", padding: "10px", background: "var(--color-bg-tertiary)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)", color: "var(--color-primary-light)", transition: "all 0.2s ease" }}
+                    className="flex items-center justify-center w-full mt-3 text-sm font-semibold cursor-pointer bg-tertiary border-card rounded-sm text-primary-light" style={{ gap: "6px", padding: "10px", transition: "all 0.2s ease" }}
                 >
                     {showAllLogins ? "▲ Show Less" : `▼ View All (${loginActivity.length})`}
                 </Button>

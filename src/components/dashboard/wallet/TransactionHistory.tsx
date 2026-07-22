@@ -312,7 +312,7 @@ export default function TransactionHistory() {
       return (
         <div className="text-center" style={{ padding: "48px 24px" }}>
           <div
-            className="mb-4 text-sm font-semibold" style={{ color: "var(--color-accent-rose)" }}
+            className="mb-4 text-sm font-semibold text-rose"
           >
             ⚠️ {error instanceof Error ? error.message : "Unable to load transactions right now."}
           </div>
@@ -381,7 +381,7 @@ export default function TransactionHistory() {
                       className="flex items-center gap-2"
                     >
                       <div
-                        className="flex items-center justify-center font-bold" style={{ minWidth: "40px", height: "32px", borderRadius: "8px", background: "rgba(255,255,255,0.05)", color: typeInfo.color, fontSize: "10px" }}
+                        className="flex items-center justify-center font-bold rounded-md" style={{ minWidth: "40px", height: "32px", background: "rgba(255,255,255,0.05)", color: typeInfo.color, fontSize: "10px" }}
                       >
                         {typeInfo.icon}
                       </div>
@@ -396,7 +396,7 @@ export default function TransactionHistory() {
                   </td>
                   <td style={{ padding: "16px 24px" }}>
                     <span
-                      className="text-xs font-semibold" style={{ padding: "4px 10px", borderRadius: "12px", background: statusColor.bg, color: statusColor.text }}
+                      className="text-xs font-semibold rounded-lg" style={{ padding: "4px 10px", background: statusColor.bg, color: statusColor.text }}
                     >
                       {tx.status}
                     </span>
@@ -517,7 +517,7 @@ export default function TransactionHistory() {
       {totalPages > 1 && (
         <nav
           aria-label="Transaction history pagination"
-          className="flex justify-center gap-2" style={{ padding: "16px 24px", borderTop: "1px solid var(--color-border)" }}
+          className="flex justify-center gap-2 border-top" style={{ padding: "16px 24px" }}
         >
           <Button
             variant="secondary"

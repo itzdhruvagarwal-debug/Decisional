@@ -32,7 +32,7 @@ export default function DashboardError({
           // Attempt to recover by trying to re-render the segment
           () => reset()
         }
-        className="text-base" style={{ padding: "12px 24px", borderRadius: "8px" }}
+        className="text-base rounded-md" style={{ padding: "12px 24px" }}
       >
         Try again
       </Button>

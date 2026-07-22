@@ -108,7 +108,7 @@ export default function SupportPage() {
           </p>
         </header>
 
-        <form onSubmit={handleSubmit} className="card grid gap-5" style={{ padding: "32px" }}>
+        <form onSubmit={handleSubmit} className="card grid gap-5 p-8">
           <div>
             <Select
               id="type"
@@ -157,8 +157,8 @@ export default function SupportPage() {
               Screenshot (Optional)
             </label>
             {screenshotUrl ? (
-              <div className="flex items-center gap-3 p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
-                <Image src={screenshotUrl} alt="Uploaded screenshot" width={48} height={48} unoptimized className="object-cover" style={{ borderRadius: "var(--radius-sm)" }} />
+              <div className="flex items-center gap-3 p-3 bg-tertiary rounded-md border-card">
+                <Image src={screenshotUrl} alt="Uploaded screenshot" width={48} height={48} unoptimized className="object-cover rounded-sm" />
                 <div className="flex-1 overflow-hidden text-sm" style={{ textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   Screenshot uploaded successfully
                 </div>
@@ -197,20 +197,20 @@ export default function SupportPage() {
           </div>
 
           {errorMsg && (
-            <div role="alert" aria-live="assertive" className="p-3 text-sm" style={{ color: "var(--color-error)", background: "rgba(225,29,72,0.1)", borderRadius: "var(--radius-sm)" }}>
+            <div role="alert" aria-live="assertive" className="p-3 text-sm rounded-sm" style={{ color: "var(--color-error)", background: "rgba(225,29,72,0.1)" }}>
               {errorMsg}
             </div>
           )}
 
           {statusMsg && (
-            <div role="status" aria-live="polite" className="p-3 text-sm" style={{ color: "var(--color-success)", background: "rgba(16,185,129,0.1)", borderRadius: "var(--radius-sm)" }}>
+            <div role="status" aria-live="polite" className="p-3 text-sm rounded-sm" style={{ color: "var(--color-success)", background: "rgba(16,185,129,0.1)" }}>
               {statusMsg}
             </div>
           )}
 
           {badgeAwarded && (
-            <div className="flex items-center gap-4 p-4" style={{ background: "linear-gradient(135deg, rgba(234,179,8,0.15), rgba(249,115,22,0.15))", border: "1px solid rgba(234,179,8,0.3)", borderRadius: "var(--radius-md)" }}>
-              <span style={{ fontSize: "36px" }}>🏆</span>
+            <div className="flex items-center gap-4 p-4 rounded-md" style={{ background: "linear-gradient(135deg, rgba(234,179,8,0.15), rgba(249,115,22,0.15))", border: "1px solid rgba(234,179,8,0.3)" }}>
+              <span className="text-3xl">🏆</span>
               <div>
                 <h4 className="font-extrabold" style={{ color: "var(--color-warning)" }}>New Badge Earned!</h4>
                 <p className="text-sm" style={{ color: "var(--color-text-primary)", marginTop: "2px" }}>

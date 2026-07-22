@@ -309,21 +309,13 @@ function DealProgress({ status }: Readonly<DealProgressProps>) {
               }}
             >
               <div
-                className="flex items-center justify-center font-bold text-sm"
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "50%",
-                  background: stepBg,
-                  color:
+                className="flex items-center justify-center font-bold text-sm rounded-full" style={{ width: "32px", height: "32px", background: stepBg, color:
                     isCompleted || isCurrent
                       ? "white"
-                      : "var(--color-text-muted)",
-                  boxShadow:
+                      : "var(--color-text-muted)", boxShadow:
                     isCurrent && !isCancelled
                       ? "0 0 0 4px rgba(99, 102, 241, 0.2)"
-                      : "none",
-                }}
+                      : "none" }}
               >
                 {isCompleted ? "Done" : idx + 1}
               </div>
@@ -350,7 +342,7 @@ function DealProgress({ status }: Readonly<DealProgressProps>) {
         })}
         {status === "CANCELLED" && (
           <div
-            className="p-3 font-semibold text-center" style={{ background: "rgba(239, 68, 68, 0.1)", color: "var(--color-error)", borderRadius: "var(--radius-md)" }}
+            className="p-3 font-semibold text-center rounded-md" style={{ background: "rgba(239, 68, 68, 0.1)", color: "var(--color-error)" }}
           >
             Deal Cancelled
           </div>
@@ -400,7 +392,7 @@ function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissionsCard
           return (
             <div
               key={sub.id}
-              className="p-4 mb-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border:
+              className="p-4 mb-3 bg-tertiary rounded-md" style={{ border:
                   sub.status === "APPROVED"
                     ? "1px solid var(--color-success)"
                     : "1px solid transparent" }}
@@ -412,7 +404,7 @@ function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissionsCard
                   Version {sub.version}
                 </span>
                 <span
-                  className="text-xs" style={{ padding: "4px 8px", borderRadius: "var(--radius-sm)", background: subBg, color: "white" }}
+                  className="text-xs rounded-sm" style={{ padding: "4px 8px", background: subBg, color: "white" }}
                 >
                   {sub.status}
                 </span>
@@ -430,7 +422,7 @@ function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissionsCard
                         itemBg = "var(--color-warning)";
                       }
                       return (
-                        <div key={item.type} className="flex items-center justify-between p-2" style={{ background: "var(--color-bg-secondary)", borderRadius: "var(--radius-sm)" }}>
+                        <div key={item.type} className="flex items-center justify-between p-2 bg-secondary rounded-sm">
                           <div className="flex flex-col" style={{ gap: "2px" }}>
                             <span className="text-sm font-semibold">
                               {item.type.replace(/_\d+$/, '').replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase())}
@@ -444,13 +436,7 @@ function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissionsCard
                               </span>
                             )}
                           </div>
-                          <span style={{
-                            fontSize: "11px",
-                            padding: "2px 6px",
-                            borderRadius: "var(--radius-sm)",
-                            background: itemBg,
-                            color: "white"
-                          }}>
+                          <span className="text-xs rounded-sm" style={{ padding: "2px 6px", background: itemBg, color: "white" }}>
                             {item.status}
                           </span>
                         </div>
@@ -477,13 +463,13 @@ function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissionsCard
               </div>
               {sub.feedback && (
                 <div
-                  className="mt-2 p-2 text-sm text-secondary" style={{ background: "var(--color-bg-secondary)", borderRadius: "var(--radius-sm)" }}
+                  className="mt-2 p-2 text-sm text-secondary bg-secondary rounded-sm"
                 >
                   Feedback: {sub.feedback}
                 </div>
               )}
               <div
-                className="mt-2 text-muted" style={{ fontSize: "11px" }}
+                className="mt-2 text-muted text-xs"
               >
                 Submitted:{" "}
                 {new Date(sub.createdAt).toLocaleDateString()}
@@ -535,15 +521,15 @@ function EngagementCard({
       </div>
 
       {disclaimer && (
-        <div className="text-xs" style={{ color: "var(--color-warning)", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: "var(--radius-sm)", padding: "8px 12px", marginBottom: "14px" }}>
+        <div className="text-xs rounded-sm" style={{ color: "var(--color-warning)", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", padding: "8px 12px", marginBottom: "14px" }}>
           {disclaimer}
         </div>
       )}
 
       <div className="flex gap-2 flex-wrap mb-4">
         {engagement.snapshots.map((snap) => (
-          <div key={snap.interval} className="p-3" style={{ flex: "1 1 140px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)", border: "1px solid var(--color-border)" }}>
-            <div className="text-muted mb-2 font-bold" style={{ fontSize: "11px", textTransform: "uppercase" }}>
+          <div key={snap.interval} className="p-3 bg-tertiary rounded-sm border-card" style={{ flex: "1 1 140px" }}>
+            <div className="text-muted mb-2 font-bold text-xs uppercase">
               {snap.interval}{snap.isEstimated ? " (est.)" : ""}
             </div>
             <div className="grid gap-1">
@@ -566,12 +552,7 @@ function EngagementCard({
       </div>
 
       {isClient && roi && (
-        <div style={{
-          padding: "14px",
-          background: "linear-gradient(135deg, rgba(99,102,241,0.08), rgba(16,185,129,0.05))",
-          border: "1px solid rgba(99,102,241,0.2)",
-          borderRadius: "var(--radius-sm)",
-        }}>
+        <div className="rounded-sm" style={{ padding: "14px", background: "linear-gradient(135deg, rgba(99,102,241,0.08), rgba(16,185,129,0.05))", border: "1px solid rgba(99,102,241,0.2)" }}>
           <div className="text-sm font-bold" style={{ marginBottom: "10px" }}>💰 ROI Summary</div>
           <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px" }}>
             {([
@@ -580,13 +561,13 @@ function EngagementCard({
               ["Cost/View", `₹${(roi.costPerView / 100).toFixed(2)}`],
               ["Cost/Eng.", `₹${(roi.costPerEngagement / 100).toFixed(2)}`],
             ] as [string, string][]).map(([label, val]) => (
-              <div key={label} className="p-2" style={{ background: "var(--color-bg-secondary)", borderRadius: "var(--radius-sm)" }}>
+              <div key={label} className="p-2 bg-secondary rounded-sm">
                 <div className="text-muted" style={{ fontSize: "10px", marginBottom: "2px" }}>{label}</div>
                 <div className="text-sm font-extrabold" style={{ color: roi.roiPercentage >= 0 ? "var(--color-success)" : "var(--color-error)" }}>{val}</div>
               </div>
             ))}
           </div>
-          <div className="text-muted mt-2" style={{ fontSize: "11px" }}>
+          <div className="text-muted mt-2 text-xs">
             Based on {latestSnap?.interval || "latest"} data. EMV: views=₹0.20, engagements=₹1.00, clicks=₹5.00.
           </div>
         </div>
@@ -1224,9 +1205,9 @@ function DealContractCard({
             ] as [string, string][]).map(([label, value]) => (
               <div
                 key={label}
-                className="p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)" }}
+                className="p-3 bg-tertiary rounded-sm"
               >
-                <div className="text-muted mb-1" style={{ fontSize: "11px" }}>{label}</div>
+                <div className="text-muted mb-1 text-xs">{label}</div>
                 <div className="text-sm font-bold">{value}</div>
               </div>
             ))}
@@ -1239,7 +1220,7 @@ function DealContractCard({
                 {contractDeliverables.map((item, index) => (
                   <div
                     key={`${item.type}-${index}`}
-                    className="text-sm" style={{ padding: "10px 12px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)", lineHeight: 1.5 }}
+                    className="text-sm bg-tertiary rounded-sm leading-normal" style={{ padding: "10px 12px" }}
                   >
                     <strong>{item.count || 1}x {item.type || "Deliverable"}</strong>
                     <span className="text-secondary">
@@ -1301,7 +1282,7 @@ function DealContractCard({
           )}
 
           <div
-            className="p-3 text-sm text-secondary" style={{ background: "rgba(99, 102, 241, 0.08)", border: "1px solid rgba(99, 102, 241, 0.18)", borderRadius: "var(--radius-sm)" }}
+            className="p-3 text-sm text-secondary rounded-sm" style={{ background: "rgba(99, 102, 241, 0.08)", border: "1px solid rgba(99, 102, 241, 0.18)" }}
           >
             Signatures: Brand {brandSigned ? "signed" : "pending"} /
             Influencer {influencerSigned ? "signed" : "pending"}
@@ -1504,7 +1485,7 @@ export default function DealDetailPage() {
                     />
                     <PaymentRow label="Gateway fee" value={formatCurrency(gatewayFee)} />
                     <div
-                      className="mt-2 flex justify-between text-base" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "8px" }}
+                      className="mt-2 flex justify-between text-base border-top" style={{ paddingTop: "8px" }}
                     >
                       <span className="font-semibold">Brand payable</span>
                       <span className="gradient-text font-extrabold">
@@ -1517,7 +1498,7 @@ export default function DealDetailPage() {
                     <PaymentRow label="Deal amount" value={formatCurrency(deal.amount)} />
                     <PaymentRow label="Platform fee" value="Paid by brand" />
                     <div
-                      className="mt-2 flex justify-between text-base" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "8px" }}
+                      className="mt-2 flex justify-between text-base border-top" style={{ paddingTop: "8px" }}
                     >
                       <span className="font-semibold">You receive</span>
                       <span className="gradient-text font-extrabold">
@@ -1554,7 +1535,7 @@ export default function DealDetailPage() {
                   )}
                   {isClient && deal.shippingAddress && (
                     <div
-                      className="mt-3 p-3 text-sm text-secondary" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
+                      className="mt-3 p-3 text-sm text-secondary bg-tertiary rounded-md"
                     >
                       <div className="font-bold" style={{ color: "var(--color-text-primary)" }}>
                         {deal.shippingAddress.fullName}
@@ -1645,7 +1626,7 @@ export default function DealDetailPage() {
                   className="flex items-center gap-3"
                 >
                   <div
-                    className="flex items-center justify-center font-bold overflow-hidden" style={{ width: "48px", height: "48px", background: "var(--gradient-card)", borderRadius: "var(--radius-md)" }}
+                    className="flex items-center justify-center font-bold overflow-hidden rounded-md" style={{ width: "48px", height: "48px", background: "var(--gradient-card)" }}
                   >
                     {deal.brand?.logo ? (
                       <Image
@@ -1788,7 +1769,7 @@ export default function DealDetailPage() {
             const itemReview = itemizedReviews[item.type] || { status: "APPROVED", feedback: "" };
 
             return (
-              <div key={item.type} className="p-3" style={{ background: "var(--color-bg-secondary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
+              <div key={item.type} className="p-3 bg-secondary rounded-md border-card">
                 <div className="flex justify-between items-start mb-2 gap-2">
                   <div className="flex flex-col">
                     <span className="font-semibold text-sm">{item.label}</span>
@@ -2024,7 +2005,7 @@ export default function DealDetailPage() {
           />
         </div>
         <div
-          className="p-3 mb-5 text-sm text-secondary" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
+          className="p-3 mb-5 text-sm text-secondary bg-tertiary rounded-md"
         >
           Ensure required hashtags are present.
         </div>
@@ -2049,13 +2030,7 @@ export default function DealDetailPage() {
       {/* ── Star Rating & Review Section ── */}
       {deal.status === "COMPLETED" && !reviewSubmitted && (
         <div
-          className="card"
-          style={{
-            padding: "28px",
-            borderRadius: "var(--radius-lg)",
-            border: "1px solid var(--color-border)",
-            background: "linear-gradient(135deg, rgba(16,185,129,0.05), rgba(59,130,246,0.05))",
-          }}
+          className="card rounded-lg border-card" style={{ padding: "28px", background: "linear-gradient(135deg, rgba(16,185,129,0.05), rgba(59,130,246,0.05))" }}
         >
           <h3 className="text-lg font-bold mb-4">⭐ Rate This Deal</h3>
           <p className="text-sm text-secondary mb-4">How was your experience? Your review helps build trust on the platform.</p>
@@ -2069,7 +2044,7 @@ export default function DealDetailPage() {
                 onMouseLeave={() => setHoverRating(0)}
                 aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
                 aria-pressed={(hoverRating || reviewRating) >= star ? "true" : "false"}
-                className="cursor-pointer" style={{ background: "none", border: "none", fontSize: "32px", transition: "transform 0.15s ease", transform: (hoverRating || reviewRating) >= star ? "scale(1.15)" : "scale(1)", filter: (hoverRating || reviewRating) >= star ? "none" : "grayscale(1) opacity(0.3)" }}
+                className="cursor-pointer border-none text-3xl" style={{ background: "none", transition: "transform 0.15s ease", transform: (hoverRating || reviewRating) >= star ? "scale(1.15)" : "scale(1)", filter: (hoverRating || reviewRating) >= star ? "none" : "grayscale(1) opacity(0.3)" }}
               >
                 ⭐
               </Button>
@@ -2090,7 +2065,7 @@ export default function DealDetailPage() {
             value={reviewComment}
             onChange={(e) => setReviewComment(e.target.value)}
             rows={3}
-            className="w-full text-sm mb-4" style={{ padding: "12px 16px", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)", background: "var(--color-bg-primary)", resize: "vertical" }}
+            className="w-full text-sm mb-4 rounded-md border-card" style={{ padding: "12px 16px", background: "var(--color-bg-primary)", resize: "vertical" }}
           />
           <Button
             variant="primary"
@@ -2125,7 +2100,7 @@ export default function DealDetailPage() {
       )}
       {deal.status === "COMPLETED" && reviewSubmitted && (
         <div
-          className="card flex items-center gap-3" style={{ padding: "20px 28px", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-success)", background: "linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.02))" }}
+          className="card flex items-center gap-3 rounded-lg" style={{ padding: "20px 28px", border: "1px solid var(--color-success)", background: "linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.02))" }}
         >
           <span className="text-2xl">✅</span>
           <div>

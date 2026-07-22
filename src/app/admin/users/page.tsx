@@ -95,7 +95,7 @@ export default async function AdminUsersPage({
     <div className="admin-page">
       <div className="admin-toolbar">
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "6px" }}>
+          <h1 className="text-3xl font-extrabold mb-1">
             User Management
           </h1>
           <p className="text-secondary text-sm">
@@ -106,7 +106,7 @@ export default async function AdminUsersPage({
           <div className="text-muted text-xs">
             Matching users
           </div>
-          <div style={{ fontSize: "22px", fontWeight: 900 }}>{total}</div>
+          <div className="font-extrabold" style={{ fontSize: "22px" }}>{total}</div>
         </div>
       </div>
 
@@ -146,16 +146,16 @@ export default async function AdminUsersPage({
           <div className="admin-table-wrap">
             <table className="w-full" style={{ minWidth: "960px", borderCollapse: "collapse" }}>
               <thead>
-                <tr style={{ background: "var(--color-bg-secondary)" }}>
+                <tr className="bg-secondary">
                   {["User", "Role", "Status", "Tax", "Trust", "Joined", "Action"].map(
                     (heading) => (
                       <th
                         key={heading}
-                        className="border-b-card text-muted text-xs font-extrabold" style={{ padding: "14px 18px", textAlign: (
+                        className="border-b-card text-muted text-xs font-extrabold uppercase" style={{ padding: "14px 18px", textAlign: (
                             {
                               Action: "right", Trust: "center"
                             } as const
-                          )[heading as "Action" | "Trust"] || "left", textTransform: "uppercase" }}
+                          )[heading as "Action" | "Trust"] || "left" }}
                       >
                         {heading}
                       </th>
@@ -181,7 +181,7 @@ export default async function AdminUsersPage({
                       <td className="p-card">
                         <div className="flex items-center gap-3">
                           <div
-                            className="flex items-center justify-center relative overflow-hidden" style={{ width: "42px", height: "42px", borderRadius: "50%", background: "var(--gradient-primary)", color: "white", fontWeight: 900 }}
+                            className="flex items-center justify-center relative overflow-hidden rounded-full font-extrabold" style={{ width: "42px", height: "42px", background: "var(--gradient-primary)", color: "white" }}
                           >
                             {avatar ? (
                               <Image
@@ -208,36 +208,26 @@ export default async function AdminUsersPage({
                       </td>
                       <td className="p-card">
                         <span
-                          className="badge"
-                          style={{
-                            background: statusColor(user.status),
-                            color: "white",
-                            textTransform: "capitalize",
-                          }}
+                          className="badge capitalize" style={{ background: statusColor(user.status), color: "white" }}
                         >
                           {user.status.toLowerCase().replaceAll("_", " ")}
                         </span>
                       </td>
                       <td className="p-card">
                         <span
-                          className="badge"
-                          style={{
-                            background: taxStatusColor(user),
-                            color: "white",
-                            textTransform: "capitalize",
-                          }}
+                          className="badge capitalize" style={{ background: taxStatusColor(user), color: "white" }}
                         >
                           {taxStatusLabel(user)}
                         </span>
                         {user.taxCompliance?.gstinLast4 && (
-                          <div className="text-muted mt-1" style={{ fontSize: "11px" }}>
+                          <div className="text-muted mt-1 text-xs">
                             GST ****{user.taxCompliance.gstinLast4}
                           </div>
                         )}
                       </td>
-                      <td className="p-card text-center" style={{ fontWeight: 900 }}>
+                      <td className="p-card text-center font-extrabold">
                         {user.trustScore}
-                        <span className="text-muted" style={{ fontSize: "11px" }}>
+                        <span className="text-muted text-xs">
                           /900
                         </span>
                       </td>

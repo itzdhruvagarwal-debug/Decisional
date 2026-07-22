@@ -77,7 +77,7 @@ export default function BadgesPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1
-            className="font-extrabold mb-2" style={{ fontSize: "32px", background: "linear-gradient(135deg, #f59e0b, #ef4444)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+            className="font-extrabold mb-2 text-3xl" style={{ background: "linear-gradient(135deg, #f59e0b, #ef4444)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
           >
             🏆 Badges & Achievements
           </h1>
@@ -91,7 +91,7 @@ export default function BadgesPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center gap-5 flex-wrap" style={{ marginBottom: "40px" }}
+            className="flex justify-center gap-5 flex-wrap mb-10"
           >
             <StatCard
               label="Current Level"
@@ -164,7 +164,7 @@ export default function BadgesPage() {
 
         {error && (
           <div
-            className="text-center" style={{ padding: "40px", color: "var(--color-accent-rose)" }}
+            className="text-center p-10 text-rose"
           >
             {error}
             <Button
@@ -200,7 +200,7 @@ export default function BadgesPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ delay: index * 0.05 }}
-                    className="card hover-lift p-6 flex flex-col items-center text-center relative" style={{ borderRadius: "16px", border: badge.earned
+                    className="card hover-lift p-6 flex flex-col items-center text-center relative rounded-xl" style={{ border: badge.earned
                         ? "1px solid rgba(16, 185, 129, 0.3)"
                         : "1px solid var(--color-border)", background: badge.earned
                         ? "linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(99, 102, 241, 0.05))"
@@ -226,7 +226,7 @@ export default function BadgesPage() {
 
                     {badge.earned && (
                       <span
-                        className="absolute font-extrabold" style={{ top: "12px", right: "12px", fontSize: "10px", padding: "4px 8px", borderRadius: "20px", background: "var(--color-accent-emerald)", color: "white", boxShadow: "0 2px 4px rgba(16, 185, 129, 0.3)" }}
+                        className="absolute font-extrabold rounded-2xl" style={{ top: "12px", right: "12px", fontSize: "10px", padding: "4px 8px", background: "var(--color-accent-emerald)", color: "white", boxShadow: "0 2px 4px rgba(16, 185, 129, 0.3)" }}
                       >
                         UNLOCKED
                       </span>
@@ -241,7 +241,7 @@ export default function BadgesPage() {
                     </h3>
 
                     <p
-                      className="text-sm text-secondary flex-1" style={{ marginBottom: badge.hasProgress && !badge.earned ? "12px" : "16px", lineHeight: 1.5 }}
+                      className="text-sm text-secondary flex-1 leading-normal" style={{ marginBottom: badge.hasProgress && !badge.earned ? "12px" : "16px" }}
                     >
                       {badge.description}
                     </p>
@@ -249,7 +249,7 @@ export default function BadgesPage() {
                     {!badge.earned && badge.hasProgress && (
                       <div className="w-full mb-4">
                         <div
-                          className="flex justify-between font-bold text-secondary" style={{ fontSize: "11px", marginBottom: "6px" }}
+                          className="flex justify-between font-bold text-secondary text-xs mb-1"
                         >
                           <span>Progress</span>
                           <span style={{ fontFamily: "monospace" }}>
@@ -267,7 +267,7 @@ export default function BadgesPage() {
                     )}
 
                     <div
-                      className="w-full flex justify-between items-center text-xs" style={{ paddingTop: "16px", borderTop: "1px solid var(--color-border)" }}
+                      className="w-full flex justify-between items-center text-xs border-top" style={{ paddingTop: "16px" }}
                     >
                       <span
                         className="font-semibold text-muted"
@@ -275,7 +275,7 @@ export default function BadgesPage() {
                         {badge.category}
                       </span>
                       <span
-                        className="font-bold text-primary" style={{ background: "rgba(99, 102, 241, 0.1)", padding: "2px 8px", borderRadius: "6px" }}
+                        className="font-bold text-primary bg-indigo-subtle" style={{ padding: "2px 8px", borderRadius: "6px" }}
                       >
                         +{badge.xpReward} XP
                       </span>
@@ -307,15 +307,15 @@ function StatCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      className="flex-1 p-6 text-center" style={{ minWidth: "160px", borderRadius: "16px", background: `linear-gradient(135deg, ${color}11, ${color}05)`, border: `1px solid ${color}33`, boxShadow: `0 4px 12px ${color}11` }}
+      className="flex-1 p-6 text-center rounded-xl" style={{ minWidth: "160px", background: `linear-gradient(135deg, ${color}11, ${color}05)`, border: `1px solid ${color}33`, boxShadow: `0 4px 12px ${color}11` }}
     >
       <div
-        className="font-extrabold mb-1" style={{ fontSize: "32px", color: color, lineHeight: 1 }}
+        className="font-extrabold mb-1 text-3xl leading-none" style={{ color: color }}
       >
         {value}
       </div>
       <div
-        className="text-xs font-bold text-secondary" style={{ textTransform: "uppercase", letterSpacing: "1px" }}
+        className="text-xs font-bold text-secondary uppercase" style={{ letterSpacing: "1px" }}
       >
         {label}
       </div>

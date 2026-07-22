@@ -171,7 +171,7 @@ function DealSkeleton() {
   return (
     <div className="card mb-4">
       <div className="flex gap-4 items-center mb-4">
-        <div className="skeleton flex-shrink-0" style={{ width: 48, height: 48, borderRadius: "var(--radius-md)" }} />
+        <div className="skeleton flex-shrink-0 rounded-md" style={{ width: 48, height: 48 }} />
         <div className="flex-1">
           <div className="skeleton" style={{ height: 16, width: "60%", borderRadius: 6, marginBottom: 8 }} />
           <div className="skeleton" style={{ height: 13, width: "40%", borderRadius: 6 }} />
@@ -265,7 +265,7 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
             className="flex gap-4 items-center"
           >
             <div
-              className="flex items-center justify-center font-bold text-lg flex-shrink-0 overflow-hidden" style={{ width: "48px", height: "48px", background: "var(--gradient-primary)", borderRadius: "var(--radius-md)", color: "white" }}
+              className="flex items-center justify-center font-bold text-lg flex-shrink-0 overflow-hidden rounded-md" style={{ width: "48px", height: "48px", background: "var(--gradient-primary)", color: "white" }}
             >
               {deal.brand.logo ? (
                 <Image
@@ -355,11 +355,7 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
 
       {selectedDeal === deal.id && (
         <div
-          style={{
-            margin: "0 24px 24px 24px",
-            paddingTop: "20px",
-            borderTop: "1px solid var(--color-border)",
-          }}
+          className="border-top" style={{ margin: "0 24px 24px 24px", paddingTop: "20px" }}
         >
           <div
             className="grid-2 gap-4 mb-4"
@@ -498,7 +494,7 @@ export default function DealsPage() {
           <div className="grid-3 mb-6">
             <div className="card text-center">
               <div
-                className="font-extrabold" style={{ fontSize: "32px", color: "var(--color-accent-cyan)" }}
+                className="font-extrabold text-3xl" style={{ color: "var(--color-accent-cyan)" }}
               >
                 {dealStats.active}
               </div>
@@ -510,7 +506,7 @@ export default function DealsPage() {
             </div>
             <div className="card text-center">
               <div
-                className="font-extrabold" style={{ fontSize: "32px", color: "var(--color-success)" }}
+                className="font-extrabold text-3xl" style={{ color: "var(--color-success)" }}
               >
                 {dealStats.completed}
               </div>
@@ -522,8 +518,7 @@ export default function DealsPage() {
             </div>
             <div className="card text-center">
               <div
-                 style={{ fontSize: "32px" }}
-                 className="font-extrabold gradient-text"
+                 className="text-3xl font-extrabold gradient-text"
               >
                 {formatCurrency(dealStats.totalEarnings || 0)}
               </div>

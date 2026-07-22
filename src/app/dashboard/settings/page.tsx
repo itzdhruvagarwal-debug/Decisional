@@ -252,7 +252,7 @@ export default function SettingsPage() {
 
     if (!profile || !user) {
         return (
-            <div className="text-center" style={{ padding: "40px" }}>
+            <div className="text-center p-10">
                 Failed to load profile
             </div>
         );

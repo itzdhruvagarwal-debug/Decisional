@@ -20,8 +20,7 @@ export default function Loading() {
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
           <div
             key={i}
-            className="skeleton"
-            style={{ height: 40, borderRadius: "var(--radius-md)", opacity: 1 - i * 0.07 }}
+            className="skeleton rounded-md" style={{ height: 40, opacity: 1 - i * 0.07 }}
           />
         ))}
       </aside>
@@ -39,7 +38,7 @@ export default function Loading() {
           </div>
           <div className="flex gap-3 items-center">
             <div className="skeleton" style={{ height: 32, width: 80, borderRadius: 20 }} />
-            <div className="skeleton" style={{ height: 36, width: 36, borderRadius: "50%" }} />
+            <div className="skeleton rounded-full" style={{ height: 36, width: 36 }} />
             <div className="skeleton" style={{ height: 36, width: 120, borderRadius: 20 }} />
           </div>
         </header>
@@ -61,13 +60,13 @@ export default function Loading() {
           <div className="grid-2 gap-6">
             <div className="card" style={{ padding: 24 }}>
               <div className="skeleton mb-4" style={{ height: 18, width: 140, borderRadius: 6 }} />
-              <div className="skeleton" style={{ height: 200, borderRadius: "var(--radius-md)" }} />
+              <div className="skeleton rounded-md" style={{ height: 200 }} />
             </div>
             <div className="card" style={{ padding: 24 }}>
               <div className="skeleton mb-4" style={{ height: 18, width: 120, borderRadius: 6 }} />
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="flex gap-3 items-center mb-4">
-                  <div className="skeleton flex-shrink-0" style={{ width: 36, height: 36, borderRadius: "50%" }} />
+                  <div className="skeleton flex-shrink-0 rounded-full" style={{ width: 36, height: 36 }} />
                   <div className="flex-1">
                     <div className="skeleton mb-2" style={{ height: 14, width: "70%", borderRadius: 4 }} />
                     <div className="skeleton" style={{ height: 11, width: "40%", borderRadius: 4 }} />

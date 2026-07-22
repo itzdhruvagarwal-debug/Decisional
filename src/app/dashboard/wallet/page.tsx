@@ -406,7 +406,7 @@ function WalletHeader({
     >
       <div>
         <h1
-          className="font-extrabold" style={{ fontSize: "32px", background: "var(--gradient-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+          className="font-extrabold text-3xl" style={{ background: "var(--gradient-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
         >
           Wallet and Payments
         </h1>
@@ -474,17 +474,17 @@ interface WalletSummaryCardsProps {
 
 function WalletSummaryCards({ userType, walletData }: WalletSummaryCardsProps) {
   return (
-    <div className="grid-4" style={{ marginBottom: "40px" }}>
-      <div className="card" style={{ background: "var(--gradient-primary)", border: "none" }}>
+    <div className="grid-4 mb-10">
+      <div className="card border-none" style={{ background: "var(--gradient-primary)" }}>
         <div className="text-sm mb-2" style={{ opacity: 0.9 }}>Available Balance</div>
-        <div className="font-extrabold" style={{ fontSize: "32px" }}>{formatCurrency(walletData.balance)}</div>
+        <div className="font-extrabold text-3xl">{formatCurrency(walletData.balance)}</div>
       </div>
 
       <div className="card">
         <div className="text-sm text-secondary mb-2">
           {userType === "BRAND" ? "Active Holds" : "Pending"}
         </div>
-        <div className="font-extrabold" style={{ fontSize: "28px", color: "var(--color-accent-amber)" }}>
+        <div className="font-extrabold text-3xl text-amber">
           {formatCurrency(userType === "BRAND" ? walletData.totalHeld || 0 : walletData.pendingBalance)}
         </div>
       </div>
@@ -493,7 +493,7 @@ function WalletSummaryCards({ userType, walletData }: WalletSummaryCardsProps) {
         <div className="text-sm text-secondary mb-2">
           {userType === "BRAND" ? "Total Spent" : "Total Earned"}
         </div>
-        <div className="font-extrabold" style={{ fontSize: "28px", color: "var(--color-accent-emerald)" }}>
+        <div className="font-extrabold text-3xl text-emerald">
           {formatCurrency(userType === "BRAND" ? walletData.totalSpent || 0 : walletData.totalEarned)}
         </div>
       </div>
@@ -502,7 +502,7 @@ function WalletSummaryCards({ userType, walletData }: WalletSummaryCardsProps) {
         <div className="text-sm text-secondary mb-2">
           {userType === "BRAND" ? "Total Added" : "Total Withdrawn"}
         </div>
-        <div className="font-extrabold" style={{ fontSize: "28px" }}>
+        <div className="font-extrabold text-3xl">
           {formatCurrency(userType === "BRAND" ? walletData.totalDeposited || 0 : walletData.totalWithdrawn)}
         </div>
       </div>
@@ -606,19 +606,13 @@ export default function WalletPage() {
               aria-selected={activeTab === tab}
               onClick={() => setActiveTab(tab)}
               variant="ghost"
-              style={{
-                padding: "12px 0",
-                borderBottom:
+              className="capitalize" style={{ padding: "12px 0", borderBottom:
                   activeTab === tab
                     ? "2px solid var(--color-primary)"
-                    : "2px solid transparent",
-                color:
+                    : "2px solid transparent", color:
                   activeTab === tab
                     ? "var(--color-primary)"
-                    : "var(--color-text-secondary)",
-                fontWeight: activeTab === tab ? 700 : 500,
-                textTransform: "capitalize",
-              }}
+                    : "var(--color-text-secondary)", fontWeight: activeTab === tab ? 700 : 500 }}
             >
               {getTabLabel(tab)}
             </Button>
@@ -703,7 +697,7 @@ export default function WalletPage() {
                       aria-label="Change selected bank account"
                       onClick={() => setSelectedAccount(null)}
                       variant="ghost"
-                      className="text-xs" style={{ color: "var(--color-accent-rose)" }}
+                      className="text-xs text-rose"
                     >
                       Change
                     </Button>

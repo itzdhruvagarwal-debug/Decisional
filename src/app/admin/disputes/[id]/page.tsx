@@ -47,11 +47,11 @@ function DealHistoryList({
       {deals.map((d) => (
         <div
           key={d.id}
-          className="flex justify-between items-center" style={{ padding: "10px 12px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}
+          className="flex justify-between items-center bg-tertiary rounded-md border-card" style={{ padding: "10px 12px" }}
         >
           <div>
             <div className="text-sm font-semibold">{d.campaign?.title || "Campaign"}</div>
-            <div className="text-muted" style={{ fontSize: "11px" }}>
+            <div className="text-muted text-xs">
               {new Date(d.createdAt).toLocaleDateString()} • ₹{(d.amount / 100).toFixed(0)}
             </div>
           </div>
@@ -131,7 +131,7 @@ export default async function AdminDisputeDetailPage({
     <div className="admin-page">
       <div className="admin-toolbar">
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "6px" }}>
+          <h1 className="text-3xl font-extrabold mb-1">
             Dispute Resolution
           </h1>
           <p className="text-secondary text-sm">
@@ -230,7 +230,7 @@ export default async function AdminDisputeDetailPage({
 
       {/* Actions */}
       <div
-        className="mt-8 p-6" style={{ background: "var(--color-bg-tertiary)", borderRadius: "12px" }}
+        className="mt-8 p-6 bg-tertiary rounded-lg"
       >
         <h3 className="mb-4">Administrator Verdict</h3>
         <p

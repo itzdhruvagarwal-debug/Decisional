@@ -250,7 +250,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
             </div>
 
             <p
-              className="campaign-card-description text-secondary text-sm" style={{ lineHeight: 1.5, minHeight: "42px" }}
+              className="campaign-card-description text-secondary text-sm leading-normal" style={{ minHeight: "42px" }}
             >
               {campaign.description}
             </p>

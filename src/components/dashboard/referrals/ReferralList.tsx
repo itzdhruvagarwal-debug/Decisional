@@ -46,7 +46,7 @@ export default function ReferralList() {
 
   return (
     <div
-      className="card p-0 overflow-hidden" style={{ border: "1px solid var(--color-border)", borderRadius: "16px", background: "var(--color-bg-card)" }}
+      className="card p-0 overflow-hidden border-card rounded-xl" style={{ background: "var(--color-bg-card)" }}
     >
       <div
         className="p-6 border-b-card flex justify-between items-center flex-wrap gap-4"
@@ -64,8 +64,8 @@ export default function ReferralList() {
               key={f}
               variant="ghost"
               onClick={() => setFilter(f)}
-              className="text-xs font-semibold" style={{ padding: "6px 12px", borderRadius: "8px", background:
-                  filter === f ? "var(--color-primary)" : "var(--color-bg-tertiary)", color: filter === f ? "white" : "var(--color-text-secondary)", border: "none" }}
+              className="text-xs font-semibold rounded-md border-none" style={{ padding: "6px 12px", background:
+                  filter === f ? "var(--color-primary)" : "var(--color-bg-tertiary)", color: filter === f ? "white" : "var(--color-text-secondary)" }}
             >
               {f}
             </Button>
@@ -77,7 +77,7 @@ export default function ReferralList() {
         <table className="w-full" style={{ borderCollapse: "collapse" }}>
           <thead>
             <tr
-              className="p-4 font-semibold text-secondary" style={{ background: "var(--color-bg-secondary)" }}
+              className="p-4 font-semibold text-secondary bg-secondary"
             >
               <th className="p-4 text-left">User</th>
               <th className="p-4 text-left">Type</th>
@@ -104,7 +104,7 @@ export default function ReferralList() {
                     className="flex items-center gap-3"
                   >
                     <div
-                      className="flex items-center justify-center font-bold text-sm" style={{ width: "36px", height: "36px", borderRadius: "50%", background:
+                      className="flex items-center justify-center font-bold text-sm rounded-full" style={{ width: "36px", height: "36px", background:
                           "linear-gradient(135deg, var(--color-primary), var(--color-accent-purple))", color: "white" }}
                     >
                       {ref.name.charAt(0).toUpperCase()}
@@ -125,7 +125,7 @@ export default function ReferralList() {
                 </td>
                 <td className="p-4">
                   <span
-                    className="font-bold" style={{ padding: "4px 10px", borderRadius: "20px", fontSize: "11px", textTransform: "uppercase", background:
+                    className="font-bold rounded-2xl text-xs uppercase" style={{ padding: "4px 10px", background:
                         ref.type === "BRAND"
                           ? "rgba(6, 182, 212, 0.15)"
                           : "rgba(236, 72, 153, 0.15)", color:
@@ -147,7 +147,7 @@ export default function ReferralList() {
                 </td>
                 <td className="p-4 text-center">
                   <span
-                    className="inline-flex items-center text-xs font-semibold" style={{ gap: "6px", padding: "4px 10px", borderRadius: "12px", background:
+                    className="inline-flex items-center text-xs font-semibold rounded-lg" style={{ gap: "6px", padding: "4px 10px", background:
                         ref.status === "ACTIVE"
                           ? "rgba(16, 185, 129, 0.15)"
                           : "rgba(245, 158, 11, 0.15)", color:
@@ -156,18 +156,13 @@ export default function ReferralList() {
                           : "var(--color-accent-amber)" }}
                   >
                     <span
-                      style={{
-                        width: "6px",
-                        height: "6px",
-                        borderRadius: "50%",
-                        background: "currentColor",
-                      }}
+                      className="rounded-full" style={{ width: "6px", height: "6px", background: "currentColor" }}
                     ></span>
                     {ref.status}
                   </span>
                 </td>
                 <td
-                  className="p-4 text-right font-bold" style={{ color: "var(--color-accent-emerald)" }}
+                  className="p-4 text-right font-bold text-emerald"
                 >
                   {ref.earnings > 0
                     ? `₹${(ref.earnings / 100).toLocaleString("en-IN")}`

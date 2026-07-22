@@ -246,7 +246,7 @@ function ApplicationsList({
         return (
           <article
             key={application.id}
-            className="grid gap-4 p-4" style={{ gridTemplateColumns: "minmax(0, 1fr) auto", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}
+            className="grid gap-4 p-4 bg-tertiary rounded-md border-card" style={{ gridTemplateColumns: "minmax(0, 1fr) auto" }}
           >
             <div style={{ minWidth: 0 }}>
               <div
@@ -270,7 +270,7 @@ function ApplicationsList({
                 )}
               </div>
               <p
-                className="text-secondary text-sm" style={{ lineHeight: 1.5, marginBottom: "10px" }}
+                className="text-secondary text-sm leading-normal" style={{ marginBottom: "10px" }}
               >
                 {application.proposal}
               </p>
@@ -288,7 +288,7 @@ function ApplicationsList({
                   Category: {application.influencer.categories?.split(",")[0] || "Other"}
                 </span>
                 {application.matchBreakdown && (
-                  <span style={{ color: "#10b981", fontWeight: "600" }} title="This is a modelled projection based on follower stats and campaign budget, not verified API statistics.">
+                  <span className="text-emerald" style={{ fontWeight: "600" }} title="This is a modelled projection based on follower stats and campaign budget, not verified API statistics.">
                     Projected CPV: ₹{((application.matchBreakdown.estimatedCpvPaise || 0) / 100).toFixed(2)} / view (Est.)
                   </span>
                 )}
@@ -700,7 +700,7 @@ export default function CampaignDetailClient({
                 (campaign.brand?.companyName || "DC").slice(0, 2).toUpperCase()
               )}
             </div>
-            <h1 className="font-extrabold" style={{ fontSize: "28px" }}>{campaign.title}</h1>
+            <h1 className="font-extrabold text-3xl">{campaign.title}</h1>
             <p className="text-secondary" style={{ marginTop: "6px" }}>
               {campaign.brand?.companyName || "Unknown Brand"}
               {campaign.brand?.isGstVerified ? " · Verified" : ""}
@@ -758,8 +758,8 @@ export default function CampaignDetailClient({
           </div>
           {user?.userType === "INFLUENCER" && recommendedPayout > 0 && (
             <div className="campaign-detail-stat" style={{ margin: 0, border: "1px solid #10b981", background: "rgba(16, 185, 129, 0.08)" }}>
-              <div className="text-xs font-semibold" style={{ color: "#10b981" }}>💡 Recommended Payout</div>
-              <div className="text-xl font-extrabold" style={{ color: "#10b981" }}>
+              <div className="text-xs font-semibold text-emerald">💡 Recommended Payout</div>
+              <div className="text-xl font-extrabold text-emerald">
                 ₹{recommendedPayout.toLocaleString("en-IN")}
               </div>
             </div>
@@ -932,7 +932,7 @@ export default function CampaignDetailClient({
               className="mt-3"
             />
             {recommendedPayout > 0 && (
-              <span className="text-xs mt-1 block" style={{ color: "#10b981" }}>
+              <span className="text-xs mt-1 block text-emerald">
                 💡 Recommended Payout Estimate for your stats: <strong>₹{recommendedPayout.toLocaleString("en-IN")}</strong>
               </span>
             )}

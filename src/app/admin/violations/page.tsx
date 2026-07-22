@@ -48,7 +48,7 @@ export default async function AdminViolationsPage() {
     <div className="admin-page">
       <div className="admin-toolbar" style={{ marginBottom: "28px" }}>
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "6px" }}>
+          <h1 className="text-3xl font-extrabold mb-1">
             User Violations
           </h1>
           <p className="text-secondary text-sm">
@@ -68,12 +68,12 @@ export default async function AdminViolationsPage() {
           <div className="admin-table-wrap">
             <table className="w-full" style={{ borderCollapse: "collapse" }}>
               <thead>
-                <tr style={{ background: "var(--color-bg-secondary)" }}>
+                <tr className="bg-secondary">
                   {["User", "Type", "Severity", "Action", "Description", "Date", "Expires"].map(
                     (heading) => (
                       <th
                         key={heading}
-                        className="text-left border-b-card text-muted text-xs font-extrabold" style={{ padding: "14px 18px", textTransform: "uppercase" }}
+                        className="text-left border-b-card text-muted text-xs font-extrabold uppercase" style={{ padding: "14px 18px" }}
                       >
                         {heading}
                       </th>
@@ -103,14 +103,14 @@ export default async function AdminViolationsPage() {
                       </td>
                       <td className="p-card">
                         <span
-                          className="badge font-extrabold" style={{ background: severityStyle.background, color: severityStyle.color, fontSize: "11px", padding: "4px 8px", borderRadius: "12px", textTransform: "uppercase" }}
+                          className="badge font-extrabold text-xs rounded-lg uppercase" style={{ background: severityStyle.background, color: severityStyle.color, padding: "4px 8px" }}
                         >
                           {violation.severity}
                         </span>
                       </td>
                       <td className="p-card">
                         <span
-                          className="badge font-extrabold" style={{ background: actionStyle.background, color: actionStyle.color, fontSize: "11px", padding: "4px 8px", borderRadius: "6px", textTransform: "uppercase" }}
+                          className="badge font-extrabold text-xs uppercase" style={{ background: actionStyle.background, color: actionStyle.color, padding: "4px 8px", borderRadius: "6px" }}
                         >
                           {violation.action}
                         </span>

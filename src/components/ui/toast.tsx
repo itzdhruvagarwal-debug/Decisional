@@ -43,7 +43,7 @@ export function Toast({ toast, onClose }: Readonly<ToastProps>) {
       <button
         onClick={() => onClose(toast.id)}
         aria-label={`Dismiss ${toast.type} notification`}
-        className="cursor-pointer text-sm" style={{ background: "none", border: "none", color: "#fff", marginLeft: "8px", opacity: 0.7, padding: "0 4px", lineHeight: 1 }}
+        className="cursor-pointer text-sm border-none leading-none" style={{ background: "none", color: "#fff", marginLeft: "8px", opacity: 0.7, padding: "0 4px" }}
       >
         ✕
       </button>

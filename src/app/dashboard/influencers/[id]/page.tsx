@@ -92,13 +92,13 @@ export default function InfluencerProfilePage() {
 
   if (loading)
     return (
-      <div className="text-center" style={{ padding: "40px" }}>
+      <div className="text-center p-10">
         Loading profile...
       </div>
     );
   if (!session)
     return (
-      <div className="text-center" style={{ padding: "40px" }}>
+      <div className="text-center p-10">
         Loading session...
       </div>
     );
@@ -122,7 +122,7 @@ export default function InfluencerProfilePage() {
   if (!profile)
     return (
       <DashboardShell user={session.user}>
-        <div className="text-center" style={{ padding: "40px" }}>
+        <div className="text-center p-10">
           Influencer not found.
         </div>
       </DashboardShell>
@@ -151,10 +151,10 @@ export default function InfluencerProfilePage() {
     >
       {/* Header / Bio */}
       <div
-        className="card flex gap-6 flex-wrap" style={{ padding: "32px" }}
+        className="card flex gap-6 flex-wrap p-8"
       >
         <div
-          className="flex items-center justify-center font-extrabold flex-shrink-0" style={{ width: "120px", height: "120px", borderRadius: "50%", background: "var(--gradient-primary)", color: "#fff", fontSize: "48px" }}
+          className="flex items-center justify-center font-extrabold flex-shrink-0 rounded-full" style={{ width: "120px", height: "120px", background: "var(--gradient-primary)", color: "#fff", fontSize: "48px" }}
         >
           {profile.displayName?.[0] || "I"}
         </div>
@@ -164,7 +164,7 @@ export default function InfluencerProfilePage() {
           >
             <div>
               <h1
-                className="font-extrabold" style={{ fontSize: "32px", margin: "0 0 8px" }}
+                className="font-extrabold text-3xl" style={{ margin: "0 0 8px" }}
               >
                 {profile.displayName}
               </h1>
@@ -183,7 +183,7 @@ export default function InfluencerProfilePage() {
                 {profile.trustScore}%
               </div>
               <div
-                className="text-muted" style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.5px" }}
+                className="text-muted text-xs uppercase" style={{ letterSpacing: "0.5px" }}
               >
                 Trust Score
               </div>
@@ -191,7 +191,7 @@ export default function InfluencerProfilePage() {
           </div>
 
           <p
-            className="mb-5" style={{ fontSize: "15px", color: "var(--color-text-primary)", lineHeight: 1.6 }}
+            className="mb-5 text-sm" style={{ color: "var(--color-text-primary)", lineHeight: 1.6 }}
           >
             {profile.bio || "This creator hasn't added a bio yet."}
           </p>
@@ -199,7 +199,7 @@ export default function InfluencerProfilePage() {
           <div className="flex gap-2 flex-wrap">
             {profile.isFeatured && (
               <span
-                className="text-xs font-extrabold inline-flex items-center gap-1" style={{ padding: "4px 12px", background: "rgba(245, 158, 11, 0.15)", color: "#f59e0b", border: "1px solid rgba(245, 158, 11, 0.25)", borderRadius: "16px", textTransform: "uppercase" }}
+                className="text-xs font-extrabold inline-flex items-center gap-1 text-amber rounded-xl uppercase" style={{ padding: "4px 12px", background: "rgba(245, 158, 11, 0.15)", border: "1px solid rgba(245, 158, 11, 0.25)" }}
               >
                 ⭐ Featured Creator
               </span>
@@ -207,7 +207,7 @@ export default function InfluencerProfilePage() {
             {profile.categories.split(",").map((cat) => (
               <span
                 key={cat}
-                className="text-xs font-semibold" style={{ padding: "4px 12px", background: "var(--color-bg-tertiary)", borderRadius: "16px" }}
+                className="text-xs font-semibold bg-tertiary rounded-xl" style={{ padding: "4px 12px" }}
               >
                 #{cat.trim()}
               </span>
@@ -256,7 +256,7 @@ export default function InfluencerProfilePage() {
                 Engagement
               </div>
               <div
-                className="text-base font-semibold" style={{ color: "var(--color-accent-emerald)" }}
+                className="text-base font-semibold text-emerald"
               >
                 {profile.instagramEngagementRate
                   ? `${profile.instagramEngagementRate}%`
@@ -279,7 +279,7 @@ export default function InfluencerProfilePage() {
               </div>
               {profile.youtubeHandle && (
                 <div
-                  className="text-xs" style={{ color: "var(--color-accent-rose)" }}
+                  className="text-xs text-rose"
                 >
                   {profile.youtubeHandle}
                 </div>
@@ -292,7 +292,7 @@ export default function InfluencerProfilePage() {
                 Engagement
               </div>
               <div
-                className="text-base font-semibold" style={{ color: "var(--color-accent-emerald)" }}
+                className="text-base font-semibold text-emerald"
               >
                 {profile.youtubeEngagementRate
                   ? `${profile.youtubeEngagementRate}%`
@@ -329,7 +329,7 @@ export default function InfluencerProfilePage() {
 
         {/* Invite & Budget Check */}
         <div
-          className="card p-6" style={{ background: "var(--color-bg-secondary)", border: "1px solid var(--color-border)" }}
+          className="card p-6 bg-secondary border-card"
         >
           <h3
             className="text-base font-bold mb-5"
@@ -338,7 +338,7 @@ export default function InfluencerProfilePage() {
           </h3>
 
           <div
-            className="p-4 mb-6" style={{ background: "var(--color-bg-primary)", borderRadius: "var(--radius-md)" }}
+            className="p-4 mb-6 rounded-md" style={{ background: "var(--color-bg-primary)" }}
           >
             <div
               className="flex justify-between mb-2"
@@ -401,7 +401,7 @@ export default function InfluencerProfilePage() {
             >
               <Link
                 href={`/dashboard/campaigns/create?invite=${profile?.id || id}`}
-                className="btn btn-primary text-center" style={{ textDecoration: "none", padding: "14px", fontSize: "15px" }}
+                className="btn btn-primary text-center text-sm" style={{ textDecoration: "none", padding: "14px" }}
               >
                 Create Campaign & Invite
               </Link>
@@ -417,7 +417,7 @@ export default function InfluencerProfilePage() {
             </div>
           ) : (
             <div
-              className="p-4 text-center text-sm text-secondary" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
+              className="p-4 text-center text-sm text-secondary bg-tertiary rounded-md"
             >
               Log in as a Brand to invite this creator to campaigns.
             </div>

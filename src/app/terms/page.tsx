@@ -14,15 +14,15 @@ export default function TermsPage() {
         <section className="section">
           <div className="container" style={{ maxWidth: "920px" }}>
             <h1
-              className="section-title gradient-text mb-3" style={{ fontSize: "40px", fontWeight: 900 }}
+              className="section-title gradient-text mb-3 text-3xl font-extrabold"
             >
               Terms of Service
             </h1>
-            <p className="text-secondary font-semibold" style={{ marginBottom: "40px" }}>
+            <p className="text-secondary font-semibold mb-10">
               Last updated: {lastUpdated}
             </p>
 
-            <div className="text-secondary grid gap-8" style={{ lineHeight: 1.8, fontSize: "15px" }}>
+            <div className="text-secondary grid gap-8 leading-relaxed text-sm">
               <section>
                 <h2 style={headingStyle}>1. Agreement</h2>
                 <p>
@@ -179,7 +179,7 @@ export default function TermsPage() {
                 </p>
               </section>
 
-              <section style={{ padding: "28px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-border)" }}>
+              <section className="bg-secondary rounded-lg border-card" style={{ padding: "28px" }}>
                 <h2 style={headingStyle}>11. Contact</h2>
                 <p>
                   For Terms questions, legal notices, or compliance escalation, email{" "}

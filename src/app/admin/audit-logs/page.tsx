@@ -37,7 +37,7 @@ export default async function AdminAuditLogsPage() {
     <div className="admin-page">
       <div className="admin-toolbar" style={{ marginBottom: "28px" }}>
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "6px" }}>
+          <h1 className="text-3xl font-extrabold mb-1">
             Audit Logs
           </h1>
           <p className="text-secondary text-sm">
@@ -57,12 +57,12 @@ export default async function AdminAuditLogsPage() {
           <div className="admin-table-wrap">
             <table className="w-full" style={{ borderCollapse: "collapse" }}>
               <thead>
-                <tr style={{ background: "var(--color-bg-secondary)" }}>
+                <tr className="bg-secondary">
                   {["Actor ID", "Action Type", "Entity Type", "Entity ID", "Timestamp", "Details"].map(
                     (heading) => (
                       <th
                         key={heading}
-                        className="text-left border-b-card text-muted text-xs font-extrabold" style={{ padding: "14px 18px", textTransform: "uppercase" }}
+                        className="text-left border-b-card text-muted text-xs font-extrabold uppercase" style={{ padding: "14px 18px" }}
                       >
                         {heading}
                       </th>
@@ -83,7 +83,7 @@ export default async function AdminAuditLogsPage() {
                       </td>
                       <td className="p-card">
                         <span
-                          className="badge font-extrabold" style={{ background: badgeStyle.background, color: badgeStyle.color, fontSize: "11px", padding: "4px 8px", borderRadius: "12px", textTransform: "uppercase" }}
+                          className="badge font-extrabold text-xs rounded-lg uppercase" style={{ background: badgeStyle.background, color: badgeStyle.color, padding: "4px 8px" }}
                         >
                           {log.entityType}
                         </span>

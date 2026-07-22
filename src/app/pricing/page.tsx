@@ -100,7 +100,7 @@ export default function PricingPage() {
 
           <section style={{ maxWidth: "820px", margin: "0 auto" }}>
             <div className="text-center" style={{ marginBottom: "36px" }}>
-              <h2 className="font-bold" style={{ fontSize: "28px" }}>
+              <h2 className="font-bold text-3xl">
                 Frequently Asked Questions
               </h2>
             </div>
@@ -175,11 +175,11 @@ function PricingCard({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      className="relative overflow-hidden flex flex-col" style={{ background: `linear-gradient(135deg, ${color}11, ${color}05)`, border: `1px solid ${color}33`, borderRadius: "20px", padding: "34px", boxShadow: isPopular ? `0 10px 40px -10px ${color}33` : "none" }}
+      className="relative overflow-hidden flex flex-col rounded-2xl" style={{ background: `linear-gradient(135deg, ${color}11, ${color}05)`, border: `1px solid ${color}33`, padding: "34px", boxShadow: isPopular ? `0 10px 40px -10px ${color}33` : "none" }}
     >
       {isPopular && (
         <div
-          className="absolute font-extrabold" style={{ top: 0, right: 0, background: color, color: "#05030f", fontSize: "11px", padding: "6px 16px", borderRadius: "0 0 0 14px", textTransform: "uppercase", letterSpacing: 0 }}
+          className="absolute font-extrabold text-xs uppercase" style={{ top: 0, right: 0, background: color, color: "#05030f", padding: "6px 16px", borderRadius: "0 0 0 14px", letterSpacing: 0 }}
         >
           Most Popular
         </div>
@@ -188,7 +188,7 @@ function PricingCard({
       <div className="mb-6">
         <div
           aria-hidden="true"
-          className="flex items-center justify-center text-lg mb-5" style={{ width: "58px", height: "58px", borderRadius: "18px", background: `linear-gradient(135deg, ${color}, ${color}88)`, fontWeight: 900, color: "#05030f", boxShadow: `0 8px 20px ${color}44` }}
+          className="flex items-center justify-center text-lg mb-5 font-extrabold" style={{ width: "58px", height: "58px", borderRadius: "18px", background: `linear-gradient(135deg, ${color}, ${color}88)`, color: "#05030f", boxShadow: `0 8px 20px ${color}44` }}
         >
           {marker}
         </div>
@@ -203,19 +203,15 @@ function PricingCard({
       </div>
 
       <div
-        className="text-center" style={{ marginBottom: "30px", padding: "20px", background: "var(--color-bg-tertiary)", borderRadius: "16px", border: "1px solid var(--color-border)" }}
+        className="text-center p-5 bg-tertiary rounded-xl border-card" style={{ marginBottom: "30px" }}
       >
         <div
-          style={{
-            fontSize: "clamp(34px, 8vw, 42px)",
-            fontWeight: 900,
-            color: "var(--color-text-primary)",
-          }}
+          className="font-extrabold" style={{ fontSize: "clamp(34px, 8vw, 42px)", color: "var(--color-text-primary)" }}
         >
           {price}
         </div>
         <div
-          className="text-xs font-bold text-secondary" style={{ textTransform: "uppercase", letterSpacing: 0 }}
+          className="text-xs font-bold text-secondary uppercase" style={{ letterSpacing: 0 }}
         >
           {subtitle}
         </div>
@@ -263,11 +259,11 @@ function FAQItem({ question, answer, delay }: Readonly<FAQItemProps>) {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay }}
-      className="overflow-hidden" style={{ background: "var(--color-bg-secondary)", borderRadius: "16px", border: "1px solid var(--color-border)" }}
+      className="overflow-hidden bg-secondary rounded-xl border-card"
     >
       <details   className="cursor-pointer group">
         <summary
-          className="font-semibold flex justify-between items-center gap-4" style={{ padding: "20px", listStyle: "none" }}
+          className="font-semibold flex justify-between items-center gap-4 p-5" style={{ listStyle: "none" }}
         >
           <span>{question}</span>
           <svg

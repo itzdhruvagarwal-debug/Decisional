@@ -196,13 +196,13 @@ export default function PayoutsAdminPage() {
       <div className="card overflow-hidden" style={{ padding: 0 }}>
         <div className="admin-table-wrap">
           <table className="w-full" style={{ minWidth: "980px", borderCollapse: "collapse" }}>
-            <thead style={{ background: "var(--color-bg-tertiary)" }}>
+            <thead className="bg-tertiary">
               <tr>
                 {["User", "Amount", "Destination", "Risk", "Requested", "Actions"].map(
                   (heading) => (
                     <th
                       key={heading}
-                      className="border-b-card text-secondary text-xs font-extrabold" style={{ padding: "14px 16px", textAlign: heading === "Actions" ? "right" : "left", textTransform: "uppercase" }}
+                      className="border-b-card text-secondary text-xs font-extrabold uppercase" style={{ padding: "14px 16px", textAlign: heading === "Actions" ? "right" : "left" }}
                     >
                       {heading}
                     </th>
@@ -227,20 +227,20 @@ export default function PayoutsAdminPage() {
                       <div className="text-muted text-xs">
                         {user.email}
                       </div>
-                      <div style={{ color: "var(--color-primary-light)", fontSize: "11px" }}>
+                      <div className="text-primary-light text-xs">
                         {user.userType}
                       </div>
                       <div
-                        className="mt-1 font-bold" style={{ color: user.taxCompliance?.panLast4
+                        className="mt-1 font-bold text-xs" style={{ color: user.taxCompliance?.panLast4
                             ? "var(--color-accent-emerald)"
-                            : "var(--color-accent-rose)", fontSize: "11px" }}
+                            : "var(--color-accent-rose)" }}
                       >
                         {user.taxCompliance?.panLast4
                           ? `PAN ****${user.taxCompliance.panLast4}`
                           : "PAN missing"}
                       </div>
                     </td>
-                    <td className="p-4" style={{ fontWeight: 900 }}>
+                    <td className="p-4 font-extrabold">
                       {formatCurrency(withdrawal.amount)}
                     </td>
                     <td className="p-4 text-sm">
@@ -313,7 +313,7 @@ export default function PayoutsAdminPage() {
     <div className="admin-page">
       <div className="admin-toolbar">
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "6px" }}>
+          <h1 className="text-3xl font-extrabold mb-1">
             Payout Operations
           </h1>
           <p className="text-secondary text-sm">
@@ -332,7 +332,7 @@ export default function PayoutsAdminPage() {
           <div className="text-muted text-xs">
             Current view
           </div>
-          <div className="text-lg" style={{ fontWeight: 900 }}>
+          <div className="text-lg font-extrabold">
             {total} payouts / {formatCurrency(totalAmount)}
           </div>
         </div>
@@ -363,7 +363,7 @@ export default function PayoutsAdminPage() {
 
       {error && (
         <div
-          className="card mb-4" style={{ padding: "14px 16px", borderColor: "rgba(244, 63, 94, 0.35)", color: "var(--color-accent-rose)" }}
+          className="card mb-4 text-rose" style={{ padding: "14px 16px", borderColor: "rgba(244, 63, 94, 0.35)" }}
         >
           {error}
         </div>
@@ -374,7 +374,7 @@ export default function PayoutsAdminPage() {
       {draft && (
         <div className="admin-modal-backdrop">
           <form className="admin-modal card" onSubmit={handleAction}>
-            <h2 className="text-xl mb-2" style={{ fontWeight: 900 }}>
+            <h2 className="text-xl mb-2 font-extrabold">
               {draft.action === "APPROVE" ? "Approve payout" : "Reject payout"}
             </h2>
             <p className="text-secondary text-sm" style={{ marginBottom: "18px" }}>
@@ -383,7 +383,7 @@ export default function PayoutsAdminPage() {
             </p>
 
             {actionError && (
-              <div className="text-sm mb-3" style={{ color: "var(--color-accent-rose)" }}>
+              <div className="text-sm mb-3 text-rose">
                 {actionError}
               </div>
             )}

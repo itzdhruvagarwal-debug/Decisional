@@ -436,7 +436,7 @@ export default function CreateCampaignClient() {
   return (
     <div className="w-full" style={{ maxWidth: "800px", margin: "0 auto", paddingBottom: "64px" }}>
       <h1
-        className="font-black mb-2" style={{ fontSize: "32px", background: "var(--gradient-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+        className="font-black mb-2 text-3xl" style={{ background: "var(--gradient-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
       >
         {editCampaignId ? "Edit Draft Campaign" : "Create New Campaign"}
       </h1>
@@ -450,32 +450,23 @@ export default function CreateCampaignClient() {
 
       {invitedInfluencer && (
         <div
-          className="flex items-center gap-3 mb-6" style={{ padding: "16px 20px", background: "rgba(99, 102, 241, 0.1)", border: "1px solid rgba(99, 102, 241, 0.2)", borderRadius: "16px", backdropFilter: "blur(8px)" }}
+          className="flex items-center gap-3 mb-6 bg-indigo-subtle rounded-xl" style={{ padding: "16px 20px", border: "1px solid rgba(99, 102, 241, 0.2)", backdropFilter: "blur(8px)" }}
         >
           <div
-            style={{
-              width: "8px",
-              height: "8px",
-              borderRadius: "50%",
-              background: "#6366f1",
-              boxShadow: "0 0 12px #6366f1",
-            }}
+            className="rounded-full" style={{ width: "8px", height: "8px", background: "#6366f1", boxShadow: "0 0 12px #6366f1" }}
           />
-          <span className="font-medium" style={{ fontSize: "15px", color: "var(--color-text-primary)" }}>
+          <span className="font-medium text-sm" style={{ color: "var(--color-text-primary)" }}>
             Inviting: <strong style={{ color: "#6366f1" }}>@{invitedInfluencer.instagramHandle || invitedInfluencer.youtubeHandle || invitedInfluencer.displayName}</strong> ({invitedInfluencer.displayName})
           </span>
         </div>
       )}
 
       <Card
-        style={{
-          borderRadius: "24px",
-          padding: "32px",
-        }}
+        className="p-8" style={{ borderRadius: "24px" }}
       >
         {error && (
           <div
-            className="mb-6" style={{ padding: "12px 16px", background: "rgba(244, 63, 94, 0.1)", border: "1px solid rgba(244, 63, 94, 0.2)", borderRadius: "var(--radius-md)", color: "var(--color-accent-rose)" }}
+            className="mb-6 bg-rose-subtle rounded-md text-rose" style={{ padding: "12px 16px", border: "1px solid rgba(244, 63, 94, 0.2)" }}
           >
             {error}
           </div>
@@ -739,7 +730,7 @@ export default function CreateCampaignClient() {
               required
               min={formData.requiresProduct ? 0 : 1000}
               fullWidth
-              className="text-secondary" style={{ background: "var(--color-bg-tertiary)", cursor: "not-allowed" }}
+              className="text-secondary bg-tertiary" style={{ cursor: "not-allowed" }}
             />
             <Input
               label="Budget Per Influencer (Approx Rs)"
@@ -751,7 +742,7 @@ export default function CreateCampaignClient() {
               required
               min={formData.requiresProduct ? 0 : 500}
               fullWidth
-              className="text-secondary" style={{ background: "var(--color-bg-tertiary)", cursor: "not-allowed" }}
+              className="text-secondary bg-tertiary" style={{ cursor: "not-allowed" }}
             />
           </div>
 
@@ -789,12 +780,7 @@ export default function CreateCampaignClient() {
           </div>
 
           <Card
-            className="mb-4"
-            style={{
-              padding: "20px",
-              background: "var(--color-bg-tertiary)",
-              border: "1px dashed var(--color-border)",
-            }}
+            className="mb-4 p-5 bg-tertiary" style={{ border: "1px dashed var(--color-border)" }}
           >
             <div
               className="flex items-center justify-between"
@@ -949,7 +935,7 @@ export default function CreateCampaignClient() {
                     type="button"
                     variant="ghost"
                     onClick={() => handleRemoveDeliverable(index)}
-                    className="text-lg" style={{ color: "var(--color-accent-rose)", padding: "0 8px" }}
+                    className="text-lg text-rose" style={{ padding: "0 8px" }}
                   >
                     x
                   </Button>

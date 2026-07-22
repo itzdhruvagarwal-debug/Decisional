@@ -42,18 +42,18 @@ function DashboardErrorFallback({ user }: Readonly<{ user: Session["user"] }>) {
   return (
     <DashboardShell user={user}>
       <div
-        className="text-center" style={{ padding: "80px 40px", background: "rgba(244, 63, 94, 0.05)", borderRadius: "var(--radius-xl)", border: "1px dashed var(--color-accent-rose)", margin: "40px auto", maxWidth: "600px" }}
+        className="text-center rounded-xl" style={{ padding: "80px 40px", background: "rgba(244, 63, 94, 0.05)", border: "1px dashed var(--color-accent-rose)", margin: "40px auto", maxWidth: "600px" }}
       >
         <div className="mb-5" style={{ fontSize: "48px" }} aria-hidden="true">
           !
         </div>
         <h2
-          className="gradient-text text-2xl mb-3" style={{ fontWeight: 900, background: "linear-gradient(135deg, #f43f5e, #fb923c)" }}
+          className="gradient-text text-2xl mb-3 font-extrabold" style={{ background: "linear-gradient(135deg, #f43f5e, #fb923c)" }}
         >
           Dashboard Interrupted
         </h2>
         <p
-          className="text-secondary mb-8" style={{ fontSize: "15px", lineHeight: 1.6 }}
+          className="text-secondary mb-8 text-sm" style={{ lineHeight: 1.6 }}
         >
           The dashboard could not load the latest workspace data. Please
           refresh or try again after a moment.
@@ -94,12 +94,12 @@ function DashboardEmptyState({ dataLoadFailed }: Readonly<{ dataLoadFailed: bool
           {dataLoadFailed ? "!" : "..."}
         </div>
         <h2
-          className="gradient-text mb-4" style={{ fontSize: "28px", fontWeight: 900 }}
+          className="gradient-text mb-4 text-3xl font-extrabold"
         >
           {dataLoadFailed ? "Access Interrupted" : "Initializing Workspace"}
         </h2>
         <p
-          className="text-secondary" style={{ fontSize: "15px", lineHeight: 1.6, marginBottom: "36px" }}
+          className="text-secondary text-sm" style={{ lineHeight: 1.6, marginBottom: "36px" }}
         >
           {dataLoadFailed
             ? "We could not load your dashboard data. Please refresh or try again after a moment."
@@ -167,9 +167,9 @@ export default async function DashboardPage({
     if (isAdmin && adminData) {
       return (
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
-          <header style={{ marginBottom: "40px" }}>
+          <header className="mb-10">
             <h1
-              className="gradient-text mb-2" style={{ fontSize: "32px", fontWeight: 900 }}
+              className="gradient-text mb-2 text-3xl font-extrabold"
             >
               Admin Ops Center
             </h1>

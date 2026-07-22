@@ -32,11 +32,7 @@ const socialLinks = [
 export default function Footer() {
   return (
     <footer
-      style={{
-        background: "var(--color-bg-secondary)",
-        padding: "64px 0 24px",
-        borderTop: "1px solid var(--color-border)",
-      }}
+      className="bg-secondary border-top" style={{ padding: "64px 0 24px" }}
     >
       <div className="container">
         <div
@@ -61,7 +57,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="flex items-center justify-center text-xs font-extrabold cursor-pointer" style={{ width: "36px", height: "36px", borderRadius: "var(--radius-sm)", background: "var(--color-bg-tertiary)", border: "1px solid var(--color-border)", transition: "all var(--transition-fast)", color: "inherit", textDecoration: "none" }}
+                  className="flex items-center justify-center text-xs font-extrabold cursor-pointer rounded-sm bg-tertiary border-card" style={{ width: "36px", height: "36px", transition: "all var(--transition-fast)", color: "inherit", textDecoration: "none" }}
                 >
                   {social.label}
                 </a>
@@ -105,7 +101,7 @@ function FooterColumn({
   return (
     <div>
       <h4
-        className="font-bold mb-4" style={{ fontSize: "15px" }}
+        className="font-bold mb-4 text-sm"
       >
         {title}
       </h4>

@@ -56,7 +56,7 @@ export default function AnalyticsPageClient({
         className="mb-8 flex justify-between items-center flex-wrap gap-4"
       >
         <div>
-          <h1 className="font-extrabold" style={{ fontSize: "28px" }}>
+          <h1 className="font-extrabold text-3xl">
             {userType === "INFLUENCER" ? "Performance Analytics" : "Campaign Analytics"}
           </h1>
           <p className="text-secondary">

@@ -163,7 +163,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
           variant="ghost"
           onClick={onClose}
           aria-label="Close period picker"
-          className="cursor-pointer flex-shrink-0" style={{ background: "none", border: "none", color: "var(--color-text-secondary,#9ca3af)", fontSize: "22px", lineHeight: 1, padding: "4px" }}
+          className="cursor-pointer flex-shrink-0 border-none leading-none p-1" style={{ background: "none", color: "var(--color-text-secondary,#9ca3af)", fontSize: "22px" }}
         >✕</Button>
       </div>
 
@@ -199,7 +199,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
                   key={p.label}
                   onClick={() => setSelected(p.label)}
                   aria-pressed={active}
-                  className="cursor-pointer text-sm font-semibold" style={{ padding: "11px 12px", borderRadius: "12px", textAlign: "left" as const, transition: "all .15s ease", background: active ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "rgba(255,255,255,0.04)", color: active ? "#fff" : "var(--color-text-secondary,#9ca3af)", border: active ? "1px solid transparent" : "1px solid rgba(255,255,255,0.08)" }}
+                  className="cursor-pointer text-sm font-semibold rounded-lg" style={{ padding: "11px 12px", textAlign: "left" as const, transition: "all .15s ease", background: active ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "rgba(255,255,255,0.04)", color: active ? "#fff" : "var(--color-text-secondary,#9ca3af)", border: active ? "1px solid transparent" : "1px solid rgba(255,255,255,0.08)" }}
                 >
                   {p.label}
                 </Button>
@@ -213,7 +213,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
               <span style={css.sectionLabel}>Custom Range</span>
               <div className="grid gap-3 mb-4" style={{ gridTemplateColumns: "1fr 1fr" }}>
                 <div>
-                  <div className="text-xs" style={{ color: "var(--color-text-secondary,#9ca3af)", marginBottom: "6px" }}>From</div>
+                  <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary,#9ca3af)" }}>From</div>
                   <Input
                     type="date" style={css.dateInput}
                     aria-label="Start date"
@@ -224,7 +224,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
                   />
                 </div>
                 <div>
-                  <div className="text-xs" style={{ color: "var(--color-text-secondary,#9ca3af)", marginBottom: "6px" }}>To</div>
+                  <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary,#9ca3af)" }}>To</div>
                   <Input
                     type="date" style={css.dateInput}
                     aria-label="End date"
@@ -237,7 +237,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
                 </div>
               </div>
               {custom.start && custom.end && custom.start > custom.end && (
-                <div role="alert" className="text-xs mb-3" style={{ color: "#ef4444" }}>
+                <div role="alert" className="text-xs mb-3 text-rose">
                   ⚠ End date must be after start date
                 </div>
               )}
@@ -261,7 +261,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
         <Button
           onClick={onClose}
           variant="secondary"
-          className="text-sm font-semibold cursor-pointer" style={{ padding: "11px 22px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.12)", background: "transparent", color: "var(--color-text-secondary,#9ca3af)" }}
+          className="text-sm font-semibold cursor-pointer rounded-lg" style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.12)", background: "transparent", color: "var(--color-text-secondary,#9ca3af)" }}
         >
           Cancel
         </Button>
@@ -269,7 +269,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
           disabled={!valid || !!isLoading}
           aria-busy={!!isLoading}
           onClick={() => valid && onConfirm(resolve())}
-          className="text-sm font-bold flex items-center gap-2" style={{ padding: "11px 28px", borderRadius: "12px", border: "none", background: valid && !isLoading ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "rgba(99,102,241,0.4)", color: "#fff", cursor: valid && !isLoading ? "pointer" : "not-allowed", transition: "all .2s" }}
+          className="text-sm font-bold flex items-center gap-2 rounded-lg border-none" style={{ padding: "11px 28px", background: valid && !isLoading ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "rgba(99,102,241,0.4)", color: "#fff", cursor: valid && !isLoading ? "pointer" : "not-allowed", transition: "all .2s" }}
         >
           {isLoading ? <>⏳ Generating…</> : <>{icon} Download</>}
         </Button>

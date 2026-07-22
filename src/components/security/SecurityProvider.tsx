@@ -41,13 +41,13 @@ function InactivityWarningModal({
     <dialog
       open
       aria-labelledby="inactivity-title"
-      className="fixed flex items-center justify-center p-6" style={{ inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", border: "none" }}
+      className="fixed flex items-center justify-center p-6 border-none" style={{ inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}
     >
       <div
-        className="w-full text-center" style={{ background: "var(--color-surface, #111)", border: "1px solid rgba(245, 158, 11, 0.3)", borderRadius: "16px", padding: "36px 32px", maxWidth: "400px", boxShadow: "0 24px 60px rgba(0,0,0,0.6)", animation: "slideDown 0.25s ease-out" }}
+        className="w-full text-center rounded-xl" style={{ background: "var(--color-surface, #111)", border: "1px solid rgba(245, 158, 11, 0.3)", padding: "36px 32px", maxWidth: "400px", boxShadow: "0 24px 60px rgba(0,0,0,0.6)", animation: "slideDown 0.25s ease-out" }}
       >
         <div
-          className="flex items-center justify-center" style={{ width: "64px", height: "64px", borderRadius: "50%", background: "rgba(245, 158, 11, 0.12)", border: "2px solid rgba(245, 158, 11, 0.4)", margin: "0 auto 20px", fontSize: "28px" }}
+          className="flex items-center justify-center rounded-full text-3xl" style={{ width: "64px", height: "64px", background: "rgba(245, 158, 11, 0.12)", border: "2px solid rgba(245, 158, 11, 0.4)", margin: "0 auto 20px" }}
         >
           !
         </div>
@@ -67,7 +67,7 @@ function InactivityWarningModal({
         </p>
 
         <div
-          className="font-extrabold" style={{ fontSize: "36px", color: secondsRemaining <= 60 ? "#f43f5e" : "#f59e0b", letterSpacing: 0, marginBottom: "28px", fontVariantNumeric: "tabular-nums", transition: "color 0.3s" }}
+          className="font-extrabold text-3xl" style={{ color: secondsRemaining <= 60 ? "#f43f5e" : "#f59e0b", letterSpacing: 0, marginBottom: "28px", fontVariantNumeric: "tabular-nums", transition: "color 0.3s" }}
         >
           {timeStr}
         </div>

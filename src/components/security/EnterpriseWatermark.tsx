@@ -92,7 +92,7 @@ export function EnterpriseWatermark() {
             {Array.from({ length: 30 }).map((_, i) => (
                 <div
                     key={`watermark-${userEmail}-${i}`}
-                    className="text-sm text-center" style={{ transform: "rotate(-35deg)", padding: "40px", fontFamily: "monospace", color: "var(--color-text)", whiteSpace: "pre-line" }}
+                    className="text-sm text-center p-10" style={{ transform: "rotate(-35deg)", fontFamily: "monospace", color: "var(--color-text)", whiteSpace: "pre-line" }}
                 >
                     {session.user.email} <br />
                     {session.user.id.slice(-8)} <br />

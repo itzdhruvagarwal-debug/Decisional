@@ -14,14 +14,14 @@ export default function RefundPage() {
       <main className="flex-1" style={{ paddingTop: "80px" }}>
         <section className="section">
           <div className="container" style={{ maxWidth: "880px" }}>
-            <h1 className="section-title gradient-text mb-3" style={{ fontSize: "40px", fontWeight: 900 }}>
+            <h1 className="section-title gradient-text mb-3 text-3xl font-extrabold">
               Refund and Cancellation Policy
             </h1>
-            <p className="text-secondary font-semibold" style={{ marginBottom: "40px" }}>
+            <p className="text-secondary font-semibold mb-10">
               Last updated: {lastUpdated}
             </p>
 
-            <div className="text-secondary grid gap-8" style={{ lineHeight: 1.8, fontSize: "15px" }}>
+            <div className="text-secondary grid gap-8 leading-relaxed text-sm">
               <section>
                 <h2 style={headingStyle}>1. How protected payments work</h2>
                 <p>
@@ -130,7 +130,7 @@ export default function RefundPage() {
                 </p>
               </section>
 
-              <section className="text-center" style={{ padding: "28px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-border)" }}>
+              <section className="text-center bg-secondary rounded-lg border-card" style={{ padding: "28px" }}>
                 <p className="text-sm text-muted">
                   Need a refund review or dispute?
                   <Link href="/dashboard/disputes" className="text-primary font-bold" style={{ marginLeft: "5px", textDecoration: "none" }}>

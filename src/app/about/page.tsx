@@ -30,7 +30,7 @@ export default function AboutPage() {
       <Navbar />
 
       <main className="flex-1" style={{ paddingTop: "80px" }}>
-        <section className="section" style={{ background: "var(--color-bg-secondary)" }}>
+        <section className="section bg-secondary">
           <div className="container text-center" style={{ maxWidth: "840px" }}>
             <h1 className="section-title">
               Decisional helps brands and creators run trusted collaborations
@@ -45,7 +45,7 @@ export default function AboutPage() {
           <div className="container">
             <div className="grid-2 items-center" style={{ gap: "48px" }}>
               <div>
-                <h2 className="font-extrabold mb-5" style={{ fontSize: "32px" }}>
+                <h2 className="font-extrabold mb-5 text-3xl">
                   Why Decisional exists
                 </h2>
                 <p style={bodyStyle}>
@@ -62,10 +62,10 @@ export default function AboutPage() {
               </div>
               <div style={visualPanelStyle}>
                 <div style={{ maxWidth: "340px" }}>
-                  <div className="text-sm font-extrabold mb-3" style={{ color: "var(--color-primary-light)", textTransform: "uppercase" }}>
+                  <div className="text-sm font-extrabold mb-3 text-primary-light uppercase">
                     Built for operational trust
                   </div>
-                  <h3 className="mb-4" style={{ fontSize: "28px", lineHeight: 1.2 }}>
+                  <h3 className="mb-4 text-3xl" style={{ lineHeight: 1.2 }}>
                     Brief. Escrow. Verify. Release.
                   </h3>
                   <p className="text-secondary" style={{ lineHeight: 1.7 }}>
@@ -77,13 +77,13 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="section" style={{ background: "var(--color-bg-secondary)" }}>
+        <section className="section bg-secondary">
           <div className="container">
             <h2 className="section-title">What we optimize for</h2>
             <div className="grid-3">
               {values.map((item) => (
                 <article key={item.title} className="card">
-                  <div className="text-xs font-extrabold mb-3" style={{ color: "var(--color-primary-light)", textTransform: "uppercase" }}>
+                  <div className="text-xs font-extrabold mb-3 text-primary-light uppercase">
                     {item.label}
                   </div>
                   <h3 className="text-xl font-extrabold" style={{ marginBottom: "10px" }}>

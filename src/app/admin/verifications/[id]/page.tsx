@@ -67,7 +67,7 @@ export default async function VerificationDetailPage({
   return (
     <div className="admin-page admin-page-narrow">
       <header className="mb-8">
-        <h1 className="gradient-text mb-2" style={{ fontSize: "28px", fontWeight: 900 }}>
+        <h1 className="gradient-text mb-2 text-3xl font-extrabold">
           Review: {name}
         </h1>
         <p className="text-secondary text-sm">
@@ -90,8 +90,8 @@ export default async function VerificationDetailPage({
               { label: "Registration", value: activeSince, color: "inherit" },
               { label: "Trust Score", value: user.trustScore, color: user.trustScore >= 50 ? "var(--color-accent-emerald)" : "var(--color-accent-amber)" },
             ].map((item) => (
-              <div key={item.label} className="flex justify-between items-center p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
-                <span className="text-xs text-secondary font-semibold" style={{ textTransform: "uppercase" }}>
+              <div key={item.label} className="flex justify-between items-center p-3 bg-tertiary rounded-md border-card">
+                <span className="text-xs text-secondary font-semibold uppercase">
                   {item.label}
                 </span>
                 <span className="text-sm font-bold" style={{ color: item.color }}>
@@ -139,8 +139,8 @@ export default async function VerificationDetailPage({
                 value: user.taxCompliance?.status || "ACTION_REQUIRED",
               },
             ].map((item) => (
-              <div key={item.label} className="flex justify-between items-center p-3" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
-                <span className="text-xs text-secondary font-semibold" style={{ textTransform: "uppercase" }}>
+              <div key={item.label} className="flex justify-between items-center p-3 bg-tertiary rounded-md border-card">
+                <span className="text-xs text-secondary font-semibold uppercase">
                   {item.label}
                 </span>
                 <span className="text-sm font-bold">
@@ -168,17 +168,17 @@ export default async function VerificationDetailPage({
               {docsWithRefreshedUrls.map((doc) => (
                 <div
                   key={doc.id}
-                  className="p-4" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-border)" }}
+                  className="p-4 bg-tertiary rounded-lg border-card"
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <div className="font-extrabold text-sm flex items-center gap-2" style={{ color: "var(--color-text-primary)", textTransform: "uppercase" }}>
+                      <div className="font-extrabold text-sm flex items-center gap-2 uppercase" style={{ color: "var(--color-text-primary)" }}>
                         {doc.type.replaceAll("_", " ")}
                         <span className={`badge ${getDocBadgeClass(doc.status)}`}>
                           {doc.status}
                         </span>
                       </div>
-                      <div className="text-muted mt-1" style={{ fontSize: "11px" }}>
+                      <div className="text-muted mt-1 text-xs">
                         ID: {doc.id.slice(0, 8)}... • {new Date(doc.createdAt).toLocaleDateString()}
                       </div>
                     </div>
@@ -196,7 +196,7 @@ export default async function VerificationDetailPage({
                   </div>
 
                   {doc.status === "PENDING" && (
-                    <div className="flex mt-4" style={{ gap: "10px", paddingTop: "16px", borderTop: "1px solid var(--color-border)" }}>
+                    <div className="flex mt-4 border-top" style={{ gap: "10px", paddingTop: "16px" }}>
                       <form action={approveDocument.bind(null, doc.id, user.id)} className="flex-1">
                         <Button variant="success" size="sm" className="w-full">
                           Approve ✅
@@ -231,7 +231,7 @@ export default async function VerificationDetailPage({
       </div>
 
       {/* Global Actions Bar */}
-      <footer className="flex flex-col gap-6" style={{ marginTop: "40px", padding: "32px", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-xl)", border: "1px solid var(--color-border)" }}>
+      <footer className="flex flex-col gap-6 p-8 bg-secondary rounded-xl border-card" style={{ marginTop: "40px" }}>
         <div>
           <h3 className="text-base font-bold mb-1">Decision Engine</h3>
           <p className="text-secondary text-sm">Finalize user status. This will trigger system-wide webhooks and emails.</p>

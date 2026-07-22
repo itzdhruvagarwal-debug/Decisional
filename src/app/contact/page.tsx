@@ -75,7 +75,7 @@ export default function ContactPage() {
                     Open Dispute Center
                   </Link>
                 </div>
-                <div className="mt-6" style={{ paddingTop: "20px", borderTop: "1px solid var(--color-border)" }}>
+                <div className="mt-6 border-top" style={{ paddingTop: "20px" }}>
                   <h3 className="text-base font-extrabold mb-2">
                     Response windows
                   </h3>

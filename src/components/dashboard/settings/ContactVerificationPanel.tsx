@@ -158,7 +158,7 @@ export default function ContactVerificationPanel({
         if (user?.emailVerified && user?.email) {
             return (
                 <div className="flex gap-2 items-center">
-                    <span className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '5px 12px', borderRadius: '20px' }}>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald bg-emerald-subtle rounded-2xl" style={{ padding: '5px 12px' }}>
                         ✅ Verified
                     </span>
                 <Button variant="secondary" disabled={isSaving} className="text-xs" style={{ padding: '4px 8px' }} onClick={() => handleStartContactChange('email')}>{isSaving ? '...' : 'Change'}</Button>
@@ -213,7 +213,7 @@ export default function ContactVerificationPanel({
         if (user?.phoneVerified && user?.phone) {
             return (
                 <div className="flex gap-2 items-center">
-                    <span className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '5px 12px', borderRadius: '20px' }}>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald bg-emerald-subtle rounded-2xl" style={{ padding: '5px 12px' }}>
                         ✅ Verified
                     </span>
                     <Button variant="secondary" disabled={isSaving} className="text-xs" style={{ padding: '4px 8px' }} onClick={() => handleStartContactChange('phone')}>{isSaving ? '...' : 'Change'}</Button>
@@ -291,7 +291,7 @@ export default function ContactVerificationPanel({
             </h3>
             <div className="flex flex-col gap-4">
                 {/* Email Verification */}
-                <div className="flex justify-between items-center p-3" style={{ background: (user?.emailVerified && user?.email) ? 'rgba(16, 185, 129, 0.06)' : 'var(--color-bg-tertiary)', borderRadius: 'var(--radius-sm)', border: (user?.emailVerified && user?.email) ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid transparent' }}>
+                <div className="flex justify-between items-center p-3 rounded-sm" style={{ background: (user?.emailVerified && user?.email) ? 'rgba(16, 185, 129, 0.06)' : 'var(--color-bg-tertiary)', border: (user?.emailVerified && user?.email) ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid transparent' }}>
                     <div>
                         <div className="font-semibold text-sm">📧 Email Address</div>
                         <div className="text-xs text-muted">{user?.email || 'N/A'}</div>
@@ -300,7 +300,7 @@ export default function ContactVerificationPanel({
                 </div>
  
                 {/* Phone Verification */}
-                <div className="flex justify-between items-center p-3" style={{ background: (user?.phoneVerified && user?.phone) ? 'rgba(16, 185, 129, 0.06)' : 'var(--color-bg-tertiary)', borderRadius: 'var(--radius-sm)', border: (user?.phoneVerified && user?.phone) ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid transparent' }}>
+                <div className="flex justify-between items-center p-3 rounded-sm" style={{ background: (user?.phoneVerified && user?.phone) ? 'rgba(16, 185, 129, 0.06)' : 'var(--color-bg-tertiary)', border: (user?.phoneVerified && user?.phone) ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid transparent' }}>
                     <div>
                         <div className="font-semibold text-sm">📱 Phone Number</div>
                         <div className="text-xs text-muted">
@@ -313,10 +313,10 @@ export default function ContactVerificationPanel({
 
             {/* Change Contact Inline UI */}
             {changeContactState.active && (
-                <div className="p-4" style={{ marginTop: '20px', background: 'var(--color-bg-tertiary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+                <div className="p-4 bg-tertiary rounded-md border-card" style={{ marginTop: '20px' }}>
                     <div className="flex justify-between items-center mb-4">
                         <h4 className="text-base font-semibold" style={{ margin: 0 }}>Change {changeContactState.type === 'email' ? 'Email Address' : 'Phone Number'}</h4>
-                        <Button variant="ghost" aria-label="Dismiss contact change dialog" className="text-muted cursor-pointer" style={{ background: 'none', border: 'none' }} onClick={() => setChangeContactState({ active: false, type: null, step: 'idle', currentEmailOtp: '', currentPhoneOtp: '', newContact: '', newOtp: '' })}>✕</Button>
+                        <Button variant="ghost" aria-label="Dismiss contact change dialog" className="text-muted cursor-pointer border-none" style={{ background: 'none' }} onClick={() => setChangeContactState({ active: false, type: null, step: 'idle', currentEmailOtp: '', currentPhoneOtp: '', newContact: '', newOtp: '' })}>✕</Button>
                     </div>
 
                     {changeContactState.step === 'verify-current' && (

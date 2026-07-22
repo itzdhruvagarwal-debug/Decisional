@@ -89,7 +89,7 @@ export default function ApplicationsPage() {
     );
   } else if (error) {
     applicationsList = (
-      <div className="text-center" style={{ padding: "48px", color: "var(--color-accent-rose)" }}>
+      <div className="text-center text-rose" style={{ padding: "48px" }}>
         ⚠️ {error}
       </div>
     );
@@ -109,7 +109,7 @@ export default function ApplicationsPage() {
         <div style={{ overflowX: "auto" }}>
           <table className="w-full text-left" style={{ borderCollapse: "collapse" }}>
             <thead>
-              <tr className="border-b-card" style={{ background: "var(--color-bg-tertiary)" }}>
+              <tr className="border-b-card bg-tertiary">
                 <th className="p-4 text-xs font-bold text-secondary">CAMPAIGN</th>
                 <th className="p-4 text-xs font-bold text-secondary">PROPOSED RATE</th>
                 <th className="p-4 text-xs font-bold text-secondary">SUBMITTED ON</th>
@@ -125,7 +125,7 @@ export default function ApplicationsPage() {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div
-                          className="flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden relative" style={{ width: "36px", height: "36px", borderRadius: "var(--radius-sm)", background: "var(--gradient-card)", color: "white" }}
+                          className="flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden relative rounded-sm" style={{ width: "36px", height: "36px", background: "var(--gradient-card)", color: "white" }}
                         >
                           {app.campaign.brand?.logo ? (
                             <Image
@@ -159,7 +159,7 @@ export default function ApplicationsPage() {
                     </td>
                     <td className="p-4">
                       <span
-                        className="inline-flex text-xs font-extrabold" style={{ border: "1px solid", borderRadius: "8px", padding: "4px 10px", ...statusStyle }}
+                        className="inline-flex text-xs font-extrabold rounded-md" style={{ border: "1px solid", padding: "4px 10px", ...statusStyle }}
                       >
                         {app.status}
                       </span>
@@ -184,7 +184,7 @@ export default function ApplicationsPage() {
       <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "40px 20px" }}>
         {/* Header */}
         <div className="mb-8">
-          <h1 className="font-extrabold" style={{ fontSize: "32px" }}>My Applications</h1>
+          <h1 className="font-extrabold text-3xl">My Applications</h1>
           <p className="text-secondary text-sm mt-1">
             Track the status of your pitches and proposals submitted to campaigns.
           </p>
@@ -192,7 +192,7 @@ export default function ApplicationsPage() {
 
         {error && (
           <div
-            className="card p-4 mb-6" style={{ background: "rgba(244, 63, 94, 0.08)", border: "1px solid rgba(244, 63, 94, 0.2)", borderRadius: "var(--radius-md)", color: "var(--color-accent-rose)" }}
+            className="card p-4 mb-6 rounded-md text-rose" style={{ background: "rgba(244, 63, 94, 0.08)", border: "1px solid rgba(244, 63, 94, 0.2)" }}
           >
             {error}
           </div>

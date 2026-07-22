@@ -22,7 +22,7 @@ export default async function AdminApplicationsPage() {
       <header className="mb-8">
         <div className="flex justify-between items-start flex-wrap gap-4">
           <div>
-            <h1 className="gradient-text mb-2" style={{ fontSize: "28px", fontWeight: 900 }}>
+            <h1 className="gradient-text mb-2 text-3xl font-extrabold">
               🚩 Flagged Applications
             </h1>
             <p className="text-secondary text-sm">
@@ -40,18 +40,18 @@ export default async function AdminApplicationsPage() {
         className="card mb-6 flex gap-8 flex-wrap" style={{ padding: "16px 24px", background: "linear-gradient(135deg, rgba(239,68,68,0.04), rgba(245,158,11,0.04))", border: "1px solid rgba(239,68,68,0.15)" }}
       >
         <div>
-          <div className="text-muted font-bold" style={{ fontSize: "11px", textTransform: "uppercase" }}>
+          <div className="text-muted font-bold text-xs uppercase">
             Total Flagged
           </div>
-          <div className="text-2xl" style={{ fontWeight: 900, color: "var(--color-error)" }}>
+          <div className="text-2xl font-extrabold" style={{ color: "var(--color-error)" }}>
             {flaggedApps.length}
           </div>
         </div>
         <div>
-          <div className="text-muted font-bold" style={{ fontSize: "11px", textTransform: "uppercase" }}>
+          <div className="text-muted font-bold text-xs uppercase">
             Total Value at Risk
           </div>
-          <div className="text-2xl" style={{ fontWeight: 900, color: "var(--color-warning)" }}>
+          <div className="text-2xl font-extrabold" style={{ color: "var(--color-warning)" }}>
             {formatCurrency(
               flaggedApps.reduce((sum, app) => sum + (app.proposedRate || 0), 0)
             )}
@@ -95,11 +95,11 @@ export default async function AdminApplicationsPage() {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span
-                        className="font-bold" style={{ fontSize: "10px", padding: "2px 8px", borderRadius: "var(--radius-sm)", background: "rgba(239,68,68,0.15)", color: "var(--color-error)", textTransform: "uppercase", letterSpacing: "0.05em" }}
+                        className="font-bold rounded-sm uppercase" style={{ fontSize: "10px", padding: "2px 8px", background: "rgba(239,68,68,0.15)", color: "var(--color-error)", letterSpacing: "0.05em" }}
                       >
                         FLAGGED
                       </span>
-                      <span className="text-muted" style={{ fontSize: "11px" }}>
+                      <span className="text-muted text-xs">
                         {new Date(app.createdAt).toLocaleDateString("en-IN", {
                           day: "numeric",
                           month: "short",
@@ -115,8 +115,8 @@ export default async function AdminApplicationsPage() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <div className="text-muted" style={{ fontSize: "11px" }}>Proposed Rate</div>
-                    <div className="text-xl" style={{ fontWeight: 900, color: "var(--color-accent-emerald)" }}>
+                    <div className="text-muted text-xs">Proposed Rate</div>
+                    <div className="text-xl font-extrabold text-emerald">
                       {formatCurrency(app.proposedRate || 0)}
                     </div>
                   </div>
@@ -124,7 +124,7 @@ export default async function AdminApplicationsPage() {
 
                 {/* Influencer info */}
                 <div
-                  className="flex justify-between items-center flex-wrap gap-3 mb-4" style={{ padding: "12px 16px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}
+                  className="flex justify-between items-center flex-wrap gap-3 mb-4 bg-tertiary rounded-md border-card" style={{ padding: "12px 16px" }}
                 >
                   <div>
                     <div className="font-bold text-sm" style={{ marginBottom: "2px" }}>
@@ -154,7 +154,7 @@ export default async function AdminApplicationsPage() {
 
                 {/* Action buttons */}
                 <div
-                  className="flex justify-end items-center gap-3 flex-wrap" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "16px" }}
+                  className="flex justify-end items-center gap-3 flex-wrap border-top" style={{ paddingTop: "16px" }}
                 >
                   <form action={approveAction}>
                     <Button

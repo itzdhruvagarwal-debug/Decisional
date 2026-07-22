@@ -587,7 +587,7 @@ function ConversationsSidebar({ state }: ConversationsSidebarProps) {
   return (
     <div className={`messages-list ${selectedConversation ? "hide-mobile" : ""}`}>
       <div
-        className="border-b-card" style={{ padding: "20px" }}
+        className="border-b-card p-5"
       >
         <h1 className="text-xl font-extrabold">Messages</h1>
       </div>
@@ -595,7 +595,7 @@ function ConversationsSidebar({ state }: ConversationsSidebarProps) {
         {(() => {
           if (loadingConversations) {
             return (
-              <div className="text-center" style={{ padding: "20px" }}>
+              <div className="text-center p-5">
                 <span
                   className="loading"
                   style={{ width: "24px", height: "24px" }}
@@ -637,7 +637,7 @@ function ConversationsSidebar({ state }: ConversationsSidebarProps) {
                     alt={conv.name || "User avatar"}
                     fill
                     unoptimized
-                    className="object-cover" style={{ borderRadius: "50%" }}
+                    className="object-cover rounded-full"
                   />
                 ) : (
                   (conv.name || "U").charAt(0).toUpperCase()
@@ -653,7 +653,7 @@ function ConversationsSidebar({ state }: ConversationsSidebarProps) {
                     {conv.name}
                   </span>
                   <span
-                    className="text-muted" style={{ fontSize: "11px" }}
+                    className="text-muted text-xs"
                   >
                     {conv.lastMessageTime
                       ? new Date(conv.lastMessageTime).toLocaleDateString()
@@ -727,7 +727,7 @@ function ChatHeader({ state }: ChatPanelProps) {
             alt={selectedChat.name || "User avatar"}
             fill
             unoptimized
-            className="object-cover" style={{ borderRadius: "50%" }}
+            className="object-cover rounded-full"
           />
         ) : (
           (selectedChat.name || "U").charAt(0)
@@ -776,10 +776,10 @@ function MessageList({ state }: ChatPanelProps) {
       aria-label="Chat messages"
       aria-live="polite"
       aria-relevant="additions"
-      className="flex-1 p-6 flex flex-col gap-4" style={{ overflowY: "auto", background: "var(--color-bg-tertiary)" }}
+      className="flex-1 p-6 flex flex-col gap-4 bg-tertiary" style={{ overflowY: "auto" }}
     >
       {loadingMessages ? (
-        <div className="text-center" style={{ padding: "20px" }}>
+        <div className="text-center p-5">
           <span className="loading" />
         </div>
       ) : (
@@ -818,7 +818,7 @@ function MessageList({ state }: ChatPanelProps) {
                     ⚠️ Warning: Message Blocked
                   </div>
                   <p
-                    className="text-sm" style={{ lineHeight: 1.5, filter: "blur(5px)", userSelect: "none", opacity: 0.5 }}
+                    className="text-sm leading-normal" style={{ filter: "blur(5px)", userSelect: "none", opacity: 0.5 }}
                   >
                     {msg.content}
                   </p>
@@ -832,7 +832,7 @@ function MessageList({ state }: ChatPanelProps) {
                   </div>
                 </div>
               ) : (
-                <p className="text-sm" style={{ lineHeight: 1.5 }}>
+                <p className="text-sm leading-normal">
                   {msg.content}
                 </p>
               )}
@@ -851,7 +851,7 @@ function MessageList({ state }: ChatPanelProps) {
       {isPeerTyping && (
         <div className="flex justify-start">
           <div
-            className="text-secondary text-sm" style={{ padding: "10px 14px", borderRadius: "16px", background: "var(--color-bg-secondary)", border: "1px solid var(--color-border)", boxShadow: "var(--shadow-sm)" }}
+            className="text-secondary text-sm rounded-xl bg-secondary border-card" style={{ padding: "10px 14px", boxShadow: "var(--shadow-sm)" }}
           >
             Typing...
           </div>
@@ -874,11 +874,11 @@ function ChatInputArea({ state }: ChatPanelProps) {
 
   return (
     <div
-      className="flex flex-col gap-2" style={{ padding: "16px 24px", borderTop: "1px solid var(--color-border)", background: "var(--color-bg-primary)", alignItems: isChatUserBlocked ? "center" : "stretch", justifyContent: isChatUserBlocked ? "center" : "initial" }}
+      className="flex flex-col gap-2 border-top" style={{ padding: "16px 24px", background: "var(--color-bg-primary)", alignItems: isChatUserBlocked ? "center" : "stretch", justifyContent: isChatUserBlocked ? "center" : "initial" }}
     >
       {isChatUserBlocked ? (
         <div
-          className="font-semibold text-sm" style={{ color: "#ef4444", padding: "8px 16px", background: "rgba(239, 68, 68, 0.1)", borderRadius: "6px", border: "1px solid rgba(239, 68, 68, 0.2)" }}
+          className="font-semibold text-sm text-rose" style={{ padding: "8px 16px", background: "rgba(239, 68, 68, 0.1)", borderRadius: "6px", border: "1px solid rgba(239, 68, 68, 0.2)" }}
         >
           🚫 You cannot message this user because a block relationship exists.
         </div>
@@ -942,7 +942,7 @@ function ChatPanel({ state }: ChatPanelProps) {
         </>
       ) : (
         <div
-          className="flex-1 flex items-center justify-center flex-col gap-4 text-secondary" style={{ background: "var(--color-bg-tertiary)" }}
+          className="flex-1 flex items-center justify-center flex-col gap-4 text-secondary bg-tertiary"
         >
           <div style={{ fontSize: "48px", opacity: 0.5 }}>💬</div>
           <p>Select a conversation to start messaging</p>

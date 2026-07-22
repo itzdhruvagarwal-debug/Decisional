@@ -46,7 +46,7 @@ export default function TwoFactorAuthPanel({
             {recoveryCodes.length > 0 && (
                 <div className="card" style={{ border: "2px solid var(--color-accent-amber)", background: "rgba(245, 158, 11, 0.06)" }}>
                     <div className="flex justify-between items-center mb-3">
-                        <h3 className="text-base font-extrabold" style={{ color: "var(--color-accent-amber)" }}>🔑 Save Your Recovery Codes</h3>
+                        <h3 className="text-base font-extrabold text-amber">🔑 Save Your Recovery Codes</h3>
                         <Button variant="ghost" onClick={() => setRecoveryCodes([])} className="text-xs">I've saved them ✓</Button>
                     </div>
                     <p className="text-sm text-secondary mb-3">
@@ -54,7 +54,7 @@ export default function TwoFactorAuthPanel({
                     </p>
                     <div className="grid gap-2 mb-3" style={{ gridTemplateColumns: "1fr 1fr" }}>
                         {recoveryCodes.map((code) => (
-                            <div key={code} className="text-sm font-bold" style={{ fontFamily: "monospace", padding: "8px 12px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)", border: "1px solid var(--color-border)", letterSpacing: "0.1em" }}>
+                            <div key={code} className="text-sm font-bold bg-tertiary rounded-sm border-card" style={{ fontFamily: "monospace", padding: "8px 12px", letterSpacing: "0.1em" }}>
                                 {code}
                             </div>
                         ))}
@@ -118,13 +118,13 @@ export default function TwoFactorAuthPanel({
 
                 {is2FASetupVisible && qrCodeData && !is2FAEnabled && (
                     <div
-                        className="mt-4 p-4" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
+                        className="mt-4 p-4 bg-tertiary rounded-md"
                     >
                         <p className="text-sm mb-3">
                             1. Scan this QR code with your authenticator app (e.g. Google Authenticator, Authy):
                         </p>
                         <div
-                            className="flex justify-center mb-4 p-4" style={{ background: "white", borderRadius: "8px", width: "fit-content", margin: "0 auto 16px auto" }}
+                            className="flex justify-center mb-4 p-4 rounded-md" style={{ background: "white", width: "fit-content", margin: "0 auto 16px auto" }}
                         >
                             <Image
                                 src={qrCodeData.qrCodeUrl}
@@ -195,7 +195,7 @@ export default function TwoFactorAuthPanel({
 
                     {is2FAEnabled && (
                         <div
-                            className="mt-4 p-4" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
+                            className="mt-4 p-4 bg-tertiary rounded-md"
                         >
                             <p className="text-sm mb-3">
                                 To disable 2FA, please enter your current password:

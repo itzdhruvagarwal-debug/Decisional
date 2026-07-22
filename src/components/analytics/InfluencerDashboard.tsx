@@ -197,7 +197,7 @@ export default function InfluencerDashboard({
                 <h3 className="level-perks-title">
                   ✨ Level {overview.level} Perks & Benefits
                 </h3>
-                <span className="badge badge-primary text-xs font-bold" style={{ padding: "4px 10px", textTransform: "uppercase" }}>
+                <span className="badge badge-primary text-xs font-bold uppercase" style={{ padding: "4px 10px" }}>
                   {calculateLevel(overview.xp).name}
                 </span>
               </div>
@@ -208,7 +208,7 @@ export default function InfluencerDashboard({
             <div className="level-perks-stats">
               <div className="stat-chip">
                 <div className="stat-chip-label">Platform Fee</div>
-                <div className="stat-chip-value-lg" style={{ color: "var(--color-accent-emerald)" }}>
+                <div className="stat-chip-value-lg text-emerald">
                   {getPlatformFeePercentage(overview.level)}%
                 </div>
                 <div className="stat-chip-sub">
@@ -217,7 +217,7 @@ export default function InfluencerDashboard({
               </div>
               <div className="stat-chip">
                 <div className="stat-chip-label">Search Boost</div>
-                <div className="stat-chip-value-lg" style={{ color: "var(--color-accent-amber)" }}>
+                <div className="stat-chip-value-lg text-amber">
                   +{Math.min(overview.level * 2, 20)} pts
                 </div>
                 <div className="stat-chip-sub">
@@ -346,8 +346,7 @@ export default function InfluencerDashboard({
                   </div>
                 </div>
                 <span
-                  className="badge badge-success"
-                  style={{ fontSize: "11px" }}
+                  className="badge badge-success text-xs"
                 >
                   +{badge.xpReward} XP
                 </span>
@@ -378,10 +377,10 @@ export default function InfluencerDashboard({
 
           <div className="grid-2 gap-3 mb-5">
             <div
-              className="p-4" style={{ borderRadius: "var(--radius-md)", background: "var(--color-bg-tertiary)" }}
+              className="p-4 rounded-md bg-tertiary"
             >
               <div
-                className="text-xs text-muted" style={{ marginBottom: "6px" }}
+                className="text-xs text-muted mb-1"
               >
                 Active Referrals
               </div>
@@ -390,15 +389,15 @@ export default function InfluencerDashboard({
               </div>
             </div>
             <div
-              className="p-4" style={{ borderRadius: "var(--radius-md)", background: "var(--color-bg-tertiary)" }}
+              className="p-4 rounded-md bg-tertiary"
             >
               <div
-                className="text-xs text-muted" style={{ marginBottom: "6px" }}
+                className="text-xs text-muted mb-1"
               >
                 Total Earnings
               </div>
               <div
-                className="text-2xl font-extrabold" style={{ color: "var(--color-accent-emerald)" }}
+                className="text-2xl font-extrabold text-emerald"
               >
                 Rs{" "}
                 {(
@@ -409,12 +408,12 @@ export default function InfluencerDashboard({
           </div>
 
           <div
-            className="p-4 flex items-center justify-between" style={{ background:
-                "linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1))", borderRadius: "var(--radius-md)", border: "1px solid rgba(99, 102, 241, 0.2)" }}
+            className="p-4 flex items-center justify-between rounded-md" style={{ background:
+                "linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1))", border: "1px solid rgba(99, 102, 241, 0.2)" }}
           >
             <div>
               <div
-                className="text-muted mb-1" style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: 0 }}
+                className="text-muted mb-1 text-xs uppercase" style={{ letterSpacing: 0 }}
               >
                 Your Referral Code
               </div>
@@ -531,7 +530,7 @@ function StatCard({
         </span>
       </div>
       <div
-        className="font-extrabold" style={{ fontSize: "28px", color: accentColor, lineHeight: 1.2 }}
+        className="font-extrabold text-3xl" style={{ color: accentColor, lineHeight: 1.2 }}
       >
         {value}
       </div>
@@ -556,7 +555,7 @@ function MetricBar({ label, value, max, color, displayValue }: MetricBarProps) {
   return (
     <div>
       <div
-        className="flex justify-between" style={{ marginBottom: "6px" }}
+        className="flex justify-between mb-1"
       >
         <span
           className="text-sm text-secondary"

@@ -99,12 +99,7 @@ export default function DisputesPage() {
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span
-                        className="badge"
-                        style={{
-                          background: getStatusColor(dispute.status),
-                          color: "white",
-                          fontSize: "11px",
-                        }}
+                        className="badge text-xs" style={{ background: getStatusColor(dispute.status), color: "white" }}
                       >
                         {getStatusLabel(dispute.status)}
                       </span>
@@ -120,14 +115,14 @@ export default function DisputesPage() {
                       </span>
                     </div>
                     <span
-                      className="text-xs font-semibold" style={{ color: "var(--color-accent-amber)", background: "rgba(245,158,11,0.1)", padding: "4px 10px", borderRadius: "8px" }}
+                      className="text-xs font-semibold text-amber rounded-md" style={{ background: "rgba(245,158,11,0.1)", padding: "4px 10px" }}
                     >
                       {dispute.type} Issue
                     </span>
                   </div>
 
                   {/* Campaign Title */}
-                  <h3 className="font-bold" style={{ fontSize: "17px", marginBottom: "6px" }}>
+                  <h3 className="font-bold mb-1" style={{ fontSize: "17px" }}>
                     {dispute.deal.campaign.title}
                   </h3>
 
@@ -142,7 +137,7 @@ export default function DisputesPage() {
 
                   {/* Description Excerpt */}
                   <div
-                    className="text-sm text-secondary" style={{ padding: "12px 14px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)", lineHeight: 1.6, borderLeft: `3px solid ${getStatusColor(dispute.status)}` }}
+                    className="text-sm text-secondary bg-tertiary rounded-md" style={{ padding: "12px 14px", lineHeight: 1.6, borderLeft: `3px solid ${getStatusColor(dispute.status)}` }}
                   >
                     "{dispute.description.length > 120
                       ? dispute.description.slice(0, 120) + "..."

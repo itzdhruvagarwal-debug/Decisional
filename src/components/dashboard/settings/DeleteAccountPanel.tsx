@@ -91,7 +91,7 @@ export default function DeleteAccountPanel({
                 <div
                     role="alert"
                     aria-live="assertive"
-                    className="p-3 mb-4" style={{ background: "rgba(239, 68, 68, 0.1)", color: "var(--color-error)", borderRadius: "var(--radius-sm)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
+                    className="p-3 mb-4 rounded-sm" style={{ background: "rgba(239, 68, 68, 0.1)", color: "var(--color-error)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
                 >
                     {error}
                 </div>

@@ -214,7 +214,7 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
             </div>
             <div className="referral-stat">
               <span className="referral-stat-label">Total Earnings</span>
-              <span className="referral-stat-value" style={{ color: "var(--color-accent-emerald)" }}>
+              <span className="referral-stat-value text-emerald">
                 Rs {((data.referralStats?.earnings || 0) / 100).toLocaleString()}
               </span>
             </div>
@@ -223,13 +223,13 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
 
             <div>
               <div
-                className="text-muted mb-2" style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: 0 }}
+                className="text-muted mb-2 text-xs uppercase" style={{ letterSpacing: 0 }}
               >
                 Share your code
               </div>
               <div className="flex gap-2">
                 <code
-                  className="flex-1 text-sm text-center" style={{ padding: "10px 14px", background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-sm)", fontFamily: "monospace", letterSpacing: 0 }}
+                  className="flex-1 text-sm text-center bg-tertiary rounded-sm" style={{ padding: "10px 14px", fontFamily: "monospace", letterSpacing: 0 }}
                 >
                   {data.referralStats?.referralCode || "Loading..."}
                 </code>
@@ -282,7 +282,7 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
           </h3>
           <Link
             href="/dashboard/campaigns"
-            className="text-sm font-medium" style={{ color: "var(--color-primary-light)" }}
+            className="text-sm font-medium text-primary-light"
           >
             View All
           </Link>
@@ -294,22 +294,22 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
             <thead>
               <tr className="border-b-card">
                 <th
-                  className="text-xs text-muted font-semibold" style={{ padding: "10px 12px", textTransform: "uppercase", letterSpacing: 0 }}
+                  className="text-xs text-muted font-semibold uppercase" style={{ padding: "10px 12px", letterSpacing: 0 }}
                 >
                   Campaign
                 </th>
                 <th
-                  className="text-xs text-muted font-semibold" style={{ padding: "10px 12px", textTransform: "uppercase", letterSpacing: 0 }}
+                  className="text-xs text-muted font-semibold uppercase" style={{ padding: "10px 12px", letterSpacing: 0 }}
                 >
                   Status
                 </th>
                 <th
-                  className="text-xs text-muted font-semibold" style={{ padding: "10px 12px", textTransform: "uppercase", letterSpacing: 0 }}
+                  className="text-xs text-muted font-semibold uppercase" style={{ padding: "10px 12px", letterSpacing: 0 }}
                 >
                   Budget
                 </th>
                 <th
-                  className="text-xs text-muted font-semibold" style={{ padding: "10px 12px", textTransform: "uppercase", letterSpacing: 0 }}
+                  className="text-xs text-muted font-semibold uppercase" style={{ padding: "10px 12px", letterSpacing: 0 }}
                 >
                   Deals
                 </th>
@@ -421,7 +421,7 @@ function StatCard({
         </span>
       </div>
       <div
-        className="font-extrabold" style={{ fontSize: "28px", color: accentColor, lineHeight: 1.2 }}
+        className="font-extrabold text-3xl" style={{ color: accentColor, lineHeight: 1.2 }}
       >
         {value}
       </div>

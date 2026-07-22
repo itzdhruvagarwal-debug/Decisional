@@ -69,26 +69,26 @@ export default function BlogPage() {
 
           <div className="container relative text-center" style={{ zIndex: 1, maxWidth: "640px" }}>
             <div
-              className="badge badge-primary animate-fade-in mb-6 text-xs font-extrabold" style={{ padding: "8px 16px", textTransform: "uppercase", letterSpacing: "1px" }}
+              className="badge badge-primary animate-fade-in mb-6 text-xs font-extrabold uppercase" style={{ padding: "8px 16px", letterSpacing: "1px" }}
             >
               Knowledge Base
             </div>
 
             <h1
-              className="section-title animate-fade-in mb-5" style={{ fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 900, lineHeight: 1.15, letterSpacing: "-0.02em" }}
+              className="section-title animate-fade-in mb-5 font-extrabold" style={{ fontSize: "clamp(32px, 5vw, 56px)", lineHeight: 1.15, letterSpacing: "-0.02em" }}
             >
               Practical Guides <br />
               <span className="gradient-text-animated">Coming Soon</span>
             </h1>
 
             <p
-              className="section-subtitle animate-fade-in text-secondary" style={{ fontSize: "17px", lineHeight: 1.75, marginBottom: "40px", animationDelay: "0.1s" }}
+              className="section-subtitle animate-fade-in text-secondary mb-10" style={{ fontSize: "17px", lineHeight: 1.75, animationDelay: "0.1s" }}
             >
               We are finalizing operational playbooks and compliance guides for Indian influencer marketing. Expect deep-dives on TDS compliance under Section 194-O, GST invoicing rules, and fake-engagement audit checklists.
             </p>
 
             <div
-              className="card glass animate-fade-in p-6" style={{ borderRadius: "var(--radius-lg, 12px)", border: "1px solid var(--color-border)", background: "rgba(30, 41, 59, 0.4)", animationDelay: "0.2s" }}
+              className="card glass animate-fade-in p-6 border-card" style={{ borderRadius: "var(--radius-lg, 12px)", background: "rgba(30, 41, 59, 0.4)", animationDelay: "0.2s" }}
             >
               <h3 className="text-base font-bold mb-2">
                 Get Notified of New Content

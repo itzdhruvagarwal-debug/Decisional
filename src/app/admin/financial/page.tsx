@@ -27,7 +27,7 @@ export default async function AdminFinancialPage() {
     <div className="admin-page" style={{ color: "var(--color-text-primary)" }}>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="gradient-text" style={{ fontSize: "28px", fontWeight: 900, marginBottom: "6px" }}>
+        <h1 className="gradient-text text-3xl font-extrabold mb-1">
           Financial Overview
         </h1>
         <p className="text-secondary text-sm">
@@ -40,7 +40,7 @@ export default async function AdminFinancialPage() {
         className="grid gap-6 mb-8" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}
       >
         <div className="card p-6" style={{ borderLeft: "4px solid var(--color-primary-light)" }}>
-          <div className="text-xs font-bold text-muted mb-2" style={{ textTransform: "uppercase" }}>
+          <div className="text-xs font-bold text-muted mb-2 uppercase">
             Gross Merchandise Value (GMV)
           </div>
           <div className="text-2xl font-extrabold">{formatCurrency(data.overview.gmv)}</div>
@@ -50,7 +50,7 @@ export default async function AdminFinancialPage() {
         </div>
 
         <div className="card p-6" style={{ borderLeft: "4px solid var(--color-success)" }}>
-          <div className="text-xs font-bold text-muted mb-2" style={{ textTransform: "uppercase" }}>
+          <div className="text-xs font-bold text-muted mb-2 uppercase">
             Net Profit (Revenue - Gateway Fees)
           </div>
           <div className="text-2xl font-extrabold" style={{ color: "var(--color-success)" }}>{formatCurrency(data.overview.netProfit)}</div>
@@ -60,7 +60,7 @@ export default async function AdminFinancialPage() {
         </div>
 
         <div className="card p-6" style={{ borderLeft: "4px solid var(--color-accent-blue)" }}>
-          <div className="text-xs font-bold text-muted mb-2" style={{ textTransform: "uppercase" }}>
+          <div className="text-xs font-bold text-muted mb-2 uppercase">
             Influencer Payouts
           </div>
           <div className="text-2xl font-extrabold">{formatCurrency(data.overview.influencerPayouts)}</div>
@@ -70,7 +70,7 @@ export default async function AdminFinancialPage() {
         </div>
 
         <div className="card p-6" style={{ borderLeft: "4px solid var(--color-accent-amber)" }}>
-          <div className="text-xs font-bold text-muted mb-2" style={{ textTransform: "uppercase" }}>
+          <div className="text-xs font-bold text-muted mb-2 uppercase">
             Gateway Fees
           </div>
           <div className="text-2xl font-extrabold">{formatCurrency(data.overview.gatewayFees)}</div>
@@ -89,7 +89,7 @@ export default async function AdminFinancialPage() {
           <div className="flex flex-col gap-4">
             <div className="flex justify-between border-b-card" style={{ paddingBottom: "12px" }}>
               <span className="text-secondary">Total Outstanding Liability (Wallet Balances)</span>
-              <span className="font-bold" style={{ color: "var(--color-accent-rose)" }}>{formatCurrency(data.wallets.totalBalance)}</span>
+              <span className="font-bold text-rose">{formatCurrency(data.wallets.totalBalance)}</span>
             </div>
             <div className="flex justify-between border-b-card" style={{ paddingBottom: "12px" }}>
               <span className="text-secondary">Total Earned by Users</span>
@@ -117,7 +117,7 @@ export default async function AdminFinancialPage() {
             </div>
             <div className="flex justify-between border-b-card" style={{ paddingBottom: "12px" }}>
               <span className="text-secondary">Pending Bank Withdrawals</span>
-              <span className="font-bold" style={{ color: "var(--color-accent-amber)" }}>
+              <span className="font-bold text-amber">
                 {formatCurrency(data.withdrawals.pendingAmount)}{" "}
                 <span className="text-xs font-medium text-muted">
                   ({data.withdrawals.pendingCount} requests)
@@ -154,11 +154,11 @@ export default async function AdminFinancialPage() {
             </div>
             <div>
               <div className="text-xs text-muted">Active/Pending Deals</div>
-              <div className="text-xl font-bold mt-1" style={{ color: "var(--color-primary-light)" }}>{data.deals.active}</div>
+              <div className="text-xl font-bold mt-1 text-primary-light">{data.deals.active}</div>
             </div>
             <div>
               <div className="text-xs text-muted">Disputed Deals</div>
-              <div className="text-xl font-bold mt-1" style={{ color: "var(--color-accent-rose)" }}>{data.deals.disputed}</div>
+              <div className="text-xl font-bold mt-1 text-rose">{data.deals.disputed}</div>
             </div>
             <div>
               <div className="text-xs text-muted">Cancelled Deals</div>

@@ -1019,5 +1019,59 @@ input:checked+.slider:before {
 .p-card { padding: 16px 18px; }
 .stat-box { padding: 12px; background: var(--color-bg-tertiary); border-radius: 8px; }
 
+/* Backgrounds & Glassmorphism */
+.bg-secondary { background: var(--color-bg-secondary); }
+.bg-tertiary { background: var(--color-bg-tertiary); }
+.bg-elevated { background: var(--color-surface-elevated); }
+.bg-glass { background: rgba(255, 255, 255, 0.03); }
+.bg-glass-card { background: rgba(255, 255, 255, 0.04); }
+.bg-emerald-subtle { background: rgba(16, 185, 129, 0.1); }
+.bg-rose-subtle { background: rgba(244, 63, 94, 0.1); }
+.bg-amber-subtle { background: rgba(245, 158, 11, 0.1); }
+.bg-indigo-subtle { background: rgba(99, 102, 241, 0.1); }
+
+/* Borders & Cards */
+.border-card { border: 1px solid var(--color-border); }
+.border-glass { border: 1px solid rgba(255, 255, 255, 0.06); }
+.border-emerald-subtle { border: 1px solid rgba(16, 185, 129, 0.3); }
+.border-rose-subtle { border: 1px solid rgba(244, 63, 94, 0.3); }
+.border-amber-subtle { border: 1px solid rgba(245, 158, 11, 0.3); }
+.border-none { border: none !important; }
+
+/* Additional Radius */
+.rounded-xl { border-radius: 16px; }
+.rounded-2xl { border-radius: 20px; }
+
+/* Additional Padding & Spacing */
+.p-1 { padding: 4px; }
+.p-5 { padding: 20px; }
+.p-8 { padding: 32px; }
+.p-10 { padding: 40px; }
+
+.px-1 { padding-left: 4px; padding-right: 4px; }
+.px-5 { padding-left: 20px; padding-right: 20px; }
+.px-8 { padding-left: 32px; padding-right: 32px; }
+
+.py-5 { padding-top: 20px; padding-bottom: 20px; }
+.py-6 { padding-top: 24px; padding-bottom: 24px; }
+.py-8 { padding-top: 32px; padding-bottom: 32px; }
+
+/* Typography & Transforms */
+.text-emerald { color: var(--color-accent-emerald, #10b981); }
+.text-rose { color: var(--color-accent-rose, #f43f5e); }
+.text-amber { color: var(--color-accent-amber, #f59e0b); }
+.text-primary-light { color: var(--color-primary-light); }
+
+.uppercase { text-transform: uppercase; }
+.lowercase { text-transform: lowercase; }
+.capitalize { text-transform: capitalize; }
+
+.tracking-wider { letter-spacing: 0.05em; }
+.tracking-widest { letter-spacing: 0.1em; }
+.leading-none { line-height: 1; }
+.leading-normal { line-height: 1.5; }
+.leading-relaxed { line-height: 1.8; }
+
+
 
 

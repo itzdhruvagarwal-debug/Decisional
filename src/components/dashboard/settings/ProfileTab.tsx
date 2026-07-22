@@ -214,7 +214,7 @@ export default function ProfileTab({
         <div className="grid-2">
             <div className="card">
                 <div
-                    className="mb-4" style={{ display: "inline-block", padding: "4px 12px", borderRadius: "20px", background: getUserTypeColor(user.userType), color: "white", fontSize: "11px", fontWeight: "800", letterSpacing: "1px" }}
+                    className="mb-4 rounded-2xl text-xs" style={{ display: "inline-block", padding: "4px 12px", background: getUserTypeColor(user.userType), color: "white", fontWeight: "800", letterSpacing: "1px" }}
                 >
                     {user.userType} PROFILE
                 </div>
@@ -226,10 +226,10 @@ export default function ProfileTab({
                         type="button"
                         onClick={() => profileImageInputRef.current?.click()}
                         aria-label="Change profile image"
-                        className="relative cursor-pointer" style={{ border: "none", background: "none", padding: 0 }}
+                        className="relative cursor-pointer border-none" style={{ background: "none", padding: 0 }}
                     >
                         <div
-                            className="overflow-hidden flex items-center justify-center relative" style={{ width: "100px", height: "100px", borderRadius: "50%", border: "4px solid var(--color-bg-tertiary)", background: "#f0f0f0" }}
+                            className="overflow-hidden flex items-center justify-center relative rounded-full" style={{ width: "100px", height: "100px", border: "4px solid var(--color-bg-tertiary)", background: "#f0f0f0" }}
                         >
                             {profile.profileImage ? (
                                 <Image
@@ -240,7 +240,7 @@ export default function ProfileTab({
                                     className="object-cover"
                                 />
                             ) : (
-                                <div style={{ fontSize: "40px" }}>
+                                <div className="text-3xl">
                                     {isBrand(user.userType) ? "🏢" : "👤"}
                                 </div>
                             )}
@@ -257,7 +257,7 @@ export default function ProfileTab({
                             )}
                         </div>
                         <div
-                            className="absolute flex items-center justify-center text-sm" style={{ bottom: "0", right: "0", background: "var(--color-primary)", color: "white", borderRadius: "50%", width: "32px", height: "32px", border: "2px solid var(--color-bg-primary)" }}
+                            className="absolute flex items-center justify-center text-sm rounded-full" style={{ bottom: "0", right: "0", background: "var(--color-primary)", color: "white", width: "32px", height: "32px", border: "2px solid var(--color-bg-primary)" }}
                         >
                             📸
                         </div>
@@ -278,11 +278,11 @@ export default function ProfileTab({
                 </h3>
 
                 <div
-                    className="p-4 mb-6 flex justify-between items-center" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
+                    className="p-4 mb-6 flex justify-between items-center bg-tertiary rounded-md"
                 >
                     <div>
                         <div
-                            className="text-xs text-secondary" style={{ textTransform: "uppercase", letterSpacing: "1px" }}
+                            className="text-xs text-secondary uppercase" style={{ letterSpacing: "1px" }}
                         >
                             Your Referral Code
                         </div>
@@ -294,14 +294,14 @@ export default function ProfileTab({
                     </div>
                     <div className="text-right">
                         <div
-                            className="text-xs text-secondary" style={{ textTransform: "uppercase", letterSpacing: "1px" }}
+                            className="text-xs text-secondary uppercase" style={{ letterSpacing: "1px" }}
                         >
                             Badges Earned
                         </div>
                         <div className="text-xl font-extrabold">
                             {badgesCount} 🎖️
                         </div>
-                        <div style={{ fontSize: "11px" }}>
+                        <div className="text-xs">
                             <Link
                                 href="/dashboard/badges"
                                 className="text-primary"
@@ -492,11 +492,11 @@ export default function ProfileTab({
                                     type="button"
                                     variant="ghost"
                                     onClick={() => toggleCategory(category)}
-                                    className="badge cursor-pointer" style={{ background: profile.categories.includes(category)
+                                    className="badge cursor-pointer border-none" style={{ background: profile.categories.includes(category)
                                             ? "var(--color-primary)"
                                             : "var(--color-bg-tertiary)", color: profile.categories.includes(category)
                                             ? "white"
-                                            : "var(--color-text-secondary)", border: "none", padding: "8px 12px" }}
+                                            : "var(--color-text-secondary)", padding: "8px 12px" }}
                                 >
                                     {category}
                                 </Button>
@@ -548,11 +548,11 @@ export default function ProfileTab({
                                     type="button"
                                     variant="ghost"
                                     onClick={() => toggleLanguage(language)}
-                                    className="badge cursor-pointer" style={{ background: profile.languages.includes(language)
+                                    className="badge cursor-pointer border-none" style={{ background: profile.languages.includes(language)
                                             ? "var(--color-primary)"
                                             : "var(--color-bg-tertiary)", color: profile.languages.includes(language)
                                             ? "white"
-                                            : "var(--color-text-secondary)", border: "none", padding: "8px 12px" }}
+                                            : "var(--color-text-secondary)", padding: "8px 12px" }}
                                 >
                                     {language}
                                 </Button>

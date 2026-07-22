@@ -28,7 +28,7 @@ export default async function AdminNewsletterPage() {
     <div className="admin-page">
       <div className="admin-toolbar" style={{ marginBottom: "28px" }}>
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "6px" }}>
+          <h1 className="text-3xl font-extrabold mb-1">
             Send Newsletter
           </h1>
           <p className="text-secondary text-sm">
@@ -39,16 +39,16 @@ export default async function AdminNewsletterPage() {
 
       <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", marginBottom: "28px" }}>
         <div className="card" style={{ padding: "18px 20px" }}>
-          <div className="text-muted text-xs" style={{ marginBottom: "6px" }}>Total Subscribers</div>
-          <div style={{ fontSize: "28px", fontWeight: 900, color: "var(--color-primary-light)" }}>{stats.total}</div>
+          <div className="text-muted text-xs mb-1">Total Subscribers</div>
+          <div className="text-3xl font-extrabold text-primary-light">{stats.total}</div>
         </div>
         <div className="card" style={{ padding: "18px 20px" }}>
-          <div className="text-muted text-xs" style={{ marginBottom: "6px" }}>Verified Subscribers</div>
-          <div style={{ fontSize: "28px", fontWeight: 900, color: "var(--color-success)" }}>{stats.verified}</div>
+          <div className="text-muted text-xs mb-1">Verified Subscribers</div>
+          <div className="text-3xl font-extrabold" style={{ color: "var(--color-success)" }}>{stats.verified}</div>
         </div>
         <div className="card" style={{ padding: "18px 20px" }}>
-          <div className="text-muted text-xs" style={{ marginBottom: "6px" }}>Pending Verification</div>
-          <div style={{ fontSize: "28px", fontWeight: 900, color: "var(--color-warning)" }}>{stats.unverified}</div>
+          <div className="text-muted text-xs mb-1">Pending Verification</div>
+          <div className="text-3xl font-extrabold" style={{ color: "var(--color-warning)" }}>{stats.unverified}</div>
         </div>
       </div>
 
@@ -82,8 +82,8 @@ export default async function AdminNewsletterPage() {
             </p>
           </div>
 
-          <div className="card-gradient mb-6" style={{ padding: "16px 20px", borderRadius: "var(--radius-md)", border: "1px dashed rgba(245, 158, 11, 0.4)", background: "rgba(245, 158, 11, 0.05)" }}>
-            <p className="text-sm font-semibold" style={{ color: "var(--color-accent-amber)", lineHeight: "1.5" }}>
+          <div className="card-gradient mb-6 rounded-md" style={{ padding: "16px 20px", border: "1px dashed rgba(245, 158, 11, 0.4)", background: "rgba(245, 158, 11, 0.05)" }}>
+            <p className="text-sm font-semibold text-amber" style={{ lineHeight: "1.5" }}>
               ⚠️ Warning: This will send an email to {stats.verified} verified subscribers immediately. Make sure to test your content before sending.
             </p>
           </div>

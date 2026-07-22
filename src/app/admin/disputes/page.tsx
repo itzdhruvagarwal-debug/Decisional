@@ -69,7 +69,7 @@ export default async function AdminDisputeListPage({
   if (loadError) {
     content = (
       <div
-        className="card p-6" style={{ color: "var(--color-accent-rose)", borderColor: "rgba(244, 63, 94, 0.3)" }}
+        className="card p-6 text-rose" style={{ borderColor: "rgba(244, 63, 94, 0.3)" }}
       >
         Could not load disputes right now. Please retry after checking database connectivity.
       </div>
@@ -89,7 +89,7 @@ export default async function AdminDisputeListPage({
         {activeDisputes.map((dispute) => (
           <div
             key={dispute.id}
-            className="card flex justify-between items-center gap-4 flex-wrap" style={{ padding: "16px 24px", background: "var(--color-bg-secondary)", border: "1px solid var(--color-border)", borderRadius: "12px" }}
+            className="card flex justify-between items-center gap-4 flex-wrap bg-secondary border-card rounded-lg" style={{ padding: "16px 24px" }}
           >
             <div>
               <div
@@ -107,12 +107,12 @@ export default async function AdminDisputeListPage({
                 className="mt-2 flex gap-2 text-xs"
               >
                 <span
-                  className="font-bold" style={{ padding: "2px 6px", borderRadius: "4px", background: showHistory ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)", color: showHistory ? "#10b981" : "#ef4444" }}
+                  className="font-bold rounded-sm" style={{ padding: "2px 6px", background: showHistory ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)", color: showHistory ? "#10b981" : "#ef4444" }}
                 >
                   {dispute.status}
                 </span>
                 <span
-                  className="text-secondary" style={{ padding: "2px 6px", borderRadius: "4px", background: "rgba(255, 255, 255, 0.05)" }}
+                  className="text-secondary rounded-sm bg-glass-card" style={{ padding: "2px 6px" }}
                 >
                   {dispute.type}
                 </span>
@@ -139,7 +139,7 @@ export default async function AdminDisputeListPage({
     <div className="admin-page">
       <div className="admin-toolbar">
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "6px" }}>
+          <h1 className="text-3xl font-extrabold mb-1">
             Dispute Resolution Queue
           </h1>
           <p className="text-secondary text-sm">

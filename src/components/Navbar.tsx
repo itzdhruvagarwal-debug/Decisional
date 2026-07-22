@@ -83,15 +83,11 @@ export default function Navbar() {
 
       <button
         type="button"
-        className={`mobile-nav-overlay ${isMobileMenuOpen ? "active" : ""}`}
+        className={`mobile-nav-overlay border-none p-0 ${isMobileMenuOpen ? "active" : ""}`}
         onClick={closeMobile}
         aria-hidden="true"
         tabIndex={-1}
-        style={{
-          border: "none",
-          padding: 0,
-          background: "transparent",
-        }}
+        style={{ background: "transparent" }}
       />
 
       <div className={`mobile-nav ${isMobileMenuOpen ? "active" : ""}`}>

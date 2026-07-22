@@ -96,19 +96,13 @@ export default function LeaderboardPage() {
     leaderboardContent = Array.from({ length: 5 }).map((_, idx) => (
       <div
         key={"skeleton-" + idx}
-        style={{
-          height: "64px",
-          borderRadius: "12px",
-          background: "var(--color-bg-secondary)",
-          opacity: 0.5,
-          animation: "pulse 2s ease-in-out infinite",
-        }}
+        className="rounded-lg bg-secondary" style={{ height: "64px", opacity: 0.5, animation: "pulse 2s ease-in-out infinite" }}
       />
     ));
   } else if (error) {
     leaderboardContent = (
       <div
-        className="text-center" style={{ padding: "40px", color: "#ef4444" }}
+        className="text-center p-10 text-rose"
       >
         {error}
         <Button
@@ -136,7 +130,7 @@ export default function LeaderboardPage() {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: index * 0.03 }}
-        className="grid items-center cursor-pointer" style={{ gridTemplateColumns: "40px 1fr 100px 80px", padding: "12px 16px", borderRadius: "12px", background:
+        className="grid items-center cursor-pointer rounded-lg" style={{ gridTemplateColumns: "40px 1fr 100px 80px", padding: "12px 16px", background:
             index < 3
               ? "linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(139, 92, 246, 0.05))"
               : "var(--color-bg-secondary)", border:
@@ -157,7 +151,7 @@ export default function LeaderboardPage() {
           className="flex items-center gap-3"
         >
           <div
-            className="flex items-center justify-center text-base font-bold overflow-hidden" style={{ width: "40px", height: "40px", borderRadius: "50%", background: `linear-gradient(135deg, hsl(${(index * 40) % 360}, 70%, 50%), hsl(${(index * 40 + 60) % 360}, 70%, 60%))`, color: "white" }}
+            className="flex items-center justify-center text-base font-bold overflow-hidden rounded-full" style={{ width: "40px", height: "40px", background: `linear-gradient(135deg, hsl(${(index * 40) % 360}, 70%, 50%), hsl(${(index * 40 + 60) % 360}, 70%, 60%))`, color: "white" }}
           >
             {user.avatar ? (
               <Image
@@ -178,7 +172,7 @@ export default function LeaderboardPage() {
               {user.name || "Anonymous"}
               {user.isWeeklyChampion && (
                 <span
-                  className="font-bold" style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "6px", background: "rgba(245, 158, 11, 0.2)", color: "#f59e0b" }}
+                  className="font-bold text-amber" style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "6px", background: "rgba(245, 158, 11, 0.2)" }}
                 >
                   🔥 HOT
                 </span>
@@ -205,7 +199,7 @@ export default function LeaderboardPage() {
         {/* Level */}
         <div className="text-right">
           <span
-            className="text-xs font-bold" style={{ padding: "4px 10px", borderRadius: "8px", background: "rgba(139, 92, 246, 0.15)", color: "#a855f7" }}
+            className="text-xs font-bold rounded-md" style={{ padding: "4px 10px", background: "rgba(139, 92, 246, 0.15)", color: "#a855f7" }}
           >
             Lv.{user.level}
           </span>
@@ -230,7 +224,7 @@ export default function LeaderboardPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1
-            className="font-extrabold" style={{ fontSize: "32px", background: "linear-gradient(135deg, #f59e0b, #ef4444)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+            className="font-extrabold text-3xl" style={{ background: "linear-gradient(135deg, #f59e0b, #ef4444)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
           >
             🏆 Leaderboard
           </h1>
@@ -245,7 +239,7 @@ export default function LeaderboardPage() {
         >
           {/* Influencer/Brand Toggle */}
           <div
-            className="flex" style={{ background: "var(--color-bg-secondary)", borderRadius: "12px", padding: "4px" }}
+            className="flex bg-secondary rounded-lg p-1"
           >
             {(["influencers", "brands"] as const).map((t) => (
               <Button
@@ -261,7 +255,7 @@ export default function LeaderboardPage() {
 
           {/* Weekly/All-time Toggle */}
           <div
-            className="flex" style={{ background: "var(--color-bg-secondary)", borderRadius: "12px", padding: "4px" }}
+            className="flex bg-secondary rounded-lg p-1"
           >
             {(["all-time", "weekly"] as const).map((f) => (
               <Button
@@ -319,8 +313,8 @@ export default function LeaderboardPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex justify-center items-end gap-4 flex-wrap" style={{ marginBottom: "40px", padding: "32px 16px", background:
-                  "linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(239, 68, 68, 0.08))", borderRadius: "16px", border: "1px solid rgba(245, 158, 11, 0.2)" }}
+              className="flex justify-center items-end gap-4 flex-wrap mb-10 rounded-xl" style={{ padding: "32px 16px", background:
+                  "linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(239, 68, 68, 0.08))", border: "1px solid rgba(245, 158, 11, 0.2)" }}
             >
               {/* 2nd place */}
               {hallOfFame[1] && (
@@ -366,13 +360,13 @@ export default function LeaderboardPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center gap-4 mb-6 flex-wrap" style={{ padding: "20px", background:
-                  "linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.15))", borderRadius: "16px", border: "2px solid #f59e0b" }}
+              className="flex items-center gap-4 mb-6 flex-wrap p-5 rounded-xl" style={{ background:
+                  "linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.15))", border: "2px solid #f59e0b" }}
             >
               <div style={{ fontSize: "48px" }}>🔥</div>
               <div>
                 <div
-                  className="font-bold" style={{ fontSize: "11px", color: "#f59e0b", textTransform: "uppercase", letterSpacing: "1px" }}
+                  className="font-bold text-xs text-amber uppercase" style={{ letterSpacing: "1px" }}
                 >
                   🏆 HOT CREATOR OF THE WEEK
                 </div>
@@ -394,7 +388,7 @@ export default function LeaderboardPage() {
         <div className="flex flex-col gap-2">
           {/* Header Row */}
           <div
-            className="grid font-bold text-secondary" style={{ gridTemplateColumns: "40px 1fr 100px 80px", padding: "8px 16px", fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px" }}
+            className="grid font-bold text-secondary text-xs uppercase" style={{ gridTemplateColumns: "40px 1fr 100px 80px", padding: "8px 16px", letterSpacing: "1px" }}
           >
             <span>#</span>
             <span>Name</span>
@@ -437,9 +431,9 @@ function PodiumUser({
       transition={{ delay, duration: 0.5 }}
       className="flex flex-col items-center gap-2"
     >
-      {isFirst && <div style={{ fontSize: "28px" }}>👑</div>}
+      {isFirst && <div className="text-3xl">👑</div>}
       <div
-        className="flex items-center justify-center font-bold overflow-hidden" style={{ width: isFirst ? "64px" : "52px", height: isFirst ? "64px" : "52px", borderRadius: "50%", background: `linear-gradient(135deg, ${color}, ${color}88)`, border: `3px solid ${color}`, fontSize: isFirst ? "24px" : "18px", color: "white", boxShadow: `0 0 20px ${color}44` }}
+        className="flex items-center justify-center font-bold overflow-hidden rounded-full" style={{ width: isFirst ? "64px" : "52px", height: isFirst ? "64px" : "52px", background: `linear-gradient(135deg, ${color}, ${color}88)`, border: `3px solid ${color}`, fontSize: isFirst ? "24px" : "18px", color: "white", boxShadow: `0 0 20px ${color}44` }}
       >
         {user.avatar ? (
           <Image
@@ -466,7 +460,7 @@ function PodiumUser({
         >
           {rank}
         </div>
-        <div className="text-secondary" style={{ fontSize: "11px" }}>
+        <div className="text-secondary text-xs">
           {user.xp.toLocaleString()} {unit}
         </div>
       </div>

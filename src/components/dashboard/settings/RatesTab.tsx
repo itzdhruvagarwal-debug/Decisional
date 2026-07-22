@@ -60,7 +60,7 @@ export default function RatesTab({ profile, setProfile }: Readonly<RatesTabProps
                 />
             </div>
 
-            <h4 className="text-sm font-bold mb-3" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "16px" }}>
+            <h4 className="text-sm font-bold mb-3 border-top" style={{ paddingTop: "16px" }}>
                 Instagram Collaboration Rates
             </h4>
             <div
@@ -96,7 +96,7 @@ export default function RatesTab({ profile, setProfile }: Readonly<RatesTabProps
                 />
             </div>
 
-            <h4 className="text-sm font-bold mb-3" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "16px" }}>
+            <h4 className="text-sm font-bold mb-3 border-top" style={{ paddingTop: "16px" }}>
                 YouTube Collaboration Rates
             </h4>
             <div
@@ -133,7 +133,7 @@ export default function RatesTab({ profile, setProfile }: Readonly<RatesTabProps
             </div>
 
             <div
-                className="p-4" style={{ background: "var(--color-bg-tertiary)", borderRadius: "var(--radius-md)" }}
+                className="p-4 bg-tertiary rounded-md"
             >
                 <p
                     className="text-sm text-secondary"

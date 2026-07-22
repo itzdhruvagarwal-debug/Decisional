@@ -10,7 +10,7 @@ export default async function VerifiedQueuePage() {
   return (
     <div className="admin-page admin-page-narrow">
       <header className="mb-8">
-        <h1 className="gradient-text mb-2" style={{ fontSize: "28px", fontWeight: 900 }}>
+        <h1 className="gradient-text mb-2 text-3xl font-extrabold">
           Verification Queue
         </h1>
         <p className="text-secondary text-sm">

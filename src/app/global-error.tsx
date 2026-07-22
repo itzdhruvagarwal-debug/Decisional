@@ -33,20 +33,9 @@ export default function GlobalError({
         {/* Abstract Background Elements */}
         <div className="fixed" style={{ top: "10%", left: "5%", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(244, 63, 94, 0.08) 0%, transparent 70%)", zIndex: 0 }} />
 
-        <div className="glass col-span-2 text-center w-full relative" style={{ maxWidth: "500px", padding: "48px 32px", borderRadius: "var(--radius-xl)", border: "1px solid rgba(244, 63, 94, 0.2)", zIndex: 1 }}>
+        <div className="glass col-span-2 text-center w-full relative rounded-xl" style={{ maxWidth: "500px", padding: "48px 32px", border: "1px solid rgba(244, 63, 94, 0.2)", zIndex: 1 }}>
           <div
-            className="flex items-center justify-center mb-8"
-            style={{
-              width: "80px",
-              height: "80px",
-              background: "rgba(244, 63, 94, 0.1)",
-              color: "var(--color-accent-rose)",
-              borderRadius: "50%",
-              fontSize: "40px",
-              margin: "0 auto",
-              border: "1px solid rgba(244, 63, 94, 0.2)",
-              boxShadow: "0 0 30px rgba(244, 63, 94, 0.1)"
-            }}
+            className="flex items-center justify-center mb-8 bg-rose-subtle text-rose rounded-full text-3xl" style={{ width: "80px", height: "80px", margin: "0 auto", border: "1px solid rgba(244, 63, 94, 0.2)", boxShadow: "0 0 30px rgba(244, 63, 94, 0.1)" }}
           >
             ⚠️
           </div>
@@ -63,7 +52,7 @@ export default function GlobalError({
           </p>
 
           {error.digest && (
-            <div className="text-xs text-muted mb-8 p-3" style={{ background: "rgba(255,255,255,0.03)", borderRadius: "var(--radius-md)", fontFamily: "monospace", border: "1px solid var(--color-border)" }}>
+            <div className="text-xs text-muted mb-8 p-3 rounded-md border-card" style={{ background: "rgba(255,255,255,0.03)", fontFamily: "monospace" }}>
               Digest: {error.digest}
             </div>
           )}
