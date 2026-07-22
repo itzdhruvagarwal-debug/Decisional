@@ -315,33 +315,6 @@ export class AuthService {
   }
 
   /**
-   * Validate Login Eligibility
-   */
-  static async validateLoginEligibility(email: string, ip: string) {
-    if (await isIpBanned(ip)) {
-      logger.warn("Login blocked by IP ban", { ip, email });
-      return { allowed: false, reason: "Access denied" };
-    }
-
-    const ipLimit = await checkRateLimit(ip, "LOGIN_IP");
-    if (!ipLimit.success) {
-      logger.warn("Login blocked by IP rate limit", { ip, email });
-      return { allowed: false, reason: "Too many attempts from this IP" };
-    }
-
-    const emailLimit = await checkRateLimit(email, "LOGIN_EMAIL");
-    if (!emailLimit.success) {
-      logger.warn("Login blocked by Email rate limit", { ip, email });
-      return {
-        allowed: false,
-        reason: "Too many failed attempts for this account",
-      };
-    }
-
-    return { allowed: true };
-  }
-
-  /**
    * Verify an OTP Token robustly.
    */
   static async verifyOtp(userId: string, code: string, type: OtpTokenType) {
