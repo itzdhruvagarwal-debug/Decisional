@@ -33,7 +33,7 @@ export interface CampaignFormData {
   deliverables: Array<{ type: string; count: number; rate: number }>;
 }
 
-function validateCampaignForm(formData: CampaignFormData) {
+function validateCampaignForm(formData: CampaignFormData): { success: boolean; fieldErrors?: Record<string, string>; error?: string } {
   const result = createCampaignSchema.safeParse({
     title: formData.title.trim(),
     description: formData.description.trim(),
@@ -46,29 +46,38 @@ function validateCampaignForm(formData: CampaignFormData) {
   });
 
   if (!result.success) {
-    throw new Error(result.error.issues[0]?.message || "Invalid campaign details");
+    const fieldErrors: Record<string, string> = {};
+    result.error.issues.forEach((issue) => {
+      const path = issue.path[0];
+      if (typeof path === "string") {
+        fieldErrors[path] = issue.message;
+      }
+    });
+    return { success: false, fieldErrors };
   }
 
   if (formData.requiresProduct && formData.totalBudget === 0) {
     if (formData.productValue < 500) {
-      throw new Error("Product-only campaigns must specify a product value of at least ₹500");
+      return { success: false, error: "Product-only campaigns must specify a product value of at least ₹500" };
     }
     if (formData.minFollowers > 10000) {
-      throw new Error("Product-only campaigns can only target influencers with up to 10,000 followers");
+      return { success: false, error: "Product-only campaigns can only target influencers with up to 10,000 followers" };
     }
   }
   if (formData.targetCategories.length === 0) {
-    throw new Error("Please select at least one category");
+    return { success: false, error: "Please select at least one category" };
   }
   if (formData.perInfluencerBudget > formData.totalBudget) {
-    throw new Error("Per influencer budget cannot exceed total budget");
+    return { success: false, error: "Per influencer budget cannot exceed total budget" };
   }
   if (formData.maxFollowers !== null && formData.maxFollowers > 0 && formData.maxFollowers < formData.minFollowers) {
-    throw new Error("Max followers must be greater than min followers");
+    return { success: false, error: "Max followers must be greater than min followers" };
   }
   if (!formData.contentDeadline || !formData.postingDeadline) {
-    throw new Error("Please select content and posting deadlines");
+    return { success: false, error: "Please select content and posting deadlines" };
   }
+
+  return { success: true };
 }
 
 interface DraftCampaignData {
@@ -201,6 +210,7 @@ export default function CreateCampaignClient() {
     productDescription: "",
     deliverables: [{ type: "INSTAGRAM_POST", count: 1, rate: 1000 }],
   });
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [customCategory, setCustomCategory] = useState("");
   const [categories, setCategories] = useState([
@@ -324,9 +334,17 @@ export default function CreateCampaignClient() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setFieldErrors({});
 
     try {
-      validateCampaignForm(formData);
+      const validation = validateCampaignForm(formData);
+      if (!validation.success) {
+        if (validation.fieldErrors) {
+          setFieldErrors(validation.fieldErrors);
+          throw new Error("Please fix the validation errors below.");
+        }
+        throw new Error(validation.error || "Invalid campaign details");
+      }
 
       const contentDeadline = new Date(`${formData.contentDeadline}T12:00:00.000Z`);
       const postingDeadline = new Date(`${formData.postingDeadline}T12:00:00.000Z`);
@@ -475,6 +493,7 @@ export default function CreateCampaignClient() {
             required
             placeholder="e.g. Summer Collection Launch"
             className="mb-4"
+            error={fieldErrors.title}
             fullWidth
           />
 
@@ -488,6 +507,7 @@ export default function CreateCampaignClient() {
             required
             placeholder="Describe your campaign goals and brand story..."
             className="mb-4"
+            error={fieldErrors.description}
             fullWidth
           />
 
@@ -501,6 +521,7 @@ export default function CreateCampaignClient() {
             required
             placeholder="Specific requirements for influencers (e.g. 'Must use #SummerVibes', 'Link in bio')"
             className="mb-4"
+            error={fieldErrors.requirements}
             fullWidth
           />
 
@@ -590,6 +611,7 @@ export default function CreateCampaignClient() {
               setFormData({ ...formData, applicationDeadline: e.target.value })
             }
             className="mb-4"
+            error={fieldErrors.applicationDeadline}
             fullWidth
             style={{
               colorScheme: "dark",
@@ -675,6 +697,7 @@ export default function CreateCampaignClient() {
                 })
               }
               min={100}
+              error={fieldErrors.minFollowers}
               fullWidth
             />
             <Input
@@ -690,6 +713,7 @@ export default function CreateCampaignClient() {
               }
               min={1000}
               placeholder="No limit"
+              error={fieldErrors.maxFollowers}
               fullWidth
             />
             <Input
@@ -706,6 +730,7 @@ export default function CreateCampaignClient() {
               min={1}
               max={100}
               placeholder="Unlimited"
+              error={fieldErrors.maxInfluencers}
               fullWidth
             />
           </div>
@@ -756,6 +781,7 @@ export default function CreateCampaignClient() {
                 setFormData({ ...formData, contentDeadline: e.target.value })
               }
               required
+              error={fieldErrors.contentDeadline}
               fullWidth
               style={{
                 colorScheme: "dark",
@@ -770,6 +796,7 @@ export default function CreateCampaignClient() {
                 setFormData({ ...formData, postingDeadline: e.target.value })
               }
               required
+              error={fieldErrors.postingDeadline}
               fullWidth
               style={{
                 colorScheme: "dark",

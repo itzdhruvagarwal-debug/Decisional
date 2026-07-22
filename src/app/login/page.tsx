@@ -55,18 +55,7 @@ function getSessionMessage(registered: boolean, reason: string | null): string |
   return null;
 }
 
-function validateLoginForm(formData: { email: string; password: string; twoFactorCode: string }, show2FA: boolean): string | null {
-  if (!formData.email.trim() || !formData.email.includes("@")) {
-    return "Please enter a valid email address.";
-  }
-  if (!show2FA && formData.password.length < 8) {
-    return "Password must be at least 8 characters.";
-  }
-  if (show2FA && formData.twoFactorCode.length !== 6) {
-    return "Please enter a valid 6-digit 2FA code.";
-  }
-  return null;
-}
+
 
 function handleSignInResult(
   result: SignInResponse | undefined,
@@ -107,6 +96,7 @@ function LoginContent() {
     twoFactorCode: "",
   });
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [show2FA, setShow2FA] = useState(false);
@@ -136,12 +126,7 @@ function LoginContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    const validationError = validateLoginForm(formData, show2FA);
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+    setFieldErrors({});
 
     // Client-side Zod Validation
     const validation = loginSchema.safeParse({
@@ -151,8 +136,15 @@ function LoginContent() {
     });
 
     if (!validation.success) {
-      const firstIssue = validation.error.issues[0];
-      setError(firstIssue?.message || "Invalid input details.");
+      const errors: Record<string, string> = {};
+      validation.error.issues.forEach((issue) => {
+        const path = issue.path[0];
+        if (typeof path === "string") {
+          errors[path] = issue.message;
+        }
+      });
+      setFieldErrors(errors);
+      setError("Please fix the validation errors below.");
       return;
     }
 
@@ -316,6 +308,7 @@ function LoginContent() {
               }
               required
               autoComplete="email"
+              error={fieldErrors.email}
               fullWidth
             />
           </div>
@@ -348,6 +341,7 @@ function LoginContent() {
                 }
                 required
                 autoComplete="current-password"
+                error={fieldErrors.password}
                 fullWidth
               />
               <Button
@@ -394,6 +388,7 @@ function LoginContent() {
                 maxLength={6}
                 required
                 autoComplete="off"
+                error={fieldErrors.twoFactorCode}
                 fullWidth
               />
             </div>

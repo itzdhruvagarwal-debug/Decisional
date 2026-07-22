@@ -1,9 +1,9 @@
 import React from "react";
 
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  readonly label?: string;
-  readonly error?: string;
-  readonly fullWidth?: boolean;
+  readonly label?: string | undefined;
+  readonly error?: string | undefined;
+  readonly fullWidth?: boolean | undefined;
 }
 
 export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(

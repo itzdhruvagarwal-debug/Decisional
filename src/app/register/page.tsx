@@ -231,47 +231,7 @@ export default function RegisterPage() {
   );
 }
 
-function getValidationErrorMessage(
-  formData: {
-    name: string;
-    email: string;
-    phone: string;
-    password: string;
-    confirmPassword: string;
-    referralCode: string;
-    agreeToTerms: boolean;
-  },
-  emailOtpVerified: boolean,
-  phoneOtpVerified: boolean,
-  userType: UserType | null,
-): { error: string; resetStep?: boolean } | null {
-  if (!emailOtpVerified) {
-    return { error: "Please verify your email address first" };
-  }
-  if (!phoneOtpVerified) {
-    return { error: "Please verify your phone number first" };
-  }
-  if (!userType) {
-    return { error: "Please choose whether you are joining as a brand or influencer", resetStep: true };
-  }
 
-  const validation = registerSchema.safeParse({
-    name: formData.name.trim(),
-    email: formData.email,
-    phone: formData.phone,
-    password: formData.password,
-    confirmPassword: formData.confirmPassword,
-    referralCode: formData.referralCode || undefined,
-    agreeToTerms: formData.agreeToTerms,
-  });
-
-  if (!validation.success) {
-    const firstIssue = validation.error.issues[0];
-    return { error: firstIssue?.message || "Invalid registration details" };
-  }
-
-  return null;
-}
 
 function useRegistration(
   initialType: UserType | null,
@@ -293,6 +253,7 @@ function useRegistration(
     agreeToTerms: false,
   });
   const [error, setError] = useState(initialError);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   // OTP verification state
@@ -489,13 +450,42 @@ function useRegistration(
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setFieldErrors({});
 
-    const validation = getValidationErrorMessage(formData, emailOtpVerified, phoneOtpVerified, userType);
-    if (validation) {
-      setError(validation.error);
-      if (validation.resetStep) {
-        setStep(1);
-      }
+    if (!emailOtpVerified) {
+      setError("Please verify your email address first");
+      return;
+    }
+    if (!phoneOtpVerified) {
+      setError("Please verify your phone number first");
+      return;
+    }
+    if (!userType) {
+      setError("Please choose whether you are joining as a brand or influencer");
+      setStep(1);
+      return;
+    }
+
+    const validation = registerSchema.safeParse({
+      name: formData.name.trim(),
+      email: formData.email,
+      phone: formData.phone,
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+      referralCode: formData.referralCode || undefined,
+      agreeToTerms: formData.agreeToTerms,
+    });
+
+    if (!validation.success) {
+      const errors: Record<string, string> = {};
+      validation.error.issues.forEach((issue) => {
+        const path = issue.path[0];
+        if (typeof path === "string") {
+          errors[path] = issue.message;
+        }
+      });
+      setFieldErrors(errors);
+      setError("Please fix the validation errors below.");
       return;
     }
 
@@ -555,6 +545,8 @@ function useRegistration(
     setFormData,
     error,
     setError,
+    fieldErrors,
+    setFieldErrors,
     isLoading,
     setIsLoading,
     emailOtpSent,
@@ -668,8 +660,9 @@ interface PasswordFieldProps {
   readonly onChange: (val: string) => void;
   readonly show: boolean;
   readonly setShow: (show: boolean) => void;
-  readonly minLength?: number;
-  readonly hint?: string;
+  readonly minLength?: number | undefined;
+  readonly hint?: string | undefined;
+  readonly error?: string | undefined;
 }
 
 function PasswordField({
@@ -682,6 +675,7 @@ function PasswordField({
   setShow,
   minLength,
   hint,
+  error,
 }: PasswordFieldProps) {
   return (
     <div style={{ marginBottom: "20px" }}>
@@ -696,6 +690,7 @@ function PasswordField({
           required
           minLength={minLength}
           style={{ paddingRight: "40px" }}
+          error={error}
           fullWidth
         />
         <Button
@@ -751,6 +746,7 @@ function Step2RegistrationForm({
     formData,
     setFormData,
     error,
+    fieldErrors,
     handleSubmit,
     emailOtpVerified,
     phoneOtpVerified,
@@ -798,6 +794,7 @@ function Step2RegistrationForm({
             required
             maxLength={80}
             autoComplete={userType === "BRAND" ? "organization" : "name"}
+            error={fieldErrors.name}
             fullWidth
           />
         </div>
@@ -850,6 +847,7 @@ function Step2RegistrationForm({
           setShow={setShowPassword}
           minLength={8}
           hint="Must contain 8+ chars, uppercase, lowercase, number & special char."
+          error={fieldErrors.password}
         />
 
         {/* Confirm password */}
@@ -861,6 +859,7 @@ function Step2RegistrationForm({
           onChange={(val) => setFormData({ ...formData, confirmPassword: val })}
           show={showConfirmPassword}
           setShow={setShowConfirmPassword}
+          error={fieldErrors.confirmPassword}
         />
 
         {/* Referral code */}
@@ -877,51 +876,65 @@ function Step2RegistrationForm({
                 referralCode: e.target.value.toUpperCase(),
               })
             }
+            error={fieldErrors.referralCode}
             fullWidth
           />
         </div>
 
         {/* Terms */}
-        <div
-          style={{
-            marginBottom: "24px",
-            display: "flex",
-            alignItems: "flex-start",
-            gap: "12px",
-          }}
-        >
-          <input
-            id="agreeToTerms"
-            type="checkbox"
-            checked={formData.agreeToTerms}
-            onChange={(e) =>
-              setFormData({ ...formData, agreeToTerms: e.target.checked })
-            }
-            style={{ marginTop: "4px" }}
-          />
-          <label
-            htmlFor="agreeToTerms"
+        <div style={{ marginBottom: "24px" }}>
+          <div
             style={{
-              fontSize: "13px",
-              color: "var(--color-text-secondary)",
-              cursor: "pointer",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "12px",
             }}
           >
-            I agree to the{" "}
-            <Link
-              href="/terms"
-              style={{ color: "var(--color-primary-light)" }}
+            <input
+              id="agreeToTerms"
+              type="checkbox"
+              checked={formData.agreeToTerms}
+              onChange={(e) =>
+                setFormData({ ...formData, agreeToTerms: e.target.checked })
+              }
+              style={{ marginTop: "4px" }}
+            />
+            <label
+              htmlFor="agreeToTerms"
+              style={{
+                fontSize: "13px",
+                color: "var(--color-text-secondary)",
+                cursor: "pointer",
+              }}
             >
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link
-              href="/privacy"
-              style={{ color: "var(--color-primary-light)" }}
+              I agree to the{" "}
+              <Link
+                href="/terms"
+                style={{ color: "var(--color-primary-light)" }}
+              >
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/privacy"
+                style={{ color: "var(--color-primary-light)" }}
+              >
+                Privacy Policy
+              </Link>
+            </label>
+          </div>
+          {fieldErrors.agreeToTerms && (
+            <span
+              style={{
+                fontSize: "12px",
+                color: "var(--color-accent-rose, #f43f5e)",
+                marginTop: "4px",
+                display: "block",
+              }}
             >
-              Privacy Policy
-            </Link>
-          </label>
+              {fieldErrors.agreeToTerms}
+            </span>
+          )}
         </div>
 
         {/* Submit */}
@@ -1149,6 +1162,7 @@ function EmailOtpField({ registration, otpButton, verifiedBadge }: EmailOtpField
           required
           disabled={emailOtpVerified}
           style={{ flex: "1 1 220px", minWidth: 0, opacity: emailOtpVerified ? 0.7 : 1 }}
+          error={registration.fieldErrors?.email}
         />
         {!emailOtpVerified && (
           <Button
@@ -1307,6 +1321,7 @@ function PhoneOtpField({ registration, otpButton, verifiedBadge }: PhoneOtpField
           disabled={phoneOtpVerified}
           maxLength={10}
           style={{ flex: "1 1 160px", minWidth: 0, opacity: phoneOtpVerified ? 0.7 : 1 }}
+          error={registration.fieldErrors?.phone}
         />
         {!phoneOtpVerified && (
           <Button
