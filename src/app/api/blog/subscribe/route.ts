@@ -18,10 +18,10 @@ export const POST = apiWrapper(async (req) => {
 
   if (existing) {
     if (existing.verified) {
-      return NextResponse.json(
-        { error: "Conflict", message: "You are already subscribed and verified!" },
-        { status: 409 }
-      );
+      return NextResponse.json({
+        success: true,
+        message: "If this email can be subscribed, a verification email has been sent.",
+      });
     }
     
     // Resend verification email for unverified subscribers

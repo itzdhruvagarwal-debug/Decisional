@@ -46,10 +46,10 @@ function getHealthS3Client(): { client: S3Client | null; bucket: string; provide
 }
 
 function isAuthorizedDeepHealth(request: NextRequest): boolean {
-  const secret = process.env.HEALTHCHECK_SECRET || process.env.CRON_SECRET;
+  const secret = process.env.HEALTHCHECK_SECRET;
   const authHeader = request.headers.get("authorization") || "";
 
-  if (!secret || !authHeader) return false;
+  if (!secret || secret.length < 32 || !authHeader) return false;
 
   const expectedHash = createHash("sha256")
     .update(`Bearer ${secret}`)

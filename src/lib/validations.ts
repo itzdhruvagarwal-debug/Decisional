@@ -145,7 +145,21 @@ export const brandProfileSchema = z.object({
     .trim()
     .min(2, "Company name must be at least 2 characters")
     .max(100, "Company name cannot exceed 100 characters"),
-  logo: z.string().url("Please provide a valid logo image URL").max(500).optional(),
+  logo: z
+    .string()
+    .trim()
+    .refine((val) => {
+      if (!val) return true;
+      if (val.startsWith("/")) return true;
+      try {
+        const u = new URL(val);
+        return u.protocol === "http:" || u.protocol === "https:";
+      } catch {
+        return false;
+      }
+    }, "Please provide a valid logo image URL or local path")
+    .max(500)
+    .optional(),
   website: z
     .string()
     .url("Please provide a valid website URL")
@@ -300,18 +314,19 @@ export const contentSubmissionItemSchema = z.object({
   url: z
     .string()
     .trim()
-    .url("Please provide a valid content submission URL")
     .max(500, "Submitted URL is too long")
     .refine(
-      (url) => {
-        const lower = url.trim().toLowerCase();
-        return (
-          lower.startsWith("https://") &&
-          !url.includes("<") &&
-          !url.includes(">")
-        );
+      (val) => {
+        if (val.includes("<") || val.includes(">")) return false;
+        if (val.startsWith("/")) return true;
+        try {
+          const u = new URL(val);
+          return u.protocol === "https:";
+        } catch {
+          return false;
+        }
       },
-      "Only secure (HTTPS) URLs are allowed",
+      "Only secure (HTTPS) URLs or valid local paths are allowed",
     ),
 });
 
@@ -320,18 +335,19 @@ export const contentSubmissionSchema = z.object({
   contentUrl: z
     .string()
     .trim()
-    .url("Please provide a valid content submission URL")
     .max(500, "Submitted URL is too long")
     .refine(
-      (url) => {
-        const lower = url.trim().toLowerCase();
-        return (
-          lower.startsWith("https://") &&
-          !url.includes("<") &&
-          !url.includes(">")
-        );
+      (val) => {
+        if (val.includes("<") || val.includes(">")) return false;
+        if (val.startsWith("/")) return true;
+        try {
+          const u = new URL(val);
+          return u.protocol === "https:";
+        } catch {
+          return false;
+        }
       },
-      "Only secure (HTTPS) URLs are allowed",
+      "Only secure (HTTPS) URLs or valid local paths are allowed",
     )
     .optional(),
   contentUrls: z.array(contentSubmissionItemSchema).optional(),
@@ -431,15 +447,16 @@ export const disputeEvidenceSchema = z.object({
   url: z
     .string()
     .trim()
-    .url("You must attach a valid link to review")
-    .refine((value) => {
+    .refine((val) => {
+      if (!val) return true;
+      if (val.startsWith("/")) return true;
       try {
-        const protocol = new URL(value).protocol;
-        return protocol === "http:" || protocol === "https:";
+        const u = new URL(val);
+        return u.protocol === "http:" || u.protocol === "https:";
       } catch {
         return false;
       }
-    }, "Evidence links must use http or https"),
+    }, "Evidence link must be a valid URL or local path"),
   description: z.string().trim().max(500).optional(),
 });
 
@@ -464,7 +481,20 @@ export const messageSchema = z.object({
   messageType: z
     .enum(["TEXT", "FILE", "OFFER", "CONTRACT_ACCEPTANCE", "SYSTEM"])
     .optional(),
-  fileUrl: z.string().url("Must be a remote asset string URL").optional(),
+  fileUrl: z
+    .string()
+    .trim()
+    .refine((val) => {
+      if (!val) return true;
+      if (val.startsWith("/")) return true;
+      try {
+        const u = new URL(val);
+        return u.protocol === "http:" || u.protocol === "https:";
+      } catch {
+        return false;
+      }
+    }, "Must be a valid remote asset URL or local path")
+    .optional(),
   // Restrict metadata to a safe, typed shape — no arbitrary nested prototype overrides
   metadata: z
     .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))

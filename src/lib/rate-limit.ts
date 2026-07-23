@@ -1,5 +1,6 @@
 import { redis } from "./redis";
 import { logger } from "./logger";
+import { randomUUID } from "node:crypto";
 
 interface RateLimitConfig {
   uniqueToken: string;
@@ -28,6 +29,7 @@ export async function rateLimit(
   const now = Date.now();
   const windowStart = now - window * 1000;
   const windowSeconds = window;
+  const requestMember = `${now}:${randomUUID()}`;
 
   // Lua script to efficiently manage sliding window
   // Clean up old entries outside the window
@@ -39,6 +41,7 @@ export async function rateLimit(
     local now = tonumber(ARGV[2])
     local limit = tonumber(ARGV[3])
     local windowSeconds = tonumber(ARGV[4])
+    local member = ARGV[5]
     
     -- Cleanup: Remove timestamps older than the window
     redis.call('ZREMRANGEBYSCORE', key, '-inf', windowStart)
@@ -47,8 +50,8 @@ export async function rateLimit(
     local count = redis.call('ZCARD', key)
     
     if count < limit then
-        -- Allowed: Add current request timestamp
-        redis.call('ZADD', key, now, now)
+        -- Allowed: Add a unique request member so same-millisecond bursts are counted.
+        redis.call('ZADD', key, now, member)
         redis.call('EXPIRE', key, windowSeconds) 
         return {1, count + 1}
     else
@@ -67,6 +70,7 @@ export async function rateLimit(
       now,
       limit,
       windowSeconds,
+      requestMember,
     )) as [number, number];
 
     const [allowed, currentCount] = result;

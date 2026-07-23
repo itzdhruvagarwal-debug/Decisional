@@ -16,7 +16,19 @@ export const disputeEscalationSchema = z.object({
 
 export const disputeEvidenceSchema = z.object({
   type: z.enum(["CONTRACT", "DELIVERABLE", "CHAT_LOG", "PAYMENT_PROOF", "OTHER"]),
-  url: z.string().url("Please enter a valid URL"),
+  url: z
+    .string()
+    .trim()
+    .refine((val) => {
+      if (!val) return true;
+      if (val.startsWith("/")) return true;
+      try {
+        const u = new URL(val);
+        return u.protocol === "http:" || u.protocol === "https:";
+      } catch {
+        return false;
+      }
+    }, "Please enter a valid URL or local path"),
   description: z.string().min(5, "Description must be at least 5 characters").max(500),
 });
 

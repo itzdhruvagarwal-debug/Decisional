@@ -1,4 +1,4 @@
-import { cp, mkdir, stat } from "node:fs/promises";
+import { cp, mkdir, rm, stat } from "node:fs/promises";
 import path from "node:path";
 
 const root = process.cwd();
@@ -19,7 +19,16 @@ async function copyIfPresent(source, destination) {
   await cp(source, destination, { recursive: true, force: true });
 }
 
+async function removeIfPresent(target) {
+  if (!(await exists(target))) return;
+  await rm(target, { force: true, recursive: true });
+}
+
 if (await exists(standaloneDir)) {
+  await removeIfPresent(path.join(standaloneDir, ".env"));
+  await removeIfPresent(path.join(standaloneDir, ".env.local"));
+  await removeIfPresent(path.join(standaloneDir, ".env.production"));
+  await removeIfPresent(path.join(standaloneDir, ".env.production.local"));
   await copyIfPresent(
     path.join(root, ".next", "static"),
     path.join(standaloneDir, ".next", "static"),

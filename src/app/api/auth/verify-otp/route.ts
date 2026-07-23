@@ -63,7 +63,10 @@ export const PUT = apiWrapper(async function PUT(request: NextRequest) {
         select: { id: true },
       });
       if (existing) {
-        return ApiResponse.conflict("This phone number is already registered. Please sign in.");
+        return ApiResponse.success(
+          null,
+          "If this phone number can be registered, an OTP has been sent.",
+        );
       }
     }
 

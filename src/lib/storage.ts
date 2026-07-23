@@ -8,6 +8,7 @@ import { AppError } from "@/lib/errors";
  */
 
 import { logger } from "./logger";
+import { randomUUID } from "node:crypto";
 import {
   DeleteObjectCommand,
   GetObjectCommand,
@@ -112,7 +113,7 @@ export async function uploadFile(
   contentType: string = "application/octet-stream",
 ): Promise<UploadResult> {
   validateStorageConfig();
-  const key = `${folder}/${Date.now()}-${sanitizeFileName(fileName)}`;
+  const key = `${folder}/${Date.now()}-${randomUUID()}-${sanitizeFileName(fileName)}`;
 
   try {
     switch (STORAGE_PROVIDER) {
@@ -297,6 +298,5 @@ function sanitizeFileName(name: string): string {
     .replace(/-+/g, "-")
     .slice(0, 100);
 }
-
 
 

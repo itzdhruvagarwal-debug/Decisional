@@ -10,7 +10,21 @@ const feedbackSchema = z.object({
   type: z.enum(["BUG", "FEEDBACK"]),
   title: z.string().min(5, "Title must be at least 5 characters long"),
   description: z.string().min(10, "Description must be at least 10 characters long"),
-  screenshotUrl: z.string().url("Invalid screenshot URL").optional().or(z.literal("")),
+  screenshotUrl: z
+    .string()
+    .trim()
+    .refine((val) => {
+      if (!val) return true;
+      if (val.startsWith("/")) return true;
+      try {
+        const u = new URL(val);
+        return u.protocol === "http:" || u.protocol === "https:";
+      } catch {
+        return false;
+      }
+    }, "Invalid screenshot URL or local path")
+    .optional()
+    .or(z.literal("")),
 });
 
 async function _handler_POST(request: NextRequest) {

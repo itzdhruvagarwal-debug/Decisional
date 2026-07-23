@@ -5,6 +5,30 @@
 
 export type CsvRow = Record<string, string | number | null | undefined>;
 
+function neutralizeCsvFormula(value: string): string {
+  const trimmed = value.trimStart();
+  if (
+    trimmed.startsWith("=") ||
+    trimmed.startsWith("+") ||
+    trimmed.startsWith("-") ||
+    trimmed.startsWith("@") ||
+    trimmed.startsWith("\t") ||
+    trimmed.startsWith("\r")
+  ) {
+    return "'" + value;
+  }
+  return value;
+}
+
+function sanitizeCsvFilename(filename: string): string {
+  const cleaned = filename
+    .replaceAll(/[\\/:*?"<>|\r\n]/g, "-")
+    .replaceAll(/[\x00-\x1f\x7f]/g, "")
+    .replaceAll(/\s+/g, "_")
+    .slice(0, 180);
+  return cleaned || `export-${Date.now()}.csv`;
+}
+
 /**
  * Converts array of objects to RFC 4180 CSV string.
  * Handles commas, quotes, newlines in values automatically.
@@ -30,17 +54,7 @@ export function toCsv(rows: CsvRow[], headers?: string[]): string {
     } else {
       str = "";
     }
-    // Neutralize formula injection characters: =, +, -, @, Tab, CR
-    if (
-      str.startsWith("=") ||
-      str.startsWith("+") ||
-      str.startsWith("-") ||
-      str.startsWith("@") ||
-      str.startsWith("\t") ||
-      str.startsWith("\r")
-    ) {
-      str = "'" + str;
-    }
+    str = neutralizeCsvFormula(str);
 
     // Wrap in quotes if contains comma, quote, or newline
     if (str.includes(",") || str.includes('"') || str.includes("\n")) {
@@ -61,11 +75,12 @@ export function toCsv(rows: CsvRow[], headers?: string[]): string {
  * Returns a NextResponse with CSV content and download headers.
  */
 export function csvResponse(csv: string, filename: string): Response {
+  const safeFilename = sanitizeCsvFilename(filename);
   return new Response(csv, {
     status: 200,
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Disposition": `attachment; filename="${safeFilename}"`,
       "Cache-Control": "no-store",
     },
   });
@@ -112,7 +127,7 @@ export function getCurrentFY(): string {
  * Escapes a CSV field value (protects commas, quotes, formula injection).
  */
 export function csvEsc(v: string | number): string {
-  const s = String(v);
+  const s = neutralizeCsvFormula(String(v));
   return s.includes(",") || s.includes('"') ? `"${s.replaceAll('"', '""')}"` : s;
 }
 

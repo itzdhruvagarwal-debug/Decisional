@@ -42,5 +42,19 @@ export const createSupportSchema = z.object({
     .string()
     .min(10, "Description must be at least 10 characters")
     .max(1000, "Description cannot exceed 1000 characters"),
-  screenshotUrl: z.string().url().or(z.literal("")).optional(),
+  screenshotUrl: z
+    .string()
+    .trim()
+    .refine((val) => {
+      if (!val) return true;
+      if (val.startsWith("/")) return true;
+      try {
+        const u = new URL(val);
+        return u.protocol === "http:" || u.protocol === "https:";
+      } catch {
+        return false;
+      }
+    }, "Please provide a valid URL or local path")
+    .or(z.literal(""))
+    .optional(),
 });
