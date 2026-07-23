@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useRef, ReactNode } from "react";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PWAInstallButton from "@/components/pwa/PWAInstallButton";
@@ -12,305 +12,13 @@ import {
   homeSteps,
   homeTestimonials,
 } from "@/lib/home-content";
+import {
+  RevealOnScroll,
+  getFeatureIcon,
+  renderStars,
+} from "@/components/landing/LandingHelpers";
+import { HeroProductMockup } from "@/components/landing/HeroProductMockup";
 
-/* ============ Scroll-triggered animation hook ============ */
-function useInView(threshold = 0.15) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isInView, setIsInView] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) setIsInView(true);
-      },
-      { threshold },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [threshold]);
-
-  return { ref, isInView };
-}
-
-function RevealOnScroll({
-  children,
-  delay = 0,
-  className = "",
-}: Readonly<{
-  children: ReactNode;
-  delay?: number;
-  className?: string;
-}>) {
-  const { ref, isInView } = useInView();
-  return (
-    <div
-      ref={ref}
-      className={className}
-      style={{
-        opacity: isInView ? 1 : 0,
-        transform: isInView ? "translateY(0)" : "translateY(32px)",
-        transition: `opacity 0.6s ease ${delay}s, transform 0.6s ease ${delay}s`,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-// Icon Mapping Function
-function getFeatureIcon(iconKey: string) {
-  switch (iconKey) {
-    case "PAY":
-      return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary-light">
-          <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-        </svg>
-      );
-    case "TR":
-      return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-secondary-light)" }}>
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-          <path d="m9 12 2 2 4-4" />
-        </svg>
-      );
-    case "CT":
-      return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-cyan">
-          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-          <polyline points="14 2 14 8 20 8" />
-          <line x1="16" y1="13" x2="8" y2="13" />
-          <line x1="16" y1="17" x2="8" y2="17" />
-        </svg>
-      );
-    case "MT":
-      return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald">
-          <circle cx="12" cy="12" r="10" />
-          <circle cx="12" cy="12" r="6" />
-          <circle cx="12" cy="12" r="2" />
-        </svg>
-      );
-    case "XP":
-      return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber">
-          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-          <path d="M4 22h16" />
-          <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34" />
-          <path d="M12 2a6 6 0 0 1 6 6v3.5a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8a6 6 0 0 1 6-6z" />
-        </svg>
-      );
-    case "PV":
-      return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-accent-purple)" }}>
-          <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
-          <path d="m9 12 2 2 4-4" />
-        </svg>
-      );
-    default:
-      return null;
-  }
-}
-
-// Gold star ratings renderer
-function renderStars(rating: number) {
-  const starKeys = ["star-1", "star-2", "star-3", "star-4", "star-5"];
-  return (
-    <div className="flex justify-center gap-1 mb-4 text-amber">
-      {starKeys.slice(0, rating).map((key) => (
-        <svg key={key} width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-        </svg>
-      ))}
-    </div>
-  );
-}
-
-/* ============ Interactive Mockup Component ============ */
-function HeroProductMockup() {
-  const [view, setView] = useState<"influencer" | "brand">("influencer");
-
-  return (
-    <div
-      className="animate-fade-in flex flex-col items-center gap-4 w-full max-w-840" style={{ marginTop: "48px", marginInline: "auto" }}
-    >
-      {/* Mockup View Selector */}
-      <div
-        className="inline-flex bg-secondary p-1 border-card rounded-full"
-      >
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => setView("influencer")}
-          className="text-sm font-semibold border-none px-4-py-2 rounded-full" style={{ background: view === "influencer" ? "var(--color-bg-tertiary)" : "transparent", color: view === "influencer" ? "white" : "var(--color-text-secondary)", transition: "all var(--transition-fast)" }}
-        >
-          Influencer View
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => setView("brand")}
-          className="text-sm font-semibold border-none px-4-py-2 rounded-full" style={{ background: view === "brand" ? "var(--color-bg-tertiary)" : "transparent", color: view === "brand" ? "white" : "var(--color-text-secondary)", transition: "all var(--transition-fast)" }}
-        >
-          Brand View
-        </Button>
-      </div>
-
-      {/* Main Glassmorphic Container */}
-      <div
-        className="w-full p-6 text-left relative overflow-hidden bg-glass rounded-xl backdrop-blur-lg" style={{ WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.08)", boxShadow: "0 24px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)" }}
-      >
-        {/* Glow Effects */}
-        <div
-          className="absolute rounded-full pointer-events-none bg-color-primary" style={{ top: "-50px", right: "-50px", width: "150px", height: "150px", filter: "blur(80px)", opacity: 0.15 }}
-        />
-        <div
-          className="absolute rounded-full pointer-events-none" style={{ bottom: "-50px", left: "-50px", width: "150px", height: "150px", background: "var(--color-secondary)", filter: "blur(80px)", opacity: 0.15 }}
-        />
-
-        {/* Mockup Header */}
-        <div
-          className="flex items-center justify-between mb-5 pb-4" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.06)" }}
-        >
-          <div className="flex items-center gap-2">
-            <span
-              className="rounded-full" style={{ width: "10px", height: "10px", background: "var(--color-success)", boxShadow: "0 0 8px var(--color-success)" }}
-            />
-            <span className="text-sm font-bold text-white">
-              {view === "influencer" ? "Influencer Workspace" : "Brand Campaign Control"}
-            </span>
-          </div>
-          <span className="text-xs text-muted">
-            Live Escrow Protection Active 🔒
-          </span>
-        </div>
-
-        {view === "influencer" ? (
-          /* ============ INFLUENCER DASHBOARD MOCK ============ */
-          <div className="flex flex-col gap-5">
-            {/* Top Stats Row */}
-            <div className="grid gap-4 grid-auto-140">
-              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
-                <span className="text-muted block text-xs">Wallet Balance</span>
-                <span className="text-xl font-extrabold text-white">₹42,850</span>
-              </div>
-              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
-                <span className="text-muted block text-xs">Trust Score</span>
-                <span className="text-xl font-extrabold text-emerald">98% <span className="text-xs font-normal">(Excellent)</span></span>
-              </div>
-              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
-                <span className="text-muted block text-xs">Gamification Tier</span>
-                <span className="text-xl font-extrabold text-amber">Gold IV 🏆</span>
-              </div>
-            </div>
-
-            {/* Active Deal Status */}
-            <div className="p-4 bg-glass rounded-lg" style={{ border: "1px solid rgba(255, 255, 255, 0.06)" }}>
-              <div className="flex justify-between mb-3">
-                <div>
-                  <h4 className="text-sm font-bold mb-1 text-white">Nike India: Air Max Launch</h4>
-                  <span className="text-xs text-secondary">Deliverable: 1 Instagram Reel + 1 Story</span>
-                </div>
-                <div className="inline-flex text-xs font-semibold bg-emerald-subtle text-emerald rounded-sm px-2-py-1" style={{ height: "fit-content" }}>
-                  ₹25,000 in Escrow
-                </div>
-              </div>
-
-              {/* Status Stepper */}
-              <div className="flex items-center justify-between relative mt-5">
-                {/* Stepper Background Line */}
-                <div className="absolute z-0" style={{ left: "20px", right: "20px", height: "2px", background: "rgba(255, 255, 255, 0.1)" }} />
-                
-                {/* Stepper Active Line */}
-                <div className="absolute bg-color-primary z-0" style={{ left: "20px", width: "50%", height: "2px" }} />
-
-                {/* Step 1: Signed */}
-                <div className="flex flex-col items-center relative gap-1-5 z-1">
-                  <div className="flex items-center justify-center text-xs font-bold rounded-full text-white w-24 h-24 bg-color-primary">✓</div>
-                  <span className="font-semibold text-2xs text-white">Signed</span>
-                </div>
-
-                {/* Step 2: Escrow Verified */}
-                <div className="flex flex-col items-center relative gap-1-5 z-1">
-                  <div className="flex items-center justify-center text-xs font-bold rounded-full text-white w-24 h-24 bg-color-primary">✓</div>
-                  <span className="font-semibold text-2xs text-white">Escrowed</span>
-                </div>
-
-                {/* Step 3: Submission Under Review */}
-                <div className="flex flex-col items-center relative gap-1-5 z-1">
-                  <div className="flex items-center justify-center text-xs rounded-full bg-tertiary text-white w-24 h-24" style={{ border: "2px solid var(--color-primary)", animation: "pulse 2s infinite" }}>●</div>
-                  <span className="font-semibold text-2xs text-white">Reviewing</span>
-                </div>
-
-                {/* Step 4: Complete & Disbursed */}
-                <div className="flex flex-col items-center relative gap-1-5 z-1">
-                  <div className="flex items-center justify-center text-muted rounded-full bg-tertiary text-2xs w-24 h-24" style={{ border: "1px solid rgba(255, 255, 255, 0.2)" }}>🔒</div>
-                  <span className="text-muted text-2xs">Payout</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* ============ BRAND DASHBOARD MOCK ============ */
-          <div className="flex flex-col gap-5">
-            {/* Top Stats Row */}
-            <div className="grid gap-4 grid-auto-140">
-              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
-                <span className="text-muted block text-xs">Active Campaigns</span>
-                <span className="text-xl font-extrabold text-white">3 Campaigns</span>
-              </div>
-              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
-                <span className="text-muted block text-xs">Secured Escrow</span>
-                <span className="text-xl font-extrabold text-cyan">₹1,85,000</span>
-              </div>
-              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
-                <span className="text-muted block text-xs">ROI Index</span>
-                <span className="text-xl font-extrabold text-emerald">3.8x Profit</span>
-              </div>
-            </div>
-
-            {/* Campaign Submissions */}
-            <div className="p-4 bg-glass rounded-lg" style={{ border: "1px solid rgba(255, 255, 255, 0.06)" }}>
-              <div className="flex justify-between items-center mb-3">
-                <h4 className="text-sm font-bold text-white">Submissions Awaiting Approval (1)</h4>
-                <span className="flex items-center gap-1 text-xs text-amber">
-                  <span className="rounded-full h-6" style={{ width: "6px", background: "var(--color-accent-amber)", animation: "pulse 1.5s infinite" }} />{" "}
-                  48h Review Timer Running
-                </span>
-              </div>
-
-              {/* Creator Submission list item */}
-              <div className="flex items-center justify-between p-3 flex-wrap bg-glass rounded-md gap-2-5" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
-                <div className="flex items-center gap-2-5">
-                  <div className="flex items-center justify-center font-extrabold text-xs rounded-full text-white w-32 h-32 bg-color-primary">
-                    AM
-                  </div>
-                  <div>
-                    <span className="text-sm font-semibold block text-white">Ananya Mehta</span>
-                    <span className="text-secondary text-xs">Instagram post content ready for review</span>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button type="button" variant="secondary" className="text-xs rounded-sm px-3-py-1 bg-none text-white" style={{ border: "1px solid rgba(255, 255, 255, 0.1)" }}>
-                    View Draft
-                  </Button>
-                  <Button type="button" variant="primary" className="font-semibold border-none text-xs rounded-sm px-3-py-1 bg-gradient-primary text-white" style={{ boxShadow: "var(--shadow-glow-primary)" }}>
-                    Approve
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ============ HOMEPAGE ============ */
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"influencer" | "brand">(
     "influencer",
@@ -324,11 +32,9 @@ export default function HomePage() {
       <section
         className="relative overflow-hidden pt-30 pb-20"
       >
-        {/* Hero Background — CSS background-image avoids Next/Image fill position issues */}
         <div
           className="absolute inset-0" style={{ zIndex: 0, backgroundImage: "url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2574&auto=format&fit=crop')", backgroundSize: "cover", backgroundPosition: "center", opacity: 0.18, filter: "blur(4px)", transform: "scale(1.05)" }}
         />
-        {/* Gradient Overlay */}
         <div
           className="absolute inset-0 z-0" style={{ background:
               "radial-gradient(circle at center, rgba(10, 10, 20, 0.6) 0%, var(--color-bg-primary) 95%)" }}
@@ -338,7 +44,6 @@ export default function HomePage() {
           <div
             className="text-center max-w-900 mx-auto"
           >
-            {/* Badge — fully inline-styled for guaranteed rendering */}
             <div
               className="inline-flex items-center gap-2 font-bold rounded-full text-xs uppercase mb-6 tracking-wider bg-indigo-15 text-indigo-light" style={{ border: "1px solid rgba(129, 140, 248, 0.5)", padding: "6px 20px" }}
             >
@@ -368,7 +73,6 @@ export default function HomePage() {
               records in one mobile-ready workspace.
             </p>
 
-            {/* CTA buttons */}
             <div
               className="flex gap-4 justify-center flex-wrap mb-5"
             >
@@ -386,7 +90,6 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* PWA download buttons */}
             <div
               className="flex gap-3 justify-center flex-wrap mb-5"
             >
@@ -402,7 +105,6 @@ export default function HomePage() {
               />
             </div>
 
-            {/* Security trust badges */}
             <div
               className="flex gap-6 justify-center flex-wrap mb-2"
             >
@@ -416,10 +118,8 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Product Mockup Component */}
             <HeroProductMockup />
 
-            {/* Social Proof Brand Strip */}
             <div
               className="animate-fade-in w-full text-center" style={{ marginTop: "48px", animationDelay: "1.1s" }}
             >
@@ -527,7 +227,6 @@ export default function HomePage() {
             </p>
           </RevealOnScroll>
 
-          {/* Tab Switcher */}
           <RevealOnScroll delay={0.15}>
             <div
               className="flex justify-center gap-1 bg-tertiary p-1 mb-10 rounded-full" style={{ maxWidth: "320px", margin: "0 auto 48px" }}
@@ -569,7 +268,6 @@ export default function HomePage() {
             </div>
           </RevealOnScroll>
 
-          {/* Steps */}
           <div
             className="flex flex-col gap-4 mx-auto" style={{ maxWidth: "700px" }}
           >
@@ -652,7 +350,6 @@ export default function HomePage() {
                       ` - ${testimonial.followers} followers`}
                   </p>
                   
-                  {/* Premium star ratings */}
                   {renderStars(testimonial.rating)}
 
                   <p
@@ -822,7 +519,6 @@ export default function HomePage() {
         <section
           className="section text-center relative overflow-hidden bg-gradient-primary"
         >
-          {/* Background pattern */}
           <div
             className="absolute inset-0" style={{ backgroundImage:
                 "radial-gradient(circle at 20% 80%, rgba(255,255,255,0.06) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04) 0%, transparent 50%)" }}

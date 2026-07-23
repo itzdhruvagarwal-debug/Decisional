@@ -1,113 +1,17 @@
 "use client";
 
-
 import { logger } from "@/lib/logger-client";
 import { useState, useEffect } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Input, Select, Textarea, Card } from "@/components/ui";
-import { z } from "zod";
-
-export const createCampaignSchema = z.object({
-  title: z
-    .string()
-    .min(5, "Title must be at least 5 characters")
-    .max(100, "Title cannot exceed 100 characters"),
-  description: z
-    .string()
-    .min(20, "Description must be at least 20 characters")
-    .max(2000, "Description cannot exceed 2000 characters"),
-  perInfluencerBudget: z
-    .number({ message: "Budget per influencer must be a number" })
-    .min(500, "Minimum budget per influencer is ₹500")
-    .max(1000000, "Maximum budget per influencer is ₹10,00,000"),
-  maxInfluencers: z
-    .number({ message: "Influencer count must be a number" })
-    .min(1, "Campaign must accept at least 1 influencer")
-    .max(100, "Maximum 100 influencers per campaign"),
-  minFollowers: z
-    .number()
-    .min(0, "Minimum followers cannot be negative"),
-  targetCategories: z
-    .array(z.string())
-    .min(1, "Please select at least one target category"),
-  applicationDeadline: z.string().min(1, "Application deadline date is required"),
-  postingDeadline: z.string().min(1, "Posting deadline date is required"),
-});
-
-export type CreateCampaignValues = z.infer<typeof createCampaignSchema>;
-
-export interface CampaignFormData {
-  title: string;
-  description: string;
-  requirements: string;
-  totalBudget: number;
-  perInfluencerBudget: number;
-  targetCategories: string[];
-  targetCities: string[];
-  targetGender: string;
-  targetAgeMin: number | null;
-  targetAgeMax: number | null;
-  minFollowers: number;
-  maxFollowers: number | null;
-  maxInfluencers: number | null;
-  applicationDeadline: string;
-  contentDeadline: string;
-  postingDeadline: string;
-  requiresProduct: boolean;
-  productName: string;
-  productValue: number;
-  productDescription: string;
-  deliverables: Array<{ type: string; count: number; rate: number }>;
-}
-
-function validateCampaignForm(formData: CampaignFormData): { success: boolean; fieldErrors?: Record<string, string>; error?: string } {
-  const result = createCampaignSchema.safeParse({
-    title: formData.title.trim(),
-    description: formData.description.trim(),
-    perInfluencerBudget: formData.perInfluencerBudget,
-    maxInfluencers: formData.maxInfluencers ?? 1,
-    minFollowers: formData.minFollowers,
-    targetCategories: formData.targetCategories,
-    applicationDeadline: formData.applicationDeadline,
-    postingDeadline: formData.postingDeadline,
-  });
-
-  if (!result.success) {
-    const fieldErrors: Record<string, string> = {};
-    result.error.issues.forEach((issue) => {
-      const path = issue.path[0];
-      if (typeof path === "string") {
-        fieldErrors[path] = issue.message;
-      }
-    });
-    return { success: false, fieldErrors };
-  }
-
-  if (formData.requiresProduct && formData.totalBudget === 0) {
-    if (formData.productValue < 500) {
-      return { success: false, error: "Product-only campaigns must specify a product value of at least ₹500" };
-    }
-    if (formData.minFollowers > 10000) {
-      return { success: false, error: "Product-only campaigns can only target influencers with up to 10,000 followers" };
-    }
-  }
-  if (formData.targetCategories.length === 0) {
-    return { success: false, error: "Please select at least one category" };
-  }
-  if (formData.perInfluencerBudget > formData.totalBudget) {
-    return { success: false, error: "Per influencer budget cannot exceed total budget" };
-  }
-  if (formData.maxFollowers !== null && formData.maxFollowers > 0 && formData.maxFollowers < formData.minFollowers) {
-    return { success: false, error: "Max followers must be greater than min followers" };
-  }
-  if (!formData.contentDeadline || !formData.postingDeadline) {
-    return { success: false, error: "Please select content and posting deadlines" };
-  }
-
-  return { success: true };
-}
+import {
+  CampaignFormData,
+  validateCampaignForm,
+} from "@/components/dashboard/campaigns/create/CampaignCreateHelpers";
+import { ProductSeedingCard } from "@/components/dashboard/campaigns/create/ProductSeedingCard";
+import { DeliverablesList } from "@/components/dashboard/campaigns/create/DeliverablesList";
 
 interface DraftCampaignData {
   status?: string;
@@ -216,20 +120,20 @@ export default function CreateCampaignClient() {
   }, [draftData]);
 
   // Form State
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CampaignFormData>({
     title: "",
     description: "",
     requirements: "",
     totalBudget: 5000,
     perInfluencerBudget: 1000,
-    targetCategories: [] as string[],
-    targetCities: [] as string[],
+    targetCategories: [],
+    targetCities: [],
     targetGender: "ANY",
-    targetAgeMin: null as number | null,
-    targetAgeMax: null as number | null,
+    targetAgeMin: null,
+    targetAgeMax: null,
     minFollowers: 1000,
-    maxFollowers: null as number | null,
-    maxInfluencers: null as number | null,
+    maxFollowers: null,
+    maxInfluencers: null,
     applicationDeadline: "",
     contentDeadline: "",
     postingDeadline: "",
@@ -265,14 +169,6 @@ export default function CreateCampaignClient() {
     "Business"
   ]);
 
-  const deliverableTypes = [
-    { value: "INSTAGRAM_POST", label: "Instagram Post" },
-    { value: "INSTAGRAM_REEL", label: "Instagram Reel" },
-    { value: "INSTAGRAM_STORY", label: "Instagram Story" },
-    { value: "YOUTUBE_VIDEO", label: "YouTube Video" },
-    { value: "YOUTUBE_SHORT", label: "YouTube Short" },
-  ];
-
   const handleCategoryToggle = (cat: string) => {
     setFormData((prev) => {
       if (prev.targetCategories.includes(cat)) {
@@ -285,54 +181,6 @@ export default function CreateCampaignClient() {
         return { ...prev, targetCategories: [...prev.targetCategories, cat] };
       }
     });
-  };
-
-  const handleAddDeliverable = () => {
-    setFormData((prev) => {
-      const type = "INSTAGRAM_POST";
-      const count = 1;
-      const rate = getRecommendedRate(type, prev.minFollowers);
-      return {
-        ...prev,
-        deliverables: [
-          ...prev.deliverables,
-          { type, count, rate },
-        ],
-      };
-    });
-  };
-
-  const handleRemoveDeliverable = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      deliverables: prev.deliverables.filter((_, i) => i !== index),
-    }));
-  };
-
-  const getRecommendedRate = (type: string, minFollowers: number) => {
-    const isYoutube = type.startsWith("YOUTUBE");
-    const multiplier = isYoutube ? 2.5 : 2;
-    const estimatedEngagement = minFollowers * 0.03;
-    const calculated = Math.round(estimatedEngagement * multiplier);
-    const floor = isYoutube ? 750 : 500;
-    return Math.max(floor, Math.round(calculated / 10) * 10);
-  };
-
-  const handleDeliverableChange = (
-    index: number,
-    field: string,
-    value: unknown,
-  ) => {
-    const newDeliverables = [...formData.deliverables] as Array<{ type: string; rate: number; count: number }>;
-    const item = { ...newDeliverables[index]!, [field]: value };
-    
-    // Automatically recalculate recommended rate if type changes
-    if (field === "type" && typeof value === "string") {
-      item.rate = getRecommendedRate(value, formData.minFollowers);
-    }
-    
-    newDeliverables[index] = item;
-    setFormData((prev) => ({ ...prev, deliverables: newDeliverables }));
   };
 
   // Auto calculate perInfluencerBudget and totalBudget based on deliverables and maxInfluencers
@@ -358,44 +206,30 @@ export default function CreateCampaignClient() {
     });
   }, [formData.deliverables, formData.maxInfluencers]);
 
-
-  const handleSubmit = async (e: React.FormEvent, isDraft: boolean = false) => {
+  const handleSubmit = async (e: React.FormEvent, isDraft = false) => {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
     setFieldErrors({});
 
+    const valResult = validateCampaignForm(formData);
+    if (!valResult.success) {
+      if (valResult.fieldErrors) setFieldErrors(valResult.fieldErrors);
+      if (valResult.error) setError(valResult.error);
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      const validation = validateCampaignForm(formData);
-      if (!validation.success) {
-        if (validation.fieldErrors) {
-          setFieldErrors(validation.fieldErrors);
-          throw new Error("Please fix the validation errors below.");
-        }
-        throw new Error(validation.error || "Invalid campaign details");
-      }
-
-      const contentDeadline = new Date(`${formData.contentDeadline}T12:00:00.000Z`);
-      const postingDeadline = new Date(`${formData.postingDeadline}T12:00:00.000Z`);
       const applicationDeadline = formData.applicationDeadline
-        ? new Date(`${formData.applicationDeadline}T23:59:59.000Z`)
+        ? new Date(formData.applicationDeadline)
         : null;
-
-      if (Number.isNaN(contentDeadline.getTime()) || Number.isNaN(postingDeadline.getTime())) {
-        throw new TypeError("Invalid campaign deadlines");
-      }
-      if (postingDeadline < contentDeadline) {
-        throw new Error("Posting deadline must be after content deadline");
-      }
-      if (applicationDeadline && Number.isNaN(applicationDeadline.getTime())) {
-        throw new TypeError("Invalid application deadline");
-      }
-      if (applicationDeadline && applicationDeadline > contentDeadline) {
-        throw new Error("Application deadline must be before content deadline");
-      }
+      const contentDeadline = new Date(formData.contentDeadline);
+      const postingDeadline = new Date(formData.postingDeadline);
 
       const url = editCampaignId ? `/api/campaigns/${editCampaignId}` : "/api/campaigns";
-      const method = editCampaignId ? "PUT" : "POST";
+      const method = editCampaignId ? "PATCH" : "POST";
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -769,170 +603,17 @@ export default function CreateCampaignClient() {
             />
           </div>
 
-          <Card
-            className="mb-4 p-5 bg-tertiary" style={{ border: "1px dashed var(--color-border)" }}
-          >
-            <div
-              className="flex items-center justify-between"
-              style={{
-                marginBottom: formData.requiresProduct ? "16px" : "0",
-              }}
-            >
-              <div>
-                <h3
-                  className="text-base font-semibold text-primary"
-                >
-                  Product Seeding (Barter / Logistics)
-                </h3>
-                <p
-                  className="text-secondary text-sm mt-1"
-                >
-                  Do you need to ship a physical product to the influencer?
-                </p>
-              </div>
-              <label className="switch" aria-label="Requires physical product seeding">
-                <Input
-                  type="checkbox"
-                  checked={formData.requiresProduct}
-                  onChange={(e) =>
-                    setFormData({ ...formData, requiresProduct: e.target.checked })
-                  }
-                />
-                <span className="slider round"></span>
-                <span className="sr-only">Requires physical product seeding</span>
-              </label>
-            </div>
+          {/* Physical product seeding */}
+          <ProductSeedingCard
+            formData={formData}
+            setFormData={setFormData}
+          />
 
-            {formData.requiresProduct && (
-              <div className="mt-4">
-                <div className="grid-2 gap-4 mb-3">
-                  <Input
-                    label="Product Name"
-                    id="product-name"
-                    type="text"
-                    value={formData.productName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, productName: e.target.value })
-                    }
-                    required={formData.requiresProduct}
-                    placeholder="e.g. Glowing Skin Serum 50ml"
-                    fullWidth
-                  />
-                  <Input
-                    label="Product Value (Rs)"
-                    id="product-value"
-                    type="number"
-                    value={formData.productValue}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        productValue: Number.parseInt(e.target.value, 10) || 0,
-                      })
-                    }
-                    min={0}
-                    placeholder="e.g. 1500"
-                    fullWidth
-                  />
-                </div>
-                <Textarea
-                  label="Logistics / Shipping Instructions"
-                  id="product-description"
-                  value={formData.productDescription}
-                  onChange={(e) =>
-                    setFormData({ ...formData, productDescription: e.target.value })
-                  }
-                  placeholder="Provide any details about the product and shipping timelines..."
-                  fullWidth
-                />
-              </div>
-            )}
-          </Card>
-
-          {/* Deliverables */}
-          <div className="form-group mb-4">
-            <div className="flex justify-between items-center mb-2">
-              <div className="label">Deliverables Required</div>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={handleAddDeliverable}
-                className="text-sm font-semibold px-2-py-1"
-              >
-                + Add Deliverable
-              </Button>
-            </div>
-
-            {formData.deliverables.map((item, index) => (
-              <div
-                key={`deliv-${item.type}-${index}`}
-                className="flex gap-3 items-center mb-2"
-              >
-                <Select
-                  value={item.type}
-                  onChange={(e) =>
-                    handleDeliverableChange(index, "type", e.target.value)
-                  }
-                  className="flex-2"
-                >
-                  {deliverableTypes.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </Select>
-                
-                <Input
-                  type="number"
-                  value={item.count}
-                  onChange={(e) =>
-                    handleDeliverableChange(
-                      index,
-                      "count",
-                      Number.parseInt(e.target.value, 10) || 1,
-                    )
-                  }
-                  min={1}
-                  max={10}
-                  className="w-80"
-                />
-                
-                <span className="text-secondary text-sm">
-                  qty
-                </span>
-                
-                <div className="flex flex-col gap-1">
-                  <Input
-                    type="number"
-                    value={item.rate || ""}
-                    onChange={(e) =>
-                      handleDeliverableChange(
-                        index,
-                        "rate",
-                        Number.parseInt(e.target.value, 10) || 0,
-                      )
-                    }
-                    min={0}
-                    placeholder="Rate (Rs)"
-                    style={{ width: "110px" }}
-                  />
-                  <span className="text-muted whitespace-nowrap text-2xs">
-                    Rec: ₹{getRecommendedRate(item.type, formData.minFollowers).toLocaleString("en-IN")}
-                  </span>
-                </div>
-                
-                {formData.deliverables.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => handleRemoveDeliverable(index)}
-                    className="text-lg text-rose" style={{ padding: "0 8px" }}
-                  >
-                    x
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
+          {/* Deliverables checklist */}
+          <DeliverablesList
+            formData={formData}
+            setFormData={setFormData}
+          />
 
           <div className="flex justify-end gap-3 mt-6">
             <Button
@@ -965,4 +646,3 @@ export default function CreateCampaignClient() {
     </div>
   );
 }
-
