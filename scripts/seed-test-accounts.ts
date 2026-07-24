@@ -13,10 +13,7 @@ import prisma from "../src/lib/db";
 import { seedTreasury } from "./seed-treasury";
 import { seedBadges } from "./seed-badges";
 
-// Load from environment variable, or decode from Base64 fallback.
-// Using Base64 avoids static analysis tools flagging a plaintext credential literal.
-const PASSWORD = process.env.TEST_ACCOUNT_PASSWORD
-  ?? Buffer.from("VGVzdEAxMjM0", "base64").toString("utf8");
+const PASSWORD = process.env.TEST_ACCOUNT_PASSWORD ?? "Test@1234";
 const BRAND_WALLET_PAISE = 100_000 * 100; // Rs 1,00,000
 
 async function upsertUser(email: string, phone: string, userType: "INFLUENCER" | "BRAND" | "ADMIN") {
