@@ -532,9 +532,8 @@ function SidebarComponent({
               <Link
                 key={item.label}
                 href={item.href}
-                className={`sidebar-link ${isActive ? "active" : ""}`}
+                className={`sidebar-link ${isActive ? "active" : ""} ${sidebarOpen ? "" : "is-collapsed"}`}
                 onClick={() => setMobileSidebarOpen(false)}
-                style={{ justifyContent: sidebarOpen ? "flex-start" : "center" }}
               >
                 <span className="sidebar-link-icon">
                   <AppIcon name={getNavIcon(item.label)} size={18} />
@@ -551,8 +550,7 @@ function SidebarComponent({
             type="button"
             variant="ghost"
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="sidebar-link sidebar-logout-btn"
-            style={{ justifyContent: sidebarOpen ? "flex-start" : "center" }}
+            className={`sidebar-link sidebar-logout-btn ${sidebarOpen ? "" : "is-collapsed"}`}
           >
             <span className="sidebar-link-icon">
               <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

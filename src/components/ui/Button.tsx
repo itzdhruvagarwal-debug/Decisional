@@ -49,6 +49,7 @@ export interface ButtonProps {
   readonly "aria-describedby"?: string;
   readonly "aria-labelledby"?: string;
   readonly "aria-hidden"?: boolean | "true" | "false";
+  readonly "data-active"?: boolean | "true" | "false";
 }
 
 export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
@@ -105,7 +106,7 @@ export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, Bu
 
     const content = (
       <>
-        {loading && <span className="loading" style={{ marginRight: children ? "8px" : "0" }} />}
+        {loading && <span className={`loading ${children ? "loading-with-label" : ""}`} />}
         {!loading && leftIcon && (
           <span className="btn-icon-left inline-flex items-center">
             {leftIcon}

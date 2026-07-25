@@ -30,43 +30,38 @@ export default function HomePage() {
 
       {/* ==================== HERO ==================== */}
       <section
-        className="relative overflow-hidden pt-30 pb-20"
+        className="landing-hero relative overflow-hidden pt-30 pb-20"
       >
-        <div
-          className="absolute inset-0" style={{ zIndex: 0, backgroundImage: "url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2574&auto=format&fit=crop')", backgroundSize: "cover", backgroundPosition: "center", opacity: 0.18, filter: "blur(4px)", transform: "scale(1.05)" }}
-        />
-        <div
-          className="absolute inset-0 z-0" style={{ background:
-              "radial-gradient(circle at center, rgba(10, 10, 20, 0.6) 0%, var(--color-bg-primary) 95%)" }}
-        />
+        <div className="landing-hero-media absolute inset-0" />
+        <div className="landing-hero-scrim absolute inset-0 z-0" />
 
         <div className="container relative z-1">
           <div
             className="text-center max-w-900 mx-auto"
           >
             <div
-              className="inline-flex items-center gap-2 font-bold rounded-full text-xs uppercase mb-6 tracking-wider bg-indigo-15 text-indigo-light" style={{ border: "1px solid rgba(129, 140, 248, 0.5)", padding: "6px 20px" }}
+              className="landing-kicker inline-flex items-center gap-2 font-bold rounded-full text-xs uppercase mb-6 tracking-wider bg-indigo-15 text-indigo-light"
             >
               🇮🇳 India-first creator collaboration workspace
             </div>
 
             <h1
-              className="mb-6 font-extrabold" style={{ fontSize: "clamp(40px, 6vw, 76px)", lineHeight: 1.06, letterSpacing: "-1px" }}
+              className="landing-hero-title mb-6 font-extrabold"
             >
               <span
-                className="inline-block" style={{ background: "linear-gradient(135deg, #818cf8 0%, #ec4899 55%, #06b6d4 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
+                className="landing-gradient-word inline-block"
               >
                 Decisional
               </span>
               <span
-                className="block font-semibold mt-3-5" style={{ fontSize: "0.48em", color: "rgba(240, 240, 245, 0.9)", letterSpacing: "0" }}
+                className="landing-hero-tagline block font-semibold mt-3-5"
               >
                 Turning Signals into Decisions
               </span>
             </h1>
 
             <p
-              className="max-w-600 leading-relaxed" style={{ fontSize: "clamp(15px, 2vw, 19px)", color: "rgba(161, 161, 181, 0.9)", margin: "0 auto 40px" }}
+              className="landing-hero-copy max-w-600 leading-relaxed"
             >
               Run influencer campaigns with verified profiles, signed
               deliverables, payment protection, content approvals, and dispute
@@ -74,17 +69,17 @@ export default function HomePage() {
             </p>
 
             <div
-              className="flex gap-4 justify-center flex-wrap mb-5"
+              className="hero-cta-group flex gap-4 justify-center flex-wrap mb-5"
             >
               <Link
                 href="/register?type=influencer"
-                className="inline-flex items-center justify-center gap-2 font-bold rounded-lg text-sm no-underline text-white" style={{ padding: "14px 28px", background: "linear-gradient(135deg, #6366f1, #4f46e5)", boxShadow: "0 4px 20px rgba(99, 102, 241, 0.4)", border: "1px solid rgba(129, 140, 248, 0.3)", transition: "transform 0.2s, box-shadow 0.2s" }}
+                className="landing-cta landing-cta-primary inline-flex items-center justify-center gap-2 font-bold rounded-lg text-sm no-underline text-white"
               >
                 I&apos;m an Influencer
               </Link>
               <Link
                 href="/register?type=brand"
-                className="inline-flex items-center justify-center gap-2 font-bold rounded-lg text-sm no-underline text-white backdrop-blur" style={{ padding: "14px 28px", background: "rgba(255, 255, 255, 0.06)", border: "1px solid rgba(255, 255, 255, 0.15)", transition: "transform 0.2s, background 0.2s" }}
+                className="landing-cta landing-cta-secondary inline-flex items-center justify-center gap-2 font-bold rounded-lg text-sm no-underline text-white backdrop-blur"
               >
                 I&apos;m a Brand
               </Link>
@@ -111,7 +106,7 @@ export default function HomePage() {
               {["🔒 Secure sessions", "💳 Protected payments", "📱 Installable PWA"].map((item) => (
                 <span
                   key={item}
-                  className="text-sm flex items-center gap-1-5" style={{ color: "rgba(107, 107, 128, 0.9)" }}
+                  className="landing-proof-item text-sm flex items-center gap-1-5"
                 >
                   {item}
                 </span>
@@ -121,7 +116,7 @@ export default function HomePage() {
             <HeroProductMockup />
 
             <div
-              className="animate-fade-in w-full text-center" style={{ marginTop: "48px", animationDelay: "1.1s" }}
+              className="landing-trust-strip animate-fade-in w-full text-center"
             >
               <p
                 className="text-xs text-muted mb-4 font-semibold uppercase tracking-wider"
@@ -129,12 +124,12 @@ export default function HomePage() {
                 Trusted by India&apos;s fastest growing brands
               </p>
               <div
-                className="flex justify-center items-center gap-6 flex-wrap" style={{ opacity: 0.6 }}
+                className="landing-brand-row flex justify-center items-center gap-6 flex-wrap"
               >
                 {["FitForma", "Myntra", "Mamaearth", "Nykaa", "Boat", "Lenskart"].map((brand) => (
                   <div
                     key={brand}
-                    className="text-sm font-bold bg-glass rounded-sm text-primary" style={{ border: "1px solid rgba(255, 255, 255, 0.05)", padding: "6px 14px", letterSpacing: "0.5px", boxShadow: "0 2px 10px rgba(0,0,0,0.1)" }}
+                    className="landing-brand-chip text-sm font-bold bg-glass rounded-sm text-primary"
                   >
                     {brand}
                   </div>
@@ -147,7 +142,7 @@ export default function HomePage() {
         <Button
           type="button"
           variant="ghost"
-          className="hide-mobile absolute flex flex-col items-center gap-2 cursor-pointer border-none p-0 bg-none opacity-50" style={{ bottom: "32px", left: "50%", transform: "translateX(-50%)", animation: "float 3s ease-in-out infinite" }}
+          className="landing-scroll-cue hide-mobile absolute flex flex-col items-center gap-2 cursor-pointer border-none p-0 bg-none opacity-50"
           onClick={() => {
             document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
           }}
@@ -193,7 +188,7 @@ export default function HomePage() {
                 <div className="card hover-lift h-full">
                   <div className="feature-icon">{getFeatureIcon(feature.icon)}</div>
                   <h3
-                    className="text-lg font-bold mb-2" style={{ letterSpacing: "-0.01em" }}
+                    className="text-lg font-bold mb-2"
                   >
                     {feature.title}
                   </h3>
@@ -229,22 +224,14 @@ export default function HomePage() {
 
           <RevealOnScroll delay={0.15}>
             <div
-              className="flex justify-center gap-1 bg-tertiary p-1 mb-10 rounded-full" style={{ maxWidth: "320px", margin: "0 auto 48px" }}
+              className="landing-segmented flex justify-center gap-1 bg-tertiary p-1 mb-10 rounded-full"
             >
               <Button
                 type="button"
                 variant="ghost"
                 onClick={() => setActiveTab("influencer")}
-                className="flex-1 text-sm rounded-full" style={{ background:
-                    activeTab === "influencer"
-                      ? "var(--gradient-primary)"
-                      : "transparent", color:
-                    activeTab === "influencer"
-                      ? "white"
-                      : "var(--color-text-secondary)", boxShadow:
-                    activeTab === "influencer"
-                      ? "var(--shadow-glow-primary)"
-                      : "none", padding: "10px 20px" }}
+                className="landing-segmented-button flex-1 text-sm rounded-full"
+                data-active={activeTab === "influencer"}
               >
                 For Influencers
               </Button>
@@ -252,16 +239,8 @@ export default function HomePage() {
                 type="button"
                 variant="ghost"
                 onClick={() => setActiveTab("brand")}
-                className="flex-1 text-sm rounded-full" style={{ background:
-                    activeTab === "brand"
-                      ? "var(--gradient-primary)"
-                      : "transparent", color:
-                    activeTab === "brand"
-                      ? "white"
-                      : "var(--color-text-secondary)", boxShadow:
-                    activeTab === "brand"
-                      ? "var(--shadow-glow-primary)"
-                      : "none", padding: "10px 20px" }}
+                className="landing-segmented-button flex-1 text-sm rounded-full"
+                data-active={activeTab === "brand"}
               >
                 For Brands
               </Button>
@@ -269,7 +248,7 @@ export default function HomePage() {
           </RevealOnScroll>
 
           <div
-            className="flex flex-col gap-4 mx-auto" style={{ maxWidth: "700px" }}
+            className="landing-steps flex flex-col gap-4 mx-auto"
           >
             {homeSteps.map((step, index) => {
               const currentStep =
@@ -283,7 +262,7 @@ export default function HomePage() {
                     className="card hover-lift step-card flex items-center gap-5"
                   >
                     <div
-                      className="flex items-center justify-center font-extrabold flex-shrink-0 bg-gradient-primary rounded-full text-2xl" style={{ width: "56px", height: "56px", boxShadow: "var(--shadow-glow-primary)" }}
+                      className="landing-step-number flex items-center justify-center font-extrabold flex-shrink-0 bg-gradient-primary rounded-full text-2xl"
                     >
                       {currentStep.step}
                     </div>
@@ -328,7 +307,7 @@ export default function HomePage() {
                   className="card hover-lift text-center h-full"
                 >
                   <div
-                    className="avatar avatar-xl relative overflow-hidden rounded-full w-80" style={{ margin: "0 auto 16px", border: "2px solid var(--color-primary)", height: "80px" }}
+                    className="landing-testimonial-avatar avatar avatar-xl relative overflow-hidden rounded-full"
                   >
                     <Image
                       src={testimonial.avatar}
@@ -395,7 +374,7 @@ export default function HomePage() {
                     For Influencers
                   </h3>
                   <div
-                    className="mb-1 font-extrabold" style={{ fontSize: "clamp(40px, 5vw, 48px)" }}
+                    className="landing-price mb-1 font-extrabold"
                   >
                     <span className="gradient-text">FREE</span>
                   </div>
@@ -416,7 +395,7 @@ export default function HomePage() {
                     ].map((item) => (
                       <li
                         key={item}
-                        className="border-b-card text-secondary text-sm flex items-center gap-2-5" style={{ padding: "12px 0" }}
+                        className="landing-check-row border-b-card text-secondary text-sm flex items-center gap-2-5"
                       >
                         <svg
                           width="16"
@@ -461,7 +440,7 @@ export default function HomePage() {
                     For Brands
                   </h3>
                   <div
-                    className="mb-1 font-extrabold" style={{ fontSize: "clamp(40px, 5vw, 48px)" }}
+                    className="landing-price mb-1 font-extrabold"
                   >
                     <span className="gradient-text">10%</span>
                   </div>
@@ -482,7 +461,7 @@ export default function HomePage() {
                     ].map((item) => (
                       <li
                         key={item}
-                        className="border-b-card text-secondary text-sm flex items-center gap-2-5" style={{ padding: "12px 0" }}
+                        className="landing-check-row border-b-card text-secondary text-sm flex items-center gap-2-5"
                       >
                         <svg
                           width="16"
@@ -517,30 +496,27 @@ export default function HomePage() {
       {/* ==================== CTA ==================== */}
       <RevealOnScroll>
         <section
-          className="section text-center relative overflow-hidden bg-gradient-primary"
+          className="landing-final-cta section text-center relative overflow-hidden bg-gradient-primary"
         >
-          <div
-            className="absolute inset-0" style={{ backgroundImage:
-                "radial-gradient(circle at 20% 80%, rgba(255,255,255,0.06) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04) 0%, transparent 50%)" }}
-          />
+          <div className="landing-final-cta-texture absolute inset-0" />
 
           <div
             className="container relative z-1"
           >
             <h2
-              className="mb-4 font-extrabold tracking-normal" style={{ fontSize: "clamp(28px, 4vw, 40px)" }}
+              className="landing-cta-title mb-4 font-extrabold tracking-normal"
             >
               Ready to Get Started?
             </h2>
             <p
-              className="mb-8 leading-relaxed opacity-90" style={{ fontSize: "clamp(15px, 2vw, 18px)", maxWidth: "500px", margin: "0 auto 32px" }}
+              className="landing-cta-copy mb-8 leading-relaxed opacity-90"
             >
               Create a free account, install the PWA, and manage campaigns from
               web, iOS home screen, or Android home screen.
             </p>
             <Link
               href="/register"
-              className="btn btn-lg font-bold" style={{ background: "white", color: "var(--color-primary-dark)", boxShadow: "0 4px 24px rgba(0,0,0,0.2)" }}
+              className="landing-cta-inverse btn btn-lg font-bold"
             >
               Create Free Account
             </Link>

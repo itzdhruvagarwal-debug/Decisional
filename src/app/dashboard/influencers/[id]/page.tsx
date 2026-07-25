@@ -51,27 +51,13 @@ function getBudgetNotice(canAfford: boolean, minRate: number | null) {
   if (!canAfford) {
     return {
       text: "Your wallet balance is lower than this creator's minimum rate. Consider depositing funds before initiating a deal.",
-      style: {
-        padding: "12px",
-        background: "rgba(239, 68, 68, 0.1)",
-        color: "var(--color-accent-rose)",
-        borderRadius: "var(--radius-md)",
-        fontSize: "13px",
-        lineHeight: 1.4,
-      },
+      tone: "danger" as const,
     };
   }
   if (minRate) {
     return {
       text: `Your wallet balance covers this creator's minimum rate (Rs ${(minRate / 100).toLocaleString("en-IN")}).`,
-      style: {
-        padding: "12px",
-        background: "rgba(16, 185, 129, 0.1)",
-        color: "var(--color-success)",
-        borderRadius: "var(--radius-md)",
-        fontSize: "13px",
-        lineHeight: 1.4,
-      },
+      tone: "success" as const,
     };
   }
   return null;
@@ -105,7 +91,7 @@ export default function InfluencerProfilePage() {
   if (session.user?.userType !== "BRAND" && session.user?.userType !== "ADMIN") {
     return (
       <DashboardShell user={session.user}>
-        <div className="card text-center max-w-680" style={{ margin: "40px auto" }}>
+        <div className="card text-center max-w-680 influencer-access-card">
           <h1 className="text-2xl font-extrabold mb-2">
             Brand access required
           </h1>
@@ -142,7 +128,7 @@ export default function InfluencerProfilePage() {
   const youtubeSubsLabel = getYoutubeSubsLabel(profile.youtubeSubscribers);
   const budgetNotice = getBudgetNotice(Boolean(canAfford), profile.minRate);
   const budgetNoticeText = budgetNotice?.text || "";
-  const budgetNoticeStyle = budgetNotice?.style || {};
+  const budgetNoticeTone = budgetNotice?.tone || "success";
 
   return (
     <DashboardShell user={session.user}>
@@ -154,17 +140,17 @@ export default function InfluencerProfilePage() {
         className="card flex gap-6 flex-wrap p-8"
       >
         <div
-          className="flex items-center justify-center font-extrabold flex-shrink-0 rounded-full text-3xl bg-gradient-primary text-white" style={{ width: "120px", height: "120px" }}
+          className="flex items-center justify-center font-extrabold flex-shrink-0 rounded-full text-3xl bg-gradient-primary text-white influencer-avatar"
         >
           {profile.displayName?.[0] || "I"}
         </div>
-        <div className="flex-1" style={{ minWidth: "300px" }}>
+        <div className="flex-1 influencer-header-copy">
           <div
             className="flex justify-between items-start"
           >
             <div>
               <h1
-                className="font-extrabold text-3xl" style={{ margin: "0 0 8px" }}
+                className="font-extrabold text-3xl influencer-title"
               >
                 {profile.displayName}
               </h1>
@@ -183,7 +169,7 @@ export default function InfluencerProfilePage() {
                 {profile.trustScore}%
               </div>
               <div
-                className="text-muted text-xs uppercase" style={{ letterSpacing: "0.5px" }}
+                className="text-muted text-xs uppercase influencer-metric-label"
               >
                 Trust Score
               </div>
@@ -199,7 +185,7 @@ export default function InfluencerProfilePage() {
           <div className="flex gap-2 flex-wrap">
             {profile.isFeatured && (
               <span
-                className="text-xs font-extrabold inline-flex items-center gap-1 text-amber rounded-xl uppercase px-2-py-1 bg-amber-15" style={{ border: "1px solid rgba(245, 158, 11, 0.25)" }}
+                className="text-xs font-extrabold inline-flex items-center gap-1 text-amber rounded-xl uppercase px-2-py-1 bg-amber-15 influencer-featured-chip"
               >
                 ⭐ Featured Creator
               </span>
@@ -217,7 +203,7 @@ export default function InfluencerProfilePage() {
       </div>
 
       <div
-        className="grid gap-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}
+        className="grid gap-6 influencer-detail-grid"
       >
         {/* Stats */}
         <div className="card stagger-children p-6">
@@ -354,7 +340,7 @@ export default function InfluencerProfilePage() {
             </div>
             {profile.maxRate && (
               <div
-                className="flex justify-between pt-2" style={{ borderTop: "1px dashed var(--color-border)" }}
+                className="flex justify-between pt-2 influencer-rate-divider"
               >
                 <span
                   className="text-sm text-secondary"
@@ -379,16 +365,15 @@ export default function InfluencerProfilePage() {
                   Your Available Balance
                 </span>
                 <span
-                  className="text-sm font-bold" style={{ color: canAfford
-                      ? "var(--color-accent-emerald)"
-                      : "var(--color-accent-rose)" }}
+                  className="text-sm font-bold influencer-balance"
+                  data-afford={canAfford ? "true" : "false"}
                 >
                   {availableBalanceStr}
                 </span>
               </div>
 
               {budgetNoticeText && (
-                <div style={budgetNoticeStyle}>
+                <div className="influencer-budget-notice" data-tone={budgetNoticeTone}>
                   {budgetNoticeText}
                 </div>
               )}

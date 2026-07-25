@@ -65,18 +65,10 @@ export default function ForgotPasswordPage() {
       className="flex items-center justify-center p-6 relative overflow-hidden min-h-screen"
     >
       {/* Background Effects (Same as Login) */}
-      <div
-        className="absolute rounded-full" style={{ top: "20%", left: "10%", width: "400px", height: "400px", background:
-            "radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%)", filter: "blur(80px)" }}
-      />
-      <div
-        className="absolute rounded-full" style={{ bottom: "20%", right: "10%", width: "350px", height: "350px", background:
-            "radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%)", filter: "blur(80px)" }}
-      />
+      <div className="absolute rounded-full forgot-password-glow forgot-password-glow-primary" />
+      <div className="absolute rounded-full forgot-password-glow forgot-password-glow-secondary" />
 
-      <div
-        className="card w-full relative p-10 z-1" style={{ maxWidth: "420px" }}
-      >
+      <div className="card w-full relative p-10 z-1 forgot-password-card">
         <Link
           href="/login"
           className="text-sm text-secondary mb-6 flex"
@@ -95,13 +87,8 @@ export default function ForgotPasswordPage() {
           <div
             role={status === "error" ? "alert" : "status"}
             aria-live={status === "error" ? "assertive" : "polite"}
-            className="text-sm mb-6 rounded-md px-4-py-3" style={{ background:
-                status === "success"
-                  ? "rgba(16, 185, 129, 0.1)"
-                  : "rgba(244, 63, 94, 0.1)", border: `1px solid ${status === "success" ? "var(--color-accent-emerald)" : "var(--color-accent-rose)"}`, color:
-                status === "success"
-                  ? "var(--color-accent-emerald)"
-                  : "var(--color-accent-rose)" }}
+            className="text-sm mb-6 rounded-md px-4-py-3 forgot-password-message"
+            data-status={status === "success" ? "success" : "error"}
           >
             {message}
           </div>
@@ -109,12 +96,12 @@ export default function ForgotPasswordPage() {
 
         {resetLink && (
           <div
-            className="mb-6 p-3 text-xs rounded-md break-all" style={{ background: "#f3f4f6", border: "1px dashed #ccc" }}
+            className="mb-6 p-3 text-xs rounded-md break-all forgot-password-dev-link"
           >
             <strong>DEV LINK:</strong>{" "}
             <a
               href={resetLink}
-              style={{ color: "blue", textDecoration: "underline" }}
+              className="forgot-password-dev-anchor"
             >
               {resetLink}
             </a>

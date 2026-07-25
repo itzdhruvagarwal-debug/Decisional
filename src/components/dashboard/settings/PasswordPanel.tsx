@@ -180,7 +180,8 @@ export default function PasswordPanel({
                 <div
                     role="status"
                     aria-live="polite"
-                    className="p-3 mb-4 bg-emerald-subtle rounded-sm text-emerald" style={{ border: "1px solid rgba(16, 185, 129, 0.2)" }}
+                    className="p-3 mb-4 bg-emerald-subtle rounded-sm text-emerald settings-alert"
+                    data-tone="success"
                 >
                     {passwordSuccess}
                 </div>
@@ -190,7 +191,8 @@ export default function PasswordPanel({
                 <div
                     role="alert"
                     aria-live="assertive"
-                    className="p-3 mb-4 rounded-sm text-rose bg-rose-subtle" style={{ border: "1px solid rgba(239, 68, 68, 0.2)" }}
+                    className="p-3 mb-4 rounded-sm text-rose bg-rose-subtle settings-alert"
+                    data-tone="danger"
                 >
                     {passwordError}
                 </div>
@@ -243,7 +245,7 @@ export default function PasswordPanel({
                                             new: !showPassword.new,
                                         })
                                     }
-                                    className="absolute cursor-pointer text-base border-none bg-none opacity-70" style={{ right: "12px", top: "50%", transform: "translateY(-50%)" }}
+                                    className="absolute cursor-pointer text-base border-none bg-none opacity-70 password-eye-button"
                                 >
                                     {showPassword.new ? "👁️" : "🙈"}
                                 </Button>
@@ -275,7 +277,7 @@ export default function PasswordPanel({
                                             confirm: !showPassword.confirm,
                                         })
                                     }
-                                    className="absolute cursor-pointer text-base border-none bg-none opacity-70" style={{ right: "12px", top: "50%", transform: "translateY(-50%)" }}
+                                    className="absolute cursor-pointer text-base border-none bg-none opacity-70 password-eye-button"
                                 >
                                     {showPassword.confirm ? "👁️" : "🙈"}
                                 </Button>
@@ -283,7 +285,7 @@ export default function PasswordPanel({
                         </div>
 
                         {passwordConfirmPending ? (
-                            <div className="flex flex-col gap-2 p-3 rounded-md" style={{ background: "rgba(244, 63, 94, 0.08)", border: "1px solid rgba(244, 63, 94, 0.3)" }}>
+                            <div className="flex flex-col gap-2 p-3 rounded-md password-confirm-card">
                                 <p className="text-sm font-semibold text-rose">⚠️ Are you sure you want to update your password?</p>
                                 <div className="flex gap-2">
                                     <Button type="submit" variant="danger" className="flex-1" disabled={isSaving}>
@@ -348,7 +350,7 @@ function ForgotPasswordSection({
             <Button type="button" variant="secondary" onClick={() => handleSendForgotPasswordOtp('email')} disabled={isSaving || !user?.email} className="flex-1">{user?.email ? "Send to Email" : "No Email Added"}</Button>
             <Button type="button" variant="secondary" onClick={() => handleSendForgotPasswordOtp('phone')} disabled={isSaving || !user?.phone} className="flex-1">{user?.phone ? "Send to Phone" : "No Phone Added"}</Button>
           </div>
-          <Button type="button" className="text-muted text-sm cursor-pointer border-none bg-none" style={{ textDecoration: "underline" }} onClick={() => setForgotPasswordState({ active: false, step: 'method', method: null, otp: '' })}>Cancel</Button>
+          <Button type="button" className="text-muted text-sm cursor-pointer border-none bg-none settings-link-button" onClick={() => setForgotPasswordState({ active: false, step: 'method', method: null, otp: '' })}>Cancel</Button>
         </>
       )}
       {forgotPasswordState.step === 'otp' && (
@@ -364,7 +366,7 @@ function ForgotPasswordSection({
             autoComplete="one-time-code"
             fullWidth
           />
-          <Button type="button" className="text-muted text-sm cursor-pointer border-none bg-none" style={{ textDecoration: "underline", alignSelf: "flex-start" }} onClick={() => setForgotPasswordState({ active: false, step: 'method', method: null, otp: '' })}>Cancel Reset</Button>
+          <Button type="button" className="text-muted text-sm cursor-pointer border-none bg-none settings-link-button self-start" onClick={() => setForgotPasswordState({ active: false, step: 'method', method: null, otp: '' })}>Cancel Reset</Button>
         </>
       )}
     </div>
@@ -423,7 +425,7 @@ function CurrentPasswordSection({
               current: !prev.current,
             }))
           }
-          className="absolute cursor-pointer text-base border-none bg-none opacity-70" style={{ right: "12px", top: "50%", transform: "translateY(-50%)" }}
+          className="absolute cursor-pointer text-base border-none bg-none opacity-70 password-eye-button"
         >
           {showPassword.current ? "👁️" : "🙈"}
         </Button>

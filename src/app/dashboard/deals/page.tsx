@@ -14,55 +14,55 @@ import { Button } from "@/components/ui";
 
 const statusConfig: Record<
   string,
-  { label: string; color: string; icon: string }
+  { label: string; tone: string; icon: string }
 > = {
   PENDING_SIGNATURE: {
     label: "Awaiting Signature",
-    color: "var(--color-warning)",
+    tone: "warning",
     icon: "SG",
   },
-  ACTIVE: { label: "Active", color: "var(--color-accent-cyan)", icon: "AC" },
+  ACTIVE: { label: "Active", tone: "cyan", icon: "AC" },
   CONTENT_SUBMITTED: {
     label: "Awaiting Review",
-    color: "var(--color-accent-amber)",
+    tone: "warning",
     icon: "RV",
   },
   REVISION_REQUESTED: {
     label: "Revision Needed",
-    color: "var(--color-warning)",
+    tone: "warning",
     icon: "RN",
   },
   CONTENT_APPROVED: {
     label: "Ready to Post",
-    color: "var(--color-primary)",
+    tone: "primary",
     icon: "AP",
   },
   POSTED: {
     label: "Post Submitted",
-    color: "var(--color-accent-cyan)",
+    tone: "cyan",
     icon: "PS",
   },
   VERIFICATION_PENDING: {
     label: "Verifying",
-    color: "var(--color-accent-amber)",
+    tone: "warning",
     icon: "VR",
   },
-  VERIFIED: { label: "Verified", color: "var(--color-success)", icon: "OK" },
-  COMPLETED: { label: "Completed", color: "var(--color-success)", icon: "CP" },
-  DISPUTED: { label: "Disputed", color: "var(--color-error)", icon: "DS" },
+  VERIFIED: { label: "Verified", tone: "success", icon: "OK" },
+  COMPLETED: { label: "Completed", tone: "success", icon: "CP" },
+  DISPUTED: { label: "Disputed", tone: "danger", icon: "DS" },
   CANCELLED: {
     label: "Cancelled",
-    color: "var(--color-text-muted)",
+    tone: "muted",
     icon: "CL",
   },
   PAYMENT_PENDING: {
     label: "Payment Pending",
-    color: "var(--color-warning)",
+    tone: "warning",
     icon: "PP",
   },
   PAYMENT_HELD: {
     label: "Payment Secured",
-    color: "var(--color-success)",
+    tone: "success",
     icon: "PS",
   },
 };
@@ -71,7 +71,7 @@ function getStatusInfo(status: string) {
   return (
     statusConfig[status] || {
       label: status.replaceAll("_", " "),
-      color: "var(--color-text-muted)",
+      tone: "muted",
       icon: "--",
     }
   );
@@ -171,27 +171,27 @@ function DealSkeleton() {
   return (
     <div className="card mb-4">
       <div className="flex gap-4 items-center mb-4">
-        <div className="skeleton flex-shrink-0 rounded-md" style={{ width: 48, height: 48 }} />
+        <div className="deal-skeleton-logo skeleton flex-shrink-0 rounded-md" />
         <div className="flex-1">
-          <div className="skeleton rounded-md" style={{ height: 16, width: "60%", marginBottom: 8 }} />
-          <div className="skeleton rounded-md h-3" style={{ width: "40%" }} />
+          <div className="deal-skeleton-title skeleton rounded-md" />
+          <div className="deal-skeleton-subtitle skeleton rounded-md h-3" />
         </div>
         <div className="skeleton rounded-full h-7 w-25" />
       </div>
       <div className="flex justify-between items-center flex-wrap gap-4">
-        <div className="flex flex-1" style={{ gap: 24 }}>
+        <div className="deal-skeleton-meta flex flex-1">
           <div>
-            <div className="skeleton rounded-sm h-3 mb-1-5" style={{ width: 70 }} />
-            <div className="skeleton rounded-sm h-3-5" style={{ width: 90 }} />
+            <div className="deal-skeleton-label-wide skeleton rounded-sm h-3 mb-1-5" />
+            <div className="deal-skeleton-value-wide skeleton rounded-sm h-3-5" />
           </div>
           <div>
-            <div className="skeleton rounded-sm h-3 mb-1-5" style={{ width: 50 }} />
+            <div className="deal-skeleton-label skeleton rounded-sm h-3 mb-1-5" />
             <div className="skeleton rounded-sm h-3-5 w-15" />
           </div>
         </div>
         <div className="text-right">
-          <div className="skeleton rounded-sm h-3 mb-1-5 ml-auto" style={{ width: 50 }} />
-          <div className="skeleton rounded-sm h-5-5 ml-auto" style={{ width: 90 }} />
+          <div className="deal-skeleton-label skeleton rounded-sm h-3 mb-1-5 ml-auto" />
+          <div className="deal-skeleton-value-wide skeleton rounded-sm h-5-5 ml-auto" />
         </div>
       </div>
     </div>
@@ -244,10 +244,8 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
 
   return (
     <div
-      className="card overflow-hidden p-0" style={{ border:
-          selectedDeal === deal.id
-            ? "1px solid var(--color-primary)"
-            : "1px solid transparent" }}
+      className="deal-list-card card overflow-hidden p-0"
+      data-selected={selectedDeal === deal.id}
     >
       <Button
         type="button"
@@ -291,7 +289,8 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
             </div>
           </div>
           <div
-            className="flex items-center gap-2 text-xs font-semibold px-3-py-1 rounded-full" style={{ background: `${status.color}20`, color: status.color, alignSelf: "flex-start" }}
+            className="deal-status-chip flex items-center gap-2 text-xs font-semibold px-3-py-1 rounded-full"
+            data-tone={status.tone}
           >
             <span>{status.icon}</span>
             <span>{status.label}</span>
@@ -337,7 +336,7 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
               </div>
             </div>
           </div>
-          <div className="text-right" style={{ minWidth: "80px" }}>
+          <div className="deal-amount text-right">
             <div
               className="text-xs text-muted"
             >
@@ -355,7 +354,7 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
 
       {selectedDeal === deal.id && (
         <div
-          className="border-top" style={{ margin: "0 24px 24px 24px", paddingTop: "20px" }}
+          className="deal-expanded border-top"
         >
           <div
             className="grid-2 gap-4 mb-4"
@@ -480,7 +479,7 @@ export default function DealsPage() {
           <div className="grid-3 mb-6">
             {[1, 2, 3].map((i) => (
               <div key={i} className="card text-center p-6">
-                <div className="skeleton h-9 w-20 rounded-md" style={{ margin: "0 auto 8px" }} />
+                <div className="deal-stat-skeleton skeleton h-9 w-20 rounded-md" />
                 <div className="skeleton rounded-sm mx-auto h-3 w-25" />
               </div>
             ))}
@@ -585,7 +584,7 @@ export default function DealsPage() {
       )}
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-4" style={{ padding: "24px 0" }}>
+        <div className="deals-pagination flex justify-center items-center gap-4">
           <Button
             variant="secondary"
             disabled={currentPage <= 1}

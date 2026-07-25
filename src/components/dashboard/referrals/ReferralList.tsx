@@ -45,9 +45,7 @@ export default function ReferralList() {
   }
 
   return (
-    <div
-      className="card p-0 overflow-hidden border-card rounded-xl" style={{ background: "var(--color-bg-card)" }}
-    >
+    <div className="card p-0 overflow-hidden border-card rounded-xl referral-list-card">
       <div
         className="p-6 border-b-card flex justify-between items-center flex-wrap gap-4"
       >
@@ -64,8 +62,8 @@ export default function ReferralList() {
               key={f}
               variant="ghost"
               onClick={() => setFilter(f)}
-              className="text-xs font-semibold rounded-md border-none px-3-py-1" style={{ background:
-                  filter === f ? "var(--color-primary)" : "var(--color-bg-tertiary)", color: filter === f ? "white" : "var(--color-text-secondary)" }}
+              className="text-xs font-semibold rounded-md border-none px-3-py-1 referral-filter-button"
+              data-active={filter === f ? "true" : "false"}
             >
               {f}
             </Button>
@@ -96,16 +94,14 @@ export default function ReferralList() {
             {filteredReferrals.map((ref) => (
               <tr
                 key={ref.id}
-                 style={{ transition: "background 0.2s" }}
-                 className="border-b-card hover:bg-[var(--color-bg-tertiary)] text-sm"
+                 className="border-b-card hover:bg-[var(--color-bg-tertiary)] text-sm referral-row"
               >
                 <td className="p-4">
                   <div
                     className="flex items-center gap-3"
                   >
                     <div
-                      className="flex items-center justify-center font-bold text-sm rounded-full text-white w-36 h-36" style={{ background:
-                          "linear-gradient(135deg, var(--color-primary), var(--color-accent-purple))" }}
+                      className="flex items-center justify-center font-bold text-sm rounded-full text-white w-36 h-36 referral-avatar"
                     >
                       {ref.name.charAt(0).toUpperCase()}
                     </div>
@@ -125,13 +121,8 @@ export default function ReferralList() {
                 </td>
                 <td className="p-4">
                   <span
-                    className="font-bold rounded-2xl text-xs uppercase px-2-py-1" style={{ background:
-                        ref.type === "BRAND"
-                          ? "rgba(6, 182, 212, 0.15)"
-                          : "rgba(236, 72, 153, 0.15)", color:
-                        ref.type === "BRAND"
-                          ? "var(--color-accent-cyan)"
-                          : "var(--color-secondary)" }}
+                    className="font-bold rounded-2xl text-xs uppercase px-2-py-1 referral-type-badge"
+                    data-type={ref.type}
                   >
                     {ref.type}
                   </span>
@@ -147,16 +138,11 @@ export default function ReferralList() {
                 </td>
                 <td className="p-4 text-center">
                   <span
-                    className="inline-flex items-center text-xs font-semibold rounded-lg gap-1-5 px-2-py-1" style={{ background:
-                        ref.status === "ACTIVE"
-                          ? "rgba(16, 185, 129, 0.15)"
-                          : "rgba(245, 158, 11, 0.15)", color:
-                        ref.status === "ACTIVE"
-                          ? "var(--color-accent-emerald)"
-                          : "var(--color-accent-amber)" }}
+                    className="inline-flex items-center text-xs font-semibold rounded-lg gap-1-5 px-2-py-1 referral-status-badge"
+                    data-status={ref.status}
                   >
                     <span
-                      className="rounded-full h-6" style={{ width: "6px", background: "currentColor" }}
+                      className="rounded-full h-6 referral-status-dot"
                     ></span>
                     {ref.status}
                   </span>

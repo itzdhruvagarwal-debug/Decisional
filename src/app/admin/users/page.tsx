@@ -30,10 +30,10 @@ function getParam(
   return Array.isArray(value) ? value[0] : value;
 }
 
-function statusColor(status: string) {
-  if (status === "ACTIVE") return "var(--color-success)";
-  if (status === "BANNED" || status === "SUSPENDED") return "var(--color-error)";
-  return "var(--color-warning)";
+function statusTone(status: string) {
+  if (status === "ACTIVE") return "success";
+  if (status === "BANNED" || status === "SUSPENDED") return "danger";
+  return "warning";
 }
 
 interface TaxComplianceUser {
@@ -55,12 +55,12 @@ function taxStatusLabel(user: TaxComplianceUser) {
   return tax.status ? tax.status.toLowerCase().replaceAll("_", " ") : "Pending";
 }
 
-function taxStatusColor(user: TaxComplianceUser) {
-  if (user.userType === "ADMIN") return "var(--color-text-muted)";
+function taxStatusTone(user: TaxComplianceUser) {
+  if (user.userType === "ADMIN") return "muted";
   const tax = user.taxCompliance;
-  if (!tax?.panLast4) return "var(--color-error)";
-  if (tax.status === "READY") return "var(--color-success)";
-  return "var(--color-warning)";
+  if (!tax?.panLast4) return "danger";
+  if (tax.status === "READY") return "success";
+  return "warning";
 }
 
 export default async function AdminUsersPage({
@@ -115,14 +115,14 @@ export default async function AdminUsersPage({
           name="search"
           placeholder="Search name, email, or phone"
           defaultValue={query}
-          style={{ minWidth: "260px", flex: "1 1 320px" }}
+          className="admin-user-search"
         />
         <Select name="type" defaultValue={userType} className="w-180">
           <option value="ALL">All roles</option>
           <option value="INFLUENCER">Influencers</option>
           <option value="BRAND">Brands</option>
         </Select>
-        <Select name="status" defaultValue={status} style={{ width: "200px" }}>
+        <Select name="status" defaultValue={status} className="admin-status-select">
           <option value="ALL">All statuses</option>
           <option value="ACTIVE">Active</option>
           <option value="PENDING_VERIFICATION">Pending verification</option>
@@ -144,18 +144,15 @@ export default async function AdminUsersPage({
           />
         ) : (
           <div className="admin-table-wrap">
-            <table className="w-full border-collapse" style={{ minWidth: "960px" }}>
+            <table className="admin-users-table w-full border-collapse">
               <thead>
                 <tr className="bg-secondary">
                   {["User", "Role", "Status", "Tax", "Trust", "Joined", "Action"].map(
                     (heading) => (
                       <th
                         key={heading}
-                        className="border-b-card text-muted text-xs font-extrabold uppercase" style={{ padding: "14px 18px", textAlign: (
-                            {
-                              Action: "right", Trust: "center"
-                            } as const
-                          )[heading as "Action" | "Trust"] || "left" }}
+                        className="admin-users-th border-b-card text-muted text-xs font-extrabold uppercase"
+                        data-align={heading === "Action" ? "right" : heading === "Trust" ? "center" : "left"}
                       >
                         {heading}
                       </th>
@@ -181,7 +178,7 @@ export default async function AdminUsersPage({
                       <td className="p-card">
                         <div className="flex items-center gap-3">
                           <div
-                            className="flex items-center justify-center relative overflow-hidden rounded-full font-extrabold bg-gradient-primary text-white" style={{ width: "42px", height: "42px" }}
+                            className="admin-user-avatar flex items-center justify-center relative overflow-hidden rounded-full font-extrabold bg-gradient-primary text-white"
                           >
                             {avatar ? (
                               <Image
@@ -208,14 +205,16 @@ export default async function AdminUsersPage({
                       </td>
                       <td className="p-card">
                         <span
-                          className="badge capitalize text-white" style={{ background: statusColor(user.status) }}
+                          className="admin-tone-badge badge capitalize text-white"
+                          data-tone={statusTone(user.status)}
                         >
                           {user.status.toLowerCase().replaceAll("_", " ")}
                         </span>
                       </td>
                       <td className="p-card">
                         <span
-                          className="badge capitalize text-white" style={{ background: taxStatusColor(user) }}
+                          className="admin-tone-badge badge capitalize text-white"
+                          data-tone={taxStatusTone(user)}
                         >
                           {taxStatusLabel(user)}
                         </span>
@@ -241,7 +240,7 @@ export default async function AdminUsersPage({
               <input type="hidden" name="userId" value={user.id} />
               <Select
                 name="badgeId"
-                className="text-xs px-2-py-05 h-30" style={{ width: "140px" }}
+                className="admin-award-select text-xs px-2-py-05 h-30"
                 defaultValue=""
                 required
               >
@@ -255,7 +254,7 @@ export default async function AdminUsersPage({
                 variant="primary"
                 size="sm"
                 type="submit"
-                className="h-30" style={{ padding: "0 8px" }}
+                className="admin-grant-btn h-30"
               >
                 Grant
               </Button>
@@ -302,15 +301,17 @@ export default async function AdminUsersPage({
         <div className="flex gap-2">
           <Link
             href={`/admin/users?page=${page - 1}&search=${encodeURIComponent(query)}&type=${userType}&status=${status}`}
-            className={`btn btn-secondary btn-sm`}
-            style={{ pointerEvents: page <= 1 ? "none" : "auto", opacity: page <= 1 ? 0.5 : 1 }}
+            className="admin-page-link btn btn-secondary btn-sm"
+            data-disabled={page <= 1}
+            aria-disabled={page <= 1}
           >
             Previous
           </Link>
           <Link
             href={`/admin/users?page=${page + 1}&search=${encodeURIComponent(query)}&type=${userType}&status=${status}`}
-            className={`btn btn-secondary btn-sm`}
-            style={{ pointerEvents: page >= totalPages ? "none" : "auto", opacity: page >= totalPages ? 0.5 : 1 }}
+            className="admin-page-link btn btn-secondary btn-sm"
+            data-disabled={page >= totalPages}
+            aria-disabled={page >= totalPages}
           >
             Next
           </Link>

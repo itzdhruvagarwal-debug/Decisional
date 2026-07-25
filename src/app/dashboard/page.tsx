@@ -41,9 +41,7 @@ async function fetchDashboardData(userId: string, userType: string, fy?: string)
 function DashboardErrorFallback({ user }: Readonly<{ user: Session["user"] }>) {
   return (
     <DashboardShell user={user}>
-      <div
-        className="text-center rounded-xl max-w-600" style={{ padding: "80px 40px", background: "rgba(244, 63, 94, 0.05)", border: "1px dashed var(--color-accent-rose)", margin: "40px auto" }}
-      >
+      <div className="text-center rounded-xl max-w-600 dashboard-error-fallback">
         <div className="mb-5 text-3xl" aria-hidden="true">
           !
         </div>
@@ -60,7 +58,7 @@ function DashboardErrorFallback({ user }: Readonly<{ user: Session["user"] }>) {
         </p>
         <a
           href="/dashboard"
-          className="btn btn-danger no-underline inline-block" style={{ padding: "12px 32px" }}
+          className="btn btn-danger no-underline inline-block dashboard-fallback-button"
           aria-label="Reload dashboard"
         >
           Reload Dashboard
@@ -72,12 +70,10 @@ function DashboardErrorFallback({ user }: Readonly<{ user: Session["user"] }>) {
 
 function DashboardEmptyState({ dataLoadFailed }: Readonly<{ dataLoadFailed: boolean }>) {
   return (
-    <div className="text-center" style={{ padding: "100px 40px" }}>
-      <div
-        className="glass mx-auto" style={{ maxWidth: "560px", padding: "60px 40px", borderRadius: "var(--radius-2xl)" }}
-      >
+    <div className="text-center dashboard-empty-wrap">
+      <div className="glass mx-auto dashboard-empty-card">
         <div
-          className="mb-6" style={{ fontSize: "64px", filter: "drop-shadow(0 0 20px rgba(99, 102, 241, 0.3))" }}
+          className="mb-6 dashboard-empty-icon"
           aria-hidden="true"
         >
           {dataLoadFailed ? "!" : "..."}
@@ -96,7 +92,7 @@ function DashboardEmptyState({ dataLoadFailed }: Readonly<{ dataLoadFailed: bool
         </p>
         <a
           href="/dashboard"
-          className="btn btn-primary btn-lg no-underline inline-block" style={{ padding: "14px 40px" }}
+          className="btn btn-primary btn-lg no-underline inline-block dashboard-empty-button"
           aria-label={
             dataLoadFailed
               ? "Retry dashboard data load"
@@ -150,7 +146,7 @@ export default async function DashboardPage({
   const renderDashboardContent = () => {
     if (isAdmin && adminData) {
       return (
-        <div className="mx-auto" style={{ maxWidth: "1400px" }}>
+        <div className="mx-auto dashboard-admin-content">
           <header className="mb-10">
             <h1
               className="gradient-text mb-2 text-3xl font-extrabold"

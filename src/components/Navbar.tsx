@@ -51,7 +51,7 @@ export default function Navbar() {
               <Link
                 key={link.label}
                 href={link.href}
-                className="btn-ghost text-sm" style={{ padding: "8px 14px" }}
+                className="nav-link btn-ghost text-sm"
               >
                 {link.label}
               </Link>

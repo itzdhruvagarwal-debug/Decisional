@@ -268,9 +268,9 @@ export default function CreateCampaignClient() {
   }
 
   return (
-    <div className="w-full max-w-800 mx-auto" style={{ paddingBottom: "64px" }}>
+    <div className="w-full max-w-800 mx-auto campaign-create-wrap">
       <h1
-        className="font-black mb-2 text-3xl bg-gradient-primary" style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+        className="font-black mb-2 text-3xl bg-gradient-primary campaign-create-title"
       >
         {editCampaignId ? "Edit Draft Campaign" : "Create New Campaign"}
       </h1>
@@ -284,10 +284,10 @@ export default function CreateCampaignClient() {
 
       {invitedInfluencer && (
         <div
-          className="flex items-center gap-3 mb-6 bg-indigo-subtle rounded-xl backdrop-blur" style={{ padding: "16px 20px", border: "1px solid rgba(99, 102, 241, 0.2)" }}
+          className="flex items-center gap-3 mb-6 bg-indigo-subtle rounded-xl backdrop-blur campaign-invite-banner"
         >
           <div
-            className="rounded-full" style={{ width: "8px", height: "8px", background: "#6366f1", boxShadow: "0 0 12px #6366f1" }}
+            className="rounded-full campaign-invite-dot"
           />
           <span className="font-medium text-sm text-primary">
             Inviting: <strong className="text-indigo">@{invitedInfluencer.instagramHandle || invitedInfluencer.youtubeHandle || invitedInfluencer.displayName}</strong> ({invitedInfluencer.displayName})
@@ -300,7 +300,7 @@ export default function CreateCampaignClient() {
       >
         {error && (
           <div
-            className="mb-6 bg-rose-subtle rounded-md text-rose px-4-py-3" style={{ border: "1px solid rgba(244, 63, 94, 0.2)" }}
+            className="mb-6 bg-rose-subtle rounded-md text-rose px-4-py-3 campaign-error"
           >
             {error}
           </div>
@@ -366,15 +366,8 @@ export default function CreateCampaignClient() {
                   type="button"
                   onClick={() => handleCategoryToggle(cat)}
                   variant={formData.targetCategories.includes(cat) ? "primary" : "ghost"}
-                  className="cursor-pointer text-sm px-4-py-2" style={{ background: formData.targetCategories.includes(cat)
-                      ? "var(--gradient-primary)"
-                      : "var(--color-bg-tertiary)", color: formData.targetCategories.includes(cat)
-                      ? "white"
-                      : "var(--color-text-secondary)", border: formData.targetCategories.includes(cat)
-                      ? "none"
-                      : "1px solid var(--color-border)", boxShadow: formData.targetCategories.includes(cat)
-                      ? "0 4px 16px rgba(99, 102, 241, 0.4)"
-                      : "none", transition: "all 0.3s ease" }}
+                  className="cursor-pointer text-sm px-4-py-2 campaign-category-chip"
+                  data-selected={formData.targetCategories.includes(cat) ? "true" : "false"}
                 >
                   {cat}
                 </Button>

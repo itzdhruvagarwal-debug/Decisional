@@ -123,28 +123,28 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
             icon="spend"
             label="Total Spent"
             value={`₹${(overview.totalSpent / 100).toLocaleString("en-IN")}`}
-            accentColor="var(--color-secondary)"
+            tone="primary"
           />
           <StatCard
             icon="campaigns"
             label="Active Campaigns"
             value={overview.activeCampaigns}
             subvalue={`${overview.totalCampaigns} total`}
-            accentColor="var(--color-accent-cyan)"
+            tone="cyan"
           />
           <StatCard
             icon="deals"
             label="Active Deals"
             value={overview.activeDeals}
             subvalue={`${overview.completedDeals} completed`}
-            accentColor="var(--color-accent-emerald)"
+            tone="emerald"
           />
           <StatCard
             icon="trust"
             label="Trust Score"
             value={overview.trustScore ? `${overview.trustScore}/900` : "N/A"}
             subvalue={overview.trustScore ? getTierLabel(overview.trustScore) : "Brand"}
-            accentColor="var(--color-primary-light)"
+            tone="violet"
           />
         </div>
       </section>
@@ -219,7 +219,7 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
               </span>
             </div>
 
-            <div className="divider" style={{ margin: "8px 0" }} />
+            <div className="divider brand-referral-divider" />
 
             <div>
               <div
@@ -250,10 +250,7 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
         </div>
 
         {/* CTA Card */}
-        <div
-          className="card col-span-2 flex flex-col justify-center" style={{ background:
-              "linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1))", border: "1px solid rgba(99, 102, 241, 0.2)" }}
-        >
+        <div className="card col-span-2 flex flex-col justify-center brand-referral-cta">
           <h3
             className="text-xl font-extrabold mb-2"
           >
@@ -319,25 +316,25 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
               {recentCampaigns.map((c) => (
                 <tr
                   key={c.id}
-                  className="border-b-card" style={{ transition: "background var(--transition-fast)" }}
+                  className="border-b-card brand-campaign-row"
                 >
                   <td
-                    className="text-sm font-semibold" style={{ padding: "14px 12px" }}
+                    className="text-sm font-semibold brand-campaign-cell"
                   >
                     {c.title}
                   </td>
-                  <td style={{ padding: "14px 12px" }}>
+                  <td className="brand-campaign-cell">
                     <span className={`badge ${getStatusBadge(c.status)}`}>
                       {c.status}
                     </span>
                   </td>
                   <td
-                    className="text-sm text-secondary" style={{ padding: "14px 12px" }}
+                    className="text-sm text-secondary brand-campaign-cell"
                   >
                     Rs {(c.budget / 100).toLocaleString()}
                   </td>
                   <td
-                    className="text-sm text-secondary" style={{ padding: "14px 12px" }}
+                    className="text-sm text-secondary brand-campaign-cell"
                   >
                     {c.dealsCount}
                   </td>
@@ -368,7 +365,7 @@ interface StatCardProps {
   readonly label: string;
   readonly value: string | number;
   readonly subvalue?: string;
-  readonly accentColor: string;
+  readonly tone: "primary" | "cyan" | "emerald" | "violet";
 }
 
 const BRAND_STAT_ICONS: Record<StatCardProps["icon"], React.ReactNode> = {
@@ -406,13 +403,11 @@ function StatCard({
   label,
   value,
   subvalue,
-  accentColor,
+  tone,
 }: StatCardProps) {
   return (
-    <div className="card hover-lift">
-      <div
-        className="flex items-center gap-2-5 mb-3" style={{ color: accentColor }}
-      >
+    <div className="card hover-lift brand-stat-card" data-tone={tone}>
+      <div className="flex items-center gap-2-5 mb-3 brand-stat-heading">
         {BRAND_STAT_ICONS[icon]}
         <span
           className="text-secondary text-sm font-medium"
@@ -420,9 +415,7 @@ function StatCard({
           {label}
         </span>
       </div>
-      <div
-        className="font-extrabold text-3xl" style={{ color: accentColor, lineHeight: 1.2 }}
-      >
+      <div className="font-extrabold text-3xl brand-stat-value">
         {value}
       </div>
       {subvalue && (

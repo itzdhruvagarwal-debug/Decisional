@@ -21,7 +21,6 @@ interface Props {
   readonly onClose: () => void;
 }
 
-// ── helpers ──────────────────────────────────────────────────────────────────
 function pad(n: number) { return String(n).padStart(2, "0"); }
 function toIso(d: Date) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
 function startOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1); }
@@ -32,17 +31,20 @@ function currentFY() {
   const y = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
   return `${y}-${String(y + 1).slice(-2)}`;
 }
+
 function fyBounds(fy: string) {
   const y = Number.parseInt(fy.split("-")[0]!, 10);
   return { start: new Date(y, 3, 1), end: new Date(y + 1, 2, 31) };
 }
+
 function prevFY(fy: string) {
   const y = Number.parseInt(fy.split("-")[0]!, 10);
   return `${y - 1}-${String(y).slice(-2)}`;
 }
+
 function availableFYs() {
   const cur = currentFY();
-  const y   = Number.parseInt(cur.split("-")[0]!, 10);
+  const y = Number.parseInt(cur.split("-")[0]!, 10);
   return [
     `${y}-${String(y + 1).slice(-2)}`,
     `${y - 1}-${String(y).slice(-2)}`,
@@ -52,30 +54,29 @@ function availableFYs() {
 
 interface Preset { label: string; start: Date; end: Date; }
 function buildPresets(): Preset[] {
-  const now  = new Date();
-  const cfy  = fyBounds(currentFY());
-  const lfy  = fyBounds(prevFY(currentFY()));
+  const now = new Date();
+  const cfy = fyBounds(currentFY());
+  const lfy = fyBounds(prevFY(currentFY()));
   const last = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const ago3 = new Date(now.getFullYear(), now.getMonth() - 3, 1);
   return [
-    { label: "This Month",                       start: startOfMonth(now),  end: endOfMonth(now) },
-    { label: "Last Month",                        start: startOfMonth(last), end: endOfMonth(last) },
-    { label: "Last 3 Months",                     start: ago3,               end: now },
-    { label: `This FY (${currentFY()})`,          start: cfy.start,          end: cfy.end },
-    { label: `Last FY (${prevFY(currentFY())})`,  start: lfy.start,          end: lfy.end },
-    { label: "Custom",                            start: now,                end: now },
+    { label: "This Month", start: startOfMonth(now), end: endOfMonth(now) },
+    { label: "Last Month", start: startOfMonth(last), end: endOfMonth(last) },
+    { label: "Last 3 Months", start: ago3, end: now },
+    { label: `This FY (${currentFY()})`, start: cfy.start, end: cfy.end },
+    { label: `Last FY (${prevFY(currentFY())})`, start: lfy.start, end: lfy.end },
+    { label: "Custom", start: now, end: now },
   ];
 }
 
-// ── component ────────────────────────────────────────────────────────────────
 export default function PeriodPickerModal({ type, title, icon, isLoading, onConfirm, onClose }: Props) {
   const presets = buildPresets();
-  const fys     = availableFYs();
-  const now     = new Date();
+  const fys = availableFYs();
+  const now = new Date();
 
   const [selected, setSelected] = useState(presets[0]!.label);
-  const [custom,   setCustom]   = useState({ start: "", end: "" });
-  const [fy,       setFy]       = useState(currentFY());
+  const [custom, setCustom] = useState({ start: "", end: "" });
+  const [fy, setFy] = useState(currentFY());
 
   const isCustom = selected === "Custom";
 
@@ -85,77 +86,23 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
       return { startDate: toIso(b.start), endDate: toIso(b.end), fy, label: `FY ${fy}` };
     }
     if (isCustom) {
-      return { startDate: custom.start, endDate: custom.end, label: `${custom.start} → ${custom.end}` };
+      return { startDate: custom.start, endDate: custom.end, label: `${custom.start} -> ${custom.end}` };
     }
-    const p = presets.find(p => p.label === selected)!;
+    const p = presets.find(preset => preset.label === selected)!;
     return { startDate: toIso(p.start), endDate: toIso(p.end), label: p.label };
   }
 
   const valid = type === "report" || (isCustom ? !!custom.start && !!custom.end && custom.start <= custom.end : true);
-
-  const selectedPreset = presets.find(p => p.label === selected);
-
-  // ── styles ───────────────────────────────────────────────────────────────
-  const css = {
-    overlay: {
-      position: "fixed" as const, inset: 0, zIndex: 9999,
-      display: "flex", alignItems: "center", justifyContent: "center", padding: "16px",
-    },
-    modal: {
-      position: "relative" as const,
-      background: "var(--color-surface, #14142b)",
-      border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: "20px", width: "100%", maxWidth: "480px",
-      boxShadow: "0 40px 120px rgba(0,0,0,0.7)",
-      overflow: "hidden",
-      zIndex: 1001,
-    },
-    header: {
-      padding: "24px 28px 20px",
-      borderBottom: "1px solid rgba(255,255,255,0.07)",
-      display: "flex", alignItems: "center", gap: "14px",
-    },
-    iconBox: {
-      width: 46, height: 46, borderRadius: "12px",
-      background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: "22px", flexShrink: 0,
-    },
-    sectionLabel: {
-      display: "block", fontSize: "10px", fontWeight: 700,
-      letterSpacing: "0.08em", textTransform: "uppercase" as const,
-      color: "var(--color-text-secondary,#9ca3af)", marginBottom: "10px",
-    },
-    presetGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "20px" },
-    infoBox: {
-      padding: "12px 16px", borderRadius: "12px",
-      background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.25)",
-      fontSize: "13px", color: "var(--color-text-secondary,#9ca3af)",
-    },
-    select: {
-      width: "100%", padding: "11px 14px", borderRadius: "12px",
-      background: "rgba(255,255,255,0.05)",
-      border: "1px solid rgba(255,255,255,0.12)",
-      color: "var(--color-text-primary,#fff)", fontSize: "14px",
-      outline: "none", marginBottom: "20px", cursor: "pointer",
-    },
-    dateInput: {
-      width: "100%", padding: "11px 14px", borderRadius: "12px",
-      background: "rgba(255,255,255,0.05)",
-      border: "1px solid rgba(255,255,255,0.12)",
-      color: "var(--color-text-primary,#fff)", fontSize: "14px",
-      outline: "none",
-    },
-  };
+  const selectedPreset = presets.find(preset => preset.label === selected);
 
   return (
     <Modal open={true} onClose={onClose} maxWidth="480px">
       {/* ── Custom Header ── */}
-      <div className="flex items-center mb-5" style={{ padding: "0 0 20px 0", borderBottom: "1px solid rgba(255,255,255,0.07)", gap: "14px" }}>
-        <div style={css.iconBox}>{icon}</div>
+      <div className="flex items-center mb-5 period-picker-header">
+        <div className="period-picker-icon">{icon}</div>
         <div className="flex-1 min-w-0">
           <div className="text-base font-bold text-text-primary">{title}</div>
-          <div className="text-xs text-secondary-muted" style={{ marginTop: "3px" }}>
+          <div className="text-xs text-secondary-muted period-picker-subtitle">
             Select the period for this {type === "report" ? "report" : "export"}
           </div>
         </div>
@@ -170,9 +117,9 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
       {/* ── Body ── */}
       {type === "report" ? (
         <>
-          <span style={css.sectionLabel}>Financial Year</span>
+          <span className="period-picker-label">Financial Year</span>
           <Select
-            style={css.select}
+            className="period-picker-select"
             aria-label="Financial year"
             value={fy}
             onChange={e => setFy(e.target.value)}
@@ -180,7 +127,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
           >
             {fys.map(f => <option key={f} value={f}>FY {f}</option>)}
           </Select>
-          <div style={css.infoBox}>
+          <div className="period-picker-info">
             📅 Report period:{" "}
             <strong className="text-text-primary">
               1 Apr {fy.split("-")[0]} – 31 Mar 20{fy.split("-")[1]}
@@ -190,8 +137,8 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
       ) : (
         <>
           {/* Quick-select presets */}
-          <span style={css.sectionLabel}>Quick Select</span>
-          <div style={css.presetGrid}>
+          <span className="period-picker-label">Quick Select</span>
+          <div className="period-picker-preset-grid">
             {presets.map(p => {
               const active = selected === p.label;
               return (
@@ -199,7 +146,8 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
                   key={p.label}
                   onClick={() => setSelected(p.label)}
                   aria-pressed={active}
-                  className="cursor-pointer text-sm font-semibold rounded-lg" style={{ padding: "11px 12px", textAlign: "left" as const, transition: "all .15s ease", background: active ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "rgba(255,255,255,0.04)", color: active ? "#fff" : "var(--color-text-secondary,#9ca3af)", border: active ? "1px solid transparent" : "1px solid rgba(255,255,255,0.08)" }}
+                  className="cursor-pointer text-sm font-semibold rounded-lg period-picker-preset"
+                  data-active={active ? "true" : "false"}
                 >
                   {p.label}
                 </Button>
@@ -210,12 +158,13 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
           {/* Custom date range */}
           {isCustom ? (
             <>
-              <span style={css.sectionLabel}>Custom Range</span>
-              <div className="grid gap-3 mb-4" style={{ gridTemplateColumns: "1fr 1fr" }}>
+              <span className="period-picker-label">Custom Range</span>
+              <div className="grid gap-3 mb-4 period-picker-date-grid">
                 <div>
                   <div className="text-xs mb-1 text-secondary-muted">From</div>
                   <Input
-                    type="date" style={css.dateInput}
+                    type="date"
+                    className="period-picker-date-input"
                     aria-label="Start date"
                     value={custom.start}
                     max={custom.end || toIso(now)}
@@ -226,7 +175,8 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
                 <div>
                   <div className="text-xs mb-1 text-secondary-muted">To</div>
                   <Input
-                    type="date" style={css.dateInput}
+                    type="date"
+                    className="period-picker-date-input"
                     aria-label="End date"
                     value={custom.end}
                     min={custom.start}
@@ -245,7 +195,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
           ) : (
             /* Period summary pill */
             selectedPreset && (
-              <div style={css.infoBox}>
+              <div className="period-picker-info">
                 📅{" "}
                 <strong className="text-text-primary">{toIso(selectedPreset.start)}</strong>
                 {" → "}
@@ -261,7 +211,7 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
         <Button
           onClick={onClose}
           variant="secondary"
-          className="text-sm font-semibold cursor-pointer rounded-lg bg-none text-secondary-muted" style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.12)" }}
+          className="text-sm font-semibold cursor-pointer rounded-lg bg-none text-secondary-muted period-picker-cancel"
         >
           Cancel
         </Button>
@@ -269,7 +219,8 @@ export default function PeriodPickerModal({ type, title, icon, isLoading, onConf
           disabled={!valid || !!isLoading}
           aria-busy={!!isLoading}
           onClick={() => valid && onConfirm(resolve())}
-          className="text-sm font-bold flex items-center gap-2 rounded-lg border-none text-white" style={{ padding: "11px 28px", background: valid && !isLoading ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "rgba(99,102,241,0.4)", cursor: valid && !isLoading ? "pointer" : "not-allowed", transition: "all .2s" }}
+          className="text-sm font-bold flex items-center gap-2 rounded-lg border-none text-white period-picker-confirm"
+          data-valid={valid && !isLoading ? "true" : "false"}
         >
           {isLoading ? <>⏳ Generating…</> : <>{icon} Download</>}
         </Button>

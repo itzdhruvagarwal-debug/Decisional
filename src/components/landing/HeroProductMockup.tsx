@@ -7,9 +7,7 @@ export function HeroProductMockup() {
   const [view, setView] = useState<"influencer" | "brand">("influencer");
 
   return (
-    <div
-      className="animate-fade-in flex flex-col items-center gap-4 w-full max-w-840" style={{ marginTop: "48px", marginInline: "auto" }}
-    >
+    <div className="hero-product-mockup animate-fade-in flex flex-col items-center gap-4 w-full max-w-840">
       {/* Mockup View Selector */}
       <div
         className="inline-flex bg-secondary p-1 border-card rounded-full"
@@ -18,7 +16,8 @@ export function HeroProductMockup() {
           type="button"
           variant="ghost"
           onClick={() => setView("influencer")}
-          className="text-sm font-semibold border-none px-4-py-2 rounded-full" style={{ background: view === "influencer" ? "var(--color-bg-tertiary)" : "transparent", color: view === "influencer" ? "white" : "var(--color-text-secondary)", transition: "all var(--transition-fast)" }}
+          className="mockup-view-toggle text-sm font-semibold border-none px-4-py-2 rounded-full"
+          data-active={view === "influencer"}
         >
           Influencer View
         </Button>
@@ -26,7 +25,8 @@ export function HeroProductMockup() {
           type="button"
           variant="ghost"
           onClick={() => setView("brand")}
-          className="text-sm font-semibold border-none px-4-py-2 rounded-full" style={{ background: view === "brand" ? "var(--color-bg-tertiary)" : "transparent", color: view === "brand" ? "white" : "var(--color-text-secondary)", transition: "all var(--transition-fast)" }}
+          className="mockup-view-toggle text-sm font-semibold border-none px-4-py-2 rounded-full"
+          data-active={view === "brand"}
         >
           Brand View
         </Button>
@@ -34,23 +34,23 @@ export function HeroProductMockup() {
 
       {/* Main Glassmorphic Container */}
       <div
-        className="w-full p-6 text-left relative overflow-hidden bg-glass rounded-xl backdrop-blur-lg" style={{ WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.08)", boxShadow: "0 24px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)" }}
+        className="mockup-panel w-full p-6 text-left relative overflow-hidden bg-glass rounded-xl backdrop-blur-lg"
       >
         {/* Glow Effects */}
         <div
-          className="absolute rounded-full pointer-events-none bg-color-primary" style={{ top: "-50px", right: "-50px", width: "150px", height: "150px", filter: "blur(80px)", opacity: 0.15 }}
+          className="mockup-glow mockup-glow-primary absolute rounded-full pointer-events-none bg-color-primary"
         />
         <div
-          className="absolute rounded-full pointer-events-none" style={{ bottom: "-50px", left: "-50px", width: "150px", height: "150px", background: "var(--color-secondary)", filter: "blur(80px)", opacity: 0.15 }}
+          className="mockup-glow mockup-glow-secondary absolute rounded-full pointer-events-none"
         />
 
         {/* Mockup Header */}
         <div
-          className="flex items-center justify-between mb-5 pb-4" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.06)" }}
+          className="mockup-header flex items-center justify-between mb-5 pb-4"
         >
           <div className="flex items-center gap-2">
             <span
-              className="rounded-full" style={{ width: "10px", height: "10px", background: "var(--color-success)", boxShadow: "0 0 8px var(--color-success)" }}
+              className="mockup-live-dot rounded-full"
             />
             <span className="text-sm font-bold text-white">
               {view === "influencer" ? "Influencer Workspace" : "Brand Campaign Control"}
@@ -66,28 +66,28 @@ export function HeroProductMockup() {
           <div className="flex flex-col gap-5">
             {/* Top Stats Row */}
             <div className="grid gap-4 grid-auto-140">
-              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
+              <div className="mockup-stat bg-glass rounded-lg px-4-py-3">
                 <span className="text-muted block text-xs">Wallet Balance</span>
                 <span className="text-xl font-extrabold text-white">₹42,850</span>
               </div>
-              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
+              <div className="mockup-stat bg-glass rounded-lg px-4-py-3">
                 <span className="text-muted block text-xs">Trust Score</span>
                 <span className="text-xl font-extrabold text-emerald">98% <span className="text-xs font-normal">(Excellent)</span></span>
               </div>
-              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
+              <div className="mockup-stat bg-glass rounded-lg px-4-py-3">
                 <span className="text-muted block text-xs">Gamification Tier</span>
                 <span className="text-xl font-extrabold text-amber">Gold IV 🏆</span>
               </div>
             </div>
 
             {/* Active Deal Status */}
-            <div className="p-4 bg-glass rounded-lg" style={{ border: "1px solid rgba(255, 255, 255, 0.06)" }}>
+            <div className="mockup-section p-4 bg-glass rounded-lg">
               <div className="flex justify-between mb-3">
                 <div>
                   <h4 className="text-sm font-bold mb-1 text-white">Nike India: Air Max Launch</h4>
                   <span className="text-xs text-secondary">Deliverable: 1 Instagram Reel + 1 Story</span>
                 </div>
-                <div className="inline-flex text-xs font-semibold bg-emerald-subtle text-emerald rounded-sm px-2-py-1" style={{ height: "fit-content" }}>
+                <div className="fit-content inline-flex text-xs font-semibold bg-emerald-subtle text-emerald rounded-sm px-2-py-1">
                   ₹25,000 in Escrow
                 </div>
               </div>
@@ -95,10 +95,10 @@ export function HeroProductMockup() {
               {/* Status Stepper */}
               <div className="flex items-center justify-between relative mt-5">
                 {/* Stepper Background Line */}
-                <div className="absolute z-0" style={{ left: "20px", right: "20px", height: "2px", background: "rgba(255, 255, 255, 0.1)" }} />
+                <div className="mockup-step-line absolute z-0" />
                 
                 {/* Stepper Active Line */}
-                <div className="absolute bg-color-primary z-0" style={{ left: "20px", width: "50%", height: "2px" }} />
+                <div className="mockup-step-line-active absolute bg-color-primary z-0" />
 
                 {/* Step 1: Signed */}
                 <div className="flex flex-col items-center relative gap-1-5 z-1">
@@ -114,13 +114,13 @@ export function HeroProductMockup() {
 
                 {/* Step 3: Submission Under Review */}
                 <div className="flex flex-col items-center relative gap-1-5 z-1">
-                  <div className="flex items-center justify-center text-xs rounded-full bg-tertiary text-white w-24 h-24" style={{ border: "2px solid var(--color-primary)", animation: "pulse 2s infinite" }}>●</div>
+                  <div className="mockup-step-current flex items-center justify-center text-xs rounded-full bg-tertiary text-white w-24 h-24">●</div>
                   <span className="font-semibold text-2xs text-white">Reviewing</span>
                 </div>
 
                 {/* Step 4: Complete & Disbursed */}
                 <div className="flex flex-col items-center relative gap-1-5 z-1">
-                  <div className="flex items-center justify-center text-muted rounded-full bg-tertiary text-2xs w-24 h-24" style={{ border: "1px solid rgba(255, 255, 255, 0.2)" }}>🔒</div>
+                  <div className="mockup-step-locked flex items-center justify-center text-muted rounded-full bg-tertiary text-2xs w-24 h-24">🔒</div>
                   <span className="text-muted text-2xs">Payout</span>
                 </div>
               </div>
@@ -131,32 +131,32 @@ export function HeroProductMockup() {
           <div className="flex flex-col gap-5">
             {/* Top Stats Row */}
             <div className="grid gap-4 grid-auto-140">
-              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
+              <div className="mockup-stat bg-glass rounded-lg px-4-py-3">
                 <span className="text-muted block text-xs">Active Campaigns</span>
                 <span className="text-xl font-extrabold text-white">3 Campaigns</span>
               </div>
-              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
+              <div className="mockup-stat bg-glass rounded-lg px-4-py-3">
                 <span className="text-muted block text-xs">Secured Escrow</span>
                 <span className="text-xl font-extrabold text-cyan">₹1,85,000</span>
               </div>
-              <div className="bg-glass rounded-lg px-4-py-3" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
+              <div className="mockup-stat bg-glass rounded-lg px-4-py-3">
                 <span className="text-muted block text-xs">ROI Index</span>
                 <span className="text-xl font-extrabold text-emerald">3.8x Profit</span>
               </div>
             </div>
 
             {/* Campaign Submissions */}
-            <div className="p-4 bg-glass rounded-lg" style={{ border: "1px solid rgba(255, 255, 255, 0.06)" }}>
+            <div className="mockup-section p-4 bg-glass rounded-lg">
               <div className="flex justify-between items-center mb-3">
                 <h4 className="text-sm font-bold text-white">Submissions Awaiting Approval (1)</h4>
                 <span className="flex items-center gap-1 text-xs text-amber">
-                  <span className="rounded-full h-6" style={{ width: "6px", background: "var(--color-accent-amber)", animation: "pulse 1.5s infinite" }} />{" "}
+                  <span className="mockup-timer-dot rounded-full h-6" />{" "}
                   48h Review Timer Running
                 </span>
               </div>
 
               {/* Creator Submission list item */}
-              <div className="flex items-center justify-between p-3 flex-wrap bg-glass rounded-md gap-2-5" style={{ border: "1px solid rgba(255, 255, 255, 0.04)" }}>
+              <div className="mockup-submission flex items-center justify-between p-3 flex-wrap bg-glass rounded-md gap-2-5">
                 <div className="flex items-center gap-2-5">
                   <div className="flex items-center justify-center font-extrabold text-xs rounded-full text-white w-32 h-32 bg-color-primary">
                     AM
@@ -167,10 +167,10 @@ export function HeroProductMockup() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button type="button" variant="secondary" className="text-xs rounded-sm px-3-py-1 bg-none text-white" style={{ border: "1px solid rgba(255, 255, 255, 0.1)" }}>
+                  <Button type="button" variant="secondary" className="mockup-secondary-action text-xs rounded-sm px-3-py-1 bg-none text-white">
                     View Draft
                   </Button>
-                  <Button type="button" variant="primary" className="font-semibold border-none text-xs rounded-sm px-3-py-1 bg-gradient-primary text-white" style={{ boxShadow: "var(--shadow-glow-primary)" }}>
+                  <Button type="button" variant="primary" className="mockup-primary-action font-semibold border-none text-xs rounded-sm px-3-py-1 bg-gradient-primary text-white">
                     Approve
                   </Button>
                 </div>

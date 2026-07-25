@@ -406,7 +406,7 @@ function WalletHeader({
     >
       <div>
         <h1
-          className="font-extrabold text-3xl bg-gradient-primary" style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+          className="font-extrabold text-3xl bg-gradient-primary wallet-title"
         >
           Wallet and Payments
         </h1>
@@ -436,7 +436,7 @@ function WalletHeader({
           aria-label={isDownloading["txn"] ? "Downloading transactions" : "Download transactions as CSV"}
           onClick={handleDownloadCSV}
           disabled={!!isDownloading["txn"]}
-          style={{ opacity: isDownloading["txn"] ? 0.7 : 1 }}
+          data-loading={isDownloading["txn"] ? "true" : "false"}
         >
           {isDownloading["txn"] ? "⏳ Downloading…" : "⬇ Download Transactions"}
         </Button>
@@ -446,7 +446,7 @@ function WalletHeader({
             aria-label={isDownloading["income"] ? "Downloading income report" : "Download income report for ITR"}
             onClick={handleDownloadIncomeReport}
             disabled={!!isDownloading["income"]}
-            style={{ opacity: isDownloading["income"] ? 0.7 : 1 }}
+            data-loading={isDownloading["income"] ? "true" : "false"}
           >
             {isDownloading["income"] ? "⏳ Downloading…" : "📄 Income Report (ITR)"}
           </Button>
@@ -457,7 +457,7 @@ function WalletHeader({
             aria-label={isDownloading["spend"] ? "Downloading spend report" : "Download spend report for GST"}
             onClick={handleDownloadSpendReport}
             disabled={!!isDownloading["spend"]}
-            style={{ opacity: isDownloading["spend"] ? 0.7 : 1 }}
+            data-loading={isDownloading["spend"] ? "true" : "false"}
           >
             {isDownloading["spend"] ? "⏳ Downloading…" : "📊 Spend Report (GST)"}
           </Button>
@@ -606,13 +606,8 @@ export default function WalletPage() {
               aria-selected={activeTab === tab}
               onClick={() => setActiveTab(tab)}
               variant="ghost"
-              className="capitalize" style={{ padding: "12px 0", borderBottom:
-                  activeTab === tab
-                    ? "2px solid var(--color-primary)"
-                    : "2px solid transparent", color:
-                  activeTab === tab
-                    ? "var(--color-primary)"
-                    : "var(--color-text-secondary)", fontWeight: activeTab === tab ? 700 : 500 }}
+              className="capitalize wallet-tab-button"
+              data-active={activeTab === tab ? "true" : "false"}
             >
               {getTabLabel(tab)}
             </Button>
@@ -652,7 +647,7 @@ export default function WalletPage() {
 
       {showWithdrawModal && (
         <div className="modal-overlay">
-          <div className="card w-full" style={{ maxWidth: "500px" }}>
+          <div className="card w-full wallet-withdraw-modal">
             <h2 className="text-xl font-extrabold mb-6">
               Request Withdrawal
             </h2>
@@ -737,7 +732,7 @@ export default function WalletPage() {
 
       {showAddFundsModal && (
         <div className="modal-overlay">
-          <div className="card w-full" style={{ maxWidth: "400px" }}>
+          <div className="card w-full wallet-add-funds-modal">
             <h2 className="text-xl font-extrabold mb-6">
               Add Funds
             </h2>

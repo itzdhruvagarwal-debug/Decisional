@@ -455,6 +455,65 @@
   font-size: 14px;
 }
 
+.forgot-password-glow {
+  filter: blur(80px);
+}
 
+.forgot-password-glow-primary {
+  top: 20%;
+  left: 10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+}
+
+.forgot-password-glow-secondary {
+  right: 10%;
+  bottom: 20%;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%);
+}
+
+.forgot-password-card {
+  max-width: 420px;
+}
+
+.forgot-password-message[data-status="success"] {
+  color: var(--color-accent-emerald);
+  border: 1px solid var(--color-accent-emerald);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.forgot-password-message[data-status="error"] {
+  color: var(--color-accent-rose);
+  border: 1px solid var(--color-accent-rose);
+  background: rgba(244, 63, 94, 0.1);
+}
+
+.forgot-password-dev-link {
+  color: #111827;
+  border: 1px dashed #ccc;
+  background: #f3f4f6;
+}
+
+.forgot-password-dev-anchor {
+  color: blue;
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .forgot-password-glow-primary {
+    left: -30%;
+    width: 280px;
+    height: 280px;
+  }
+
+  .forgot-password-glow-secondary {
+    right: -25%;
+    width: 260px;
+    height: 260px;
+  }
+}
 
 

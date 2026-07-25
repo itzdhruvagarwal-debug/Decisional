@@ -88,17 +88,17 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           onClick={handleBackdropClick}
-          className="fixed flex items-center justify-center p-5 inset-0 backdrop-blur z-1000" style={{ background: "rgba(0,0,0,0.7)" }}
+          className="referral-modal-overlay fixed flex items-center justify-center p-5 inset-0 backdrop-blur z-1000"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.92, y: 24 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 24 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="w-full relative overflow-hidden" style={{ background: "linear-gradient(160deg, rgba(20,20,35,0.98) 0%, rgba(12,12,24,0.98) 100%)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "28px", padding: "clamp(24px,5vw,40px)", maxWidth: "480px", boxShadow: "0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.15)" }}
+            className="referral-share-modal w-full relative overflow-hidden"
           >
             {/* Glow accent */}
-            <div className="absolute pointer-events-none" style={{ top: -80, left: "50%", transform: "translateX(-50%)", width: "300px", height: "200px", background: "rgba(99,102,241,0.2)", filter: "blur(80px)" }} />
+            <div className="referral-share-glow absolute pointer-events-none" />
 
             {/* Header */}
             <div className="flex items-center justify-between relative mb-6">
@@ -121,7 +121,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
             </div>
 
             {/* Referral link */}
-            <div className="mb-6 flex items-center gap-3 rounded-xl min-w-0 bg-glass-card" style={{ border: "1px solid rgba(255, 255, 255, 0.08)", padding: "14px 16px" }}>
+            <div className="referral-link-box mb-6 flex items-center gap-3 rounded-xl min-w-0 bg-glass-card">
               <div className="flex-1 min-w-0">
                 <div className="font-bold text-muted mb-1 uppercase text-2xs tracking-wider">
                   Your Referral Link
@@ -134,7 +134,8 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                 onClick={handleCopyLink}
                 aria-label="Copy referral link"
-                className="text-xs font-bold cursor-pointer flex-shrink-0 flex items-center border-none px-4-py-2 whitespace-nowrap text-white rounded-lg gap-1-5" style={{ background: linkCopied ? "#10b981" : "var(--color-primary)", transition: "background 0.2s" }}
+                className="referral-copy-btn text-xs font-bold cursor-pointer flex-shrink-0 flex items-center border-none px-4-py-2 whitespace-nowrap text-white rounded-lg gap-1-5"
+                data-copied={linkCopied}
               >
                 {linkCopied ? (
                   <>
@@ -165,9 +166,10 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
                   rel="noopener noreferrer"
                   whileHover={{ y: -3, scale: 1.03 }}
                   whileTap={{ scale: 0.96 }}
-                  className="text-center flex flex-col items-center gap-2 cursor-pointer rounded-xl no-underline" style={{ background: ch.bg, border: `1px solid ${ch.color}33`, padding: "16px 8px" }}
+                  className="referral-channel text-center flex flex-col items-center gap-2 cursor-pointer rounded-xl no-underline"
+                  data-channel={ch.id}
                 >
-                  <span className="font-extrabold leading-none" style={{ fontSize: ch.id === "twitter" ? "18px" : "22px", color: ch.color }}>
+                  <span className="referral-channel-icon font-extrabold leading-none">
                     {ch.icon}
                   </span>
                   <span className="font-bold text-secondary text-xs whitespace-nowrap">
@@ -182,7 +184,7 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
               <motion.button
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                 onClick={handleNativeShare}
-                className="w-full text-sm font-bold cursor-pointer flex items-center justify-center gap-2 p-3.5 rounded-lg bg-indigo-12 text-indigo-light" style={{ border: "1px solid rgba(99, 102, 241, 0.3)" }}
+                className="referral-native-share w-full text-sm font-bold cursor-pointer flex items-center justify-center gap-2 p-3.5 rounded-lg bg-indigo-12 text-indigo-light"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
@@ -257,14 +259,14 @@ export default function ReferralsPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <div className="mx-auto max-w-1000" style={{ padding: "40px 20px" }}>
+      <div className="referrals-page mx-auto max-w-1000">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
-          <h1 className="mb-3 font-extrabold text-5xl" style={{ background: "linear-gradient(135deg, #10b981, #06b6d4, #3b82f6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: "-1.5px" }}>
+          <h1 className="referrals-title mb-3 font-extrabold text-5xl">
             🤝 Partner Network
           </h1>
           <p className="text-secondary text-lg max-w-600 mx-auto">
@@ -274,13 +276,14 @@ export default function ReferralsPage() {
 
         {/* Tabs */}
         <div className="flex justify-center mb-10">
-          <div className="scrollable-tabs flex gap-2 rounded-xl bg-glass-light" style={{ padding: "6px", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="referrals-tabs scrollable-tabs flex gap-2 rounded-xl bg-glass-light">
             {(["overview", "history"] as const).map((tab) => (
               <Button
                 key={tab}
                 variant={activeTab === tab ? "primary" : "ghost"}
                 onClick={() => setActiveTab(tab)}
-                className="font-extrabold text-sm uppercase tracking-wider" style={{ padding: "12px 32px", boxShadow: activeTab === tab ? "0 10px 20px rgba(99,102,241,0.3)" : "none" }}
+                className="referrals-tab-btn font-extrabold text-sm uppercase tracking-wider"
+                data-active={activeTab === tab}
               >
                 {tab}
               </Button>
@@ -299,9 +302,9 @@ export default function ReferralsPage() {
             >
               {/* Code Card */}
               <motion.div
-                className="text-center relative overflow-hidden mb-10 backdrop-blur-lg rounded-3xl bg-glass-light" style={{ padding: "clamp(24px, 5vw, 48px)", border: "1px solid rgba(255, 255, 255, 0.08)", boxShadow: "0 40px 80px rgba(0, 0, 0, 0.3)" }}
+                className="referral-code-card text-center relative overflow-hidden mb-10 backdrop-blur-lg rounded-3xl bg-glass-light"
               >
-                <div className="absolute rounded-full bg-emerald-subtle pointer-events-none" style={{ top: -60, right: -60, width: "250px", height: "250px", filter: "blur(100px)" }} />
+                <div className="referral-card-glow absolute rounded-full bg-emerald-subtle pointer-events-none" />
 
                 <div className="text-xs font-extrabold mb-5 text-emerald uppercase tracking-widest">
                   Your Network Identifier
@@ -309,15 +312,16 @@ export default function ReferralsPage() {
 
                 {/* Code box */}
                 <div className="flex flex-col items-center gap-4 mb-8">
-                  <div className="flex items-center gap-4 justify-between bg-secondary rounded-2xl" style={{ border: "2px dashed var(--color-primary)", padding: "14px 24px", maxWidth: "100%" }}>
-                    <span className="font-extrabold text-primary break-all tracking-wider" style={{ fontSize: "clamp(18px,4.5vw,32px)", fontFamily: "Space Grotesk, monospace" }}>
+                  <div className="referral-code-box flex items-center gap-4 justify-between bg-secondary rounded-2xl">
+                    <span className="referral-code-text font-extrabold text-primary break-all tracking-wider">
                       {stats.referralCode}
                     </span>
                     <motion.button
                       whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                       onClick={copyCode}
                       aria-label="Copy referral code"
-                      className="cursor-pointer flex items-center justify-center flex-shrink-0 border-none rounded-lg text-white" style={{ background: copied ? "#10b981" : "var(--color-primary)", width: "44px", height: "44px", boxShadow: "0 4px 12px rgba(99,102,241,0.2)", transition: "all 0.2s ease" }}
+                      className="referral-code-copy cursor-pointer flex items-center justify-center flex-shrink-0 border-none rounded-lg text-white"
+                      data-copied={copied}
                     >
                       {copied ? (
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -349,7 +353,7 @@ export default function ReferralsPage() {
                   onClick={() => setShareOpen(true)}
                   id="share-referral-btn"
                   aria-label="Share referral link"
-                  className="font-extrabold cursor-pointer inline-flex items-center mb-8 border-none rounded-xl text-sm text-white gap-2-5 bg-gradient-indigo" style={{ padding: "14px 32px", boxShadow: "0 8px 24px rgba(99,102,241,0.3)", letterSpacing: "0.3px" }}
+                  className="referral-share-btn font-extrabold cursor-pointer inline-flex items-center mb-8 border-none rounded-xl text-sm text-white gap-2-5 bg-gradient-indigo"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="18" cy="5" r="3" />
@@ -374,19 +378,19 @@ export default function ReferralsPage() {
               </motion.div>
 
               {/* Progress & Tiers */}
-              <div style={{ marginBottom: "64px" }}>
+              <div className="referral-progress-section">
                 <div className="flex justify-between items-end mb-5 flex-wrap gap-3">
                   <h3 className="font-extrabold text-2xl text-white">Milestone Progress 🚀</h3>
                   <div className="font-bold text-secondary text-sm">
                     <span className="text-xl text-emerald">{stats.activeReferrals}</span> / {nextTierMin} ACTIVE PARTNERS
                   </div>
                 </div>
-                <div className="overflow-hidden mb-8 rounded-2xl h-3-5-rem bg-glass-card" style={{ border: "1px solid rgba(255,255,255,0.05)" }}>
+                <div className="referral-progress-track overflow-hidden mb-8 rounded-2xl h-3-5-rem bg-glass-card">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 1.5, ease: "circOut" }}
-                    className="h-full" style={{ background: "linear-gradient(90deg, #10b981, #06b6d4, #3b82f6)", boxShadow: "0 0 20px rgba(16,185,129,0.4)" }}
+                    className="referral-progress-fill h-full"
                   />
                 </div>
                 <div className="grid gap-4 grid-auto-160">
@@ -399,7 +403,7 @@ export default function ReferralsPage() {
               </div>
 
               {/* Steps */}
-              <div className="p-10 rounded-3xl bg-glass" style={{ border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+              <div className="referral-roadmap p-10 rounded-3xl bg-glass">
                 <h3 className="mb-8 text-center font-extrabold text-2xl">Partnership Roadmap 🗺️</h3>
                 <div className="grid gap-6 grid-auto-250">
                   <StepCard num="01" title="Broadcast"  desc="Deploy your unique code across your socials and network."       icon="📢" />
@@ -415,7 +419,7 @@ export default function ReferralsPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.4 }}
-              className="p-8 rounded-3xl bg-glass" style={{ border: "1px solid rgba(255, 255, 255, 0.05)" }}
+              className="referral-history p-8 rounded-3xl bg-glass"
             >
               <ReferralList />
             </motion.div>
@@ -442,12 +446,20 @@ interface StatBoxProps {
   readonly color: string;
   readonly icon: string;
 }
+function getStatTone(color: string) {
+  if (color === "#10b981") return "emerald";
+  if (color === "#06b6d4") return "cyan";
+  if (color === "#f59e0b") return "amber";
+  return "indigo";
+}
+
 function StatBox({ label, value, color, icon }: StatBoxProps) {
+  const tone = getStatTone(color);
   return (
-    <div className="p-6 text-center rounded-2xl" style={{ background: "rgba(0,0,0,0.2)", border: `1px solid ${color}22` }}>
+    <div className="referral-stat-box p-6 text-center rounded-2xl" data-tone={tone}>
       <div className="text-2xl mb-2">{icon}</div>
       <div className="mb-1 font-extrabold text-2xl text-white">{value}</div>
-      <div className="text-xs uppercase tracking-wider font-extrabold" style={{ color }}>{label}</div>
+      <div className="referral-stat-label text-xs uppercase tracking-wider font-extrabold">{label}</div>
     </div>
   );
 }
@@ -460,15 +472,18 @@ interface TierCardProps {
   readonly color: string;
   readonly delay: number;
 }
-function TierCard({ name, percent, min, active, color, delay }: TierCardProps) {
+function TierCard({ name, percent, min, active, color: _color, delay }: TierCardProps) {
+  const tier = name.toLowerCase();
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
       transition={{ delay }} whileHover={{ y: -5 }}
-      className="text-center rounded-2xl" style={{ background: active ? `linear-gradient(135deg, ${color}33, ${color}11)` : "rgba(255,255,255,0.02)", border: active ? `1px solid ${color}` : "1px solid rgba(255,255,255,0.05)", padding: "24px 16px", boxShadow: active ? `0 10px 30px ${color}22` : "none" }}
+      className="referral-tier-card text-center rounded-2xl"
+      data-active={active}
+      data-tier={tier}
     >
-      <div className="text-xs font-extrabold mb-2" style={{ color: active ? "white" : "var(--color-text-muted)" }}>{name}</div>
-      <div className="mb-1 font-extrabold text-2xl" style={{ color: active ? color : "white" }}>{percent}</div>
+      <div className="referral-tier-name text-xs font-extrabold mb-2">{name}</div>
+      <div className="referral-tier-percent mb-1 font-extrabold text-2xl">{percent}</div>
       <div className="font-bold text-muted text-2xs">{min}+ ACTIVE</div>
     </motion.div>
   );
@@ -482,8 +497,8 @@ interface StepCardProps {
 }
 function StepCard({ num, title, desc, icon }: StepCardProps) {
   return (
-    <div className="p-6 relative rounded-3xl bg-black-20" style={{ border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-      <div className="absolute text-3xl font-extrabold" style={{ top: "12px", right: "20px", color: "rgba(255,255,255,0.03)" }}>{num}</div>
+    <div className="referral-step-card p-6 relative rounded-3xl bg-black-20">
+      <div className="referral-step-num absolute text-3xl font-extrabold">{num}</div>
       <div className="mb-4 text-3xl">{icon}</div>
       <div className="text-lg font-extrabold mb-2 text-white">{title}</div>
       <div className="text-sm text-secondary leading-normal">{desc}</div>

@@ -13,6 +13,12 @@ type FlaggedApp = Prisma.PromiseReturnType<
   typeof AdminService.getFlaggedApplications
 >[number];
 
+function getTrustTone(score: number) {
+  if (score < 30) return "danger";
+  if (score < 60) return "warning";
+  return "success";
+}
+
 export default async function AdminApplicationsPage() {
   // Call service directly on the server — consistent with other admin pages; avoids loopback REST overhead
   const flaggedApps = await AdminService.getFlaggedApplications();
@@ -37,7 +43,7 @@ export default async function AdminApplicationsPage() {
 
       {/* Summary stats */}
       <div
-        className="card mb-6 flex gap-8 flex-wrap px-6-py-4" style={{ background: "linear-gradient(135deg, rgba(239,68,68,0.04), rgba(245,158,11,0.04))", border: "1px solid rgba(239,68,68,0.15)" }}
+        className="card mb-6 flex gap-8 flex-wrap px-6-py-4 admin-flagged-summary"
       >
         <div>
           <div className="text-muted font-bold text-xs uppercase">
@@ -76,17 +82,10 @@ export default async function AdminApplicationsPage() {
               await rejectFlaggedApplication(app.id, reason);
             };
 
-            let trustColor = "var(--color-success)";
-            if (app.influencer.user.trustScore < 30) {
-              trustColor = "var(--color-error)";
-            } else if (app.influencer.user.trustScore < 60) {
-              trustColor = "var(--color-warning)";
-            }
-
             return (
               <div
                 key={app.id}
-                className="card p-6 bg-rose-02" style={{ border: "1px solid rgba(239, 68, 68, 0.2)" }}
+                className="card p-6 bg-rose-02 admin-flagged-card"
               >
                 {/* Header row */}
                 <div
@@ -95,7 +94,7 @@ export default async function AdminApplicationsPage() {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span
-                        className="font-bold rounded-sm uppercase text-rose text-2xs px-2-py-05 tracking-wider" style={{ background: "rgba(239,68,68,0.15)" }}
+                        className="font-bold rounded-sm uppercase text-rose text-2xs px-2-py-05 tracking-wider admin-flagged-pill"
                       >
                         FLAGGED
                       </span>
@@ -135,9 +134,8 @@ export default async function AdminApplicationsPage() {
                       <span>
                         Trust Score:{" "}
                         <strong
-                          style={{
-                            color: trustColor,
-                          }}
+                          className="admin-trust-score"
+                          data-tone={getTrustTone(app.influencer.user.trustScore)}
                         >
                           {app.influencer.user.trustScore}
                         </strong>
@@ -146,7 +144,7 @@ export default async function AdminApplicationsPage() {
                   </div>
                   <Link
                     href={`/admin/users?search=${encodeURIComponent(app.influencer.user.email)}`}
-                    className="btn btn-secondary text-xs" style={{ padding: "6px 14px" }}
+                    className="btn btn-secondary text-xs admin-view-profile-btn"
                   >
                     View User Profile
                   </Link>
@@ -171,7 +169,7 @@ export default async function AdminApplicationsPage() {
                       type="text"
                       name="reason"
                       placeholder="Rejection reason (optional)..."
-                      className="text-sm px-3-py-1" style={{ width: "220px" }}
+                      className="text-sm px-3-py-1 admin-reject-reason"
                     />
                     <Button
                       type="submit"

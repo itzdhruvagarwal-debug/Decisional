@@ -13,12 +13,6 @@ export interface ToastProps {
   onClose: (id: string) => void;
 }
 
-export function getToastBg(type: ToastType): string {
-  if (type === "success") return "linear-gradient(135deg, #059669, #10b981)";
-  if (type === "error") return "linear-gradient(135deg, #dc2626, #ef4444)";
-  return "linear-gradient(135deg, #2563eb, #3b82f6)";
-}
-
 export function getToastIcon(type: ToastType): string {
   if (type === "success") return "✓ ";
   if (type === "error") return "✕ ";
@@ -26,7 +20,6 @@ export function getToastIcon(type: ToastType): string {
 }
 
 export function Toast({ toast, onClose }: Readonly<ToastProps>) {
-  const bg = getToastBg(toast.type);
   const icon = getToastIcon(toast.type);
 
   return (
@@ -34,7 +27,7 @@ export function Toast({ toast, onClose }: Readonly<ToastProps>) {
       role="alert"
       aria-live="assertive"
       aria-atomic="true"
-      className="text-sm font-medium flex items-center justify-between w-full rounded-lg text-white" style={{ padding: "12px 20px", background: bg, boxShadow: "0 8px 32px rgba(0,0,0,0.3)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", animation: "slideInRight 0.3s ease-out" }}
+      className={`app-toast app-toast-${toast.type} text-sm font-medium flex items-center justify-between w-full rounded-lg text-white`}
     >
       <span>
         {icon}
@@ -43,7 +36,7 @@ export function Toast({ toast, onClose }: Readonly<ToastProps>) {
       <button
         onClick={() => onClose(toast.id)}
         aria-label={`Dismiss ${toast.type} notification`}
-        className="cursor-pointer text-sm border-none leading-none bg-none text-white ml-2 opacity-70" style={{ padding: "0 4px" }}
+        className="app-toast-close cursor-pointer text-sm border-none leading-none bg-none text-white ml-2 opacity-70"
       >
         ✕
       </button>
@@ -56,7 +49,7 @@ export function ToastContainer({ toasts, onClose }: Readonly<{ toasts: ToastItem
   return (
     <div
       aria-label="Notifications"
-      className="fixed flex flex-col gap-2" style={{ top: 24, right: 24, zIndex: 9999, maxWidth: "400px" }}
+      className="app-toast-container fixed flex flex-col gap-2"
     >
       {toasts.map(t => (
         <Toast key={t.id} toast={t} onClose={onClose} />

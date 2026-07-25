@@ -15,7 +15,7 @@ type PricingCardProps = {
   features: string[];
   ctaText: string;
   ctaLink: string;
-  color: string;
+  tone: "primary" | "cyan";
   delay: number;
   isPopular?: boolean;
 };
@@ -28,19 +28,18 @@ type FAQItemProps = {
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] font-sans">
+    <div className="min-h-screen bg-primary text-primary">
       <Navbar />
 
       <main
         className="overflow-hidden relative pt-30 pb-20"
       >
-        <div className="max-w-1040 mx-auto" style={{ padding: "0 20px" }}>
-          <div className="text-center" style={{ marginBottom: "52px" }}>
+        <div className="pricing-page max-w-1040 mx-auto">
+          <div className="pricing-header text-center">
             <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="font-extrabold mb-4" style={{ fontSize: "clamp(34px, 7vw, 48px)", background:
-                  "linear-gradient(135deg, var(--color-primary), var(--color-accent-cyan))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+              className="pricing-title font-extrabold mb-4"
             >
               Transparent Pricing
             </motion.h1>
@@ -56,7 +55,7 @@ export default function PricingPage() {
           </div>
 
           <div
-            className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "28px", marginBottom: "72px" }}
+            className="pricing-grid grid"
           >
             <PricingCard
               title="Influencer"
@@ -73,7 +72,7 @@ export default function PricingPage() {
               ]}
               ctaText="Join as Influencer"
               ctaLink="/register?type=influencer"
-              color="var(--color-primary)"
+              tone="primary"
               delay={0.2}
             />
 
@@ -92,13 +91,13 @@ export default function PricingPage() {
               ]}
               ctaText="Start Hiring"
               ctaLink="/register?type=brand"
-              color="var(--color-accent-cyan)"
+              tone="cyan"
               delay={0.3}
               isPopular
             />
           </div>
 
-          <section className="mx-auto" style={{ maxWidth: "820px" }}>
+          <section className="pricing-faq mx-auto">
             <div className="text-center mb-8">
               <h2 className="font-bold text-3xl">
                 Frequently Asked Questions
@@ -135,7 +134,7 @@ export default function PricingPage() {
           </section>
 
           <div
-            className="text-center" style={{ marginTop: "60px", paddingBottom: "40px" }}
+            className="pricing-contact text-center"
           >
             <p
               className="text-secondary mb-4"
@@ -166,7 +165,7 @@ function PricingCard({
   features,
   ctaText,
   ctaLink,
-  color,
+  tone,
   delay,
   isPopular,
 }: Readonly<PricingCardProps>) {
@@ -175,11 +174,13 @@ function PricingCard({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      className="relative overflow-hidden flex flex-col rounded-2xl" style={{ background: `linear-gradient(135deg, ${color}11, ${color}05)`, border: `1px solid ${color}33`, padding: "34px", boxShadow: isPopular ? `0 10px 40px -10px ${color}33` : "none" }}
+      className="pricing-card relative overflow-hidden flex flex-col rounded-2xl"
+      data-tone={tone}
+      data-popular={Boolean(isPopular)}
     >
       {isPopular && (
         <div
-          className="absolute font-extrabold text-xs uppercase tracking-normal" style={{ top: 0, right: 0, background: color, color: "#05030f", padding: "6px 16px", borderRadius: "0 0 0 14px" }}
+          className="pricing-popular-ribbon absolute font-extrabold text-xs uppercase tracking-normal"
         >
           Most Popular
         </div>
@@ -188,7 +189,7 @@ function PricingCard({
       <div className="mb-6">
         <div
           aria-hidden="true"
-          className="flex items-center justify-center text-lg mb-5 font-extrabold" style={{ width: "58px", height: "58px", borderRadius: "18px", background: `linear-gradient(135deg, ${color}, ${color}88)`, color: "#05030f", boxShadow: `0 8px 20px ${color}44` }}
+          className="pricing-marker flex items-center justify-center text-lg mb-5 font-extrabold"
         >
           {marker}
         </div>
@@ -206,7 +207,7 @@ function PricingCard({
         className="text-center p-5 bg-tertiary rounded-xl border-card mb-7-5"
       >
         <div
-          className="font-extrabold text-primary" style={{ fontSize: "clamp(34px, 8vw, 42px)" }}
+          className="pricing-price font-extrabold text-primary"
         >
           {price}
         </div>
@@ -223,11 +224,11 @@ function PricingCard({
         {features.map((feature) => (
           <li
             key={feature}
-            className="flex items-start gap-3 text-sm text-secondary" style={{ lineHeight: 1.55 }}
+            className="pricing-feature flex items-start gap-3 text-sm text-secondary"
           >
             <svg
               aria-hidden="true"
-              className="flex-shrink-0" style={{ color, width: "16px", height: "16px", marginTop: "3px" }}
+              className="pricing-feature-icon flex-shrink-0"
               fill="none"
               stroke="currentColor"
               strokeWidth="3"
@@ -242,9 +243,9 @@ function PricingCard({
 
       <Link href={ctaLink} className="w-full">
         <Button
-          className="w-full p-4 text-base font-bold cursor-pointer" style={{ background: isPopular
-              ? `linear-gradient(135deg, ${color}, ${color}dd)`
-              : "var(--color-bg-secondary)", color: isPopular ? "#05030f" : "var(--color-text-primary)", border: isPopular ? "none" : `1px solid ${color}44`, transition: "transform 0.2s" }}
+          className="pricing-card-cta w-full p-4 text-base font-bold cursor-pointer"
+          data-popular={Boolean(isPopular)}
+          data-tone={tone}
         >
           {ctaText}
         </Button>
@@ -268,12 +269,7 @@ function FAQItem({ question, answer, delay }: Readonly<FAQItemProps>) {
           <span>{question}</span>
           <svg
             aria-hidden="true"
-            style={{
-              width: "12px",
-              height: "12px",
-              transition: "transform 0.3s",
-            }}
-            className="group-open:rotate-180"
+            className="faq-chevron group-open:rotate-180"
             fill="none"
             stroke="currentColor"
             strokeWidth="3"
@@ -283,7 +279,7 @@ function FAQItem({ question, answer, delay }: Readonly<FAQItemProps>) {
           </svg>
         </summary>
         <div
-          className="text-secondary text-sm leading-1-6" style={{ padding: "0 20px 20px" }}
+          className="faq-answer text-secondary text-sm leading-1-6"
         >
           {answer}
         </div>

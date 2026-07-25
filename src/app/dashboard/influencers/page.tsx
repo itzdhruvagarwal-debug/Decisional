@@ -114,7 +114,7 @@ export default function DiscoverInfluencersPage() {
   ) {
     return (
       <DashboardShell user={session.user}>
-        <div className="card text-center max-w-680" style={{ margin: "40px auto" }}>
+        <div className="creator-access-card card text-center max-w-680">
           <h1 className="text-2xl font-extrabold mb-2">
             Brand access required
           </h1>
@@ -131,13 +131,13 @@ export default function DiscoverInfluencersPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <div className="mx-auto" style={{ maxWidth: "1200px", padding: "40px 20px" }}>
+      <div className="creators-page mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
-          <h1 className="mb-3 font-extrabold tracking-normal text-5xl" style={{ background: "linear-gradient(135deg, #8b5cf6, #3b82f6, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          <h1 className="creators-title mb-3 font-extrabold tracking-normal text-5xl">
             Discover Top Creators
           </h1>
           <p className="text-secondary text-lg max-w-600 mx-auto">
@@ -149,9 +149,9 @@ export default function DiscoverInfluencersPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           onSubmit={handleSearch}
-          className="flex gap-5 flex-wrap border-card rounded-lg mb-10" style={{ padding: "clamp(16px, 4vw, 32px)", background: "var(--color-bg-card)", boxShadow: "var(--shadow-sm)" }}
+          className="creator-filter-form flex gap-5 flex-wrap border-card rounded-lg mb-10"
         >
-          <div style={{ flex: "1 1 min(280px, 100%)" }}>
+          <div className="filter-field filter-field-wide">
             <Input
               id="search-keywords-input"
               type="text"
@@ -162,7 +162,7 @@ export default function DiscoverInfluencersPage() {
               fullWidth
             />
           </div>
-          <div style={{ flex: "1 1 min(180px, 100%)" }}>
+          <div className="filter-field">
             <Select
               id="category-select"
               label="Category"
@@ -178,7 +178,7 @@ export default function DiscoverInfluencersPage() {
               ))}
             </Select>
           </div>
-          <div style={{ flex: "1 1 min(180px, 100%)" }}>
+          <div className="filter-field">
             <Select
               id="platform-select"
               label="Platform"
@@ -191,7 +191,7 @@ export default function DiscoverInfluencersPage() {
               <option value="youtube">YouTube</option>
             </Select>
           </div>
-          <div style={{ flex: "1 1 min(180px, 100%)" }}>
+          <div className="filter-field">
             <Select
               id="min-followers-select"
               label="Minimum Reach"
@@ -206,7 +206,7 @@ export default function DiscoverInfluencersPage() {
               <option value="1000000">1M+ Subs/Followers</option>
             </Select>
           </div>
-          <div style={{ flex: "1 1 min(180px, 100%)" }}>
+          <div className="filter-field">
             <Select
               id="min-engagement-select"
               label="Min Engagement"
@@ -221,7 +221,7 @@ export default function DiscoverInfluencersPage() {
               <option value="5">5%+</option>
             </Select>
           </div>
-          <div style={{ flex: "1 1 min(180px, 100%)" }}>
+          <div className="filter-field">
             <Input
               id="city-input"
               type="text"
@@ -232,7 +232,7 @@ export default function DiscoverInfluencersPage() {
               fullWidth
             />
           </div>
-          <div style={{ flex: "1 1 min(140px, 100%)" }}>
+          <div className="filter-field filter-field-small">
             <Input
               id="min-rate-input"
               type="number"
@@ -243,7 +243,7 @@ export default function DiscoverInfluencersPage() {
               fullWidth
             />
           </div>
-          <div style={{ flex: "1 1 min(140px, 100%)" }}>
+          <div className="filter-field filter-field-small">
             <Input
               id="max-rate-input"
               type="number"
@@ -254,11 +254,11 @@ export default function DiscoverInfluencersPage() {
               fullWidth
             />
           </div>
-          <div className="flex items-end" style={{ flex: "1 1 auto" }}>
+          <div className="filter-submit flex items-end">
             <Button
               type="submit"
               variant="primary"
-              className="font-extrabold text-sm h-13" style={{ padding: "0 32px" }}
+              className="creator-search-btn font-extrabold text-sm h-13"
             >
               Search
             </Button>
@@ -274,9 +274,9 @@ export default function DiscoverInfluencersPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="text-center text-secondary" style={{ padding: "80px" }}
+                  className="creators-loading text-center text-secondary"
                 >
-                  <div className="loader rounded-md w-48 h-48" style={{ border: "4px solid var(--color-border)", borderTopColor: "var(--color-primary)", margin: "0 auto 24px", animation: "spin 1s linear infinite" }} />
+                  <div className="creator-loader loader rounded-md w-48 h-48" />
                   <p className="text-base font-semibold tracking-normal">Loading creator data...</p>
                 </motion.div>
               );
@@ -314,23 +314,18 @@ export default function DiscoverInfluencersPage() {
                     show: { opacity: 1, y: 0 }
                   }}
                   whileHover={{ y: -10, transition: { duration: 0.2 } }}
-                  className="flex flex-col h-full relative overflow-hidden rounded-lg p-8" style={{ background: inf.isFeatured
-                      ? "linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, var(--color-bg-card) 100%)"
-                      : "var(--color-bg-card)", backdropFilter: "blur(10px)", border: inf.isFeatured
-                      ? "1px solid rgba(245, 158, 11, 0.4)"
-                      : "1px solid var(--color-border)", boxShadow: inf.isFeatured
-                      ? "0 10px 30px rgba(245, 158, 11, 0.12), var(--shadow-sm)"
-                      : "var(--shadow-sm)" }}
+                  className="creator-card flex flex-col h-full relative overflow-hidden rounded-lg p-8"
+                  data-featured={Boolean(inf.isFeatured)}
                 >
                   {/* Subtle Background Accent */}
-                  <div className="absolute rounded-md bg-gradient-primary pointer-events-none" style={{ top: "-20px", right: "-20px", width: "100px", height: "100px", opacity: 0.05, filter: "blur(40px)" }} />
+                  <div className="creator-card-accent absolute rounded-md bg-gradient-primary pointer-events-none" />
 
                   <div className="flex gap-5 items-center mb-6">
-                    <div className="flex items-center justify-center flex-shrink-0 rounded-md text-3xl font-extrabold bg-gradient-primary" style={{ width: "72px", height: "72px", boxShadow: "0 10px 20px rgba(0,0,0,0.2)" }}>
+                    <div className="creator-avatar flex items-center justify-center flex-shrink-0 rounded-md text-3xl font-extrabold bg-gradient-primary">
                       {inf.displayName?.[0] || "I"}
                     </div>
                     <div>
-                      <h3 className="text-lg font-extrabold text-primary" style={{ margin: "0 0 6px" }}>
+                      <h3 className="creator-card-title text-lg font-extrabold text-primary">
                         {inf.displayName}
                       </h3>
                       <div className="flex items-center text-sm text-muted gap-1-5">
@@ -342,14 +337,14 @@ export default function DiscoverInfluencersPage() {
 
                   <div className="flex gap-2 flex-wrap mb-5">
                     {inf.isFeatured && (
-                      <span className="font-extrabold inline-flex items-center gap-1 text-xs rounded-md text-amber uppercase px-2-py-1 bg-amber-15" style={{ border: "1px solid rgba(245, 158, 11, 0.25)" }}>
+                      <span className="creator-badge-featured font-extrabold inline-flex items-center gap-1 text-xs rounded-md text-amber uppercase px-2-py-1 bg-amber-15">
                         ⭐ Featured
                       </span>
                     )}
-                    <span className="font-extrabold text-xs rounded-md text-emerald uppercase px-2-py-1" style={{ background: "rgba(16, 185, 129, 0.15)" }}>
+                    <span className="creator-badge-trust font-extrabold text-xs rounded-md text-emerald uppercase px-2-py-1">
                       TRUST: {inf.trustScore}%
                     </span>
-                    <span className="font-extrabold text-xs rounded-md uppercase px-2-py-1" style={{ background: "rgba(59, 130, 246, 0.15)", color: "#3b82f6" }}>
+                    <span className="creator-badge-category font-extrabold text-xs rounded-md uppercase px-2-py-1">
                       {inf.categories.split(',')[0]}
                     </span>
                   </div>
@@ -358,7 +353,7 @@ export default function DiscoverInfluencersPage() {
                     {inf.bio || "High-impact creator focused on quality content delivery and authentic audience engagement."}
                   </p>
 
-                  <div className="grid gap-3 mb-6" style={{ gridTemplateColumns: "1fr 1fr 1fr", padding: "20px 0", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                  <div className="creator-stats grid gap-3 mb-6">
                     <div className="text-center">
                       <div className="text-muted font-bold mb-1 text-xs uppercase">Followers</div>
                       <div className="font-extrabold text-sm text-primary">{formatNumber(inf.instagramFollowers)}</div>
@@ -373,28 +368,16 @@ export default function DiscoverInfluencersPage() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2-5" style={{ marginTop: "auto" }}>
+                  <div className="creator-actions flex gap-2-5">
                     <Link
                       href={`/dashboard/influencers/${inf.id}`}
-                      className="flex-1 text-center text-sm font-bold bg-secondary rounded-md no-underline" style={{ padding: "12px 8px", border: "1px solid rgba(255,255,255,0.05)", transition: "all 0.3s" }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.08)";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLAnchorElement).style.background = "var(--color-bg-secondary)";
-                      }}
+                      className="creator-secondary-link flex-1 text-center text-sm font-bold bg-secondary rounded-md no-underline"
                     >
                       View Profile
                     </Link>
                     <Link
                       href={`/dashboard/campaigns/create?invite=${inf.id}`}
-                      className="flex-1 text-center text-sm font-bold rounded-md no-underline bg-gradient-primary" style={{ padding: "12px 8px", transition: "all 0.3s", boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)" }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLAnchorElement).style.opacity = "0.9";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLAnchorElement).style.opacity = "1";
-                      }}
+                      className="creator-primary-link flex-1 text-center text-sm font-bold rounded-md no-underline bg-gradient-primary"
                     >
                       Invite
                     </Link>

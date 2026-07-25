@@ -50,6 +50,10 @@
   animation: spin 0.7s linear infinite;
 }
 
+.loading-with-label {
+  margin-right: 8px;
+}
+
 /* ==================== TOASTS ==================== */
 
 .toast {
@@ -1205,3 +1209,162 @@ input:checked+.slider:before {
 .opacity-70 { opacity: 0.7; }
 .opacity-90 { opacity: 0.9; }
 .grid-auto-180 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+/* ==================== STANDARD RESPONSIVE SAFETY UTILITIES ==================== */
+
+.z-1 { z-index: 1; }
+.h-30 { min-height: 30px; }
+.w-32 { width: 32px; }
+.h-32 { height: 32px; }
+.w-36 { width: 36px; }
+.h-36 { height: 36px; }
+.w-80 { width: 80px; }
+.min-w-0 { min-width: 0; }
+.min-w-220 { min-width: 220px; }
+.max-w-1000 { max-width: 1000px; }
+.leading-1-6 { line-height: 1.6; }
+.bg-indigo-12 { background: rgba(99, 102, 241, 0.12); }
+.bg-indigo-15 { background: rgba(99, 102, 241, 0.15); }
+.bg-rose-02 { background: rgba(239, 68, 68, 0.02); }
+
+.sidebar-link.is-collapsed {
+  justify-content: center;
+}
+
+.sidebar-link:not(.is-collapsed) {
+  justify-content: flex-start;
+}
+
+.responsive-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.responsive-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 24px;
+}
+
+.responsive-two-col {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.responsive-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.text-secondary-light { color: var(--color-secondary-light); }
+.fit-content { height: fit-content; }
+.grid-auto-140 { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.w-24 { width: 24px; }
+.h-24 { height: 24px; }
+
+.logo-mark {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.logo-copy {
+  line-height: 1.1;
+}
+
+.site-footer {
+  padding: 64px 0 24px;
+}
+
+.site-footer-grid {
+  gap: 40px;
+}
+
+.site-footer-copy {
+  max-width: 280px;
+}
+
+.site-social-link,
+.site-footer-link {
+  transition: color var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+}
+
+.site-social-link:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-primary);
+}
+
+.site-footer-link:hover {
+  color: var(--color-text-primary);
+}
+
+.app-toast-container {
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  max-width: 400px;
+}
+
+.app-toast {
+  padding: 12px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: slideInRight 0.3s ease-out;
+}
+
+.app-toast-success {
+  background: linear-gradient(135deg, #059669, #10b981);
+}
+
+.app-toast-error {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+}
+
+.app-toast-info {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+}
+
+.app-toast-close {
+  padding: 0 4px;
+}
+
+@media (max-width: 640px) {
+  .app-toast-container {
+    left: 12px;
+    right: 12px;
+    max-width: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .responsive-actions {
+    align-items: stretch;
+  }
+
+  .responsive-actions > .btn,
+  .responsive-actions > a,
+  .responsive-actions > button {
+    flex: 1 1 180px;
+  }
+
+  .responsive-two-col {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-actions {
+    flex-direction: column;
+  }
+
+  .responsive-actions > .btn,
+  .responsive-actions > a,
+  .responsive-actions > button {
+    width: 100%;
+  }
+}

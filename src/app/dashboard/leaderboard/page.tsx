@@ -11,12 +11,6 @@ import DashboardShell from "@/components/dashboard/DashboardShell";
 import EmptyState from "@/components/ui/EmptyState";
 import { Button, Select } from "@/components/ui";
 
-const rankColorMap: Record<number, string> = {
-  0: "#ffd700",
-  1: "#c0c0c0",
-  2: "#cd7f32",
-};
-
 interface LeaderboardUser {
   id: string;
   name: string;
@@ -96,7 +90,7 @@ export default function LeaderboardPage() {
     leaderboardContent = Array.from({ length: 5 }).map((_, idx) => (
       <div
         key={"skeleton-" + idx}
-        className="rounded-lg bg-secondary opacity-50" style={{ height: "64px", animation: "pulse 2s ease-in-out infinite" }}
+        className="leaderboard-skeleton rounded-lg bg-secondary opacity-50"
       />
     ));
   } else if (error) {
@@ -130,18 +124,14 @@ export default function LeaderboardPage() {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: index * 0.03 }}
-        className="grid items-center cursor-pointer rounded-lg px-4-py-3" style={{ gridTemplateColumns: "40px 1fr 100px 80px", background:
-            index < 3
-              ? "linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(139, 92, 246, 0.05))"
-              : "var(--color-bg-secondary)", border:
-            index === 0
-              ? "1px solid rgba(245, 158, 11, 0.3)"
-              : "1px solid transparent", transition: "all 0.2s" }}
+        className="leaderboard-row grid items-center cursor-pointer rounded-lg px-4-py-3"
+        data-rank={index < 3 ? index + 1 : "default"}
         whileHover={{ x: 4 }}
       >
         {/* Rank */}
         <span
-          className="font-extrabold" style={{ fontSize: index < 3 ? "20px" : "14px", color: rankColorMap[index] || "var(--color-text-secondary)" }}
+          className="leaderboard-rank font-extrabold"
+          data-rank={index < 3 ? index + 1 : "default"}
         >
           {index < 3 ? ["🥇", "🥈", "🥉"][index] : index + 1}
         </span>
@@ -151,7 +141,8 @@ export default function LeaderboardPage() {
           className="flex items-center gap-3"
         >
           <div
-            className="flex items-center justify-center text-base font-bold overflow-hidden rounded-full text-white" style={{ width: "40px", height: "40px", background: `linear-gradient(135deg, hsl(${(index * 40) % 360}, 70%, 50%), hsl(${(index * 40 + 60) % 360}, 70%, 60%))` }}
+            className="leaderboard-avatar flex items-center justify-center text-base font-bold overflow-hidden rounded-full text-white"
+            data-tone={index % 6}
           >
             {user.avatar ? (
               <Image
@@ -172,7 +163,7 @@ export default function LeaderboardPage() {
               {user.name || "Anonymous"}
               {user.isWeeklyChampion && (
                 <span
-                  className="font-bold text-amber text-2xs px-2-py-05 rounded-md" style={{ background: "rgba(245, 158, 11, 0.2)" }}
+                  className="leaderboard-hot-badge font-bold text-amber text-2xs px-2-py-05 rounded-md"
                 >
                   🔥 HOT
                 </span>
@@ -199,7 +190,7 @@ export default function LeaderboardPage() {
         {/* Level */}
         <div className="text-right">
           <span
-            className="text-xs font-bold rounded-md px-2-py-1" style={{ background: "rgba(139, 92, 246, 0.15)", color: "#a855f7" }}
+            className="leaderboard-level text-xs font-bold rounded-md px-2-py-1"
           >
             Lv.{user.level}
           </span>
@@ -224,7 +215,7 @@ export default function LeaderboardPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1
-            className="font-extrabold text-3xl bg-gradient-amber-rose" style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+            className="leaderboard-title font-extrabold text-3xl bg-gradient-amber-rose"
           >
             🏆 Leaderboard
           </h1>
@@ -246,7 +237,8 @@ export default function LeaderboardPage() {
                 key={t}
                 onClick={() => setTab(t)}
                 variant={tab === t ? "primary" : "ghost"}
-                className="font-semibold text-sm px-4-py-2 rounded-lg" style={{ transition: "all 0.2s", color: tab === t ? "white" : "var(--color-text-secondary)" }}
+                className="leaderboard-toggle font-semibold text-sm px-4-py-2 rounded-lg"
+                data-active={tab === t}
               >
                 {t === "influencers" ? "👤 Creators" : "🏢 Brands"}
               </Button>
@@ -262,7 +254,8 @@ export default function LeaderboardPage() {
                 key={f}
                 onClick={() => setFilter(f)}
                 variant={filter === f ? (f === "weekly" ? "warning" : "primary") : "ghost"}
-                className="font-semibold text-sm px-4-py-2 rounded-lg" style={{ transition: "all 0.2s", color: filter === f ? "white" : "var(--color-text-secondary)" }}
+                className="leaderboard-toggle font-semibold text-sm px-4-py-2 rounded-lg"
+                data-active={filter === f}
               >
                 {f === "weekly" ? "🔥 This Week" : "🏛️ All-Time"}
               </Button>
@@ -273,7 +266,7 @@ export default function LeaderboardPage() {
           <Select
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            className="px-2-py-1" style={{ width: "160px" }}
+            className="leaderboard-select px-2-py-1"
           >
             <option value="">🏙️ All Cities</option>
             {cities.map((c) => (
@@ -307,8 +300,7 @@ export default function LeaderboardPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex justify-center items-end gap-4 flex-wrap mb-10 rounded-xl" style={{ padding: "32px 16px", background:
-                  "linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(239, 68, 68, 0.08))", border: "1px solid rgba(245, 158, 11, 0.2)" }}
+              className="leaderboard-podium flex justify-center items-end gap-4 flex-wrap mb-10 rounded-xl"
             >
               {/* 2nd place */}
               {hallOfFame[1] && (
@@ -354,8 +346,7 @@ export default function LeaderboardPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center gap-4 mb-6 flex-wrap p-5 rounded-xl" style={{ background:
-                  "linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.15))", border: "2px solid #f59e0b" }}
+              className="leaderboard-weekly-banner flex items-center gap-4 mb-6 flex-wrap p-5 rounded-xl"
             >
               <div className="text-3xl">🔥</div>
               <div>
@@ -382,7 +373,7 @@ export default function LeaderboardPage() {
         <div className="flex flex-col gap-2">
           {/* Header Row */}
           <div
-            className="grid font-bold text-secondary text-xs uppercase px-4-py-2 tracking-wider" style={{ gridTemplateColumns: "40px 1fr 100px 80px" }}
+            className="leaderboard-header-row grid font-bold text-secondary text-xs uppercase px-4-py-2 tracking-wider"
           >
             <span>#</span>
             <span>Name</span>
@@ -412,8 +403,8 @@ interface PodiumUserProps {
 function PodiumUser({
   user,
   rank,
-  color,
-  height,
+  color: _color,
+  height: _height,
   delay,
   isFirst,
   unit,
@@ -427,7 +418,9 @@ function PodiumUser({
     >
       {isFirst && <div className="text-3xl">👑</div>}
       <div
-        className="flex items-center justify-center font-bold overflow-hidden rounded-full text-white" style={{ width: isFirst ? "64px" : "52px", height: isFirst ? "64px" : "52px", background: `linear-gradient(135deg, ${color}, ${color}88)`, border: `3px solid ${color}`, fontSize: isFirst ? "24px" : "18px", boxShadow: `0 0 20px ${color}44` }}
+        className="podium-avatar flex items-center justify-center font-bold overflow-hidden rounded-full text-white"
+        data-rank={rank}
+        data-first={Boolean(isFirst)}
       >
         {user.avatar ? (
           <Image
@@ -442,15 +435,20 @@ function PodiumUser({
         )}
       </div>
       <div
-        className="font-bold text-center" style={{ fontSize: isFirst ? "15px" : "13px", maxWidth: "100px" }}
+        className="podium-name font-bold text-center"
+        data-first={Boolean(isFirst)}
       >
         {user.name || "Anonymous"}
       </div>
       <div
-        className="flex items-center justify-center flex-col gap-1" style={{ width: isFirst ? "100px" : "80px", height: `${height}px`, borderRadius: "12px 12px 0 0", background: `linear-gradient(to top, ${color}33, ${color}11)`, border: `1px solid ${color}44` }}
+        className="podium-base flex items-center justify-center flex-col gap-1"
+        data-rank={rank}
+        data-first={Boolean(isFirst)}
       >
         <div
-          className="font-extrabold" style={{ fontSize: isFirst ? "22px" : "18px", color }}
+          className="podium-rank font-extrabold"
+          data-rank={rank}
+          data-first={Boolean(isFirst)}
         >
           {rank}
         </div>

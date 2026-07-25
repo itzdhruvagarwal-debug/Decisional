@@ -31,17 +31,13 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer
-      className="bg-secondary border-top" style={{ padding: "64px 0 24px" }}
-    >
+    <footer className="site-footer bg-secondary border-top">
       <div className="container">
-        <div
-          className="grid mb-10 grid-auto-180" style={{ gap: "40px" }}
-        >
-          <div style={{ gridColumn: "span 1" }}>
+        <div className="site-footer-grid grid mb-10 grid-auto-180">
+          <div>
             <Logo />
             <p
-              className="text-secondary text-sm leading-relaxed" style={{ maxWidth: "280px" }}
+              className="site-footer-copy text-secondary text-sm leading-relaxed"
             >
               Decisional helps Indian brands and influencers run trusted
               collaborations with verified profiles, protected payments, and
@@ -57,7 +53,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="flex items-center justify-center text-xs font-extrabold cursor-pointer rounded-sm bg-tertiary border-card text-inherit no-underline w-36 h-36" style={{ transition: "all var(--transition-fast)" }}
+                  className="site-social-link flex items-center justify-center text-xs font-extrabold cursor-pointer rounded-sm bg-tertiary border-card text-inherit no-underline w-36 h-36"
                 >
                   {social.label}
                 </a>
@@ -110,7 +106,7 @@ function FooterColumn({
           <li key={item.label} className="mb-2">
             <Link
               href={item.href}
-              className="text-secondary text-sm" style={{ transition: "color var(--transition-fast)" }}
+              className="site-footer-link text-secondary text-sm"
             >
               {item.label}
             </Link>

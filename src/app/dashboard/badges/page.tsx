@@ -77,7 +77,7 @@ export default function BadgesPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1
-            className="font-extrabold mb-2 text-3xl bg-gradient-amber-rose" style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+            className="badges-title font-extrabold mb-2 text-3xl bg-gradient-amber-rose"
           >
             🏆 Badges & Achievements
           </h1>
@@ -123,10 +123,8 @@ export default function BadgesPage() {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               variant={activeCategory === cat ? "primary" : "ghost"}
-              className="font-semibold text-sm px-4-py-2" style={{ border: activeCategory === cat ? "none" : "1px solid var(--color-border)", boxShadow:
-                  activeCategory === cat
-                    ? "0 4px 12px rgba(99, 102, 241, 0.3)"
-                    : "none" }}
+              className="badges-filter-btn font-semibold text-sm px-4-py-2"
+              data-active={activeCategory === cat}
             >
               {cat.charAt(0) + cat.slice(1).toLowerCase()}
             </Button>
@@ -142,10 +140,8 @@ export default function BadgesPage() {
               key={rarity}
               onClick={() => setActiveRarity(rarity)}
               variant={activeRarity === rarity ? "primary" : "ghost"}
-              className="font-semibold text-sm px-4-py-2" style={{ border: activeRarity === rarity ? "none" : "1px solid var(--color-border)", boxShadow:
-                  activeRarity === rarity
-                    ? "0 4px 12px rgba(99, 102, 241, 0.3)"
-                    : "none" }}
+              className="badges-filter-btn font-semibold text-sm px-4-py-2"
+              data-active={activeRarity === rarity}
             >
               {rarity.charAt(0) + rarity.slice(1).toLowerCase()}
             </Button>
@@ -188,7 +184,7 @@ export default function BadgesPage() {
                   title="No Badges Found"
                   description="No achievements found matching the selected category."
                   compact
-                  style={{ gridColumn: "1 / -1" }}
+                  className="grid-full"
                 />
               ) : (
                 filteredBadges.map((badge, index) => (
@@ -199,48 +195,34 @@ export default function BadgesPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ delay: index * 0.05 }}
-                    className="card hover-lift p-6 flex flex-col items-center text-center relative rounded-xl" style={{ border: badge.earned
-                        ? "1px solid rgba(16, 185, 129, 0.3)"
-                        : "1px solid var(--color-border)", background: badge.earned
-                        ? "linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(99, 102, 241, 0.05))"
-                        : "var(--color-bg-secondary)", opacity: badge.earned ? 1 : 0.7, filter: badge.earned ? "none" : "grayscale(0.8)", transition: "all 0.3s" }}
-                    onMouseEnter={(e) => {
-                      if (!badge.earned)
-                        e.currentTarget.style.filter = "grayscale(0)";
-                      if (!badge.earned) e.currentTarget.style.opacity = "1";
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!badge.earned)
-                        e.currentTarget.style.filter = "grayscale(0.8)";
-                      if (!badge.earned) e.currentTarget.style.opacity = "0.7";
-                    }}
+                    className="badge-card card hover-lift p-6 flex flex-col items-center text-center relative rounded-xl"
+                    data-earned={badge.earned}
                   >
                     <div
-                      className="mb-4 text-3xl" style={{ filter: badge.earned
-                          ? "drop-shadow(0 4px 8px rgba(0,0,0,0.2))"
-                          : "none", transform: badge.earned ? "scale(1.1)" : "scale(1)" }}
+                      className="badge-card-icon mb-4 text-3xl"
+                      data-earned={badge.earned}
                     >
                       {badge.icon}
                     </div>
 
                     {badge.earned && (
                       <span
-                        className="absolute font-extrabold rounded-2xl text-2xs px-2-py-1 text-white" style={{ top: "12px", right: "12px", background: "var(--color-accent-emerald)", boxShadow: "0 2px 4px rgba(16, 185, 129, 0.3)" }}
+                        className="badge-unlocked absolute font-extrabold rounded-2xl text-2xs px-2-py-1 text-white"
                       >
                         UNLOCKED
                       </span>
                     )}
 
                     <h3
-                      className="text-lg font-bold mb-2" style={{ color: badge.earned
-                          ? "var(--color-text-primary)"
-                          : "var(--color-text-secondary)" }}
+                      className="badge-card-name text-lg font-bold mb-2"
+                      data-earned={badge.earned}
                     >
                       {badge.name}
                     </h3>
 
                     <p
-                      className="text-sm text-secondary flex-1 leading-normal" style={{ marginBottom: badge.hasProgress && !badge.earned ? "12px" : "16px" }}
+                      className="badge-card-description text-sm text-secondary flex-1 leading-normal"
+                      data-has-progress={Boolean(badge.hasProgress && !badge.earned)}
                     >
                       {badge.description}
                     </p>
@@ -255,13 +237,12 @@ export default function BadgesPage() {
                             {badge.id.startsWith("earn_") ? `₹${(badge.currentProgress || 0).toLocaleString()}` : (badge.currentProgress || 0)} / {badge.id.startsWith("earn_") ? `₹${(badge.targetProgress || 1).toLocaleString()}` : (badge.targetProgress || 1)}
                           </span>
                         </div>
-                        <div
-                          className="w-full overflow-hidden h-6" style={{ borderRadius: "3px", background: "rgba(255, 255, 255, 0.1)" }}
-                        >
-                          <div
-                            className="h-full" style={{ width: `${Math.min(100, Math.max(0, ((badge.currentProgress || 0) / (badge.targetProgress || 1)) * 100))}%`, background: "linear-gradient(90deg, #f59e0b, #ef4444)", borderRadius: "3px", transition: "width 0.5s ease-out" }}
-                          />
-                        </div>
+                        <progress
+                          className="badge-progress w-full"
+                          value={Math.min(100, Math.max(0, ((badge.currentProgress || 0) / (badge.targetProgress || 1)) * 100))}
+                          max={100}
+                          aria-label={`${badge.name} progress`}
+                        />
                       </div>
                     )}
 
@@ -306,10 +287,11 @@ function StatCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      className="flex-1 p-6 text-center rounded-xl" style={{ minWidth: "160px", background: `linear-gradient(135deg, ${color}11, ${color}05)`, border: `1px solid ${color}33`, boxShadow: `0 4px 12px ${color}11` }}
+      className="badge-stat-card flex-1 p-6 text-center rounded-xl"
+      data-tone={color === "#8b5cf6" ? "purple" : color === "#f59e0b" ? "amber" : "emerald"}
     >
       <div
-        className="font-extrabold mb-1 text-3xl leading-none" style={{ color: color }}
+        className="badge-stat-value font-extrabold mb-1 text-3xl leading-none"
       >
         {value}
       </div>

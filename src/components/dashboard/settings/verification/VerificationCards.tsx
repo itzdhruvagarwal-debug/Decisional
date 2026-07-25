@@ -17,13 +17,7 @@ export function DigiLockerCardComponent({
     handleDigiLockerConnect,
 }: DigiLockerCardProps) {
     return (
-        <div
-            className="card"
-            style={{
-                border: "1px solid rgba(34,197,94,0.3)",
-                background: "linear-gradient(135deg, rgba(34,197,94,0.06), rgba(59,130,246,0.04))",
-            }}
-        >
+        <div className="verification-digilocker-card card">
             <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div className="flex-1 min-w-200">
                     <div className="flex items-center mb-2 gap-2-5">
@@ -63,15 +57,7 @@ interface TierCardProps {
 
 export function Tier1CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "isBrand">) {
     return (
-        <div
-            className="card"
-            style={{
-                border:
-                    tier >= 1
-                        ? "1px solid rgba(99,102,241,0.35)"
-                        : "1px solid var(--color-border)",
-            }}
-        >
+        <div className="verification-tier-card card" data-tier="1" data-unlocked={tier >= 1}>
             <div
                 className="flex items-center justify-between flex-wrap mb-3 gap-2-5"
             >
@@ -125,16 +111,7 @@ export function Tier1CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "
 
 export function Tier2CardComponent({ tier, isBrand, renderDocRow }: TierCardProps) {
     return (
-        <div
-            className="card"
-            style={{
-                border:
-                    tier >= 2
-                        ? "1px solid rgba(245,158,11,0.35)"
-                        : "1px solid var(--color-border)",
-                opacity: tier < 1 ? 0.55 : 1,
-            }}
-        >
+        <div className="verification-tier-card card" data-tier="2" data-unlocked={tier >= 2} data-disabled={tier < 1}>
             <div
                 className="flex items-center justify-between flex-wrap mb-3 gap-2-5"
             >
@@ -191,16 +168,7 @@ export function Tier2CardComponent({ tier, isBrand, renderDocRow }: TierCardProp
 
 export function Tier3CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "isBrand">) {
     return (
-        <div
-            className="card"
-            style={{
-                border:
-                    tier >= 3
-                        ? "1px solid rgba(16,185,129,0.35)"
-                        : "1px solid var(--color-border)",
-                opacity: tier < 2 ? 0.55 : 1,
-            }}
-        >
+        <div className="verification-tier-card card" data-tier="3" data-unlocked={tier >= 3} data-disabled={tier < 2}>
             <div
                 className="flex items-center justify-between flex-wrap mb-3 gap-2-5"
             >
@@ -208,7 +176,7 @@ export function Tier3CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "
                     className="flex items-center gap-2-5"
                 >
                     <div
-                        className="flex items-center justify-center rounded-full w-30 h-30" style={{ background: "rgba(16, 185, 129, 0.12)" }}
+                        className="flex items-center justify-center rounded-full w-30 h-30 bg-emerald-subtle"
                     >
                         🏢
                     </div>
@@ -272,26 +240,20 @@ interface TierStatusCardProps {
 
 export function TierStatusCardComponent({
     tier,
-    tierColors,
+    tierColors: _tierColors,
     isUnlimited,
     tierLimit,
     tierDesc,
     trustScore,
 }: TierStatusCardProps) {
     return (
-        <div
-            className="card"
-            style={{
-                background: `linear-gradient(135deg, ${tierColors[tier]}12, var(--color-bg-secondary))`,
-                border: `1px solid ${tierColors[tier]}30`,
-            }}
-        >
+        <div className="verification-status-card card" data-tier={tier}>
             <div
                 className="flex justify-between items-start flex-wrap gap-4"
             >
                 <div>
                     <div
-                        className="font-bold text-xs mb-1 uppercase tracking-wider" style={{ color: tierColors[tier] }}
+                        className="verification-tier-label font-bold text-xs mb-1 uppercase tracking-wider"
                     >
                         Your Verification Tier
                     </div>
@@ -299,13 +261,13 @@ export function TierStatusCardComponent({
                         className="flex items-center gap-3"
                     >
                         <div
-                            className="flex items-center justify-center rounded-full text-2xl text-white" style={{ width: "52px", height: "52px", background: `linear-gradient(135deg, ${tierColors[tier]}, ${tierColors[tier]}88)` }}
+                            className="verification-tier-icon flex items-center justify-center rounded-full text-2xl text-white"
                         >
                             {getTierIcon(tier)}
                         </div>
                         <div>
                             <div
-                                className="text-xl font-extrabold" style={{ color: tierColors[tier] }}
+                                className="verification-tier-heading text-xl font-extrabold"
                             >
                                 Tier {tier} —{" "}
                                 {
@@ -329,9 +291,8 @@ export function TierStatusCardComponent({
                         Monthly Limit
                     </div>
                     <div
-                        className="font-extrabold text-2xl" style={{ color: isUnlimited
-                                ? "#10b981"
-                                : "var(--color-text-primary)" }}
+                        className="verification-monthly-limit font-extrabold text-2xl"
+                        data-unlimited={isUnlimited}
                     >
                         {getMonthlyLimitText(isUnlimited, tier, tierLimit)}
                     </div>
@@ -359,8 +320,11 @@ export function TierStatusCardComponent({
                 <div
                     className="overflow-hidden bg-tertiary rounded-full h-6"
                 >
-                    <div
-                        className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, (trustScore / 900) * 100))}%`, background: `linear-gradient(90deg, ${tierColors[tier]}, #10b981)`, transition: "width 0.6s" }}
+                    <progress
+                        className="verification-trust-progress w-full"
+                        value={Math.min(100, Math.max(0, (trustScore / 900) * 100))}
+                        max={100}
+                        aria-label="Trust score progress"
                     />
                 </div>
             </div>
@@ -415,9 +379,8 @@ export function Step1MandatoryCardComponent({
                 ].map((item) => (
                     <div
                         key={item.label}
-                        className="flex items-center justify-between rounded-md px-4-py-3" style={{ background: item.verified
-                                ? "rgba(16,185,129,0.07)"
-                                : "var(--color-bg-tertiary)", border: `1px solid ${item.verified ? "rgba(16,185,129,0.3)" : "var(--color-border)"}` }}
+                        className="verification-required-row flex items-center justify-between rounded-md px-4-py-3"
+                        data-verified={item.verified}
                     >
                         <div
                             className="flex items-center gap-2-5"

@@ -107,10 +107,10 @@ const allStates = [
     "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu", "Lakshadweep", "Delhi", "Puducherry", "Ladakh", "Jammu and Kashmir"
 ];
 
-function getUserTypeColor(userType?: string): string {
-    if (isInfluencer(userType)) return "var(--color-primary)";
-    if (isBrand(userType)) return "#ec4899";
-    return "#14b8a6";
+function getUserTypeTone(userType?: string): "influencer" | "brand" | "partner" {
+    if (isInfluencer(userType)) return "influencer";
+    if (isBrand(userType)) return "brand";
+    return "partner";
 }
 
 export default function ProfileTab({
@@ -214,7 +214,8 @@ export default function ProfileTab({
         <div className="grid-2">
             <div className="card">
                 <div
-                    className="mb-4 rounded-2xl text-xs inline-block px-2-py-1 text-white tracking-wider" style={{ background: getUserTypeColor(user.userType), fontWeight: "800" }}
+                    className="mb-4 rounded-2xl text-xs inline-block px-2-py-1 text-white tracking-wider profile-type-pill"
+                    data-tone={getUserTypeTone(user.userType)}
                 >
                     {user.userType} PROFILE
                 </div>
@@ -229,7 +230,7 @@ export default function ProfileTab({
                         className="relative cursor-pointer border-none p-0 bg-none"
                     >
                         <div
-                            className="overflow-hidden flex items-center justify-center relative rounded-full" style={{ width: "100px", height: "100px", border: "4px solid var(--color-bg-tertiary)", background: "#f0f0f0" }}
+                            className="overflow-hidden flex items-center justify-center relative rounded-full profile-avatar-frame"
                         >
                             {profile.profileImage ? (
                                 <Image
@@ -247,17 +248,16 @@ export default function ProfileTab({
 
                             {isUploading && (
                                 <div
-                                    className="absolute flex items-center justify-center inset-0" style={{ background: "rgba(0,0,0,0.5)" }}
+                                    className="absolute flex items-center justify-center inset-0 profile-upload-overlay"
                                 >
                                     <span
-                                        className="loading"
-                                        style={{ width: "20px", height: "20px" }}
+                                        className="loading profile-upload-spinner"
                                     ></span>
                                 </div>
                             )}
                         </div>
                         <div
-                            className="absolute flex items-center justify-center text-sm rounded-full text-white bg-color-primary w-32 h-32" style={{ bottom: "0", right: "0", border: "2px solid var(--color-bg-primary)" }}
+                            className="absolute flex items-center justify-center text-sm rounded-full text-white bg-color-primary w-32 h-32 profile-camera-button"
                         >
                             📸
                         </div>
@@ -492,11 +492,8 @@ export default function ProfileTab({
                                     type="button"
                                     variant="ghost"
                                     onClick={() => toggleCategory(category)}
-                                    className="badge cursor-pointer border-none px-3-py-2" style={{ background: profile.categories.includes(category)
-                                            ? "var(--color-primary)"
-                                            : "var(--color-bg-tertiary)", color: profile.categories.includes(category)
-                                            ? "white"
-                                            : "var(--color-text-secondary)" }}
+                                    className="badge cursor-pointer border-none px-3-py-2 profile-choice-chip"
+                                    data-selected={profile.categories.includes(category) ? "true" : "false"}
                                 >
                                     {category}
                                 </Button>
@@ -548,11 +545,8 @@ export default function ProfileTab({
                                     type="button"
                                     variant="ghost"
                                     onClick={() => toggleLanguage(language)}
-                                    className="badge cursor-pointer border-none px-3-py-2" style={{ background: profile.languages.includes(language)
-                                            ? "var(--color-primary)"
-                                            : "var(--color-bg-tertiary)", color: profile.languages.includes(language)
-                                            ? "white"
-                                            : "var(--color-text-secondary)" }}
+                                    className="badge cursor-pointer border-none px-3-py-2 profile-choice-chip"
+                                    data-selected={profile.languages.includes(language) ? "true" : "false"}
                                 >
                                     {language}
                                 </Button>

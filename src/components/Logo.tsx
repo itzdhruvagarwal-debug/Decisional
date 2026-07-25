@@ -6,10 +6,7 @@ export default function Logo() {
       href="/"
       className="flex items-center gap-3 no-underline"
     >
-      <div
-        className="p-2 flex items-center justify-center rounded-lg text-white" style={{ background:
-            "linear-gradient(135deg, var(--color-primary), var(--color-secondary))", boxShadow: "0 4px 15px rgba(99, 102, 241, 0.3)" }}
-      >
+      <div className="logo-mark p-2 flex items-center justify-center rounded-lg text-white">
         {/* Decisional Logo — Signal-to-Decision icon */}
         <svg
           width="24"
@@ -28,9 +25,7 @@ export default function Logo() {
           <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
         </svg>
       </div>
-      <div
-        className="flex flex-col" style={{ lineHeight: 1.1 }}
-      >
+      <div className="logo-copy flex flex-col">
         <span
           className="gradient-text text-2xl font-extrabold tracking-normal"
         >

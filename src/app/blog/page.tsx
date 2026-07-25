@@ -63,9 +63,7 @@ export default function BlogPage() {
       <main className="flex-1 flex items-center justify-center pt-30 pb-20">
         <section className="section w-full relative">
           {/* Subtle glowing radial background for depth */}
-          <div
-            className="absolute pointer-events-none z-0" style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%)" }}
-          />
+          <div className="blog-glow absolute pointer-events-none z-0" />
 
           <div className="container relative text-center max-w-640 z-1">
             <div
@@ -75,20 +73,20 @@ export default function BlogPage() {
             </div>
 
             <h1
-              className="section-title animate-fade-in mb-5 font-extrabold" style={{ fontSize: "clamp(32px, 5vw, 56px)", lineHeight: 1.15, letterSpacing: "-0.02em" }}
+              className="blog-title section-title animate-fade-in mb-5 font-extrabold"
             >
               Practical Guides <br />
               <span className="gradient-text-animated">Coming Soon</span>
             </h1>
 
             <p
-              className="section-subtitle animate-fade-in text-secondary mb-10 text-base" style={{ lineHeight: 1.75, animationDelay: "0.1s" }}
+              className="blog-subtitle section-subtitle animate-fade-in text-secondary mb-10 text-base"
             >
               We are finalizing operational playbooks and compliance guides for Indian influencer marketing. Expect deep-dives on TDS compliance under Section 194-O, GST invoicing rules, and fake-engagement audit checklists.
             </p>
 
             <div
-              className="card glass animate-fade-in p-6 border-card" style={{ borderRadius: "var(--radius-lg, 12px)", background: "rgba(30, 41, 59, 0.4)", animationDelay: "0.2s" }}
+              className="blog-subscribe-card card glass animate-fade-in p-6 border-card"
             >
               <h3 className="text-base font-bold mb-2">
                 Get Notified of New Content
@@ -99,7 +97,8 @@ export default function BlogPage() {
 
               {status && (
                 <div
-                  className="p-3 mb-4 text-sm font-medium text-center" style={{ borderRadius: "var(--radius-md, 8px)", background: status.type === "success" ? "rgba(16, 185, 129, 0.15)" : "rgba(239, 68, 68, 0.15)", border: `1px solid ${status.type === "success" ? "rgba(16, 185, 129, 0.3)" : "rgba(239, 68, 68, 0.3)"}`, color: status.type === "success" ? "#10b981" : "#ef4444" }}
+                  className="blog-status p-3 mb-4 text-sm font-medium text-center"
+                  data-status={status.type}
                 >
                   {status.message}
                 </div>

@@ -6,6 +6,191 @@
     var(--color-bg-primary);
 }
 
+/* ==================== ADMIN USER TABLE STANDARDIZED CLASSES ==================== */
+
+.admin-user-search {
+  min-width: 260px;
+  flex: 1 1 320px;
+}
+
+.admin-status-select {
+  width: 200px;
+}
+
+.admin-users-table {
+  min-width: 960px;
+}
+
+.admin-users-th {
+  padding: 14px 18px;
+  text-align: left;
+}
+
+.admin-users-th[data-align="center"] {
+  text-align: center;
+}
+
+.admin-users-th[data-align="right"] {
+  text-align: right;
+}
+
+.admin-user-avatar {
+  width: 42px;
+  height: 42px;
+}
+
+.admin-tone-badge[data-tone="success"] {
+  background: var(--color-success);
+}
+
+.admin-tone-badge[data-tone="warning"] {
+  background: var(--color-warning);
+}
+
+.admin-tone-badge[data-tone="danger"] {
+  background: var(--color-error);
+}
+
+.admin-tone-badge[data-tone="muted"] {
+  background: var(--color-text-muted);
+}
+
+.admin-award-select {
+  width: 140px;
+}
+
+.admin-grant-btn {
+  padding: 0 8px;
+}
+
+.admin-page-link[data-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.admin-payouts-table {
+  min-width: 980px;
+}
+
+.admin-payouts-th {
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.admin-payouts-th[data-align="right"] {
+  text-align: right;
+}
+
+.admin-pan-status[data-present="true"] {
+  color: var(--color-accent-emerald);
+}
+
+.admin-pan-status[data-present="false"] {
+  color: var(--color-accent-rose);
+}
+
+.admin-payout-status {
+  padding: 4px 9px;
+  border: 1px solid currentColor;
+}
+
+.admin-payout-status[data-tone="success"] {
+  color: var(--color-accent-emerald);
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.admin-payout-status[data-tone="danger"] {
+  color: var(--color-accent-rose);
+  background: rgba(244, 63, 94, 0.12);
+  border-color: rgba(244, 63, 94, 0.25);
+}
+
+.admin-payout-status[data-tone="warning"] {
+  color: var(--color-accent-amber);
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+.admin-current-view-card {
+  border-color: rgba(99, 102, 241, 0.22);
+}
+
+.admin-filter-button {
+  padding: 8px 14px;
+}
+
+.admin-error-card {
+  padding: 14px 16px;
+  border-color: rgba(244, 63, 94, 0.35);
+}
+
+.admin-payout-note {
+  min-height: 104px;
+}
+
+.admin-flagged-summary {
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.04), rgba(245, 158, 11, 0.04));
+}
+
+.admin-flagged-card {
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.admin-flagged-pill {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.admin-trust-score[data-tone="success"] {
+  color: var(--color-success);
+}
+
+.admin-trust-score[data-tone="warning"] {
+  color: var(--color-warning);
+}
+
+.admin-trust-score[data-tone="danger"] {
+  color: var(--color-error);
+}
+
+.admin-view-profile-btn {
+  padding: 6px 14px;
+}
+
+.admin-reject-reason {
+  width: 220px;
+}
+
+.admin-newsletter-stat {
+  padding: 18px 20px;
+}
+
+.admin-newsletter-content {
+  min-height: 220px;
+  font-family: var(--font-mono, monospace);
+}
+
+.admin-newsletter-warning {
+  padding: 16px 20px;
+  border: 1px dashed rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.admin-newsletter-submit {
+  padding: 14px 28px;
+}
+
+@media (max-width: 640px) {
+  .admin-user-search,
+  .admin-status-select,
+  .admin-award-select,
+  .admin-reject-reason {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 .admin-sidebar {
   position: fixed;
   inset: 0 auto 0 0;

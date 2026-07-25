@@ -65,28 +65,10 @@ function getUserName(user: Withdrawal["wallet"]["user"]) {
   return user.email;
 }
 
-function getStatusStyle(status: string) {
-  if (status === "COMPLETED") {
-    return {
-      background: "rgba(16, 185, 129, 0.12)",
-      color: "var(--color-accent-emerald)",
-      borderColor: "rgba(16, 185, 129, 0.25)",
-    };
-  }
-
-  if (status === "FAILED") {
-    return {
-      background: "rgba(244, 63, 94, 0.12)",
-      color: "var(--color-accent-rose)",
-      borderColor: "rgba(244, 63, 94, 0.25)",
-    };
-  }
-
-  return {
-    background: "rgba(245, 158, 11, 0.12)",
-    color: "var(--color-accent-amber)",
-    borderColor: "rgba(245, 158, 11, 0.25)",
-  };
+function getStatusTone(status: string) {
+  if (status === "COMPLETED") return "success";
+  if (status === "FAILED") return "danger";
+  return "warning";
 }
 
 interface PayoutResponse {
@@ -195,14 +177,15 @@ export default function PayoutsAdminPage() {
     return (
       <div className="card overflow-hidden p-0">
         <div className="admin-table-wrap">
-          <table className="w-full border-collapse" style={{ minWidth: "980px" }}>
+          <table className="w-full border-collapse admin-payouts-table">
             <thead className="bg-tertiary">
               <tr>
                 {["User", "Amount", "Destination", "Risk", "Requested", "Actions"].map(
                   (heading) => (
                     <th
                       key={heading}
-                      className="border-b-card text-secondary text-xs font-extrabold uppercase" style={{ padding: "14px 16px", textAlign: heading === "Actions" ? "right" : "left" }}
+                      className="border-b-card text-secondary text-xs font-extrabold uppercase admin-payouts-th"
+                      data-align={heading === "Actions" ? "right" : "left"}
                     >
                       {heading}
                     </th>
@@ -212,7 +195,6 @@ export default function PayoutsAdminPage() {
             </thead>
             <tbody>
               {withdrawals.map((withdrawal) => {
-                const statusStyle = getStatusStyle(withdrawal.status);
                 const user = withdrawal.wallet.user;
 
                 return (
@@ -231,9 +213,8 @@ export default function PayoutsAdminPage() {
                         {user.userType}
                       </div>
                       <div
-                        className="mt-1 font-bold text-xs" style={{ color: user.taxCompliance?.panLast4
-                            ? "var(--color-accent-emerald)"
-                            : "var(--color-accent-rose)" }}
+                        className="mt-1 font-bold text-xs admin-pan-status"
+                        data-present={user.taxCompliance?.panLast4 ? "true" : "false"}
                       >
                         {user.taxCompliance?.panLast4
                           ? `PAN ****${user.taxCompliance.panLast4}`
@@ -259,7 +240,8 @@ export default function PayoutsAdminPage() {
                     </td>
                     <td className="p-4">
                       <span
-                        className="inline-flex text-xs font-extrabold rounded-full" style={{ border: "1px solid", padding: "4px 9px", ...statusStyle }}
+                        className="inline-flex text-xs font-extrabold rounded-full admin-payout-status"
+                        data-tone={getStatusTone(withdrawal.status)}
                       >
                         {withdrawal.status}
                       </span>
@@ -322,7 +304,7 @@ export default function PayoutsAdminPage() {
         </div>
 
         <div
-          className="card px-4-py-3 min-w-220" style={{ borderColor: "rgba(99, 102, 241, 0.22)" }}
+          className="card px-4-py-3 min-w-220 admin-current-view-card"
         >
           <div className="text-muted text-xs">
             Current view
@@ -340,7 +322,7 @@ export default function PayoutsAdminPage() {
             type="button"
             variant={filter === status ? "primary" : "secondary"}
             onClick={() => setFilter(status)}
-            className="min-h-40" style={{ padding: "8px 14px" }}
+            className="min-h-40 admin-filter-button"
           >
             {status}
           </Button>
@@ -350,7 +332,7 @@ export default function PayoutsAdminPage() {
           type="button"
           variant="ghost"
           onClick={() => { fetchWithdrawals(); }}
-          className="min-h-40" style={{ padding: "8px 14px" }}
+          className="min-h-40 admin-filter-button"
         >
           Refresh
         </Button>
@@ -358,7 +340,7 @@ export default function PayoutsAdminPage() {
 
       {error && (
         <div
-          className="card mb-4 text-rose" style={{ padding: "14px 16px", borderColor: "rgba(244, 63, 94, 0.35)" }}
+          className="card mb-4 text-rose admin-error-card"
         >
           {error}
         </div>
@@ -397,7 +379,7 @@ export default function PayoutsAdminPage() {
                     setDraft({ ...draft, note: event.target.value })
                   }
                   placeholder="Explain why this payout is rejected"
-                  className="resize-y mb-4" style={{ minHeight: "104px" }}
+                  className="resize-y mb-4 admin-payout-note"
                 />
               </>
             ) : (
