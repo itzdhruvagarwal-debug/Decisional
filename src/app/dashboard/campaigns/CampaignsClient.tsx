@@ -1,14 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { formatCurrency, formatNumber, normalizeStringArray } from "@/lib/utils-client";
 import { Pagination } from "@/components/ui/pagination";
 import EmptyState from "@/components/ui/EmptyState";
-import { Button, Input, Select } from "@/components/ui";
+import { Badge, Button, Input, Select, Skeleton } from "@/components/ui";
 
 interface Campaign {
   id: string;
@@ -183,13 +182,58 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
     return campaigns;
   }, [campaigns]);
 
-  let content;
-  if (loading) {
-    content = (
-      <div className="flex justify-center p-10">
-        <span className="loading w-40 h-40" />
+  /** Stable handler — avoids re-creating on every render */
+  const handleCategoryChange = useCallback((category: string) => {
+    setSelectedCategory(category);
+    setPage(1);
+  }, []);
+
+  const handleSortChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortBy(e.target.value);
+    setPage(1);
+  }, []);
+
+  /** Skeleton grid shown while SWR is fetching */
+  function CampaignCardSkeleton() {
+    return (
+      <div className="campaign-card-grid grid gap-4 grid-auto-280" aria-hidden="true">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="card" style={{ padding: 18 }}>
+            <div className="flex items-center gap-3 mb-3">
+              <Skeleton width={40} height={40} borderRadius={6} />
+              <div className="flex-1">
+                <Skeleton height={12} width={100} borderRadius={4} style={{ marginBottom: 6 }} />
+                <Skeleton height={16} width={160} borderRadius={4} />
+              </div>
+              <Skeleton height={22} width={64} borderRadius={20} />
+            </div>
+            <Skeleton height={42} borderRadius={6} style={{ marginBottom: 12 }} />
+            <div className="flex gap-1.5 mb-3">
+              <Skeleton height={20} width={56} borderRadius={4} />
+              <Skeleton height={20} width={64} borderRadius={4} />
+              <Skeleton height={20} width={52} borderRadius={4} />
+            </div>
+            <div className="grid gap-2 mb-3" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
+              {[1, 2, 3].map((j) => (
+                <div key={j}>
+                  <Skeleton height={10} width={36} borderRadius={3} style={{ marginBottom: 4 }} />
+                  <Skeleton height={14} width={52} borderRadius={3} />
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between items-center">
+              <Skeleton height={12} width={80} borderRadius={3} />
+              <Skeleton height={34} width={96} borderRadius={6} />
+            </div>
+          </div>
+        ))}
       </div>
     );
+  }
+
+  let content;
+  if (loading) {
+    content = <CampaignCardSkeleton />;
   } else if (error) {
     content = (
       <EmptyState
@@ -214,9 +258,9 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
         {filteredCampaigns.map((campaign) => (
           <article key={campaign.id} className="card campaign-card" style={{ padding: "18px" }}>
             <div className="campaign-card-brand-row">
-              <div className="campaign-card-logo" aria-hidden="true">
+              <div className="campaign-card-logo" aria-hidden={!campaign.brand.logo}>
                 {campaign.brand.logo ? (
-                  <Image src={campaign.brand.logo} alt="" fill unoptimized className="object-cover" />
+                  <Image src={campaign.brand.logo} alt={campaign.brand.companyName} fill unoptimized className="object-cover" />
                 ) : (
                   campaign.brand.companyName.slice(0, 2).toUpperCase()
                 )}
@@ -227,9 +271,9 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
                 </div>
                 <h3>{campaign.title}</h3>
               </div>
-              <span className="badge badge-success campaign-card-rate">
+              <Badge variant="success" className="campaign-card-rate">
                 {formatCurrency(campaign.perInfluencerBudget)}
-              </span>
+              </Badge>
             </div>
 
             <p
@@ -242,14 +286,14 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
               className="campaign-card-tags flex flex-wrap gap-1-5" style={{ margin: "10px 0 14px" }}
             >
               {campaign.deliverables.slice(0, 2).map((item, index) => (
-                <span key={`${campaign.id}-del-${index}`} className="badge badge-primary">
+                <Badge key={`${campaign.id}-del-${index}`} variant="primary">
                   {item.count}x {deliverableLabels[item.type] || item.type}
-                </span>
+                </Badge>
               ))}
               {campaign.targetCategories.slice(0, 2).map((category) => (
-                <span key={`${campaign.id}-${category}`} className="badge">
+                <Badge key={`${campaign.id}-${category}`} variant="ghost">
                   {category}
-                </span>
+                </Badge>
               ))}
             </div>
 
@@ -290,9 +334,14 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
               <span className="text-xs text-secondary">
                 Post by {new Date(campaign.postingDeadline).toLocaleDateString("en-IN")}
               </span>
-              <Link href={`/dashboard/campaigns/${campaign.id}`} className="btn btn-primary">
+              <Button
+                href={`/dashboard/campaigns/${campaign.id}`}
+                variant="primary"
+                size="sm"
+                aria-label={`View details for campaign: ${campaign.title}`}
+              >
                 View Details
-              </Link>
+              </Button>
             </div>
           </article>
         ))}
@@ -313,9 +362,13 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
             </p>
           </div>
           {canCreateCampaign && (
-            <Link href="/dashboard/campaigns/create" className="btn btn-primary">
+            <Button
+              href="/dashboard/campaigns/create"
+              variant="primary"
+              aria-label="Create a new campaign"
+            >
               Create Campaign
-            </Link>
+            </Button>
           )}
         </div>
 
@@ -332,10 +385,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
 
           <Select
             value={sortBy}
-            onChange={(e) => {
-              setSortBy(e.target.value);
-              setPage(1);
-            }}
+            onChange={handleSortChange}
             className="min-w-160"
           >
             <option value="newest">Newest</option>
@@ -352,14 +402,10 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
             <Button
               key={category}
               variant={selectedCategory === category ? "primary" : "ghost"}
-              onClick={() => {
-                setSelectedCategory(category);
-                setPage(1);
-              }}
-              className="whitespace-nowrap" style={{ background:
-                  selectedCategory === category
-                    ? "var(--gradient-primary)"
-                    : "var(--color-bg-tertiary)", color: selectedCategory === category ? "white" : "inherit" }}
+              size="sm"
+              onClick={() => handleCategoryChange(category)}
+              aria-pressed={selectedCategory === category}
+              className="whitespace-nowrap"
             >
               {category}
             </Button>

@@ -10,6 +10,7 @@ import {
 import { logger } from "@/lib/logger";
 import AnalyticsPageClient from "./analytics/AnalyticsPageClient";
 import { isAdmin as rbacIsAdmin, isBrand, isInfluencer } from "@/lib/rbac";
+import { Button } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -56,13 +57,14 @@ function DashboardErrorFallback({ user }: Readonly<{ user: Session["user"] }>) {
           The dashboard could not load the latest workspace data. Please
           refresh or try again after a moment.
         </p>
-        <a
+        <Button
           href="/dashboard"
-          className="btn btn-danger no-underline inline-block dashboard-fallback-button"
+          variant="danger"
           aria-label="Reload dashboard"
+          className="dashboard-fallback-button"
         >
           Reload Dashboard
-        </a>
+        </Button>
       </div>
     </DashboardShell>
   );
@@ -90,17 +92,19 @@ function DashboardEmptyState({ dataLoadFailed }: Readonly<{ dataLoadFailed: bool
             ? "We could not load your dashboard data. Please refresh or try again after a moment."
             : "We are fetching your latest campaign, engagement, and financial data."}
         </p>
-        <a
+        <Button
           href="/dashboard"
-          className="btn btn-primary btn-lg no-underline inline-block dashboard-empty-button"
+          variant="primary"
+          size="lg"
           aria-label={
             dataLoadFailed
               ? "Retry dashboard data load"
               : "Refresh dashboard data"
           }
+          className="dashboard-empty-button"
         >
           {dataLoadFailed ? "Retry" : "Refresh"}
-        </a>
+        </Button>
       </div>
     </div>
   );

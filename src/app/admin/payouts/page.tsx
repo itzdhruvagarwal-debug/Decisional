@@ -1,11 +1,11 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { formatCurrency } from "@/lib/utils-client";
 import EmptyState from "@/components/ui/EmptyState";
-import { Button, Textarea } from "@/components/ui";
+import { Badge, Button, Textarea } from "@/components/ui";
 import { z } from "zod";
 
 export const payoutDecisionSchema = z.object({
@@ -103,10 +103,10 @@ export default function PayoutsAdminPage() {
 
   const [actionError, setActionError] = useState<string>("");
 
-  const openAction = (withdrawal: Withdrawal, action: PayoutAction) => {
+  const openAction = useCallback((withdrawal: Withdrawal, action: PayoutAction) => {
     setActionError("");
     setDraft({ withdrawal, action, note: "" });
-  };
+  }, []);
 
   const handleAction = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -156,8 +156,18 @@ export default function PayoutsAdminPage() {
   const renderContent = () => {
     if (loading) {
       return (
-        <div className="card text-center p-10">
-          Loading payouts...
+        <div className="card overflow-hidden p-0" aria-hidden="true">
+          <table className="w-full border-collapse">
+            <tbody>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <tr key={i} className="border-b-card">
+                  {[140, 80, 120, 80, 100, 60].map((w, j) => (
+                    <td key={j} className="p-4"><div className="skeleton rounded-sm h-4" style={{ width: w }} /></td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       );
     }
@@ -177,15 +187,15 @@ export default function PayoutsAdminPage() {
     return (
       <div className="card overflow-hidden p-0">
         <div className="admin-table-wrap">
-          <table className="w-full border-collapse admin-payouts-table">
+          <table className="w-full border-collapse admin-payouts-table" aria-label="Payout queue">
             <thead className="bg-tertiary">
               <tr>
                 {["User", "Amount", "Destination", "Risk", "Requested", "Actions"].map(
                   (heading) => (
                     <th
                       key={heading}
+                      scope="col"
                       className="border-b-card text-secondary text-xs font-extrabold uppercase admin-payouts-th"
-                      data-align={heading === "Actions" ? "right" : "left"}
                     >
                       {heading}
                     </th>
@@ -239,12 +249,14 @@ export default function PayoutsAdminPage() {
                       )}
                     </td>
                     <td className="p-4">
-                      <span
-                        className="inline-flex text-xs font-extrabold rounded-full admin-payout-status"
-                        data-tone={getStatusTone(withdrawal.status)}
+                      <Badge
+                        variant={
+                          withdrawal.status === "COMPLETED" ? "success" :
+                          withdrawal.status === "FAILED" ? "danger" : "warning"
+                        }
                       >
                         {withdrawal.status}
-                      </span>
+                      </Badge>
                       <div className="text-muted text-xs mt-1">
                         Risk {withdrawal.riskScore}
                         {withdrawal.isManualReview ? " / manual" : ""}

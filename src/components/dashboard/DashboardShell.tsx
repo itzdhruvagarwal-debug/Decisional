@@ -6,7 +6,7 @@ import { fetcher } from "@/lib/fetcher";
 import EmptyState from "@/components/ui/EmptyState";
 import Logo from "../Logo";
 import PWAInstallButton from "@/components/pwa/PWAInstallButton";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { isAdmin as rbacIsAdmin, isBrand, isInfluencer } from "@/lib/rbac";
@@ -300,7 +300,7 @@ export default function DashboardShell({
     };
   }, []);
 
-  const markAsRead = async (notificationId?: string) => {
+  const markAsRead = useCallback(async (notificationId?: string) => {
     try {
       const body = notificationId
         ? { notificationIds: [notificationId] }
@@ -315,7 +315,7 @@ export default function DashboardShell({
     } catch (error) {
       logger.error("[dashboard-shell] Failed to mark notifications as read:", error);
     }
-  };
+  }, [refreshNotifications]);
 
   const userType = user?.userType;
   const isBrandOrIndividual = isBrand(userType);
@@ -401,7 +401,7 @@ export default function DashboardShell({
         { icon: "deals" as const, label: "Deals", href: "/dashboard/deals" },
         { icon: "settings" as const, label: "Profile", href: "/dashboard/settings" },
       ];
-  const isActivePath = (href: string) => {
+  const isActivePath = useCallback((href: string) => {
     if (pathname === href) return true;
     if (href !== "/dashboard" && pathname.startsWith(`${href}/`)) {
       const hasMoreSpecificMatch = navItems.some(
@@ -414,7 +414,7 @@ export default function DashboardShell({
       return !hasMoreSpecificMatch;
     }
     return false;
-  };
+  }, [pathname, navItems]);
 
   return (
     <div className="dashboard-app-shell">
@@ -470,7 +470,7 @@ interface SidebarProps {
   readonly isAdmin: boolean;
 }
 
-function SidebarComponent({
+const SidebarComponent = memo(function SidebarComponent({
   sidebarOpen,
   setSidebarOpen,
   mobileSidebarOpen,
@@ -584,7 +584,8 @@ function SidebarComponent({
       </aside>
     </>
   );
-}
+});
+SidebarComponent.displayName = "SidebarComponent";
 
 interface TopbarProps {
   readonly user?: DashboardUser | null | undefined;
@@ -600,7 +601,7 @@ interface TopbarProps {
   readonly setMobileSidebarOpen: (open: boolean) => void;
 }
 
-function TopbarComponent({
+const TopbarComponent = memo(function TopbarComponent({
   user,
   isAdmin,
   pathname,
@@ -721,14 +722,15 @@ function TopbarComponent({
       </div>
     </header>
   );
-}
+});
+TopbarComponent.displayName = "TopbarComponent";
 
 interface MobileTabbarProps {
   readonly mobileNavItems: Array<{ icon: string; label: string; href: string; primary?: boolean }>;
   readonly isActivePath: (href: string) => boolean;
 }
 
-function MobileTabbarComponent({ mobileNavItems, isActivePath }: MobileTabbarProps) {
+const MobileTabbarComponent = memo(function MobileTabbarComponent({ mobileNavItems, isActivePath }: MobileTabbarProps) {
   return (
     <nav className="dashboard-mobile-tabbar" aria-label="Primary mobile navigation">
       {mobileNavItems.map((item) => {
@@ -749,4 +751,5 @@ function MobileTabbarComponent({ mobileNavItems, isActivePath }: MobileTabbarPro
       })}
     </nav>
   );
-}
+});
+MobileTabbarComponent.displayName = "MobileTabbarComponent";
