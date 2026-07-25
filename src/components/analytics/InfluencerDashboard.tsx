@@ -14,7 +14,7 @@ import {
 
 import { ToastContainer, useToasts } from "@/components/ui/toast";
 import EmptyState from "@/components/ui/EmptyState";
-import { Button } from "@/components/ui";
+import { Badge, Button } from "@/components/ui";
 
 export interface InfluencerAnalyticsData {
   overview: {
@@ -197,9 +197,9 @@ export default function InfluencerDashboard({
                 <h3 className="level-perks-title">
                   ✨ Level {overview.level} Perks & Benefits
                 </h3>
-                <span className="badge badge-primary text-xs font-bold uppercase px-2-py-1">
+                <Badge variant="primary" className="text-xs font-bold uppercase">
                   {calculateLevel(overview.xp).name}
-                </span>
+                </Badge>
               </div>
               <p className="level-perks-desc">
                 Your Creator Level is determined by your total XP. Complete campaigns, refer other creators, and maintain a high trust score to level up and unlock better platform terms and enhanced search ranking.
@@ -329,9 +329,9 @@ export default function InfluencerDashboard({
             <h3 className="text-base font-bold">
               Recent Achievements
             </h3>
-            <span className="badge badge-primary">
+            <Badge variant="primary">
               {data.gamification?.recentBadges?.length || 0} Badges
-            </span>
+            </Badge>
           </div>
           <div className="badge-list">
             {data.gamification?.recentBadges?.map((badge: { id: string; name: string; description: string; icon: string; earnedAt: Date; xpReward?: number }) => (
@@ -345,11 +345,9 @@ export default function InfluencerDashboard({
                     {badge.description}
                   </div>
                 </div>
-                <span
-                  className="badge badge-success text-xs"
-                >
+                <Badge variant="success" className="text-xs">
                   +{badge.xpReward} XP
-                </span>
+                </Badge>
               </div>
             ))}
             {(!data.gamification?.recentBadges ||
@@ -370,9 +368,9 @@ export default function InfluencerDashboard({
             <h3 className="text-base font-bold">
               Referral Rewards
             </h3>
-            <span className="badge badge-primary">
+            <Badge variant="primary">
               {data.gamification?.referralStats?.tier?.label || "Novice"} Tier
-            </span>
+            </Badge>
           </div>
 
           <div className="grid-2 gap-3 mb-5">

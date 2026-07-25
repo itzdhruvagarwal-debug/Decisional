@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { AdminService } from "@/services/admin.service";
 import EmptyState from "@/components/ui/EmptyState";
+import { Badge, Button } from "@/components/ui";
 
 type PendingUserElement = Prisma.PromiseReturnType<typeof AdminService.getVerificationQueue>[number];
 
@@ -48,7 +49,7 @@ export default function VerificationQueue({ pendingUsers, isNarrow = false }: Re
                   <div>
                     <div className="vq-user-name">{name}</div>
                     <div className="vq-user-meta">
-                      <span className="badge badge-primary vq-badge-xs">{user.userType}</span>
+                      <Badge variant="primary" className="vq-badge-xs">{user.userType}</Badge>
                       <span>{user.email}</span>
                     </div>
                   </div>
@@ -77,12 +78,14 @@ export default function VerificationQueue({ pendingUsers, isNarrow = false }: Re
                     </div>
                   </div>
 
-                  <Link
+                  <Button
                     href={`/admin/verifications/${user.id}`}
-                    className="btn btn-primary btn-sm"
+                    variant="primary"
+                    size="sm"
+                    aria-label={`Review verification for ${name}`}
                   >
                     Review
-                  </Link>
+                  </Button>
                 </div>
               </div>
             );

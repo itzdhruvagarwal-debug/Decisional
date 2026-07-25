@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui";
+import { Badge, Button, Spinner } from "@/components/ui";
 import EmptyState from "@/components/ui/EmptyState";
 import { formatCurrency } from "@/lib/utils-client";
 import { CampaignApplication } from "./CampaignDetailHelpers";
@@ -21,8 +21,8 @@ export function ApplicationsList({
 }: ApplicationsListProps) {
   if (loading) {
     return (
-      <div className="p-6 text-center">
-        <span className="loading" />
+      <div className="flex justify-center p-6">
+        <Spinner size="md" />
       </div>
     );
   }
@@ -65,19 +65,14 @@ export function ApplicationsList({
                 className="flex items-center flex-wrap mb-2 gap-2-5"
               >
                 <strong>{application.influencer.displayName}</strong>
-                <span className="badge">{application.status}</span>
-                <span className="badge">
-                  Trust {application.influencer.user?.trustScore ?? 0}
-                </span>
-                <span className="badge">
-                  {formatCurrency(application.proposedRate)}
-                </span>
+                <Badge variant="ghost">{application.status}</Badge>
+                <Badge variant="ghost">Trust {application.influencer.user?.trustScore ?? 0}</Badge>
+                <Badge variant="ghost">{formatCurrency(application.proposedRate)}</Badge>
                 {matchScore !== undefined && (
-                  <span
-                    className="badge font-bold" style={{ backgroundColor: matchBgColor, color: matchTextColor, borderColor: matchTextColor }}
-                    title={`Match Score Details:\n- Niche Fit: ${application.matchBreakdown?.categoryScore}%\n- Engagement Fit: ${application.matchBreakdown?.engagementScore}%\n- Authenticity Fit: ${application.matchBreakdown?.authenticityScore}%\n- Reputation Fit: ${application.matchBreakdown?.qualityScore}%\n- ROI/CPV Fit (Projected): ${application.matchBreakdown?.roiScore}%\n- Est. Views (Modelled): ${application.matchBreakdown?.estimatedViews}\n- Est. CPV (Modelled): ₹${((application.matchBreakdown?.estimatedCpvPaise || 0) / 100).toFixed(2)}`}
-                  >
-                    🔥 {matchScore}% Match
+                  <span title={`Match Score Details:\n- Niche Fit: ${application.matchBreakdown?.categoryScore}%\n- Engagement Fit: ${application.matchBreakdown?.engagementScore}%\n- Authenticity Fit: ${application.matchBreakdown?.authenticityScore}%\n- Reputation Fit: ${application.matchBreakdown?.qualityScore}%\n- ROI/CPV Fit (Projected): ${application.matchBreakdown?.roiScore}%\n- Est. Views (Modelled): ${application.matchBreakdown?.estimatedViews}\n- Est. CPV (Modelled): ₹${((application.matchBreakdown?.estimatedCpvPaise || 0) / 100).toFixed(2)}`}>
+                    <Badge variant={matchScore >= 80 ? "success" : matchScore >= 50 ? "warning" : "danger"}>
+                      🔥 {matchScore}% Match
+                    </Badge>
                   </span>
                 )}
               </div>
@@ -110,12 +105,14 @@ export function ApplicationsList({
             <div
               className="flex items-start gap-2 flex-wrap justify-end"
             >
-              <Link
+              <Button
                 href={`/dashboard/influencers/${application.influencer.id}`}
-                className="btn btn-secondary btn-sm"
+                variant="secondary"
+                size="sm"
+                aria-label={`View profile of ${application.influencer.displayName}`}
               >
                 Profile
-              </Link>
+              </Button>
               {canAct && (
                 <>
                   <Button

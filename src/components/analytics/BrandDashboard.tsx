@@ -13,7 +13,7 @@ import {
 import Link from "next/link";
 import { ToastContainer, useToasts } from "@/components/ui/toast";
 import EmptyState from "@/components/ui/EmptyState";
-import { Button } from "@/components/ui";
+import { Badge, Button } from "@/components/ui";
 
 export interface BrandAnalyticsData {
   overview: {
@@ -202,9 +202,9 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
           <div className="referral-stat-row">
             <div className="referral-stat">
               <span className="referral-stat-label">Tier</span>
-              <span className="badge badge-success">
+              <Badge variant="success">
                 {data.referralStats?.tier?.label || "Novice"}
-              </span>
+              </Badge>
             </div>
             <div className="referral-stat">
               <span className="referral-stat-label">Active Referrals</span>
@@ -264,9 +264,9 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
             referrals!
           </p>
           <div>
-            <Link href="/dashboard/referrals" className="btn btn-primary">
+            <Button href="/dashboard/referrals" variant="primary">
               View Details
-            </Link>
+            </Button>
           </div>
         </div>
       </div>

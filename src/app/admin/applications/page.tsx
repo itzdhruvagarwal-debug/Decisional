@@ -5,7 +5,7 @@ import { formatCurrency } from "@/lib/utils-client";
 import { z } from "zod";
 import Link from "next/link";
 import EmptyState from "@/components/ui/EmptyState";
-import { Button, Input } from "@/components/ui";
+import { Badge, Button, Input } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -35,9 +35,14 @@ export default async function AdminApplicationsPage() {
               Review campaign pitches flagged by the automated security risk engine.
             </p>
           </div>
-          <Link href="/admin" className="btn btn-secondary text-sm px-4-py-2">
+          <Button
+            href="/admin"
+            variant="secondary"
+            size="sm"
+            aria-label="Back to Admin Dashboard"
+          >
             ← Admin Dashboard
-          </Link>
+          </Button>
         </div>
       </header>
 
@@ -93,11 +98,9 @@ export default async function AdminApplicationsPage() {
                 >
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span
-                        className="font-bold rounded-sm uppercase text-rose text-2xs px-2-py-05 tracking-wider admin-flagged-pill"
-                      >
+                      <Badge variant="danger" className="uppercase text-2xs tracking-wider">
                         FLAGGED
-                      </span>
+                      </Badge>
                       <span className="text-muted text-xs">
                         {new Date(app.createdAt).toLocaleDateString("en-IN", {
                           day: "numeric",
@@ -142,12 +145,14 @@ export default async function AdminApplicationsPage() {
                       </span>
                     </div>
                   </div>
-                  <Link
+                  <Button
                     href={`/admin/users?search=${encodeURIComponent(app.influencer.user.email)}`}
-                    className="btn btn-secondary text-xs admin-view-profile-btn"
+                    variant="secondary"
+                    size="sm"
+                    aria-label={`View profile for ${app.influencer.displayName}`}
                   >
                     View User Profile
-                  </Link>
+                  </Button>
                 </div>
 
                 {/* Action buttons */}

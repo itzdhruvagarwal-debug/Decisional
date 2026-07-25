@@ -2,6 +2,7 @@ import { AdminService } from "@/services/admin.service";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import EmptyState from "@/components/ui/EmptyState";
+import { Badge } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -82,11 +83,16 @@ export default async function AdminAuditLogsPage() {
                         {log.actionType}
                       </td>
                       <td className="p-card">
-                        <span
-                          className="badge font-extrabold text-xs rounded-lg uppercase px-2-py-1" style={{ background: badgeStyle.background, color: badgeStyle.color }}
+                        <Badge
+                          variant={
+                            log.entityType === "USER" ? "primary" :
+                            log.entityType === "DEAL" ? "success" :
+                            log.entityType === "CAMPAIGN" ? "warning" : "ghost"
+                          }
+                          className="uppercase text-xs"
                         >
                           {log.entityType}
-                        </span>
+                        </Badge>
                       </td>
                       <td className="p-card text-secondary text-sm">
                         {log.entityId || "-"}

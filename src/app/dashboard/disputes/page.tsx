@@ -6,6 +6,7 @@ import Link from "next/link";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { useSession } from "next-auth/react";
 import EmptyState from "@/components/ui/EmptyState";
+import { Badge, Button, Spinner } from "@/components/ui";
 
 interface Dispute {
   id: string;
@@ -59,17 +60,22 @@ export default function DisputesPage() {
               Manage and track your dispute cases
             </p>
           </div>
-          <Link href="/dashboard/deals" className="btn btn-secondary">
+          <Button
+            href="/dashboard/deals"
+            variant="secondary"
+            size="sm"
+            aria-label="Back to Deals"
+          >
             ← Back to Deals
-          </Link>
+          </Button>
         </div>
 
         {/* Content */}
         {(() => {
           if (isLoading) {
             return (
-              <div className="text-center p-10">
-                <span className="loading w-36 h-36" />
+              <div className="flex justify-center p-10">
+                <Spinner size="lg" />
               </div>
             );
           }
@@ -98,11 +104,15 @@ export default function DisputesPage() {
                     className="flex justify-between items-start mb-3 flex-wrap gap-2"
                   >
                     <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className="badge text-xs text-white" style={{ background: getStatusColor(dispute.status) }}
+                      <Badge
+                        variant={
+                          dispute.status === "RESOLVED" ? "success" :
+                          dispute.status === "OPEN" ? "primary" :
+                          dispute.status === "CLOSED" ? "ghost" : "warning"
+                        }
                       >
                         {getStatusLabel(dispute.status)}
-                      </span>
+                      </Badge>
                       <span className="text-xs text-secondary">
                         #{dispute.id.slice(-6)}
                       </span>

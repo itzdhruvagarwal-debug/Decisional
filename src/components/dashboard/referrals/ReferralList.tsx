@@ -2,7 +2,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import EmptyState from "@/components/ui/EmptyState";
-import { Button } from "@/components/ui";
+import { Badge, Button } from "@/components/ui";
 
 interface Referral {
   id: string;
@@ -53,7 +53,7 @@ export default function ReferralList() {
           className="text-lg font-bold flex items-center gap-2"
         >
           Referral History{" "}
-          <span className="badge badge-primary">{referrals.length}</span>
+          <Badge variant="primary">{referrals.length}</Badge>
         </h3>
 
         <div className="flex gap-2">

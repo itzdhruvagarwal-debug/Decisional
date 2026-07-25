@@ -4,7 +4,7 @@ import Image from "next/image";
 import { AdminService } from "@/services/admin.service";
 import { Prisma } from "@prisma/client";
 import EmptyState from "@/components/ui/EmptyState";
-import { Button, Input, Select } from "@/components/ui";
+import { Badge, Button, Input, Select } from "@/components/ui";
 import { z } from "zod";
 
 export const adminUserFilterSchema = z.object({
@@ -144,15 +144,15 @@ export default async function AdminUsersPage({
           />
         ) : (
           <div className="admin-table-wrap">
-            <table className="admin-users-table w-full border-collapse">
+            <table className="admin-users-table w-full border-collapse" aria-label="Platform users">
               <thead>
                 <tr className="bg-secondary">
                   {["User", "Role", "Status", "Tax", "Trust", "Joined", "Action"].map(
                     (heading) => (
                       <th
                         key={heading}
+                        scope="col"
                         className="admin-users-th border-b-card text-muted text-xs font-extrabold uppercase"
-                        data-align={heading === "Action" ? "right" : heading === "Trust" ? "center" : "left"}
                       >
                         {heading}
                       </th>
@@ -201,23 +201,29 @@ export default async function AdminUsersPage({
                         </div>
                       </td>
                       <td className="p-card">
-                        <span className="badge badge-primary">{user.userType}</span>
+                        <Badge variant="primary">{user.userType}</Badge>
                       </td>
                       <td className="p-card">
-                        <span
-                          className="admin-tone-badge badge capitalize text-white"
-                          data-tone={statusTone(user.status)}
+                        <Badge
+                          variant={
+                            user.status === "ACTIVE" ? "success" :
+                            user.status === "BANNED" ? "danger" :
+                            user.status === "SUSPENDED" ? "danger" :
+                            user.status === "FLAGGED" ? "warning" : "ghost"
+                          }
                         >
                           {user.status.toLowerCase().replaceAll("_", " ")}
-                        </span>
+                        </Badge>
                       </td>
                       <td className="p-card">
-                        <span
-                          className="admin-tone-badge badge capitalize text-white"
-                          data-tone={taxStatusTone(user)}
+                        <Badge
+                          variant={
+                            taxStatusTone(user) === "success" ? "success" :
+                            taxStatusTone(user) === "danger" ? "danger" : "warning"
+                          }
                         >
                           {taxStatusLabel(user)}
-                        </span>
+                        </Badge>
                         {user.taxCompliance?.gstinLast4 && (
                           <div className="text-muted mt-1 text-xs">
                             GST ****{user.taxCompliance.gstinLast4}
@@ -295,27 +301,27 @@ export default async function AdminUsersPage({
         )}
       </div>
 
-      <div
-        className="flex justify-between items-center mt-4 text-muted text-sm"
-      >
-        <div className="flex gap-2">
-          <Link
-            href={`/admin/users?page=${page - 1}&search=${encodeURIComponent(query)}&type=${userType}&status=${status}`}
-            className="admin-page-link btn btn-secondary btn-sm"
-            data-disabled={page <= 1}
-            aria-disabled={page <= 1}
-          >
-            Previous
-          </Link>
-          <Link
-            href={`/admin/users?page=${page + 1}&search=${encodeURIComponent(query)}&type=${userType}&status=${status}`}
-            className="admin-page-link btn btn-secondary btn-sm"
-            data-disabled={page >= totalPages}
-            aria-disabled={page >= totalPages}
-          >
-            Next
-          </Link>
-        </div>
+        <div className="flex justify-between items-center mt-4 text-muted text-sm">
+          <div className="flex gap-2">
+            <Button
+              href={`/admin/users?page=${page - 1}&search=${encodeURIComponent(query)}&type=${userType}&status=${status}`}
+              variant="secondary"
+              size="sm"
+              aria-label="Previous page"
+              aria-disabled={page <= 1}
+            >
+              Previous
+            </Button>
+            <Button
+              href={`/admin/users?page=${page + 1}&search=${encodeURIComponent(query)}&type=${userType}&status=${status}`}
+              variant="secondary"
+              size="sm"
+              aria-label="Next page"
+              aria-disabled={page >= totalPages}
+            >
+              Next
+            </Button>
+          </div>
         <span>
           Page {page} of {totalPages} &bull; Showing {users.length} of {total}
         </span>

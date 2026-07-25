@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Logo from "./Logo";
+import { Button } from "@/components/ui";
 
 const primaryLinks = [
   { label: "Features", href: "/#features" },
@@ -22,9 +23,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -36,7 +35,7 @@ export default function Navbar() {
     };
   }, [isMobileMenuOpen]);
 
-  const closeMobile = () => setIsMobileMenuOpen(false);
+  const closeMobile = useCallback(() => setIsMobileMenuOpen(false), []);
 
   return (
     <>
@@ -59,12 +58,8 @@ export default function Navbar() {
           </div>
 
           <div className="nav-auth-buttons">
-            <Link href="/login" className="btn btn-secondary btn-sm">
-              Login
-            </Link>
-            <Link href="/register" className="btn btn-primary btn-sm">
-              Get Started
-            </Link>
+            <Button href="/login" variant="secondary" size="sm">Login</Button>
+            <Button href="/register" variant="primary" size="sm">Get Started</Button>
           </div>
 
           <button
@@ -97,20 +92,22 @@ export default function Navbar() {
         ))}
 
         <div className="mobile-auth">
-          <Link
+          <Button
             href="/login"
-            className="btn btn-secondary text-center justify-center"
+            variant="secondary"
+            className="text-center justify-center w-full"
             onClick={closeMobile}
           >
             Login
-          </Link>
-          <Link
+          </Button>
+          <Button
             href="/register"
-            className="btn btn-primary text-center justify-center"
+            variant="primary"
+            className="text-center justify-center w-full"
             onClick={closeMobile}
           >
             Get Started Free
-          </Link>
+          </Button>
         </div>
       </div>
     </>

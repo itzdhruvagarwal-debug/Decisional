@@ -10,7 +10,7 @@ import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { formatCurrency } from "@/lib/utils-client";
 import EmptyState from "@/components/ui/EmptyState";
-import { Button } from "@/components/ui";
+import { Badge, Button } from "@/components/ui";
 
 const statusConfig: Record<
   string,
@@ -288,13 +288,18 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
               </p>
             </div>
           </div>
-          <div
-            className="deal-status-chip flex items-center gap-2 text-xs font-semibold px-3-py-1 rounded-full"
-            data-tone={status.tone}
+          <Badge
+            variant={
+              status.tone === "success" ? "success" :
+              status.tone === "danger" ? "danger" :
+              status.tone === "warning" ? "warning" :
+              status.tone === "cyan" ? "primary" : "ghost"
+            }
+            className="flex items-center gap-2"
           >
             <span>{status.icon}</span>
             <span>{status.label}</span>
-          </div>
+          </Badge>
         </div>
 
         <div
@@ -394,33 +399,17 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
             className="flex gap-3 flex-wrap"
           >
             {canSubmitContent && (
-              <Link
-                href={`/dashboard/deals/${deal.id}`}
-                className="btn btn-primary"
-              >
+              <Button href={`/dashboard/deals/${deal.id}`} variant="primary" size="sm">
                 Submit Content
-              </Link>
+              </Button>
             )}
             {deal.status === "CONTENT_APPROVED" && (
-              <Link
-                href={`/dashboard/deals/${deal.id}`}
-                className="btn btn-primary"
-              >
+              <Button href={`/dashboard/deals/${deal.id}`} variant="primary" size="sm">
                 Submit Post URL
-              </Link>
+              </Button>
             )}
-            <Link
-              href={`/dashboard/messages?deal=${deal.id}`}
-              className="btn btn-secondary"
-            >
-              Message
-            </Link>
-            <Link
-              href={`/dashboard/deals/${deal.id}`}
-              className="btn btn-ghost"
-            >
-              Details
-            </Link>
+            <Button href={`/dashboard/messages?deal=${deal.id}`} variant="secondary" size="sm">Message</Button>
+            <Button href={`/dashboard/deals/${deal.id}`} variant="ghost" size="sm">Details</Button>
           </div>
         </div>
       )}
