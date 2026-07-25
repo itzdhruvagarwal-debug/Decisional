@@ -12,6 +12,7 @@ import {
   Message,
   Conversation,
   RawConversation,
+  RawMessage,
   normalizeConversation,
   sendMessageSchema,
   reportUserSchema,
@@ -157,7 +158,7 @@ export function useMessages() {
           logger.error("[messages] Failed to fetch block status:", blockErr);
         }
 
-        const mappedMessages = (data.messages || []).map((m: any) => ({
+        const mappedMessages = (data.messages || []).map((m: RawMessage) => ({
           id: m.id,
           senderId: m.senderId,
           content: m.content,

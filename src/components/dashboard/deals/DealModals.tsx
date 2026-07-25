@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Modal, Button, Input, Textarea } from "@/components/ui";
-import { DealDetail, getFlatDeliverablesList } from "./DealDetailHelpers";
+import { DealDetail, getFlatDeliverablesList, ContentUrlEntry } from "./DealDetailHelpers";
 import { ToastType } from "@/components/ui/toast";
 
 interface DealModalsProps {
@@ -24,7 +24,7 @@ interface DealModalsProps {
   readonly postUrl: string;
   readonly setPostUrl: (val: string) => void;
   readonly isSubmitting: boolean;
-  readonly handleAction: (action: string, payload?: any) => Promise<boolean>;
+  readonly handleAction: (action: string, payload?: Record<string, unknown>) => Promise<boolean>;
   readonly showToast: (type: ToastType, message: string) => void;
   readonly handleReviewContent: () => Promise<void>;
   readonly itemizedReviews: Record<string, { status: "APPROVED" | "REVISION_REQUESTED"; feedback: string }>;
@@ -160,7 +160,7 @@ export function DealModals({
           {getFlatDeliverablesList(deal).map((item) => {
             const latestSub = deal?.contentSubmissions?.[0];
             const existing = latestSub?.contentUrls && Array.isArray(latestSub.contentUrls)
-              ? latestSub.contentUrls.find((u: any) => u.type === item.type)
+              ? latestSub.contentUrls.find((u: ContentUrlEntry) => u.type === item.type)
               : null;
             const itemReview = itemizedReviews[item.type] || {
               status: "APPROVED",
@@ -285,7 +285,7 @@ export function DealModals({
           {getFlatDeliverablesList(deal).map((item) => {
             const latestSub = deal?.contentSubmissions?.[0];
             const existing = latestSub?.contentUrls && Array.isArray(latestSub.contentUrls)
-              ? latestSub.contentUrls.find((u: any) => u.type === item.type)
+              ? latestSub.contentUrls.find((u: ContentUrlEntry) => u.type === item.type)
               : null;
             const isApproved = existing?.status === "APPROVED";
             const inputId = `input-${item.type}`;
@@ -383,7 +383,7 @@ export function DealModals({
               const submissionUrls = deliverablesList.map((item) => {
                 const latestSub = deal?.contentSubmissions?.[0];
                 const existing = latestSub?.contentUrls && Array.isArray(latestSub.contentUrls)
-                  ? latestSub.contentUrls.find((u: any) => u.type === item.type)
+                  ? latestSub.contentUrls.find((u: ContentUrlEntry) => u.type === item.type)
                   : null;
 
                 if (existing?.status === "APPROVED") {

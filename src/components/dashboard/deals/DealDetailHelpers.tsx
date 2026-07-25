@@ -44,8 +44,33 @@ export interface DeliverableItem {
   count: number;
 }
 
+/** Shape of each deliverable entry stored in campaign.deliverables JSON */
+export interface DeliverableConfig {
+  type: string;
+  label?: string;
+  count?: number;
+}
+
+/** Shape of each content submission attached to a deal */
+export interface ContentSubmission {
+  id?: string;
+  contentUrl?: string;
+  notes?: string;
+  createdAt?: string;
+  status?: string;
+  contentUrls?: ContentUrlEntry[];
+}
+
+/** Shape of each URL item inside a content submission */
+export interface ContentUrlEntry {
+  type: string;
+  url: string;
+  status?: string;
+  feedback?: string;
+}
+
 export interface ContractTermsJson {
-  deliverables?: any[];
+  deliverables?: DeliverableConfig[];
   submissionDeadline?: string;
   postingDeadline?: string;
   reviewPeriodHours?: number;
@@ -81,6 +106,8 @@ export interface EngagementMetricsData {
   comments: number;
   shares?: number;
   saves?: number;
+  estimatedReach?: number;
+  engagementRate?: number;
 }
 
 export interface EngagementSnapshot {
@@ -94,6 +121,10 @@ export interface ROIData {
   estimatedCostPerView: number;
   earnedMediaValue: number;
   estimatedReach: number;
+  estimatedValue?: number;
+  roiPercentage?: number;
+  costPerView?: number;
+  costPerEngagement?: number;
 }
 
 export interface EngagementReport {
@@ -106,6 +137,7 @@ export interface EngagementReport {
   snapshots: EngagementSnapshot[];
   roi: ROIData;
   hasEstimatedData?: boolean;
+  trend?: string;
 }
 
 export const statusConfig: Record<string, { label: string; color: string }> = {
@@ -132,10 +164,10 @@ export const ratingLabelMap: Record<number, string> = {
 export function getFlatDeliverablesList(dealObj: DealDetail | null | undefined) {
   if (!dealObj?.campaign?.deliverables) return [];
   const arr = Array.isArray(dealObj.campaign.deliverables)
-    ? dealObj.campaign.deliverables
-    : [];
+    ? (dealObj.campaign.deliverables as unknown as DeliverableConfig[])
+    : ([] as DeliverableConfig[]);
   const list: { type: string; label: string }[] = [];
-  arr.forEach((d: any) => {
+  arr.forEach((d: DeliverableConfig) => {
     const count = typeof d.count === "number" ? d.count : 1;
     const label = d.label || d.type || "Deliverable";
     for (let i = 0; i < count; i++) {
@@ -176,5 +208,5 @@ export interface DealDetail extends Omit<Deal, "contractTerms" | "shippingAddres
   contractTerms: Prisma.JsonValue;
   shippingAddress: Prisma.JsonValue;
   contractSignature: Prisma.JsonValue;
-  contentSubmissions?: any[];
+  contentSubmissions?: ContentSubmission[];
 }

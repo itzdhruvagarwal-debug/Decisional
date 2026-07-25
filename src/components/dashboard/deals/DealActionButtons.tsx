@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui";
-import { DealDetail, getFlatDeliverablesList } from "./DealDetailHelpers";
+import { DealDetail, getFlatDeliverablesList, ContentUrlEntry } from "./DealDetailHelpers";
 
 export interface DealActionButtonsProps {
   readonly dealStatus: string;
@@ -70,7 +70,7 @@ export function DealActionButtons({
               const latestSub = deal?.contentSubmissions?.[0];
               const prevUrls: Record<string, string> = {};
               if (latestSub?.contentUrls && Array.isArray(latestSub.contentUrls)) {
-                latestSub.contentUrls.forEach((item: any) => {
+                latestSub.contentUrls.forEach((item: ContentUrlEntry) => {
                   prevUrls[item.type] = item.url || "";
                 });
               }
@@ -100,9 +100,9 @@ export function DealActionButtons({
             const latestSub = deal?.contentSubmissions?.[0];
             const prevReviews: Record<string, { status: "APPROVED" | "REVISION_REQUESTED"; feedback: string }> = {};
             const deliverablesList = getFlatDeliverablesList(deal);
-            deliverablesList.forEach((item: any) => {
+            deliverablesList.forEach((item) => {
               const existing = latestSub?.contentUrls && Array.isArray(latestSub.contentUrls)
-                ? latestSub.contentUrls.find((urlObj: any) => urlObj.type === item.type)
+                ? latestSub.contentUrls.find((urlObj: ContentUrlEntry) => urlObj.type === item.type)
                 : null;
               prevReviews[item.type] = {
                 status: existing?.status === "APPROVED" ? "APPROVED" : "REVISION_REQUESTED",

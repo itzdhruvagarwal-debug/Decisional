@@ -1,9 +1,9 @@
 import EmptyState from "@/components/ui/EmptyState";
 import { Card } from "@/components/ui";
-import { formatContractDate } from "./DealDetailHelpers";
+import { formatContractDate, ContentSubmission, ContentUrlEntry } from "./DealDetailHelpers";
 
 interface ContentSubmissionsCardProps {
-  readonly submissions?: any[] | undefined;
+  readonly submissions?: ContentSubmission[] | undefined;
 }
 
 export function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissionsCardProps>) {
@@ -19,14 +19,15 @@ export function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissi
   }
 
   const latestSub = submissions[0];
+  if (!latestSub) return null;
   const notes = latestSub.notes || "";
-  const subUrls = Array.isArray(latestSub.contentUrls) ? latestSub.contentUrls : [];
+  const subUrls: ContentUrlEntry[] = Array.isArray(latestSub.contentUrls) ? latestSub.contentUrls : [];
 
   return (
     <Card className="card p-6">
       <h3 className="font-bold text-lg mb-4">Submissions History</h3>
       <div className="flex flex-col gap-4">
-        {subUrls.map((urlObj: any) => (
+        {subUrls.map((urlObj: ContentUrlEntry) => (
           <div key={urlObj.type} className="flex justify-between items-center p-3 bg-secondary rounded-md border-card">
             <div>
               <div className="font-semibold text-sm">

@@ -21,6 +21,18 @@ export interface Message {
   readAt?: string | null;
 }
 
+/** Raw shape returned from the /api/messages endpoint before client-side mapping */
+export interface RawMessage {
+  id: string;
+  senderId: string;
+  content: string;
+  createdAt: string;
+  isBlocked?: boolean;
+  hasWarning?: boolean;
+  isRead?: boolean;
+  readAt?: string | null;
+}
+
 export interface Conversation {
   id: string;
   userId: string;

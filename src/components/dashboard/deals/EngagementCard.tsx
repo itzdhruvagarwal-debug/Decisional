@@ -23,7 +23,7 @@ export function EngagementCard({
   };
   const latestSnap = engagement.snapshots.at(-1);
   const roi = engagement.roi;
-  const trend = (engagement as any).trend || "INSUFFICIENT_DATA";
+  const trend = engagement.trend ?? "INSUFFICIENT_DATA";
 
   return (
     <Card className="card mb-6">
@@ -52,8 +52,8 @@ export function EngagementCard({
                 ["Likes", snap.metrics.likes.toLocaleString("en-IN")],
                 ["Comments", snap.metrics.comments.toLocaleString("en-IN")],
                 ["Shares", (snap.metrics.shares || 0).toLocaleString("en-IN")],
-                ["Reach", ((snap.metrics as any).estimatedReach || 0).toLocaleString("en-IN")],
-                ["Eng. Rate", `${((snap.metrics as any).engagementRate || 0).toFixed(2)}%`],
+                ["Reach", (snap.metrics.estimatedReach ?? 0).toLocaleString("en-IN")],
+                ["Eng. Rate", `${(snap.metrics.engagementRate ?? 0).toFixed(2)}%`],
               ] as [string, string][]).map(([label, val]) => (
                 <div key={label} className="flex justify-between text-xs">
                   <span className="text-muted">{label}</span>
@@ -70,14 +70,14 @@ export function EngagementCard({
           <div className="text-sm font-bold mb-2">💰 ROI Summary</div>
           <div className="grid gap-2-5 engagement-roi-grid">
             {([
-              ["Est. Value", `₹${(((roi as any).estimatedValue || 0) / 100).toLocaleString("en-IN")}`],
-              ["ROI", `${(roi as any).roiPercentage >= 0 ? "+" : ""}${(roi as any).roiPercentage || 0}%`],
-              ["Cost/View", `₹${(((roi as any).costPerView || 0) / 100).toFixed(2)}`],
-              ["Cost/Eng.", `₹${(((roi as any).costPerEngagement || 0) / 100).toFixed(2)}`],
+              ["Est. Value", `₹${((roi.estimatedValue ?? 0) / 100).toLocaleString("en-IN")}`],
+              ["ROI", `${(roi.roiPercentage ?? 0) >= 0 ? "+" : ""}${roi.roiPercentage ?? 0}%`],
+              ["Cost/View", `₹${((roi.costPerView ?? 0) / 100).toFixed(2)}`],
+              ["Cost/Eng.", `₹${((roi.costPerEngagement ?? 0) / 100).toFixed(2)}`],
             ] as [string, string][]).map(([label, val]) => (
               <div key={label} className="p-2 bg-secondary rounded-sm">
                 <div className="text-muted text-2xs mb-0.5">{label}</div>
-                <div className="text-sm font-extrabold engagement-roi-value" data-positive={(roi as any).roiPercentage >= 0 ? "true" : "false"}>{val}</div>
+                <div className="text-sm font-extrabold engagement-roi-value" data-positive={(roi.roiPercentage ?? 0) >= 0 ? "true" : "false"}>{val}</div>
               </div>
             ))}
           </div>
