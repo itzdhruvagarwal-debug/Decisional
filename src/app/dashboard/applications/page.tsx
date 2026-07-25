@@ -5,10 +5,10 @@ import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { formatCurrency } from "@/lib/utils-client";
 import EmptyState from "@/components/ui/EmptyState";
+import { Badge, Button, Skeleton, Spinner } from "@/components/ui";
 
 interface Application {
   id: string;
@@ -34,29 +34,57 @@ interface ApplicationsResponse {
   totalPages?: number;
 }
 
-function getStatusStyle(status: string) {
+function getStatusVariant(status: string): "success" | "danger" | "warning" {
   switch (status.toUpperCase()) {
     case "SELECTED":
     case "ACCEPTED":
-      return {
-        background: "rgba(16, 185, 129, 0.12)",
-        color: "var(--color-accent-emerald)",
-        borderColor: "rgba(16, 185, 129, 0.25)",
-      };
+      return "success";
     case "REJECTED":
-      return {
-        background: "rgba(244, 63, 94, 0.12)",
-        color: "var(--color-accent-rose)",
-        borderColor: "rgba(244, 63, 94, 0.25)",
-      };
+      return "danger";
     case "PENDING":
     default:
-      return {
-        background: "rgba(245, 158, 11, 0.12)",
-        color: "var(--color-accent-amber)",
-        borderColor: "rgba(245, 158, 11, 0.25)",
-      };
+      return "warning";
   }
+}
+
+/** Skeleton placeholder matching the 5-column applications table layout. */
+function ApplicationsTableSkeleton() {
+  return (
+    <div className="card overflow-hidden p-0" aria-hidden="true">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b-card bg-tertiary">
+              {["CAMPAIGN", "PROPOSED RATE", "SUBMITTED ON", "STATUS", "ACTION"].map((col) => (
+                <th key={col} scope="col" className="p-4">
+                  <Skeleton height={10} width={col === "CAMPAIGN" ? 72 : 56} borderRadius={4} />
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <tr key={i} className="border-b-card">
+                <td className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Skeleton width={36} height={36} borderRadius={4} />
+                    <div>
+                      <Skeleton height={14} width={160} borderRadius={4} style={{ marginBottom: 6 }} />
+                      <Skeleton height={11} width={100} borderRadius={4} />
+                    </div>
+                  </div>
+                </td>
+                <td className="p-4"><Skeleton height={14} width={72} borderRadius={4} /></td>
+                <td className="p-4"><Skeleton height={14} width={80} borderRadius={4} /></td>
+                <td className="p-4"><Skeleton height={24} width={72} borderRadius={6} /></td>
+                <td className="p-4 text-right"><Skeleton height={32} width={108} borderRadius={6} style={{ marginLeft: "auto" }} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 }
 
 export default function ApplicationsPage() {
@@ -75,18 +103,14 @@ export default function ApplicationsPage() {
   if (!session) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <span className="loading" />
+        <Spinner size="lg" />
       </div>
     );
   }
 
   let applicationsList;
   if (loading) {
-    applicationsList = (
-      <div className="flex justify-center p-10">
-        <span className="loading w-40 h-40" />
-      </div>
-    );
+    applicationsList = <ApplicationsTableSkeleton />;
   } else if (error) {
     applicationsList = (
       <div className="text-center text-rose p-10">
@@ -107,71 +131,71 @@ export default function ApplicationsPage() {
     applicationsList = (
       <div className="card overflow-hidden p-0">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b-card bg-tertiary">
-                <th className="p-4 text-xs font-bold text-secondary">CAMPAIGN</th>
-                <th className="p-4 text-xs font-bold text-secondary">PROPOSED RATE</th>
-                <th className="p-4 text-xs font-bold text-secondary">SUBMITTED ON</th>
-                <th className="p-4 text-xs font-bold text-secondary">STATUS</th>
-                <th className="p-4 text-xs font-bold text-secondary text-right">ACTION</th>
-              </tr>
-            </thead>
+            <table className="w-full text-left border-collapse" aria-label="My campaign applications">
+              <thead>
+                <tr className="border-b-card bg-tertiary">
+                  <th scope="col" className="p-4 text-xs font-bold text-secondary">CAMPAIGN</th>
+                  <th scope="col" className="p-4 text-xs font-bold text-secondary">PROPOSED RATE</th>
+                  <th scope="col" className="p-4 text-xs font-bold text-secondary">SUBMITTED ON</th>
+                  <th scope="col" className="p-4 text-xs font-bold text-secondary">STATUS</th>
+                  <th scope="col" className="p-4 text-xs font-bold text-secondary text-right">ACTION</th>
+                </tr>
+              </thead>
             <tbody>
-              {applications.map((app) => {
-                const statusStyle = getStatusStyle(app.status);
-                return (
-                  <tr key={app.id} className="border-b-card">
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden relative rounded-sm text-white w-36 h-36 bg-gradient-card"
-                        >
-                          {app.campaign.brand?.logo ? (
-                            <Image
-                              src={app.campaign.brand.logo}
-                              alt=""
-                              fill
-                              unoptimized
-                              className="object-cover"
-                            />
-                          ) : (
-                            (app.campaign.brand?.companyName || "DC").slice(0, 2).toUpperCase()
-                          )}
+              {applications.map((app) => (
+                <tr key={app.id} className="border-b-card">
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden relative rounded-sm text-white w-36 h-36 bg-gradient-card"
+                      >
+                        {app.campaign.brand?.logo ? (
+                          <Image
+                            src={app.campaign.brand.logo}
+                            alt={app.campaign.brand?.companyName ?? "Brand logo"}
+                            fill
+                            unoptimized
+                            className="object-cover"
+                          />
+                        ) : (
+                          (app.campaign.brand?.companyName || "DC").slice(0, 2).toUpperCase()
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-bold text-sm">
+                          {app.campaign.title}
                         </div>
-                        <div>
-                          <div className="font-bold text-sm">
-                            {app.campaign.title}
-                          </div>
-                          <div className="text-xs text-secondary">
-                            by {app.campaign.brand?.companyName || "Unknown Brand"}
-                          </div>
+                        <div className="text-xs text-secondary">
+                          by {app.campaign.brand?.companyName || "Unknown Brand"}
                         </div>
                       </div>
-                    </td>
-                    <td className="p-4 font-bold">{formatCurrency(app.proposedRate)}</td>
-                    <td className="p-4 text-secondary text-sm">
-                      {new Date(app.createdAt).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className="inline-flex text-xs font-extrabold rounded-md" style={{ border: "1px solid", padding: "4px 10px", ...statusStyle }}
-                      >
-                        {app.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      <Link href={`/dashboard/campaigns/${app.campaign.id}`} className="btn btn-ghost btn-sm">
-                        View Campaign
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
+                    </div>
+                  </td>
+                  <td className="p-4 font-bold">{formatCurrency(app.proposedRate)}</td>
+                  <td className="p-4 text-secondary text-sm">
+                    {new Date(app.createdAt).toLocaleDateString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </td>
+                  <td className="p-4">
+                    <Badge variant={getStatusVariant(app.status)} className="text-xs font-extrabold">
+                      {app.status}
+                    </Badge>
+                  </td>
+                  <td className="p-4 text-right">
+                    <Button
+                      href={`/dashboard/campaigns/${app.campaign.id}`}
+                      variant="ghost"
+                      size="sm"
+                      aria-label={`View campaign: ${app.campaign.title}`}
+                    >
+                      View Campaign
+                    </Button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

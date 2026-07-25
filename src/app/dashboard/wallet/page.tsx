@@ -2,7 +2,7 @@
 
 
 import { logger } from "@/lib/logger-client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { useSession } from "next-auth/react";
@@ -147,14 +147,14 @@ function useWallet(session: ReturnType<typeof useSession>["data"], requireFreshS
   const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   const [toasts, setToasts] = useState<ToastItem[]>([]);
-  const handleRemoveToast = (id: string) => {
+  const handleRemoveToast = useCallback((id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));
-  };
-  const showToast = (type: ToastType, message: string) => {
+  }, []);
+  const showToast = useCallback((type: ToastType, message: string) => {
     const id = String(Date.now());
     setToasts(prev => [...prev, { id, type, message }]);
     setTimeout(() => handleRemoveToast(id), 5000);
-  };
+  }, [handleRemoveToast]);
 
   const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();

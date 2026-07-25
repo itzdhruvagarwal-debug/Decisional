@@ -1,10 +1,10 @@
 import prisma from "@/lib/db";
-import Link from "next/link";
 import { logger } from "@/lib/logger";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { requireActiveAdmin } from "@/lib/admin-auth";
 import EmptyState from "@/components/ui/EmptyState";
+import { Badge, Button } from "@/components/ui";
 
 import { Prisma } from "@prisma/client";
 
@@ -106,16 +106,12 @@ export default async function AdminDisputeListPage({
               <div
                 className="mt-2 flex gap-2 text-xs"
               >
-                <span
-                  className="font-bold rounded-sm px-2-py-05" style={{ background: showHistory ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)", color: showHistory ? "#10b981" : "#ef4444" }}
-                >
+                <Badge variant={showHistory ? "success" : "danger"}>
                   {dispute.status}
-                </span>
-                <span
-                  className="text-secondary rounded-sm bg-glass-card px-2-py-05"
-                >
+                </Badge>
+                <Badge variant="ghost">
                   {dispute.type}
-                </span>
+                </Badge>
                 <span>
                   Amount: {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
                     Number(dispute.deal?.amount || 0) / 100,
@@ -123,12 +119,14 @@ export default async function AdminDisputeListPage({
                 </span>
               </div>
             </div>
-            <Link
+            <Button
               href={`/admin/disputes/${dispute.id}`}
-              className="btn btn-primary text-sm px-4-py-2"
+              variant="primary"
+              size="sm"
+              aria-label={showHistory ? `View details for dispute ${dispute.id}` : `Resolve dispute ${dispute.id}`}
             >
               {showHistory ? "View Details" : "Resolve"}
-            </Link>
+            </Button>
           </div>
         ))}
       </div>
@@ -149,19 +147,25 @@ export default async function AdminDisputeListPage({
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
-        <Link
+      <div className="flex gap-2 mb-6" role="tablist" aria-label="Dispute queue filters">
+        <Button
           href="/admin/disputes"
-          className={`btn ${showHistory ? "btn-secondary" : "btn-primary"} text-sm px-4-py-2`}
+          variant={showHistory ? "secondary" : "primary"}
+          size="sm"
+          aria-label="View active disputes"
+          {...(!showHistory ? { "aria-current": "page" as const } : {})}
         >
           Active Disputes
-        </Link>
-        <Link
+        </Button>
+        <Button
           href="/admin/disputes?history=true"
-          className={`btn ${showHistory ? "btn-primary" : "btn-secondary"} text-sm px-4-py-2`}
+          variant={showHistory ? "primary" : "secondary"}
+          size="sm"
+          aria-label="View dispute history"
+          {...(showHistory ? { "aria-current": "page" as const } : {})}
         >
           Dispute History
-        </Link>
+        </Button>
       </div>
 
       {content}

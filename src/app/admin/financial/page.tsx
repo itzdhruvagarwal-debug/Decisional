@@ -3,6 +3,7 @@ import { requireActiveAdmin } from "@/lib/admin-auth";
 import { redirect } from "next/navigation";
 import { formatCurrency } from "@/lib/utils-client";
 import { AdminAnalyticsService } from "@/services/admin-analytics.service";
+import { Button } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -208,20 +209,22 @@ export default async function AdminFinancialPage() {
           Generate and download detailed financial statements in CSV format for compliance, auditing, and tax filing.
         </p>
         <div className="flex gap-4 flex-wrap">
-          <a
+          <Button
             href="/api/admin/reports/revenue?format=csv"
-            download
-            className="btn btn-primary inline-flex items-center gap-2 no-underline"
+            variant="primary"
+            leftIcon={<span aria-hidden="true">📊</span>}
+            aria-label="Download revenue report as CSV"
           >
-            📊 Download Revenue Report (CSV)
-          </a>
-          <a
+            Download Revenue Report (CSV)
+          </Button>
+          <Button
             href="/api/admin/reports/tds?format=csv"
-            download
-            className="btn btn-secondary inline-flex items-center gap-2 no-underline"
+            variant="secondary"
+            leftIcon={<span aria-hidden="true">📜</span>}
+            aria-label="Download TDS report as CSV"
           >
-            📜 Download TDS Report (CSV)
-          </a>
+            Download TDS Report (CSV)
+          </Button>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { AdminService } from "@/services/admin.service";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import EmptyState from "@/components/ui/EmptyState";
+import { Badge } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -13,31 +14,28 @@ async function getViolations() {
   return violations;
 }
 
-function getSeverityStyle(severity: string) {
+function getSeverityVariant(severity: string): "danger" | "warning" | "success" | "ghost" {
   switch (severity) {
     case "CRITICAL":
-      return { background: "rgba(239, 68, 68, 0.15)", color: "#f87171" };
     case "HIGH":
-      return { background: "rgba(249, 115, 22, 0.15)", color: "#fb923c" };
+      return "danger";
     case "MEDIUM":
-      return { background: "rgba(234, 179, 8, 0.15)", color: "#facc15" };
+      return "warning";
     case "LOW":
-      return { background: "rgba(34, 197, 94, 0.15)", color: "#4ade80" };
+      return "success";
     default:
-      return { background: "rgba(107, 114, 128, 0.15)", color: "#9ca3af" };
+      return "ghost";
   }
 }
 
-function getActionStyle(action: string) {
+function getActionVariant(action: string): "danger" | "warning" | "ghost" {
   switch (action) {
     case "PERMANENT_BAN":
-      return { background: "var(--color-error)", color: "white" };
+      return "danger";
     case "TEMP_SUSPENSION":
-      return { background: "rgba(249, 115, 22, 0.8)", color: "white" };
-    case "WARNING":
-      return { background: "rgba(234, 179, 8, 0.8)", color: "white" };
+      return "warning";
     default:
-      return { background: "rgba(107, 114, 128, 0.8)", color: "white" };
+      return "ghost";
   }
 }
 
@@ -66,13 +64,14 @@ export default async function AdminViolationsPage() {
       ) : (
         <div className="card overflow-hidden p-0">
           <div className="admin-table-wrap">
-            <table className="w-full border-collapse">
+            <table className="w-full border-collapse" aria-label="User violations list">
               <thead>
                 <tr className="bg-secondary">
                   {["User", "Type", "Severity", "Action", "Description", "Date", "Expires"].map(
                     (heading) => (
                       <th
                         key={heading}
+                        scope="col"
                         className="text-left border-b-card text-muted text-xs font-extrabold uppercase" style={{ padding: "14px 18px" }}
                       >
                         {heading}
@@ -83,8 +82,6 @@ export default async function AdminViolationsPage() {
               </thead>
               <tbody>
                 {violations.map((violation) => {
-                  const severityStyle = getSeverityStyle(violation.severity);
-                  const actionStyle = getActionStyle(violation.action);
                   const name =
                     violation.user.influencerProfile?.displayName ||
                     violation.user.brandProfile?.companyName ||
@@ -102,18 +99,14 @@ export default async function AdminViolationsPage() {
                         {violation.type}
                       </td>
                       <td className="p-card">
-                        <span
-                          className="badge font-extrabold text-xs rounded-lg uppercase px-2-py-1" style={{ background: severityStyle.background, color: severityStyle.color }}
-                        >
+                        <Badge variant={getSeverityVariant(violation.severity)} className="font-extrabold text-xs uppercase">
                           {violation.severity}
-                        </span>
+                        </Badge>
                       </td>
                       <td className="p-card">
-                        <span
-                          className="badge font-extrabold text-xs uppercase px-2-py-1 rounded-md" style={{ background: actionStyle.background, color: actionStyle.color }}
-                        >
+                        <Badge variant={getActionVariant(violation.action)} className="font-extrabold text-xs uppercase">
                           {violation.action}
-                        </span>
+                        </Badge>
                       </td>
                       <td className="p-card text-sm text-primary">
                         <div className="overflow-hidden whitespace-nowrap max-w-240 text-ellipsis" title={violation.description}>
