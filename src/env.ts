@@ -337,3 +337,26 @@ if (_env.success && env.NODE_ENV !== "production" && !env.CONTRACT_SIGNING_SECRE
     "[WARNING] CONTRACT_SIGNING_SECRET is not set in non-production environment. Contract signatures will use fallback mock verification!",
   );
 }
+
+// ── Placeholder / ungenerated secret detection ──
+// Catches secrets that were copy-pasted from .env as-is without running `openssl rand -hex 32`.
+const PLACEHOLDER_PREFIXES = ["generate-with:", "your_", "change_in_production", "xxx"];
+const CRITICAL_SECRETS = [
+  "CRON_SECRET",
+  "CONTRACT_SIGNING_SECRET",
+  "SIGNING_SECRET",
+  "HMAC_KEY",
+  "NEXTAUTH_SECRET",
+] as const;
+
+for (const key of CRITICAL_SECRETS) {
+  const val = process.env[key];
+  if (val && PLACEHOLDER_PREFIXES.some((prefix) => val.toLowerCase().startsWith(prefix))) {
+    const msg = `[SECURITY] ${key} contains an ungenerated placeholder value ("${val.slice(0, 20)}..."). Run: openssl rand -hex 32`;
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(msg);
+    } else {
+      console.warn("\x1b[31m%s\x1b[0m", msg);
+    }
+  }
+}

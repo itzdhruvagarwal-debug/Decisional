@@ -171,8 +171,7 @@ export async function deleteFile(key: string): Promise<DeleteResult> {
         return await deleteFromS3(key);
       case "local":
       default:
-        logger.warn("Local delete not implemented", { key });
-        return { success: true };
+        return await deleteFromLocal(key);
     }
   } catch (error) {
     logger.error("Storage delete failed", error, { key });
@@ -276,6 +275,25 @@ async function uploadToLocal(
   const url = `/uploads/${key}`;
   logger.debug("Local file saved", { url });
   return { success: true, url, key, size: file.length };
+}
+
+async function deleteFromLocal(key: string): Promise<DeleteResult> {
+  const fs = await import("node:fs/promises");
+  const path = await import("node:path");
+  const filePath = path.join(process.cwd(), "public", "uploads", key);
+  try {
+    await fs.unlink(filePath);
+    logger.debug("Local file deleted", { filePath });
+    return { success: true };
+  } catch (err: unknown) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") {
+      // File already gone — treat as success
+      return { success: true };
+    }
+    logger.error("Local file delete failed", err, { filePath });
+    return { success: false, error: "Local file deletion failed" };
+  }
 }
 
 async function deleteFromS3(key: string): Promise<DeleteResult> {
