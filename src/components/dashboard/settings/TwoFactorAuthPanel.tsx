@@ -5,7 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
-import { Button, Input } from "@/components/ui";
+import { Badge, Button, Input } from "@/components/ui";
 
 interface TwoFactorAuthPanelProps {
     isSaving: boolean;
@@ -87,9 +87,9 @@ export default function TwoFactorAuthPanel({
                         </p>
                     </div>
                     {is2FAEnabled ? (
-                        <div className="badge badge-success">Enabled</div>
+                        <Badge variant="success">Enabled</Badge>
                     ) : (
-                        <div className="badge badge-warning">Disabled</div>
+                        <Badge variant="warning">Disabled</Badge>
                     )}
                 </div>
 

@@ -121,9 +121,9 @@ export default function DiscoverInfluencersPage() {
           <p className="text-secondary mb-5">
             Influencer discovery is available for brand accounts. Browse campaigns instead.
           </p>
-          <Link href="/dashboard/campaigns" className="btn btn-primary">
+          <Button href="/dashboard/campaigns" variant="primary">
             Browse Campaigns
-          </Link>
+          </Button>
         </div>
       </DashboardShell>
     );
