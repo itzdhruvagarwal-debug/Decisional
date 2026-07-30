@@ -24,7 +24,13 @@ export const registerSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   confirmPassword: z.string(),
-  referralCode: z.string().optional(),
+  referralCode: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^[A-Z0-9]+$/, "Referral code can only contain uppercase letters and numbers")
+    .optional()
+    .or(z.literal("")),
   agreeToTerms: z.literal(true, {
     message: "You must agree to the Terms of Service and Privacy Policy",
   }),

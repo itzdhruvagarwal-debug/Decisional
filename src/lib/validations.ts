@@ -219,8 +219,8 @@ export const createCampaignSchema = z
     requirements: z.string().min(10),
     guidelines: z.string().max(3000).optional(),
 
-    totalBudget: z.number().int().min(1000, "Minimum campaign budget is ₹1,000"),
-    perInfluencerBudget: z.number().int().min(500, "Minimum per-influencer budget is ₹500").optional(),
+    totalBudget: z.number().int().min(0, "Minimum campaign budget is ₹0"),
+    perInfluencerBudget: z.number().int().min(0, "Minimum per-influencer budget is ₹0").optional(),
     maxInfluencers: z.number().int().min(1).max(100).nullable().optional(),
 
     targetCategories: z.array(z.string().min(1)).min(1),
@@ -257,6 +257,24 @@ export const createCampaignSchema = z
     status: z.enum(["DRAFT", "ACTIVE"]).optional(),
   })
   .superRefine((value, ctx) => {
+    const isProductOnly = value.requiresProduct && value.totalBudget === 0;
+    if (!isProductOnly) {
+      if (value.totalBudget < 1000) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["totalBudget"],
+          message: "Minimum campaign budget is ₹1,000",
+        });
+      }
+      if (value.perInfluencerBudget !== undefined && value.perInfluencerBudget < 500) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["perInfluencerBudget"],
+          message: "Minimum per-influencer budget is ₹500",
+        });
+      }
+    }
+
     if (value.requiresProduct && value.totalBudget === 0) {
       if (value.productValue === undefined || value.productValue < 500) {
         ctx.addIssue({
@@ -372,15 +390,26 @@ export const contentApprovalSchema = z.object({
 
 export const postVerificationSchema = z.object({
   dealId: dbIdSchema,
-  postUrl: z
-    .string()
-    .trim()
-    .url("Please provide a valid post URL")
-    .regex(
-      /^(https?:\/\/)?(www\.)?(instagram\.com\/(p|reel)\/.+|youtu\.be\/.+|youtube\.com\/(watch\?v=|shorts\/).+)/,
-      "Currently only YouTube and Instagram are structurally supported for automated verifications",
-    )
-    .max(500, "URL too long"),
+  postUrl: z.preprocess(
+    (val) => {
+      if (typeof val !== "string") return val;
+      const trimmed = val.trim();
+      if (!trimmed) return trimmed;
+      if (!/^https?:\/\//i.test(trimmed)) {
+        return `https://${trimmed}`;
+      }
+      return trimmed;
+    },
+    z
+      .string()
+      .trim()
+      .url("Please provide a valid post URL")
+      .regex(
+        /^(https?:\/\/)?(www\.)?(instagram\.com\/(p|reel)\/.+|youtu\.be\/.+|youtube\.com\/(watch\?v=|shorts\/).+)/,
+        "Currently only YouTube and Instagram are structurally supported for automated verifications",
+      )
+      .max(500, "URL too long")
+  ),
 });
 
 export const shippingAddressSchema = z.object({

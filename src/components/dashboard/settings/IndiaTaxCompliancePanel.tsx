@@ -76,8 +76,8 @@ function StatusPill({ status }: Readonly<{ status: string }>) {
 function validateComplianceDraft(draft: Draft) {
   const errors: Record<string, string> = {};
   const result = taxComplianceSchema.safeParse({
-    pan: draft.panNumber.trim(),
-    gstin: draft.gstin.trim(),
+    pan: draft.panNumber.trim().toUpperCase(),
+    gstin: draft.gstin.trim().toUpperCase(),
   });
   if (!result.success) {
     for (const issue of result.error.issues) {
@@ -147,8 +147,8 @@ export default function IndiaTaxCompliancePanel() {
     setSuccess("");
     setFieldErrors({});
 
-    const pan = draft.panNumber.trim();
-    const gstin = draft.gstin.trim();
+    const pan = draft.panNumber.trim().toUpperCase();
+    const gstin = draft.gstin.trim().toUpperCase();
 
     const newFieldErrors = validateComplianceDraft(draft);
 

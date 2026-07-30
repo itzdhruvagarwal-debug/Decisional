@@ -11,7 +11,7 @@ export const createCampaignSchema = z.object({
     .max(2000, "Description cannot exceed 2000 characters"),
   perInfluencerBudget: z
     .number({ message: "Budget per influencer must be a number" })
-    .min(500, "Minimum budget per influencer is ₹500")
+    .min(0, "Budget per influencer cannot be negative")
     .max(1000000, "Maximum budget per influencer is ₹10,00,000"),
   maxInfluencers: z
     .number({ message: "Influencer count must be a number" })
@@ -23,7 +23,7 @@ export const createCampaignSchema = z.object({
   targetCategories: z
     .array(z.string())
     .min(1, "Please select at least one target category"),
-  applicationDeadline: z.string().min(1, "Application deadline date is required"),
+  applicationDeadline: z.string().optional(),
   postingDeadline: z.string().min(1, "Posting deadline date is required"),
 });
 
@@ -61,7 +61,7 @@ export function validateCampaignForm(formData: CampaignFormData): { success: boo
     maxInfluencers: formData.maxInfluencers ?? 1,
     minFollowers: formData.minFollowers,
     targetCategories: formData.targetCategories,
-    applicationDeadline: formData.applicationDeadline,
+    applicationDeadline: formData.applicationDeadline || undefined,
     postingDeadline: formData.postingDeadline,
   });
 
@@ -76,6 +76,7 @@ export function validateCampaignForm(formData: CampaignFormData): { success: boo
     return { success: false, fieldErrors };
   }
 
+  // Budget validation for barter-only vs cash campaigns
   if (formData.requiresProduct && formData.totalBudget === 0) {
     if (formData.productValue < 500) {
       return { success: false, error: "Product-only campaigns must specify a product value of at least ₹500" };
@@ -83,7 +84,16 @@ export function validateCampaignForm(formData: CampaignFormData): { success: boo
     if (formData.minFollowers > 10000) {
       return { success: false, error: "Product-only campaigns can only target influencers with up to 10,000 followers" };
     }
+  } else {
+    // Non-barter campaigns check
+    if (formData.perInfluencerBudget < 500) {
+      return { success: false, error: "Minimum budget per influencer is ₹500" };
+    }
+    if (formData.totalBudget < 1000) {
+      return { success: false, error: "Minimum campaign budget is ₹1,000" };
+    }
   }
+
   if (formData.targetCategories.length === 0) {
     return { success: false, error: "Please select at least one category" };
   }
@@ -95,6 +105,36 @@ export function validateCampaignForm(formData: CampaignFormData): { success: boo
   }
   if (!formData.contentDeadline || !formData.postingDeadline) {
     return { success: false, error: "Please select content and posting deadlines" };
+  }
+
+  // Deadline checks
+  const contentDate = new Date(formData.contentDeadline);
+  const postingDate = new Date(formData.postingDeadline);
+  if (Number.isNaN(contentDate.getTime()) || Number.isNaN(postingDate.getTime())) {
+    return { success: false, error: "Please select valid content and posting deadlines" };
+  }
+  if (postingDate < contentDate) {
+    return { success: false, error: "Posting deadline must be after content deadline" };
+  }
+
+  if (formData.applicationDeadline) {
+    const appDate = new Date(formData.applicationDeadline);
+    if (Number.isNaN(appDate.getTime())) {
+      return { success: false, error: "Please select a valid application deadline" };
+    }
+    
+    // Normalize to local midnight to check past constraint
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const appDateStart = new Date(appDate);
+    appDateStart.setHours(0, 0, 0, 0);
+
+    if (appDateStart < today) {
+      return { success: false, error: "Application deadline cannot be in the past" };
+    }
+    if (appDateStart > contentDate) {
+      return { success: false, error: "Application deadline must be before content deadline" };
+    }
   }
 
   return { success: true };

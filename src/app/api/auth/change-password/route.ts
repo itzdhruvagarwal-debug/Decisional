@@ -6,6 +6,7 @@ import { AuthService } from "@/services/auth.service";
 import { logger } from "@/lib/logger";
 import { passwordSchema } from "@/lib/validations";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { AppError } from "@/lib/errors";
 
 const changePasswordSchema = z.object({
   oldPassword: z.string().min(1, "Current password is required"),
@@ -34,8 +35,15 @@ async function _handler_POST(request: NextRequest) {
     const parsed = changePasswordSchema.safeParse(body);
 
     if (!parsed.success) {
+      const firstIssue = parsed.error.issues[0];
+      const fieldName = firstIssue?.path.join(".") || "";
+      const issueMsg = firstIssue?.message || "Invalid value";
       return NextResponse.json(
-        { success: false, message: "Invalid request payload", data: parsed.error.format() },
+        {
+          success: false,
+          message: `Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`,
+          data: parsed.error.format()
+        },
         { status: 400 }
       );
     }
@@ -57,6 +65,13 @@ async function _handler_POST(request: NextRequest) {
     );
   } catch (error: unknown) {
     logger.warn("Password change failed", { error: (error instanceof Error ? error.message : String(error)) });
+
+    if (error instanceof AppError) {
+      return NextResponse.json(
+        { success: false, message: error.message === "Incorrect old password" ? "Incorrect current password" : error.message },
+        { status: error.statusCode }
+      );
+    }
 
     if ((error instanceof Error ? error.message : String(error)) === "Incorrect old password" || (error instanceof Error ? error.message : String(error)) === "User not found") {
       return NextResponse.json(

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { AdminService } from "@/services/admin.service";
 import { logger } from "@/lib/logger";
 import { paginationSchema } from "@/lib/validations";
+import { AppError } from "@/lib/errors";
 
 const querySchema = paginationSchema.extend({
   search: z.string().trim().max(100).optional(),
@@ -40,6 +41,9 @@ async function _handler_GET(request: NextRequest) {
     return ApiResponse.success(users, "Users retrieved");
   } catch (error: unknown) {
     logger.error("GET /api/admin/users error", { error: (error instanceof Error ? error.message : String(error)) });
+    if (error instanceof AppError) {
+      return ApiResponse.error(error.message, error.statusCode);
+    }
     return ApiResponse.error("Internal server error", 500);
   }
 }

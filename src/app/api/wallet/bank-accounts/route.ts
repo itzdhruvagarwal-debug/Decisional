@@ -5,6 +5,7 @@ import { z } from "zod";
 import { logger } from "@/lib/logger";
 import { encrypt, maskAccountNumber, maskUpiId, hashForDuplicateDetection } from "@/lib/encryption";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { AppError } from "@/lib/errors";
 
 const bankAccountSchema = z
   .object({
@@ -89,6 +90,9 @@ async function _handler_GET(req: NextRequest) {
     return NextResponse.json({ accounts: accounts.map(maskAccount) });
   } catch (error) {
     logger.error("Failed to fetch bank accounts", error);
+    if (error instanceof AppError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    }
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
@@ -152,6 +156,9 @@ async function _handler_POST(req: NextRequest) {
     return NextResponse.json({ success: true, account: maskAccount(account) });
   } catch (error) {
     logger.error("Failed to add bank account", error);
+    if (error instanceof AppError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    }
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
@@ -190,6 +197,9 @@ async function _handler_DELETE(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error("Failed to delete bank account", error);
+    if (error instanceof AppError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    }
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
@@ -215,6 +225,9 @@ async function _handler_PUT(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error("Failed to set default bank account", error);
+    if (error instanceof AppError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    }
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

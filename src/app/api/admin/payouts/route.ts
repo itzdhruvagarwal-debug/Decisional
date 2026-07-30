@@ -6,6 +6,7 @@ import { logger } from "@/lib/logger";
 import { decrypt, maskAccountNumber } from "@/lib/encryption";
 import { WithdrawalStatus } from "@prisma/client";
 import { paginationSchema } from "@/lib/validations";
+import { AppError } from "@/lib/errors";
 
 const querySchema = paginationSchema.extend({
   status: z
@@ -65,7 +66,7 @@ async function _handler_GET(request: NextRequest) {
                   influencerProfile: { select: { displayName: true } },
                   brandProfile: { select: { companyName: true } },
                   taxCompliance: {
-                    select: {
+                     select: {
                       panLast4: true,
                       status: true,
                       itrAcknowledgementLast4: true,
@@ -95,6 +96,9 @@ async function _handler_GET(request: NextRequest) {
     );
   } catch (error: unknown) {
     logger.error("GET /api/admin/payouts error", { error: (error instanceof Error ? error.message : String(error)) });
+    if (error instanceof AppError) {
+      return ApiResponse.error(error.message, error.statusCode);
+    }
     return ApiResponse.error("Internal server error", 500);
   }
 }

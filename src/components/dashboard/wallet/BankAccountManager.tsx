@@ -111,11 +111,11 @@ export default function BankAccountManager({
 
     const validation = bankAccountSchema.safeParse({
       payoutType,
-      accountName: newAccount.accountName,
-      accountNumber: newAccount.accountNumber,
-      ifscCode: newAccount.ifscCode,
-      bankName: newAccount.bankName,
-      upiId: newAccount.upiId,
+      accountName: newAccount.accountName.trim(),
+      accountNumber: newAccount.accountNumber.trim(),
+      ifscCode: newAccount.ifscCode.trim().toUpperCase(),
+      bankName: newAccount.bankName.trim(),
+      upiId: newAccount.upiId.trim(),
     });
 
     if (!validation.success) {
@@ -127,16 +127,16 @@ export default function BankAccountManager({
     try {
       const payload = payoutType === "upi"
         ? {
-            accountName: newAccount.accountName,
-            upiId: newAccount.upiId,
+            accountName: newAccount.accountName.trim(),
+            upiId: newAccount.upiId.trim(),
             isDefault: newAccount.isDefault,
           }
         : {
-            accountName: newAccount.accountName,
-            accountNumber: newAccount.accountNumber,
-            ifscCode: newAccount.ifscCode,
-            bankName: newAccount.bankName,
-            upiId: newAccount.upiId || undefined,
+            accountName: newAccount.accountName.trim(),
+            accountNumber: newAccount.accountNumber.trim(),
+            ifscCode: newAccount.ifscCode.trim().toUpperCase(),
+            bankName: newAccount.bankName.trim(),
+            upiId: newAccount.upiId.trim() || undefined,
             isDefault: newAccount.isDefault,
           };
 

@@ -96,7 +96,12 @@ export function checkSubmissionDeadline(deal: FullDeal, findings: Finding[]): { 
   const submittedAt = latestSubmission?.submittedAt ? new Date(latestSubmission.submittedAt) : null;
 
   if (submissionDeadline && submittedAt) {
-    const isOnTime = submittedAt <= submissionDeadline;
+    const subDeadlineStart = new Date(submissionDeadline);
+    subDeadlineStart.setUTCHours(0, 0, 0, 0);
+    const submittedStart = new Date(submittedAt);
+    submittedStart.setUTCHours(0, 0, 0, 0);
+
+    const isOnTime = submittedStart <= subDeadlineStart;
     const hoursLate = isOnTime ? 0 : Math.round((submittedAt.getTime() - submissionDeadline.getTime()) / (3600 * 1000));
     findings.push({
       check: "Submitted before deadline",
@@ -128,7 +133,12 @@ export function checkPostingDeadline(deal: FullDeal, findings: Finding[]) {
   const postingDeadline = deal.postingDeadline ? new Date(deal.postingDeadline) : null;
   const postedAt = deal.postedAt ? new Date(deal.postedAt) : null;
   if (postingDeadline && postedAt) {
-    const isOnTime = postedAt <= postingDeadline;
+    const postDeadlineStart = new Date(postingDeadline);
+    postDeadlineStart.setUTCHours(0, 0, 0, 0);
+    const postedStart = new Date(postedAt);
+    postedStart.setUTCHours(0, 0, 0, 0);
+
+    const isOnTime = postedStart <= postDeadlineStart;
     findings.push({
       check: "Posted before posting deadline",
       result: isOnTime ? "PASS" : "FAIL",
@@ -147,9 +157,15 @@ export function determineTimelineVerdict(
   findings: Finding[]
 ): MediatorAnalysis {
   const raisedByInfluencer = dispute.raisedBy.userType === "INFLUENCER";
+  
+  const subDeadlineStart = submissionDeadline ? new Date(submissionDeadline) : null;
+  if (subDeadlineStart) subDeadlineStart.setUTCHours(0, 0, 0, 0);
+  const submittedStart = submittedAt ? new Date(submittedAt) : null;
+  if (submittedStart) submittedStart.setUTCHours(0, 0, 0, 0);
+
   const influencerMissedDeadline =
     !hasSubmission ||
-    (submissionDeadline && submittedAt && submittedAt > submissionDeadline);
+    (subDeadlineStart && submittedStart && submittedStart > subDeadlineStart);
   const brandDelayed = brandApprovedLate.late;
 
   if (raisedByInfluencer && brandDelayed) {

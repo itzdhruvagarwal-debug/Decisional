@@ -7,6 +7,7 @@ import { createApplicationSchema } from "@/lib/validations";
 import { requireActiveAdmin } from "@/lib/admin-auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { parsePagination } from "@/lib/utils";
+import { AppError } from "@/lib/errors";
 
 async function _handler_GET(request: NextRequest) {
   try {
@@ -49,7 +50,12 @@ async function _handler_POST(request: NextRequest) {
 
     const body = await request.json();
     const parsed = createApplicationSchema.safeParse(body);
-    if (!parsed.success) return ApiResponse.error("Invalid payload");
+    if (!parsed.success) {
+      const firstIssue = parsed.error.issues[0];
+      const fieldName = firstIssue?.path.join(".") || "";
+      const issueMsg = firstIssue?.message || "Invalid value";
+      return ApiResponse.error(`Invalid payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`);
+    }
 
     const application = await ApplicationService.createApplication(session.user.id, {
       ...parsed.data,
@@ -64,6 +70,11 @@ async function _handler_POST(request: NextRequest) {
     return ApiResponse.success(application, "Application submitted", 201);
   } catch (error: unknown) {
     logger.error("POST /api/applications error", { error: (error instanceof Error ? error.message : String(error)) });
+
+    if (error instanceof AppError) {
+      return ApiResponse.error(error.message, error.statusCode);
+    }
+
     const message = (error instanceof Error ? error.message : String(error)) || "Submission failed";
     const isBusinessValidation =
       message.includes("Already applied") ||

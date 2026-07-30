@@ -239,8 +239,16 @@ export function validateDeadlines(
     if (applicationDeadline && Number.isNaN(applicationDeadline.getTime())) {
       throw AppError.badRequest("Invalid application deadline");
     }
-    if (applicationDeadline && applicationDeadline < now) {
-      throw AppError.badRequest("Application deadline cannot be in the past");
+    if (applicationDeadline) {
+      const startOfToday = new Date(now);
+      startOfToday.setUTCHours(0, 0, 0, 0);
+
+      const appDeadlineUTC = new Date(applicationDeadline);
+      appDeadlineUTC.setUTCHours(0, 0, 0, 0);
+
+      if (appDeadlineUTC < startOfToday) {
+        throw AppError.badRequest("Application deadline cannot be in the past");
+      }
     }
     if (applicationDeadline && applicationDeadline > contentDeadline) {
       throw AppError.badRequest("Application deadline must be before content deadline");

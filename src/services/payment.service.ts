@@ -72,21 +72,27 @@ export class PaymentService {
     dealId: string,
   ): Promise<void> {
     const checkTime = deal.postedAt || deal.verifiedAt || new Date();
-    if (deal.postingDeadline && new Date(checkTime) > new Date(deal.postingDeadline)) {
-      await prisma.deal.updateMany({
-        where: { id: dealId, status: "VERIFIED" },
-        data: {
-          status: "PAYMENT_PENDING",
-          rejectionReason: `LATE_POST_BLOCKED: Post verified/submitted after deadline (Posted: ${deal.postedAt?.toISOString() ?? "N/A"}, Verified: ${deal.verifiedAt?.toISOString() ?? "N/A"}, Deadline: ${deal.postingDeadline?.toISOString() ?? "N/A"})`,
-        },
-      });
-      logger.warn("PAYOUT_BLOCKED: Post verified/submitted after deadline — deal moved to PAYMENT_PENDING for admin review", {
-        dealId,
-        postedAt: deal.postedAt,
-        verifiedAt: deal.verifiedAt,
-        deadline: deal.postingDeadline,
-      });
-      throw AppError.badRequest("LATE_POST_PAYMENT_BLOCKED");
+    if (deal.postingDeadline) {
+      const checkStart = new Date(checkTime);
+      checkStart.setUTCHours(0, 0, 0, 0);
+      const deadlineStart = new Date(deal.postingDeadline);
+      deadlineStart.setUTCHours(0, 0, 0, 0);
+      if (checkStart > deadlineStart) {
+        await prisma.deal.updateMany({
+          where: { id: dealId, status: "VERIFIED" },
+          data: {
+            status: "PAYMENT_PENDING",
+            rejectionReason: `LATE_POST_BLOCKED: Post verified/submitted after deadline (Posted: ${deal.postedAt?.toISOString() ?? "N/A"}, Verified: ${deal.verifiedAt?.toISOString() ?? "N/A"}, Deadline: ${deal.postingDeadline?.toISOString() ?? "N/A"})`,
+          },
+        });
+        logger.warn("PAYOUT_BLOCKED: Post verified/submitted after deadline — deal moved to PAYMENT_PENDING for admin review", {
+          dealId,
+          postedAt: deal.postedAt,
+          verifiedAt: deal.verifiedAt,
+          deadline: deal.postingDeadline,
+        });
+        throw AppError.badRequest("LATE_POST_PAYMENT_BLOCKED");
+      }
     }
   }
 

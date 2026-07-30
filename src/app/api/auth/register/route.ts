@@ -5,6 +5,7 @@ import { registerSchema } from "@/lib/validations";
 import redis from "@/lib/redis";
 import { apiWrapper, ApiResponse } from "@/lib/api-wrapper";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { AppError } from "@/lib/errors";
 
 export const POST = apiWrapper(async function POST(request: NextRequest) {
   // IP-based rate limit: max 5 registrations per IP per 10 minutes
@@ -28,7 +29,10 @@ export const POST = apiWrapper(async function POST(request: NextRequest) {
 
     const parsed = registerSchema.safeParse(body);
     if (!parsed.success) {
-      return ApiResponse.error("Invalid request data");
+      const firstIssue = parsed.error.issues[0];
+      const fieldName = firstIssue?.path.join(".") || "";
+      const issueMsg = firstIssue?.message || "Invalid value";
+      return ApiResponse.error(`Invalid request data: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`);
     }
 
     // OTP verification is enforced server-side via Redis — client flags are ignored
@@ -75,6 +79,10 @@ export const POST = apiWrapper(async function POST(request: NextRequest) {
     );
   } catch (error: unknown) {
     logger.error("Registration route error", { error: (error instanceof Error ? error.message : String(error)) });
+
+    if (error instanceof AppError) {
+      return ApiResponse.error(error.message, error.statusCode);
+    }
 
     const errMsg = error instanceof Error ? error.message : String(error);
 

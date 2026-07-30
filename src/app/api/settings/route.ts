@@ -33,13 +33,17 @@ const updateProfileSchema = z.object({
   // Brand & Individual
   companyName: z.string().optional().nullish(),
   description: z.string().max(2000).optional().nullish(),
-  website: z
-    .string()
-    .trim()
-    .url("Website must be a valid URL")
-    .refine((value) => /^https?:\/\//i.test(value), "Website must use http or https")
-    .optional()
-    .nullish(),
+  website: z.preprocess(
+    (val) => (typeof val === "string" && val.trim() === "" ? null : val),
+    z
+      .string()
+      .trim()
+      .url("Website must be a valid URL")
+      .refine((value) => /^https?:\/\//i.test(value), "Website must use http or https")
+      .optional()
+      .nullable()
+      .nullish()
+  ),
   industry: z.string().optional().nullish(),
   profileImage: z.string().optional().nullish(),
 });

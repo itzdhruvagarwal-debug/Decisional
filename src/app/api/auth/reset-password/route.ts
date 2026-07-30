@@ -5,6 +5,7 @@ import { AuthService } from "@/services/auth.service";
 import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { emailSchema, passwordSchema } from "@/lib/validations";
+import { AppError } from "@/lib/errors";
 
 const requestResetSchema = z.object({
   action: z.literal("request"),
@@ -20,11 +21,14 @@ const completeResetSchema = z.object({
 async function handleRequestReset(request: NextRequest, body: unknown) {
   const parsed = requestResetSchema.safeParse(body);
   if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    const fieldName = firstIssue?.path.join(".") || "";
+    const issueMsg = firstIssue?.message || "Invalid value";
     return NextResponse.json(
       {
         success: false,
-        error: "Invalid request payload",
-        message: "Invalid request payload",
+        error: `Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`,
+        message: `Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`,
         data: parsed.error.format(),
       },
       { status: 400 },
@@ -68,11 +72,14 @@ async function handleRequestReset(request: NextRequest, body: unknown) {
 async function handleCompleteReset(body: unknown) {
   const parsed = completeResetSchema.safeParse(body);
   if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    const fieldName = firstIssue?.path.join(".") || "";
+    const issueMsg = firstIssue?.message || "Invalid value";
     return NextResponse.json(
       {
         success: false,
-        error: "Invalid request payload",
-        message: "Invalid request payload",
+        error: `Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`,
+        message: `Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`,
         data: parsed.error.format(),
       },
       { status: 400 },
@@ -106,6 +113,17 @@ async function _handler_POST(request: NextRequest) {
     logger.warn("Password reset failed", {
       error: error instanceof Error ? error.message : String(error),
     });
+
+    if (error instanceof AppError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message === "Invalid or expired token" ? "The reset link is invalid or has expired." : error.message,
+          message: error.message === "Invalid or expired token" ? "The reset link is invalid or has expired." : error.message,
+        },
+        { status: error.statusCode }
+      );
+    }
 
     if (
       (error instanceof Error ? error.message : String(error)) ===

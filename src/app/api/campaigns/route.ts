@@ -9,6 +9,8 @@ import { CampaignService, type ListCampaignsParams } from "@/services/campaign.s
 import { requireActiveAdmin } from "@/lib/admin-auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { parsePagination } from "@/lib/utils";
+import { AppError } from "@/lib/errors";
+import { TierError } from "@/services/campaign/types";
 
 function toPaise(amountInRupees: number): number {
   return Math.round(amountInRupees * 100);
@@ -98,7 +100,10 @@ async function _handler_POST(request: NextRequest) {
     const parsed = createCampaignSchema.safeParse(body);
 
     if (!parsed.success) {
-      return ApiResponse.error("Invalid payload");
+      const firstIssue = parsed.error.issues[0];
+      const fieldName = firstIssue?.path.join(".") || "";
+      const issueMsg = firstIssue?.message || "Invalid value";
+      return ApiResponse.error(`Invalid payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`);
     }
 
     const payload = {
@@ -128,9 +133,11 @@ async function _handler_POST(request: NextRequest) {
   } catch (error: unknown) {
     logger.error("POST /api/campaigns error", error);
 
-    const errWithTier = error as { tierError?: unknown; message?: string };
-    if (errWithTier?.tierError) {
-      return ApiResponse.forbidden(errWithTier.message || "Verification required");
+    if (error instanceof AppError) {
+      if (error instanceof TierError) {
+        return ApiResponse.forbidden(error.message || "Verification required");
+      }
+      return ApiResponse.error(error.message, error.statusCode);
     }
 
     const errMsg = error instanceof Error ? error.message : String(error);

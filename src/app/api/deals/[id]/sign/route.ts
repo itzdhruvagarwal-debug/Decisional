@@ -57,6 +57,13 @@ async function validateAndGetDealToSign(dealId: string, userId: string) {
 }
 
 function handleSignContractError(error: unknown) {
+  if (error instanceof AppError) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: error.statusCode }
+    );
+  }
+
   const msg = error instanceof Error ? error.message : "";
 
   if (msg.includes("already signed")) {

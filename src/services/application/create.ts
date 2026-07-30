@@ -98,8 +98,12 @@ export async function getAndValidateCampaign(
     ) {
       throw AppError.badRequest("This campaign has reached its maximum number of influencer slots.");
     }
-    if (campaign.applicationDeadline && new Date() > campaign.applicationDeadline) {
-      throw AppError.badRequest("Application deadline has passed");
+    if (campaign.applicationDeadline) {
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
+      if (todayStart > campaign.applicationDeadline) {
+        throw AppError.badRequest("Application deadline has passed");
+      }
     }
 
     const isProductOnly = campaign.requiresProduct && campaign.totalBudget === 0;

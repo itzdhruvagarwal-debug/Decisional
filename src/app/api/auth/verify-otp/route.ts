@@ -7,6 +7,7 @@ import redis from "@/lib/redis";
 import { sendOTP, verifyOTP } from "@/lib/sms";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { apiWrapper, ApiResponse } from "@/lib/api-wrapper";
+import { AppError } from "@/lib/errors";
 
 const sendRegistrationOtpSchema = z.object({
   phone: z
@@ -42,7 +43,10 @@ export const PUT = apiWrapper(async function PUT(request: NextRequest) {
 
     const parsed = sendRegistrationOtpSchema.safeParse(body);
     if (!parsed.success) {
-      return ApiResponse.error("Invalid request payload");
+      const firstIssue = parsed.error.issues[0];
+      const fieldName = firstIssue?.path.join(".") || "";
+      const issueMsg = firstIssue?.message || "Invalid value";
+      return ApiResponse.error(`Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`);
     }
 
     const phone = parsed.data.phone;
@@ -91,6 +95,9 @@ export const PUT = apiWrapper(async function PUT(request: NextRequest) {
     );
   } catch (error: unknown) {
     logger.error("Phone OTP send failed", { error: (error instanceof Error ? error.message : String(error)) });
+    if (error instanceof AppError) {
+      return ApiResponse.error(error.message, error.statusCode);
+    }
     return ApiResponse.error("Failed to send OTP", 500);
   }
 });
@@ -111,7 +118,10 @@ export const POST = apiWrapper(async function POST(request: NextRequest) {
     ) {
       const parsedLegacy = verifyLegacyOtpSchema.safeParse(body);
       if (!parsedLegacy.success) {
-        return ApiResponse.error("Invalid request payload");
+        const firstIssue = parsedLegacy.error.issues[0];
+        const fieldName = firstIssue?.path.join(".") || "";
+        const issueMsg = firstIssue?.message || "Invalid value";
+        return ApiResponse.error(`Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`);
       }
 
       await AuthService.verifyOtp(
@@ -125,7 +135,10 @@ export const POST = apiWrapper(async function POST(request: NextRequest) {
 
     const parsedRegistration = verifyRegistrationOtpSchema.safeParse(body);
     if (!parsedRegistration.success) {
-      return ApiResponse.error("Invalid request payload");
+      const firstIssue = parsedRegistration.error.issues[0];
+      const fieldName = firstIssue?.path.join(".") || "";
+      const issueMsg = firstIssue?.message || "Invalid value";
+      return ApiResponse.error(`Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`);
     }
 
     const { phone, otp, type } = parsedRegistration.data;
@@ -147,6 +160,10 @@ export const POST = apiWrapper(async function POST(request: NextRequest) {
     return ApiResponse.success({ verified: true }, "Phone verified successfully!");
   } catch (error: unknown) {
     logger.warn("OTP verification failed", { error: (error instanceof Error ? error.message : String(error)) });
+
+    if (error instanceof AppError) {
+      return ApiResponse.error(error.message, error.statusCode);
+    }
 
     const errMsg = error instanceof Error ? error.message : String(error);
 

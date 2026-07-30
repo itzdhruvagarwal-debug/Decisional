@@ -28,7 +28,7 @@ export const createCampaignSchema = z.object({
 });
 
 export const createDisputeSchema = z.object({
-  type: z.enum(["TIMELINE", "DELIVERABLES", "QUALITY", "COMMUNICATION", "PAYMENT", "OTHER"]),
+  type: z.enum(["QUALITY", "TIMELINE", "PAYMENT", "CONTENT_DELETED", "TERMS_VIOLATION", "OTHER"]),
   description: z.string().min(50, "Please describe the issue in at least 50 characters.").max(2000, "Description cannot exceed 2000 characters"),
 });
 

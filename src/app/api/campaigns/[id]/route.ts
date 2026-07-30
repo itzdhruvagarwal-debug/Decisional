@@ -9,6 +9,8 @@ import { CampaignService } from "@/services/campaign.service";
 import { requireActiveAdmin } from "@/lib/admin-auth";
 import prisma from "@/lib/db";
 import { isAdmin, isInfluencer } from "@/lib/rbac";
+import { AppError } from "@/lib/errors";
+import { TierError } from "@/services/campaign/types";
 
 const paramsSchema = routeParamsSchema;
 const actionSchema = z.object({ action: z.enum(["ACTIVATE", "CANCEL"]) });
@@ -28,6 +30,20 @@ function parseCampaignId(resolvedParams: Record<string, string | string[]>) {
 
 function handleApiError(error: unknown, defaultMessage: string, loggerLabel: string) {
   logger.error(loggerLabel, error);
+
+  if (error instanceof AppError) {
+    if (error instanceof TierError) {
+      return NextResponse.json(
+        { success: false, message: error.message || "Verification required" },
+        { status: 403 },
+      );
+    }
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: error.statusCode },
+    );
+  }
+
   const errorMsg = error instanceof Error ? error.message : String(error);
   
   if (errorMsg.includes("not found") || errorMsg.includes("unauthorized")) {
@@ -214,10 +230,13 @@ async function _handler_PUT(
     const body = await request.json();
     const parsedBody = createCampaignSchema.safeParse(body);
     if (!parsedBody.success) {
+      const firstIssue = parsedBody.error.issues[0];
+      const fieldName = firstIssue?.path.join(".") || "";
+      const issueMsg = firstIssue?.message || "Invalid value";
       return NextResponse.json(
         {
           success: false,
-          message: "Invalid payload",
+          message: `Invalid payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`,
           data: parsedBody.error.format(),
         },
         { status: 400 },

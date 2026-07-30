@@ -16,6 +16,7 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { apiWrapper, ApiResponse } from "@/lib/api-wrapper";
 import { createActivityLog } from "@/lib/audit";
+import { AppError } from "@/lib/errors";
 
 const changeContactSchema = z.object({
     action: z.enum(['init', 'verify-current', 'send-new', 'confirm-new']),
@@ -285,7 +286,10 @@ export const POST = apiWrapper(async function POST(req: NextRequest) {
         const parsed = changeContactSchema.safeParse(body);
 
         if (!parsed.success) {
-            return ApiResponse.error("Validation failed");
+            const firstIssue = parsed.error.issues[0];
+            const fieldName = firstIssue?.path.join(".") || "";
+            const issueMsg = firstIssue?.message || "Invalid value";
+            return ApiResponse.error(`Validation failed: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`);
         }
 
         const { action, currentEmailOtp, currentPhoneOtp, type, newContact, newOtp } = parsed.data;
@@ -317,6 +321,9 @@ export const POST = apiWrapper(async function POST(req: NextRequest) {
         return ApiResponse.error("Invalid action");
     } catch (error) {
         logger.error("Change contact error:", error);
+        if (error instanceof AppError) {
+            return ApiResponse.error(error.message, error.statusCode);
+        }
         return ApiResponse.error("An unexpected error occurred.", 500);
     }
 });

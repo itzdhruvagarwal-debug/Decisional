@@ -6,6 +6,7 @@ import { routeParamsSchema } from "@/lib/validations";
 import { DealService } from "@/services/deal.service";
 import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { AppError } from "@/lib/errors";
 
 const paramsSchema = routeParamsSchema;
 const rejectSchema = z.object({
@@ -31,7 +32,13 @@ async function _handler_POST(request: NextRequest, context: { params: Promise<Re
         const body = await request.json().catch(() => ({}));
         const parsedBody = rejectSchema.safeParse(body);
         if (!parsedBody.success) {
-            return NextResponse.json({ success: false, message: "Invalid payload", data: parsedBody.error.format() }, { status: 400 });
+            const firstIssue = parsedBody.error.issues[0];
+            const fieldName = firstIssue?.path.join(".") || "";
+            const issueMsg = firstIssue?.message || "Invalid value";
+            return NextResponse.json(
+                { success: false, message: `Invalid payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`, data: parsedBody.error.format() },
+                { status: 400 }
+            );
         }
 
         await DealService.rejectPendingInvite(
@@ -43,6 +50,10 @@ async function _handler_POST(request: NextRequest, context: { params: Promise<Re
         return NextResponse.json({ success: true, message: "Invite rejected successfully" }, { status: 200 });
     } catch (error: unknown) {
         logger.error("POST /api/deals/[id]/reject error", { error });
+
+        if (error instanceof AppError) {
+            return NextResponse.json({ success: false, message: error.message }, { status: error.statusCode });
+        }
 
         const errMsg = error instanceof Error ? error.message : String(error);
         const errCode = (error as { code?: string })?.code;
