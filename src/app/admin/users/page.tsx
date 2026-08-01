@@ -7,6 +7,17 @@ import { banUser, unbanUser, awardBadgeAction } from "../actions";
 import Image from "next/image";
 import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Button, Input, Select } from "@/components/ui";
+import type { AdminService } from "@/services/admin.service";
+import type { Prisma } from "@prisma/client";
+
+export type AdminUserListElement = Prisma.PromiseReturnType<typeof AdminService.listUsers>["users"][number];
+export type ListUsersResult = {
+  success: boolean;
+  data: {
+    users: AdminUserListElement[];
+    total: number;
+  };
+};
 
 interface TaxComplianceUser {
   userType: string;
@@ -49,7 +60,7 @@ export default function AdminUsersPage() {
   if (type !== "ALL") queryParams.set("type", type);
   if (status !== "ALL") queryParams.set("status", status);
 
-  const { data, error, isLoading, mutate } = useSWR<any>(
+  const { data, error, isLoading, mutate } = useSWR<ListUsersResult>(
     `/api/admin/users?${queryParams.toString()}`,
     fetcher
   );
