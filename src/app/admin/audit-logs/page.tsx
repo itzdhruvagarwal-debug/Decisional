@@ -1,57 +1,90 @@
-import { AdminService } from "@/services/admin.service";
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+"use client";
+
+import React, { useState } from "react";
+import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
 import EmptyState from "@/components/ui/EmptyState";
-import { Badge } from "@/components/ui";
+import { Badge, Input, Select } from "@/components/ui";
 
-export const dynamic = "force-dynamic";
+export default function AdminAuditLogsPage() {
+  const [actorId, setActorId] = useState("");
+  const [entityType, setEntityType] = useState("");
+  const [entityId, setEntityId] = useState("");
 
-async function getAuditLogs() {
-  const session = await auth();
-  if (!session?.user) redirect("/login");
+  const queryParams = new URLSearchParams();
+  if (actorId.trim()) queryParams.set("actorId", actorId.trim());
+  if (entityType) queryParams.set("entityType", entityType);
+  if (entityId.trim()) queryParams.set("entityId", entityId.trim());
 
-  const auditLogs = await AdminService.listAuditLogs();
-  return auditLogs;
-}
+  const { data, error, isLoading } = useSWR<any>(
+    `/api/admin/audit-logs?${queryParams.toString()}`,
+    fetcher
+  );
 
-function getEntityTypeBadgeStyle(entityType: string) {
-  switch (entityType) {
-    case "USER":
-      return { background: "rgba(59, 130, 246, 0.15)", color: "#60a5fa" };
-    case "DEAL":
-      return { background: "rgba(168, 85, 247, 0.15)", color: "#c084fc" };
-    case "CAMPAIGN":
-      return { background: "rgba(34, 197, 94, 0.15)", color: "#4ade80" };
-    case "APPLICATION":
-      return { background: "rgba(234, 179, 8, 0.15)", color: "#facc15" };
-    case "WALLET":
-      return { background: "rgba(236, 72, 153, 0.15)", color: "#f472b6" };
-    default:
-      return { background: "rgba(107, 114, 128, 0.15)", color: "#9ca3af" };
-  }
-}
-
-export default async function AdminAuditLogsPage() {
-  const auditLogs = await getAuditLogs();
+  const auditLogs = data?.data || [];
 
   return (
     <div className="admin-page">
       <div className="admin-toolbar mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold mb-1">
-            Audit Logs
-          </h1>
+          <h1 className="text-3xl font-extrabold mb-1">Audit Logs</h1>
           <p className="text-secondary text-sm">
             View all system activity and administrative actions.
           </p>
         </div>
       </div>
 
-      {auditLogs.length === 0 ? (
+      {/* Interactive Filters */}
+      <div className="card p-4 mb-6 flex flex-wrap gap-4 items-end">
+        <div className="flex-1 min-w-200">
+          <Input
+            label="Actor ID"
+            id="filter-actor-id"
+            value={actorId}
+            onChange={(e) => setActorId(e.target.value)}
+            placeholder="Search by Actor ID..."
+            fullWidth
+          />
+        </div>
+        <div className="w-180">
+          <Select
+            label="Entity Type"
+            id="filter-entity-type"
+            value={entityType}
+            onChange={(e) => setEntityType(e.target.value)}
+            fullWidth
+          >
+            <option value="">All Types</option>
+            <option value="USER">User</option>
+            <option value="DEAL">Deal</option>
+            <option value="CAMPAIGN">Campaign</option>
+            <option value="APPLICATION">Application</option>
+            <option value="WALLET">Wallet</option>
+          </Select>
+        </div>
+        <div className="flex-1 min-w-200">
+          <Input
+            label="Entity ID"
+            id="filter-entity-id"
+            value={entityId}
+            onChange={(e) => setEntityId(e.target.value)}
+            placeholder="Search by Entity ID..."
+            fullWidth
+          />
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center p-12">
+          <span className="loading w-16 h-16" />
+        </div>
+      ) : error ? (
+        <div className="text-center text-rose p-6">Failed to load audit logs.</div>
+      ) : auditLogs.length === 0 ? (
         <EmptyState
           emoji="📋"
           title="No Audit Logs"
-          description="No activity has been logged yet."
+          description="No activity matches your filters."
         />
       ) : (
         <div className="card overflow-hidden p-0">
@@ -63,17 +96,17 @@ export default async function AdminAuditLogsPage() {
                     (heading) => (
                       <th
                         key={heading}
-                        className="text-left border-b-card text-muted text-xs font-extrabold uppercase" style={{ padding: "14px 18px" }}
+                        className="text-left border-b-card text-muted text-xs font-extrabold uppercase"
+                        style={{ padding: "14px 18px" }}
                       >
                         {heading}
                       </th>
-                    ),
+                    )
                   )}
                 </tr>
               </thead>
               <tbody>
-                {auditLogs.map((log) => {
-                  const badgeStyle = getEntityTypeBadgeStyle(log.entityType);
+                {auditLogs.map((log: any) => {
                   return (
                     <tr key={log.id} className="border-b-card">
                       <td className="p-card text-secondary text-sm">
@@ -101,7 +134,10 @@ export default async function AdminAuditLogsPage() {
                         {new Date(log.timestamp).toLocaleString("en-IN")}
                       </td>
                       <td className="p-card">
-                        <div className="text-sm overflow-hidden text-primary whitespace-nowrap max-w-240 text-ellipsis" title={log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : ""}>
+                        <div
+                          className="text-sm overflow-hidden text-primary whitespace-nowrap max-w-240 text-ellipsis"
+                          title={log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : ""}
+                        >
                           {log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : "-"}
                         </div>
                       </td>

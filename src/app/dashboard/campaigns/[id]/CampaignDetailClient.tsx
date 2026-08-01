@@ -138,6 +138,17 @@ export default function CampaignDetailClient({
               Cancel Campaign
             </Button>
           )}
+          {isOwner && (campaign.status === "ACTIVE" || campaign.status === "COMPLETED") && (
+            <a
+              href={`/api/reports/brand/campaign/${campaign.id}/roi?format=csv`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="secondary" className="cursor-pointer">
+                📊 ROI Report (CSV)
+              </Button>
+            </a>
+          )}
         </div>
       </header>
 

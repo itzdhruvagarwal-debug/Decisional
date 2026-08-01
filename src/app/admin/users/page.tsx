@@ -1,40 +1,12 @@
+"use client";
+
+import React, { useState } from "react";
+import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
 import { banUser, unbanUser, awardBadgeAction } from "../actions";
-import Link from "next/link";
 import Image from "next/image";
-import { AdminService } from "@/services/admin.service";
-import { Prisma } from "@prisma/client";
 import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Button, Input, Select } from "@/components/ui";
-import { z } from "zod";
-
-export const adminUserFilterSchema = z.object({
-  search: z.string().optional(),
-  type: z.enum(["ALL", "INFLUENCER", "BRAND"]),
-  status: z.enum(["ALL", "ACTIVE", "PENDING_VERIFICATION", "SUSPENDED", "BANNED", "FLAGGED"]),
-});
-
-export const awardBadgeSchema = z.object({
-  badgeId: z.enum(["beta_tester", "mystery_badge", "bug_reporter", "feedback_giver"]),
-  userId: z.string().uuid(),
-});
-
-export type AdminUserListElement = Prisma.PromiseReturnType<typeof AdminService.listUsers>["users"][number];
-
-export const dynamic = "force-dynamic";
-
-function getParam(
-  params: Record<string, string | string[] | undefined>,
-  key: string,
-) {
-  const value = params[key];
-  return Array.isArray(value) ? value[0] : value;
-}
-
-function statusTone(status: string) {
-  if (status === "ACTIVE") return "success";
-  if (status === "BANNED" || status === "SUSPENDED") return "danger";
-  return "warning";
-}
 
 interface TaxComplianceUser {
   userType: string;
@@ -63,33 +35,59 @@ function taxStatusTone(user: TaxComplianceUser) {
   return "warning";
 }
 
-export default async function AdminUsersPage({
-  searchParams,
-}: {
-  readonly searchParams?: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const params = (await searchParams) || {};
-  const query = (getParam(params, "search") || getParam(params, "q"))?.trim() || "";
-  const userType = getParam(params, "type") || "ALL";
-  const status = getParam(params, "status") || "ALL";
-  const page = Math.max(1, Number(getParam(params, "page") || 1));
+export default function AdminUsersPage() {
+  const [search, setSearch] = useState("");
+  const [type, setType] = useState("ALL");
+  const [status, setStatus] = useState("ALL");
+  const [page, setPage] = useState(1);
   const limit = 50;
 
-  // Call AdminService directly on the server to prevent port-binding failures and loopback request overhead
-  const listParams: {
-    page: number;
-    limit: number;
-    search?: string;
-    userType?: string;
-    status?: string;
-  } = { page, limit };
-  if (query) listParams.search = query;
-  if (userType !== "ALL") listParams.userType = userType;
-  if (status !== "ALL") listParams.status = status;
+  const queryParams = new URLSearchParams();
+  queryParams.set("page", String(page));
+  queryParams.set("limit", String(limit));
+  if (search.trim()) queryParams.set("search", search.trim());
+  if (type !== "ALL") queryParams.set("type", type);
+  if (status !== "ALL") queryParams.set("status", status);
 
-  const { users, total } = await AdminService.listUsers(listParams);
+  const { data, error, isLoading, mutate } = useSWR<any>(
+    `/api/admin/users?${queryParams.toString()}`,
+    fetcher
+  );
 
+  const users = data?.data?.users || [];
+  const total = data?.data?.total || 0;
   const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  const handleBan = async (userId: string) => {
+    if (!confirm("Are you sure you want to ban this user?")) return;
+    try {
+      await banUser(userId);
+      mutate();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to ban user");
+    }
+  };
+
+  const handleUnban = async (userId: string) => {
+    try {
+      await unbanUser(userId);
+      mutate();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to unban user");
+    }
+  };
+
+  const handleAwardBadge = async (e: React.FormEvent<HTMLFormElement>, userId: string) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    try {
+      await awardBadgeAction(formData);
+      alert("Badge awarded successfully!");
+      mutate();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to award badge");
+    }
+  };
 
   return (
     <div className="admin-page">
@@ -110,19 +108,39 @@ export default async function AdminUsersPage({
         </div>
       </div>
 
-      <form className="card admin-filter-row p-3.5 mb-4">
+      <div className="card admin-filter-row p-3.5 mb-4 flex flex-wrap gap-3">
         <Input
           name="search"
           placeholder="Search name, email, or phone"
-          defaultValue={query}
-          className="admin-user-search"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+          className="admin-user-search flex-1 min-w-200"
         />
-        <Select name="type" defaultValue={userType} className="w-180">
+        <Select
+          name="type"
+          value={type}
+          onChange={(e) => {
+            setType(e.target.value);
+            setPage(1);
+          }}
+          className="w-180"
+        >
           <option value="ALL">All roles</option>
           <option value="INFLUENCER">Influencers</option>
           <option value="BRAND">Brands</option>
         </Select>
-        <Select name="status" defaultValue={status} className="admin-status-select">
+        <Select
+          name="status"
+          value={status}
+          onChange={(e) => {
+            setStatus(e.target.value);
+            setPage(1);
+          }}
+          className="admin-status-select w-180"
+        >
           <option value="ALL">All statuses</option>
           <option value="ACTIVE">Active</option>
           <option value="PENDING_VERIFICATION">Pending verification</option>
@@ -130,13 +148,16 @@ export default async function AdminUsersPage({
           <option value="BANNED">Banned</option>
           <option value="FLAGGED">Flagged</option>
         </Select>
-        <Button type="submit" variant="primary">
-          Apply
-        </Button>
-      </form>
+      </div>
 
       <div className="card overflow-hidden p-0">
-        {users.length === 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center p-12">
+            <span className="loading w-16 h-16" />
+          </div>
+        ) : error ? (
+          <div className="text-center text-rose p-6">Failed to load users.</div>
+        ) : users.length === 0 ? (
           <EmptyState
             emoji="👤"
             title="No Users Found"
@@ -156,12 +177,12 @@ export default async function AdminUsersPage({
                       >
                         {heading}
                       </th>
-                    ),
+                    )
                   )}
                 </tr>
               </thead>
               <tbody>
-                {users.map((user: AdminUserListElement) => {
+                {users.map((user: any) => {
                   const name =
                     user.influencerProfile?.displayName ||
                     user.brandProfile?.companyName ||
@@ -242,51 +263,60 @@ export default async function AdminUsersPage({
                       <td className="p-card text-right">
                         <div className="flex justify-end items-center gap-2">
                           {user.userType !== "ADMIN" && (
-            <form action={awardBadgeAction} className="inline-flex gap-1">
-              <input type="hidden" name="userId" value={user.id} />
-              <Select
-                name="badgeId"
-                className="admin-award-select text-xs px-2-py-05 h-30"
-                defaultValue=""
-                required
-              >
-                <option value="" disabled>Award Badge...</option>
-                <option value="beta_tester">🔭 Beta Tester</option>
-                <option value="mystery_badge">❓ Mystery Badge</option>
-                <option value="bug_reporter">🐛 Bug Hunter</option>
-                <option value="feedback_giver">💡 Idea Generator</option>
-              </Select>
-              <Button
-                variant="primary"
-                size="sm"
-                type="submit"
-                className="admin-grant-btn h-30"
-              >
-                Grant
-              </Button>
-            </form>
-          )}
+                            <form onSubmit={(e) => handleAwardBadge(e, user.id)} className="inline-flex gap-1">
+                              <input type="hidden" name="userId" value={user.id} />
+                              <Select
+                                name="badgeId"
+                                className="admin-award-select text-xs px-2-py-05 h-30"
+                                defaultValue=""
+                                required
+                              >
+                                <option value="" disabled>Award Badge...</option>
+                                <option value="beta_tester">🔭 Beta Tester</option>
+                                <option value="mystery_badge">❓ Mystery Badge</option>
+                                <option value="bug_reporter">🐛 Bug Hunter</option>
+                                <option value="feedback_giver">💡 Idea Generator</option>
+                              </Select>
+                              <Button
+                                variant="primary"
+                                size="sm"
+                                type="submit"
+                                className="admin-grant-btn h-30"
+                              >
+                                Grant
+                              </Button>
+                            </form>
+                          )}
                           {user.userType !== "ADMIN" && (
                             <>
                               {user.status === "FLAGGED" && (
-                                <form action={unbanUser.bind(null, user.id)}>
-                                  <Button variant="success" size="sm" type="submit" className="h-30">
-                                    Approve (Activate)
-                                  </Button>
-                                </form>
+                                <Button
+                                  variant="success"
+                                  size="sm"
+                                  onClick={() => handleUnban(user.id)}
+                                  className="h-30"
+                                >
+                                  Approve (Activate)
+                                </Button>
                               )}
                               {isBanned ? (
-                                <form action={unbanUser.bind(null, user.id)}>
-                                  <Button variant="secondary" size="sm" type="submit" className="h-30">
-                                    Unban
-                                  </Button>
-                                </form>
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => handleUnban(user.id)}
+                                  className="h-30"
+                                >
+                                  Unban
+                                </Button>
                               ) : (
-                                <form action={banUser.bind(null, user.id)}>
-                                  <Button variant="danger" size="sm" type="submit" className="h-30">
-                                    Ban
-                                  </Button>
-                                </form>
+                                <Button
+                                  variant="danger"
+                                  size="sm"
+                                  onClick={() => handleBan(user.id)}
+                                  className="h-30"
+                                >
+                                  Ban
+                                </Button>
                               )}
                             </>
                           )}
@@ -301,27 +331,29 @@ export default async function AdminUsersPage({
         )}
       </div>
 
-        <div className="flex justify-between items-center mt-4 text-muted text-sm">
-          <div className="flex gap-2">
-            <Button
-              href={`/admin/users?page=${page - 1}&search=${encodeURIComponent(query)}&type=${userType}&status=${status}`}
-              variant="secondary"
-              size="sm"
-              aria-label="Previous page"
-              aria-disabled={page <= 1}
-            >
-              Previous
-            </Button>
-            <Button
-              href={`/admin/users?page=${page + 1}&search=${encodeURIComponent(query)}&type=${userType}&status=${status}`}
-              variant="secondary"
-              size="sm"
-              aria-label="Next page"
-              aria-disabled={page >= totalPages}
-            >
-              Next
-            </Button>
-          </div>
+      <div className="flex justify-between items-center mt-4 text-muted text-sm">
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            variant="secondary"
+            size="sm"
+            aria-label="Previous page"
+            aria-disabled={page <= 1}
+            disabled={page <= 1}
+          >
+            Previous
+          </Button>
+          <Button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            variant="secondary"
+            size="sm"
+            aria-label="Next page"
+            aria-disabled={page >= totalPages}
+            disabled={page >= totalPages}
+          >
+            Next
+          </Button>
+        </div>
         <span>
           Page {page} of {totalPages} &bull; Showing {users.length} of {total}
         </span>

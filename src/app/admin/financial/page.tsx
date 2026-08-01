@@ -225,6 +225,14 @@ export default async function AdminFinancialPage() {
           >
             Download TDS Report (CSV)
           </Button>
+          <Button
+            href="/api/admin/financial?format=csv"
+            variant="secondary"
+            leftIcon={<span aria-hidden="true">💼</span>}
+            aria-label="Download General Ledger as CSV"
+          >
+            Download General Ledger (CSV)
+          </Button>
         </div>
       </div>
     </div>

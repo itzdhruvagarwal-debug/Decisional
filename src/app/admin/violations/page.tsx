@@ -1,18 +1,10 @@
-import { AdminService } from "@/services/admin.service";
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+"use client";
+
+import React, { useState } from "react";
+import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
 import EmptyState from "@/components/ui/EmptyState";
-import { Badge } from "@/components/ui";
-
-export const dynamic = "force-dynamic";
-
-async function getViolations() {
-  const session = await auth();
-  if (!session?.user) redirect("/login");
-
-  const violations = await AdminService.listViolations();
-  return violations;
-}
+import { Badge, Input } from "@/components/ui";
 
 function getSeverityVariant(severity: string): "danger" | "warning" | "success" | "ghost" {
   switch (severity) {
@@ -39,27 +31,53 @@ function getActionVariant(action: string): "danger" | "warning" | "ghost" {
   }
 }
 
-export default async function AdminViolationsPage() {
-  const violations = await getViolations();
+export default function AdminViolationsPage() {
+  const [userIdFilter, setUserIdFilter] = useState("");
+
+  const queryParams = new URLSearchParams();
+  if (userIdFilter.trim()) queryParams.set("userId", userIdFilter.trim());
+
+  const { data, error, isLoading } = useSWR<any>(
+    `/api/admin/violations?${queryParams.toString()}`,
+    fetcher
+  );
+
+  const violations = data?.data || [];
 
   return (
     <div className="admin-page">
       <div className="admin-toolbar mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold mb-1">
-            User Violations
-          </h1>
+          <h1 className="text-3xl font-extrabold mb-1">User Violations</h1>
           <p className="text-secondary text-sm">
             View all user violations and enforcement actions.
           </p>
         </div>
       </div>
 
-      {violations.length === 0 ? (
+      {/* Interactive Filter */}
+      <div className="card p-4 mb-6 max-w-400">
+        <Input
+          label="Filter by User ID"
+          id="filter-user-id"
+          value={userIdFilter}
+          onChange={(e) => setUserIdFilter(e.target.value)}
+          placeholder="Enter exact User ID..."
+          fullWidth
+        />
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center p-12">
+          <span className="loading w-16 h-16" />
+        </div>
+      ) : error ? (
+        <div className="text-center text-rose p-6">Failed to load violations.</div>
+      ) : violations.length === 0 ? (
         <EmptyState
           emoji="✔"
           title="No Violations"
-          description="No violations have been recorded yet."
+          description="No violations match the filter."
         />
       ) : (
         <div className="card overflow-hidden p-0">
@@ -72,16 +90,17 @@ export default async function AdminViolationsPage() {
                       <th
                         key={heading}
                         scope="col"
-                        className="text-left border-b-card text-muted text-xs font-extrabold uppercase" style={{ padding: "14px 18px" }}
+                        className="text-left border-b-card text-muted text-xs font-extrabold uppercase"
+                        style={{ padding: "14px 18px" }}
                       >
                         {heading}
                       </th>
-                    ),
+                    )
                   )}
                 </tr>
               </thead>
               <tbody>
-                {violations.map((violation) => {
+                {violations.map((violation: any) => {
                   const name =
                     violation.user.influencerProfile?.displayName ||
                     violation.user.brandProfile?.companyName ||
