@@ -334,7 +334,7 @@ export const env = _env.success
 if (_env.success && env.NODE_ENV !== "production" && !env.CONTRACT_SIGNING_SECRET) {
   console.warn(
     "\x1b[33m%s\x1b[0m",
-    "[WARNING] CONTRACT_SIGNING_SECRET is not set in non-production environment. Contract signatures will use fallback mock verification!",
+    "[WARNING] CONTRACT_SIGNING_SECRET is not set in non-production environment. Contract signing and verification will throw errors until it is configured.",
   );
 }
 
