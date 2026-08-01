@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { apiWrapper } from "@/lib/api-wrapper";
 import prisma from "@/lib/db";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 
 const updateMessageSchema = z.object({
   status: z.enum(["ACCEPTED", "DECLINED"]),
@@ -39,8 +40,8 @@ export const PATCH = apiWrapper(async (req, { params }) => {
     return NextResponse.json({ error: "Only offers can be updated" }, { status: 400 });
   }
 
-  const currentMetadata = (message.metadata as Record<string, any>) || {};
-  const updatedMetadata = {
+  const currentMetadata = (message.metadata as Prisma.JsonObject) || {};
+  const updatedMetadata: Prisma.JsonObject = {
     ...currentMetadata,
     status,
     updatedAt: new Date().toISOString(),
@@ -49,7 +50,7 @@ export const PATCH = apiWrapper(async (req, { params }) => {
   const updatedMessage = await prisma.message.update({
     where: { id: messageId },
     data: {
-      metadata: updatedMetadata as any,
+      metadata: updatedMetadata,
     },
   });
 

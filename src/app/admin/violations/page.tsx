@@ -5,6 +5,14 @@ import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Input } from "@/components/ui";
+import type { AdminService } from "@/services/admin.service";
+import type { Prisma } from "@prisma/client";
+
+export type AdminViolationElement = Prisma.PromiseReturnType<typeof AdminService.listViolations>[number];
+export type ListViolationsResult = {
+  success: boolean;
+  data: AdminViolationElement[];
+};
 
 function getSeverityVariant(severity: string): "danger" | "warning" | "success" | "ghost" {
   switch (severity) {
@@ -37,7 +45,7 @@ export default function AdminViolationsPage() {
   const queryParams = new URLSearchParams();
   if (userIdFilter.trim()) queryParams.set("userId", userIdFilter.trim());
 
-  const { data, error, isLoading } = useSWR<any>(
+  const { data, error, isLoading } = useSWR<ListViolationsResult>(
     `/api/admin/violations?${queryParams.toString()}`,
     fetcher
   );
@@ -100,7 +108,7 @@ export default function AdminViolationsPage() {
                 </tr>
               </thead>
               <tbody>
-                {violations.map((violation: any) => {
+                {violations.map((violation: AdminViolationElement) => {
                   const name =
                     violation.user.influencerProfile?.displayName ||
                     violation.user.brandProfile?.companyName ||

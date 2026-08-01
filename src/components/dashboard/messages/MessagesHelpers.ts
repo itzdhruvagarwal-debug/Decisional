@@ -9,6 +9,8 @@ export const sendMessageSchema = z.object({
   content: z.string().min(1, "Message content cannot be empty").max(2000, "Message cannot exceed 2000 characters"),
 });
 
+export type MessageMetadata = Record<string, string | number | boolean | null | undefined>;
+
 export interface Message {
   id: string;
   senderId: string;
@@ -21,7 +23,7 @@ export interface Message {
   readAt?: string | null;
   messageType?: "TEXT" | "FILE" | "OFFER" | "CONTRACT_ACCEPTANCE" | "SYSTEM";
   fileUrl?: string | null;
-  metadata?: any;
+  metadata?: MessageMetadata | null;
 }
 
 /** Raw shape returned from the /api/messages endpoint before client-side mapping */
@@ -36,7 +38,7 @@ export interface RawMessage {
   readAt?: string | null;
   messageType?: "TEXT" | "FILE" | "OFFER" | "CONTRACT_ACCEPTANCE" | "SYSTEM";
   fileUrl?: string | null;
-  metadata?: any;
+  metadata?: MessageMetadata | null;
 }
 
 export interface Conversation {

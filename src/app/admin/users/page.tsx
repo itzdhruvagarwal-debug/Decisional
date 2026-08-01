@@ -193,7 +193,7 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user: any) => {
+                {users.map((user: AdminUserListElement) => {
                   const name =
                     user.influencerProfile?.displayName ||
                     user.brandProfile?.companyName ||

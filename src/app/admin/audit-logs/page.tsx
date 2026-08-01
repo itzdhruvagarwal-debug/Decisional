@@ -5,6 +5,14 @@ import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Input, Select } from "@/components/ui";
+import type { AdminService } from "@/services/admin.service";
+import type { Prisma } from "@prisma/client";
+
+export type AdminAuditLogElement = Prisma.PromiseReturnType<typeof AdminService.listAuditLogs>[number];
+export type ListAuditLogsResult = {
+  success: boolean;
+  data: AdminAuditLogElement[];
+};
 
 export default function AdminAuditLogsPage() {
   const [actorId, setActorId] = useState("");
@@ -16,7 +24,7 @@ export default function AdminAuditLogsPage() {
   if (entityType) queryParams.set("entityType", entityType);
   if (entityId.trim()) queryParams.set("entityId", entityId.trim());
 
-  const { data, error, isLoading } = useSWR<any>(
+  const { data, error, isLoading } = useSWR<ListAuditLogsResult>(
     `/api/admin/audit-logs?${queryParams.toString()}`,
     fetcher
   );
@@ -106,7 +114,7 @@ export default function AdminAuditLogsPage() {
                 </tr>
               </thead>
               <tbody>
-                {auditLogs.map((log: any) => {
+                {auditLogs.map((log: AdminAuditLogElement) => {
                   return (
                     <tr key={log.id} className="border-b-card">
                       <td className="p-card text-secondary text-sm">

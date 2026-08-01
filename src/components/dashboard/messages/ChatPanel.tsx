@@ -101,8 +101,9 @@ export function MessageList({ state }: Readonly<ChatPanelProps>) {
     }
 
     if (msg.messageType === "FILE" && msg.fileUrl) {
-      const fileName = msg.metadata?.fileName || "Shared File";
-      const isImg = msg.metadata?.fileType?.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp)$/i.test(msg.fileUrl);
+      const fileName = String(msg.metadata?.fileName || "Shared File");
+      const fileType = String(msg.metadata?.fileType || "");
+      const isImg = fileType.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp)$/i.test(msg.fileUrl);
       return (
         <div className="flex flex-col gap-2 min-w-200">
           <div className="flex items-center gap-2 font-semibold text-sm">
