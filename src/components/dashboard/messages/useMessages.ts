@@ -171,6 +171,9 @@ export function useMessages() {
           hasWarning: m.hasWarning,
           isRead: Boolean(m.isRead),
           readAt: m.readAt || null,
+          messageType: m.messageType || "TEXT",
+          fileUrl: m.fileUrl || null,
+          metadata: m.metadata || null,
         }));
         setMessages(mappedMessages);
         setIsPeerTyping(Boolean(data.presence?.isTyping));
@@ -339,6 +342,130 @@ export function useMessages() {
     }
   };
 
+  const handleSendFile = async (fileUrl: string, fileName: string, fileType: string) => {
+    if (!selectedConversation) return;
+
+    const tempId = `temp-${Date.now()}`;
+    const displayContent = `Shared file: ${fileName}`;
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: tempId,
+        senderId: session?.user?.id || "me",
+        content: displayContent,
+        createdAt: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        isMe: true,
+        messageType: "FILE",
+        fileUrl,
+        metadata: { fileName, fileType },
+      },
+    ]);
+
+    try {
+      const response = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          receiverId: selectedConversation,
+          content: displayContent,
+          messageType: "FILE",
+          fileUrl,
+          metadata: { fileName, fileType },
+        }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.error || payload?.message || "Failed to send file");
+      }
+
+      fetchMessages(false);
+    } catch (err) {
+      logger.error("[messages] Failed to send file message:", err);
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      showToast("error", "File sharing failed. Please try again.");
+    }
+  };
+
+  const handleSendOffer = async (offerDetails: {
+    title: string;
+    amount: number; // in paise
+    description: string;
+    deliverables: string;
+    contentDeadline: string;
+    postingDeadline: string;
+  }) => {
+    if (!selectedConversation) return;
+
+    const tempId = `temp-${Date.now()}`;
+    const displayContent = `Custom Offer: ${offerDetails.title} (₹${(offerDetails.amount / 100).toLocaleString()})`;
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: tempId,
+        senderId: session?.user?.id || "me",
+        content: displayContent,
+        createdAt: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        isMe: true,
+        messageType: "OFFER",
+        metadata: { ...offerDetails, status: "PENDING" },
+      },
+    ]);
+
+    try {
+      const response = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          receiverId: selectedConversation,
+          content: displayContent,
+          messageType: "OFFER",
+          metadata: { ...offerDetails, status: "PENDING" },
+        }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.error || payload?.message || "Failed to send offer");
+      }
+
+      fetchMessages(false);
+    } catch (err) {
+      logger.error("[messages] Failed to send offer message:", err);
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      showToast("error", "Offer creation failed. Please try again.");
+    }
+  };
+
+  const handleUpdateOfferStatus = async (messageId: string, status: "ACCEPTED" | "DECLINED") => {
+    try {
+      const response = await fetch(`/api/messages/${messageId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.error || payload?.message || "Failed to update offer");
+      }
+
+      showToast("success", `Offer ${status.toLowerCase()} successfully`);
+      fetchMessages(false);
+    } catch (err) {
+      logger.error("[messages] Failed to update offer:", err);
+      showToast("error", "Failed to update offer status. Please try again.");
+    }
+  };
+
   const handleBlockUser = async () => {
     if (!selectedConversation) return;
     const confirmBlock = window.confirm("Are you sure you want to block this user? You will not be able to send or receive messages from them.");
@@ -466,6 +593,9 @@ export function useMessages() {
     removeToast,
     handleInputChange,
     handleSend,
+    handleSendFile,
+    handleSendOffer,
+    handleUpdateOfferStatus,
     handleBlockUser,
     handleUnblockUser,
     handleReportUserSubmit,

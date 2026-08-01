@@ -93,6 +93,7 @@ function canUploadToFolder(
   folder: string,
   mimeType: string,
 ) {
+  if (folder === "chat") return true;
   if (folder === "avatars") return isImageMime(mimeType);
   if (folder === "logos") return isBrand(userType) && isImageMime(mimeType);
   if (folder === "content" || folder === "posts") {
@@ -152,7 +153,7 @@ function parseAndValidateBase64Input(body: unknown): Base64InputResult {
   }
 
   const uploadFolder = typeof folder === "string" ? folder : "misc";
-  const allowedFolders = ["avatars", "logos", "content", "posts", "feedback"];
+  const allowedFolders = ["avatars", "logos", "content", "posts", "feedback", "chat"];
   if (!allowedFolders.includes(uploadFolder)) {
     return { success: false, errorResponse: ApiResponse.error("Invalid upload folder") };
   }
@@ -297,7 +298,7 @@ async function handleBase64Upload(req: NextRequest, session: UploadSession) {
   }
 }
 
-function validateUploadFile(file: File, session: UploadSession): string | null {
+function validateUploadFile(file: File, folder: string, session: UploadSession): string | null {
   if (file.size === 0) {
     return "Empty file provided";
   }
@@ -328,7 +329,7 @@ function validateUploadFile(file: File, session: UploadSession): string | null {
     return `File type '${file.type}' is not allowed. Only images, videos and PDFs are permitted.`;
   }
 
-  if (file.type === "application/pdf") {
+  if (file.type === "application/pdf" && folder !== "chat") {
     return "PDF uploads must use the verification document flow.";
   }
 
@@ -385,7 +386,7 @@ async function handleFormDataUpload(req: NextRequest, session: UploadSession) {
     const file = formData.get("file") as File | null;
     const folder = (formData.get("folder") as string) || "misc";
 
-    const allowedFolders = ["avatars", "logos", "content", "posts", "feedback"];
+    const allowedFolders = ["avatars", "logos", "content", "posts", "feedback", "chat"];
     if (!allowedFolders.includes(folder)) {
       return ApiResponse.error("Invalid upload folder");
     }
@@ -406,7 +407,7 @@ async function handleFormDataUpload(req: NextRequest, session: UploadSession) {
       );
     }
 
-    const fileValidationError = validateUploadFile(file, session);
+    const fileValidationError = validateUploadFile(file, folder, session);
     if (fileValidationError) {
       return ApiResponse.error(fileValidationError);
     }

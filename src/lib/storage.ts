@@ -59,7 +59,7 @@ interface DeleteResult {
   error?: string;
 }
 
-export type UploadFolder = "verification" | "content" | "avatars" | "logos" | "posts" | "feedback";
+export type UploadFolder = "verification" | "content" | "avatars" | "logos" | "posts" | "feedback" | "chat";
 
 function getS3Client(): S3Client | null {
   if (!S3_ACCESS_KEY || !S3_SECRET_KEY || !S3_BUCKET) return null;

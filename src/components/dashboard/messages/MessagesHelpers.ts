@@ -19,6 +19,9 @@ export interface Message {
   hasWarning?: boolean;
   isRead?: boolean;
   readAt?: string | null;
+  messageType?: "TEXT" | "FILE" | "OFFER" | "CONTRACT_ACCEPTANCE" | "SYSTEM";
+  fileUrl?: string | null;
+  metadata?: any;
 }
 
 /** Raw shape returned from the /api/messages endpoint before client-side mapping */
@@ -31,6 +34,9 @@ export interface RawMessage {
   hasWarning?: boolean;
   isRead?: boolean;
   readAt?: string | null;
+  messageType?: "TEXT" | "FILE" | "OFFER" | "CONTRACT_ACCEPTANCE" | "SYSTEM";
+  fileUrl?: string | null;
+  metadata?: any;
 }
 
 export interface Conversation {
