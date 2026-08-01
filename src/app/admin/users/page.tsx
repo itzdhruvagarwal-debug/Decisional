@@ -88,7 +88,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleAwardBadge = async (e: React.FormEvent<HTMLFormElement>, userId: string) => {
+  const handleAwardBadge = async (e: React.FormEvent<HTMLFormElement>, _userId: string) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     try {

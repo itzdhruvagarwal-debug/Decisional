@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { apiWrapper } from "@/lib/api-wrapper";
 import prisma from "@/lib/db";
-import { AppError } from "@/lib/errors";
 import { z } from "zod";
 
 const updateMessageSchema = z.object({
