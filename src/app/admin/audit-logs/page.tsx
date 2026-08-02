@@ -31,10 +31,12 @@ export default function AdminAuditLogsPage() {
 
   const auditLogs = data?.data || [];
 
-  const getEntityBadgeVariant = (type: string) => {
+  const getEntityBadgeVariant = (type: string | null) => {
     if (type === "USER") return "primary";
     if (type === "DEAL") return "success";
     if (type === "CAMPAIGN") return "warning";
+    if (type === "FEEDBACK") return "primary";
+    if (type === "BUG") return "danger";
     return "ghost";
   };
 
@@ -156,6 +158,8 @@ export default function AdminAuditLogsPage() {
             <option value="CAMPAIGN">Campaign</option>
             <option value="APPLICATION">Application</option>
             <option value="WALLET">Wallet</option>
+            <option value="FEEDBACK">Feedback</option>
+            <option value="BUG">Bug Report</option>
           </Select>
         </div>
         <div className="flex-1 min-w-200">

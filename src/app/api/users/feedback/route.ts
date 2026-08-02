@@ -50,6 +50,7 @@ async function _handler_POST(request: NextRequest) {
   await createActivityLog({
     userId: session.user.id,
     action: type === "BUG" ? "BUG_REPORT_SUBMITTED" : "FEEDBACK_SUBMITTED",
+    entityType: type === "BUG" ? "BUG" : "FEEDBACK",
     metadata: { title, description, screenshotUrl: screenshotUrl || undefined },
   });
 
