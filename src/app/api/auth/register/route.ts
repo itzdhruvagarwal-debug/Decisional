@@ -7,12 +7,54 @@ import { apiWrapper, ApiResponse } from "@/lib/api-wrapper";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { AppError } from "@/lib/errors";
 
-export const POST = apiWrapper(async function POST(request: NextRequest) {
-  // IP-based rate limit: max 5 registrations per IP per 10 minutes
-  const ip =
+function getRequestIp(request: NextRequest): string {
+  return (
     (request as NextRequest & { ip?: string }).ip ||
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    "unknown";
+    "unknown"
+  );
+}
+
+function validateRegisterInput(body: unknown) {
+  const parsed = registerSchema.safeParse(body);
+  if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    const fieldName = firstIssue?.path.join(".") || "";
+    const issueMsg = firstIssue?.message || "Invalid value";
+    const prefix = fieldName ? `${fieldName} - ` : "";
+    return {
+      success: false,
+      message: `Invalid request data: ${prefix}${issueMsg}`
+    };
+  }
+  return { success: true, data: parsed.data };
+}
+
+function handleRegisterError(error: unknown) {
+  logger.error("Registration route error", { error: (error instanceof Error ? error.message : String(error)) });
+
+  if (error instanceof AppError) {
+    return ApiResponse.error(error.message, error.statusCode);
+  }
+
+  const errMsg = error instanceof Error ? error.message : String(error);
+
+  const safeErrors = [
+    "Email already registered",
+    "Phone number already registered",
+    "Invalid referral code",
+    "Registration blocked. Please contact support.",
+  ];
+
+  if (safeErrors.includes(errMsg) || errMsg.includes("Rate limit")) {
+    return ApiResponse.error(errMsg);
+  }
+
+  return ApiResponse.error("Registration failed. Please try again.", 500);
+}
+
+export const POST = apiWrapper(async function POST(request: NextRequest) {
+  const ip = getRequestIp(request);
 
   const ipLimit = await checkRateLimit(ip, "REGISTER");
   if (!ipLimit.success) {
@@ -27,19 +69,14 @@ export const POST = apiWrapper(async function POST(request: NextRequest) {
       return ApiResponse.error("Invalid request body");
     }
 
-    const parsed = registerSchema.safeParse(body);
-    if (!parsed.success) {
-      const firstIssue = parsed.error.issues[0];
-      const fieldName = firstIssue?.path.join(".") || "";
-      const issueMsg = firstIssue?.message || "Invalid value";
-      return ApiResponse.error(`Invalid request data: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`);
+    const validation = validateRegisterInput(body);
+    if (!validation.success) {
+      return ApiResponse.error(validation.message!);
     }
 
-    // OTP verification is enforced server-side via Redis — client flags are ignored
-
-
-    const emailKey = `email-otp-verified:${parsed.data.email}`;
-    const phoneKey = `phone-otp-verified:${parsed.data.phone}`;
+    const parsedData = validation.data!;
+    const emailKey = `email-otp-verified:${parsedData.email}`;
+    const phoneKey = `phone-otp-verified:${parsedData.phone}`;
     const [isEmailOtpVerified, isPhoneOtpVerified] = await Promise.all([
       redis.get(emailKey),
       redis.get(phoneKey),
@@ -49,10 +86,6 @@ export const POST = apiWrapper(async function POST(request: NextRequest) {
       return ApiResponse.error("OTP verification expired. Please verify email and phone again.");
     }
 
-    const ip =
-      (request as NextRequest & { ip?: string }).ip ||
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      "unknown";
     const userAgent = request.headers.get("user-agent") || "unknown";
     const bodyRecord =
       body && typeof body === "object" && !Array.isArray(body)
@@ -64,7 +97,7 @@ export const POST = apiWrapper(async function POST(request: NextRequest) {
         ? bodyRecord.deviceFingerprint
         : "");
 
-    const user = await AuthService.registerUser(parsed.data, ip, {
+    const user = await AuthService.registerUser(parsedData, ip, {
       emailVerified: true,
       phoneVerified: true,
       userAgent,
@@ -78,27 +111,6 @@ export const POST = apiWrapper(async function POST(request: NextRequest) {
       201,
     );
   } catch (error: unknown) {
-    logger.error("Registration route error", { error: (error instanceof Error ? error.message : String(error)) });
-
-    if (error instanceof AppError) {
-      return ApiResponse.error(error.message, error.statusCode);
-    }
-
-    const errMsg = error instanceof Error ? error.message : String(error);
-
-    // Only expose safe, pre-defined business rule messages to the user
-    const safeErrors = [
-      "Email already registered",
-      "Phone number already registered",
-      "Invalid referral code",
-      "Registration blocked. Please contact support.",
-    ];
-
-    if (safeErrors.includes(errMsg) || errMsg.includes("Rate limit")) {
-      return ApiResponse.error(errMsg);
-    }
-
-    // Never leak internal error details to the client
-    return ApiResponse.error("Registration failed. Please try again.", 500);
+    return handleRegisterError(error);
   }
 });

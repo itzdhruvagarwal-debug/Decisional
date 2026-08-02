@@ -77,6 +77,14 @@ function getStatusInfo(status: string) {
   );
 }
 
+function getBadgeToneVariant(tone: string) {
+  if (tone === "success") return "success";
+  if (tone === "danger") return "danger";
+  if (tone === "warning") return "warning";
+  if (tone === "cyan") return "primary";
+  return "ghost";
+}
+
 interface Deal {
   id: string;
   status: string;
@@ -289,12 +297,7 @@ function DealListItem({ deal, selectedDeal, setSelectedDeal }: DealListItemProps
             </div>
           </div>
           <Badge
-            variant={
-              status.tone === "success" ? "success" :
-              status.tone === "danger" ? "danger" :
-              status.tone === "warning" ? "warning" :
-              status.tone === "cyan" ? "primary" : "ghost"
-            }
+            variant={getBadgeToneVariant(status.tone)}
             className="flex items-center gap-2"
           >
             <span>{status.icon}</span>

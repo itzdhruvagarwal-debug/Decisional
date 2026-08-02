@@ -1,6 +1,29 @@
 import { Prisma } from "@prisma/client";
 import { logger } from "./logger";
 
+async function createCreditTransaction(
+  tx: Prisma.TransactionClient,
+  walletId: string,
+  amount: number,
+  dealId?: string,
+  description?: string,
+  razorpayPaymentId?: string | null,
+  metadata?: Record<string, unknown>,
+) {
+  await tx.transaction.create({
+    data: {
+      walletId,
+      dealId: dealId || null,
+      type: "CREDIT",
+      amount,
+      status: "COMPLETED",
+      description: description || `Payout credited`,
+      razorpayPaymentId: razorpayPaymentId || null,
+      metadata: metadata ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
+    },
+  });
+}
+
 async function distributeRecoveredDebtToCreditors(
   tx: Prisma.TransactionClient,
   initialRemainingDebtPaid: number,
@@ -65,18 +88,7 @@ async function createNewWalletWithCredit(
   });
 
   if (creditAmount > 0) {
-    await tx.transaction.create({
-      data: {
-        walletId: newWallet.id,
-        dealId: dealId || null,
-        type: "CREDIT",
-        amount: creditAmount,
-        status: "COMPLETED",
-        description: description || `Payout credited`,
-        razorpayPaymentId: razorpayPaymentId || null,
-        metadata: metadata ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
-      },
-    });
+    await createCreditTransaction(tx, newWallet.id, creditAmount, dealId, description, razorpayPaymentId, metadata);
   }
 
   return newWallet;
@@ -173,18 +185,15 @@ async function applyDebtRecovery(config: ApplyDebtRecoveryConfig) {
   });
 
   if (netCredit > 0) {
-    await tx.transaction.create({
-      data: {
-        walletId: wallet.id,
-        dealId: dealId || null,
-        type: "CREDIT",
-        amount: netCredit,
-        status: "COMPLETED",
-        description: description || `Payout credited (net of debt)`,
-        razorpayPaymentId: razorpayPaymentId || null,
-        metadata: metadata ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
-      },
-    });
+    await createCreditTransaction(
+      tx,
+      wallet.id,
+      netCredit,
+      dealId,
+      description || `Payout credited (net of debt)`,
+      razorpayPaymentId,
+      metadata
+    );
   }
 
   return updatedWallet;
@@ -235,18 +244,7 @@ export async function creditWalletWithDebtAdjustment(
   });
 
   if (creditAmount > 0) {
-    await tx.transaction.create({
-      data: {
-        walletId: wallet.id,
-        dealId: dealId || null,
-        type: "CREDIT",
-        amount: creditAmount,
-        status: "COMPLETED",
-        description: description || `Payout credited`,
-        razorpayPaymentId: razorpayPaymentId || null,
-        metadata: metadata ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
-      },
-    });
+    await createCreditTransaction(tx, wallet.id, creditAmount, dealId, description, razorpayPaymentId, metadata);
   }
 
   return updatedWallet;

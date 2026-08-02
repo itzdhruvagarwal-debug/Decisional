@@ -46,6 +46,158 @@ function taxStatusTone(user: TaxComplianceUser) {
   return "warning";
 }
 
+interface UserRowProps {
+  readonly user: AdminUserListElement;
+  readonly onBan: (id: string) => void;
+  readonly onUnban: (id: string) => void;
+  readonly onAwardBadge: (e: React.FormEvent<HTMLFormElement>, id: string) => void;
+}
+
+function UserRow({ user, onBan, onUnban, onAwardBadge }: UserRowProps) {
+  const name =
+    user.influencerProfile?.displayName ||
+    user.brandProfile?.companyName ||
+    (user.userType === "ADMIN"
+      ? user.email?.split("@")[0]
+      : null) ||
+    "Unknown user";
+  const avatar = user.influencerProfile?.avatar || user.brandProfile?.logo;
+  const isBanned = user.status === "BANNED";
+
+  const getStatusVariant = (status: string) => {
+    if (status === "ACTIVE") return "success";
+    if (status === "BANNED" || status === "SUSPENDED") return "danger";
+    if (status === "FLAGGED") return "warning";
+    return "ghost";
+  };
+
+  const getTaxVariant = (user: TaxComplianceUser) => {
+    const tone = taxStatusTone(user);
+    if (tone === "success") return "success";
+    if (tone === "danger") return "danger";
+    return "warning";
+  };
+
+  return (
+    <tr className="border-b-card">
+      <td className="p-card">
+        <div className="flex items-center gap-3">
+          <div
+            className="admin-user-avatar flex items-center justify-center relative overflow-hidden rounded-full font-extrabold bg-gradient-primary text-white"
+          >
+            {avatar ? (
+              <Image
+                src={avatar}
+                alt=""
+                fill
+                unoptimized
+                className="object-cover"
+              />
+            ) : (
+              name.charAt(0).toUpperCase()
+            )}
+          </div>
+          <div className="min-w-0">
+            <div className="font-extrabold">{name}</div>
+            <div className="text-muted text-xs">
+              {user.email}
+            </div>
+          </div>
+        </div>
+      </td>
+      <td className="p-card">
+        <Badge variant="primary">{user.userType}</Badge>
+      </td>
+      <td className="p-card">
+        <Badge variant={getStatusVariant(user.status)}>
+          {user.status.toLowerCase().replaceAll("_", " ")}
+        </Badge>
+      </td>
+      <td className="p-card">
+        <Badge variant={getTaxVariant(user)}>
+          {taxStatusLabel(user)}
+        </Badge>
+        {user.taxCompliance?.gstinLast4 && (
+          <div className="text-muted mt-1 text-xs">
+            GST ****{user.taxCompliance.gstinLast4}
+          </div>
+        )}
+      </td>
+      <td className="p-card text-center font-extrabold">
+        {user.trustScore}
+        <span className="text-muted text-xs">
+          /900
+        </span>
+      </td>
+      <td className="p-card text-muted text-sm">
+        {new Date(user.createdAt).toLocaleDateString("en-IN")}
+      </td>
+      <td className="p-card text-right">
+        <div className="flex justify-end items-center gap-2">
+          {user.userType !== "ADMIN" && (
+            <form onSubmit={(e) => onAwardBadge(e, user.id)} className="inline-flex gap-1">
+              <input type="hidden" name="userId" value={user.id} />
+              <Select
+                name="badgeId"
+                className="admin-award-select text-xs px-2-py-05 h-30"
+                defaultValue=""
+                required
+              >
+                <option value="" disabled>Award Badge...</option>
+                <option value="beta_tester">🔭 Beta Tester</option>
+                <option value="mystery_badge">❓ Mystery Badge</option>
+                <option value="bug_reporter">🐛 Bug Hunter</option>
+                <option value="feedback_giver">💡 Idea Generator</option>
+              </Select>
+              <Button
+                variant="primary"
+                size="sm"
+                type="submit"
+                className="admin-grant-btn h-30"
+              >
+                Grant
+              </Button>
+            </form>
+          )}
+          {user.userType !== "ADMIN" && (
+            <>
+              {user.status === "FLAGGED" && (
+                <Button
+                  variant="success"
+                  size="sm"
+                  onClick={() => onUnban(user.id)}
+                  className="h-30"
+                >
+                  Approve (Activate)
+                </Button>
+              )}
+              {isBanned ? (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => onUnban(user.id)}
+                  className="h-30"
+                >
+                  Unban
+                </Button>
+              ) : (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => onBan(user.id)}
+                  className="h-30"
+                >
+                  Ban
+                </Button>
+              )}
+            </>
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
   const [type, setType] = useState("ALL");
@@ -99,6 +251,60 @@ export default function AdminUsersPage() {
       alert(err instanceof Error ? err.message : "Failed to award badge");
     }
   };
+
+  let content;
+  if (isLoading) {
+    content = (
+      <div className="flex justify-center p-12">
+        <span className="loading w-16 h-16" />
+      </div>
+    );
+  } else if (error) {
+    content = (
+      <div className="text-center text-rose p-6">Failed to load users.</div>
+    );
+  } else if (users.length === 0) {
+    content = (
+      <EmptyState
+        emoji="👤"
+        title="No Users Found"
+        description="Try changing the search query or status filters."
+      />
+    );
+  } else {
+    content = (
+      <div className="admin-table-wrap">
+        <table className="admin-users-table w-full border-collapse" aria-label="Platform users">
+          <thead>
+            <tr className="bg-secondary">
+              {["User", "Role", "Status", "Tax", "Trust", "Joined", "Action"].map(
+                (heading) => (
+                  <th
+                    key={heading}
+                    scope="col"
+                    className="admin-users-th border-b-card text-muted text-xs font-extrabold uppercase"
+                  >
+                    {heading}
+                  </th>
+                )
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user: AdminUserListElement) => (
+              <UserRow
+                key={user.id}
+                user={user}
+                onBan={handleBan}
+                onUnban={handleUnban}
+                onAwardBadge={handleAwardBadge}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-page">
@@ -162,184 +368,7 @@ export default function AdminUsersPage() {
       </div>
 
       <div className="card overflow-hidden p-0">
-        {isLoading ? (
-          <div className="flex justify-center p-12">
-            <span className="loading w-16 h-16" />
-          </div>
-        ) : error ? (
-          <div className="text-center text-rose p-6">Failed to load users.</div>
-        ) : users.length === 0 ? (
-          <EmptyState
-            emoji="👤"
-            title="No Users Found"
-            description="Try changing the search query or status filters."
-          />
-        ) : (
-          <div className="admin-table-wrap">
-            <table className="admin-users-table w-full border-collapse" aria-label="Platform users">
-              <thead>
-                <tr className="bg-secondary">
-                  {["User", "Role", "Status", "Tax", "Trust", "Joined", "Action"].map(
-                    (heading) => (
-                      <th
-                        key={heading}
-                        scope="col"
-                        className="admin-users-th border-b-card text-muted text-xs font-extrabold uppercase"
-                      >
-                        {heading}
-                      </th>
-                    )
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user: AdminUserListElement) => {
-                  const name =
-                    user.influencerProfile?.displayName ||
-                    user.brandProfile?.companyName ||
-                    (user.userType === "ADMIN"
-                      ? user.email?.split("@")[0]
-                      : null) ||
-                    "Unknown user";
-                  const avatar =
-                    user.influencerProfile?.avatar || user.brandProfile?.logo;
-                  const isBanned = user.status === "BANNED";
-
-                  return (
-                    <tr key={user.id} className="border-b-card">
-                      <td className="p-card">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="admin-user-avatar flex items-center justify-center relative overflow-hidden rounded-full font-extrabold bg-gradient-primary text-white"
-                          >
-                            {avatar ? (
-                              <Image
-                                src={avatar}
-                                alt=""
-                                fill
-                                unoptimized
-                                className="object-cover"
-                              />
-                            ) : (
-                              name.charAt(0).toUpperCase()
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="font-extrabold">{name}</div>
-                            <div className="text-muted text-xs">
-                              {user.email}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-card">
-                        <Badge variant="primary">{user.userType}</Badge>
-                      </td>
-                      <td className="p-card">
-                        <Badge
-                          variant={
-                            user.status === "ACTIVE" ? "success" :
-                            user.status === "BANNED" ? "danger" :
-                            user.status === "SUSPENDED" ? "danger" :
-                            user.status === "FLAGGED" ? "warning" : "ghost"
-                          }
-                        >
-                          {user.status.toLowerCase().replaceAll("_", " ")}
-                        </Badge>
-                      </td>
-                      <td className="p-card">
-                        <Badge
-                          variant={
-                            taxStatusTone(user) === "success" ? "success" :
-                            taxStatusTone(user) === "danger" ? "danger" : "warning"
-                          }
-                        >
-                          {taxStatusLabel(user)}
-                        </Badge>
-                        {user.taxCompliance?.gstinLast4 && (
-                          <div className="text-muted mt-1 text-xs">
-                            GST ****{user.taxCompliance.gstinLast4}
-                          </div>
-                        )}
-                      </td>
-                      <td className="p-card text-center font-extrabold">
-                        {user.trustScore}
-                        <span className="text-muted text-xs">
-                          /900
-                        </span>
-                      </td>
-                      <td className="p-card text-muted text-sm">
-                        {new Date(user.createdAt).toLocaleDateString("en-IN")}
-                      </td>
-                      <td className="p-card text-right">
-                        <div className="flex justify-end items-center gap-2">
-                          {user.userType !== "ADMIN" && (
-                            <form onSubmit={(e) => handleAwardBadge(e, user.id)} className="inline-flex gap-1">
-                              <input type="hidden" name="userId" value={user.id} />
-                              <Select
-                                name="badgeId"
-                                className="admin-award-select text-xs px-2-py-05 h-30"
-                                defaultValue=""
-                                required
-                              >
-                                <option value="" disabled>Award Badge...</option>
-                                <option value="beta_tester">🔭 Beta Tester</option>
-                                <option value="mystery_badge">❓ Mystery Badge</option>
-                                <option value="bug_reporter">🐛 Bug Hunter</option>
-                                <option value="feedback_giver">💡 Idea Generator</option>
-                              </Select>
-                              <Button
-                                variant="primary"
-                                size="sm"
-                                type="submit"
-                                className="admin-grant-btn h-30"
-                              >
-                                Grant
-                              </Button>
-                            </form>
-                          )}
-                          {user.userType !== "ADMIN" && (
-                            <>
-                              {user.status === "FLAGGED" && (
-                                <Button
-                                  variant="success"
-                                  size="sm"
-                                  onClick={() => handleUnban(user.id)}
-                                  className="h-30"
-                                >
-                                  Approve (Activate)
-                                </Button>
-                              )}
-                              {isBanned ? (
-                                <Button
-                                  variant="secondary"
-                                  size="sm"
-                                  onClick={() => handleUnban(user.id)}
-                                  className="h-30"
-                                >
-                                  Unban
-                                </Button>
-                              ) : (
-                                <Button
-                                  variant="danger"
-                                  size="sm"
-                                  onClick={() => handleBan(user.id)}
-                                  className="h-30"
-                                >
-                                  Ban
-                                </Button>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+        {content}
       </div>
 
       <div className="flex justify-between items-center mt-4 text-muted text-sm">

@@ -12,6 +12,31 @@ import { env } from "@/env";
 
 const API_BASE = "https://www.googleapis.com/youtube/v3";
 
+async function fetchYouTube(
+  endpoint: string,
+  searchParams: Record<string, string>,
+  accessToken?: string
+) {
+  const url = new URL(`${API_BASE}${endpoint}`);
+  for (const [key, value] of Object.entries(searchParams)) {
+    url.searchParams.set(key, value);
+  }
+
+  const apiKey = process.env.YOUTUBE_API_KEY || "";
+  if (apiKey) {
+    url.searchParams.set("key", apiKey);
+  }
+
+  const headers: Record<string, string> = {};
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
+  }
+
+  const res = await fetch(url.toString(), { headers });
+  return res.json();
+}
+
+
 // ==================== TYPES ====================
 
 export interface YouTubeChannel {
@@ -254,29 +279,17 @@ export async function getYouTubeChannel(
   try {
     // Try by ID first, then by forHandle
     const isChannelId = channelIdentifier.startsWith("UC");
-    const url = new URL(`${API_BASE}/channels`);
-    url.searchParams.set("part", "snippet,statistics");
+    const searchParams: Record<string, string> = {
+      part: "snippet,statistics",
+    };
 
     if (isChannelId) {
-      url.searchParams.set("id", channelIdentifier);
+      searchParams.id = channelIdentifier;
     } else {
-      url.searchParams.set(
-        "forHandle",
-        `@${channelIdentifier.replace("@", "")}`,
-      );
+      searchParams.forHandle = `@${channelIdentifier.replace("@", "")}`;
     }
 
-    if (apiKey) {
-      url.searchParams.set("key", apiKey);
-    }
-
-    const headers: Record<string, string> = {};
-    if (accessToken) {
-      headers["Authorization"] = `Bearer ${accessToken}`;
-    }
-
-    const res = await fetch(url.toString(), { headers });
-    const data = await res.json();
+    const data = await fetchYouTube("/channels", searchParams, accessToken);
 
     if (data.error) {
       // Securely log only the message and reason, not the full request URL or potential metadata
@@ -324,20 +337,10 @@ export async function getYouTubeChannelByToken(
   if (!accessToken) return null;
 
   try {
-    const url = new URL(`${API_BASE}/channels`);
-    url.searchParams.set("part", "snippet,statistics");
-    url.searchParams.set("mine", "true");
-
-    const apiKey = process.env.YOUTUBE_API_KEY || "";
-    if (apiKey) {
-      url.searchParams.set("key", apiKey);
-    }
-
-    const res = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-
-    const data = await res.json();
+    const data = await fetchYouTube("/channels", {
+      part: "snippet,statistics",
+      mine: "true",
+    }, accessToken);
 
     if (data.error || !data.items || data.items.length === 0) return null;
 
@@ -412,22 +415,10 @@ export async function getYouTubeVideo(
   }
 
   try {
-    const url = new URL(`${API_BASE}/videos`);
-    url.searchParams.set("part", "snippet,statistics,contentDetails,status");
-    url.searchParams.set("id", videoId);
-
-    const apiKey = process.env.YOUTUBE_API_KEY || "";
-    if (apiKey) {
-      url.searchParams.set("key", apiKey);
-    }
-
-    const headers: Record<string, string> = {};
-    if (accessToken) {
-      headers["Authorization"] = `Bearer ${accessToken}`;
-    }
-
-    const res = await fetch(url.toString(), { headers });
-    const data = await res.json();
+    const data = await fetchYouTube("/videos", {
+      part: "snippet,statistics,contentDetails,status",
+      id: videoId,
+    }, accessToken);
 
     if (data.error || !data.items || data.items.length === 0) {
       return null;

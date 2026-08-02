@@ -31,6 +31,94 @@ export default function AdminAuditLogsPage() {
 
   const auditLogs = data?.data || [];
 
+  const getEntityBadgeVariant = (type: string) => {
+    if (type === "USER") return "primary";
+    if (type === "DEAL") return "success";
+    if (type === "CAMPAIGN") return "warning";
+    return "ghost";
+  };
+
+  let content;
+  if (isLoading) {
+    content = (
+      <div className="flex justify-center p-12">
+        <span className="loading w-16 h-16" />
+      </div>
+    );
+  } else if (error) {
+    content = (
+      <div className="text-center text-rose p-6">Failed to load audit logs.</div>
+    );
+  } else if (auditLogs.length === 0) {
+    content = (
+      <EmptyState
+        emoji="📋"
+        title="No Audit Logs"
+        description="No activity matches your filters."
+      />
+    );
+  } else {
+    content = (
+      <div className="card overflow-hidden p-0">
+        <div className="admin-table-wrap">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-secondary">
+                {["Actor ID", "Action Type", "Entity Type", "Entity ID", "Timestamp", "Details"].map(
+                  (heading) => (
+                    <th
+                      key={heading}
+                      className="text-left border-b-card text-muted text-xs font-extrabold uppercase"
+                      style={{ padding: "14px 18px" }}
+                    >
+                      {heading}
+                    </th>
+                  )
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {auditLogs.map((log: AdminAuditLogElement) => {
+                return (
+                  <tr key={log.id} className="border-b-card">
+                    <td className="p-card text-secondary text-sm">
+                      {log.actorId}
+                    </td>
+                    <td className="p-card font-extrabold">
+                      {log.actionType}
+                    </td>
+                    <td className="p-card">
+                      <Badge
+                        variant={getEntityBadgeVariant(log.entityType)}
+                        className="uppercase text-xs"
+                      >
+                        {log.entityType}
+                      </Badge>
+                    </td>
+                    <td className="p-card text-secondary text-sm">
+                      {log.entityId || "-"}
+                    </td>
+                    <td className="p-card text-secondary text-sm">
+                      {new Date(log.timestamp).toLocaleString("en-IN")}
+                    </td>
+                    <td className="p-card">
+                      <div
+                        className="text-sm overflow-hidden text-primary whitespace-nowrap max-w-240 text-ellipsis"
+                        title={log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : ""}
+                      >
+                        {log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : "-"}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-page">
       <div className="admin-toolbar mb-6">
@@ -82,81 +170,7 @@ export default function AdminAuditLogsPage() {
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center p-12">
-          <span className="loading w-16 h-16" />
-        </div>
-      ) : error ? (
-        <div className="text-center text-rose p-6">Failed to load audit logs.</div>
-      ) : auditLogs.length === 0 ? (
-        <EmptyState
-          emoji="📋"
-          title="No Audit Logs"
-          description="No activity matches your filters."
-        />
-      ) : (
-        <div className="card overflow-hidden p-0">
-          <div className="admin-table-wrap">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-secondary">
-                  {["Actor ID", "Action Type", "Entity Type", "Entity ID", "Timestamp", "Details"].map(
-                    (heading) => (
-                      <th
-                        key={heading}
-                        className="text-left border-b-card text-muted text-xs font-extrabold uppercase"
-                        style={{ padding: "14px 18px" }}
-                      >
-                        {heading}
-                      </th>
-                    )
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {auditLogs.map((log: AdminAuditLogElement) => {
-                  return (
-                    <tr key={log.id} className="border-b-card">
-                      <td className="p-card text-secondary text-sm">
-                        {log.actorId}
-                      </td>
-                      <td className="p-card font-extrabold">
-                        {log.actionType}
-                      </td>
-                      <td className="p-card">
-                        <Badge
-                          variant={
-                            log.entityType === "USER" ? "primary" :
-                            log.entityType === "DEAL" ? "success" :
-                            log.entityType === "CAMPAIGN" ? "warning" : "ghost"
-                          }
-                          className="uppercase text-xs"
-                        >
-                          {log.entityType}
-                        </Badge>
-                      </td>
-                      <td className="p-card text-secondary text-sm">
-                        {log.entityId || "-"}
-                      </td>
-                      <td className="p-card text-secondary text-sm">
-                        {new Date(log.timestamp).toLocaleString("en-IN")}
-                      </td>
-                      <td className="p-card">
-                        <div
-                          className="text-sm overflow-hidden text-primary whitespace-nowrap max-w-240 text-ellipsis"
-                          title={log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : ""}
-                        >
-                          {log.beforeJSON || log.afterJSON ? JSON.stringify({ before: log.beforeJSON, after: log.afterJSON }) : "-"}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      {content}
     </div>
   );
 }

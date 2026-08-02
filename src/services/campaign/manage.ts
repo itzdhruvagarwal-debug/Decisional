@@ -2,7 +2,7 @@ import { logger } from "@/lib/logger";
 import { isInfluencer } from "@/lib/rbac";
 import { checkVerificationTierForAmount, tierErrorResponse } from "@/lib/verification-tiers";
 import { calculateTotalAmount } from "@/lib/razorpay";
-import { TierError, safeStringCast, safeStringOrNullCast, estimateCampaignDealSlots } from "./types";
+import { TierError, safeStringCast, safeStringOrNullCast, estimateCampaignDealSlots, CAMPAIGN_INCLUDE } from "./types";
 import prisma from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { AppError } from "@/lib/errors";
@@ -21,29 +21,7 @@ export async function getCampaignById(
         id: campaignId,
         deletedAt: null,
       },
-      include: {
-        brand: {
-          select: {
-            id: true,
-            userId: true,
-            companyName: true,
-            logo: true,
-            averageRating: true,
-            isGstVerified: true,
-            totalCampaigns: true,
-          },
-        },
-        applications: {
-          where: { status: "SELECTED" },
-          select: { id: true },
-        },
-        _count: {
-          select: {
-            applications: true,
-            deals: true,
-          },
-        },
-      },
+      include: CAMPAIGN_INCLUDE,
     });
 
     if (!campaign) {

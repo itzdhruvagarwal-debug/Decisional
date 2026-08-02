@@ -13,6 +13,47 @@ const rejectSchema = z.object({
     reason: z.string().trim().min(5).max(500).optional(),
 }).optional();
 
+function validateRejectPayload(body: unknown) {
+  const parsedBody = rejectSchema.safeParse(body);
+  if (!parsedBody.success) {
+    const firstIssue = parsedBody.error.issues[0];
+    const fieldName = firstIssue?.path.join(".") || "";
+    const issueMsg = firstIssue?.message || "Invalid value";
+    const prefix = fieldName ? `${fieldName} - ` : "";
+    return {
+      success: false,
+      message: `Invalid payload: ${prefix}${issueMsg}`,
+      errors: parsedBody.error.format()
+    };
+  }
+  return { success: true, data: parsedBody.data };
+}
+
+function handleRejectError(error: unknown) {
+  logger.error("POST /api/deals/[id]/reject error", { error });
+
+  if (error instanceof AppError) {
+    return NextResponse.json({ success: false, message: error.message }, { status: error.statusCode });
+  }
+
+  const errMsg = error instanceof Error ? error.message : String(error);
+  const errCode = (error as { code?: string })?.code;
+
+  if (errMsg?.includes("Unauthorized")) {
+    return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
+  }
+
+  if (errMsg?.includes("not found") || errCode === "P2025") {
+    return NextResponse.json({ success: false, message: "Deal not found" }, { status: 404 });
+  }
+
+  if (errMsg?.includes("pending signature")) {
+    return NextResponse.json({ success: false, message: errMsg }, { status: 400 });
+  }
+
+  return NextResponse.json({ success: false, message: "Failed to reject invite" }, { status: 500 });
+}
+
 async function _handler_POST(request: NextRequest, context: { params: Promise<Record<string, string | string[]>> }) {
     try {
         const session = await auth();
@@ -30,13 +71,10 @@ async function _handler_POST(request: NextRequest, context: { params: Promise<Re
         if (!parsedParams.success) return NextResponse.json({ success: false, message: "Invalid Deal ID" }, { status: 400 });
 
         const body = await request.json().catch(() => ({}));
-        const parsedBody = rejectSchema.safeParse(body);
-        if (!parsedBody.success) {
-            const firstIssue = parsedBody.error.issues[0];
-            const fieldName = firstIssue?.path.join(".") || "";
-            const issueMsg = firstIssue?.message || "Invalid value";
+        const validation = validateRejectPayload(body);
+        if (!validation.success) {
             return NextResponse.json(
-                { success: false, message: `Invalid payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`, data: parsedBody.error.format() },
+                { success: false, message: validation.message, data: validation.errors },
                 { status: 400 }
             );
         }
@@ -44,33 +82,12 @@ async function _handler_POST(request: NextRequest, context: { params: Promise<Re
         await DealService.rejectPendingInvite(
             session.user.id,
             parsedParams.data.id,
-            parsedBody.data?.reason,
+            validation.data?.reason,
         );
 
         return NextResponse.json({ success: true, message: "Invite rejected successfully" }, { status: 200 });
     } catch (error: unknown) {
-        logger.error("POST /api/deals/[id]/reject error", { error });
-
-        if (error instanceof AppError) {
-            return NextResponse.json({ success: false, message: error.message }, { status: error.statusCode });
-        }
-
-        const errMsg = error instanceof Error ? error.message : String(error);
-        const errCode = (error as { code?: string })?.code;
-
-        if (errMsg?.includes("Unauthorized")) {
-            return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
-        }
-
-        if (errMsg?.includes("not found") || errCode === "P2025") {
-            return NextResponse.json({ success: false, message: "Deal not found" }, { status: 404 });
-        }
-
-        if (errMsg?.includes("pending signature")) {
-            return NextResponse.json({ success: false, message: errMsg }, { status: 400 });
-        }
-
-        return NextResponse.json({ success: false, message: "Failed to reject invite" }, { status: 500 });
+        return handleRejectError(error);
     }
 }
 

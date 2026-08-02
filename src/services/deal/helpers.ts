@@ -1,6 +1,7 @@
 import { AppError } from "@/lib/errors";
 import { Prisma } from "@prisma/client";
 import { invalidate } from "@/lib/cache";
+import { ContractTerms } from "@/lib/contract-engine";
 
 export async function invalidateDealCache(dealId: string) {
   await invalidate(`deal:${dealId}`);
@@ -162,4 +163,76 @@ export function validateShippingAddress(value: unknown): Prisma.InputJsonValue {
 
   return address as Prisma.InputJsonValue;
 }
+
+export async function createDealAndReserveFunds(
+  tx: Prisma.TransactionClient,
+  params: {
+    brandUserId: string;
+    campaignId: string;
+    influencerId: string;
+    brandProfileId: string;
+    dealAmount: number;
+    paymentAmounts: {
+      totalAmount: number;
+      platformFee: number;
+      gatewayFee: number;
+      influencerReceives: number;
+    };
+    requiresProduct: boolean;
+    productName: string | null;
+    productValue: number | null;
+    productHandlingFee: number;
+    submissionDeadline: Date;
+    postingDeadline: Date;
+    draftContractTerms: ContractTerms;
+  }
+) {
+  const reserveResult = await tx.wallet.updateMany({
+    where: { userId: params.brandUserId, pendingBalance: { gte: params.paymentAmounts.totalAmount } },
+    data: { pendingBalance: { decrement: params.paymentAmounts.totalAmount } },
+  });
+
+  if (reserveResult.count === 0) {
+    throw AppError.badRequest("Insufficient held campaign funds.");
+  }
+
+  const deal = await tx.deal.create({
+    data: {
+      campaignId: params.campaignId,
+      influencerId: params.influencerId,
+      brandId: params.brandProfileId,
+      amount: params.dealAmount,
+      platformFee: params.paymentAmounts.platformFee,
+      gatewayFee: params.paymentAmounts.gatewayFee,
+      totalAmount: params.paymentAmounts.totalAmount,
+      influencerPayout: params.paymentAmounts.influencerReceives,
+      reservedFromWallet: true,
+      requiresProduct: params.requiresProduct,
+      productName: params.productName,
+      productValue: params.productValue,
+      productHandlingFee: params.productHandlingFee,
+      productFulfillmentStatus: params.requiresProduct
+        ? "ADDRESS_PENDING"
+        : "NOT_REQUIRED",
+      submissionDeadline: params.submissionDeadline,
+      postingDeadline: params.postingDeadline,
+      signDeadline: new Date(Date.now() + 48 * 60 * 60 * 1000),
+      contractTerms: params.draftContractTerms as unknown as Prisma.InputJsonValue,
+      status: "PENDING_SIGNATURE",
+    },
+  });
+
+  await tx.deal.update({
+    where: { id: deal.id },
+    data: {
+      contractTerms: {
+        ...params.draftContractTerms,
+        dealId: deal.id,
+      } as unknown as Prisma.InputJsonValue,
+    },
+  });
+
+  return deal;
+}
+
 

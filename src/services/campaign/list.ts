@@ -3,7 +3,7 @@ import prisma from "@/lib/db";
 import { CampaignStatus, Prisma } from "@prisma/client";
 import { AppError } from "@/lib/errors";
 import { isInfluencer, isBrand, isAdmin } from "@/lib/rbac";
-import { ListCampaignsParams } from "./types";
+import { ListCampaignsParams, CAMPAIGN_INCLUDE } from "./types";
 
 export function resolveStatusFilter(
     params: ListCampaignsParams,
@@ -304,29 +304,7 @@ export async function listCampaigns(
       const [campaigns, total] = await Promise.all([
         prisma.campaign.findMany({
           where,
-          include: {
-            brand: {
-              select: {
-                id: true,
-                userId: true,
-                companyName: true,
-                logo: true,
-                averageRating: true,
-                isGstVerified: true,
-                totalCampaigns: true,
-              },
-            },
-            applications: {
-              where: { status: "SELECTED" },
-              select: { id: true },
-            },
-            _count: {
-              select: {
-                applications: true,
-                deals: true,
-              },
-            },
-          },
+          include: CAMPAIGN_INCLUDE,
           orderBy: { [sortBy]: sortOrder },
           skip: (page - 1) * limit,
           take: limit,

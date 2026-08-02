@@ -32,6 +32,29 @@ const verifyLegacyOtpSchema = z.object({
   type: z.enum(["EMAIL_VERIFICATION", "PHONE_VERIFICATION", "LOGIN_OTP"]),
 });
 
+function validatePutPayload(body: unknown) {
+  const parsed = sendRegistrationOtpSchema.safeParse(body);
+  if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    const fieldName = firstIssue?.path.join(".") || "";
+    const issueMsg = firstIssue?.message || "Invalid value";
+    const prefix = fieldName ? `${fieldName} - ` : "";
+    return {
+      success: false,
+      message: `Invalid request payload: ${prefix}${issueMsg}`
+    };
+  }
+  return { success: true, data: parsed.data };
+}
+
+function handlePutError(error: unknown) {
+  logger.error("Phone OTP send failed", { error: (error instanceof Error ? error.message : String(error)) });
+  if (error instanceof AppError) {
+    return ApiResponse.error(error.message, error.statusCode);
+  }
+  return ApiResponse.error("Failed to send OTP", 500);
+}
+
 export const PUT = apiWrapper(async function PUT(request: NextRequest) {
   try {
     let body: unknown;
@@ -41,16 +64,12 @@ export const PUT = apiWrapper(async function PUT(request: NextRequest) {
       return ApiResponse.error("Invalid request body");
     }
 
-    const parsed = sendRegistrationOtpSchema.safeParse(body);
-    if (!parsed.success) {
-      const firstIssue = parsed.error.issues[0];
-      const fieldName = firstIssue?.path.join(".") || "";
-      const issueMsg = firstIssue?.message || "Invalid value";
-      return ApiResponse.error(`Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`);
+    const validation = validatePutPayload(body);
+    if (!validation.success) {
+      return ApiResponse.error(validation.message!);
     }
 
-    const phone = parsed.data.phone;
-    const type = parsed.data.type;
+    const { phone, type } = validation.data!;
 
     const ip =
       (request as NextRequest & { ip?: string }).ip ||
@@ -76,31 +95,75 @@ export const PUT = apiWrapper(async function PUT(request: NextRequest) {
 
     const sendResult = await sendOTP(phone, { purpose: type });
     if (!sendResult.success) {
-      return sendResult.retryAfterSeconds
-        ? ApiResponse.tooManyRequests(sendResult.error || "Failed to send OTP", sendResult.retryAfterSeconds)
-        : ApiResponse.error(sendResult.error || "Failed to send OTP", 500);
+      if (sendResult.retryAfterSeconds) {
+        return ApiResponse.tooManyRequests(sendResult.error || "Failed to send OTP", sendResult.retryAfterSeconds);
+      }
+      return ApiResponse.error(sendResult.error || "Failed to send OTP", 500);
     }
 
-    return ApiResponse.success(
-      {
-        channel: sendResult.channel,
-        fallbackUsed: sendResult.fallbackUsed,
-        ...(process.env.NODE_ENV !== "production" && sendResult.otp
-          ? { otp: sendResult.otp }
-          : {}),
-      },
-      sendResult.channel === "whatsapp"
-        ? "OTP sent on WhatsApp"
-        : "OTP sent by SMS",
-    );
+    const responseData = {
+      channel: sendResult.channel,
+      fallbackUsed: sendResult.fallbackUsed,
+      ...(process.env.NODE_ENV !== "production" && sendResult.otp ? { otp: sendResult.otp } : {}),
+    };
+    const message = sendResult.channel === "whatsapp" ? "OTP sent on WhatsApp" : "OTP sent by SMS";
+    return ApiResponse.success(responseData, message);
   } catch (error: unknown) {
-    logger.error("Phone OTP send failed", { error: (error instanceof Error ? error.message : String(error)) });
-    if (error instanceof AppError) {
-      return ApiResponse.error(error.message, error.statusCode);
-    }
-    return ApiResponse.error("Failed to send OTP", 500);
+    return handlePutError(error);
   }
 });
+
+function validateLegacyPayload(body: unknown) {
+  const parsedLegacy = verifyLegacyOtpSchema.safeParse(body);
+  if (!parsedLegacy.success) {
+    const firstIssue = parsedLegacy.error.issues[0];
+    const fieldName = firstIssue?.path.join(".") || "";
+    const issueMsg = firstIssue?.message || "Invalid value";
+    const prefix = fieldName ? `${fieldName} - ` : "";
+    return {
+      success: false,
+      message: `Invalid request payload: ${prefix}${issueMsg}`
+    };
+  }
+  return { success: true, data: parsedLegacy.data };
+}
+
+function validateRegistrationPayload(body: unknown) {
+  const parsedRegistration = verifyRegistrationOtpSchema.safeParse(body);
+  if (!parsedRegistration.success) {
+    const firstIssue = parsedRegistration.error.issues[0];
+    const fieldName = firstIssue?.path.join(".") || "";
+    const issueMsg = firstIssue?.message || "Invalid value";
+    const prefix = fieldName ? `${fieldName} - ` : "";
+    return {
+      success: false,
+      message: `Invalid request payload: ${prefix}${issueMsg}`
+    };
+  }
+  return { success: true, data: parsedRegistration.data };
+}
+
+function handlePostError(error: unknown) {
+  logger.warn("OTP verification failed", { error: (error instanceof Error ? error.message : String(error)) });
+
+  if (error instanceof AppError) {
+    return ApiResponse.error(error.message, error.statusCode);
+  }
+
+  const errMsg = error instanceof Error ? error.message : String(error);
+  const safeErrorMessages = [
+    "Invalid or expired OTP",
+    "OTP has expired",
+    "Maximum attempts exceeded",
+    "Invalid OTP",
+  ];
+
+  if (safeErrorMessages.includes(errMsg)) {
+    return ApiResponse.error(errMsg);
+  }
+
+  return ApiResponse.error("Verification failed. Please try again.", 500);
+}
 
 export const POST = apiWrapper(async function POST(request: NextRequest) {
   try {
@@ -111,37 +174,24 @@ export const POST = apiWrapper(async function POST(request: NextRequest) {
       return ApiResponse.error("Invalid request body");
     }
 
-    if (
-      typeof body === "object" &&
-      body !== null &&
-      Object.hasOwn(body, "userId")
-    ) {
-      const parsedLegacy = verifyLegacyOtpSchema.safeParse(body);
-      if (!parsedLegacy.success) {
-        const firstIssue = parsedLegacy.error.issues[0];
-        const fieldName = firstIssue?.path.join(".") || "";
-        const issueMsg = firstIssue?.message || "Invalid value";
-        return ApiResponse.error(`Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`);
+    if (body && typeof body === "object" && Object.hasOwn(body, "userId")) {
+      const validation = validateLegacyPayload(body);
+      if (!validation.success) {
+        return ApiResponse.error(validation.message!);
       }
 
-      await AuthService.verifyOtp(
-        parsedLegacy.data.userId,
-        parsedLegacy.data.code,
-        parsedLegacy.data.type,
-      );
+      const { userId, code, type } = validation.data!;
+      await AuthService.verifyOtp(userId, code, type);
 
       return ApiResponse.success(null, "OTP verified successfully.");
     }
 
-    const parsedRegistration = verifyRegistrationOtpSchema.safeParse(body);
-    if (!parsedRegistration.success) {
-      const firstIssue = parsedRegistration.error.issues[0];
-      const fieldName = firstIssue?.path.join(".") || "";
-      const issueMsg = firstIssue?.message || "Invalid value";
-      return ApiResponse.error(`Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`);
+    const validation = validateRegistrationPayload(body);
+    if (!validation.success) {
+      return ApiResponse.error(validation.message!);
     }
 
-    const { phone, otp, type } = parsedRegistration.data;
+    const { phone, otp, type } = validation.data!;
     const key = `phone-otp:${type}:${phone}`;
     const exists = await redis.get(key);
 
@@ -159,27 +209,6 @@ export const POST = apiWrapper(async function POST(request: NextRequest) {
 
     return ApiResponse.success({ verified: true }, "Phone verified successfully!");
   } catch (error: unknown) {
-    logger.warn("OTP verification failed", { error: (error instanceof Error ? error.message : String(error)) });
-
-    if (error instanceof AppError) {
-      return ApiResponse.error(error.message, error.statusCode);
-    }
-
-    const errMsg = error instanceof Error ? error.message : String(error);
-
-    // Only expose safe, pre-defined OTP validation errors to the user
-    const safeErrorMessages = [
-      "Invalid or expired OTP",
-      "OTP has expired",
-      "Maximum attempts exceeded",
-      "Invalid OTP",
-    ];
-
-    if (safeErrorMessages.includes(errMsg)) {
-      return ApiResponse.error(errMsg);
-    }
-
-    // Never leak internal error details to the client
-    return ApiResponse.error("Verification failed. Please try again.", 500);
+    return handlePostError(error);
   }
 });

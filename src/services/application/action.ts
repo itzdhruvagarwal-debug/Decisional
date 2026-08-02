@@ -10,6 +10,7 @@ import { NotificationService } from "@/services/notification.service";
 import { logger } from "@/lib/logger";
 import { resolveApplicationDealAmount } from "./types";
 import { validateApplicationCanBeAccepted } from "./create";
+import { createDealAndReserveFunds } from "@/services/deal/helpers";
 
 export async function calculateDealFinancials(
     application: {
@@ -209,50 +210,25 @@ export async function acceptApplication(userId: string, applicationId: string, c
               },
             );
 
-            const reserveResult = await tx.wallet.updateMany({
-              where: { userId, pendingBalance: { gte: paymentAmounts.totalAmount } },
-              data: { pendingBalance: { decrement: paymentAmounts.totalAmount } },
-            });
-
-            if (reserveResult.count === 0) {
-              throw AppError.badRequest("Insufficient held campaign funds.");
-            }
-
-            const deal = await tx.deal.create({
-              data: {
-                campaignId: application.campaignId,
-                influencerId: application.influencerId,
-                brandId: brandProfile.id,
-                amount: dealAmount,
+            const deal = await createDealAndReserveFunds(tx, {
+              brandUserId: userId,
+              campaignId: application.campaignId,
+              influencerId: application.influencerId,
+              brandProfileId: brandProfile.id,
+              dealAmount,
+              paymentAmounts: {
+                totalAmount: paymentAmounts.totalAmount,
                 platformFee: paymentAmounts.platformFee,
                 gatewayFee: paymentAmounts.gatewayFee,
-                totalAmount: paymentAmounts.totalAmount,
-                influencerPayout: paymentAmounts.influencerReceives,
-                reservedFromWallet: true,
-                requiresProduct: application.campaign.requiresProduct,
-                productName: application.campaign.productName,
-                productValue: application.campaign.productValue,
-                productHandlingFee,
-                productFulfillmentStatus: application.campaign.requiresProduct
-                  ? "ADDRESS_PENDING"
-                  : "NOT_REQUIRED",
-                submissionDeadline: application.campaign.contentDeadline,
-                postingDeadline: application.campaign.postingDeadline,
-                signDeadline: new Date(Date.now() + 48 * 60 * 60 * 1000),
-                contractTerms:
-                  draftContractTerms as unknown as Prisma.InputJsonValue,
-                status: "PENDING_SIGNATURE",
+                influencerReceives: paymentAmounts.influencerReceives,
               },
-            });
-
-            await tx.deal.update({
-              where: { id: deal.id },
-              data: {
-                contractTerms: {
-                  ...draftContractTerms,
-                  dealId: deal.id,
-                } as unknown as Prisma.InputJsonValue,
-              },
+              requiresProduct: application.campaign.requiresProduct,
+              productName: application.campaign.productName,
+              productValue: application.campaign.productValue,
+              productHandlingFee,
+              submissionDeadline: application.campaign.contentDeadline,
+              postingDeadline: application.campaign.postingDeadline,
+              draftContractTerms,
             });
 
             await tx.application.update({

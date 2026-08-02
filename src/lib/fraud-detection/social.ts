@@ -6,6 +6,7 @@ import { FraudCheckResult, FraudFlag, PostVerificationParams, GrowthCheckParams,
 import { fetchInstagramPostData, fetchYouTubePostData, runVerificationRules } from "./payment";
 import { findPostByUrl } from "../instagram";
 import { extractVideoId, getYouTubeVideo } from "../youtube";
+import { resolveFraudAction } from "./utils";
 
 export async function checkPostVerification(
   params: PostVerificationParams,
@@ -296,10 +297,7 @@ export function checkEngagementAnomaly(
     }
   }
 
-  let action: FraudCheckResult["action"] = "ALLOW";
-  if (riskScore >= 60) action = "BLOCK";
-  else if (riskScore >= 35) action = "REVIEW";
-  else if (riskScore >= 20) action = "FLAG";
+  const action = resolveFraudAction(riskScore);
 
   return {
     passed: action === "ALLOW" || action === "FLAG",
@@ -387,10 +385,7 @@ export function checkCommentQuality(comments: string[]): FraudCheckResult {
     riskScore += 15;
   }
 
-  let action: FraudCheckResult["action"] = "ALLOW";
-  if (riskScore >= 60) action = "BLOCK";
-  else if (riskScore >= 35) action = "REVIEW";
-  else if (riskScore >= 15) action = "FLAG";
+  const action = resolveFraudAction(riskScore);
 
   return {
     passed: action === "ALLOW" || action === "FLAG",

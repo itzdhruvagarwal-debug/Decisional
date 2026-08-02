@@ -12,6 +12,16 @@ import { isAdmin } from "@/lib/rbac";
 const TYPING_TTL_SECONDS = 7;
 const TYPING_REFRESH_SECONDS = 4;
 
+const SENDER_SELECT_PROJECTION = {
+  id: true,
+  email: true,
+  userType: true,
+  influencerProfile: {
+    select: { displayName: true, avatar: true },
+  },
+  brandProfile: { select: { companyName: true, logo: true } },
+};
+
 type ConversationAccess = {
   isAdmin: boolean;
   participantIds: string[];
@@ -136,6 +146,8 @@ export class MessageService {
   ) {
     const access = await getConversationAccess(userId, params);
 
+    let whereClause: Prisma.MessageWhereInput;
+
     if (params.dealId) {
       if (access.participantIds.includes(userId)) {
         await prisma.message.updateMany({
@@ -143,59 +155,25 @@ export class MessageService {
           data: { isRead: true, readAt: new Date() },
         });
       }
-
-      const rawMessages = await prisma.message.findMany({
-        where: { dealId: params.dealId },
-        include: {
-          sender: {
-            select: {
-              id: true,
-              email: true,
-              userType: true,
-              influencerProfile: {
-                select: { displayName: true, avatar: true },
-              },
-              brandProfile: { select: { companyName: true, logo: true } },
-            },
-          },
-        },
-        orderBy: { createdAt: "asc" },
-        skip: (params.page - 1) * params.limit,
-        take: params.limit,
+      whereClause = { dealId: params.dealId };
+    } else {
+      await prisma.message.updateMany({
+        where: { senderId: params.with!, receiverId: userId, isRead: false },
+        data: { isRead: true, readAt: new Date() },
       });
-
-      const presence = await getTypingPresence(access, userId);
-      return {
-        messages: rawMessages.map((message) =>
-          redactMessage(message, access.isAdmin),
-        ),
-        dealId: params.dealId,
-        presence,
-      };
-    }
-
-    await prisma.message.updateMany({
-      where: { senderId: params.with!, receiverId: userId, isRead: false },
-      data: { isRead: true, readAt: new Date() },
-    });
-
-    const rawMessages = await prisma.message.findMany({
-      where: {
+      whereClause = {
         OR: [
           { senderId: userId, receiverId: params.with! },
           { senderId: params.with!, receiverId: userId },
         ],
-      },
+      };
+    }
+
+    const rawMessages = await prisma.message.findMany({
+      where: whereClause,
       include: {
         sender: {
-          select: {
-            id: true,
-            userType: true,
-            influencerProfile: {
-              select: { displayName: true, avatar: true },
-            },
-            brandProfile: { select: { companyName: true, logo: true } },
-          },
+          select: SENDER_SELECT_PROJECTION,
         },
       },
       orderBy: { createdAt: "asc" },
@@ -208,6 +186,7 @@ export class MessageService {
       messages: rawMessages.map((message) =>
         redactMessage(message, access.isAdmin),
       ),
+      ...(params.dealId ? { dealId: params.dealId } : {}),
       presence,
     };
   }
@@ -267,12 +246,7 @@ export class MessageService {
 
     const users = await prisma.user.findMany({
       where: { id: { in: pagePartnerIds } },
-      select: {
-        id: true,
-        userType: true,
-        influencerProfile: { select: { displayName: true, avatar: true } },
-        brandProfile: { select: { companyName: true, logo: true } },
-      },
+      select: SENDER_SELECT_PROJECTION,
     });
     const userMap = new Map(users.map((user) => [user.id, user]));
 
@@ -526,12 +500,7 @@ export class MessageService {
       data: createData,
       include: {
         sender: {
-          select: {
-            id: true,
-            userType: true,
-            influencerProfile: { select: { displayName: true, avatar: true } },
-            brandProfile: { select: { companyName: true, logo: true } },
-          },
+          select: SENDER_SELECT_PROJECTION,
         },
       },
     });

@@ -1,6 +1,7 @@
 import { apiWrapper, ApiResponse, type AuthenticatedRequest } from "@/lib/api-wrapper";
 import { NextRequest } from "next/server";
 import { UserType } from "@prisma/client";
+import { z } from "zod";
 
 import { isAdmin } from "@/lib/rbac";
 import { createCampaignSchema } from "@/lib/validations";
@@ -83,6 +84,62 @@ async function _handler_GET(request: NextRequest) {
   }
 }
 
+function validateCampaignPayload(body: unknown) {
+  const parsed = createCampaignSchema.safeParse(body);
+  if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    const fieldName = firstIssue?.path.join(".") || "";
+    const issueMsg = firstIssue?.message || "Invalid value";
+    const prefix = fieldName ? `${fieldName} - ` : "";
+    return {
+      success: false,
+      message: `Invalid payload: ${prefix}${issueMsg}`
+    };
+  }
+  return { success: true, data: parsed.data };
+}
+
+function prepareCampaignPayload(data: z.infer<typeof createCampaignSchema>) {
+  return {
+    ...data,
+    totalBudget: toPaise(data.totalBudget),
+    perInfluencerBudget:
+      typeof data.perInfluencerBudget === "number"
+        ? toPaise(data.perInfluencerBudget)
+        : undefined,
+    productValue:
+      typeof data.productValue === "number"
+        ? toPaise(data.productValue)
+        : undefined,
+    deliverables: data.deliverables.map((d) => ({
+      ...d,
+      rate: typeof d.rate === "number" ? toPaise(d.rate) : undefined,
+    })),
+  };
+}
+
+function handleCampaignPostError(error: unknown) {
+  logger.error("POST /api/campaigns error", error);
+
+  if (error instanceof AppError) {
+    if (error instanceof TierError) {
+      return ApiResponse.forbidden(error.message || "Verification required");
+    }
+    return ApiResponse.error(error.message, error.statusCode);
+  }
+
+  const errMsg = error instanceof Error ? error.message : String(error);
+  if (errMsg?.includes("Insufficient wallet balance")) {
+    return ApiResponse.error(errMsg);
+  }
+
+  if (errMsg?.includes("required") || errMsg?.includes("Invalid")) {
+    return ApiResponse.error(errMsg);
+  }
+
+  return ApiResponse.error("Internal server error", 500);
+}
+
 async function _handler_POST(request: NextRequest) {
   try {
     const session = (request as AuthenticatedRequest).session;
@@ -97,31 +154,12 @@ async function _handler_POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const parsed = createCampaignSchema.safeParse(body);
-
-    if (!parsed.success) {
-      const firstIssue = parsed.error.issues[0];
-      const fieldName = firstIssue?.path.join(".") || "";
-      const issueMsg = firstIssue?.message || "Invalid value";
-      return ApiResponse.error(`Invalid payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`);
+    const validation = validateCampaignPayload(body);
+    if (!validation.success) {
+      return ApiResponse.error(validation.message!);
     }
 
-    const payload = {
-      ...parsed.data,
-      totalBudget: toPaise(parsed.data.totalBudget),
-      perInfluencerBudget:
-        typeof parsed.data.perInfluencerBudget === "number"
-          ? toPaise(parsed.data.perInfluencerBudget)
-          : undefined,
-      productValue:
-        typeof parsed.data.productValue === "number"
-          ? toPaise(parsed.data.productValue)
-          : undefined,
-      deliverables: parsed.data.deliverables.map((d) => ({
-        ...d,
-        rate: typeof d.rate === "number" ? toPaise(d.rate) : undefined,
-      })),
-    };
+    const payload = prepareCampaignPayload(validation.data!);
 
     const campaign = await CampaignService.createCampaign(
       session.user.id,
@@ -131,25 +169,7 @@ async function _handler_POST(request: NextRequest) {
 
     return ApiResponse.success(campaign, "Campaign created", 201);
   } catch (error: unknown) {
-    logger.error("POST /api/campaigns error", error);
-
-    if (error instanceof AppError) {
-      if (error instanceof TierError) {
-        return ApiResponse.forbidden(error.message || "Verification required");
-      }
-      return ApiResponse.error(error.message, error.statusCode);
-    }
-
-    const errMsg = error instanceof Error ? error.message : String(error);
-    if (errMsg?.includes("Insufficient wallet balance")) {
-      return ApiResponse.error(errMsg);
-    }
-
-    if (errMsg?.includes("required") || errMsg?.includes("Invalid")) {
-      return ApiResponse.error(errMsg);
-    }
-
-    return ApiResponse.error("Internal server error", 500);
+    return handleCampaignPostError(error);
   }
 }
 

@@ -45,6 +45,13 @@ export default function DisputesPage() {
 
   const getStatusLabel = (status: string) => status.replaceAll("_", " ");
 
+  const getStatusBadgeVariant = (status: string) => {
+    if (status === "RESOLVED") return "success";
+    if (status === "OPEN") return "primary";
+    if (status === "CLOSED") return "ghost";
+    return "warning";
+  };
+
   return (
     <DashboardShell user={session?.user}>
       <div className="animate-fade-in">
@@ -105,11 +112,7 @@ export default function DisputesPage() {
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge
-                        variant={
-                          dispute.status === "RESOLVED" ? "success" :
-                          dispute.status === "OPEN" ? "primary" :
-                          dispute.status === "CLOSED" ? "ghost" : "warning"
-                        }
+                        variant={getStatusBadgeVariant(dispute.status)}
                       >
                         {getStatusLabel(dispute.status)}
                       </Badge>

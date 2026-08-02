@@ -11,19 +11,21 @@ interface WalletTransactionFilters {
   endDate?: Date;
 }
 
+const WALLET_INCLUDE = {
+  withdrawals: {
+    orderBy: { createdAt: "desc" as const },
+    take: 5,
+  },
+  user: {
+    select: { userType: true },
+  },
+} as const;
+
 export class WalletService {
   private static async findOrCreateWallet(userId: string) {
     const walletData = await prisma.wallet.findUnique({
       where: { userId },
-      include: {
-        withdrawals: {
-          orderBy: { createdAt: "desc" },
-          take: 5,
-        },
-        user: {
-          select: { userType: true },
-        },
-      },
+      include: WALLET_INCLUDE,
     });
 
     if (walletData) return walletData;
@@ -32,15 +34,7 @@ export class WalletService {
     try {
       return await prisma.wallet.create({
         data: { userId },
-        include: {
-          withdrawals: {
-            orderBy: { createdAt: "desc" },
-            take: 5,
-          },
-          user: {
-            select: { userType: true },
-          },
-        },
+        include: WALLET_INCLUDE,
       });
     } catch (createError) {
       if (
@@ -50,15 +44,7 @@ export class WalletService {
         logger.info("Wallet creation conflict (P2002), re-querying wallet", { userId });
         const wallet = await prisma.wallet.findUnique({
           where: { userId },
-          include: {
-            withdrawals: {
-              orderBy: { createdAt: "desc" },
-              take: 5,
-            },
-            user: {
-              select: { userType: true },
-            },
-          },
+          include: WALLET_INCLUDE,
         });
         if (!wallet) {
           throw AppError.internal("Failed to find wallet after creation conflict");

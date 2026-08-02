@@ -77,43 +77,41 @@ export function ChatHeader({ state }: Readonly<ChatPanelProps>) {
 export function MessageList({ state }: Readonly<ChatPanelProps>) {
   const { messages, isPeerTyping, loadingMessages, messagesEndRef } = state;
 
-  const renderMessageContent = (msg: Message) => {
-    if (msg.isBlocked) {
-      return (
-        <div className="flex flex-col gap-2">
-          <div
-            className="chat-block-warning flex items-center gap-2 text-xs font-semibold"
-            data-me={msg.isMe}
-          >
-            ⚠️ Warning: Message Blocked
-          </div>
-          <p className="chat-blocked-content text-sm leading-normal select-none opacity-50">
-            {msg.content}
-          </p>
-          <div
-            className="chat-muted-meta text-center text-2xs"
-            data-me={msg.isMe}
-          >
-            Sharing contact details before a contract is against our terms.
-          </div>
-        </div>
-      );
-    }
+  const renderBlockedMessage = (msg: Message) => (
+    <div className="flex flex-col gap-2">
+      <div
+        className="chat-block-warning flex items-center gap-2 text-xs font-semibold"
+        data-me={msg.isMe}
+      >
+        ⚠️ Warning: Message Blocked
+      </div>
+      <p className="chat-blocked-content text-sm leading-normal select-none opacity-50">
+        {msg.content}
+      </p>
+      <div
+        className="chat-muted-meta text-center text-2xs"
+        data-me={msg.isMe}
+      >
+        Sharing contact details before a contract is against our terms.
+      </div>
+    </div>
+  );
 
-    if (msg.messageType === "FILE" && msg.fileUrl) {
-      const fileName = String(msg.metadata?.fileName || "Shared File");
-      const fileType = String(msg.metadata?.fileType || "");
-      const isImg = fileType.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp)$/i.test(msg.fileUrl);
-      return (
-        <div className="flex flex-col gap-2 min-w-200">
-          <div className="flex items-center gap-2 font-semibold text-sm">
-            📎 File Shared
+  const renderFileMessage = (msg: Message) => {
+    const fileName = String(msg.metadata?.fileName || "Shared File");
+    const fileType = String(msg.metadata?.fileType || "");
+    const isImg = fileType.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp)$/i.test(msg.fileUrl || "");
+    return (
+      <div className="flex flex-col gap-2 min-w-200">
+        <div className="flex items-center gap-2 font-semibold text-sm">
+          📎 File Shared
+        </div>
+        {isImg && msg.fileUrl ? (
+          <div className="relative w-full max-w-240 h-160 rounded-md overflow-hidden bg-dark-80 border-card mb-1">
+            <img src={msg.fileUrl} alt={fileName} className="object-cover w-full h-full" />
           </div>
-          {isImg ? (
-            <div className="relative w-full max-w-240 h-160 rounded-md overflow-hidden bg-dark-80 border-card mb-1">
-              <img src={msg.fileUrl} alt={fileName} className="object-cover w-full h-full" />
-            </div>
-          ) : null}
+        ) : null}
+        {msg.fileUrl && (
           <a
             href={msg.fileUrl}
             target="_blank"
@@ -128,64 +126,81 @@ export function MessageList({ state }: Readonly<ChatPanelProps>) {
               📥 Download {fileName.slice(0, 20)}{fileName.length > 20 ? "..." : ""}
             </Button>
           </a>
+        )}
+      </div>
+    );
+  };
+
+  const renderOfferMessage = (msg: Message) => {
+    const offer = msg.metadata || {};
+    const amount = Number(offer.amount || 0);
+    const isPending = offer.status === "PENDING";
+    const isAccepted = offer.status === "ACCEPTED";
+    const isDeclined = offer.status === "DECLINED";
+
+    let statusClass = "bg-amber-500/20 text-amber-400";
+    if (isAccepted) {
+      statusClass = "bg-emerald-500/20 text-emerald-400";
+    } else if (isDeclined) {
+      statusClass = "bg-rose-500/20 text-rose-400";
+    }
+
+    return (
+      <div className="offer-card flex flex-col gap-3 p-4 rounded-lg bg-dark-80 border-card text-left max-w-320">
+        <div className="flex items-center justify-between border-b pb-2">
+          <span className="font-bold text-sm text-gradient">Custom Offer</span>
+          <span className={`text-2xs font-extrabold px-2 py-0.5 rounded-full ${statusClass}`}>
+            {offer.status || "PENDING"}
+          </span>
         </div>
-      );
+        <div className="text-sm font-bold">{offer.title || "Custom Deal"}</div>
+        <div className="text-xs text-secondary leading-relaxed line-clamp-3">
+          {offer.description || "No description provided."}
+        </div>
+        {offer.deliverables ? (
+          <div className="text-2xs text-muted">
+            <strong>Deliverables:</strong> {offer.deliverables}
+          </div>
+        ) : null}
+        <div className="flex justify-between items-center bg-dark-90 p-2 rounded text-xs">
+          <span>Proposed Rate:</span>
+          <strong className="text-white">₹{(amount / 100).toLocaleString()}</strong>
+        </div>
+        {isPending && !msg.isMe ? (
+          <div className="flex gap-2 mt-1 w-full">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => state.handleUpdateOfferStatus?.(msg.id, "ACCEPTED")}
+              className="flex-1 text-2xs py-1 cursor-pointer"
+            >
+              Accept
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => state.handleUpdateOfferStatus?.(msg.id, "DECLINED")}
+              className="flex-1 text-2xs py-1 cursor-pointer"
+            >
+              Decline
+            </Button>
+          </div>
+        ) : null}
+      </div>
+    );
+  };
+
+  const renderMessageContent = (msg: Message) => {
+    if (msg.isBlocked) {
+      return renderBlockedMessage(msg);
+    }
+
+    if (msg.messageType === "FILE" && msg.fileUrl) {
+      return renderFileMessage(msg);
     }
 
     if (msg.messageType === "OFFER") {
-      const offer = msg.metadata || {};
-      const amount = Number(offer.amount || 0);
-      const isPending = offer.status === "PENDING";
-      const isAccepted = offer.status === "ACCEPTED";
-      const isDeclined = offer.status === "DECLINED";
-
-      return (
-        <div className="offer-card flex flex-col gap-3 p-4 rounded-lg bg-dark-80 border-card text-left max-w-320">
-          <div className="flex items-center justify-between border-b pb-2">
-            <span className="font-bold text-sm text-gradient">Custom Offer</span>
-            <span className={`text-2xs font-extrabold px-2 py-0.5 rounded-full ${
-              isAccepted ? "bg-emerald-500/20 text-emerald-400" :
-              isDeclined ? "bg-rose-500/20 text-rose-400" :
-              "bg-amber-500/20 text-amber-400"
-            }`}>
-              {offer.status || "PENDING"}
-            </span>
-          </div>
-          <div className="text-sm font-bold">{offer.title || "Custom Deal"}</div>
-          <div className="text-xs text-secondary leading-relaxed line-clamp-3">
-            {offer.description || "No description provided."}
-          </div>
-          {offer.deliverables ? (
-            <div className="text-2xs text-muted">
-              <strong>Deliverables:</strong> {offer.deliverables}
-            </div>
-          ) : null}
-          <div className="flex justify-between items-center bg-dark-90 p-2 rounded text-xs">
-            <span>Proposed Rate:</span>
-            <strong className="text-white">₹{(amount / 100).toLocaleString()}</strong>
-          </div>
-          {isPending && !msg.isMe ? (
-            <div className="flex gap-2 mt-1 w-full">
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => state.handleUpdateOfferStatus?.(msg.id, "ACCEPTED")}
-                className="flex-1 text-2xs py-1 cursor-pointer"
-              >
-                Accept
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => state.handleUpdateOfferStatus?.(msg.id, "DECLINED")}
-                className="flex-1 text-2xs py-1 cursor-pointer"
-              >
-                Decline
-              </Button>
-            </div>
-          ) : null}
-        </div>
-      );
+      return renderOfferMessage(msg);
     }
 
     return <p className="text-sm leading-normal">{msg.content}</p>;

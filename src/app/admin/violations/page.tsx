@@ -52,6 +52,97 @@ export default function AdminViolationsPage() {
 
   const violations = data?.data || [];
 
+  let content;
+  if (isLoading) {
+    content = (
+      <div className="flex justify-center p-12">
+        <span className="loading w-16 h-16" />
+      </div>
+    );
+  } else if (error) {
+    content = (
+      <div className="text-center text-rose p-6">Failed to load violations.</div>
+    );
+  } else if (violations.length === 0) {
+    content = (
+      <EmptyState
+        emoji="✔"
+        title="No Violations"
+        description="No violations match the filter."
+      />
+    );
+  } else {
+    content = (
+      <div className="card overflow-hidden p-0">
+        <div className="admin-table-wrap">
+          <table className="w-full border-collapse" aria-label="User violations list">
+            <thead>
+              <tr className="bg-secondary">
+                {["User", "Type", "Severity", "Action", "Description", "Date", "Expires"].map(
+                  (heading) => (
+                    <th
+                      key={heading}
+                      scope="col"
+                      className="text-left border-b-card text-muted text-xs font-extrabold uppercase"
+                      style={{ padding: "14px 18px" }}
+                    >
+                      {heading}
+                    </th>
+                  )
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {violations.map((violation: AdminViolationElement) => {
+                const name =
+                  violation.user.influencerProfile?.displayName ||
+                  violation.user.brandProfile?.companyName ||
+                  violation.user.email;
+
+                return (
+                  <tr key={violation.id} className="border-b-card">
+                    <td className="p-card">
+                      <div className="font-extrabold">{name}</div>
+                      <div className="text-muted text-xs mt-1">
+                        {violation.user.email} ({violation.user.userType})
+                      </div>
+                    </td>
+                    <td className="p-card font-bold">
+                      {violation.type}
+                    </td>
+                    <td className="p-card">
+                      <Badge variant={getSeverityVariant(violation.severity)} className="font-extrabold text-xs uppercase">
+                        {violation.severity}
+                      </Badge>
+                    </td>
+                    <td className="p-card">
+                      <Badge variant={getActionVariant(violation.action)} className="font-extrabold text-xs uppercase">
+                        {violation.action}
+                      </Badge>
+                    </td>
+                    <td className="p-card text-sm text-primary">
+                      <div className="overflow-hidden whitespace-nowrap max-w-240 text-ellipsis" title={violation.description}>
+                        {violation.description}
+                      </div>
+                    </td>
+                    <td className="p-card text-secondary text-sm">
+                      {new Date(violation.createdAt).toLocaleDateString("en-IN")}
+                    </td>
+                    <td className="p-card text-secondary text-sm">
+                      {violation.expiresAt
+                        ? new Date(violation.expiresAt).toLocaleDateString("en-IN")
+                        : "Never"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-page">
       <div className="admin-toolbar mb-6">
@@ -75,87 +166,7 @@ export default function AdminViolationsPage() {
         />
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center p-12">
-          <span className="loading w-16 h-16" />
-        </div>
-      ) : error ? (
-        <div className="text-center text-rose p-6">Failed to load violations.</div>
-      ) : violations.length === 0 ? (
-        <EmptyState
-          emoji="✔"
-          title="No Violations"
-          description="No violations match the filter."
-        />
-      ) : (
-        <div className="card overflow-hidden p-0">
-          <div className="admin-table-wrap">
-            <table className="w-full border-collapse" aria-label="User violations list">
-              <thead>
-                <tr className="bg-secondary">
-                  {["User", "Type", "Severity", "Action", "Description", "Date", "Expires"].map(
-                    (heading) => (
-                      <th
-                        key={heading}
-                        scope="col"
-                        className="text-left border-b-card text-muted text-xs font-extrabold uppercase"
-                        style={{ padding: "14px 18px" }}
-                      >
-                        {heading}
-                      </th>
-                    )
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {violations.map((violation: AdminViolationElement) => {
-                  const name =
-                    violation.user.influencerProfile?.displayName ||
-                    violation.user.brandProfile?.companyName ||
-                    violation.user.email;
-
-                  return (
-                    <tr key={violation.id} className="border-b-card">
-                      <td className="p-card">
-                        <div className="font-extrabold">{name}</div>
-                        <div className="text-muted text-xs mt-1">
-                          {violation.user.email} ({violation.user.userType})
-                        </div>
-                      </td>
-                      <td className="p-card font-bold">
-                        {violation.type}
-                      </td>
-                      <td className="p-card">
-                        <Badge variant={getSeverityVariant(violation.severity)} className="font-extrabold text-xs uppercase">
-                          {violation.severity}
-                        </Badge>
-                      </td>
-                      <td className="p-card">
-                        <Badge variant={getActionVariant(violation.action)} className="font-extrabold text-xs uppercase">
-                          {violation.action}
-                        </Badge>
-                      </td>
-                      <td className="p-card text-sm text-primary">
-                        <div className="overflow-hidden whitespace-nowrap max-w-240 text-ellipsis" title={violation.description}>
-                          {violation.description}
-                        </div>
-                      </td>
-                      <td className="p-card text-secondary text-sm">
-                        {new Date(violation.createdAt).toLocaleDateString("en-IN")}
-                      </td>
-                      <td className="p-card text-secondary text-sm">
-                        {violation.expiresAt
-                          ? new Date(violation.expiresAt).toLocaleDateString("en-IN")
-                          : "Never"}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      {content}
     </div>
   );
 }

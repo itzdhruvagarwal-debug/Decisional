@@ -1,30 +1,10 @@
 import * as Sentry from "@sentry/nextjs";
 
-export type LogLevel = "debug" | "info" | "warn" | "error" | "critical";
-
-interface LogContext {
-  userId?: string;
-  requestId?: string;
-  dealId?: string;
-  action?: string;
-  [key: string]: unknown;
-}
-
-type StringablePrimitive = string | number | boolean | bigint | symbol;
+import { LogLevel, LogContext, safeStringCommon, buildWithContext } from "./logger-common";
+export type { LogLevel, LogContext };
 
 function safeString(message: unknown): string {
-  if (typeof message === "string") return message;
-  if (message === null) return "null";
-  if (message === undefined) return "undefined";
-  if (message instanceof Error) return message.stack || message.message;
-  if (typeof message !== "object") {
-    return String(message as StringablePrimitive);
-  }
-  try {
-    return JSON.stringify(message);
-  } catch {
-    return "[Complex Object]";
-  }
+  return safeStringCommon(message);
 }
 
 export const logger = {
@@ -109,17 +89,6 @@ export const logger = {
   },
 
   withContext(baseContext: LogContext) {
-    return {
-      debug: (msg: string, data?: Record<string, unknown>) =>
-        logger.debug(msg, data, baseContext),
-      info: (msg: string, data?: Record<string, unknown>) =>
-        logger.info(msg, data, baseContext),
-      warn: (msg: string, data?: Record<string, unknown>) =>
-        logger.warn(msg, data, baseContext),
-      error: (msg: string, err?: unknown) =>
-        logger.error(msg, err, baseContext),
-      critical: (msg: string, err?: unknown) =>
-        logger.critical(msg, err, baseContext),
-    };
+    return buildWithContext(this, baseContext);
   },
 };

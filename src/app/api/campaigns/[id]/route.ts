@@ -233,10 +233,11 @@ async function _handler_PUT(
       const firstIssue = parsedBody.error.issues[0];
       const fieldName = firstIssue?.path.join(".") || "";
       const issueMsg = firstIssue?.message || "Invalid value";
+      const prefix = fieldName ? `${fieldName} - ` : "";
       return NextResponse.json(
         {
           success: false,
-          message: `Invalid payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`,
+          message: `Invalid payload: ${prefix}${issueMsg}`,
           data: parsedBody.error.format(),
         },
         { status: 400 },

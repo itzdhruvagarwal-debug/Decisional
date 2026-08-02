@@ -15,6 +15,7 @@ import { assertAccountCanTransact, calculateProductHandlingFee, assertSufficient
 import { checkAndAwardBadges } from "@/lib/gamification-engine";
 import { validateCampaignInputAndBudgets } from "./list";
 import { TierError, DirectInviteParams, estimateCampaignDealSlots, safeStringCast, safeStringOrNullCast } from "./types";
+import { createDealAndReserveFunds } from "@/services/deal/helpers";
 
 export async function checkBrandVerificationTiers(
     userId: string,
@@ -135,47 +136,25 @@ export async function handleDirectInviteInCampaign(params: DirectInviteParams) {
       }
     );
 
-    const reserveResult = await tx.wallet.updateMany({
-      where: { userId: profile.userId, pendingBalance: { gte: paymentAmounts.totalAmount } },
-      data: { pendingBalance: { decrement: paymentAmounts.totalAmount } },
-    });
-
-    if (reserveResult.count === 0) {
-      throw AppError.badRequest("Insufficient held campaign funds.");
-    }
-
-    const createdDeal = await tx.deal.create({
-      data: {
-        campaignId: newCampaign.id,
-        influencerId: invitedInfluencer.id,
-        brandId: profile.id,
-        amount: dealAmount,
+    const createdDeal = await createDealAndReserveFunds(tx, {
+      brandUserId: profile.userId,
+      campaignId: newCampaign.id,
+      influencerId: invitedInfluencer.id,
+      brandProfileId: profile.id,
+      dealAmount,
+      paymentAmounts: {
+        totalAmount: paymentAmounts.totalAmount,
         platformFee: paymentAmounts.platformFee,
         gatewayFee: paymentAmounts.gatewayFee,
-        totalAmount: paymentAmounts.totalAmount,
-        influencerPayout: paymentAmounts.influencerReceives,
-        reservedFromWallet: true,
-        requiresProduct,
-        productName,
-        productValue: productValuePaise,
-        productHandlingFee,
-        productFulfillmentStatus: requiresProduct ? "ADDRESS_PENDING" : "NOT_REQUIRED",
-        submissionDeadline: contentDeadline,
-        postingDeadline,
-        signDeadline: new Date(Date.now() + 48 * 60 * 60 * 1000),
-        contractTerms: draftContractTerms as unknown as Prisma.InputJsonValue,
-        status: "PENDING_SIGNATURE",
+        influencerReceives: paymentAmounts.influencerReceives,
       },
-    });
-
-    await tx.deal.update({
-      where: { id: createdDeal.id },
-      data: {
-        contractTerms: {
-          ...draftContractTerms,
-          dealId: createdDeal.id,
-        } as unknown as Prisma.InputJsonValue,
-      },
+      requiresProduct,
+      productName,
+      productValue: productValuePaise,
+      productHandlingFee,
+      submissionDeadline: contentDeadline,
+      postingDeadline,
+      draftContractTerms,
     });
 
     await tx.campaign.update({

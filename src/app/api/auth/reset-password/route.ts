@@ -24,11 +24,13 @@ async function handleRequestReset(request: NextRequest, body: unknown) {
     const firstIssue = parsed.error.issues[0];
     const fieldName = firstIssue?.path.join(".") || "";
     const issueMsg = firstIssue?.message || "Invalid value";
+    const prefix = fieldName ? `${fieldName} - ` : "";
+    const errorStr = `Invalid request payload: ${prefix}${issueMsg}`;
     return NextResponse.json(
       {
         success: false,
-        error: `Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`,
-        message: `Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`,
+        error: errorStr,
+        message: errorStr,
         data: parsed.error.format(),
       },
       { status: 400 },
@@ -75,11 +77,13 @@ async function handleCompleteReset(body: unknown) {
     const firstIssue = parsed.error.issues[0];
     const fieldName = firstIssue?.path.join(".") || "";
     const issueMsg = firstIssue?.message || "Invalid value";
+    const prefix = fieldName ? `${fieldName} - ` : "";
+    const errorStr = `Invalid request payload: ${prefix}${issueMsg}`;
     return NextResponse.json(
       {
         success: false,
-        error: `Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`,
-        message: `Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`,
+        error: errorStr,
+        message: errorStr,
         data: parsed.error.format(),
       },
       { status: 400 },
@@ -95,58 +99,66 @@ async function handleCompleteReset(body: unknown) {
   );
 }
 
+async function parseRequestBody(request: NextRequest) {
+  try {
+    return await request.json();
+  } catch {
+    return {};
+  }
+}
+
+function handleResetError(error: unknown) {
+  logger.warn("Password reset failed", {
+    error: error instanceof Error ? error.message : String(error),
+  });
+
+  if (error instanceof AppError) {
+    const errorMsg = error.message === "Invalid or expired token"
+      ? "The reset link is invalid or has expired."
+      : error.message;
+    return NextResponse.json(
+      {
+        success: false,
+        error: errorMsg,
+        message: errorMsg,
+      },
+      { status: error.statusCode }
+    );
+  }
+
+  const rawMsg = error instanceof Error ? error.message : String(error);
+  if (rawMsg === "Invalid or expired token") {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "The reset link is invalid or has expired.",
+        message: "The reset link is invalid or has expired.",
+      },
+      { status: 400 },
+    );
+  }
+
+  return NextResponse.json(
+    {
+      success: false,
+      error: "Internal server error",
+      message: "Internal server error",
+    },
+    { status: 500 },
+  );
+}
+
 async function _handler_POST(request: NextRequest) {
   try {
-    const body = (await request.json().catch(() => ({}))) as {
-      action?: string;
-      email?: string;
-      token?: string;
-      newPassword?: string;
-    };
+    const body = await parseRequestBody(request);
 
-    if (typeof body === "object" && body !== null && body.action === "request") {
+    if (body && typeof body === "object" && !Array.isArray(body) && body.action === "request") {
       return await handleRequestReset(request, body);
     }
 
     return await handleCompleteReset(body);
   } catch (error: unknown) {
-    logger.warn("Password reset failed", {
-      error: error instanceof Error ? error.message : String(error),
-    });
-
-    if (error instanceof AppError) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: error.message === "Invalid or expired token" ? "The reset link is invalid or has expired." : error.message,
-          message: error.message === "Invalid or expired token" ? "The reset link is invalid or has expired." : error.message,
-        },
-        { status: error.statusCode }
-      );
-    }
-
-    if (
-      (error instanceof Error ? error.message : String(error)) ===
-      "Invalid or expired token"
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "The reset link is invalid or has expired.",
-          message: "The reset link is invalid or has expired.",
-        },
-        { status: 400 },
-      );
-    }
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Internal server error",
-        message: "Internal server error",
-      },
-      { status: 500 },
-    );
+    return handleResetError(error);
   }
 }
 

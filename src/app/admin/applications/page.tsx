@@ -3,7 +3,6 @@ import { Prisma } from "@prisma/client";
 import { approveFlaggedApplication, rejectFlaggedApplication } from "../actions";
 import { formatCurrency } from "@/lib/utils-client";
 import { z } from "zod";
-import Link from "next/link";
 import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Button, Input } from "@/components/ui";
 

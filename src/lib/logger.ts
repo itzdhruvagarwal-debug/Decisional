@@ -98,31 +98,11 @@ const winstonLogger: WinstonLogger = createLogger({
   ],
 });
 
-export type LogLevel = "debug" | "info" | "warn" | "error" | "critical";
-
-interface LogContext {
-  userId?: string;
-  requestId?: string;
-  dealId?: string;
-  action?: string;
-  [key: string]: unknown;
-}
-
-type StringablePrimitive = string | number | boolean | bigint | symbol;
+import { LogLevel, LogContext, safeStringCommon, buildWithContext } from "./logger-common";
+export type { LogLevel, LogContext };
 
 function safeString(message: unknown): string {
-  if (typeof message === "string") return message;
-  if (message === null) return "null";
-  if (message === undefined) return "undefined";
-  if (message instanceof Error) return message.stack || message.message;
-  if (typeof message !== "object") {
-    return String(message as StringablePrimitive);
-  }
-  try {
-    return JSON.stringify(message);
-  } catch {
-    return inspect(message);
-  }
+  return safeStringCommon(message, (obj) => inspect(obj));
 }
 
 // Wrapper to match existing interface
@@ -148,15 +128,7 @@ export const logger = {
         stack: error.stack,
       };
     } else if (error !== undefined && error !== null) {
-      if (typeof error !== "object") {
-        meta.error = String(error as string | number | boolean | bigint | symbol);
-      } else {
-        try {
-          meta.error = JSON.stringify(error);
-        } catch {
-          meta.error = inspect(error);
-        }
-      }
+      meta.error = safeString(error);
     }
     winstonLogger.error(safeString(message), meta);
   },
@@ -170,33 +142,14 @@ export const logger = {
         stack: error.stack,
       };
     } else if (error !== undefined && error !== null) {
-      if (typeof error !== "object") {
-        meta.error = String(error as string | number | boolean | bigint | symbol);
-      } else {
-        try {
-          meta.error = JSON.stringify(error);
-        } catch {
-          meta.error = inspect(error);
-        }
-      }
+      meta.error = safeString(error);
     }
     // Log as error but with critical tag (Winston default levels don't have crit)
     winstonLogger.error(`[CRITICAL] ${safeString(message)}`, meta);
   },
 
   withContext(baseContext: LogContext) {
-    return {
-      debug: (msg: string, data?: Record<string, unknown>) =>
-        logger.debug(msg, data, baseContext),
-      info: (msg: string, data?: Record<string, unknown>) =>
-        logger.info(msg, data, baseContext),
-      warn: (msg: string, data?: Record<string, unknown>) =>
-        logger.warn(msg, data, baseContext),
-      error: (msg: string, err?: unknown) =>
-        logger.error(msg, err, baseContext),
-      critical: (msg: string, err?: unknown) =>
-        logger.critical(msg, err, baseContext),
-    };
+    return buildWithContext(this, baseContext);
   },
 };
 

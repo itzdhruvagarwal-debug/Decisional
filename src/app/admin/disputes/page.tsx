@@ -23,6 +23,61 @@ type DisputeWithDetails = Prisma.DisputeGetPayload<{
   };
 }>;
 
+function DisputeItem({
+  dispute,
+  showHistory,
+}: {
+  readonly dispute: DisputeWithDetails;
+  readonly showHistory: boolean;
+}) {
+  const campaignTitle = dispute.deal?.campaign?.title || "Untitled Campaign";
+  const userEmail = dispute.raisedBy?.email || "Unknown user";
+  const createdDate = new Date(dispute.createdAt).toLocaleDateString();
+  const badgeVariant = showHistory ? "success" : "danger";
+  const formattedAmount = new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+  }).format(Number(dispute.deal?.amount || 0) / 100);
+
+  return (
+    <div
+      className="card flex justify-between items-center gap-4 flex-wrap bg-secondary border-card rounded-lg px-6-py-4"
+    >
+      <div>
+        <div className="font-bold text-base mb-1">
+          {campaignTitle}
+        </div>
+        <div className="text-xs text-muted">
+          Raised by: {userEmail} | {createdDate}
+        </div>
+        <div className="mt-2 flex gap-2 text-xs">
+          <Badge variant={badgeVariant}>
+            {dispute.status}
+          </Badge>
+          <Badge variant="ghost">
+            {dispute.type}
+          </Badge>
+          <span>
+            Amount: {formattedAmount}
+          </span>
+        </div>
+      </div>
+      <Button
+        href={`/admin/disputes/${dispute.id}`}
+        variant="primary"
+        size="sm"
+        aria-label={
+          showHistory
+            ? `View details for dispute ${dispute.id}`
+            : `Resolve dispute ${dispute.id}`
+        }
+      >
+        {showHistory ? "View Details" : "Resolve"}
+      </Button>
+    </div>
+  );
+}
+
 export default async function AdminDisputeListPage({
   searchParams,
 }: {
@@ -87,47 +142,11 @@ export default async function AdminDisputeListPage({
     content = (
       <div className="grid gap-4">
         {activeDisputes.map((dispute) => (
-          <div
+          <DisputeItem
             key={dispute.id}
-            className="card flex justify-between items-center gap-4 flex-wrap bg-secondary border-card rounded-lg px-6-py-4"
-          >
-            <div>
-              <div
-                className="font-bold text-base mb-1"
-              >
-                {dispute.deal?.campaign?.title || "Untitled Campaign"}
-              </div>
-              <div
-                className="text-xs text-muted"
-              >
-                Raised by: {dispute.raisedBy?.email || "Unknown user"} |{" "}
-                {new Date(dispute.createdAt).toLocaleDateString()}
-              </div>
-              <div
-                className="mt-2 flex gap-2 text-xs"
-              >
-                <Badge variant={showHistory ? "success" : "danger"}>
-                  {dispute.status}
-                </Badge>
-                <Badge variant="ghost">
-                  {dispute.type}
-                </Badge>
-                <span>
-                  Amount: {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
-                    Number(dispute.deal?.amount || 0) / 100,
-                  )}
-                </span>
-              </div>
-            </div>
-            <Button
-              href={`/admin/disputes/${dispute.id}`}
-              variant="primary"
-              size="sm"
-              aria-label={showHistory ? `View details for dispute ${dispute.id}` : `Resolve dispute ${dispute.id}`}
-            >
-              {showHistory ? "View Details" : "Resolve"}
-            </Button>
-          </div>
+            dispute={dispute}
+            showHistory={showHistory}
+          />
         ))}
       </div>
     );

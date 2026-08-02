@@ -2,6 +2,7 @@ import prisma from "../db";
 import { hashForDuplicateDetection } from "../encryption";
 import { FraudCheckResult, FraudFlag, ApplicationCheckParams } from "./types";
 import { calculateSimilarity } from "./social";
+import { resolveFraudAction } from "./utils";
 
 export async function checkApplicationFraud(
   params: ApplicationCheckParams,
@@ -91,10 +92,7 @@ export async function checkApplicationFraud(
   }
 
   // Determine action
-  let action: FraudCheckResult["action"] = "ALLOW";
-  if (riskScore >= 60) action = "BLOCK";
-  else if (riskScore >= 35) action = "REVIEW";
-  else if (riskScore >= 15) action = "FLAG";
+  const action = resolveFraudAction(riskScore);
 
   return {
     passed: action === "ALLOW" || action === "FLAG",

@@ -500,6 +500,23 @@ async function payoutReferralMonetaryReward(config: PayoutReferralMonetaryReward
   });
 }
 
+function buildActiveReferralWhere(referrerId: string): Prisma.UserWhereInput {
+  return {
+    referredBy: referrerId,
+    OR: [
+      { influencerProfile: { completedDeals: { gt: 0 } } },
+      {
+        brandProfile: {
+          OR: [
+            { campaigns: { some: { status: "COMPLETED" } } },
+            { totalSpent: { gt: 0 } }
+          ]
+        }
+      },
+    ],
+  };
+}
+
 export async function processReferralReward(
   userId: string,
   dealAmount: number,
@@ -554,20 +571,7 @@ export async function processReferralReward(
 
   // Recount active referrals currently (which already includes the completed deal in the DB transaction)
   const activeReferralsCurrent = await db.user.count({
-    where: {
-      referredBy: referrerId,
-      OR: [
-        { influencerProfile: { completedDeals: { gt: 0 } } },
-        {
-          brandProfile: {
-            OR: [
-              { campaigns: { some: { status: "COMPLETED" } } },
-              { totalSpent: { gt: 0 } }
-            ]
-          }
-        },
-      ],
-    },
+    where: buildActiveReferralWhere(referrerId),
   });
 
   // Calculate active referrals before this transaction.
@@ -669,20 +673,7 @@ export async function getEffectivePlatformFee(
   const baseFee = Number(process.env.PLATFORM_FEE_PERCENTAGE) || 10;
 
   const activeReferrals = await prisma.user.count({
-    where: {
-      referredBy: userId,
-      OR: [
-        { influencerProfile: { completedDeals: { gt: 0 } } },
-        {
-          brandProfile: {
-            OR: [
-              { campaigns: { some: { status: "COMPLETED" } } },
-              { totalSpent: { gt: 0 } }
-            ]
-          }
-        },
-      ],
-    },
+    where: buildActiveReferralWhere(userId),
   });
 
   const tier = getTierFromCount(activeReferrals);

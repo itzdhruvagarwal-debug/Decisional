@@ -61,6 +61,72 @@ async function hasOpenDispute(dealId: string): Promise<boolean> {
   return existing !== null;
 }
 
+function addDispatchOverdueNotifications(
+  deal: StaleDeal,
+  staleDays: number,
+  campaignTitle: string,
+  influencerName: string,
+  brandName: string,
+  dealLink: string,
+  notifications: Parameters<typeof NotificationService.createNotifications>[0]
+) {
+  const brandUserId = deal.brand?.userId;
+  if (brandUserId) {
+    const s = staleDays === 1 ? "" : "s";
+    notifications.push({
+      userId: brandUserId,
+      type: "deal_update",
+      title: `⚠️ Product dispatch overdue — ${staleDays} days`,
+      message: `The deal "${campaignTitle}" with ${influencerName} is waiting for you to dispatch the product. It has been ${staleDays} day${s} since the shipping address was submitted. Please dispatch soon to avoid escalation.`,
+      data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_reminder" },
+    });
+  }
+  const influencerUserId = deal.influencer?.userId;
+  if (influencerUserId) {
+    const s = staleDays === 1 ? "" : "s";
+    notifications.push({
+      userId: influencerUserId,
+      type: "deal_update",
+      title: `⏳ Awaiting product dispatch — ${staleDays} days`,
+      message: `The brand ${brandName} has not yet dispatched the product for "${campaignTitle}". It has been ${staleDays} day${s}. You may raise a dispute if needed.`,
+      data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_reminder" },
+    });
+  }
+}
+
+function addTransitOverdueNotifications(
+  deal: StaleDeal,
+  staleDays: number,
+  campaignTitle: string,
+  influencerName: string,
+  brandName: string,
+  dealLink: string,
+  notifications: Parameters<typeof NotificationService.createNotifications>[0]
+) {
+  const influencerUserId = deal.influencer?.userId;
+  if (influencerUserId) {
+    const s = staleDays === 1 ? "" : "s";
+    notifications.push({
+      userId: influencerUserId,
+      type: "deal_update",
+      title: `⚠️ Please confirm product received — ${staleDays} days in transit`,
+      message: `The product for "${campaignTitle}" has been marked as dispatched by ${brandName} and has been in transit for ${staleDays} day${s}. Please confirm receipt once you have the product.`,
+      data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_reminder" },
+    });
+  }
+  const brandUserId = deal.brand?.userId;
+  if (brandUserId) {
+    const s = staleDays === 1 ? "" : "s";
+    notifications.push({
+      userId: brandUserId,
+      type: "deal_update",
+      title: `⏳ Product receipt unconfirmed — ${staleDays} days`,
+      message: `${influencerName} has not yet confirmed receipt of the product for "${campaignTitle}". It has been ${staleDays} day${s} since dispatch. Please follow up.`,
+      data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_reminder" },
+    });
+  }
+}
+
 async function sendReminderNotifications(deal: StaleDeal, staleDays: number) {
   const campaignTitle = deal.campaign.title;
   const influencerName = deal.influencer.displayName || "Influencer";
@@ -70,45 +136,9 @@ async function sendReminderNotifications(deal: StaleDeal, staleDays: number) {
   const notifications: Parameters<typeof NotificationService.createNotifications>[0] = [];
 
   if (deal.productFulfillmentStatus === "READY_TO_DISPATCH") {
-    // Brand hasn't dispatched yet
-    if (deal.brand?.userId) {
-      notifications.push({
-        userId: deal.brand.userId,
-        type: "deal_update",
-        title: `⚠️ Product dispatch overdue — ${staleDays} days`,
-        message: `The deal "${campaignTitle}" with ${influencerName} is waiting for you to dispatch the product. It has been ${staleDays} day${staleDays === 1 ? "" : "s"} since the shipping address was submitted. Please dispatch soon to avoid escalation.`,
-        data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_reminder" },
-      });
-    }
-    if (deal.influencer?.userId) {
-      notifications.push({
-        userId: deal.influencer.userId,
-        type: "deal_update",
-        title: `⏳ Awaiting product dispatch — ${staleDays} days`,
-        message: `The brand ${brandName} has not yet dispatched the product for "${campaignTitle}". It has been ${staleDays} day${staleDays === 1 ? "" : "s"}. You may raise a dispute if needed.`,
-        data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_reminder" },
-      });
-    }
+    addDispatchOverdueNotifications(deal, staleDays, campaignTitle, influencerName, brandName, dealLink, notifications);
   } else {
-    // DISPATCHED — influencer hasn't confirmed receipt
-    if (deal.influencer?.userId) {
-      notifications.push({
-        userId: deal.influencer.userId,
-        type: "deal_update",
-        title: `⚠️ Please confirm product received — ${staleDays} days in transit`,
-        message: `The product for "${campaignTitle}" has been marked as dispatched by ${brandName} and has been in transit for ${staleDays} day${staleDays === 1 ? "" : "s"}. Please confirm receipt once you have the product.`,
-        data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_reminder" },
-      });
-    }
-    if (deal.brand?.userId) {
-      notifications.push({
-        userId: deal.brand.userId,
-        type: "deal_update",
-        title: `⏳ Product receipt unconfirmed — ${staleDays} days`,
-        message: `${influencerName} has not yet confirmed receipt of the product for "${campaignTitle}". It has been ${staleDays} day${staleDays === 1 ? "" : "s"} since dispatch. Please follow up.`,
-        data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_reminder" },
-      });
-    }
+    addTransitOverdueNotifications(deal, staleDays, campaignTitle, influencerName, brandName, dealLink, notifications);
   }
 
   if (notifications.length > 0) {
@@ -222,6 +252,49 @@ async function autoEscalateToDispute(deal: StaleDeal, staleDays: number) {
   }
 }
 
+interface ProcessDealResult {
+  reminded: boolean;
+  escalated: boolean;
+  skipped: boolean;
+}
+
+async function processSingleStaleDeal(deal: StaleDeal): Promise<ProcessDealResult> {
+  const staleDays = getStaleDays(deal);
+
+  if (staleDays < REMINDER_DAYS) {
+    return { reminded: false, escalated: false, skipped: true };
+  }
+
+  // Check for existing open dispute — skip if already in dispute
+  const alreadyDisputed = await hasOpenDispute(deal.id);
+  if (alreadyDisputed) {
+    return { reminded: false, escalated: false, skipped: true };
+  }
+
+  if (staleDays >= ESCALATION_DAYS) {
+    const escalated_ = await autoEscalateToDispute(deal, staleDays);
+    if (escalated_) {
+      logger.info("STALE_FULFILLMENT: Auto-escalated deal", {
+        dealId: deal.id,
+        staleDays,
+        status: deal.productFulfillmentStatus,
+      });
+      return { reminded: false, escalated: true, skipped: false };
+    } else {
+      return { reminded: false, escalated: false, skipped: true };
+    }
+  } else {
+    // 7–13 days: send reminder
+    await sendReminderNotifications(deal, staleDays);
+    logger.info("STALE_FULFILLMENT: Sent reminder for stale deal", {
+      dealId: deal.id,
+      staleDays,
+      status: deal.productFulfillmentStatus,
+    });
+    return { reminded: true, escalated: false, skipped: false };
+  }
+}
+
 async function scanStaleFulfillmentDeals(): Promise<{
   scanned: number;
   reminded: number;
@@ -260,45 +333,17 @@ async function scanStaleFulfillmentDeals(): Promise<{
     scanned += batch.length;
     hasMore = batch.length === BATCH_SIZE;
     if (batch.length > 0) {
-      cursor = batch[batch.length - 1]!.id;
+      cursor = batch.at(-1)!.id;
     }
 
     for (const deal of batch) {
-      const staleDays = getStaleDays(deal as StaleDeal);
-
-      if (staleDays < REMINDER_DAYS) {
-        skipped++;
-        continue;
-      }
-
-      // Check for existing open dispute — skip if already in dispute
-      const alreadyDisputed = await hasOpenDispute(deal.id);
-      if (alreadyDisputed) {
-        skipped++;
-        continue;
-      }
-
-      if (staleDays >= ESCALATION_DAYS) {
-        const escalated_ = await autoEscalateToDispute(deal as StaleDeal, staleDays);
-        if (escalated_) {
-          escalated++;
-          logger.info("STALE_FULFILLMENT: Auto-escalated deal", {
-            dealId: deal.id,
-            staleDays,
-            status: deal.productFulfillmentStatus,
-          });
-        } else {
-          skipped++;
-        }
-      } else {
-        // 7–13 days: send reminder
-        await sendReminderNotifications(deal as StaleDeal, staleDays);
+      const res = await processSingleStaleDeal(deal);
+      if (res.reminded) {
         reminded++;
-        logger.info("STALE_FULFILLMENT: Sent reminder for stale deal", {
-          dealId: deal.id,
-          staleDays,
-          status: deal.productFulfillmentStatus,
-        });
+      } else if (res.escalated) {
+        escalated++;
+      } else if (res.skipped) {
+        skipped++;
       }
     }
   }

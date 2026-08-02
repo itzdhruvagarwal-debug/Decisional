@@ -179,17 +179,13 @@ export class DisputeService {
     };
   }
 
-  static async addEvidence(
+  private static async getAndValidateDispute(
+    disputeId: string,
     userId: string,
-    data: {
-      disputeId: string;
-      type: string;
-      url: string;
-      description?: string;
-    },
+    errorMessageAction: string,
   ) {
     const dispute = await prisma.dispute.findUnique({
-      where: { id: data.disputeId },
+      where: { id: disputeId },
       include: {
         deal: {
           include: {
@@ -202,19 +198,32 @@ export class DisputeService {
 
     if (!dispute) throw AppError.notFound("Dispute not found");
 
-    // Check dispute is still open for evidence
     const openStatuses = ["OPEN", "TIER1_AUTO", "TIER2_MEDIATION"];
     if (!openStatuses.includes(dispute.status)) {
-      throw AppError.badRequest(`Cannot add evidence to a ${dispute.status} dispute`);
+      throw AppError.badRequest(`Cannot ${errorMessageAction} a ${dispute.status} dispute`);
     }
 
-    const allowedEvidenceUsers = [
+    const allowedUsers = [
       dispute.raisedByUserId,
       dispute.deal.influencer.userId,
       dispute.deal.brand?.userId,
     ].filter(Boolean);
 
-    if (!allowedEvidenceUsers.includes(userId)) throw AppError.forbidden("Unauthorized");
+    if (!allowedUsers.includes(userId)) throw AppError.forbidden("Unauthorized");
+
+    return dispute;
+  }
+
+  static async addEvidence(
+    userId: string,
+    data: {
+      disputeId: string;
+      type: string;
+      url: string;
+      description?: string;
+    },
+  ) {
+    const dispute = await DisputeService.getAndValidateDispute(data.disputeId, userId, "add evidence to");
 
     const evidence = await prisma.disputeEvidence.create({
       data: {
@@ -237,32 +246,7 @@ export class DisputeService {
       reason?: string;
     },
   ) {
-    const dispute = await prisma.dispute.findUnique({
-      where: { id: data.disputeId },
-      include: {
-        deal: {
-          include: {
-            influencer: { select: { userId: true } },
-            brand: { select: { userId: true } },
-          },
-        },
-      },
-    });
-
-    if (!dispute) throw AppError.notFound("Dispute not found");
-
-    const actionableStatuses = ["OPEN", "TIER1_AUTO", "TIER2_MEDIATION"];
-    if (!actionableStatuses.includes(dispute.status)) {
-      throw AppError.badRequest(`Cannot update a ${dispute.status} dispute`);
-    }
-
-    const allowedUsers = [
-      dispute.raisedByUserId,
-      dispute.deal.influencer.userId,
-      dispute.deal.brand?.userId,
-    ].filter(Boolean);
-
-    if (!allowedUsers.includes(userId)) throw AppError.forbidden("Unauthorized");
+    const dispute = await DisputeService.getAndValidateDispute(data.disputeId, userId, "update");
 
     if (data.action === "accept_resolution") {
       if (dispute.status === "TIER2_MEDIATION") {

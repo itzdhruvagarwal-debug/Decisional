@@ -98,7 +98,12 @@ export default function ApplicationsPage() {
   );
 
   const applications = payload?.data?.applications || payload?.applications || [];
-  const error = fetchErr ? "Failed to fetch applications" : (payload && !payload.success ? (payload.message || "Failed to load applications") : "");
+  let error = "";
+  if (fetchErr) {
+    error = "Failed to fetch applications";
+  } else if (payload && !payload.success) {
+    error = payload.message || "Failed to load applications";
+  }
 
   if (!session) {
     return (

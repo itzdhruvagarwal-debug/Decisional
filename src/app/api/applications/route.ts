@@ -54,7 +54,8 @@ async function _handler_POST(request: NextRequest) {
       const firstIssue = parsed.error.issues[0];
       const fieldName = firstIssue?.path.join(".") || "";
       const issueMsg = firstIssue?.message || "Invalid value";
-      return ApiResponse.error(`Invalid payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`);
+      const prefix = fieldName ? `${fieldName} - ` : "";
+      return ApiResponse.error(`Invalid payload: ${prefix}${issueMsg}`);
     }
 
     const application = await ApplicationService.createApplication(session.user.id, {

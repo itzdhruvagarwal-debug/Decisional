@@ -41,6 +41,31 @@ function getMissingVerificationDocs(
   return hasBusinessProof ? missing : [...missing, "BUSINESS_PROOF"];
 }
 
+async function promoteToFullyVerified(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  currentTrustScore: number,
+) {
+  await tx.user.update({
+    where: { id: userId },
+    data: {
+      status: "ACTIVE",
+      verificationLevel: "FULL",
+      trustScore: Math.max(currentTrustScore, 50),
+    },
+  });
+
+  await checkAndAwardBadges(userId, "VERIFICATION", tx);
+
+  await NotificationService.createNotification({
+    userId,
+    type: "system",
+    title: "Verification Approved",
+    message:
+      "Your profile is now fully verified. You can now create campaigns and hire influencers!",
+  }, tx);
+}
+
 export async function approveUser(userId: string) {
   const _session = await requireAdmin();
 
@@ -92,25 +117,7 @@ export async function approveUser(userId: string) {
         }, tx);
       } else {
         // Fully verified
-        await tx.user.update({
-          where: { id: userId },
-          data: {
-            status: "ACTIVE",
-            verificationLevel: "FULL",
-            trustScore: Math.max(user.trustScore, 50),
-          },
-        });
-
-        // Gamification hook
-        await checkAndAwardBadges(userId, "VERIFICATION", tx);
-
-        await NotificationService.createNotification({
-          userId,
-          type: "system",
-          title: "Verification Approved",
-          message:
-            "Your profile is now fully verified. You can now create campaigns and hire influencers!",
-        }, tx);
+        await promoteToFullyVerified(tx, userId, user.trustScore);
       }
     },
     {
@@ -191,24 +198,7 @@ export async function approveDocument(docId: string, userId: string) {
       const missingDocs = getMissingVerificationDocs(user.userType, verifiedDocs);
 
       if (missingDocs.length === 0 && user.verificationLevel !== "FULL") {
-        await tx.user.update({
-          where: { id: userId },
-          data: {
-            status: "ACTIVE",
-            verificationLevel: "FULL",
-            trustScore: Math.max(user.trustScore, 50),
-          },
-        });
-
-        await checkAndAwardBadges(userId, "VERIFICATION", tx);
-
-        await NotificationService.createNotification({
-          userId,
-          type: "system",
-          title: "Verification Approved",
-          message:
-            "Your profile is now fully verified. You can now create campaigns and hire influencers!",
-        }, tx);
+        await promoteToFullyVerified(tx, userId, user.trustScore);
       }
     },
     { maxWait: 10000, timeout: 15000 },

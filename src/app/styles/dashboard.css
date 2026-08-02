@@ -1153,21 +1153,21 @@
 }
 
 .referral-channel[data-channel="whatsapp"] {
-  color: #25d366;
-  background: rgba(37, 211, 102, 0.12);
-  border: 1px solid rgba(37, 211, 102, 0.2);
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
 }
 
 .referral-channel[data-channel="twitter"] {
-  color: #e7e9ea;
-  background: rgba(231, 233, 234, 0.08);
-  border: 1px solid rgba(231, 233, 234, 0.2);
+  color: #0f1419;
+  background: #f7f9f9;
+  border: 1px solid #cfd9de;
 }
 
 .referral-channel[data-channel="linkedin"] {
-  color: #0a66c2;
-  background: rgba(10, 102, 194, 0.15);
-  border: 1px solid rgba(10, 102, 194, 0.2);
+  color: #004182;
+  background: #eef4f8;
+  border: 1px solid #cce0f0;
 }
 
 .referral-channel-icon {

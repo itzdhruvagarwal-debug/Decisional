@@ -282,13 +282,20 @@ function StatCard({
   readonly color: string;
   readonly delay: number;
 }) {
+  let tone = "emerald";
+  if (color === "#8b5cf6") {
+    tone = "purple";
+  } else if (color === "#f59e0b") {
+    tone = "amber";
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
       className="badge-stat-card flex-1 p-6 text-center rounded-xl"
-      data-tone={color === "#8b5cf6" ? "purple" : color === "#f59e0b" ? "amber" : "emerald"}
+      data-tone={tone}
     >
       <div
         className="badge-stat-value font-extrabold mb-1 text-3xl leading-none"

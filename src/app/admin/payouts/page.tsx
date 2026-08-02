@@ -250,10 +250,7 @@ export default function PayoutsAdminPage() {
                     </td>
                     <td className="p-4">
                       <Badge
-                        variant={
-                          withdrawal.status === "COMPLETED" ? "success" :
-                          withdrawal.status === "FAILED" ? "danger" : "warning"
-                        }
+                        variant={getStatusTone(withdrawal.status)}
                       >
                         {withdrawal.status}
                       </Badge>

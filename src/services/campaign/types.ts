@@ -78,3 +78,28 @@ export interface ListCampaignsParams {
   ownerOnly?: boolean;
   search?: string;
 }
+
+export const CAMPAIGN_INCLUDE = {
+  brand: {
+    select: {
+      id: true,
+      userId: true,
+      companyName: true,
+      logo: true,
+      averageRating: true,
+      isGstVerified: true,
+      totalCampaigns: true,
+    },
+  },
+  applications: {
+    where: { status: "SELECTED" as const },
+    select: { id: true },
+  },
+  _count: {
+    select: {
+      applications: true,
+      deals: true,
+    },
+  },
+} as const;
+

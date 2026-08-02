@@ -13,6 +13,46 @@ const changePasswordSchema = z.object({
   newPassword: passwordSchema,
 });
 
+function validatePayload(body: unknown) {
+  const parsed = changePasswordSchema.safeParse(body);
+  if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    const fieldName = firstIssue?.path.join(".") || "";
+    const issueMsg = firstIssue?.message || "Invalid value";
+    const prefix = fieldName ? `${fieldName} - ` : "";
+    return {
+      success: false,
+      message: `Invalid request payload: ${prefix}${issueMsg}`,
+      errors: parsed.error.format()
+    };
+  }
+  return { success: true, data: parsed.data };
+}
+
+function handleChangePasswordError(error: unknown) {
+  logger.warn("Password change failed", { error: (error instanceof Error ? error.message : String(error)) });
+
+  if (error instanceof AppError) {
+    return NextResponse.json(
+      { success: false, message: error.message === "Incorrect old password" ? "Incorrect current password" : error.message },
+      { status: error.statusCode }
+    );
+  }
+
+  const errorMsg = error instanceof Error ? error.message : String(error);
+  if (errorMsg === "Incorrect old password" || errorMsg === "User not found") {
+    return NextResponse.json(
+      { success: false, message: "Incorrect current password" },
+      { status: 400 }
+    );
+  }
+
+  return NextResponse.json(
+    { success: false, message: "Internal server error" },
+    { status: 500 }
+  );
+}
+
 async function _handler_POST(request: NextRequest) {
   try {
     const session = await auth();
@@ -32,30 +72,27 @@ async function _handler_POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const parsed = changePasswordSchema.safeParse(body);
+    const validation = validatePayload(body);
 
-    if (!parsed.success) {
-      const firstIssue = parsed.error.issues[0];
-      const fieldName = firstIssue?.path.join(".") || "";
-      const issueMsg = firstIssue?.message || "Invalid value";
+    if (!validation.success) {
       return NextResponse.json(
         {
           success: false,
-          message: `Invalid request payload: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`,
-          data: parsed.error.format()
+          message: validation.message,
+          data: validation.errors
         },
         { status: 400 }
       );
     }
 
-    if (parsed.data.oldPassword === parsed.data.newPassword) {
+    const { oldPassword, newPassword } = validation.data!;
+
+    if (oldPassword === newPassword) {
       return NextResponse.json(
         { success: false, message: "New password must be different from the old password" },
         { status: 400 }
       );
     }
-
-    const { oldPassword, newPassword } = parsed.data;
 
     await AuthService.changePassword(session.user.id, oldPassword, newPassword);
 
@@ -64,26 +101,7 @@ async function _handler_POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error: unknown) {
-    logger.warn("Password change failed", { error: (error instanceof Error ? error.message : String(error)) });
-
-    if (error instanceof AppError) {
-      return NextResponse.json(
-        { success: false, message: error.message === "Incorrect old password" ? "Incorrect current password" : error.message },
-        { status: error.statusCode }
-      );
-    }
-
-    if ((error instanceof Error ? error.message : String(error)) === "Incorrect old password" || (error instanceof Error ? error.message : String(error)) === "User not found") {
-      return NextResponse.json(
-        { success: false, message: "Incorrect current password" },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      { success: false, message: "Internal server error" },
-      { status: 500 }
-    );
+    return handleChangePasswordError(error);
   }
 }
 

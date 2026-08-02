@@ -289,7 +289,8 @@ export const POST = apiWrapper(async function POST(req: NextRequest) {
             const firstIssue = parsed.error.issues[0];
             const fieldName = firstIssue?.path.join(".") || "";
             const issueMsg = firstIssue?.message || "Invalid value";
-            return ApiResponse.error(`Validation failed: ${fieldName ? `${fieldName} - ` : ""}${issueMsg}`);
+            const prefix = fieldName ? `${fieldName} - ` : "";
+            return ApiResponse.error(`Validation failed: ${prefix}${issueMsg}`);
         }
 
         const { action, currentEmailOtp, currentPhoneOtp, type, newContact, newOtp } = parsed.data;
