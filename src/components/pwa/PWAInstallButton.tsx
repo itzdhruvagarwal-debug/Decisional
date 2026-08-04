@@ -91,10 +91,14 @@ export default function PWAInstallButton({
   style?: CSSProperties;
 }>) {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(() => isStandaloneDisplay());
+  const [isInstalled, setIsInstalled] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
+    setIsInstalled(isStandaloneDisplay());
+
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setPromptEvent(event as BeforeInstallPromptEvent);
@@ -114,7 +118,7 @@ export default function PWAInstallButton({
 
   if (isInstalled) return null;
 
-  const resolvedPlatform = platform === "auto" ? detectPlatform() : platform;
+  const resolvedPlatform = !isMounted ? "desktop" : (platform === "auto" ? detectPlatform() : platform);
   const copy = getPlatformCopy(resolvedPlatform === "desktop" ? "auto" : resolvedPlatform);
   const resolvedVariant = variant || (label ? "store" : "icon");
 

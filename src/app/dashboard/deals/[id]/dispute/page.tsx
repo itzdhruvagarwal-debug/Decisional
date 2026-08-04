@@ -144,10 +144,10 @@ export default function DisputePage({
             >
               Cancel
             </Link>
-            <Button
-              type="submit"
-              variant="danger"
-              className="flex-1" style={{ background: "var(--color-error)", borderColor: "var(--color-error)" }}
+             <Button
+               type="submit"
+               variant="danger"
+               className="flex-1"
               disabled={isSubmitting || description.trim().length < 50}
             >
               {isSubmitting ? "Submitting..." : "Raise Dispute"}

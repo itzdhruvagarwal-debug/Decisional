@@ -96,25 +96,25 @@ function CampaignCardSkeleton() {
   return (
     <div className="campaign-card-grid grid gap-4 grid-auto-280" aria-hidden="true">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="card" style={{ padding: 18 }}>
+        <div key={i} className="card p-18px">
           <div className="flex items-center gap-3 mb-3">
             <Skeleton width={40} height={40} borderRadius={6} />
             <div className="flex-1">
-              <Skeleton height={12} width={100} borderRadius={4} style={{ marginBottom: 6 }} />
+              <Skeleton height={12} width={100} borderRadius={4} className="mb-1-5" />
               <Skeleton height={16} width={160} borderRadius={4} />
             </div>
             <Skeleton height={22} width={64} borderRadius={20} />
           </div>
-          <Skeleton height={42} borderRadius={6} style={{ marginBottom: 12 }} />
+          <Skeleton height={42} borderRadius={6} className="mb-3" />
           <div className="flex gap-1.5 mb-3">
             <Skeleton height={20} width={56} borderRadius={4} />
             <Skeleton height={20} width={64} borderRadius={4} />
             <Skeleton height={20} width={52} borderRadius={4} />
           </div>
-          <div className="grid gap-2 mb-3" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
+          <div className="grid gap-2 mb-3 responsive-three-col">
             {[1, 2, 3].map((j) => (
               <div key={j}>
-                <Skeleton height={10} width={36} borderRadius={3} style={{ marginBottom: 4 }} />
+                <Skeleton height={10} width={36} borderRadius={3} className="mb-1" />
                 <Skeleton height={14} width={52} borderRadius={3} />
               </div>
             ))}
@@ -257,7 +257,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
         className="campaign-card-grid grid gap-4 grid-auto-280"
       >
         {filteredCampaigns.map((campaign) => (
-          <article key={campaign.id} className="card campaign-card" style={{ padding: "18px" }}>
+          <article key={campaign.id} className="card campaign-card p-18px">
             <div className="campaign-card-brand-row">
               <div className="campaign-card-logo" aria-hidden={!campaign.brand.logo}>
                 {campaign.brand.logo ? (
@@ -278,13 +278,13 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
             </div>
 
             <p
-              className="campaign-card-description text-secondary text-sm leading-normal" style={{ minHeight: "42px" }}
+              className="campaign-card-description text-secondary text-sm leading-normal campaign-desc-min-h-42"
             >
               {campaign.description}
             </p>
 
             <div
-              className="campaign-card-tags flex flex-wrap gap-1-5" style={{ margin: "10px 0 14px" }}
+              className="campaign-card-tags flex flex-wrap gap-1-5 campaign-tags-margin"
             >
               {campaign.deliverables.slice(0, 2).map((item, index) => (
                 <Badge key={`${campaign.id}-del-${index}`} variant="primary">
@@ -377,17 +377,21 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
           className="flex gap-3 flex-wrap mt-5"
         >
           <Input
+            id="search-campaigns-input"
             type="text"
             placeholder="Search campaigns..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="min-w-220"
+            aria-label="Search campaigns"
           />
 
           <Select
+            id="sort-campaigns-select"
             value={sortBy}
             onChange={handleSortChange}
             className="min-w-160"
+            aria-label="Sort campaigns"
           >
             <option value="newest">Newest</option>
             <option value="budget_high">Budget: High to Low</option>
@@ -397,7 +401,7 @@ export default function CampaignsClient({ user }: { readonly user: { readonly us
         </div>
 
         <div
-          className="flex gap-2 mt-4 overflow-x-auto"
+          className="scrollable-tabs flex gap-2 mt-4 overflow-x-auto"
         >
           {categories.map((category) => (
             <Button

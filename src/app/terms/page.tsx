@@ -24,7 +24,7 @@ export default function TermsPage() {
 
             <div className="text-secondary grid gap-8 leading-relaxed text-sm">
               <section>
-                <h2 style={headingStyle}>1. Agreement</h2>
+                <h2 className="terms-heading">1. Agreement</h2>
                 <p>
                   These Terms govern your use of Decisional. By using the website, PWA,
                   dashboard, APIs, messaging, payments, verification, campaign, or dispute
@@ -39,19 +39,19 @@ export default function TermsPage() {
                 </p>
               </section>
 
-              <section className="card" style={panelStyle}>
-                <h2 style={headingStyle}>2. Roles and eligibility</h2>
+              <section className="card terms-panel">
+                <h2 className="terms-heading">2. Roles and eligibility</h2>
                 <div className="grid gap-4 grid-auto-240">
-                  <div style={miniPanelStyle}>
-                    <h3 style={subheadingStyle}>Brands</h3>
+                  <div className="terms-mini-panel">
+                    <h3 className="terms-subheading">Brands</h3>
                     <p>Brands create briefs, fund campaign budgets, review work, approve content, and follow applicable advertising, tax, and platform rules.</p>
                   </div>
-                  <div style={miniPanelStyle}>
-                    <h3 style={subheadingStyle}>Influencers</h3>
+                  <div className="terms-mini-panel">
+                    <h3 className="terms-subheading">Influencers</h3>
                     <p>Influencers apply to campaigns, deliver original content, disclose sponsored work, maintain linked social accounts, and meet agreed deadlines.</p>
                   </div>
-                  <div style={miniPanelStyle}>
-                    <h3 style={subheadingStyle}>Admins</h3>
+                  <div className="terms-mini-panel">
+                    <h3 className="terms-subheading">Admins</h3>
                     <p>Admins review verification, disputes, payouts, safety signals, and platform compliance. Admin access is granted only through secure sessions.</p>
                   </div>
                 </div>
@@ -64,7 +64,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>3. Verification, KYC, and trust systems</h2>
+                <h2 className="terms-heading">3. Verification, KYC, and trust systems</h2>
                 <p>
                   Decisional may require email, phone, PAN, Aadhaar-related verification, bank,
                   GSTIN, CIN, ITR, social account, business, or content ownership checks before
@@ -80,7 +80,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>4. Campaigns, contracts, and deliverables</h2>
+                <h2 className="terms-heading">4. Campaigns, contracts, and deliverables</h2>
                 <ul className="list-disc pl-6 space-y-2">
                   <li>Campaign briefs must be lawful, clear, complete, and not misleading.</li>
                   <li>Creators must submit original content that matches agreed deliverables, deadlines, mandatory tags, and disclosure requirements.</li>
@@ -92,7 +92,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>5. Payments, escrow, fees, tax, and payouts</h2>
+                <h2 className="terms-heading">5. Payments, escrow, fees, tax, and payouts</h2>
                 <p>
                   Campaign funds may be collected upfront and held through Razorpay and our
                   internal ledger until release, refund, dispute resolution, or expiry. Platform
@@ -109,7 +109,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>6. Prohibited conduct</h2>
+                <h2 className="terms-heading">6. Prohibited conduct</h2>
                 <ul className="list-disc pl-6 space-y-2">
                   <li>Fake followers, engagement pods, bot traffic, fake screenshots, fake invoices, or manipulated post analytics.</li>
                   <li>Bypassing platform payments, sharing private contact details to avoid fees, or soliciting off-platform settlements.</li>
@@ -121,7 +121,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>7. Content rights</h2>
+                <h2 className="terms-heading">7. Content rights</h2>
                 <p>
                   Unless a deal states otherwise, creators keep ownership of their underlying
                   content, while brands receive the usage rights described in the approved brief,
@@ -138,7 +138,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>8. Disputes and enforcement</h2>
+                <h2 className="terms-heading">8. Disputes and enforcement</h2>
                 <p>
                   Disputes must be raised before final approval or payout release unless the issue
                   relates to fraud, post deletion, or a continuing obligation. We may review
@@ -154,7 +154,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>9. India tax and compliance responsibilities</h2>
+                <h2 className="terms-heading">9. India tax and compliance responsibilities</h2>
                 <ul className="list-disc pl-6 space-y-2">
                   <li>Creators and brands must provide accurate PAN, GSTIN, legal name, address, bank, and invoice information where requested.</li>
                   <li>Users must file their own income-tax, GST, ITR, professional tax, and other statutory returns where applicable.</li>
@@ -164,7 +164,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>10. Service availability and liability</h2>
+                <h2 className="terms-heading">10. Service availability and liability</h2>
                 <p>
                   We work to keep Decisional reliable, but we do not guarantee uninterrupted
                   access, campaign outcomes, social platform API availability, creator performance,
@@ -180,10 +180,10 @@ export default function TermsPage() {
               </section>
 
               <section className="bg-secondary rounded-lg border-card p-6">
-                <h2 style={headingStyle}>11. Contact</h2>
+                <h2 className="terms-heading">11. Contact</h2>
                 <p>
                   For Terms questions, legal notices, or compliance escalation, email{" "}
-                  <a href="mailto:legal@decisional.in" style={linkStyle}>legal@decisional.in</a>.
+                  <a href="mailto:legal@decisional.in" className="terms-link">legal@decisional.in</a>.
                 </p>
               </section>
             </div>
@@ -195,36 +195,3 @@ export default function TermsPage() {
     </div>
   );
 }
-
-const headingStyle = {
-  fontSize: "20px",
-  fontWeight: 800,
-  color: "var(--color-text-primary)",
-  marginBottom: "14px",
-};
-
-const subheadingStyle = {
-  fontSize: "16px",
-  fontWeight: 800,
-  color: "var(--color-text-primary)",
-  marginBottom: "8px",
-};
-
-const panelStyle = {
-  padding: "24px",
-  background: "rgba(255,255,255,0.02)",
-  border: "1px solid var(--color-border)",
-};
-
-const miniPanelStyle = {
-  padding: "16px",
-  background: "var(--color-bg-tertiary)",
-  borderRadius: "var(--radius-md)",
-  border: "1px solid var(--color-border)",
-};
-
-const linkStyle = {
-  color: "var(--color-primary)",
-  fontWeight: 700,
-  textDecoration: "none",
-};

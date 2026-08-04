@@ -275,12 +275,18 @@ export default function SettingsPage() {
                 {activeTab !== "notifications" && activeTab !== "tax" && activeTab !== "security" && activeTab !== "verification" && (
                     <Button
                         variant="primary"
-                        aria-label={isSaving ? "Saving changes" : "Save profile changes"}
+                        aria-label={isSaving ? "Saving changes" : "Save Changes"}
                         aria-busy={isSaving}
                         onClick={handleSave}
                         disabled={isSaving}
                     >
-                        {isSaving ? <span className="loading" /> : "💾 Save Changes"}
+                        {isSaving ? (
+                            <span className="loading" />
+                        ) : (
+                            <>
+                                <span aria-hidden="true">💾</span> Save Changes
+                            </>
+                        )}
                     </Button>
                 )}
             </div>

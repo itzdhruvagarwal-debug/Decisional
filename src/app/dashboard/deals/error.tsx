@@ -16,12 +16,11 @@ export default function DealsError({
     <div
       role="alert"
       aria-live="assertive"
-      className="flex flex-col items-center justify-center gap-5 text-primary flex-1"
-      style={{ minHeight: "60vh" }}
+      className="flex flex-col items-center justify-center gap-5 text-primary flex-1 min-h-60vh"
     >
       <div className="text-3xl" aria-hidden="true">⚠️</div>
       <h2 className="text-xl font-extrabold">Deals failed to load</h2>
-      <p className="text-secondary text-sm text-center" style={{ maxWidth: 380 }}>
+      <p className="text-secondary text-sm text-center max-w-380">
         Your deals could not be fetched. Please try again.
       </p>
       {error.digest && (

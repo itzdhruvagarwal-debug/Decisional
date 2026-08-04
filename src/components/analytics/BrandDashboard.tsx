@@ -156,7 +156,7 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
         </h3>
         <div className="chart-wrapper">
           {chartsReady && (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280}>
               <BarChart data={spendHistory} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid
                   strokeDasharray="3 3"

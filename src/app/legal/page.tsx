@@ -45,17 +45,17 @@ export default function LegalPage() {
               payment, privacy, tax-readiness, and dispute workflows.
             </p>
 
-            <div className="grid grid-auto-240" style={{ gap: "18px" }}>
+            <div className="grid grid-auto-240 gap-18px">
               {legalPages.map((page) => (
                 <Link
                   key={page.href}
                   href={page.href}
-                  className="card grid border-card text-inherit no-underline gap-2-5 bg-glass" style={{ padding: "22px" }}
+                  className="card grid border-card text-inherit no-underline gap-2-5 bg-glass legal-card"
                 >
-                  <h2 className="text-lg text-primary" style={{ fontWeight: 850 }}>
+                  <h2 className="text-lg text-primary font-black-850">
                     {page.title}
                   </h2>
-                  <p className="text-secondary text-sm" style={{ lineHeight: 1.65 }}>
+                  <p className="text-secondary text-sm leading-relaxed-1-65">
                     {page.body}
                   </p>
                   <span className="text-primary font-extrabold text-sm">

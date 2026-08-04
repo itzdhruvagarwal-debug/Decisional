@@ -47,7 +47,12 @@ export function useCampaignDetail({
 
   const rawCampaign: RawCampaign | null = payload?.data?.campaign || payload?.campaign || (payload?.data && "id" in payload.data ? (payload.data as RawCampaign) : null);
   const campaign = useMemo(() => rawCampaign ? normalizeCampaign(rawCampaign) : null, [rawCampaign]);
-  const error = fetchErr ? "Failed to load campaign" : (!rawCampaign && payload ? (payload?.message || "Campaign not found") : "");
+  let error = "";
+  if (fetchErr) {
+    error = "Failed to load campaign";
+  } else if (!rawCampaign && payload) {
+    error = payload?.message || "Campaign not found";
+  }
 
   const hasApplied = Boolean(payload?.data?.hasApplied || rawCampaign?.hasApplied || payload?.hasApplied);
   const applicationStatus = payload?.data?.applicationStatus || rawCampaign?.applicationStatus || payload?.applicationStatus || null;

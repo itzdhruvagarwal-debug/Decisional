@@ -1,7 +1,7 @@
 "use client";
 
 
-import Link from "next/link";
+
 import { useState, useMemo } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
@@ -230,14 +230,19 @@ function DealsEmptyState({ statusFilter, isInfluencer, setStatusFilter }: DealsE
     ? "No Deals Yet"
     : `No ${statusFilter.replaceAll("_", " ").toLowerCase()} deals`;
 
+  const isAll = statusFilter === "all";
+  const actionLabel = isAll ? (isInfluencer ? "Browse Campaigns" : "Create Campaign") : "View All Deals";
+  const actionHref = isAll ? (isInfluencer ? "/dashboard/campaigns" : "/dashboard/campaigns/create") : undefined;
+  const onActionClick = !isAll ? () => setStatusFilter("all") : undefined;
+
   return (
     <EmptyState
-      emoji={statusFilter === "all" ? "🤝" : "🔍"}
+      emoji={isAll ? "🤝" : "🔍"}
       title={title}
       description={message}
-      actionLabel={statusFilter === "all" ? (isInfluencer ? "Browse Campaigns" : "Create Campaign") : "View All Deals"}
-      actionHref={statusFilter === "all" ? (isInfluencer ? "/dashboard/campaigns" : "/dashboard/campaigns/create") : undefined}
-      onActionClick={statusFilter !== "all" ? () => setStatusFilter("all") : undefined}
+      actionLabel={actionLabel}
+      actionHref={actionHref}
+      onActionClick={onActionClick}
     />
   );
 }

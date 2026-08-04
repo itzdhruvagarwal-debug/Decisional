@@ -11,11 +11,11 @@ interface RatesTabProps {
 export default function RatesTab({ profile, setProfile }: Readonly<RatesTabProps>) {
     return (
         <div className="card max-w-600">
-            <h3
+            <h2
                 className="text-base font-bold mb-5"
             >
                 Your Rate Card
-            </h3>
+            </h2>
             <p
                 className="text-sm text-secondary mb-6"
             >

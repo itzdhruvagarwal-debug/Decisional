@@ -75,12 +75,12 @@ export default function DeleteAccountPanel({
     };
 
     return (
-        <div className="card" style={{ border: "1px solid rgba(239, 68, 68, 0.2)" }}>
-            <h3
+        <div className="card border-rose-subtle">
+            <h2
                 className="text-xl font-bold mb-3 text-rose"
             >
                 ⚠️ Danger Zone: Delete Account
-            </h3>
+            </h2>
             <p
                 className="text-sm text-secondary mb-5 leading-normal"
             >
@@ -91,7 +91,7 @@ export default function DeleteAccountPanel({
                 <div
                     role="alert"
                     aria-live="assertive"
-                    className="p-3 mb-4 rounded-sm text-rose bg-rose-subtle" style={{ border: "1px solid rgba(239, 68, 68, 0.2)" }}
+                    className="p-3 mb-4 rounded-sm text-rose bg-rose-subtle border-rose-subtle"
                 >
                     {error}
                 </div>

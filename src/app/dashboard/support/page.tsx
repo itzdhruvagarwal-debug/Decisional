@@ -98,7 +98,7 @@ export default function SupportPage() {
 
   return (
     <DashboardShell user={session?.user}>
-      <div className="max-w-680 mx-auto" style={{ padding: "24px 16px" }}>
+      <div className="max-w-680 mx-auto p-24-16">
         <header className="mb-8 text-center">
           <h1 className="font-extrabold mb-2 gradient-text text-3xl">
             Support & Feedback Hub
@@ -180,7 +180,7 @@ export default function SupportPage() {
                   disabled={uploadingScreenshot}
                   onClick={() => fileInputRef.current?.click()}
                   variant="ghost"
-                  className="w-full p-3 text-secondary text-center font-semibold" style={{ border: "1px dashed var(--color-border)" }}
+                  className="w-full p-3 text-secondary text-center font-semibold border-dashed"
                 >
                   {uploadingScreenshot ? "Uploading screenshot..." : "📷 Upload Screenshot (Max 5MB)"}
                 </Button>
@@ -197,7 +197,7 @@ export default function SupportPage() {
           </div>
 
           {errorMsg && (
-            <div role="alert" aria-live="assertive" className="p-3 text-sm rounded-sm text-rose" style={{ background: "rgba(225,29,72,0.1)" }}>
+            <div role="alert" aria-live="assertive" className="p-3 text-sm rounded-sm text-rose bg-rose-subtle">
               {errorMsg}
             </div>
           )}
@@ -209,7 +209,7 @@ export default function SupportPage() {
           )}
 
           {badgeAwarded && (
-            <div className="flex items-center gap-4 p-4 rounded-md" style={{ background: "linear-gradient(135deg, rgba(234,179,8,0.15), rgba(249,115,22,0.15))", border: "1px solid rgba(234,179,8,0.3)" }}>
+            <div className="flex items-center gap-4 p-4 rounded-md badge-earning-panel">
               <span className="text-3xl">🏆</span>
               <div>
                 <h4 className="font-extrabold text-amber">New Badge Earned!</h4>

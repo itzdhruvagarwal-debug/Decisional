@@ -1,7 +1,6 @@
 import { Prisma } from "@prisma/client";
-import { BrandComplianceConfig } from "./types";
+import { BrandComplianceConfig, DbClient, GamificationUser } from "./types";
 import prisma from "../db";
-import { DbClient, GamificationUser } from "./types";
 
 export async function checkBrandFastApprover(userId: string, db: DbClient): Promise<boolean> {
   const submissions = await db.contentSubmission.findMany({

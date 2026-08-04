@@ -69,7 +69,7 @@ function ApplicationsTableSkeleton() {
                   <div className="flex items-center gap-3">
                     <Skeleton width={36} height={36} borderRadius={4} />
                     <div>
-                      <Skeleton height={14} width={160} borderRadius={4} style={{ marginBottom: 6 }} />
+                      <Skeleton height={14} width={160} borderRadius={4} className="mb-1-5" />
                       <Skeleton height={11} width={100} borderRadius={4} />
                     </div>
                   </div>
@@ -77,7 +77,7 @@ function ApplicationsTableSkeleton() {
                 <td className="p-4"><Skeleton height={14} width={72} borderRadius={4} /></td>
                 <td className="p-4"><Skeleton height={14} width={80} borderRadius={4} /></td>
                 <td className="p-4"><Skeleton height={24} width={72} borderRadius={6} /></td>
-                <td className="p-4 text-right"><Skeleton height={32} width={108} borderRadius={6} style={{ marginLeft: "auto" }} /></td>
+                <td className="p-4 text-right"><Skeleton height={32} width={108} borderRadius={6} className="ml-auto" /></td>
               </tr>
             ))}
           </tbody>
@@ -210,7 +210,7 @@ export default function ApplicationsPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <div className="mx-auto max-w-1000" style={{ padding: "40px 20px" }}>
+      <div className="mx-auto max-w-1000 p-40-20">
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-extrabold text-3xl">My Applications</h1>
@@ -221,7 +221,7 @@ export default function ApplicationsPage() {
 
         {error && (
           <div
-            className="card p-4 mb-6 rounded-md text-rose" style={{ background: "rgba(244, 63, 94, 0.08)", border: "1px solid rgba(244, 63, 94, 0.2)" }}
+            className="card p-4 mb-6 rounded-md text-rose bg-rose-subtle border-rose-subtle"
           >
             {error}
           </div>

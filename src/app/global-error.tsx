@@ -22,14 +22,14 @@ export default function GlobalError({
         <title>System Error - Decisional</title>
       </head>
       <body
-        className="flex items-center justify-center p-6 bg-primary text-primary min-h-screen" style={{ fontFamily: "'Inter', sans-serif" }}
+        className="flex items-center justify-center p-6 bg-primary text-primary min-h-screen font-inter"
       >
         {/* Abstract Background Elements */}
-        <div className="fixed z-0" style={{ top: "10%", left: "5%", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(244, 63, 94, 0.08) 0%, transparent 70%)" }} />
+        <div className="fixed z-0 system-error-bg-glow" />
 
-        <div className="glass col-span-2 text-center w-full relative rounded-xl z-1" style={{ maxWidth: "500px", padding: "48px 32px", border: "1px solid rgba(244, 63, 94, 0.2)" }}>
+        <div className="glass col-span-2 text-center w-full relative rounded-xl z-1 system-error-card border-rose-subtle">
           <div
-            className="flex items-center justify-center mb-8 bg-rose-subtle text-rose rounded-full text-3xl mx-auto w-80" style={{ height: "80px", border: "1px solid rgba(244, 63, 94, 0.2)", boxShadow: "0 0 30px rgba(244, 63, 94, 0.1)" }}
+            className="flex items-center justify-center mb-8 bg-rose-subtle text-rose rounded-full text-3xl mx-auto w-80 system-error-icon border-rose-subtle"
           >
             ⚠️
           </div>
@@ -54,7 +54,7 @@ export default function GlobalError({
               onClick={() => reset()}
               variant="danger"
               aria-label="Restart Session"
-              className="flex-1" style={{ boxShadow: "0 0 20px rgba(244, 63, 94, 0.2)" }}
+              className="flex-1 btn-restart-shadow"
             >
               🔄 Restart Session
             </Button>

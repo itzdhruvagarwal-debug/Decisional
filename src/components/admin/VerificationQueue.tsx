@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { AdminService } from "@/services/admin.service";
 import EmptyState from "@/components/ui/EmptyState";
@@ -37,12 +36,7 @@ export default function VerificationQueue({ pendingUsers, isNarrow = false }: Re
                 <div className="vq-user-info">
                   <div
                     className="avatar"
-                    style={{
-                      background:
-                        user.userType === "BRAND"
-                          ? "var(--color-secondary)"
-                          : "var(--gradient-primary)",
-                    }}
+                    data-type={user.userType.toLowerCase()}
                   >
                     {name[0]}
                   </div>

@@ -93,7 +93,7 @@ export default function WeeklyChallenges() {
                 : "bg-[var(--color-bg-secondary)]"
             }`}
           >
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 gap-4">
               <div className="flex items-center gap-4">
                 <div className="text-4xl">{challenge.icon}</div>
                 <div>
@@ -110,7 +110,7 @@ export default function WeeklyChallenges() {
                   </p>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-left sm:text-right flex-shrink-0">
                 <div className="text-2xl font-bold text-[var(--color-accent)]">
                   +{challenge.xpReward} XP
                 </div>

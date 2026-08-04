@@ -24,7 +24,7 @@ export default function SecurityTab({
 }: Readonly<SecurityTabProps>) {
     return (
         <div
-            className="grid gap-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}
+            className="grid gap-6 grid-auto-300"
         >
             <ContactVerificationPanel
                 user={user}

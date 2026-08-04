@@ -213,13 +213,15 @@ export function MessageList({ state }: Readonly<ChatPanelProps>) {
       aria-relevant="additions"
       className="flex-1 p-6 flex flex-col gap-4 bg-tertiary overflow-y-auto"
     >
-      {loadingMessages ? (
+      {loadingMessages && (
         <div className="text-center p-5">
           <span className="loading w-16 h-16" />
         </div>
-      ) : messages.length === 0 ? (
+      )}
+      {!loadingMessages && messages.length === 0 && (
         <div className="text-center text-muted p-5 text-sm">No messages yet. Say hello!</div>
-      ) : (
+      )}
+      {!loadingMessages && messages.length > 0 && (
         messages.map((msg: Message) => (
           <div key={msg.id} className={`flex ${msg.isMe ? "justify-end" : "justify-start"}`}>
             <div
@@ -313,7 +315,7 @@ export function ChatInputArea({ state }: Readonly<ChatPanelProps>) {
       return;
     }
     const amountVal = Number(offerAmount);
-    if (isNaN(amountVal) || amountVal <= 0) {
+    if (Number.isNaN(amountVal) || amountVal <= 0) {
       showToast("error", "Please enter a valid amount");
       return;
     }
@@ -337,7 +339,8 @@ export function ChatInputArea({ state }: Readonly<ChatPanelProps>) {
       setOfferContentDeadline("");
       setOfferPostingDeadline("");
     } catch (err) {
-      showToast("error", "Failed to send offer");
+      const message = err instanceof Error ? err.message : "Failed to send offer";
+      showToast("error", message);
     }
   };
 

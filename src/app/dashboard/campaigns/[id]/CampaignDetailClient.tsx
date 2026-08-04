@@ -281,7 +281,7 @@ export default function CampaignDetailClient({
                   <span className="flex-shrink-0 text-emerald">✓</span>
                   <div>
                     <span className="font-semibold text-primary">
-                      {item.count}x {item.type.replace(/_/g, " ").toLowerCase()}
+                      {item.count}x {item.type.replaceAll("_", " ").toLowerCase()}
                     </span>
                     {item.specs && (
                       <p className="text-muted text-xs mt-0.5 leading-relaxed">{item.specs}</p>

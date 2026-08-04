@@ -16,12 +16,11 @@ export default function AdminFinancialError({
     <div
       role="alert"
       aria-live="assertive"
-      className="admin-page flex flex-col items-center justify-center gap-5 text-primary"
-      style={{ minHeight: "60vh" }}
+      className="admin-page flex flex-col items-center justify-center gap-5 text-primary min-h-60vh"
     >
       <div className="text-3xl" aria-hidden="true">⚠️</div>
       <h2 className="text-xl font-extrabold">Financial overview failed to load</h2>
-      <p className="text-secondary text-sm text-center" style={{ maxWidth: 400 }}>
+      <p className="text-secondary text-sm text-center max-w-400">
         Treasury and platform fee data could not be fetched. Check service availability and try again.
       </p>
       {error.digest && (

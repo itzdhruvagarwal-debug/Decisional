@@ -43,7 +43,7 @@ export default function ContactPage() {
             </div>
 
             <div className="grid-2 gap-8 items-start">
-              <div className="grid" style={{ gap: "18px" }}>
+              <div className="grid gap-18px">
                 {contactRows.map((row) => (
                   <article key={row.title} className="card">
                     <h2 className="text-xl font-extrabold mb-2">
@@ -52,7 +52,7 @@ export default function ContactPage() {
                     <p className="text-secondary mb-3 leading-relaxed">
                       {row.body}
                     </p>
-                    <a href={row.href} style={linkStyle}>
+                    <a href={row.href} className="text-primary font-bold">
                       {row.label}
                     </a>
                   </article>
@@ -75,7 +75,7 @@ export default function ContactPage() {
                     Open Dispute Center
                   </Link>
                 </div>
-                <div className="mt-6 border-top" style={{ paddingTop: "20px" }}>
+                <div className="mt-6 border-top pt-5">
                   <h3 className="text-base font-extrabold mb-2">
                     Response windows
                   </h3>
@@ -95,8 +95,3 @@ export default function ContactPage() {
   );
 }
 
-const linkStyle = {
-  color: "var(--color-primary)",
-  fontWeight: 700,
-  textDecoration: "none",
-};

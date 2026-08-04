@@ -22,7 +22,7 @@ export default function CookiePage() {
 
             <div className="text-secondary grid gap-8 leading-relaxed text-sm">
               <section>
-                <h2 style={headingStyle}>1. What cookies do</h2>
+                <h2 className="terms-heading">1. What cookies do</h2>
                 <p>
                   Cookies and similar technologies help Decisional keep users signed in, secure
                   payments, remember preferences, detect abuse, measure reliability, and improve
@@ -32,8 +32,8 @@ export default function CookiePage() {
                 </p>
               </section>
 
-              <section className="card" style={panelStyle}>
-                <h2 style={headingStyle}>2. Types we use</h2>
+              <section className="card terms-panel">
+                <h2 className="terms-heading">2. Types we use</h2>
                 <ul className="list-disc pl-6 space-y-3">
                   <li>
                     <strong>Essential cookies:</strong> authentication, CSRF protection, session
@@ -64,7 +64,7 @@ export default function CookiePage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>3. Your choices</h2>
+                <h2 className="terms-heading">3. Your choices</h2>
                 <p>
                   You can block or delete cookies in your browser. Essential cookies are required
                   for login, payments, security, and dashboard access. If you block them, core
@@ -78,7 +78,7 @@ export default function CookiePage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>4. Third-party cookies</h2>
+                <h2 className="terms-heading">4. Third-party cookies</h2>
                 <p>
                   Payment, OTP, social-login, KYC, analytics, and support providers may set their
                   own cookies or local storage when their tools are loaded or used. Their use is
@@ -87,10 +87,10 @@ export default function CookiePage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>5. Contact</h2>
+                <h2 className="terms-heading">5. Contact</h2>
                 <p>
                   For cookie or tracking questions, email{" "}
-                  <a href="mailto:privacy@decisional.in" style={linkStyle}>privacy@decisional.in</a>.
+                  <a href="mailto:privacy@decisional.in" className="terms-link">privacy@decisional.in</a>.
                 </p>
               </section>
             </div>
@@ -102,22 +102,3 @@ export default function CookiePage() {
     </div>
   );
 }
-
-const headingStyle = {
-  fontSize: "20px",
-  fontWeight: 800,
-  color: "var(--color-text-primary)",
-  marginBottom: "14px",
-};
-
-const panelStyle = {
-  padding: "24px",
-  background: "rgba(255,255,255,0.02)",
-  border: "1px solid var(--color-border)",
-};
-
-const linkStyle = {
-  color: "var(--color-primary)",
-  fontWeight: 700,
-  textDecoration: "none",
-};

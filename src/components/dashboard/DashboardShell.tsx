@@ -483,13 +483,10 @@ const SidebarComponent = memo(function SidebarComponent({
   return (
     <>
       {/* Mobile Sidebar Overlay */}
-      <Button
-        type="button"
-        variant="ghost"
+      <div
         className={`sidebar-overlay ${mobileSidebarOpen ? "active" : ""}`}
         onClick={() => setMobileSidebarOpen(false)}
         aria-hidden="true"
-        tabIndex={-1}
       />
 
       {/* Sidebar */}
@@ -628,7 +625,7 @@ const TopbarComponent = memo(function TopbarComponent({
           <AppIcon name="menu" size={22} />
         </Button>
         <div className="dashboard-mobile-logo" aria-hidden="true">
-          <Logo />
+          <Logo tabIndex={-1} />
         </div>
         <div>
           <h1 className="dashboard-topbar-title">

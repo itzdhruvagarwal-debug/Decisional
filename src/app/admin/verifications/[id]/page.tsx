@@ -230,7 +230,7 @@ export default async function VerificationDetailPage({
       </div>
 
       {/* Global Actions Bar */}
-      <footer className="flex flex-col gap-6 p-8 bg-secondary rounded-xl border-card" style={{ marginTop: "40px" }}>
+      <footer className="flex flex-col gap-6 p-8 bg-secondary rounded-xl border-card mt-10">
         <div>
           <h3 className="text-base font-bold mb-1">Decision Engine</h3>
           <p className="text-secondary text-sm">Finalize user status. This will trigger system-wide webhooks and emails.</p>
@@ -243,7 +243,7 @@ export default async function VerificationDetailPage({
             </Button>
           </form>
 
-          <div className="h-40" style={{ width: "1px", background: "var(--color-border)" }} />
+          <div className="vertical-separator" />
 
           <form
             action={async (formData) => {
@@ -252,13 +252,13 @@ export default async function VerificationDetailPage({
               const { reason } = verificationRejectSchema.parse({ reason: rawReason });
               await rejectUser(user.id, reason);
             }}
-            className="flex gap-3 flex-wrap" style={{ flex: "1 1 360px" }}
+            className="flex gap-3 flex-wrap flex-basis-300"
           >
             <Input
               name="reason"
               placeholder="Final rejection context..."
               required
-              className="h-13" style={{ flex: "1 1 260px" }}
+              className="h-13 flex-basis-200"
             />
             <Button type="submit" variant="danger" size="lg" className="min-w-180">
               ❌ Hard Reject

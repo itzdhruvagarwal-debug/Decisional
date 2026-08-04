@@ -40,7 +40,7 @@ export function DealActionButtons({
   setShowReviewModal,
 }: Readonly<DealActionButtonsProps>) {
   return (
-    <div className="deal-detail-actions flex gap-3 mb-6 flex-wrap" role="group" aria-label="Deal actions">
+    <div className="deal-detail-actions flex gap-3 mb-6 flex-wrap" aria-label="Deal actions">
       {dealStatus === "PENDING_SIGNATURE" && (
         <>
           <Button

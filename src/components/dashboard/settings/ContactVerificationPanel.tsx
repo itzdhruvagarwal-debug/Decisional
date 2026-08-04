@@ -158,7 +158,7 @@ export default function ContactVerificationPanel({
         if (user?.emailVerified && user?.email) {
             return (
                 <div className="flex gap-2 items-center">
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald bg-emerald-subtle rounded-2xl" style={{ padding: '5px 12px' }}>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald bg-emerald-subtle rounded-2xl px-3-py-1-2">
                         ✅ Verified
                     </span>
                 <Button variant="secondary" disabled={isSaving} className="text-xs px-2-py-1" onClick={() => handleStartContactChange('email')}>{isSaving ? '...' : 'Change'}</Button>
@@ -213,7 +213,7 @@ export default function ContactVerificationPanel({
         if (user?.phoneVerified && user?.phone) {
             return (
                 <div className="flex gap-2 items-center">
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald bg-emerald-subtle rounded-2xl" style={{ padding: '5px 12px' }}>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald bg-emerald-subtle rounded-2xl px-3-py-1-2">
                         ✅ Verified
                     </span>
                     <Button variant="secondary" disabled={isSaving} className="text-xs px-2-py-1" onClick={() => handleStartContactChange('phone')}>{isSaving ? '...' : 'Change'}</Button>
@@ -245,7 +245,7 @@ export default function ContactVerificationPanel({
         if (verifyContactState.type === 'phone' && verifyContactState.step === 'input') {
             return (
                 <div className="flex gap-2">
-                    <Input type="text" aria-label="Phone number with country code" placeholder="e.g. 919876543210" className="text-xs px-2-py-1" style={{ width: '130px' }} value={pendingContact} onChange={(e) => setPendingContact(e.target.value)} />
+                    <Input type="text" aria-label="Phone number with country code" placeholder="e.g. 919876543210" className="text-xs px-2-py-1 w-130" value={pendingContact} onChange={(e) => setPendingContact(e.target.value)} />
                     <Button variant="primary" disabled={isSaving} onClick={async () => {
                         if (pendingContact) {
                             setIsSaving(true);
@@ -286,12 +286,12 @@ export default function ContactVerificationPanel({
 
     return (
         <div className="card">
-            <h3 className="text-xl font-bold mb-6">
+            <h2 className="text-xl font-bold mb-6">
                 Contact Verification
-            </h3>
+            </h2>
             <div className="flex flex-col gap-4">
                 {/* Email Verification */}
-                <div className="flex justify-between items-center p-3 rounded-sm" style={{ background: (user?.emailVerified && user?.email) ? 'rgba(16, 185, 129, 0.06)' : 'var(--color-bg-tertiary)', border: (user?.emailVerified && user?.email) ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid transparent' }}>
+                <div className={`flex justify-between items-center p-3 rounded-sm ${user?.emailVerified && user?.email ? "bg-emerald-subtle border-emerald-subtle" : "bg-tertiary border-inactive-login"}`}>
                     <div>
                         <div className="font-semibold text-sm">📧 Email Address</div>
                         <div className="text-xs text-muted">{user?.email || 'N/A'}</div>
@@ -300,7 +300,7 @@ export default function ContactVerificationPanel({
                 </div>
  
                 {/* Phone Verification */}
-                <div className="flex justify-between items-center p-3 rounded-sm" style={{ background: (user?.phoneVerified && user?.phone) ? 'rgba(16, 185, 129, 0.06)' : 'var(--color-bg-tertiary)', border: (user?.phoneVerified && user?.phone) ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid transparent' }}>
+                <div className={`flex justify-between items-center p-3 rounded-sm ${user?.phoneVerified && user?.phone ? "bg-emerald-subtle border-emerald-subtle" : "bg-tertiary border-inactive-login"}`}>
                     <div>
                         <div className="font-semibold text-sm">📱 Phone Number</div>
                         <div className="text-xs text-muted">

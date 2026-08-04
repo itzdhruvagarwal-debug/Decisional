@@ -8,27 +8,21 @@ import PeriodPickerModal, { type PeriodValue } from "@/components/dashboard/wall
 import { logger } from "@/lib/logger-client";
 import { Button, Input, Select } from "@/components/ui";
 
-const transactionTypeIcons: Record<string, { icon: string; color: string }> = {
-  CREDIT: { icon: "IN", color: "var(--color-accent-emerald)" },
-  DEBIT: { icon: "OUT", color: "var(--color-accent-rose)" },
-  WITHDRAWAL: { icon: "WD", color: "var(--color-accent-amber)" },
-  REFUND: { icon: "RF", color: "var(--color-accent-cyan)" },
-  PLATFORM_FEE: { icon: "FEE", color: "var(--color-text-secondary)" },
-  CHARGEBACK: { icon: "CB", color: "var(--color-accent-rose)" },
+const transactionTypeIcons: Record<string, { icon: string; textClass: string }> = {
+  CREDIT: { icon: "IN", textClass: "text-emerald" },
+  DEBIT: { icon: "OUT", textClass: "text-rose" },
+  WITHDRAWAL: { icon: "WD", textClass: "text-amber" },
+  REFUND: { icon: "RF", textClass: "text-cyan" },
+  PLATFORM_FEE: { icon: "FEE", textClass: "text-secondary" },
+  CHARGEBACK: { icon: "CB", textClass: "text-rose" },
 };
 
-const statusColors: Record<string, { bg: string; text: string }> = {
-  COMPLETED: {
-    bg: "rgba(16, 185, 129, 0.2)",
-    text: "var(--color-accent-emerald)",
-  },
-  PENDING: { bg: "rgba(245, 158, 11, 0.2)", text: "var(--color-accent-amber)" },
-  PROCESSING: {
-    bg: "rgba(99, 102, 241, 0.2)",
-    text: "var(--color-primary-light)",
-  },
-  FAILED: { bg: "rgba(244, 63, 94, 0.2)", text: "var(--color-accent-rose)" },
-  REVERSED: { bg: "rgba(244, 63, 94, 0.2)", text: "var(--color-accent-rose)" },
+const statusColors: Record<string, string> = {
+  COMPLETED: "bg-emerald-subtle text-emerald",
+  PENDING: "bg-amber-subtle text-amber",
+  PROCESSING: "bg-indigo-subtle text-primary-light",
+  FAILED: "bg-rose-subtle text-rose",
+  REVERSED: "bg-rose-subtle text-rose",
 };
 
 interface Transaction {
@@ -310,7 +304,7 @@ export default function TransactionHistory() {
     }
     if (error) {
       return (
-        <div className="text-center" style={{ padding: "48px 24px" }}>
+        <div className="text-center p-48-24">
           <div
             className="mb-4 text-sm font-semibold text-rose"
           >
@@ -361,15 +355,12 @@ export default function TransactionHistory() {
             {transactions.map((tx) => {
               const typeInfo = transactionTypeIcons[tx.type] || {
                 icon: "TX",
-                color: "var(--color-text-secondary)",
+                textClass: "text-secondary",
               };
               const isOutflow = ["DEBIT", "WITHDRAWAL", "PLATFORM_FEE", "CHARGEBACK"].includes(
                 tx.type,
               );
-              const statusColor = statusColors[tx.status] || {
-                bg: "rgba(255,255,255,0.1)",
-                text: "white",
-              };
+              const statusColorClass = statusColors[tx.status] || "bg-glass-light text-primary";
 
               return (
                 <tr
@@ -381,7 +372,7 @@ export default function TransactionHistory() {
                       className="flex items-center gap-2"
                     >
                       <div
-                        className="flex items-center justify-center font-bold rounded-md text-2xs" style={{ minWidth: "40px", height: "32px", background: "rgba(255,255,255,0.05)", color: typeInfo.color }}
+                        className={`flex items-center justify-center font-bold rounded-md text-2xs bg-glass-light tx-icon-wrapper ${typeInfo.textClass}`}
                       >
                         {typeInfo.icon}
                       </div>
@@ -389,14 +380,14 @@ export default function TransactionHistory() {
                     </div>
                   </td>
                   <td
-                    className="font-semibold px-6-py-4" style={{ color: typeInfo.color }}
+                    className={`font-semibold px-6-py-4 ${typeInfo.textClass}`}
                   >
                     {isOutflow ? "-" : "+"}
                     {formatCurrency(tx.amount)}
                   </td>
                   <td className="px-6-py-4">
                     <span
-                      className="text-xs font-semibold rounded-lg px-2-py-1" style={{ background: statusColor.bg, color: statusColor.text }}
+                      className={`text-xs font-semibold rounded-lg px-2-py-1 ${statusColorClass}`}
                     >
                       {tx.status}
                     </span>

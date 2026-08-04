@@ -3,8 +3,8 @@ import { createApplication } from "./application/create";
 import { acceptApplication, rejectApplication } from "./application/action";
 
 export class ApplicationService {
-  static listApplications = listApplications;
-  static createApplication = createApplication;
-  static acceptApplication = acceptApplication;
-  static rejectApplication = rejectApplication;
+  static readonly listApplications = listApplications;
+  static readonly createApplication = createApplication;
+  static readonly acceptApplication = acceptApplication;
+  static readonly rejectApplication = rejectApplication;
 }

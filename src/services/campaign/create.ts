@@ -1,9 +1,8 @@
-import { UserStatus } from "@prisma/client";
+import { UserStatus, Prisma, UserType } from "@prisma/client";
 import { checkTrustGate } from "@/lib/trust-engine";
 import { isBrand } from "@/lib/rbac";
 import { logger } from "@/lib/logger";
 import prisma from "@/lib/db";
-import { Prisma, UserType } from "@prisma/client";
 import { AppError } from "@/lib/errors";
 import { createActivityLog } from "@/lib/audit";
 import { NotificationService } from "@/services/notification.service";

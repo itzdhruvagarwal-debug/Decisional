@@ -44,7 +44,7 @@ export default function TwoFactorAuthPanel({
         <div className="flex flex-col gap-6">
             {/* Recovery Codes Display — shown once after 2FA setup */}
             {recoveryCodes.length > 0 && (
-                <div className="card" style={{ border: "2px solid var(--color-accent-amber)", background: "rgba(245, 158, 11, 0.06)" }}>
+                <div className="card card-amber-warning">
                     <div className="flex justify-between items-center mb-3">
                         <h3 className="text-base font-extrabold text-amber">🔑 Save Your Recovery Codes</h3>
                         <Button variant="ghost" onClick={() => setRecoveryCodes([])} className="text-xs">I've saved them ✓</Button>
@@ -52,7 +52,7 @@ export default function TwoFactorAuthPanel({
                     <p className="text-sm text-secondary mb-3">
                         These codes can be used to access your account if you lose your authenticator. Each code can only be used once. Store them somewhere safe — they won't be shown again.
                     </p>
-                    <div className="grid gap-2 mb-3" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                    <div className="grid gap-2 mb-3 responsive-two-col">
                         {recoveryCodes.map((code) => (
                             <div key={code} className="text-sm font-bold bg-tertiary rounded-sm border-card font-mono px-3-py-2 tracking-widest">
                                 {code}
@@ -75,11 +75,11 @@ export default function TwoFactorAuthPanel({
                     className="flex justify-between items-start mb-4"
                 >
                     <div>
-                        <h3
+                        <h2
                             className="text-lg font-bold mb-1"
                         >
                             Two-Factor Authentication
-                        </h3>
+                        </h2>
                         <p
                             className="text-sm text-secondary"
                         >
@@ -124,7 +124,7 @@ export default function TwoFactorAuthPanel({
                             1. Scan this QR code with your authenticator app (e.g. Google Authenticator, Authy):
                         </p>
                         <div
-                            className="flex justify-center mb-4 p-4 rounded-md" style={{ background: "white", width: "fit-content", margin: "0 auto 16px auto" }}
+                            className="flex justify-center mb-4 p-4 rounded-md qr-code-container"
                         >
                             <Image
                                 src={qrCodeData.qrCodeUrl}

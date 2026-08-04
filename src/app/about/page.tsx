@@ -43,29 +43,29 @@ export default function AboutPage() {
 
         <section className="section">
           <div className="container">
-            <div className="grid-2 items-center" style={{ gap: "48px" }}>
+            <div className="grid-2 items-center gap-48px">
               <div>
                 <h2 className="font-extrabold mb-5 text-3xl">
                   Why Decisional exists
                 </h2>
-                <p style={bodyStyle}>
+                <p className="text-secondary mb-4 leading-relaxed">
                   Influencer campaigns often fail because the basics are scattered:
                   unclear briefs, risky advance payments, fake reach, missing approvals,
                   tax confusion, and no reliable record when a deal goes wrong.
                 </p>
-                <p style={bodyStyle}>
+                <p className="text-secondary mb-4 leading-relaxed">
                   Decisional brings those moving parts into one protected workflow. Brands
                   can fund campaigns, review applications, sign contracts, approve content,
                   and resolve disputes. Influencers can discover relevant campaigns, submit
                   work, track payments, and build trust through verified performance.
                 </p>
               </div>
-              <div style={visualPanelStyle}>
-                <div style={{ maxWidth: "340px" }}>
+              <div className="about-visual-panel">
+                <div className="max-w-340">
                   <div className="text-sm font-extrabold mb-3 text-primary-light uppercase">
                     Built for operational trust
                   </div>
-                  <h3 className="mb-4 text-3xl" style={{ lineHeight: 1.2 }}>
+                  <h3 className="mb-4 text-3xl leading-1-2">
                     Brief. Escrow. Verify. Release.
                   </h3>
                   <p className="text-secondary leading-relaxed">
@@ -104,20 +104,3 @@ export default function AboutPage() {
   );
 }
 
-const bodyStyle = {
-  color: "var(--color-text-secondary)",
-  marginBottom: "16px",
-  lineHeight: 1.7,
-};
-
-const visualPanelStyle = {
-  minHeight: "360px",
-  background:
-    "linear-gradient(135deg, rgba(109, 40, 255, 0.12), rgba(16, 185, 129, 0.1))",
-  borderRadius: "24px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  border: "1px solid rgba(109, 40, 255, 0.22)",
-  padding: "32px",
-};

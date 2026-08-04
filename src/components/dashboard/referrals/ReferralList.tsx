@@ -56,7 +56,7 @@ export default function ReferralList() {
           <Badge variant="primary">{referrals.length}</Badge>
         </h3>
 
-        <div className="flex gap-2">
+        <div className="scrollable-tabs flex gap-2">
           {["ALL", "ACTIVE", "PENDING"].map((f) => (
             <Button
               key={f}

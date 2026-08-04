@@ -156,17 +156,16 @@ export default function SocialTab({
                     className="flex items-center gap-3 mb-5"
                 >
                     <div
-                        className="flex items-center justify-center text-2xl rounded-md w-48 h-48" style={{ background:
-                                "linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)" }}
+                        className="flex items-center justify-center text-2xl rounded-md w-48 h-48 bg-instagram"
                     >
                         📸
                     </div>
                     <div className="flex-1">
-                        <h3 className="text-base font-bold mb-1">
+                        <h2 className="text-base font-bold mb-1">
                             Instagram
-                        </h3>
+                        </h2>
                         <div
-                            className="text-xs" style={{ color: socialConnections?.instagram?.connected ? "#10b981" : "var(--color-text-muted)" }}
+                            className={`text-xs ${socialConnections?.instagram?.connected ? "text-emerald" : "text-muted"}`}
                         >
                             {socialConnections?.instagram?.connected ? "✅ Connected" : "❌ Not Connected"}
                         </div>
@@ -255,16 +254,16 @@ export default function SocialTab({
                     className="flex items-center gap-3 mb-5"
                 >
                     <div
-                        className="flex items-center justify-center text-2xl rounded-md w-48 h-48" style={{ background: "#FF0000" }}
+                        className="flex items-center justify-center text-2xl rounded-md w-48 h-48 bg-youtube"
                     >
                         🎥
                     </div>
                     <div className="flex-1">
-                        <h3 className="text-base font-bold mb-1">
+                        <h2 className="text-base font-bold mb-1">
                             YouTube
-                        </h3>
+                        </h2>
                         <div
-                            className="text-xs" style={{ color: socialConnections?.youtube?.connected ? "#10b981" : "var(--color-text-muted)" }}
+                            className={`text-xs ${socialConnections?.youtube?.connected ? "text-emerald" : "text-muted"}`}
                         >
                             {socialConnections?.youtube?.connected ? "✅ Connected" : "❌ Not Connected"}
                         </div>

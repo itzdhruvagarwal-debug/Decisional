@@ -415,7 +415,7 @@ function WalletHeader({
         </p>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 flex-wrap">
         {userType === "BRAND" && (
           <Button variant="secondary" aria-label="Add funds to wallet" onClick={() => setShowAddFundsModal(true)}>
             Add Funds

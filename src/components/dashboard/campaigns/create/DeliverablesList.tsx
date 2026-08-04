@@ -72,9 +72,11 @@ export function DeliverablesList({
       {formData.deliverables.map((item, index) => (
         <div
           key={`deliv-${item.type}-${index}`}
-          className="flex gap-3 items-center mb-2"
+          className="flex flex-wrap sm:flex-nowrap gap-2-5 sm:gap-3 items-center mb-4 sm:mb-2 pb-3 sm:pb-0 border-b-card sm:border-none w-full"
         >
           <Select
+            id={`deliverable-type-${index}`}
+            name={`deliverable-type-${index}`}
             value={item.type}
             onChange={(e) =>
               handleDeliverableChange(index, "type", e.target.value)
@@ -89,6 +91,8 @@ export function DeliverablesList({
           </Select>
           
           <Input
+            id={`deliverable-qty-${index}`}
+            name={`deliverable-qty-${index}`}
             type="number"
             value={item.count}
             onChange={(e) =>
@@ -101,6 +105,7 @@ export function DeliverablesList({
             min={1}
             max={10}
             className="w-80"
+            aria-label="Quantity"
           />
           
           <span className="text-secondary text-sm">
@@ -109,6 +114,8 @@ export function DeliverablesList({
           
           <div className="flex flex-col gap-1">
             <Input
+              id={`deliverable-rate-${index}`}
+              name={`deliverable-rate-${index}`}
               type="number"
               value={item.rate || ""}
               onChange={(e) =>
@@ -120,7 +127,8 @@ export function DeliverablesList({
               }
               min={0}
               placeholder="Rate (Rs)"
-              style={{ width: "110px" }}
+              className="w-110"
+              aria-label="Rate in Rupees"
             />
             <span className="text-muted whitespace-nowrap text-2xs">
               Rec: ₹{getRecommendedRate(item.type, formData.minFollowers).toLocaleString("en-IN")}
@@ -132,7 +140,7 @@ export function DeliverablesList({
               type="button"
               variant="ghost"
               onClick={() => handleRemoveDeliverable(index)}
-              className="text-lg text-rose" style={{ padding: "0 8px" }}
+              className="text-lg text-rose deliverable-remove-btn"
             >
               x
             </Button>

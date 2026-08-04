@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
-import { logger } from "@/lib/logger-client";
+
 import {
   DealDetail,
   parseContractTerms,

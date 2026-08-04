@@ -145,7 +145,7 @@ export default async function AdminDisputeDetailPage({
         <div className="card">
           <h2>Case Details</h2>
           <dl
-            className="grid mt-4" style={{ gridTemplateColumns: "120px 1fr", gap: "8px 16px" }}
+            className="grid mt-4 metadata-dl"
           >
             <dt className="font-semibold text-secondary">Status</dt>
             <dd className={`badge badge-${dispute.status === "OPEN" ? "warning" : "success"}`}>

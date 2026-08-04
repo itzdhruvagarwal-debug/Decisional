@@ -32,8 +32,7 @@ function MessagesContent() {
     <DashboardShell user={session.user}>
       <ToastContainer toasts={toasts} onClose={removeToast} />
       <div
-        className="card flex overflow-hidden p-0 bg-primary"
-        style={{ height: "calc(100vh - 120px)" }}
+        className="card flex overflow-hidden p-0 bg-primary messages-container"
       >
         <ConversationsSidebar state={state} />
         <ChatPanel state={state} />

@@ -27,7 +27,13 @@ export function StatusBadge({ doc }: Readonly<StatusBadgeProps>) {
     };
     return (
         <span
-            className="font-semibold text-xs rounded-2xl px-2-py-05" style={{ color: colors[doc.status] || "#999", background: `${colors[doc.status]}18` }}
+            className={`font-semibold text-xs rounded-2xl px-2-py-05 ${
+                doc.status === "VERIFIED"
+                    ? "text-emerald bg-emerald-subtle border-emerald-subtle"
+                    : doc.status === "REJECTED"
+                    ? "text-rose bg-rose-subtle border-rose-subtle"
+                    : "text-amber bg-amber-subtle border-amber-subtle"
+            }`}
         >
             {icons[doc.status]} {doc.status}
         </span>
@@ -59,7 +65,7 @@ export function UploadBtn({
     return (
         <Button
             variant="secondary"
-            aria-label={`${doc ? "Re-upload" : "Upload"} ${type.replace(/_/g, " ").toLowerCase()}`}
+            aria-label={`${doc ? "Re-upload" : "Upload"} ${type.replaceAll("_", " ").toLowerCase()}`}
             aria-busy={isUploading && uploadingDocType === type}
             onClick={() => onUpload(type)}
             disabled={isUploading}
@@ -81,11 +87,6 @@ interface DocRowProps {
     onUpload: (type: string) => void;
 }
 
-function getDocRowBorder(status?: string) {
-    if (status === "REJECTED") return "1px solid rgba(239,68,68,0.3)";
-    if (status === "VERIFIED") return "1px solid rgba(16,185,129,0.3)";
-    return "1px solid var(--color-border)";
-}
 
 export function DocRow({
     type,
@@ -99,10 +100,13 @@ export function DocRow({
 }: Readonly<DocRowProps>) {
     return (
         <div
-            className="flex items-center justify-between rounded-md px-4-py-3" style={{ background:
-                    doc?.status === "VERIFIED"
-                        ? "rgba(16,185,129,0.07)"
-                        : "var(--color-bg-tertiary)", border: getDocRowBorder(doc?.status) }}
+            className={`flex items-center justify-between rounded-md px-4-py-3 ${
+                doc?.status === "VERIFIED"
+                    ? "bg-emerald-subtle border-emerald-subtle"
+                    : doc?.status === "REJECTED"
+                    ? "bg-tertiary border-rose-subtle"
+                    : "bg-tertiary border-card"
+            }`}
         >
             <div
                 className="flex items-center gap-2-5"

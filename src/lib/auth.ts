@@ -185,12 +185,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return true;
     },
     async jwt({ token, user, account: _account, trigger: _trigger }): Promise<Record<string, unknown>> {
-      let t = token;
-      if (user || _trigger === "update") {
-        t = await handleInitialJwtSession(token, user, _trigger);
-      } else {
-        t = await handleExistingJwtSession(token);
-      }
+      const t = (user || _trigger === "update")
+        ? await handleInitialJwtSession(token, user, _trigger)
+        : await handleExistingJwtSession(token);
 
       // Track active JTI for session invalidation on password change or admin action
       if (t.id && t.jti && !t.error) {

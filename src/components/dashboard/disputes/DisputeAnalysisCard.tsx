@@ -25,11 +25,12 @@ export function DisputeAnalysisCard({
 }: Readonly<DisputeAnalysisCardProps>) {
   if (!analysis) return null;
 
-  const confidenceTone = analysis.confidence === "HIGH"
-    ? "success"
-    : analysis.confidence === "MEDIUM"
-      ? "warning"
-      : "danger";
+  let confidenceTone: "success" | "warning" | "danger" = "danger";
+  if (analysis.confidence === "HIGH") {
+    confidenceTone = "success";
+  } else if (analysis.confidence === "MEDIUM") {
+    confidenceTone = "warning";
+  }
 
   const trustTone = (value: number) => (value >= 0 ? "positive" : "negative");
   const verdictTone = (() => {

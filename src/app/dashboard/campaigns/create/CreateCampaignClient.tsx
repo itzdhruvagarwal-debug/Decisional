@@ -488,7 +488,7 @@ export default function CreateCampaignClient() {
             />
           </div>
 
-          <div className="mb-4 grid gap-4 grid-cols-3">
+          <div className="mb-4 grid gap-4 grid-cols-1 md:grid-cols-3">
             <Input
               label="Min Followers Req."
               id="min-followers"

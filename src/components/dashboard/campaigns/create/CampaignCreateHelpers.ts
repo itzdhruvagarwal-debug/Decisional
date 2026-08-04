@@ -53,7 +53,59 @@ export interface CampaignFormData {
   deliverables: Array<{ type: string; count: number; rate: number }>;
 }
 
-export function validateCampaignForm(formData: CampaignFormData): { success: boolean; fieldErrors?: Record<string, string>; error?: string } {
+type ValidationResult = { success: boolean; fieldErrors?: Record<string, string>; error?: string };
+
+function validateBudget(formData: CampaignFormData): ValidationResult | null {
+  if (formData.requiresProduct && formData.totalBudget === 0) {
+    if (formData.productValue < 500) {
+      return { success: false, error: "Product-only campaigns must specify a product value of at least ₹500" };
+    }
+    if (formData.minFollowers > 10000) {
+      return { success: false, error: "Product-only campaigns can only target influencers with up to 10,000 followers" };
+    }
+  } else {
+    if (formData.perInfluencerBudget < 500) {
+      return { success: false, error: "Minimum budget per influencer is ₹500" };
+    }
+    if (formData.totalBudget < 1000) {
+      return { success: false, error: "Minimum campaign budget is ₹1,000" };
+    }
+  }
+  return null;
+}
+
+function validateDeadlines(formData: CampaignFormData): ValidationResult | null {
+  if (!formData.contentDeadline || !formData.postingDeadline) {
+    return { success: false, error: "Please select content and posting deadlines" };
+  }
+  const contentDate = new Date(formData.contentDeadline);
+  const postingDate = new Date(formData.postingDeadline);
+  if (Number.isNaN(contentDate.getTime()) || Number.isNaN(postingDate.getTime())) {
+    return { success: false, error: "Please select valid content and posting deadlines" };
+  }
+  if (postingDate < contentDate) {
+    return { success: false, error: "Posting deadline must be after content deadline" };
+  }
+  if (formData.applicationDeadline) {
+    const appDate = new Date(formData.applicationDeadline);
+    if (Number.isNaN(appDate.getTime())) {
+      return { success: false, error: "Please select a valid application deadline" };
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const appDateStart = new Date(appDate);
+    appDateStart.setHours(0, 0, 0, 0);
+    if (appDateStart < today) {
+      return { success: false, error: "Application deadline cannot be in the past" };
+    }
+    if (appDateStart > contentDate) {
+      return { success: false, error: "Application deadline must be before content deadline" };
+    }
+  }
+  return null;
+}
+
+export function validateCampaignForm(formData: CampaignFormData): ValidationResult {
   const result = createCampaignSchema.safeParse({
     title: formData.title.trim(),
     description: formData.description.trim(),
@@ -76,23 +128,8 @@ export function validateCampaignForm(formData: CampaignFormData): { success: boo
     return { success: false, fieldErrors };
   }
 
-  // Budget validation for barter-only vs cash campaigns
-  if (formData.requiresProduct && formData.totalBudget === 0) {
-    if (formData.productValue < 500) {
-      return { success: false, error: "Product-only campaigns must specify a product value of at least ₹500" };
-    }
-    if (formData.minFollowers > 10000) {
-      return { success: false, error: "Product-only campaigns can only target influencers with up to 10,000 followers" };
-    }
-  } else {
-    // Non-barter campaigns check
-    if (formData.perInfluencerBudget < 500) {
-      return { success: false, error: "Minimum budget per influencer is ₹500" };
-    }
-    if (formData.totalBudget < 1000) {
-      return { success: false, error: "Minimum campaign budget is ₹1,000" };
-    }
-  }
+  const budgetError = validateBudget(formData);
+  if (budgetError) return budgetError;
 
   if (formData.targetCategories.length === 0) {
     return { success: false, error: "Please select at least one category" };
@@ -103,39 +140,9 @@ export function validateCampaignForm(formData: CampaignFormData): { success: boo
   if (formData.maxFollowers !== null && formData.maxFollowers > 0 && formData.maxFollowers < formData.minFollowers) {
     return { success: false, error: "Max followers must be greater than min followers" };
   }
-  if (!formData.contentDeadline || !formData.postingDeadline) {
-    return { success: false, error: "Please select content and posting deadlines" };
-  }
 
-  // Deadline checks
-  const contentDate = new Date(formData.contentDeadline);
-  const postingDate = new Date(formData.postingDeadline);
-  if (Number.isNaN(contentDate.getTime()) || Number.isNaN(postingDate.getTime())) {
-    return { success: false, error: "Please select valid content and posting deadlines" };
-  }
-  if (postingDate < contentDate) {
-    return { success: false, error: "Posting deadline must be after content deadline" };
-  }
-
-  if (formData.applicationDeadline) {
-    const appDate = new Date(formData.applicationDeadline);
-    if (Number.isNaN(appDate.getTime())) {
-      return { success: false, error: "Please select a valid application deadline" };
-    }
-    
-    // Normalize to local midnight to check past constraint
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const appDateStart = new Date(appDate);
-    appDateStart.setHours(0, 0, 0, 0);
-
-    if (appDateStart < today) {
-      return { success: false, error: "Application deadline cannot be in the past" };
-    }
-    if (appDateStart > contentDate) {
-      return { success: false, error: "Application deadline must be before content deadline" };
-    }
-  }
+  const deadlineError = validateDeadlines(formData);
+  if (deadlineError) return deadlineError;
 
   return { success: true };
 }

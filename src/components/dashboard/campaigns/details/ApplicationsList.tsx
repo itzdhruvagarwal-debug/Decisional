@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Badge, Button, Spinner } from "@/components/ui";
 import EmptyState from "@/components/ui/EmptyState";
 import { formatCurrency } from "@/lib/utils-client";
@@ -42,23 +41,20 @@ export function ApplicationsList({
       {applications.map((application) => {
         const canAct = ["PENDING", "SHORTLISTED"].includes(application.status);
         const matchScore = application.matchScore;
-        
-        let matchBgColor = "rgba(239, 68, 68, 0.15)";
-        let matchTextColor = "#ef4444";
-        if (matchScore !== undefined) {
-          if (matchScore >= 80) {
-            matchBgColor = "rgba(16, 185, 129, 0.15)";
-            matchTextColor = "#10b981";
-          } else if (matchScore >= 50) {
-            matchBgColor = "rgba(245, 158, 11, 0.15)";
-            matchTextColor = "#f59e0b";
-          }
-        }
+
+        const matchVariant =
+          matchScore === undefined
+            ? "danger"
+            : matchScore >= 80
+            ? "success"
+            : matchScore >= 50
+            ? "warning"
+            : "danger";
 
         return (
           <article
             key={application.id}
-            className="grid gap-4 p-4 bg-tertiary rounded-md border-card" style={{ gridTemplateColumns: "minmax(0, 1fr) auto" }}
+            className="grid gap-4 p-4 bg-tertiary rounded-md border-card application-item-grid"
           >
             <div className="min-w-0">
               <div
@@ -69,8 +65,8 @@ export function ApplicationsList({
                 <Badge variant="ghost">Trust {application.influencer.user?.trustScore ?? 0}</Badge>
                 <Badge variant="ghost">{formatCurrency(application.proposedRate)}</Badge>
                 {matchScore !== undefined && (
-                  <span title={`Match Score Details:\n- Niche Fit: ${application.matchBreakdown?.categoryScore}%\n- Engagement Fit: ${application.matchBreakdown?.engagementScore}%\n- Authenticity Fit: ${application.matchBreakdown?.authenticityScore}%\n- Reputation Fit: ${application.matchBreakdown?.qualityScore}%\n- ROI/CPV Fit (Projected): ${application.matchBreakdown?.roiScore}%\n- Est. Views (Modelled): ${application.matchBreakdown?.estimatedViews}\n- Est. CPV (Modelled): ₹${((application.matchBreakdown?.estimatedCpvPaise || 0) / 100).toFixed(2)}`}>
-                    <Badge variant={matchScore >= 80 ? "success" : matchScore >= 50 ? "warning" : "danger"}>
+                  <span title={`Match Score Details:\n- Niche Fit: ${application.matchBreakdown?.categoryScore}%\n- Engagement Fit: ${application.matchBreakdown?.engagementScore}%\n- Authenticity Fit: ${application.matchBreakdown?.authenticityScore}%\n- Reputation Fit: ${application.matchBreakdown?.qualityScore}%\n- ROI/CPV Fit (Projected): ${application.matchBreakdown?.roiScore}%\n- Est. Views (Modelled): ${application.matchBreakdown?.estimatedViews}\n- Est. CPV (Modelled): \u20b9${((application.matchBreakdown?.estimatedCpvPaise || 0) / 100).toFixed(2)}`}>
+                    <Badge variant={matchVariant}>
                       🔥 {matchScore}% Match
                     </Badge>
                   </span>
@@ -95,7 +91,7 @@ export function ApplicationsList({
                   Category: {application.influencer.categories?.split(",")[0] || "Other"}
                 </span>
                 {application.matchBreakdown && (
-                  <span className="text-emerald" style={{ fontWeight: "600" }} title="This is a modelled projection based on follower stats and campaign budget, not verified API statistics.">
+                  <span className="text-emerald font-semibold" title="This is a modelled projection based on follower stats and campaign budget, not verified API statistics.">
                     Projected CPV: ₹{((application.matchBreakdown.estimatedCpvPaise || 0) / 100).toFixed(2)} / view (Est.)
                   </span>
                 )}

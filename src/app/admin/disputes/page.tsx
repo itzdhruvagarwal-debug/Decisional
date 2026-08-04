@@ -1,3 +1,4 @@
+import React from "react";
 import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { auth } from "@/lib/auth";
@@ -6,7 +7,7 @@ import { requireActiveAdmin } from "@/lib/admin-auth";
 import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Button } from "@/components/ui";
 
-import { Prisma } from "@prisma/client";
+import { Prisma, DisputeStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -78,6 +79,63 @@ function DisputeItem({
   );
 }
 
+const ACTIVE_STATUSES: DisputeStatus[] = ["OPEN", "TIER2_MEDIATION", "TIER3_ARBITRATION"];
+const HISTORY_STATUSES: DisputeStatus[] = ["RESOLVED", "CLOSED", "TIER1_AUTO"];
+
+async function fetchDisputes(showHistory: boolean): Promise<{ disputes: DisputeWithDetails[]; error: boolean }> {
+  try {
+    const disputes = await prisma.dispute.findMany({
+      where: {
+        status: { in: showHistory ? HISTORY_STATUSES : ACTIVE_STATUSES },
+      },
+      include: {
+        deal: {
+          include: {
+            campaign: { select: { title: true } },
+            influencer: { select: { displayName: true } },
+            brand: { select: { companyName: true } },
+          },
+        },
+        raisedBy: { select: { email: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    return { disputes: disputes as DisputeWithDetails[], error: false };
+  } catch (error) {
+    logger.error("Admin dispute queue failed to load", error);
+    return { disputes: [], error: true };
+  }
+}
+
+function renderDisputeContent(
+  disputes: DisputeWithDetails[],
+  showHistory: boolean,
+  loadError: boolean,
+): React.ReactNode {
+  if (loadError) {
+    return (
+      <div className="card p-6 text-rose border-rose-subtle">
+        Could not load disputes right now. Please retry after checking database connectivity.
+      </div>
+    );
+  }
+  if (disputes.length === 0) {
+    const emoji = showHistory ? "📋" : "⚖️";
+    const title = showHistory ? "No Historical Disputes" : "No Active Disputes";
+    const description = showHistory
+      ? "No historical disputes have been recorded."
+      : "There are no active disputes at the moment.";
+    return <EmptyState emoji={emoji} title={title} description={description} compact />;
+  }
+  return (
+    <div className="grid gap-4">
+      {disputes.map((dispute) => (
+        <DisputeItem key={dispute.id} dispute={dispute} showHistory={showHistory} />
+      ))}
+    </div>
+  );
+}
+
 export default async function AdminDisputeListPage({
   searchParams,
 }: {
@@ -93,64 +151,8 @@ export default async function AdminDisputeListPage({
   const params = await searchParams;
   const showHistory = params.history === "true";
 
-  let activeDisputes: DisputeWithDetails[] = [];
-  let loadError = false;
-
-  try {
-    activeDisputes = await prisma.dispute.findMany({
-      where: {
-        status: showHistory
-          ? { in: ["RESOLVED", "CLOSED", "TIER1_AUTO"] }
-          : { in: ["OPEN", "TIER2_MEDIATION", "TIER3_ARBITRATION"] },
-      },
-      include: {
-        deal: {
-          include: {
-            campaign: { select: { title: true } },
-            influencer: { select: { displayName: true } },
-            brand: { select: { companyName: true } },
-          },
-        },
-        raisedBy: { select: { email: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-  } catch (error) {
-    loadError = true;
-    logger.error("Admin dispute queue failed to load", error);
-  }
-
-  let content;
-  if (loadError) {
-    content = (
-      <div
-        className="card p-6 text-rose" style={{ borderColor: "rgba(244, 63, 94, 0.3)" }}
-      >
-        Could not load disputes right now. Please retry after checking database connectivity.
-      </div>
-    );
-  } else if (activeDisputes.length === 0) {
-    content = (
-      <EmptyState
-        emoji={showHistory ? "📋" : "⚖️"}
-        title={showHistory ? "No Historical Disputes" : "No Active Disputes"}
-        description={showHistory ? "No historical disputes have been recorded." : "There are no active disputes at the moment."}
-        compact
-      />
-    );
-  } else {
-    content = (
-      <div className="grid gap-4">
-        {activeDisputes.map((dispute) => (
-          <DisputeItem
-            key={dispute.id}
-            dispute={dispute}
-            showHistory={showHistory}
-          />
-        ))}
-      </div>
-    );
-  }
+  const { disputes, error } = await fetchDisputes(showHistory);
+  const content = renderDisputeContent(disputes, showHistory, error);
 
   return (
     <div className="admin-page">
@@ -166,7 +168,7 @@ export default async function AdminDisputeListPage({
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6" role="tablist" aria-label="Dispute queue filters">
+      <div className="scrollable-tabs flex gap-2 mb-6" role="tablist" aria-label="Dispute queue filters">
         <Button
           href="/admin/disputes"
           variant={showHistory ? "secondary" : "primary"}

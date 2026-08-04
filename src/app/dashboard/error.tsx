@@ -22,7 +22,7 @@ export default function DashboardError({
     <div
       role="alert"
       aria-live="assertive"
-      className="flex justify-center items-center flex-col gap-6 bg-primary text-primary" style={{ height: "100vh" }}
+      className="flex justify-center items-center flex-col gap-6 bg-primary text-primary h-100vh"
     >
       <h2>Something went wrong!</h2>
       <Button

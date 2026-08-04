@@ -249,17 +249,20 @@ export default function LeaderboardPage() {
           <div
             className="flex bg-secondary rounded-lg p-1"
           >
-            {(["all-time", "weekly"] as const).map((f) => (
-              <Button
-                key={f}
-                onClick={() => setFilter(f)}
-                variant={filter === f ? (f === "weekly" ? "warning" : "primary") : "ghost"}
-                className="leaderboard-toggle font-semibold text-sm px-4-py-2 rounded-lg"
-                data-active={filter === f}
-              >
-                {f === "weekly" ? "🔥 This Week" : "🏛️ All-Time"}
-              </Button>
-            ))}
+            {(["all-time", "weekly"] as const).map((f) => {
+              const btnVariant = filter === f ? (f === "weekly" ? "warning" : "primary") : "ghost";
+              return (
+                <Button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  variant={btnVariant}
+                  className="leaderboard-toggle font-semibold text-sm px-4-py-2 rounded-lg"
+                  data-active={filter === f}
+                >
+                  {f === "weekly" ? "🔥 This Week" : "🏛️ All-Time"}
+                </Button>
+              );
+            })}
           </div>
 
           {/* City Filter */}

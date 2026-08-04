@@ -271,14 +271,14 @@ export default function ProfileTab({
                     />
                 </div>
 
-                <h3
+                <h2
                     className="text-base font-bold mb-5"
                 >
                     Basic Information
-                </h3>
+                </h2>
 
                 <div
-                    className="p-4 mb-6 flex justify-between items-center bg-tertiary rounded-md"
+                    className="p-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-tertiary rounded-md gap-4"
                 >
                     <div>
                         <div
@@ -287,12 +287,12 @@ export default function ProfileTab({
                             Your Referral Code
                         </div>
                         <div
-                            className="text-xl font-extrabold font-mono"
+                            className="text-xl font-extrabold font-mono break-all"
                         >
                             {referralCode || "..."}
                         </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right">
                         <div
                             className="text-xs text-secondary uppercase tracking-wider"
                         >
@@ -475,11 +475,11 @@ export default function ProfileTab({
 
             {isInfluencer(user.userType) && (
                 <div className="card">
-                    <h3
+                    <h2
                         className="text-base font-bold mb-5"
                     >
                         Categories & Languages
-                    </h3>
+                    </h2>
 
                     <div className="mb-5">
                         <div className="label">Categories (Select up to 5)</div>

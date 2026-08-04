@@ -179,7 +179,7 @@ export default function AdminAnalyticsView({ data }: AdminAnalyticsProps) {
 
           <div className="w-full mt-4" style={{ height: 350 }}>
             {chartsReady && (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={350}>
                 <BarChart data={data.financials.revenueHistory} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-white/5" vertical={false} />
                   <XAxis dataKey="month" stroke="currentColor" className="text-gray-400 text-xs" tickFormatter={(str) => str.slice(0, 3)} axisLine={false} tickLine={false} dy={10} />
@@ -220,7 +220,7 @@ export default function AdminAnalyticsView({ data }: AdminAnalyticsProps) {
             <h3 className="text-lg font-bold mb-6 text-white tracking-tight">User Growth (30 Days)</h3>
             <div className="w-full" style={{ height: 280 }}>
               {chartsReady && (
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280}>
                   <LineChart data={data.growth} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">

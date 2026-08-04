@@ -8,10 +8,10 @@ export type { ListCampaignsParams };
 export { TierError };
 
 export class CampaignService {
-  static listCampaigns = listCampaigns;
-  static createCampaign = createCampaign;
-  static getCampaignById = getCampaignById;
-  static updateDraftCampaign = updateDraftCampaign;
-  static activateDraftCampaign = activateDraftCampaign;
-  static cancelCampaign = cancelCampaign;
+  static readonly listCampaigns = listCampaigns;
+  static readonly createCampaign = createCampaign;
+  static readonly getCampaignById = getCampaignById;
+  static readonly updateDraftCampaign = updateDraftCampaign;
+  static readonly activateDraftCampaign = activateDraftCampaign;
+  static readonly cancelCampaign = cancelCampaign;
 }

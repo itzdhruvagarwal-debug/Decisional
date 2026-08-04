@@ -22,10 +22,9 @@ export function Spinner({
   "aria-label": ariaLabel = "Loading",
 }: SpinnerProps) {
   return (
-    <span
+    <output
       className={`loading ${className}`}
       style={{ ...sizeStyle[size], ...style }}
-      role="status"
       aria-label={ariaLabel}
     />
   );

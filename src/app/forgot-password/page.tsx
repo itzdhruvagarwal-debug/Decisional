@@ -87,6 +87,7 @@ export default function ForgotPasswordPage() {
           <div
             role={status === "error" ? "alert" : "status"}
             aria-live={status === "error" ? "assertive" : "polite"}
+            aria-atomic="true"
             className="text-sm mb-6 rounded-md px-4-py-3 forgot-password-message"
             data-status={status === "success" ? "success" : "error"}
           >
@@ -95,9 +96,7 @@ export default function ForgotPasswordPage() {
         )}
 
         {resetLink && (
-          <div
-            className="mb-6 p-3 text-xs rounded-md break-all forgot-password-dev-link"
-          >
+          <div className="mb-6 p-3 text-xs rounded-md break-all forgot-password-dev-link">
             <strong>DEV LINK:</strong>{" "}
             <a
               href={resetLink}
@@ -136,4 +135,3 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
-

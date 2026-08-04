@@ -48,15 +48,14 @@ export function ConversationsSidebar({ state }: Readonly<ConversationsSidebarPro
               key={conv.userId}
               onClick={() => setSelectedConversation(conv.userId)}
               type="button"
-              aria-label={`Chat with ${conv.name}${conv.unread > 0 ? `, ${conv.unread} unread message${conv.unread === 1 ? "" : "s"}` : ""}`}
+              aria-label={(() => {
+                const unreadText = conv.unread > 0
+                  ? `, ${conv.unread} unread message${conv.unread === 1 ? "" : "s"}`
+                  : "";
+                return `Chat with ${conv.name}${unreadText}`;
+              })()}
               {...(selectedConversation === conv.userId ? { "aria-current": "true" as const } : {})}
               className="conversation-item"
-              style={{
-                background:
-                  selectedConversation === conv.userId
-                    ? "rgba(99, 102, 241, 0.1)"
-                    : "transparent",
-              }}
             >
               <div className="flex items-center justify-center font-bold flex-shrink-0 rounded-full text-white w-48 h-48 bg-gradient-card">
                 {conv.avatar ? (
@@ -72,7 +71,7 @@ export function ConversationsSidebar({ state }: Readonly<ConversationsSidebarPro
                 )}
               </div>
               <div className="flex-1 text-left min-w-0">
-                <div className="flex justify-between mb-1" style={{ alignItems: "baseline" }}>
+                <div className="flex justify-between mb-1 items-baseline">
                   <span className="font-extrabold text-sm overflow-hidden text-primary whitespace-nowrap text-ellipsis max-w-140">
                     {conv.name}
                   </span>
@@ -84,16 +83,11 @@ export function ConversationsSidebar({ state }: Readonly<ConversationsSidebarPro
                 </div>
                 <div className="flex justify-between items-center">
                   <span
-                    className="text-sm overflow-hidden whitespace-nowrap"
-                    style={{
-                      color:
-                        conv.unread > 0
-                          ? "var(--color-text-primary)"
-                          : "var(--color-text-muted)",
-                      fontWeight: conv.unread > 0 ? 600 : 400,
-                      textOverflow: "ellipsis",
-                      maxWidth: "160px",
-                    }}
+                    className={`text-sm overflow-hidden whitespace-nowrap text-ellipsis max-w-160 ${
+                      conv.unread > 0
+                        ? "text-primary font-semibold"
+                        : "text-secondary font-normal"
+                    }`}
                   >
                     {conv.isTyping ? "Typing..." : conv.lastMessage || "Start a conversation"}
                   </span>

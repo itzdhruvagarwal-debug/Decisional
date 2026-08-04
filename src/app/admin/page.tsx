@@ -66,7 +66,7 @@ export default async function VerifiedQueuePage() {
               return (
                 <div
                   key={app.id}
-                  className="card p-6 flex flex-col gap-4 bg-rose-02" style={{ border: "1px solid rgba(239, 68, 68, 0.2)" }}
+                  className="card p-6 flex flex-col gap-4 bg-rose-02 border-rose-subtle"
                 >
                   <div className="flex justify-between flex-wrap gap-4">
                     <div>

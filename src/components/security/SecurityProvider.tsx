@@ -41,13 +41,13 @@ function InactivityWarningModal({
     <dialog
       open
       aria-labelledby="inactivity-title"
-      className="fixed flex items-center justify-center p-6 border-none inset-0 backdrop-blur" style={{ zIndex: 9999, background: "rgba(0,0,0,0.75)" }}
+      className="fixed flex items-center justify-center p-6 border-none inset-0 backdrop-blur security-dialog-overlay"
     >
       <div
-        className="w-full text-center rounded-xl" style={{ background: "var(--color-surface, #111)", border: "1px solid rgba(245, 158, 11, 0.3)", padding: "36px 32px", maxWidth: "400px", boxShadow: "0 24px 60px rgba(0,0,0,0.6)", animation: "slideDown 0.25s ease-out" }}
+        className="w-full text-center rounded-xl security-dialog-content"
       >
         <div
-          className="flex items-center justify-center rounded-full text-3xl bg-amber-12" style={{ width: "64px", height: "64px", border: "2px solid rgba(245, 158, 11, 0.4)", margin: "0 auto 20px" }}
+          className="flex items-center justify-center rounded-full text-3xl bg-amber-12 security-dialog-icon"
         >
           !
         </div>
@@ -60,14 +60,14 @@ function InactivityWarningModal({
         </h2>
 
         <p
-          className="text-sm mb-2 leading-relaxed" style={{ color: "var(--color-text-secondary, #aaa)" }}
+          className="text-sm mb-2 leading-relaxed text-secondary"
         >
           For your security, you&apos;ll be automatically signed out due to
           inactivity in:
         </p>
 
         <div
-          className="font-extrabold text-3xl mb-6 tracking-normal" style={{ color: secondsRemaining <= 60 ? "#f43f5e" : "#f59e0b", fontVariantNumeric: "tabular-nums", transition: "color 0.3s" }}
+          className={`font-extrabold text-3xl mb-6 tracking-normal tabular-nums transition-colors duration-300 ${secondsRemaining <= 60 ? "text-rose" : "text-amber"}`}
         >
           {timeStr}
         </div>

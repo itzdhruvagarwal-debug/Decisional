@@ -237,7 +237,7 @@ export default function InfluencerDashboard({
           </h3>
           <div className="chart-wrapper">
             {chartsReady && (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280}>
                 <AreaChart data={earningsHistory} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">

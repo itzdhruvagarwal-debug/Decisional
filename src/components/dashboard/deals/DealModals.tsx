@@ -154,8 +154,7 @@ export function DealModals({
         maxWidth="600px"
       >
         <div
-          className="mb-5 flex flex-col gap-4 overflow-y-auto"
-          style={{ maxHeight: "350px", paddingRight: "4px" }}
+          className="mb-5 flex flex-col gap-4 overflow-y-auto deal-modal-scroll-container"
         >
           {getFlatDeliverablesList(deal).map((item) => {
             const latestSub = deal?.contentSubmissions?.[0];
@@ -279,8 +278,7 @@ export function DealModals({
         maxWidth="550px"
       >
         <div
-          className="mb-5 flex flex-col gap-4 overflow-y-auto"
-          style={{ maxHeight: "350px", paddingRight: "4px" }}
+          className="mb-5 flex flex-col gap-4 overflow-y-auto deal-modal-scroll-container"
         >
           {getFlatDeliverablesList(deal).map((item) => {
             const latestSub = deal?.contentSubmissions?.[0];
@@ -348,6 +346,7 @@ export function DealModals({
             type="file"
             ref={fileInputRef}
             aria-hidden="true"
+            tabIndex={-1}
             className="hidden"
             onChange={handleContentUpload}
             accept="image/*,video/*,.pdf"

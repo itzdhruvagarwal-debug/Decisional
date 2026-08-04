@@ -93,7 +93,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
         <div
           role="alert"
           aria-live="assertive"
-          className="text-center flex flex-col items-center justify-center gap-4 rounded-lg" style={{ padding: "40px 24px", minHeight: "200px", background: "rgba(244, 63, 94, 0.04)", border: "1px solid rgba(244, 63, 94, 0.15)", margin: "16px" }}
+          className="text-center flex flex-col items-center justify-center gap-4 rounded-lg error-boundary-card"
         >
           <div className="text-3xl">⚠️</div>
           <h3
@@ -102,7 +102,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
             Something went wrong
           </h3>
           <p
-            className="text-sm leading-relaxed m-0" style={{ color: "var(--color-text-secondary, #aaa)", maxWidth: "360px" }}
+            className="text-sm leading-relaxed m-0 text-secondary max-w-360"
           >
             An unexpected error occurred in this section.
             {this.state.errorId && (
@@ -110,7 +110,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 {" "}
                 Please reference ID{" "}
                 <code
-                  className="text-xs rounded-sm px-2-py-05 font-mono" style={{ background: "rgba(255,255,255,0.08)" }}
+                  className="text-xs rounded-sm px-2-py-05 font-mono bg-glass-light"
                 >
                   ERR-{this.state.errorId}
                 </code>{" "}

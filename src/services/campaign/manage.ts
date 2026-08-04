@@ -1,5 +1,5 @@
 import { logger } from "@/lib/logger";
-import { isInfluencer } from "@/lib/rbac";
+import { isInfluencer, isAdmin } from "@/lib/rbac";
 import { checkVerificationTierForAmount, tierErrorResponse } from "@/lib/verification-tiers";
 import { calculateTotalAmount } from "@/lib/razorpay";
 import { TierError, safeStringCast, safeStringOrNullCast, estimateCampaignDealSlots, CAMPAIGN_INCLUDE } from "./types";
@@ -8,7 +8,6 @@ import { Prisma } from "@prisma/client";
 import { AppError } from "@/lib/errors";
 import { createActivityLog } from "@/lib/audit";
 import { calculateProductHandlingFee, assertSufficientBalance } from "@/lib/utils";
-import { isAdmin } from "@/lib/rbac";
 import { resolveBrandPlatformFee } from "@/lib/platform-fees";
 
 export async function getCampaignById(

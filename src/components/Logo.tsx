@@ -1,10 +1,11 @@
 import Link from "next/link";
 
-export default function Logo() {
+export default function Logo({ tabIndex }: Readonly<{ tabIndex?: number }> = {}) {
   return (
     <Link
       href="/"
       className="flex items-center gap-3 no-underline"
+      tabIndex={tabIndex}
     >
       <div className="logo-mark p-2 flex items-center justify-center rounded-lg text-white">
         {/* Decisional Logo — Signal-to-Decision icon */}

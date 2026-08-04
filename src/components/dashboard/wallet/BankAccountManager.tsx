@@ -231,7 +231,11 @@ export default function BankAccountManager({
       {/* Inline notice */}
       {notice && (
         <div
-          className="mb-3 text-sm font-semibold rounded-md px-3-py-2-5" style={{ background: notice.type === "success" ? "rgba(16, 185, 129, 0.1)" : "rgba(244, 63, 94, 0.1)", color: notice.type === "success" ? "var(--color-accent-emerald)" : "var(--color-accent-rose)", border: `1px solid ${notice.type === "success" ? "rgba(16, 185, 129, 0.25)" : "rgba(244, 63, 94, 0.25)"}` }}
+          className={`mb-3 text-sm font-semibold rounded-md px-3-py-2-5 ${
+            notice.type === "success"
+              ? "bg-emerald-subtle text-emerald border-emerald-subtle"
+              : "bg-rose-subtle text-rose border-rose-subtle"
+          }`}
         >
           {notice.message}
         </div>
@@ -240,7 +244,7 @@ export default function BankAccountManager({
       {/* Inline delete confirmation */}
       {deleteConfirmId && (
         <div
-          className="mb-3 rounded-md" style={{ padding: "12px 14px", background: "rgba(244, 63, 94, 0.08)", border: "1px solid rgba(244, 63, 94, 0.3)" }}
+          className="mb-3 rounded-md px-3-py-2-5 bg-rose-subtle border-rose-subtle"
         >
           <p className="text-sm font-semibold text-rose mb-2">
             ⚠️ Are you sure you want to delete this bank account? This cannot be undone.
@@ -352,7 +356,7 @@ export default function BankAccountManager({
                 fullWidth
               />
             )}
-            <div className="flex items-center gap-2" style={{ paddingTop: "22px" }}>
+            <div className="flex items-center gap-2 pt-5">
               <input
                 type="checkbox"
                 id="bank-is-default"
@@ -387,17 +391,13 @@ export default function BankAccountManager({
         {accounts.map((acc) => (
           <div
             key={acc.id}
-            className="p-4 flex justify-between items-center rounded-md" style={{ border: acc.isDefault
-                ? "1px solid rgba(99, 102, 241, 0.5)"
-                : "1px solid var(--color-border)", background: acc.isDefault
-                ? "rgba(99, 102, 241, 0.05)"
-                : "transparent" }}
+            className={`p-4 flex justify-between items-center rounded-md bank-account-item ${acc.isDefault ? "default" : ""}`}
           >
             <div>
               <div className="font-semibold flex items-center gap-2">
                 {acc.bankName === "UPI" ? `UPI: ${acc.upiId}` : `${acc.bankName} — ${acc.accountName}`}
                 {acc.isDefault && (
-                  <span className="font-extrabold text-xs px-2-py-05 rounded-full bg-indigo-15" style={{ color: "var(--color-accent-indigo)" }}>
+                  <span className="font-extrabold text-xs px-2-py-05 rounded-full bg-indigo-15 bank-account-badge-default">
                     Default
                   </span>
                 )}
@@ -409,33 +409,50 @@ export default function BankAccountManager({
               </div>
             </div>
             <div className="flex gap-2">
-              {onSelectAccount && (
-                <Button
-                  variant="secondary"
-                  aria-label={`Select ${acc.bankName === "UPI" ? `UPI: ${acc.upiId}` : `${acc.bankName} — ${acc.accountName}`}`}
-                  onClick={() => onSelectAccount(acc)}
-                >
-                  Select
-                </Button>
-              )}
-              {!acc.isDefault && (
-                <Button
-                  variant="ghost"
-                  aria-label={`Set ${acc.bankName === "UPI" ? `UPI: ${acc.upiId}` : acc.bankName} as default`}
-                  onClick={() => handleSetDefault(acc.id)}
-                  className="text-xs"
-                >
-                  Set Default
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                aria-label={`Delete ${acc.bankName === "UPI" ? `UPI: ${acc.upiId}` : `${acc.bankName} — ${acc.accountName}`}`}
-                onClick={() => handleDeleteRequest(acc.id)}
-                className="text-rose"
-              >
-                Delete
-              </Button>
+              {onSelectAccount && (() => {
+                const selectLabel = acc.bankName === "UPI"
+                  ? `UPI: ${acc.upiId}`
+                  : `${acc.bankName} \u2014 ${acc.accountName}`;
+                return (
+                  <Button
+                    variant="secondary"
+                    aria-label={`Select ${selectLabel}`}
+                    onClick={() => onSelectAccount(acc)}
+                  >
+                    Select
+                  </Button>
+                );
+              })()}
+              {!acc.isDefault && (() => {
+                const defaultLabel = acc.bankName === "UPI"
+                  ? `UPI: ${acc.upiId}`
+                  : acc.bankName;
+                return (
+                  <Button
+                    variant="ghost"
+                    aria-label={`Set ${defaultLabel} as default`}
+                    onClick={() => handleSetDefault(acc.id)}
+                    className="text-xs"
+                  >
+                    Set Default
+                  </Button>
+                );
+              })()}
+              {(() => {
+                const deleteLabel = acc.bankName === "UPI"
+                  ? `UPI: ${acc.upiId}`
+                  : `${acc.bankName} \u2014 ${acc.accountName}`;
+                return (
+                  <Button
+                    variant="ghost"
+                    aria-label={`Delete ${deleteLabel}`}
+                    onClick={() => handleDeleteRequest(acc.id)}
+                    className="text-rose"
+                  >
+                    Delete
+                  </Button>
+                );
+              })()}
             </div>
           </div>
         ))}

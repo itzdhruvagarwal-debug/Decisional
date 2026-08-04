@@ -24,7 +24,7 @@ export default function PrivacyPage() {
 
             <div className="text-secondary grid gap-8 leading-relaxed text-sm">
               <section>
-                <h2 style={headingStyle}>1. Who we are</h2>
+                <h2 className="terms-heading">1. Who we are</h2>
                 <p>
                   Decisional operates an India-focused influencer collaboration marketplace
                   for brands, creators, and platform administrators. This Privacy Policy
@@ -35,8 +35,8 @@ export default function PrivacyPage() {
                 </p>
               </section>
 
-              <section className="card" style={panelStyle}>
-                <h2 style={headingStyle}>2. Information we collect</h2>
+              <section className="card terms-panel">
+                <h2 className="terms-heading">2. Information we collect</h2>
                 <ul className="list-disc pl-6 space-y-3">
                   <li>
                     <strong>Account data:</strong> name, email, phone number, password hash,
@@ -81,7 +81,7 @@ export default function PrivacyPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>3. Why we use your data</h2>
+                <h2 className="terms-heading">3. Why we use your data</h2>
                 <ul className="list-disc pl-6 space-y-2">
                   <li>To create accounts, authenticate users, prevent account takeover, and provide role-based access.</li>
                   <li>To verify creators and brands, calculate trust scores, enforce tier limits, and reduce fraud.</li>
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>4. Consent, lawful use, and user rights</h2>
+                <h2 className="terms-heading">4. Consent, lawful use, and user rights</h2>
                 <p>
                   We process personal data for account performance, consent-based actions,
                   security, legal compliance, and other lawful platform purposes. Where consent
@@ -111,7 +111,7 @@ export default function PrivacyPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>5. Sharing with service providers</h2>
+                <h2 className="terms-heading">5. Sharing with service providers</h2>
                 <p>
                   We do not sell personal data. We share limited data with providers who help us
                   operate the service, including Supabase/Postgres hosting, Upstash Redis,
@@ -129,7 +129,7 @@ export default function PrivacyPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>6. Security and retention</h2>
+                <h2 className="terms-heading">6. Security and retention</h2>
                 <p>
                   We use access controls, encryption, token revocation, rate limits, audit logs,
                   fraud checks, and least-privilege workflows. We retain records only for as long
@@ -145,7 +145,7 @@ export default function PrivacyPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>7. Automated checks and trust scoring</h2>
+                <h2 className="terms-heading">7. Automated checks and trust scoring</h2>
                 <p>
                   Decisional may use rule-based and automated checks for fraud prevention,
                   content verification, trust scoring, limits, dispute triage, payout review,
@@ -157,7 +157,7 @@ export default function PrivacyPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>8. Children and prohibited use</h2>
+                <h2 className="terms-heading">8. Children and prohibited use</h2>
                 <p>
                   Decisional is intended for users who can enter into binding commercial
                   relationships. Users under 18 may not create creator, brand, or admin accounts.
@@ -167,13 +167,13 @@ export default function PrivacyPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>9. Contact and grievance redressal</h2>
+                <h2 className="terms-heading">9. Contact and grievance redressal</h2>
                 <p>
                   For privacy requests, account deletion, correction, consent withdrawal, or
                   grievance escalation, contact us at{" "}
-                  <a href="mailto:privacy@decisional.in" style={linkStyle}>privacy@decisional.in</a>.
+                  <a href="mailto:privacy@decisional.in" className="terms-link">privacy@decisional.in</a>.
                   For legal notices, contact{" "}
-                  <a href="mailto:legal@decisional.in" style={linkStyle}>legal@decisional.in</a>.
+                  <a href="mailto:legal@decisional.in" className="terms-link">legal@decisional.in</a>.
                 </p>
               </section>
             </div>
@@ -185,22 +185,3 @@ export default function PrivacyPage() {
     </div>
   );
 }
-
-const headingStyle = {
-  fontSize: "20px",
-  fontWeight: 800,
-  color: "var(--color-text-primary)",
-  marginBottom: "14px",
-};
-
-const panelStyle = {
-  padding: "24px",
-  background: "rgba(255,255,255,0.02)",
-  border: "1px solid var(--color-border)",
-};
-
-const linkStyle = {
-  color: "var(--color-primary)",
-  fontWeight: 700,
-  textDecoration: "none",
-};

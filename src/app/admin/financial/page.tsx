@@ -40,7 +40,7 @@ export default async function AdminFinancialPage() {
       <div
         className="grid gap-6 mb-8 grid-auto-240"
       >
-        <div className="card p-6" style={{ borderLeft: "4px solid var(--color-primary-light)" }}>
+        <div className="card p-6 border-l-primary">
           <div className="text-xs font-bold text-muted mb-2 uppercase">
             Gross Merchandise Value (GMV)
           </div>
@@ -50,7 +50,7 @@ export default async function AdminFinancialPage() {
           </div>
         </div>
 
-        <div className="card p-6" style={{ borderLeft: "4px solid var(--color-success)" }}>
+        <div className="card p-6 border-l-success">
           <div className="text-xs font-bold text-muted mb-2 uppercase">
             Net Profit (Revenue - Gateway Fees)
           </div>
@@ -60,7 +60,7 @@ export default async function AdminFinancialPage() {
           </div>
         </div>
 
-        <div className="card p-6" style={{ borderLeft: "4px solid var(--color-accent-blue)" }}>
+        <div className="card p-6 border-l-blue">
           <div className="text-xs font-bold text-muted mb-2 uppercase">
             Influencer Payouts
           </div>
@@ -70,7 +70,7 @@ export default async function AdminFinancialPage() {
           </div>
         </div>
 
-        <div className="card p-6" style={{ borderLeft: "4px solid var(--color-accent-amber)" }}>
+        <div className="card p-6 border-l-amber">
           <div className="text-xs font-bold text-muted mb-2 uppercase">
             Gateway Fees
           </div>
@@ -144,7 +144,7 @@ export default async function AdminFinancialPage() {
         {/* Deal Operations Stats */}
         <div className="card p-6">
           <h3 className="text-lg font-extrabold mb-5">💼 Deal Operations Stats</h3>
-          <div className="grid gap-4" style={{ gridTemplateColumns: "1fr 1fr" }}>
+          <div className="grid gap-4 responsive-two-col">
             <div>
               <div className="text-xs text-muted">Total Deals Created</div>
               <div className="text-xl font-bold mt-1">{data.deals.total}</div>

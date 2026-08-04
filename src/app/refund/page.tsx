@@ -23,7 +23,7 @@ export default function RefundPage() {
 
             <div className="text-secondary grid gap-8 leading-relaxed text-sm">
               <section>
-                <h2 style={headingStyle}>1. How protected payments work</h2>
+                <h2 className="text-xl font-extrabold mb-14px text-primary">1. How protected payments work</h2>
                 <p>
                   Decisional uses funded campaign budgets, payment holds, wallet ledgers, and
                   deal status checks to protect both brands and influencers. Refund eligibility
@@ -37,8 +37,8 @@ export default function RefundPage() {
                 </p>
               </section>
 
-              <section className="card" style={panelStyle}>
-                <h2 style={headingStyle}>2. Brand cancellations</h2>
+              <section className="card refund-panel-rose">
+                <h2 className="text-xl font-extrabold mb-14px text-primary">2. Brand cancellations</h2>
                 <ul className="list-disc pl-6 space-y-3">
                   <li>
                     <strong>Before influencer selection:</strong> Uncommitted campaign funds may
@@ -69,7 +69,7 @@ export default function RefundPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>3. Influencer cancellations</h2>
+                <h2 className="text-xl font-extrabold mb-14px text-primary">3. Influencer cancellations</h2>
                 <p>
                   Influencers should decline unsuitable work before signing. After signing, missed
                   deadlines, non-delivery, copied content, misleading metrics, or unapproved
@@ -84,7 +84,7 @@ export default function RefundPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>4. Non-refundable amounts</h2>
+                <h2 className="text-xl font-extrabold mb-14px text-primary">4. Non-refundable amounts</h2>
                 <ul className="list-disc pl-6 space-y-2">
                   <li>Gateway charges, bank charges, payout charges, or taxes already incurred.</li>
                   <li>Platform service fees for completed or substantially performed work.</li>
@@ -95,7 +95,7 @@ export default function RefundPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>5. Refund timing</h2>
+                <h2 className="text-xl font-extrabold mb-14px text-primary">5. Refund timing</h2>
                 <p>
                   Approved refunds are usually credited to the Decisional wallet first. If a
                   refund to the original payment method is supported, Razorpay or the banking
@@ -111,7 +111,7 @@ export default function RefundPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>6. Dispute outcomes and evidence</h2>
+                <h2 className="text-xl font-extrabold mb-14px text-primary">6. Dispute outcomes and evidence</h2>
                 <ul className="list-disc pl-6 space-y-2">
                   <li>Full brand refund: usually applies to non-delivery, verified fraud, or major breach before accepted work.</li>
                   <li>Partial split: may apply where some deliverables were usable, late, incomplete, or disputed in good faith.</li>
@@ -121,7 +121,7 @@ export default function RefundPage() {
               </section>
 
               <section>
-                <h2 style={headingStyle}>7. How to request a refund</h2>
+                <h2 className="text-xl font-extrabold mb-14px text-primary">7. How to request a refund</h2>
                 <p>
                   Use the deal or Dispute Center flow and include the campaign ID, deal ID,
                   relevant screenshots, post URLs, chat evidence, deadline evidence, and the
@@ -133,7 +133,7 @@ export default function RefundPage() {
               <section className="text-center bg-secondary rounded-lg border-card p-6">
                 <p className="text-sm text-muted">
                   Need a refund review or dispute?
-                  <Link href="/dashboard/disputes" className="text-primary font-bold no-underline" style={{ marginLeft: "5px" }}>
+                  <Link href="/dashboard/disputes" className="text-primary font-bold no-underline ml-1">
                     Open Dispute Center
                   </Link>
                 </p>
@@ -148,15 +148,6 @@ export default function RefundPage() {
   );
 }
 
-const headingStyle = {
-  fontSize: "20px",
-  fontWeight: 800,
-  color: "var(--color-text-primary)",
-  marginBottom: "14px",
-};
 
-const panelStyle = {
-  padding: "24px",
-  background: "rgba(244, 63, 94, 0.03)",
-  border: "1px solid rgba(244, 63, 94, 0.1)",
-};
+
+

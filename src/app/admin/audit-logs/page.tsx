@@ -70,8 +70,7 @@ export default function AdminAuditLogsPage() {
                   (heading) => (
                     <th
                       key={heading}
-                      className="text-left border-b-card text-muted text-xs font-extrabold uppercase"
-                      style={{ padding: "14px 18px" }}
+                      className="text-left border-b-card text-muted text-xs font-extrabold uppercase p-14-18"
                     >
                       {heading}
                     </th>

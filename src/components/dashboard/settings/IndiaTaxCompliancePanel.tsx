@@ -66,7 +66,7 @@ function StatusPill({ status }: Readonly<{ status: string }>) {
   const ready = status === "READY";
   return (
     <span
-      className="inline-flex items-center text-xs font-extrabold rounded-full" style={{ padding: "6px 10px", color: ready ? "var(--color-accent-emerald)" : "var(--color-accent-rose)", background: ready ? "rgba(16, 185, 129, 0.12)" : "rgba(244, 63, 94, 0.12)", border: `1px solid ${ready ? "rgba(16, 185, 129, 0.25)" : "rgba(244, 63, 94, 0.25)"}` }}
+      className={`inline-flex items-center text-xs font-extrabold rounded-full ${ready ? "badge-tax-ready" : "badge-tax-action"}`}
     >
       {ready ? "Ready" : "Action required"}
     </span>
@@ -210,7 +210,7 @@ export default function IndiaTaxCompliancePanel() {
   const status = summary?.status || "ACTION_REQUIRED";
 
   return (
-    <div className="grid gap-5" style={{ maxWidth: "960px" }}>
+    <div className="grid gap-5 max-w-960">
       <section className="card p-5">
         <div className="flex justify-between gap-4 flex-wrap mb-4">
           <div>
@@ -360,7 +360,7 @@ export default function IndiaTaxCompliancePanel() {
           />
         </div>
 
-        <div className="flex justify-end" style={{ marginTop: "18px" }}>
+        <div className="flex justify-end mt-18">
           <Button type="submit" disabled={saving}>
             {saving ? "Saving..." : "Save tax details"}
           </Button>

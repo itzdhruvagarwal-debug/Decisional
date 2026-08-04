@@ -16,7 +16,7 @@ export const resetPasswordSchema = z.object({
     .min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/\d/, "Password must contain at least one number")
     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -110,6 +110,7 @@ function ResetPasswordForm() {
         <div
           role={status === "error" ? "alert" : "status"}
           aria-live={status === "error" ? "assertive" : "polite"}
+          aria-atomic="true"
           className={`text-sm mb-6 ${status === "success" ? "auth-banner" : "auth-error-banner"}`}
         >
           {message}

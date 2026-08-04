@@ -34,10 +34,7 @@
   text-align: right;
 }
 
-.admin-user-avatar {
-  width: 42px;
-  height: 42px;
-}
+
 
 .admin-tone-badge[data-tone="success"] {
   background: var(--color-success);
@@ -1173,12 +1170,11 @@
   }
 
   .dashboard-overview-panel .dashboard-overview-grid {
-    grid-template-columns: repeat(4, minmax(68px, 1fr)) !important;
-    gap: 6px !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
   }
 
   .dashboard-overview-panel .card {
-    min-height: 86px;
     text-align: center;
   }
 
@@ -1315,7 +1311,7 @@
     align-items: center;
     justify-content: center;
     gap: 4px;
-    color: #8b85a1;
+    color: #4b5563;
     font-size: 10px;
     font-weight: 800;
     line-height: 1;

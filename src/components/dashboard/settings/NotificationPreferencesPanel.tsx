@@ -41,11 +41,11 @@ export default function NotificationPreferencesPanel({
 }: Readonly<NotificationPreferencesPanelProps>) {
   return (
     <div className="card max-w-800">
-      <h3
+      <h2
         className="text-xl font-bold mb-6"
       >
         Notification Preferences
-      </h3>
+      </h2>
 
       <PreferenceGroup
         title="Email notifications"
@@ -133,22 +133,14 @@ function Toggle({
   return (
     <label
       aria-label={label}
-      className="relative inline-block h-24 w-11" style={{ flex: "0 0 auto" }}
+      className="switch flex-shrink-0"
     >
       <input
         type="checkbox"
         checked={checked}
         onChange={onChange}
-        style={{ opacity: 0, width: 0, height: 0 }}
       />
-      <span
-        aria-hidden="true"
-        className="absolute cursor-pointer" style={{ top: 0, left: 0, right: 0, bottom: 0, backgroundColor: checked ? "var(--color-primary)" : "#2f2f46", transition: ".2s", borderRadius: "34px" }}
-      />
-      <span
-        aria-hidden="true"
-        className="absolute rounded-full" style={{ height: "18px", width: "18px", left: checked ? "23px" : "3px", bottom: "3px", backgroundColor: "white", transition: ".2s" }}
-      />
+      <span className="slider round" />
     </label>
   );
 }

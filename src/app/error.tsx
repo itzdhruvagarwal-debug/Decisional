@@ -23,10 +23,10 @@ export default function RootError({
       className="flex items-center justify-center p-6 min-h-screen"
     >
       <div
-        className="card animate-fade-in text-center w-full border-card bg-glass backdrop-blur" style={{ maxWidth: "480px", padding: "40px 32px", boxShadow: "0 20px 40px -15px rgba(0,0,0,0.5)" }}
+        className="card animate-fade-in text-center w-full border-card bg-glass backdrop-blur root-error-card"
       >
         <div
-          className="flex items-center justify-center mb-6 bg-rose-subtle rounded-full text-3xl mx-auto text-rose" style={{ width: "64px", height: "64px", border: "1px solid rgba(244, 63, 94, 0.2)" }}
+          className="flex items-center justify-center mb-6 bg-rose-subtle rounded-full text-3xl mx-auto text-rose icon-container-64 border-rose-subtle"
         >
           ⚠️
         </div>
@@ -42,7 +42,7 @@ export default function RootError({
 
         {error.digest && (
           <div
-            className="text-xs text-muted mb-6 break-all px-3-py-2-5 font-mono bg-glass-light" style={{ borderRadius: "var(--radius-sm, 6px)", border: "1px solid var(--color-border, rgba(255,255,255,0.08))" }}
+            className="text-xs text-muted mb-6 break-all px-3-py-2-5 font-mono bg-glass-light rounded-sm border-card"
           >
             Ref: {error.digest}
           </div>

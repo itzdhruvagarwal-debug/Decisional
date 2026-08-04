@@ -14,13 +14,10 @@ export function ProductSeedingCard({
 }: ProductSeedingCardProps) {
   return (
     <Card
-      className="mb-4 p-5 bg-tertiary" style={{ border: "1px dashed var(--color-border)" }}
+      className="mb-4 p-5 bg-tertiary border-dashed"
     >
       <div
-        className="flex items-center justify-between"
-        style={{
-          marginBottom: formData.requiresProduct ? "16px" : "0",
-        }}
+        className={`flex items-center justify-between ${formData.requiresProduct ? "mb-4" : "mb-0"}`}
       >
         <div>
           <h3

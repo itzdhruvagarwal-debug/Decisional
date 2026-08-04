@@ -170,11 +170,11 @@ export default function PasswordPanel({
 
     return (
         <div className="card">
-            <h3
+            <h2
                 className="text-xl font-bold mb-6"
             >
                 Change Password
-            </h3>
+            </h2>
 
             {passwordSuccess && (
                 <div
