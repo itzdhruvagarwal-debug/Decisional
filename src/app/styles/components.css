@@ -1833,3 +1833,98 @@ input:checked+.slider:before {
 .max-w-160 {
   max-width: 160px !important;
 }
+
+/* ==================== MOBILE INTERFACE ALIGNMENTS (MOCKUP 3 & 4) ==================== */
+@media (max-width: 768px) {
+  /* Campaign detail apply bar styles */
+  .campaign-detail-apply-bar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #ffffff !important;
+    border-top: 1px solid #e9e8f2 !important;
+    padding: 14px 20px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    z-index: 9999 !important;
+    box-shadow: 0 -8px 24px rgba(18, 12, 40, 0.05) !important;
+  }
+
+  .campaign-detail-apply-bar-label {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    color: #8c89a0 !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  .campaign-detail-apply-bar-payout {
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    color: #6d28ff !important;
+  }
+
+  .campaign-detail-apply-bar-btn {
+    border-radius: 14px !important;
+    padding: 10px 24px !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    box-shadow: 0 8px 18px rgba(109, 40, 255, 0.25) !important;
+  }
+
+  /* Deal contract card styles in Mockup 4 */
+  .deal-contract-card {
+    background: #110e28 !important;
+    border-radius: 24px !important;
+    padding: 20px !important;
+    border: none !important;
+    color: #ffffff !important;
+    box-shadow: 0 16px 36px rgba(17, 14, 40, 0.15) !important;
+  }
+
+  .deal-contract-card strong {
+    color: #ffffff !important;
+  }
+
+  .deal-contract-card p,
+  .deal-contract-card span {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  /* Progress stepper custom tweaks */
+  .deal-progress-card {
+    background: #ffffff !important;
+    border: 1px solid #e9e8f2 !important;
+    border-radius: 24px !important;
+    padding: 20px !important;
+    box-shadow: 0 8px 24px rgba(18, 12, 40, 0.03) !important;
+  }
+
+  .deal-progress-step-circle.completed {
+    background: #10b981 !important;
+  }
+
+  .deal-progress-step-circle.current {
+    background: #6d28ff !important;
+    box-shadow: 0 0 0 4px rgba(109, 40, 255, 0.15) !important;
+  }
+
+  .deal-progress-step-label.current {
+    color: #0e0c1a !important;
+    font-weight: 800 !important;
+  }
+
+  /* Chat/AI Assistant help card in Mockup 4 */
+  .help-card-bot {
+    background: #f1f0f9 !important;
+    border: 1px solid rgba(109, 40, 255, 0.05) !important;
+    border-radius: 20px !important;
+    padding: 14px 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+}
+
