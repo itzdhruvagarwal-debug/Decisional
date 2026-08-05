@@ -364,28 +364,6 @@ export default function CampaignDetailClient({
           </div>
         </div>
       )}
-      {/* Sticky Bottom Apply Bar for Mobile (Mockup 3) */}
-      {canApply && (
-        <div className="campaign-detail-apply-bar">
-          <div className="flex flex-col">
-            <span className="campaign-detail-apply-bar-label">You Earn</span>
-            <strong className="campaign-detail-apply-bar-payout">
-              {formatCurrency(campaign.perInfluencerBudget || campaign.totalBudget)}
-            </strong>
-          </div>
-          <Button
-            type="button"
-            variant="primary"
-            onClick={() => {
-              setNotice(null);
-              setShowApplyModal(true);
-            }}
-            className="campaign-detail-apply-bar-btn"
-          >
-            Apply Now
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

@@ -26,71 +26,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      {/* Mobile Onboarding view */}
-      <div className="mobile-onboarding-screen">
-        {/* Onboarding Header */}
-        <div className="flex justify-between items-center w-full">
-          <div className="flex items-center gap-2">
-            <span className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white w-9 h-9 rounded-xl flex items-center justify-center font-black text-xl shadow-[0_4px_14px_rgba(109,40,255,0.3)]">D</span>
-            <span className="font-extrabold text-xl tracking-tight text-white">Decisional</span>
-          </div>
-        </div>
-
-        {/* 3D Illustration Mockup Container */}
-        <div className="flex-1 flex items-center justify-center my-6 relative min-h-[260px]">
-          <div className="w-full max-w-[290px] aspect-[4/5] rounded-[32px] overflow-hidden shadow-[0_30px_70px_rgba(109,40,255,0.22)] border border-white/10 relative bg-[#120f26]/60 backdrop-blur-md">
-            <Image
-              src="/onboarding_illustration.jpg"
-              alt="Decisional App 3D Onboarding Illustration"
-              fill
-              style={{ objectFit: "cover" }}
-              sizes="(max-width: 768px) 100vw, 290px"
-              priority
-            />
-          </div>
-        </div>
-
-        {/* Copy Deck / Content Area */}
-        <div className="mb-8 text-left">
-          {/* Custom dot slider indicators */}
-          <div className="flex justify-start gap-2 mb-6">
-            <span className="w-6 h-1.5 rounded-full bg-violet-500 transition-all duration-300" />
-            <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
-            <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
-            <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
-          </div>
-
-          <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-white mb-3">
-            Smarter collaborations.<br />
-            <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">Stronger results.</span>
-          </h1>
-          <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-            The secure influencer marketing platform that puts trust, transparency and results first.
-          </p>
-        </div>
-
-        {/* Onboarding Buttons */}
-        <div className="flex flex-col gap-4 w-full">
-          <Link
-            href="/register"
-            className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-[0_12px_28px_rgba(109,40,255,0.35)] transition-all transform hover:scale-[1.01] active:scale-[0.98] text-sm no-underline"
-          >
-            <span>Get Started</span>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-            </svg>
-          </Link>
-          <div className="text-center text-xs pb-2">
-            <span className="text-gray-400">Already have an account? </span>
-            <Link href="/login" className="text-violet-400 font-extrabold hover:underline no-underline ml-1">
-              Log in
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <div className="desktop-homepage-content">
-        <Navbar />
+      <Navbar />
 
       {/* ==================== HERO ==================== */}
       <section
@@ -589,7 +525,6 @@ export default function HomePage() {
       </RevealOnScroll>
 
       <Footer />
-      </div>
     </div>
   );
 }

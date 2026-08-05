@@ -6,7 +6,7 @@ import { fetcher } from "@/lib/fetcher";
 import EmptyState from "@/components/ui/EmptyState";
 import Logo from "../Logo";
 import PWAInstallButton from "@/components/pwa/PWAInstallButton";
-import { useState, useEffect, useRef, useCallback, memo } from "react";
+import { useState, useEffect, useRef, useCallback, memo, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { isAdmin as rbacIsAdmin, isBrand, isInfluencer } from "@/lib/rbac";
@@ -328,50 +328,52 @@ export default function DashboardShell({
     subtitleText = "Influencer Dashboard";
   }
 
-  const navItems = isAdmin
-    ? [
-        { icon: "AD", label: "Admin Panel", href: "/admin" },
-      ]
-    : [
-        { icon: "DB", label: "Dashboard", href: "/dashboard" },
-        // Show Create Campaign only for Brands/Individuals
-        ...(isBrandOrIndividual
-          ? [
-            {
-              icon: "CP",
-              label: "My Campaigns",
-              href: "/dashboard/campaigns",
-            },
-            {
-              icon: "CP",
-              label: "Create Campaign",
-              href: "/dashboard/campaigns/create",
-            },
-          ]
-          : []),
-        // Show Campaigns only for Influencers (Browse)
-        ...(!isBrandOrIndividual
-          ? [
-            { icon: "CP", label: "Campaigns", href: "/dashboard/campaigns" },
-            { icon: "DL", label: "My Applications", href: "/dashboard/applications" },
-          ]
-          : [
-            {
-              icon: "FI",
-              label: "Find Influencers",
-              href: "/dashboard/influencers",
-            },
-          ]),
-        { icon: "DL", label: "My Deals", href: "/dashboard/deals" },
-        { icon: "WT", label: "Wallet", href: "/dashboard/wallet" },
-        { icon: "MS", label: "Messages", href: "/dashboard/messages" },
-        { icon: "DS", label: "Disputes", href: "/dashboard/disputes" },
-        { icon: "LB", label: "Leaderboard", href: "/dashboard/leaderboard" },
-        { icon: "BG", label: "Badges", href: "/dashboard/badges" },
-        { icon: "RF", label: "Referrals", href: "/dashboard/referrals" },
-        { icon: "MS", label: "Support & Feedback", href: "/dashboard/support" },
-        { icon: "ST", label: "Settings", href: "/dashboard/settings" },
-      ];
+  const navItems = useMemo(() => {
+    return isAdmin
+      ? [
+          { icon: "AD", label: "Admin Panel", href: "/admin" },
+        ]
+      : [
+          { icon: "DB", label: "Dashboard", href: "/dashboard" },
+          // Show Create Campaign only for Brands/Individuals
+          ...(isBrandOrIndividual
+            ? [
+              {
+                icon: "CP",
+                label: "My Campaigns",
+                href: "/dashboard/campaigns",
+              },
+              {
+                icon: "CP",
+                label: "Create Campaign",
+                href: "/dashboard/campaigns/create",
+              },
+            ]
+            : []),
+          // Show Campaigns only for Influencers (Browse)
+          ...(!isBrandOrIndividual
+            ? [
+              { icon: "CP", label: "Campaigns", href: "/dashboard/campaigns" },
+              { icon: "DL", label: "My Applications", href: "/dashboard/applications" },
+            ]
+            : [
+              {
+                icon: "FI",
+                label: "Find Influencers",
+                href: "/dashboard/influencers",
+              },
+            ]),
+          { icon: "DL", label: "My Deals", href: "/dashboard/deals" },
+          { icon: "WT", label: "Wallet", href: "/dashboard/wallet" },
+          { icon: "MS", label: "Messages", href: "/dashboard/messages" },
+          { icon: "DS", label: "Disputes", href: "/dashboard/disputes" },
+          { icon: "LB", label: "Leaderboard", href: "/dashboard/leaderboard" },
+          { icon: "BG", label: "Badges", href: "/dashboard/badges" },
+          { icon: "RF", label: "Referrals", href: "/dashboard/referrals" },
+          { icon: "MS", label: "Support & Feedback", href: "/dashboard/support" },
+          { icon: "ST", label: "Settings", href: "/dashboard/settings" },
+        ];
+  }, [isAdmin, isBrandOrIndividual]);
   let mobilePrimaryHref = "/dashboard/campaigns";
   if (rbacIsAdmin(user?.userType)) {
     mobilePrimaryHref = "/admin";

@@ -231,7 +231,7 @@ export class DisputeService {
       throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in evidence descriptions.");
     }
 
-    const dispute = await DisputeService.getAndValidateDispute(data.disputeId, userId, "add evidence to");
+    await DisputeService.getAndValidateDispute(data.disputeId, userId, "add evidence to");
 
     const evidence = await prisma.disputeEvidence.create({
       data: {

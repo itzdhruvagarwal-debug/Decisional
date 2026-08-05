@@ -15,11 +15,6 @@ export function StatusBadge({ doc }: Readonly<StatusBadgeProps>) {
                 Not uploaded
             </span>
         );
-    const colors: Record<string, string> = {
-        VERIFIED: "#10b981",
-        PENDING: "#f59e0b",
-        REJECTED: "#ef4444",
-    };
     const icons: Record<string, string> = {
         VERIFIED: "✅",
         PENDING: "⏳",

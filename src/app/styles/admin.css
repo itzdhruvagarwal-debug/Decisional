@@ -1141,87 +1141,41 @@
   }
 
   .dashboard-welcome-card {
-    padding: 0 !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    margin-bottom: 8px !important;
-  }
-
-  .dashboard-welcome-kicker {
-    display: none !important;
+    padding: 18px 14px;
+    border-radius: 20px;
   }
 
   .dashboard-welcome-card h2 {
-    font-size: 24px !important;
-    font-weight: 800 !important;
-    color: #0e0c1a !important;
+    font-size: 22px !important;
   }
 
   .dashboard-welcome-card p:not(.dashboard-welcome-kicker) {
     font-size: 13px;
-    line-height: 1.4;
-    color: #575569 !important;
+    line-height: 1.45;
   }
 
   .dashboard-welcome-score {
-    width: 68px !important;
-    height: 68px !important;
-    border-width: 5px !important;
-    border-color: #6d28ff !important;
-    background: #ffffff !important;
-    box-shadow: 0 8px 20px rgba(109, 40, 255, 0.08) !important;
-  }
-
-  .dashboard-welcome-score span {
-    color: #8c89a0 !important;
-    font-size: 8px !important;
+    width: 72px;
+    height: 72px;
+    border-width: 7px;
   }
 
   .dashboard-welcome-score strong {
-    font-size: 18px !important;
-    color: #0e0c1a !important;
-  }
-
-  .dashboard-welcome-score small {
-    color: #575569 !important;
-    font-size: 8px !important;
+    font-size: 20px;
   }
 
   .dashboard-overview-panel {
-    padding: 20px !important;
-    border-radius: 24px !important;
-    background: #110e28 !important;
-    border: none !important;
-    color: #ffffff !important;
-    box-shadow: 0 16px 36px rgba(17, 14, 40, 0.15) !important;
-  }
-
-  .dashboard-overview-panel h3 {
-    color: #ffffff !important;
+    padding: 16px;
+    border-radius: 20px;
   }
 
   .dashboard-overview-panel .dashboard-overview-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
+    gap: 10px !important;
   }
 
   .dashboard-overview-panel .card {
-    text-align: center !important;
-    background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 16px !important;
-    padding: 12px !important;
-    box-shadow: none !important;
-  }
-
-  .dashboard-overview-panel .card strong {
-    color: #ffffff !important;
-  }
-
-  .dashboard-overview-panel .card p,
-  .dashboard-overview-panel .card span {
-    color: rgba(255, 255, 255, 0.6) !important;
+    text-align: center;
   }
 
   .campaign-card-grid {
@@ -1230,37 +1184,21 @@
   }
 
   .campaign-card {
-    background: #ffffff !important;
-    border: 1px solid #e9e8f2 !important;
-    border-radius: 24px !important;
-    padding: 18px !important;
-    box-shadow: 0 8px 24px rgba(18, 12, 40, 0.03) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
+    padding: 16px !important;
   }
 
   .campaign-card-logo {
-    width: 48px !important;
-    height: 48px !important;
-    border-radius: 12px !important;
+    width: 54px;
+    height: 54px;
   }
 
   .campaign-card-footer {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    border-top: 1px solid #e9e8f2 !important;
-    padding-top: 12px !important;
-    margin-top: 4px !important;
+    align-items: stretch !important;
+    flex-direction: column;
   }
 
   .campaign-card-footer .btn {
-    width: auto !important;
-    padding: 8px 16px !important;
-    font-size: 12px !important;
-    border-radius: 10px !important;
+    width: 100%;
   }
 
   .campaign-detail-page {
