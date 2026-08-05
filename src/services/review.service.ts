@@ -1,6 +1,7 @@
 import { AppError } from "@/lib/errors";
 import prisma from "@/lib/db";
 import { Prisma } from "@prisma/client";
+import { checkMessageForContacts } from "@/lib/contact-filter";
 import { updateTrustAndLevel } from "@/lib/trust-engine";
 import { checkAndAwardBadges, awardBadgeIfNotExists } from "@/lib/gamification-engine";
 import { getDealAndVerifyParticipant } from "@/lib/utils";
@@ -90,6 +91,10 @@ export class ReviewService {
       comment?: string;
     },
   ) {
+    if (data.comment && checkMessageForContacts(data.comment).hasContactInfo) {
+      throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in review comments.");
+    }
+
     if (data.rating < 1 || data.rating > 5)
       throw AppError.badRequest("Rating must be between 1 and 5");
 

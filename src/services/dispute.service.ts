@@ -1,6 +1,7 @@
 import { AppError } from "@/lib/errors";
 import prisma from "@/lib/db";
 import { Prisma, DisputeType, DisputeStatus } from "@prisma/client";
+import { checkMessageForContacts } from "@/lib/contact-filter";
 import {
   analyzeDispute,
   applyResolution,
@@ -65,6 +66,9 @@ export class DisputeService {
       description: string;
     },
   ) {
+    if (data.description && checkMessageForContacts(data.description).hasContactInfo) {
+      throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in dispute descriptions.");
+    }
     // Verify user is part of deal
     const deal = await getDealAndVerifyParticipant(data.dealId, userId);
 
@@ -223,6 +227,10 @@ export class DisputeService {
       description?: string;
     },
   ) {
+    if (data.description && checkMessageForContacts(data.description).hasContactInfo) {
+      throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in evidence descriptions.");
+    }
+
     const dispute = await DisputeService.getAndValidateDispute(data.disputeId, userId, "add evidence to");
 
     const evidence = await prisma.disputeEvidence.create({
@@ -246,6 +254,10 @@ export class DisputeService {
       reason?: string;
     },
   ) {
+    if (data.reason && checkMessageForContacts(data.reason).hasContactInfo) {
+      throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in dispute action reasons.");
+    }
+
     const dispute = await DisputeService.getAndValidateDispute(data.disputeId, userId, "update");
 
     if (data.action === "accept_resolution") {
