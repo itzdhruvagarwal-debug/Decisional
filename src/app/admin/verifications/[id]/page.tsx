@@ -83,18 +83,18 @@ export default async function VerificationDetailPage({
           </h2>
           <div className="flex flex-col gap-3">
             {[
-              { label: "Internal ID", value: user.id, color: "inherit" },
-              { label: "Email Address", value: user.email, color: "inherit" },
-              { label: "Phone Contact", value: user.phone || "Not provided", color: "inherit" },
-              { label: "Account Type", value: user.userType, color: "inherit" },
-              { label: "Registration", value: activeSince, color: "inherit" },
-              { label: "Trust Score", value: user.trustScore, color: user.trustScore >= 50 ? "var(--color-accent-emerald)" : "var(--color-accent-amber)" },
+              { label: "Internal ID", value: user.id, colorClass: "" },
+              { label: "Email Address", value: user.email, colorClass: "" },
+              { label: "Phone Contact", value: user.phone || "Not provided", colorClass: "" },
+              { label: "Account Type", value: user.userType, colorClass: "" },
+              { label: "Registration", value: activeSince, colorClass: "" },
+              { label: "Trust Score", value: user.trustScore, colorClass: user.trustScore >= 50 ? "text-emerald" : "text-amber" },
             ].map((item) => (
               <div key={item.label} className="flex justify-between items-center p-3 bg-tertiary rounded-md border-card">
                 <span className="text-xs text-secondary font-semibold uppercase">
                   {item.label}
                 </span>
-                <span className="text-sm font-bold" style={{ color: item.color }}>
+                <span className={`text-sm font-bold ${item.colorClass}`}>
                   {item.value}
                 </span>
               </div>

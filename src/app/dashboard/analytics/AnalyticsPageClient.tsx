@@ -72,9 +72,7 @@ export default function AnalyticsPageClient({
             label="Financial Year:"
             value={selectedFY}
             onChange={(e) => handleFYChange(e.target.value)}
-            style={{
-              width: "200px",
-            }}
+            className="w-[200px]"
           >
             <option value="">Rolling 12 Months</option>
             {availableFYs.map((fy) => (

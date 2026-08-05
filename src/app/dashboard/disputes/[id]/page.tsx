@@ -10,7 +10,6 @@ import { Button, Textarea } from "@/components/ui";
 import {
   DisputeDetail,
   MediatorAnalysis,
-  getStatusColor,
   disputeEvidenceSchema,
   disputeEscalationSchema,
 } from "@/components/dashboard/disputes/DisputeHelpers";
@@ -30,6 +29,17 @@ export default function DisputeDetailPage({ params }: Readonly<DisputeDetailPage
   );
 
   const dispute: DisputeDetail | null = disputeData?.dispute || null;
+
+  const getStatusBgClass = (status: string) => {
+    switch (status) {
+      case "OPEN": return "bg-[var(--color-primary)]";
+      case "TIER1_AUTO": return "bg-[var(--color-accent-cyan)]";
+      case "TIER2_MEDIATION": return "bg-[var(--color-warning)]";
+      case "RESOLVED": return "bg-[var(--color-success)]";
+      case "CLOSED": return "bg-[var(--color-text-muted)]";
+      default: return "bg-[var(--color-text-secondary)]";
+    }
+  };
 
   const analysis: MediatorAnalysis | null = useMemo(() => {
     if (!disputeData) return null;
@@ -185,8 +195,7 @@ export default function DisputeDetailPage({ params }: Readonly<DisputeDetailPage
         </Link>
         <h1 className="text-xl font-extrabold">Dispute #{dispute.id.slice(-6)}</h1>
         <span
-          className="badge text-xs font-semibold rounded-lg text-white px-2 py-1"
-          style={{ background: getStatusColor(dispute.status) }}
+          className={`badge text-xs font-semibold rounded-lg text-white px-2 py-1 ${getStatusBgClass(dispute.status)}`}
         >
           {dispute.status.replaceAll("_", " ")}
         </span>
@@ -197,7 +206,7 @@ export default function DisputeDetailPage({ params }: Readonly<DisputeDetailPage
         )}
       </header>
 
-      <main className="p-6 w-full mx-auto" style={{ maxWidth: "1200px" }}>
+      <main className="p-6 w-full mx-auto max-w-[1200px]">
         {/* AI Mediator Analysis Card */}
         <DisputeAnalysisCard
           analysis={analysis}
@@ -234,7 +243,7 @@ export default function DisputeDetailPage({ params }: Readonly<DisputeDetailPage
 
             {/* Resolution */}
             {dispute.resolution && (
-              <div className="card mb-6" style={{ border: "1px solid var(--color-success)" }}>
+              <div className="card mb-6 border border-[var(--color-success)]">
                 <h2 className="text-lg font-bold mb-4 text-emerald">✅ Resolution</h2>
                 <p>{dispute.resolution}</p>
                 {dispute.resolvedAt && (

@@ -32,14 +32,16 @@ export default function DisputesPage() {
   const { data, isLoading } = useSWR<DisputesResponse>("/api/disputes", fetcher);
   const disputes = data?.disputes || [];
 
-  const getStatusColor = (status: string) => {
+
+
+  const getStatusBorderClass = (status: string) => {
     switch (status) {
-      case "OPEN": return "var(--color-primary)";
-      case "TIER1_AUTO": return "var(--color-accent-cyan)";
-      case "TIER2_MEDIATION": return "var(--color-warning)";
-      case "RESOLVED": return "var(--color-success)";
-      case "CLOSED": return "var(--color-text-muted)";
-      default: return "var(--color-text-secondary)";
+      case "OPEN": return "border-l-[var(--color-primary)]";
+      case "TIER1_AUTO": return "border-l-[var(--color-accent-cyan)]";
+      case "TIER2_MEDIATION": return "border-l-[var(--color-warning)]";
+      case "RESOLVED": return "border-l-[var(--color-success)]";
+      case "CLOSED": return "border-l-[var(--color-text-muted)]";
+      default: return "border-l-[var(--color-text-secondary)]";
     }
   };
 
@@ -150,7 +152,7 @@ export default function DisputesPage() {
 
                   {/* Description Excerpt */}
                   <div
-                    className="text-sm text-secondary bg-tertiary rounded-md leading-relaxed" style={{ padding: "12px 14px", borderLeft: `3px solid ${getStatusColor(dispute.status)}` }}
+                    className={`text-sm text-secondary bg-tertiary rounded-md leading-relaxed py-3 px-3.5 border-l-[3px] ${getStatusBorderClass(dispute.status)}`}
                   >
                     "{dispute.description.length > 120
                       ? dispute.description.slice(0, 120) + "..."

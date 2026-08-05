@@ -17,7 +17,7 @@ export default function WalletLoading() {
       </div>
 
       {/* Stats row */}
-      <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+      <div className="grid gap-4 mb-6 grid-cols-3">
         {[1, 2, 3].map((i) => (
           <div key={i} className="card p-5">
             <div className="skeleton h-3 w-24 rounded-sm mb-2" />
@@ -32,7 +32,7 @@ export default function WalletLoading() {
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div key={i} className="flex justify-between items-center border-b-card py-4">
             <div className="flex items-center gap-3">
-              <div className="skeleton rounded-full flex-shrink-0" style={{ width: 36, height: 36 }} />
+              <div className="skeleton rounded-full flex-shrink-0 w-9 h-9" />
               <div>
                 <div className="skeleton h-4 w-40 rounded-sm mb-1.5" />
                 <div className="skeleton h-3 w-28 rounded-sm" />

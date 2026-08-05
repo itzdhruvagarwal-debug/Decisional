@@ -174,12 +174,6 @@ export default function BrandDashboard({ data }: BrandDashboardProps) {
                 />
                 <Tooltip
                   cursor={{ fill: "rgba(99, 102, 241, 0.05)" }}
-                  contentStyle={{
-                    backgroundColor: "var(--color-bg-card)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "8px",
-                    color: "var(--color-text-primary)",
-                  }}
                   formatter={(value: number | undefined) => [
                     `₹${((value ?? 0) / 100).toLocaleString("en-IN")}`,
                     "Spent",

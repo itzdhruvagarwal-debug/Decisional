@@ -18,7 +18,7 @@ export default function DealsLoading() {
         {[1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="card p-5 flex justify-between items-center gap-4 flex-wrap">
             <div className="flex items-center gap-4 flex-1">
-              <div className="skeleton rounded-full flex-shrink-0" style={{ width: 48, height: 48 }} />
+              <div className="skeleton rounded-full flex-shrink-0 w-12 h-12" />
               <div className="flex-1">
                 <div className="skeleton h-5 w-56 rounded-sm mb-2" />
                 <div className="skeleton h-3.5 w-40 rounded-sm mb-2" />

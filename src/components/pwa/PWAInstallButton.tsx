@@ -1,6 +1,5 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 
@@ -82,13 +81,11 @@ export default function PWAInstallButton({
   label,
   platform = "auto",
   variant,
-  style,
 }: Readonly<{
   className?: string;
   label?: string;
   platform?: InstallPlatform;
   variant?: InstallVariant;
-  style?: CSSProperties;
 }>) {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -146,7 +143,6 @@ export default function PWAInstallButton({
       <Button
         type="button"
         className={className || (resolvedVariant === "store" ? "pwa-store-button" : "")}
-        style={style}
         onClick={install}
         aria-label={label || copy.title}
         title={label || copy.title}

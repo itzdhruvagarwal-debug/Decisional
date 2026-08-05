@@ -15,7 +15,6 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       error,
       fullWidth = false,
       id,
-      style,
       options,
       children,
       ...props
@@ -24,10 +23,11 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   ) => {
     const selectId =
       id ?? (label ? `select-${label.toLowerCase().replace(/\s+/g, "-")}` : undefined);
+    const wrapperClasses = `input-wrapper flex flex-col gap-2 ${fullWidth ? "w-full" : "w-auto"}`;
 
     return (
       <div
-        className="input-wrapper flex flex-col gap-2" style={{ width: fullWidth ? "100%" : "auto", ...style }}
+        className={wrapperClasses}
       >
         {label && (
           <label className="label mb-0" htmlFor={selectId}>

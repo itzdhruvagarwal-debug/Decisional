@@ -17,7 +17,7 @@ export default function ReferralsLoading() {
         </div>
       </div>
       {/* Stats */}
-      <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+      <div className="grid gap-4 mb-6 grid-cols-3">
         {[1, 2, 3].map((i) => (
           <div key={i} className="card p-5">
             <div className="skeleton h-3 w-24 rounded-sm mb-2" />
@@ -31,7 +31,7 @@ export default function ReferralsLoading() {
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="flex justify-between items-center border-b-card py-3">
             <div className="flex items-center gap-3">
-              <div className="skeleton rounded-full" style={{ width: 32, height: 32 }} />
+              <div className="skeleton rounded-full w-8 h-8" />
               <div className="skeleton h-4 w-36 rounded-sm" />
             </div>
             <div className="skeleton h-6 w-20 rounded-md" />

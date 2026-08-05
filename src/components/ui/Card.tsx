@@ -3,7 +3,6 @@ import React from "react";
 export interface CardProps {
   readonly children: React.ReactNode;
   readonly className?: string;
-  readonly style?: React.CSSProperties;
   readonly gradient?: boolean;
   readonly as?: "div" | "article" | "section" | "li";
   readonly onClick?: React.MouseEventHandler<HTMLDivElement>;
@@ -14,7 +13,6 @@ export interface CardProps {
 export function Card({
   children,
   className = "",
-  style,
   gradient = false,
   as: Tag = "div",
   onClick,
@@ -25,7 +23,6 @@ export function Card({
     <Tag
       id={id}
       className={`card ${gradient ? "card-gradient" : ""} ${className}`}
-      style={style}
       // onClick only valid on div, but Tag can vary — cast to any for flexibility
       {...(onClick ? { onClick: onClick as React.MouseEventHandler } : {})}
       {...(ariaLabel ? { "aria-label": ariaLabel } : {})}

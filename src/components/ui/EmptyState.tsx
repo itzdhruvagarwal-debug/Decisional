@@ -14,7 +14,6 @@ export interface EmptyStateProps {
   readonly onSecondaryActionClick?: (() => void) | undefined;
   readonly compact?: boolean | undefined;
   readonly className?: string | undefined;
-  readonly style?: React.CSSProperties | undefined;
 }
 
 export default function EmptyState({
@@ -29,12 +28,10 @@ export default function EmptyState({
   onSecondaryActionClick,
   compact = false,
   className = "",
-  style,
 }: EmptyStateProps) {
   return (
     <div
       className={`empty-state ${compact ? "compact" : ""} ${className}`}
-      style={style}
     >
       {emoji && (
         <div className="empty-state-emoji" aria-hidden="true">

@@ -15,7 +15,7 @@ export default function AdminVerificationsLoading() {
           <div key={i} className="card p-6">
             <div className="flex justify-between items-start gap-4 mb-4">
               <div className="flex items-center gap-4">
-                <div className="skeleton rounded-full flex-shrink-0" style={{ width: 48, height: 48 }} />
+                <div className="skeleton rounded-full flex-shrink-0 w-12 h-12" />
                 <div>
                   <div className="skeleton h-5 w-44 rounded-sm mb-2" />
                   <div className="skeleton h-3 w-56 rounded-sm" />
@@ -23,7 +23,7 @@ export default function AdminVerificationsLoading() {
               </div>
               <div className="skeleton h-6 w-24 rounded-md" />
             </div>
-            <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+            <div className="grid gap-3 grid-cols-3">
               {[1, 2, 3].map((j) => (
                 <div key={j}>
                   <div className="skeleton h-3 w-24 rounded-sm mb-1.5" />

@@ -20,8 +20,8 @@ export default function AdminViolationsLoading() {
             <thead>
               <tr className="bg-secondary">
                 {["User", "Type", "Severity", "Action", "Description", "Date", "Expires"].map((col) => (
-                  <th key={col} className="text-left border-b-card" style={{ padding: "14px 18px" }}>
-                    <div className="skeleton h-3 rounded-sm" style={{ width: col === "Description" ? 80 : 48 }} />
+                  <th key={col} className="text-left border-b-card py-[14px] px-[18px]">
+                    <div className={`skeleton h-3 rounded-sm ${col === "Description" ? "w-[80px]" : "w-[48px]"}`} />
                   </th>
                 ))}
               </tr>

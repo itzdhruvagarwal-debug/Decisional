@@ -6,7 +6,7 @@ import { fetcher } from "@/lib/fetcher";
 import EmptyState from "@/components/ui/EmptyState";
 import Logo from "../Logo";
 import PWAInstallButton from "@/components/pwa/PWAInstallButton";
-import { useState, useEffect, useRef, useCallback, memo, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, memo, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { isAdmin as rbacIsAdmin, isBrand, isInfluencer } from "@/lib/rbac";
@@ -270,6 +270,7 @@ export default function DashboardShell({
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
 
+
   // Close mobile sidebar on route change without a visual flash.
   useEffect(() => {
     const id = requestAnimationFrame(() => setMobileSidebarOpen(false));
@@ -278,9 +279,13 @@ export default function DashboardShell({
 
   // Lock body when mobile sidebar is open
   useEffect(() => {
-    document.body.style.overflow = mobileSidebarOpen ? "hidden" : "";
+    if (mobileSidebarOpen) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
     return () => {
-      document.body.style.overflow = "";
+      document.body.classList.remove("overflow-hidden");
     };
   }, [mobileSidebarOpen]);
 
@@ -482,6 +487,9 @@ const SidebarComponent = memo(function SidebarComponent({
   isActivePath,
   isAdmin,
 }: SidebarProps) {
+  const xpBarId = React.useId().replace(/:/g, "");
+  const xpBarFillClass = `xp-bar-fill-${xpBarId}`;
+  const xpPercent = Math.min(((user?.xp || 0) % 1000) / 10, 100);
   return (
     <>
       {/* Mobile Sidebar Overlay */}
@@ -572,10 +580,12 @@ const SidebarComponent = memo(function SidebarComponent({
               <span className="gradient-text">Level {user?.level || 1}</span>
             </div>
             <div className="xp-bar mt-2 h-6">
-              <div
-                className="xp-bar-fill"
-                style={{ width: `${Math.min(((user?.xp || 0) % 1000) / 10, 100)}%` }}
-              />
+              <style>{`
+                .${xpBarFillClass} {
+                  width: ${xpPercent}%;
+                }
+              `}</style>
+              <div className={`xp-bar-fill ${xpBarFillClass}`} />
             </div>
             <div className="dashboard-level-xp-label">{user?.xp || 0} XP</div>
           </div>

@@ -24,8 +24,8 @@ export default function AdminUsersLoading() {
             <thead>
               <tr className="bg-secondary">
                 {["User", "Type", "Status", "Joined", "Trust", "Badges", "Actions"].map((col) => (
-                  <th key={col} className="text-left border-b-card" style={{ padding: "14px 18px" }}>
-                    <div className="skeleton h-3 rounded-sm" style={{ width: col === "User" ? 40 : 52 }} />
+                  <th key={col} className="text-left border-b-card py-[14px] px-[18px]">
+                    <div className={`skeleton h-3 rounded-sm ${col === "User" ? "w-[40px]" : "w-[52px]"}`} />
                   </th>
                 ))}
               </tr>
@@ -35,7 +35,7 @@ export default function AdminUsersLoading() {
                 <tr key={i} className="border-b-card">
                   <td className="p-card">
                     <div className="flex items-center gap-3">
-                      <div className="skeleton rounded-full flex-shrink-0" style={{ width: 36, height: 36 }} />
+                      <div className="skeleton rounded-full flex-shrink-0 w-9 h-9" />
                       <div>
                         <div className="skeleton h-4 w-36 rounded-sm mb-1" />
                         <div className="skeleton h-3 w-44 rounded-sm" />

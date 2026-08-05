@@ -9,11 +9,11 @@ interface PaginationProps {
 
 export function Pagination({ page, totalPages, setPage, marginTop = "12px" }: Readonly<PaginationProps>) {
   if (totalPages <= 1) return null;
+  const mtClass = marginTop === "32px" ? "mt-8" : "mt-3";
   return (
     <nav
       aria-label="Pagination"
-      className="flex items-center justify-center gap-3 mb-4"
-      style={{ marginTop }}
+      className={`flex items-center justify-center gap-3 mb-4 ${mtClass}`}
     >
       <Button
         variant="secondary"

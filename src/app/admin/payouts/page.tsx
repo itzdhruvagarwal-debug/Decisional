@@ -161,8 +161,8 @@ export default function PayoutsAdminPage() {
             <tbody>
               {Array.from({ length: 6 }).map((_, i) => (
                 <tr key={i} className="border-b-card">
-                  {[140, 80, 120, 80, 100, 60].map((w, j) => (
-                    <td key={j} className="p-4"><div className="skeleton rounded-sm h-4" style={{ width: w }} /></td>
+                  {["w-[140px]", "w-[80px]", "w-[120px]", "w-[80px]", "w-[100px]", "w-[60px]"].map((widthClass, j) => (
+                    <td key={j} className="p-4"><div className={`skeleton rounded-sm h-4 ${widthClass}`} /></td>
                   ))}
                 </tr>
               ))}

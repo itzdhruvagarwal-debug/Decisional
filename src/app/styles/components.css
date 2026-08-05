@@ -1833,3 +1833,24 @@ input:checked+.slider:before {
 .max-w-160 {
   max-width: 160px !important;
 }
+
+/* Custom dashboard referral code banner */
+.referral-code-banner {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1)) !important;
+  border: 1px solid rgba(99, 102, 241, 0.2) !important;
+}
+
+/* Global Recharts overrides */
+.recharts-default-tooltip {
+  background-color: var(--color-bg-card) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(10px) !important;
+  color: var(--color-text-primary) !important;
+  box-shadow: var(--shadow-md) !important;
+  padding: 10px 14px !important;
+}
+
+.recharts-legend-custom {
+  padding-top: 20px !important;
+}

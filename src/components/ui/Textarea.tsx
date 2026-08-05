@@ -7,13 +7,14 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
 }
 
 export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className = "", label, error, fullWidth = false, id, style, ...props }, ref) => {
+  ({ className = "", label, error, fullWidth = false, id, ...props }, ref) => {
     const textareaId =
       id ?? (label ? `textarea-${label.toLowerCase().replace(/\s+/g, "-")}` : undefined);
+    const wrapperClasses = `input-wrapper flex flex-col gap-2 ${fullWidth ? "w-full" : "w-auto"}`;
 
     return (
       <div
-        className="input-wrapper flex flex-col gap-2" style={{ width: fullWidth ? "100%" : "auto", ...style }}
+        className={wrapperClasses}
       >
         {label && (
           <label className="label mb-0" htmlFor={textareaId}>
@@ -22,8 +23,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         )}
         <textarea
           id={textareaId}
-          className={`input resize-y ${error ? "input-error" : ""} ${className}`}
-          style={{ minHeight: "100px" }}
+          className={`input resize-y min-h-[100px] ${error ? "input-error" : ""} ${className}`}
           ref={ref}
           {...props}
         />

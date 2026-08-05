@@ -67,7 +67,6 @@ export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, Bu
       href,
       type = "button",
       autoFocus,
-      style,
       prefetch,
       target,
       rel,
@@ -99,11 +98,6 @@ export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, Bu
       .filter(Boolean)
       .join(" ");
 
-    const inlineStyles: React.CSSProperties = {
-      ...(fullWidth ? { width: "100%" } : {}),
-      ...style,
-    };
-
     const content = (
       <>
         {loading && <span className={`loading ${children ? "loading-with-label" : ""}`} />}
@@ -126,7 +120,6 @@ export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, Bu
         <Link
           href={href}
           className={classes}
-          style={inlineStyles}
           {...(prefetch !== undefined ? { prefetch } : {})}
           {...(target !== undefined ? { target } : {})}
           {...(rel !== undefined ? { rel } : {})}
@@ -145,7 +138,6 @@ export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, Bu
         type={type}
         autoFocus={autoFocus}
         className={classes}
-        style={inlineStyles}
         disabled={disabled || loading}
         onClick={onClick}
         onMouseEnter={onMouseEnter}

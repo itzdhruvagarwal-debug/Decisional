@@ -81,7 +81,7 @@ export default function CampaignDetailClient({
   return (
     <div className="grid gap-6 max-w-1000 mx-auto pb-16">
       {/* Header section */}
-      <header className="flex justify-between items-start gap-4 flex-wrap pb-4" style={{ borderBottom: "1px solid var(--color-border)" }}>
+      <header className="flex justify-between items-start gap-4 flex-wrap pb-4 border-b border-b-[var(--color-border)]">
         <div>
           <div className="flex items-center gap-3 mb-2 flex-wrap">
             <h1 className="font-black text-2xl md:text-3xl tracking-tight text-primary">

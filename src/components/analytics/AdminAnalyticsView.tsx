@@ -177,7 +177,7 @@ export default function AdminAnalyticsView({ data }: AdminAnalyticsProps) {
             </div>
           </div>
 
-          <div className="w-full mt-4" style={{ height: 350 }}>
+          <div className="w-full mt-4 h-[350px]">
             {chartsReady && (
               <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={350}>
                 <BarChart data={data.financials.revenueHistory} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -187,10 +187,9 @@ export default function AdminAnalyticsView({ data }: AdminAnalyticsProps) {
                   <YAxis yAxisId="right" orientation="right" stroke="currentColor" className="text-gray-400 text-xs" tickFormatter={(val) => `Rs ${val / 1000}k`} axisLine={false} tickLine={false} dx={10} />
                   <Tooltip
                     cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
-                    contentStyle={{ backgroundColor: 'rgba(22, 22, 40, 0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', backdropFilter: 'blur(10px)', color: '#fff', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
                     formatter={(value: number | undefined) => [fmt(value ?? 0), ""]}
                   />
-                  <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                  <Legend className="recharts-legend-custom" />
                   <Bar yAxisId="right" dataKey="gmv" fill="url(#gmvGrad)" name="GMV" radius={[6, 6, 0, 0]} />
                   <Bar yAxisId="left" dataKey="revenue" fill="url(#revGrad)" name="Net Revenue" radius={[6, 6, 0, 0]} />
                   <defs>
@@ -218,7 +217,7 @@ export default function AdminAnalyticsView({ data }: AdminAnalyticsProps) {
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <div className="relative z-10">
             <h3 className="text-lg font-bold mb-6 text-white tracking-tight">User Growth (30 Days)</h3>
-            <div className="w-full" style={{ height: 280 }}>
+            <div className="w-full h-[280px]">
               {chartsReady && (
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280}>
                   <LineChart data={data.growth} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -231,9 +230,7 @@ export default function AdminAnalyticsView({ data }: AdminAnalyticsProps) {
                     <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-white/5" vertical={false} />
                     <XAxis dataKey="date" stroke="currentColor" className="text-gray-400 text-xs" tickFormatter={(str) => str.slice(5)} axisLine={false} tickLine={false} dy={10} />
                     <YAxis stroke="currentColor" className="text-gray-400 text-xs" axisLine={false} tickLine={false} dx={-10} />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: 'rgba(22, 22, 40, 0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', backdropFilter: 'blur(10px)', color: '#fff', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
-                    />
+                    <Tooltip />
                     <Line type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: '#3b82f6', stroke: '#fff', strokeWidth: 2 }} name="New Users" />
                     <Line type="monotone" dataKey="brand" stroke="#8b5cf6" strokeWidth={3} dot={false} name="Brands" />
                     <Line type="monotone" dataKey="influencer" stroke="#10b981" strokeWidth={3} dot={false} name="Influencers" />

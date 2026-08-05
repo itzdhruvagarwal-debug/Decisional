@@ -17,6 +17,9 @@ export default function Modal({
   maxWidth = "480px",
   children,
 }: ModalProps) {
+  const uniqueId = React.useId().replace(/:/g, "");
+  const modalClass = `modal-container-${uniqueId}`;
+
   // Listen for Escape key
   useEffect(() => {
     if (!open) return;
@@ -32,12 +35,12 @@ export default function Modal({
   // Lock body scroll when open
   useEffect(() => {
     if (open) {
-      document.body.style.overflow = "hidden";
+      document.body.classList.add("overflow-hidden");
     } else {
-      document.body.style.overflow = "";
+      document.body.classList.remove("overflow-hidden");
     }
     return () => {
-      document.body.style.overflow = "";
+      document.body.classList.remove("overflow-hidden");
     };
   }, [open]);
 
@@ -58,9 +61,13 @@ export default function Modal({
           />
 
           {/* Modal Container */}
+          <style>{`
+            .${modalClass} {
+              max-width: ${maxWidth};
+            }
+          `}</style>
           <motion.div
-            className="modal-container"
-            style={{ maxWidth }}
+            className={`modal-container ${modalClass}`}
             role="dialog"
             aria-modal="true"
             aria-labelledby={title ? "modal-title-id" : undefined}

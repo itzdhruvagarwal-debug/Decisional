@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { calculateLevel, getPlatformFeePercentage } from "@/lib/drs-score";
 import {
   AreaChart,
@@ -113,13 +113,13 @@ export default function InfluencerDashboard({
     recentActivity = [],
   } = data;
 
-  let trustScoreColor = "var(--color-accent-rose)";
+  let trustScoreColorClass = "text-[var(--color-accent-rose)]";
   if (overview.trustScore >= 850) {
-    trustScoreColor = "var(--color-accent-emerald)";
+    trustScoreColorClass = "text-[var(--color-accent-emerald)]";
   } else if (overview.trustScore >= 750) {
-    trustScoreColor = "var(--color-primary-light)";
+    trustScoreColorClass = "text-[var(--color-primary-light)]";
   } else if (overview.trustScore >= 600) {
-    trustScoreColor = "var(--color-accent-amber)";
+    trustScoreColorClass = "text-[var(--color-accent-amber)]";
   }
 
   if (!overview || !performance) {
@@ -142,9 +142,7 @@ export default function InfluencerDashboard({
         <div className="dashboard-welcome-score" aria-label={`Trust score ${overview.trustScore}`}>
           <span>Trust Score</span>
           <strong
-            style={{
-              color: trustScoreColor,
-            }}
+            className={trustScoreColorClass}
           >
             {overview.trustScore}
           </strong>
@@ -163,28 +161,28 @@ export default function InfluencerDashboard({
             label="Earnings"
             value={`₹${(overview.totalEarnings / 100).toLocaleString("en-IN")}`}
             subvalue="Lifetime"
-            accentColor="var(--color-accent-emerald)"
+            accentColorClass="text-[var(--color-accent-emerald)]"
           />
           <StatCard
             icon="deals"
             label="Completed"
             value={overview.completedDeals}
             subvalue={`${overview.activeDeals} active`}
-            accentColor="var(--color-accent-cyan)"
+            accentColorClass="text-[var(--color-accent-cyan)]"
           />
           <StatCard
             icon="trust"
             label="Trust Score"
             value={`${overview.trustScore}/900`}
             subvalue={getTierLabel(overview.trustScore)}
-            accentColor="var(--color-primary-light)"
+            accentColorClass="text-[var(--color-primary-light)]"
           />
           <StatCard
             icon="delivery"
             label="On-time"
             value={`${performance.deliveryRate}%`}
             subvalue="Delivery Rate"
-            accentColor="var(--color-accent-amber)"
+            accentColorClass="text-[var(--color-accent-amber)]"
           />
         </div>
       </section>
@@ -260,12 +258,6 @@ export default function InfluencerDashboard({
                     tickFormatter={(val) => `Rs ${val / 1000}k`}
                   />
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: "var(--color-bg-card)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: "8px",
-                      color: "var(--color-text-primary)",
-                    }}
                     formatter={(value: number | undefined) => [
                       `₹${((value ?? 0) / 100).toLocaleString("en-IN")}`,
                       "Earnings",
@@ -406,8 +398,7 @@ export default function InfluencerDashboard({
           </div>
 
           <div
-            className="p-4 flex items-center justify-between rounded-md" style={{ background:
-                "linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1))", border: "1px solid rgba(99, 102, 241, 0.2)" }}
+            className="referral-code-banner p-4 flex items-center justify-between rounded-md"
           >
             <div>
               <div
@@ -478,7 +469,7 @@ interface StatCardProps {
   readonly label: string;
   readonly value: string | number;
   readonly subvalue?: string;
-  readonly accentColor: string;
+  readonly accentColorClass: string;
 }
 
 const STAT_ICONS: Record<StatCardProps["icon"], React.ReactNode> = {
@@ -513,12 +504,12 @@ function StatCard({
   label,
   value,
   subvalue,
-  accentColor,
+  accentColorClass,
 }: StatCardProps) {
   return (
     <div className="card hover-lift">
       <div
-        className="flex items-center gap-2-5 mb-3" style={{ color: accentColor }}
+        className={`flex items-center gap-2-5 mb-3 ${accentColorClass}`}
       >
         {STAT_ICONS[icon]}
         <span
@@ -528,7 +519,7 @@ function StatCard({
         </span>
       </div>
       <div
-        className="font-extrabold text-3xl" style={{ color: accentColor, lineHeight: 1.2 }}
+        className={`font-extrabold text-3xl leading-[1.2] ${accentColorClass}`}
       >
         {value}
       </div>
@@ -550,6 +541,10 @@ interface MetricBarProps {
 }
 
 function MetricBar({ label, value, max, color, displayValue }: MetricBarProps) {
+  const barId = React.useId().replace(/:/g, "");
+  const fillClass = `trust-meter-fill-${barId}`;
+  const progressPercent = (value / max) * 100;
+
   return (
     <div>
       <div
@@ -565,13 +560,13 @@ function MetricBar({ label, value, max, color, displayValue }: MetricBarProps) {
         </span>
       </div>
       <div className="trust-meter">
-        <div
-          className="trust-meter-fill"
-          style={{
-            width: `${(value / max) * 100}%`,
-            background: color,
-          }}
-        />
+        <style>{`
+          .${fillClass} {
+            width: ${progressPercent}%;
+            background: ${color};
+          }
+        `}</style>
+        <div className={`trust-meter-fill ${fillClass}`} />
       </div>
     </div>
   );

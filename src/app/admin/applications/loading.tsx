@@ -17,8 +17,8 @@ export default function AdminApplicationsLoading() {
             <thead>
               <tr className="bg-secondary">
                 {["Influencer", "Campaign", "Proposed Rate", "Status", "Date", "Action"].map((col) => (
-                  <th key={col} className="text-left border-b-card" style={{ padding: "14px 18px" }}>
-                    <div className="skeleton h-3 rounded-sm" style={{ width: col === "Campaign" ? 60 : 48 }} />
+                  <th key={col} className="text-left border-b-card py-[14px] px-[18px]">
+                    <div className={`skeleton h-3 rounded-sm ${col === "Campaign" ? "w-[60px]" : "w-[48px]"}`} />
                   </th>
                 ))}
               </tr>

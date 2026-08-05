@@ -17,8 +17,8 @@ export default function AdminAuditLogsLoading() {
             <thead>
               <tr className="bg-secondary">
                 {["Admin", "Action", "Entity", "Details", "IP", "Timestamp"].map((col) => (
-                  <th key={col} className="text-left border-b-card" style={{ padding: "14px 18px" }}>
-                    <div className="skeleton h-3 rounded-sm" style={{ width: col === "Details" ? 56 : 40 }} />
+                  <th key={col} className="text-left border-b-card py-[14px] px-[18px]">
+                    <div className={`skeleton h-3 rounded-sm ${col === "Details" ? "w-[56px]" : "w-[40px]"}`} />
                   </th>
                 ))}
               </tr>

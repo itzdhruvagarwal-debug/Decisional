@@ -139,14 +139,26 @@ export default function WeeklyChallenges() {
                 </span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                <div
-                  className={`h-3 rounded-full transition-all ${
-                    challenge.completed
-                      ? "bg-green-500"
-                      : "bg-[var(--color-accent)]"
-                  }`}
-                  style={{ width: `${progressPercentage}%` }}
-                />
+                {(() => {
+                  const randomId = Math.random().toString(36).substring(2, 9);
+                  const progressClass = `challenge-progress-${randomId}`;
+                  return (
+                    <>
+                      <style>{`
+                        .${progressClass} {
+                          width: ${progressPercentage}%;
+                        }
+                      `}</style>
+                      <div
+                        className={`h-3 rounded-full transition-all ${progressClass} ${
+                          challenge.completed
+                            ? "bg-green-500"
+                            : "bg-[var(--color-accent)]"
+                        }`}
+                      />
+                    </>
+                  );
+                })()}
               </div>
             </div>
 

@@ -361,7 +361,7 @@ export function ChatInputArea({ state }: Readonly<ChatPanelProps>) {
             type="file"
             ref={fileInputRef}
             onChange={handleFileChange}
-            style={{ display: "none" }}
+            className="hidden"
             id="chat-file-upload-input"
           />
           <Button
