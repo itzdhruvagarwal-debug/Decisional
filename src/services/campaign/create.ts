@@ -15,6 +15,18 @@ import { checkAndAwardBadges } from "@/lib/gamification-engine";
 import { validateCampaignInputAndBudgets } from "./list";
 import { TierError, DirectInviteParams, estimateCampaignDealSlots, safeStringCast, safeStringOrNullCast } from "./types";
 import { createDealAndReserveFunds } from "@/services/deal/helpers";
+import { checkMessageForContacts } from "@/lib/contact-filter";
+
+export function assertNoContactDetails(text: string | null | undefined, fieldName: string) {
+  if (!text) return;
+  const filterResult = checkMessageForContacts(text, { allowUrls: true });
+  if (filterResult.hasContactInfo) {
+    throw AppError.badRequest(
+      `Contact details (phone, email, social handles, or UPI) are not allowed in the campaign ${fieldName}.`
+    );
+  }
+}
+
 
 export async function checkBrandVerificationTiers(
     userId: string,
@@ -287,6 +299,11 @@ export function parseAndValidateCampaignDetails(data: Record<string, unknown>) {
       throw AppError.badRequest("Missing required fields: title, description, requirements");
     }
 
+    assertNoContactDetails(title, "title");
+    assertNoContactDetails(description, "description");
+    assertNoContactDetails(requirements, "requirements");
+    assertNoContactDetails(guidelines, "guidelines");
+
     const contentDeadline = new Date(data.contentDeadline as string);
     const postingDeadline = new Date(data.postingDeadline as string);
     const applicationDeadline = data.applicationDeadline
@@ -330,6 +347,9 @@ export function parseAndValidateCampaignDetails(data: Record<string, unknown>) {
     const productDescription = data.productDescription
       ? safeStringCast(data.productDescription).trim()
       : null;
+
+    assertNoContactDetails(productName, "product name");
+    assertNoContactDetails(productDescription, "product description");
 
     return {
       requiresProduct,

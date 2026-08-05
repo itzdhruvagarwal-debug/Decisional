@@ -1,6 +1,7 @@
 import { logger } from "@/lib/logger";
 import { MatchingService } from "@/services/matching.service";
 import { ApplicationInput } from "@/lib/validations";
+import { checkMessageForContacts } from "@/lib/contact-filter";
 import prisma from "@/lib/db";
 import { Prisma, ApplicationStatus } from "@prisma/client";
 import { AppError } from "@/lib/errors";
@@ -163,6 +164,9 @@ export async function listApplications(
 export function validateApplicationRatesAndProposal(data: ApplicationInput) {
     if (!data.proposal || data.proposal.trim().length < 10) {
       throw AppError.badRequest("Proposal is required and must be at least 10 characters");
+    }
+    if (data.proposal && checkMessageForContacts(data.proposal).hasContactInfo) {
+      throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in your proposal pitch.");
     }
     if (data.proposedRate && data.proposedRate < 0) {
       throw AppError.badRequest("Proposed rate cannot be negative");

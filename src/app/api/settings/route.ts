@@ -1,6 +1,7 @@
 import { apiWrapper } from "@/lib/api-wrapper";
 import { AppError } from "@/lib/errors";
 import { NextRequest, NextResponse } from "next/server";
+import { checkMessageForContacts } from "@/lib/contact-filter";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { z } from "zod";
@@ -340,6 +341,13 @@ async function _handler_PUT(req: NextRequest) {
     const data = result.data;
     const userId = session.user.id;
     const email = session.user.email || "";
+
+    if (data.bio && checkMessageForContacts(data.bio).hasContactInfo) {
+      throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in your bio.");
+    }
+    if (data.description && checkMessageForContacts(data.description).hasContactInfo) {
+      throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in your description.");
+    }
 
     if (isInfluencer(session.user.userType)) {
       await updateInfluencerProfile(userId, email, data);

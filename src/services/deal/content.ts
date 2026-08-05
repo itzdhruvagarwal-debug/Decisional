@@ -1,6 +1,7 @@
 import { addUserXp } from "@/lib/gamification-engine";
 import { ContractTerms } from "@/lib/contract-engine";
 import { assertSufficientBalance } from "@/lib/utils";
+import { checkMessageForContacts } from "@/lib/contact-filter";
 import { updateTrustAndLevel } from "@/lib/trust-engine";
 import { recalculateSocialProof } from "@/lib/social-proof-calculator";
 import prisma from "@/lib/db";
@@ -19,6 +20,10 @@ export async function submitContent(
     notes?: string,
     contentUrls?: Array<{ type: string; url: string; status?: string; feedback?: string }>,
   ) {
+    if (notes && checkMessageForContacts(notes).hasContactInfo) {
+      throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in submission notes.");
+    }
+
     try {
       const updatedDeal = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         // LOCK: Lock and fetch deal using helper
@@ -249,6 +254,12 @@ export async function reviewContent(
     dealId: string,
     reviews: Array<{ type: string; status: "APPROVED" | "REVISION_REQUESTED"; feedback?: string | undefined }>,
   ) {
+    for (const r of reviews) {
+      if (r.feedback && checkMessageForContacts(r.feedback).hasContactInfo) {
+        throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in review feedback.");
+      }
+    }
+
     const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const deal = await lockAndFetchDealForAction(tx, dealId);
       if (!deal) throw AppError.notFound("Deal not found");

@@ -9,6 +9,7 @@ import { AppError } from "@/lib/errors";
 import { createActivityLog } from "@/lib/audit";
 import { calculateProductHandlingFee, assertSufficientBalance } from "@/lib/utils";
 import { resolveBrandPlatformFee } from "@/lib/platform-fees";
+import { assertNoContactDetails } from "./create";
 
 export async function getCampaignById(
     campaignId: string,
@@ -148,6 +149,13 @@ export async function updateDraftCampaign(
         if (campaign.status !== "DRAFT") {
           throw AppError.badRequest("Campaign details can only be updated in DRAFT status");
         }
+
+        if (data.title !== undefined) assertNoContactDetails(safeStringCast(data.title), "title");
+        if (data.description !== undefined) assertNoContactDetails(safeStringCast(data.description), "description");
+        if (data.requirements !== undefined) assertNoContactDetails(safeStringCast(data.requirements), "requirements");
+        if (data.guidelines !== undefined) assertNoContactDetails(safeStringOrNullCast(data.guidelines), "guidelines");
+        if (data.productName !== undefined) assertNoContactDetails(safeStringCast(data.productName), "product name");
+        if (data.productDescription !== undefined) assertNoContactDetails(safeStringCast(data.productDescription), "product description");
 
         const updateData = buildCampaignUpdatePayload(data);
 

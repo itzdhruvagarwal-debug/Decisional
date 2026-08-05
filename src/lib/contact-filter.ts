@@ -52,7 +52,7 @@ function testRegex(regex: RegExp, text: string): boolean {
   return regex.exec(text) !== null;
 }
 
-function checkBasicContacts(content: string, findings: string[]) {
+function checkBasicContacts(content: string, findings: string[], options?: { allowUrls?: boolean }) {
   if (
     testRegex(CONTACT_REGEX.email, content) ||
     testRegex(CONTACT_REGEX.emailObfuscated, content) ||
@@ -66,7 +66,7 @@ function checkBasicContacts(content: string, findings: string[]) {
     findings.push("phone");
   }
 
-  if (testRegex(CONTACT_REGEX.url, content)) {
+  if (!options?.allowUrls && testRegex(CONTACT_REGEX.url, content)) {
     findings.push("url");
   }
 }
@@ -153,12 +153,12 @@ function checkNlpContact(content: string, findings: string[], wordCount: number,
   }
 }
 
-export function checkMessageForContacts(content: string) {
+export function checkMessageForContacts(content: string, options?: { allowUrls?: boolean }) {
   const findings: string[] = [];
   const normalizedContent = cleanAndNormalizeText(content);
   const phonePatternMatch = CONTACT_REGEX.phone.exec(content);
 
-  checkBasicContacts(content, findings);
+  checkBasicContacts(content, findings, options);
   checkSocialAndUpi(content, normalizedContent, findings);
   const wordCount = checkNumberWords(content, findings);
   checkNlpContact(content, findings, wordCount, phonePatternMatch);

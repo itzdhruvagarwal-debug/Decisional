@@ -1,6 +1,7 @@
 import prisma from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { AppError } from "@/lib/errors";
+import { checkMessageForContacts } from "@/lib/contact-filter";
 import { createActivityLog } from "@/lib/audit";
 import { generateContractTerms } from "@/lib/contract-engine";
 import { resolveBrandPlatformFee } from "@/lib/platform-fees";
@@ -315,6 +316,10 @@ export async function rejectApplication(
     applicationId: string,
     rejectionReason?: string,
   ) {
+    if (rejectionReason && checkMessageForContacts(rejectionReason).hasContactInfo) {
+      throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in application rejection reasons.");
+    }
+
     try {
       const result = await prisma.$transaction(
         async (tx: Prisma.TransactionClient) => {
