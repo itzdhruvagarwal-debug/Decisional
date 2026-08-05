@@ -494,9 +494,9 @@ return (
 <>
 {/* Mobile Sidebar Overlay */}
 <div
+role="none"
 className={`sidebar-overlay ${mobileSidebarOpen ? "active" : ""}`}
 onClick={() => setMobileSidebarOpen(false)}
-aria-hidden="true"
 />
 
 {/* Sidebar */}

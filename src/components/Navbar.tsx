@@ -76,12 +76,10 @@ type="button"
 </div>
 </nav>
 
-<button
-type="button"
-className={`mobile-nav-overlay border-none p-0 bg-none ${isMobileMenuOpen ? "active" : ""}`}
-onClick={closeMobile}
-aria-hidden="true"
-tabIndex={-1}
+<div
+  role="none"
+  className={`mobile-nav-overlay ${isMobileMenuOpen ? "active" : ""}`}
+  onClick={closeMobile}
 />
 
 <div className={`mobile-nav ${isMobileMenuOpen ? "active" : ""}`}>

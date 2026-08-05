@@ -156,7 +156,7 @@ Monthly Spend (Last 12 Months)
 </h3>
 <div className="chart-wrapper">
 {chartsReady && (
-<ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280}>
+<ResponsiveContainer width="100%" height={280} minWidth={0}>
 <BarChart data={spendHistory} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
 <CartesianGrid
 strokeDasharray="3 3"
