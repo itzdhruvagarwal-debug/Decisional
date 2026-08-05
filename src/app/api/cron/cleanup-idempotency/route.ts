@@ -5,13 +5,13 @@ import { validateCronSecret } from "../guard";
 import { cleanupExpiredIdempotencyKeys } from "@/lib/idempotency";
 
 async function _handler_POST(_req: NextRequest) {
-  await validateCronSecret();
+await validateCronSecret();
 
-  const deleted = await cleanupExpiredIdempotencyKeys();
+const deleted = await cleanupExpiredIdempotencyKeys();
 
-  logger.info("[Cron] Idempotency cleanup completed", { deleted });
+logger.info("[Cron] Idempotency cleanup completed", { deleted });
 
-  return NextResponse.json({ success: true, deleted });
+return NextResponse.json({ success: true, deleted });
 }
 
 export const POST = apiWrapper(_handler_POST);

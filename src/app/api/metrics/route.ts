@@ -8,43 +8,43 @@ import crypto from "node:crypto";
 const EXPECTED_TOKEN = process.env.PROMETHEUS_AUTH_TOKEN || null;
 
 export async function GET(request: Request) {
-  try {
-    // Require auth token in ALL environments — metrics exposure is a security risk.
-    if (!EXPECTED_TOKEN) {
-      logger.error(
-        "[Metrics] PROMETHEUS_AUTH_TOKEN is not set — metrics endpoint disabled",
-      );
-      return new NextResponse("Not Found", { status: 404 });
-    }
+try {
+// Require auth token in ALL environments metrics exposure is a security risk.
+if (!EXPECTED_TOKEN) {
+logger.error(
+"[Metrics] PROMETHEUS_AUTH_TOKEN is not set metrics endpoint disabled",
+);
+return new NextResponse("Not Found", { status: 404 });
+}
 
-    const authHeader = request.headers.get("Authorization") || "";
-    const expectedHeader = `Bearer ${EXPECTED_TOKEN}`;
+const authHeader = request.headers.get("Authorization") || "";
+const expectedHeader = `Bearer ${EXPECTED_TOKEN}`;
 
-    // Use timingSafeEqual on hashed values to prevent timing attacks while handling variable length headers.
-    const expectedHash = crypto.createHash("sha256").update(expectedHeader).digest();
-    const actualHash = crypto.createHash("sha256").update(authHeader).digest();
+// Use timingSafeEqual on hashed values to prevent timing attacks while handling variable length headers.
+const expectedHash = crypto.createHash("sha256").update(expectedHeader).digest();
+const actualHash = crypto.createHash("sha256").update(authHeader).digest();
 
-    if (!crypto.timingSafeEqual(expectedHash, actualHash)) {
-      logger.warn(
-        "[Metrics] Unauthorized attempt to access metrics endpoint",
-        {
-          ip: request.headers.get("x-forwarded-for"),
-        },
-      );
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+if (!crypto.timingSafeEqual(expectedHash, actualHash)) {
+logger.warn(
+"[Metrics] Unauthorized attempt to access metrics endpoint",
+{
+ip: request.headers.get("x-forwarded-for"),
+},
+);
+return new NextResponse("Unauthorized", { status: 401 });
+}
 
-    const metrics = await getMetrics();
-    const contentType = getMetricsContentType();
+const metrics = await getMetrics();
+const contentType = getMetricsContentType();
 
-    return new NextResponse(metrics, {
-      status: 200,
-      headers: {
-        "Content-Type": contentType,
-      },
-    });
-  } catch (error) {
-    logger.error("Failed to generate metrics", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
-  }
+return new NextResponse(metrics, {
+status: 200,
+headers: {
+"Content-Type": contentType,
+},
+});
+} catch (error) {
+logger.error("Failed to generate metrics", error);
+return new NextResponse("Internal Server Error", { status: 500 });
+}
 }

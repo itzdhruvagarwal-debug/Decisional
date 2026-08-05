@@ -6,17 +6,17 @@ import { ErrorBoundary } from "@/components/security/ErrorBoundary";
 import PWARegister from "@/components/pwa/PWARegister";
 
 export function Providers({ children }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <SessionProvider
-      basePath="/api/auth"
-      refetchOnWindowFocus={true}
-    >
-      <ErrorBoundary componentName="RootLayout">
-        <SecurityProvider>
-          <PWARegister />
-          {children}
-        </SecurityProvider>
-      </ErrorBoundary>
-    </SessionProvider>
-  );
+return (
+<SessionProvider
+basePath="/api/auth"
+refetchOnWindowFocus={true}
+>
+<ErrorBoundary componentName="RootLayout">
+<SecurityProvider>
+<PWARegister />
+{children}
+</SecurityProvider>
+</ErrorBoundary>
+</SessionProvider>
+);
 }

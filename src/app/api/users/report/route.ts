@@ -7,32 +7,32 @@ import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 const reportBodySchema = z.object({
-  reportedUserId: z.string().cuid(),
-  reason: z.string().min(3),
-  description: z.string().optional(),
+reportedUserId: z.string().cuid(),
+reason: z.string().min(3),
+description: z.string().optional(),
 });
 
 async function _handler_POST(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return ApiResponse.unauthorized();
-  }
+const session = await auth();
+if (!session?.user?.id) {
+return ApiResponse.unauthorized();
+}
 
-  const limit = await checkRateLimit(session.user.id, "USER_REPORTS");
-  if (!limit.success) {
-    return ApiResponse.tooManyRequests("You are reporting users too frequently. Please try again later.");
-  }
+const limit = await checkRateLimit(session.user.id, "USER_REPORTS");
+if (!limit.success) {
+return ApiResponse.tooManyRequests("You are reporting users too frequently. Please try again later.");
+}
 
-  const body = await request.json().catch(() => null);
-  const parsed = reportBodySchema.safeParse(body);
-  if (!parsed.success) {
-    return ApiResponse.error("Invalid payload", 400);
-  }
+const body = await request.json().catch(() => null);
+const parsed = reportBodySchema.safeParse(body);
+if (!parsed.success) {
+return ApiResponse.error("Invalid payload", 400);
+}
 
-  const { reportedUserId, reason, description } = parsed.data;
+const { reportedUserId, reason, description } = parsed.data;
 
-  await BlockService.reportUser(session.user.id, reportedUserId, reason, description);
-  return ApiResponse.success(null, "User reported successfully");
+await BlockService.reportUser(session.user.id, reportedUserId, reason, description);
+return ApiResponse.success(null, "User reported successfully");
 }
 
 export const POST = apiWrapper(_handler_POST, { requireAuth: true });

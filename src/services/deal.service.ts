@@ -9,14 +9,14 @@ import { verifyPost } from "./deal/verify";
 export type { DealWithRelations, ExpiredDealCandidate };
 
 export class DealService {
-  static readonly listDeals = listDeals;
-  static readonly submitContent = submitContent;
-  static readonly rejectPendingInvite = rejectPendingInvite;
-  static readonly submitShippingAddress = submitShippingAddress;
-  static readonly confirmProductDispatch = confirmProductDispatch;
-  static readonly confirmProductReceived = confirmProductReceived;
-  static readonly approveContent = approveContent;
-  static readonly reviewContent = reviewContent;
-  static readonly autoApproveExpiredContent = autoApproveExpiredContent;
-  static readonly verifyPost = verifyPost;
+static readonly listDeals = listDeals;
+static readonly submitContent = submitContent;
+static readonly rejectPendingInvite = rejectPendingInvite;
+static readonly submitShippingAddress = submitShippingAddress;
+static readonly confirmProductDispatch = confirmProductDispatch;
+static readonly confirmProductReceived = confirmProductReceived;
+static readonly approveContent = approveContent;
+static readonly reviewContent = reviewContent;
+static readonly autoApproveExpiredContent = autoApproveExpiredContent;
+static readonly verifyPost = verifyPost;
 }

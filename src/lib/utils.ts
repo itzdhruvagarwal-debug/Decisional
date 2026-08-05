@@ -9,97 +9,97 @@ import { z } from "zod";
 export * from "@/lib/utils-client";
 
 export function generateOTP(): string {
-  return randomInt(100000, 999999).toString();
+return randomInt(100000, 999999).toString();
 }
 
 export function generateReferralCode(prefix: string = ""): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  const cleanPrefix = prefix.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 2);
-  const suffixLength = 10 - cleanPrefix.length;
-  let suffix = "";
-  for (let i = 0; i < suffixLength; i++) {
-    suffix += chars.charAt(randomInt(0, chars.length));
-  }
-  return `${cleanPrefix}${suffix}`;
+const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const cleanPrefix = prefix.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 2);
+const suffixLength = 10 - cleanPrefix.length;
+let suffix = "";
+for (let i = 0; i < suffixLength; i++) {
+suffix += chars.charAt(randomInt(0, chars.length));
+}
+return `${cleanPrefix}${suffix}`;
 }
 
 export function calculateProductHandlingFee(
-  productValue: number | null,
-  requiresProduct: boolean,
-  isProductOnly: boolean,
-  platformFeePercent?: number,
+productValue: number | null,
+requiresProduct: boolean,
+isProductOnly: boolean,
+platformFeePercent?: number,
 ) {
-  if (!requiresProduct || !productValue) return 0;
-  if (isProductOnly) {
-    const feePercent = platformFeePercent ?? env.PLATFORM_FEE_PERCENTAGE;
-    return Math.max(0, Math.round((productValue * feePercent) / 100));
-  }
-  return Math.max(0, Math.round(productValue * 0.02));
+if (!requiresProduct || !productValue) return 0;
+if (isProductOnly) {
+const feePercent = platformFeePercent ?? env.PLATFORM_FEE_PERCENTAGE;
+return Math.max(0, Math.round((productValue * feePercent) / 100));
+}
+return Math.max(0, Math.round(productValue * 0.02));
 }
 
 export async function getDealAndVerifyParticipant(dealId: string, userId: string) {
-  const deal = await prisma.deal.findUnique({
-    where: { id: dealId },
-    include: {
-      influencer: { select: { userId: true } },
-      brand: { select: { userId: true } },
-    },
-  });
-  if (!deal) throw AppError.notFound("Deal not found");
-  const participants = [deal.influencer.userId, deal.brand?.userId].filter(Boolean) as string[];
-  if (!participants.includes(userId)) throw AppError.forbidden("Unauthorized");
-  return deal;
+const deal = await prisma.deal.findUnique({
+where: { id: dealId },
+include: {
+influencer: { select: { userId: true } },
+brand: { select: { userId: true } },
+},
+});
+if (!deal) throw AppError.notFound("Deal not found");
+const participants = [deal.influencer.userId, deal.brand?.userId].filter(Boolean) as string[];
+if (!participants.includes(userId)) throw AppError.forbidden("Unauthorized");
+return deal;
 }
 
 export function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  if (typeof error === "string") return error;
-  try {
-    return JSON.stringify(error);
-  } catch {
-    return String(error);
-  }
+if (error instanceof Error) return error.message;
+if (typeof error === "string") return error;
+try {
+return JSON.stringify(error);
+} catch {
+return String(error);
+}
 }
 
 export const notificationPreferencesSchema = z.object({
-  email: z.object({
-    marketing: z.boolean().default(true),
-    updates: z.boolean().default(true),
-    security: z.boolean().default(true),
-  }).default({ marketing: true, updates: true, security: true }),
-  push: z.object({
-    marketing: z.boolean().default(true),
-    updates: z.boolean().default(true),
-    security: z.boolean().default(true),
-  }).default({ marketing: true, updates: true, security: true }),
+email: z.object({
+marketing: z.boolean().default(true),
+updates: z.boolean().default(true),
+security: z.boolean().default(true),
+}).default({ marketing: true, updates: true, security: true }),
+push: z.object({
+marketing: z.boolean().default(true),
+updates: z.boolean().default(true),
+security: z.boolean().default(true),
+}).default({ marketing: true, updates: true, security: true }),
 }).default({
-  email: { marketing: true, updates: true, security: true },
-  push: { marketing: true, updates: true, security: true },
+email: { marketing: true, updates: true, security: true },
+push: { marketing: true, updates: true, security: true },
 });
 
 export type NotificationPreferences = z.infer<typeof notificationPreferencesSchema>;
 
 export function parseNotificationPreferences(prefs: unknown): NotificationPreferences {
-  if (!prefs) {
-    return {
-      email: { marketing: true, updates: true, security: true },
-      push: { marketing: true, updates: true, security: true },
-    };
-  }
-  let parsed = prefs;
-  if (typeof prefs === "string") {
-    try {
-      parsed = JSON.parse(prefs);
-    } catch {
-      // ignore
-    }
-  }
-  const result = notificationPreferencesSchema.safeParse(parsed);
-  if (result.success) {
-    return result.data;
-  }
-  return {
-    email: { marketing: true, updates: true, security: true },
-    push: { marketing: true, updates: true, security: true },
-  };
+if (!prefs) {
+return {
+email: { marketing: true, updates: true, security: true },
+push: { marketing: true, updates: true, security: true },
+};
+}
+let parsed = prefs;
+if (typeof prefs === "string") {
+try {
+parsed = JSON.parse(prefs);
+} catch {
+// ignore
+}
+}
+const result = notificationPreferencesSchema.safeParse(parsed);
+if (result.success) {
+return result.data;
+}
+return {
+email: { marketing: true, updates: true, security: true },
+push: { marketing: true, updates: true, security: true },
+};
 }

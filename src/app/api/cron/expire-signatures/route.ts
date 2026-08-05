@@ -8,247 +8,247 @@ import { getDealTotalAmount } from "@/lib/utils";
 import { AppError } from "@/lib/errors";
 
 export type ExpiredSignatureDeal = Prisma.DealGetPayload<{
-  include: {
-    brand: { select: { id: true; userId: true; companyName: true } };
-    campaign: {
-      select: {
-        id: true;
-        title: true;
-        isDirectInvite: true;
-        totalBudget: true;
-        status: true;
-        brandId: true;
-      };
-    };
-    influencer: {
-      select: { id: true; userId: true; displayName: true };
-    };
-  };
+include: {
+brand: { select: { id: true; userId: true; companyName: true } };
+campaign: {
+select: {
+id: true;
+title: true;
+isDirectInvite: true;
+totalBudget: true;
+status: true;
+brandId: true;
+};
+};
+influencer: {
+select: { id: true; userId: true; displayName: true };
+};
+};
 }>;
 
 
 async function _handler_POST(_req: NextRequest) {
-  await validateCronSecret();
+await validateCronSecret();
 
-  const now = new Date();
-  const BATCH_SIZE = 50;
-  const MAX_PROCESS_LIMIT = 200;
-  let processedCount = 0;
-  const results: Array<{ dealId: string; success: boolean; error?: string }> = [];
+const now = new Date();
+const BATCH_SIZE = 50;
+const MAX_PROCESS_LIMIT = 200;
+let processedCount = 0;
+const results: Array<{ dealId: string; success: boolean; error?: string }> = [];
 
-  while (processedCount < MAX_PROCESS_LIMIT) {
-    const currentTake = Math.min(BATCH_SIZE, MAX_PROCESS_LIMIT - processedCount);
-    const expiredDeals = await prisma.deal.findMany({
-      where: {
-        status: "PENDING_SIGNATURE",
-        signDeadline: { lt: now },
-      },
-      include: {
-        brand: { select: { id: true, userId: true, companyName: true } },
-        campaign: {
-          select: {
-            id: true,
-            title: true,
-            isDirectInvite: true,
-            totalBudget: true,
-            status: true,
-            brandId: true,
-          },
-        },
-        influencer: {
-          select: { id: true, userId: true, displayName: true },
-        },
-      },
-      take: currentTake,
-    });
+while (processedCount < MAX_PROCESS_LIMIT) {
+const currentTake = Math.min(BATCH_SIZE, MAX_PROCESS_LIMIT - processedCount);
+const expiredDeals = await prisma.deal.findMany({
+where: {
+status: "PENDING_SIGNATURE",
+signDeadline: { lt: now },
+},
+include: {
+brand: { select: { id: true, userId: true, companyName: true } },
+campaign: {
+select: {
+id: true,
+title: true,
+isDirectInvite: true,
+totalBudget: true,
+status: true,
+brandId: true,
+},
+},
+influencer: {
+select: { id: true, userId: true, displayName: true },
+},
+},
+take: currentTake,
+});
 
-    if (expiredDeals.length === 0) {
-      break;
-    }
+if (expiredDeals.length === 0) {
+break;
+}
 
-    for (const deal of expiredDeals) {
-      try {
-        await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-          await expireSingleDealSignature(tx, deal);
-        });
+for (const deal of expiredDeals) {
+try {
+await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+await expireSingleDealSignature(tx, deal);
+});
 
-        results.push({
-          dealId: deal.id,
-          success: true,
-        });
-      } catch (err: unknown) {
-        logger.error("Failed to expire deal signature", err, { dealId: deal.id });
-        results.push({
-          dealId: deal.id,
-          success: false,
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
-    }
+results.push({
+dealId: deal.id,
+success: true,
+});
+} catch (err: unknown) {
+logger.error("Failed to expire deal signature", err, { dealId: deal.id });
+results.push({
+dealId: deal.id,
+success: false,
+error: err instanceof Error ? err.message : String(err),
+});
+}
+}
 
-    processedCount += expiredDeals.length;
-  }
+processedCount += expiredDeals.length;
+}
 
-  logger.info("Expire signatures cron run completed", { expiredCount: processedCount });
+logger.info("Expire signatures cron run completed", { expiredCount: processedCount });
 
-  return NextResponse.json({
-    success: true,
-    scanned: processedCount,
-    results,
-  });
+return NextResponse.json({
+success: true,
+scanned: processedCount,
+results,
+});
 }
 
 export const POST = apiWrapper(_handler_POST);
 
 async function handleWalletRefund(tx: Prisma.TransactionClient, deal: ExpiredSignatureDeal, brandUserId: string) {
-  const wallet = await tx.wallet.findUnique({
-    where: { userId: brandUserId },
-    select: { id: true },
-  });
+const wallet = await tx.wallet.findUnique({
+where: { userId: brandUserId },
+select: { id: true },
+});
 
-  if (wallet && deal.amount > 0) {
-    const refundAmount = getDealTotalAmount(deal);
-    const isCampaignPoolRefund = !deal.campaign.isDirectInvite;
-    await tx.wallet.update({
-      where: { id: wallet.id },
-      data: {
-        ...(isCampaignPoolRefund
-          ? { pendingBalance: { increment: refundAmount } }
-          : { balance: { increment: refundAmount } }),
-      },
-    });
+if (wallet && deal.amount > 0) {
+const refundAmount = getDealTotalAmount(deal);
+const isCampaignPoolRefund = !deal.campaign.isDirectInvite;
+await tx.wallet.update({
+where: { id: wallet.id },
+data: {
+...(isCampaignPoolRefund
+? { pendingBalance: { increment: refundAmount } }
+: { balance: { increment: refundAmount } }),
+},
+});
 
-    await tx.transaction.create({
-      data: {
-        walletId: wallet.id,
-        dealId: deal.id,
-        type: "REFUND",
-        amount: refundAmount,
-        status: "COMPLETED",
-        description: `Refund for expired invite: ${deal.campaign.title}`,
-        metadata: {
-          balanceImpact: !isCampaignPoolRefund,
-          source: isCampaignPoolRefund ? "campaign_pool_refund" : "direct_invite_refund",
-        },
-      },
-    });
-  }
+await tx.transaction.create({
+data: {
+walletId: wallet.id,
+dealId: deal.id,
+type: "REFUND",
+amount: refundAmount,
+status: "COMPLETED",
+description: `Refund for expired invite: ${deal.campaign.title}`,
+metadata: {
+balanceImpact: !isCampaignPoolRefund,
+source: isCampaignPoolRefund ? "campaign_pool_refund" : "direct_invite_refund",
+},
+},
+});
+}
 }
 
 async function handleDirectInviteRefund(tx: Prisma.TransactionClient, deal: ExpiredSignatureDeal, brandUserId: string) {
-  await handlePendingBalanceRefund(tx, deal, brandUserId, {
-    description: `Refund for expired invite: ${deal.campaign.title}`,
-  });
+await handlePendingBalanceRefund(tx, deal, brandUserId, {
+description: `Refund for expired invite: ${deal.campaign.title}`,
+});
 }
 
 async function handleFallbackRefund(tx: Prisma.TransactionClient, deal: ExpiredSignatureDeal, brandUserId: string) {
-  await handlePendingBalanceRefund(tx, deal, brandUserId, {
-    description: `Refund for expired deal signature: ${deal.campaign.title}`,
-    metadata: { balanceImpact: true, source: "non_wallet_pool_refund" },
-  });
+await handlePendingBalanceRefund(tx, deal, brandUserId, {
+description: `Refund for expired deal signature: ${deal.campaign.title}`,
+metadata: { balanceImpact: true, source: "non_wallet_pool_refund" },
+});
 }
 
-/** Shared: moves up to refundableAmount from pendingBalance → balance and creates a REFUND transaction. */
+/** Shared: moves up to refundableAmount from pendingBalance balance and creates a REFUND transaction. */
 async function handlePendingBalanceRefund(
-  tx: Prisma.TransactionClient,
-  deal: ExpiredSignatureDeal,
-  brandUserId: string,
-  opts: { description: string; metadata?: Prisma.InputJsonObject },
+tx: Prisma.TransactionClient,
+deal: ExpiredSignatureDeal,
+brandUserId: string,
+opts: { description: string; metadata?: Prisma.InputJsonObject },
 ) {
-  const wallet = await tx.wallet.findUnique({
-    where: { userId: brandUserId },
-    select: { id: true, pendingBalance: true },
-  });
+const wallet = await tx.wallet.findUnique({
+where: { userId: brandUserId },
+select: { id: true, pendingBalance: true },
+});
 
-  const refundableAmount = wallet
-    ? Math.min(wallet.pendingBalance, getDealTotalAmount(deal))
-    : 0;
+const refundableAmount = wallet
+? Math.min(wallet.pendingBalance, getDealTotalAmount(deal))
+: 0;
 
-  if (wallet && refundableAmount > 0) {
-    await tx.wallet.update({
-      where: { id: wallet.id },
-      data: {
-        pendingBalance: { decrement: refundableAmount },
-        balance: { increment: refundableAmount },
-      },
-    });
+if (wallet && refundableAmount > 0) {
+await tx.wallet.update({
+where: { id: wallet.id },
+data: {
+pendingBalance: { decrement: refundableAmount },
+balance: { increment: refundableAmount },
+},
+});
 
-    await tx.transaction.create({
-      data: {
-        walletId: wallet.id,
-        dealId: deal.id,
-        type: "REFUND",
-        amount: refundableAmount,
-        status: "COMPLETED",
-        description: opts.description,
-        ...(opts.metadata !== undefined ? { metadata: opts.metadata as Prisma.InputJsonValue } : {}),
-      },
-    });
-  }
+await tx.transaction.create({
+data: {
+walletId: wallet.id,
+dealId: deal.id,
+type: "REFUND",
+amount: refundableAmount,
+status: "COMPLETED",
+description: opts.description,
+...(opts.metadata !== undefined ? { metadata: opts.metadata as Prisma.InputJsonValue } : {}),
+},
+});
+}
 }
 
 async function expireSingleDealSignature(tx: Prisma.TransactionClient, deal: ExpiredSignatureDeal) {
-  // Atomic status update guard
-  const lockResult = await tx.deal.updateMany({
-    where: { id: deal.id, status: "PENDING_SIGNATURE" },
-    data: {
-      status: "CANCELLED",
-      rejectionReason: "Invite signature deadline expired (auto-cancelled)",
-    },
-  });
+// Atomic status update guard
+const lockResult = await tx.deal.updateMany({
+where: { id: deal.id, status: "PENDING_SIGNATURE" },
+data: {
+status: "CANCELLED",
+rejectionReason: "Invite signature deadline expired (auto-cancelled)",
+},
+});
 
-  if (lockResult.count === 0) {
-    throw AppError.conflict("Deal is no longer in PENDING_SIGNATURE status");
-  }
+if (lockResult.count === 0) {
+throw AppError.conflict("Deal is no longer in PENDING_SIGNATURE status");
+}
 
-  await tx.application.updateMany({
-    where: {
-      campaignId: deal.campaignId,
-      influencerId: deal.influencerId,
-      status: "SELECTED",
-    },
-    data: {
-      status: "WITHDRAWN",
-      rejectionReason: "Invite signature deadline expired",
-    },
-  });
+await tx.application.updateMany({
+where: {
+campaignId: deal.campaignId,
+influencerId: deal.influencerId,
+status: "SELECTED",
+},
+data: {
+status: "WITHDRAWN",
+rejectionReason: "Invite signature deadline expired",
+},
+});
 
-  await tx.campaign.updateMany({
-    where: { id: deal.campaignId, selectedInfluencers: { gt: 0 } },
-    data: {
-      selectedInfluencers: { decrement: 1 },
-      reservedAmount: { decrement: deal.amount },
-      reservedTotalAmount: { decrement: getDealTotalAmount(deal) },
-    },
-  });
+await tx.campaign.updateMany({
+where: { id: deal.campaignId, selectedInfluencers: { gt: 0 } },
+data: {
+selectedInfluencers: { decrement: 1 },
+reservedAmount: { decrement: deal.amount },
+reservedTotalAmount: { decrement: getDealTotalAmount(deal) },
+},
+});
 
-  const brandUserId = deal.brand?.userId;
-  if (brandUserId) {
-    if (deal.reservedFromWallet) {
-      await handleWalletRefund(tx, deal, brandUserId);
-    } else if (deal.campaign.isDirectInvite) {
-      await handleDirectInviteRefund(tx, deal, brandUserId);
-    } else {
-      await handleFallbackRefund(tx, deal, brandUserId);
-    }
-  }
+const brandUserId = deal.brand?.userId;
+if (brandUserId) {
+if (deal.reservedFromWallet) {
+await handleWalletRefund(tx, deal, brandUserId);
+} else if (deal.campaign.isDirectInvite) {
+await handleDirectInviteRefund(tx, deal, brandUserId);
+} else {
+await handleFallbackRefund(tx, deal, brandUserId);
+}
+}
 
-  if (deal.campaign.isDirectInvite) {
-    await tx.campaign.update({
-      where: { id: deal.campaignId },
-      data: { status: "CANCELLED", deletedAt: new Date() },
-    });
+if (deal.campaign.isDirectInvite) {
+await tx.campaign.update({
+where: { id: deal.campaignId },
+data: { status: "CANCELLED", deletedAt: new Date() },
+});
 
-    if (deal.campaign.brandId && deal.campaign.status === "ACTIVE") {
-      await tx.brandProfile.updateMany({
-        where: {
-          id: deal.campaign.brandId,
-          activeCampaigns: { gt: 0 },
-        },
-        data: {
-          activeCampaigns: { decrement: 1 },
-        },
-      });
-    }
-  }
+if (deal.campaign.brandId && deal.campaign.status === "ACTIVE") {
+await tx.brandProfile.updateMany({
+where: {
+id: deal.campaign.brandId,
+activeCampaigns: { gt: 0 },
+},
+data: {
+activeCampaigns: { decrement: 1 },
+},
+});
+}
+}
 }

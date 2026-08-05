@@ -5,26 +5,26 @@ import { getReferralStats } from "@/lib/referral-engine";
 import { logger } from "@/lib/logger";
 
 async function _handler_GET() {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+try {
+const session = await auth();
+if (!session?.user?.id) {
+return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+}
 
-    const stats = await getReferralStats(session.user.id);
+const stats = await getReferralStats(session.user.id);
 
-    if (!stats) {
-      return NextResponse.json({ error: "Stats not found" }, { status: 404 });
-    }
+if (!stats) {
+return NextResponse.json({ error: "Stats not found" }, { status: 404 });
+}
 
-    return NextResponse.json(stats);
-  } catch (error) {
-    logger.error("Gamification referrals error", error);
-    return NextResponse.json(
-      { error: "Failed to fetch referral stats" },
-      { status: 500 },
-    );
-  }
+return NextResponse.json(stats);
+} catch (error) {
+logger.error("Gamification referrals error", error);
+return NextResponse.json(
+{ error: "Failed to fetch referral stats" },
+{ status: 500 },
+);
+}
 }
 
 

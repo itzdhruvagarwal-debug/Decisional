@@ -5,28 +5,28 @@ import AdminFrame from "@/components/admin/AdminFrame";
 import { requireActiveAdmin } from "@/lib/admin-auth";
 
 export default async function AdminLayout({
-  children,
+children,
 }: {
-  readonly children: React.ReactNode;
+readonly children: React.ReactNode;
 }) {
-  const session = await auth();
+const session = await auth();
 
-  let adminEmail: string;
-  try {
-    const admin = await requireActiveAdmin(session?.user);
-    adminEmail = admin.email;
-  } catch {
-    redirect(session?.user ? "/dashboard" : "/login?callbackUrl=/admin");
-  }
+let adminEmail: string;
+try {
+const admin = await requireActiveAdmin(session?.user);
+adminEmail = admin.email;
+} catch {
+redirect(session?.user ? "/dashboard" : "/login?callbackUrl=/admin");
+}
 
-  return (
-    <AdminFrame
-      user={{
-        name: session!.user.name ?? null,
-        email: adminEmail,
-      }}
-    >
-      {children}
-    </AdminFrame>
-  );
+return (
+<AdminFrame
+user={{
+name: session!.user.name ?? null,
+email: adminEmail,
+}}
+>
+{children}
+</AdminFrame>
+);
 }

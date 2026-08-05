@@ -13,189 +13,189 @@ import { getDealParticipantRole } from "@/lib/utils";
 import { Prisma } from "@prisma/client";
 
 export interface SignResult {
-  signed: {
-    isFullySigned: boolean;
-  };
+signed: {
+isFullySigned: boolean;
+};
 }
 
 export type DealToSign = Prisma.DealGetPayload<{
-  include: {
-    influencer: { select: { userId: true; displayName: true } };
-    brand: { select: { userId: true; companyName: true } };
-    campaign: { select: { title: true } };
-  };
+include: {
+influencer: { select: { userId: true; displayName: true } };
+brand: { select: { userId: true; companyName: true } };
+campaign: { select: { title: true } };
+};
 }>;
 
 
 const paramsSchema = routeParamsSchema;
 
 async function validateAndGetDealToSign(dealId: string, userId: string) {
-  const deal = await prisma.deal.findUnique({
-    where: { id: dealId },
-    include: {
-      influencer: { select: { userId: true, displayName: true } },
-      brand: { select: { userId: true, companyName: true } },
-      campaign: { select: { title: true } },
-    },
-  });
+const deal = await prisma.deal.findUnique({
+where: { id: dealId },
+include: {
+influencer: { select: { userId: true, displayName: true } },
+brand: { select: { userId: true, companyName: true } },
+campaign: { select: { title: true } },
+},
+});
 
-  if (!deal) {
-    throw AppError.notFound("Deal not found");
-  }
+if (!deal) {
+throw AppError.notFound("Deal not found");
+}
 
-  if (deal.status !== "PENDING_SIGNATURE") {
-    throw AppError.badRequest("Deal is not pending signature");
-  }
+if (deal.status !== "PENDING_SIGNATURE") {
+throw AppError.badRequest("Deal is not pending signature");
+}
 
-  const { isInfluencer, isBrand } = getDealParticipantRole(deal, userId);
+const { isInfluencer, isBrand } = getDealParticipantRole(deal, userId);
 
-  if (!isInfluencer && !isBrand) {
-    throw AppError.forbidden("You are not a party to this deal");
-  }
+if (!isInfluencer && !isBrand) {
+throw AppError.forbidden("You are not a party to this deal");
+}
 
-  return { deal, isInfluencer };
+return { deal, isInfluencer };
 }
 
 function handleSignContractError(error: unknown) {
-  if (error instanceof AppError) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: error.statusCode }
-    );
-  }
+if (error instanceof AppError) {
+return NextResponse.json(
+{ error: error.message },
+{ status: error.statusCode }
+);
+}
 
-  const msg = error instanceof Error ? error.message : "";
+const msg = error instanceof Error ? error.message : "";
 
-  if (msg.includes("already signed")) {
-    return NextResponse.json(
-      { error: "This contract has already been signed" },
-      { status: 409 },
-    );
-  }
+if (msg.includes("already signed")) {
+return NextResponse.json(
+{ error: "This contract has already been signed" },
+{ status: 409 },
+);
+}
 
-  if (msg.includes("pending signature")) {
-    return NextResponse.json(
-      { error: "Deal is not pending signature" },
-      { status: 400 },
-    );
-  }
+if (msg.includes("pending signature")) {
+return NextResponse.json(
+{ error: "Deal is not pending signature" },
+{ status: 400 },
+);
+}
 
-  if (msg.includes("not the")) {
-    return NextResponse.json(
-      { error: "You are not authorized to sign this contract" },
-      { status: 403 },
-    );
-  }
+if (msg.includes("not the")) {
+return NextResponse.json(
+{ error: "You are not authorized to sign this contract" },
+{ status: 403 },
+);
+}
 
-  logger.error("Contract signing error", error);
-  return NextResponse.json(
-    { error: "Failed to sign contract. Please try again." },
-    { status: 500 },
-  );
+logger.error("Contract signing error", error);
+return NextResponse.json(
+{ error: "Failed to sign contract. Please try again." },
+{ status: 500 },
+);
 }
 
 async function sendSignNotifications(
-  dealId: string,
-  deal: DealToSign,
-  isInfluencer: boolean,
-  result: SignResult
+dealId: string,
+deal: DealToSign,
+isInfluencer: boolean,
+result: SignResult
 ) {
-  const counterpartyUserId = isInfluencer ? deal.brand?.userId : deal.influencer.userId;
+const counterpartyUserId = isInfluencer ? deal.brand?.userId : deal.influencer.userId;
 
-  if (counterpartyUserId) {
-    const signerName = isInfluencer ? deal.influencer.displayName : deal.brand?.companyName;
+if (counterpartyUserId) {
+const signerName = isInfluencer ? deal.influencer.displayName : deal.brand?.companyName;
 
-    let message = `${signerName || "The other party"} has signed the contract for "${deal.campaign.title}". Please sign to proceed.`;
-    if (result.signed.isFullySigned) {
-      if (deal.reservedFromWallet) {
-        message = `Both parties have signed the contract for "${deal.campaign.title}". Payment is secured and work can begin.`;
-      } else {
-        message = `Both parties have signed the contract for "${deal.campaign.title}". Please secure payment to activate the deal.`;
-      }
-    }
+let message = `${signerName || "The other party"} has signed the contract for "${deal.campaign.title}". Please sign to proceed.`;
+if (result.signed.isFullySigned) {
+if (deal.reservedFromWallet) {
+message = `Both parties have signed the contract for "${deal.campaign.title}". Payment is secured and work can begin.`;
+} else {
+message = `Both parties have signed the contract for "${deal.campaign.title}". Please secure payment to activate the deal.`;
+}
+}
 
-    await NotificationService.createNotification({
-      userId: counterpartyUserId,
-      type: "deal_update",
-      title: result.signed.isFullySigned ? "Contract Fully Signed" : "Contract Signed",
-      message,
-      data: { link: `/dashboard/deals/${dealId}` },
-    });
-  }
+await NotificationService.createNotification({
+userId: counterpartyUserId,
+type: "deal_update",
+title: result.signed.isFullySigned ? "Contract Fully Signed" : "Contract Signed",
+message,
+data: { link: `/dashboard/deals/${dealId}` },
+});
+}
 }
 
 async function _handler_POST(
-  request: NextRequest,
-  { params }: { params: Promise<Record<string, string | string[]>> },
+request: NextRequest,
+{ params }: { params: Promise<Record<string, string | string[]>> },
 ) {
-  try {
-    const resolvedParams = await params;
-    const parsedParams = paramsSchema.safeParse(resolvedParams);
-    if (!parsedParams.success) {
-      return NextResponse.json({ error: "Invalid deal ID" }, { status: 400 });
-    }
+try {
+const resolvedParams = await params;
+const parsedParams = paramsSchema.safeParse(resolvedParams);
+if (!parsedParams.success) {
+return NextResponse.json({ error: "Invalid deal ID" }, { status: 400 });
+}
 
-    const dealId = parsedParams.data.id;
-    const session = await auth();
+const dealId = parsedParams.data.id;
+const session = await auth();
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+if (!session?.user?.id) {
+return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+}
 
-    const limit = await checkRateLimit(session.user.id, "DEAL_UPDATES");
-    if (!limit.success) {
-      return NextResponse.json(
-        { error: "Too many deal update requests" },
-        { status: 429 },
-      );
-    }
+const limit = await checkRateLimit(session.user.id, "DEAL_UPDATES");
+if (!limit.success) {
+return NextResponse.json(
+{ error: "Too many deal update requests" },
+{ status: 429 },
+);
+}
 
-    const { deal, isInfluencer } = await validateAndGetDealToSign(dealId, session.user.id);
-    const role: "INFLUENCER" | "BRAND" = isInfluencer ? "INFLUENCER" : "BRAND";
+const { deal, isInfluencer } = await validateAndGetDealToSign(dealId, session.user.id);
+const role: "INFLUENCER" | "BRAND" = isInfluencer ? "INFLUENCER" : "BRAND";
 
-    const ipAddress =
-      (request as NextRequest & { ip?: string }).ip ||
-      request.headers.get("x-real-ip") ||
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      "unknown";
-    const userAgent = request.headers.get("user-agent") || "unknown";
+const ipAddress =
+(request as NextRequest & { ip?: string }).ip ||
+request.headers.get("x-real-ip") ||
+request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+"unknown";
+const userAgent = request.headers.get("user-agent") || "unknown";
 
-    let result;
-    try {
-      result = await signAndSaveDealContract(
-        dealId,
-        session.user.id,
-        role,
-        ipAddress,
-        userAgent,
-      );
-    } catch (error: unknown) {
-      return handleSignContractError(error);
-    }
+let result;
+try {
+result = await signAndSaveDealContract(
+dealId,
+session.user.id,
+role,
+ipAddress,
+userAgent,
+);
+} catch (error: unknown) {
+return handleSignContractError(error);
+}
 
-    await invalidate(`deal:${dealId}`);
-    await sendSignNotifications(dealId, deal, isInfluencer, result);
+await invalidate(`deal:${dealId}`);
+await sendSignNotifications(dealId, deal, isInfluencer, result);
 
-    logger.info("Contract signed via dedicated route", {
-      dealId,
-      userId: session.user.id,
-      role,
-      isFullySigned: result.signed.isFullySigned,
-    });
+logger.info("Contract signed via dedicated route", {
+dealId,
+userId: session.user.id,
+role,
+isFullySigned: result.signed.isFullySigned,
+});
 
-    return NextResponse.json({
-      success: true,
-      message: result.message,
-      isFullySigned: result.signed.isFullySigned,
-      signedAt: result.signed.signedAt,
-    });
-  } catch (error) {
-    if (error instanceof AppError) {
-      return NextResponse.json({ error: error.message }, { status: error.statusCode });
-    }
-    logger.error("Sign POST route error", error);
-    return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 });
-  }
+return NextResponse.json({
+success: true,
+message: result.message,
+isFullySigned: result.signed.isFullySigned,
+signedAt: result.signed.signedAt,
+});
+} catch (error) {
+if (error instanceof AppError) {
+return NextResponse.json({ error: error.message }, { status: error.statusCode });
+}
+logger.error("Sign POST route error", error);
+return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 });
+}
 }
 
 // Wrapped handlers via apiWrapper

@@ -16,246 +16,246 @@ import { DealModals } from "@/components/dashboard/deals/DealModals";
 import { Button, Textarea } from "@/components/ui";
 
 export default function DealDetailPage() {
-  const { id } = useParams() as { id: string };
-  const { data: session } = useSession();
-  const { requireFreshSession } = useTokenRefreshGuard();
-  const dealState = useDealDetail(id, session, requireFreshSession);
-  
-  const {
-    deal,
-    isLoading: loading,
-    error,
-    isSubmitting,
-    reviewRating,
-    setReviewRating,
-    hoverRating,
-    setHoverRating,
-    reviewComment,
-    setReviewComment,
-    reviewSubmitted,
-    setReviewSubmitted,
-    showAddressModal,
-    setShowAddressModal,
-    showReviewModal,
-    setShowReviewModal,
-    showSubmitModal,
-    setShowSubmitModal,
-    showVerifyModal,
-    setShowVerifyModal,
-    shippingAddress: shippingForm,
-    setShippingAddress: setShippingForm,
-    itemizedUrls,
-    setItemizedUrls,
-    contentForm,
-    setContentForm,
-    postUrl,
-    setPostUrl,
-    itemizedReviews,
-    setItemizedReviews,
-    isUploadingContent,
-    uploadingField,
-    setUploadingField,
-    fileInputRef,
-    handleContentUpload,
-    handleAction,
-    handleReviewContent,
-    showToast,
-    setIsSubmitting,
-    toasts,
-    removeToast,
-    engagement,
-    engagementDisclaimer,
-  } = dealState;
+const { id } = useParams() as { id: string };
+const { data: session } = useSession();
+const { requireFreshSession } = useTokenRefreshGuard();
+const dealState = useDealDetail(id, session, requireFreshSession);
 
-  const ratingLabelMap: Record<number, string> = {
-    1: "Poor - Disappointed",
-    2: "Fair - Needs improvement",
-    3: "Good - Satisfactory",
-    4: "Very Good - Great work",
-    5: "Excellent - Outstanding!",
-  };
+const {
+deal,
+isLoading: loading,
+error,
+isSubmitting,
+reviewRating,
+setReviewRating,
+hoverRating,
+setHoverRating,
+reviewComment,
+setReviewComment,
+reviewSubmitted,
+setReviewSubmitted,
+showAddressModal,
+setShowAddressModal,
+showReviewModal,
+setShowReviewModal,
+showSubmitModal,
+setShowSubmitModal,
+showVerifyModal,
+setShowVerifyModal,
+shippingAddress: shippingForm,
+setShippingAddress: setShippingForm,
+itemizedUrls,
+setItemizedUrls,
+contentForm,
+setContentForm,
+postUrl,
+setPostUrl,
+itemizedReviews,
+setItemizedReviews,
+isUploadingContent,
+uploadingField,
+setUploadingField,
+fileInputRef,
+handleContentUpload,
+handleAction,
+handleReviewContent,
+showToast,
+setIsSubmitting,
+toasts,
+removeToast,
+engagement,
+engagementDisclaimer,
+} = dealState;
 
-  const isClient = session?.user?.userType === "BRAND";
-  const isInfluencer = session?.user?.userType === "INFLUENCER";
+const ratingLabelMap: Record<number, string> = {
+1: "Poor - Disappointed",
+2: "Fair - Needs improvement",
+3: "Good - Satisfactory",
+4: "Very Good - Great work",
+5: "Excellent - Outstanding!",
+};
 
-  if (loading) {
-    return (
-      <DashboardShell user={session?.user || undefined}>
-        <div className="flex justify-center items-center h-64">
-          <span className="loading" />
-        </div>
-      </DashboardShell>
-    );
-  }
+const isClient = session?.user?.userType === "BRAND";
+const isInfluencer = session?.user?.userType === "INFLUENCER";
 
-  if (error || !deal) {
-    return (
-      <DashboardShell user={session?.user || undefined}>
-        <div className="text-center p-8">
-          <div className="text-rose font-semibold mb-2">Failed to load deal</div>
-          <div className="text-sm text-secondary">{String(error || "Deal not found.")}</div>
-        </div>
-      </DashboardShell>
-    );
-  }
+if (loading) {
+return (
+<DashboardShell user={session?.user || undefined}>
+<div className="flex justify-center items-center h-64">
+<span className="loading" />
+</div>
+</DashboardShell>
+);
+}
 
-  const terms = parseContractTerms(deal.contractTerms);
-  const { canSubmitContent } = computeDealDisplay(deal, terms);
+if (error || !deal) {
+return (
+<DashboardShell user={session?.user || undefined}>
+<div className="text-center p-8">
+<div className="text-rose font-semibold mb-2">Failed to load deal</div>
+<div className="text-sm text-secondary">{String(error || "Deal not found.")}</div>
+</div>
+</DashboardShell>
+);
+}
 
-  return (
-    <DashboardShell user={session?.user || undefined}>
-      <ToastContainer toasts={toasts} onClose={removeToast} />
+const terms = parseContractTerms(deal.contractTerms);
+const { canSubmitContent } = computeDealDisplay(deal, terms);
 
-      <DealActionButtons
-        dealStatus={deal.status}
-        dealId={deal.id}
-        isInfluencer={isInfluencer}
-        isClient={isClient}
-        isSubmitting={isSubmitting}
-        canSubmitContent={canSubmitContent}
-        deal={deal}
-        handleSignContract={() => dealState.handleSignContract()}
-        handleRejectInvite={() => dealState.handleRejectInvite()}
-        handleCancelDeal={() => dealState.handleCancelDeal()}
-        setItemizedUrls={setItemizedUrls}
-        setContentForm={setContentForm}
-        setShowSubmitModal={setShowSubmitModal}
-        setShowVerifyModal={setShowVerifyModal}
-        setItemizedReviews={setItemizedReviews}
-        setShowReviewModal={setShowReviewModal}
-      />
+return (
+<DashboardShell user={session?.user || undefined}>
+<ToastContainer toasts={toasts} onClose={removeToast} />
 
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          <DealContractCard deal={deal} />
-          
-          <ContentSubmissionsCard submissions={deal.contentSubmissions} />
-        </div>
+<DealActionButtons
+dealStatus={deal.status}
+dealId={deal.id}
+isInfluencer={isInfluencer}
+isClient={isClient}
+isSubmitting={isSubmitting}
+canSubmitContent={canSubmitContent}
+deal={deal}
+handleSignContract={() => dealState.handleSignContract()}
+handleRejectInvite={() => dealState.handleRejectInvite()}
+handleCancelDeal={() => dealState.handleCancelDeal()}
+setItemizedUrls={setItemizedUrls}
+setContentForm={setContentForm}
+setShowSubmitModal={setShowSubmitModal}
+setShowVerifyModal={setShowVerifyModal}
+setItemizedReviews={setItemizedReviews}
+setShowReviewModal={setShowReviewModal}
+/>
 
-        <div className="flex flex-col gap-6">
-          <DealProgress status={deal.status} />
+<div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
+<div className="lg:col-span-2 flex flex-col gap-6">
+<DealContractCard deal={deal} />
 
-          <EngagementCard
-            engagement={engagement}
-            disclaimer={engagementDisclaimer}
-            isClient={isClient}
-          />
-        </div>
-      </div>
+<ContentSubmissionsCard submissions={deal.contentSubmissions} />
+</div>
 
-      {deal.status === "COMPLETED" && !reviewSubmitted && (
-        <div className="card mt-6 deal-review-card">
-          <h3 className="deal-review-title">⭐ Rate This Deal</h3>
-          <p className="deal-review-copy">How was your experience? Your review helps build trust on the platform.</p>
-          <div className="deal-rating-row">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Button
-                key={star}
-                type="button"
-                onClick={() => setReviewRating(star)}
-                onMouseEnter={() => setHoverRating(star)}
-                onMouseLeave={() => setHoverRating(0)}
-                aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
-                aria-pressed={(hoverRating || reviewRating) >= star ? "true" : "false"}
-                className="deal-rating-star"
-                data-active={(hoverRating || reviewRating) >= star ? "true" : "false"}
-              >
-                ⭐
-              </Button>
-            ))}
-            {reviewRating > 0 && (
-              <span
-                role="status"
-                aria-live="polite"
-                className="deal-rating-label"
-              >
-                {ratingLabelMap[reviewRating] || "Excellent"}
-              </span>
-            )}
-          </div>
-          <Textarea
-            placeholder="Share your experience (optional)..."
-            aria-label="Share your experience (optional)"
-            value={reviewComment}
-            onChange={(e) => setReviewComment(e.target.value)}
-            rows={3}
-            className="deal-review-textarea"
-          />
-          <Button
-            variant="primary"
-            disabled={reviewRating === 0 || isSubmitting}
-            onClick={async () => {
-              setIsSubmitting(true);
-              try {
-                const res = await fetch("/api/reviews", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    dealId: id,
-                    rating: reviewRating,
-                    ...(reviewComment.trim() ? { comment: reviewComment.trim() } : {}),
-                  }),
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "Failed to submit review");
-                showToast("success", "Review submitted! Thank you.");
-                setReviewSubmitted(true);
-              } catch (err: unknown) {
-                showToast("error", err instanceof Error ? err.message : String(err));
-              } finally {
-                setIsSubmitting(false);
-              }
-            }}
-            className="deal-review-submit"
-          >
-            {isSubmitting ? <span className="loading" /> : "Submit Review"}
-          </Button>
-        </div>
-      )}
-      {deal.status === "COMPLETED" && reviewSubmitted && (
-        <div
-          className="card flex items-center gap-3 rounded-lg mt-6 deal-review-success"
-        >
-          <span className="text-2xl">✅</span>
-          <div>
-            <strong>Review Submitted</strong>
-            <p className="text-sm text-secondary m-0">
-              {"⭐".repeat(reviewRating)} — Thank you for your feedback!
-            </p>
-          </div>
-        </div>
-      )}
+<div className="flex flex-col gap-6">
+<DealProgress status={deal.status} />
 
-      <DealModals
-        showAddressModal={showAddressModal}
-        setShowAddressModal={setShowAddressModal}
-        showReviewModal={showReviewModal}
-        setShowReviewModal={setShowReviewModal}
-        showSubmitModal={showSubmitModal}
-        setShowSubmitModal={setShowSubmitModal}
-        showVerifyModal={showVerifyModal}
-        setShowVerifyModal={setShowVerifyModal}
-        deal={deal}
-        shippingForm={shippingForm}
-        setShippingForm={setShippingForm}
-        itemizedUrls={itemizedUrls}
-        setItemizedUrls={setItemizedUrls}
-        contentForm={contentForm}
-        setContentForm={setContentForm}
-        postUrl={postUrl}
-        setPostUrl={setPostUrl}
-        isSubmitting={isSubmitting}
-        handleAction={handleAction}
-        showToast={showToast}
-        handleReviewContent={handleReviewContent}
-        itemizedReviews={itemizedReviews}
-        setItemizedReviews={setItemizedReviews}
-        isUploadingContent={isUploadingContent}
-        uploadingField={uploadingField}
-        setUploadingField={setUploadingField}
-        fileInputRef={fileInputRef}
-        handleContentUpload={handleContentUpload}
-      />
-    </DashboardShell>
-  );
+<EngagementCard
+engagement={engagement}
+disclaimer={engagementDisclaimer}
+isClient={isClient}
+/>
+</div>
+</div>
+
+{deal.status === "COMPLETED" && !reviewSubmitted && (
+<div className="card mt-6 deal-review-card">
+<h3 className="deal-review-title"> Rate This Deal</h3>
+<p className="deal-review-copy">How was your experience? Your review helps build trust on the platform.</p>
+<div className="deal-rating-row">
+{[1, 2, 3, 4, 5].map((star) => (
+<Button
+key={star}
+type="button"
+onClick={() => setReviewRating(star)}
+onMouseEnter={() => setHoverRating(star)}
+onMouseLeave={() => setHoverRating(0)}
+aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
+aria-pressed={(hoverRating || reviewRating) >= star ? "true" : "false"}
+className="deal-rating-star"
+data-active={(hoverRating || reviewRating) >= star ? "true" : "false"}
+>
+
+</Button>
+))}
+{reviewRating > 0 && (
+<span
+role="status"
+aria-live="polite"
+className="deal-rating-label"
+>
+{ratingLabelMap[reviewRating] || "Excellent"}
+</span>
+)}
+</div>
+<Textarea
+placeholder="Share your experience (optional)..."
+aria-label="Share your experience (optional)"
+value={reviewComment}
+onChange={(e) => setReviewComment(e.target.value)}
+rows={3}
+className="deal-review-textarea"
+/>
+<Button
+variant="primary"
+disabled={reviewRating === 0 || isSubmitting}
+onClick={async () => {
+setIsSubmitting(true);
+try {
+const res = await fetch("/api/reviews", {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({
+dealId: id,
+rating: reviewRating,
+...(reviewComment.trim() ? { comment: reviewComment.trim() } : {}),
+}),
+});
+const data = await res.json();
+if (!res.ok) throw new Error(data.error || "Failed to submit review");
+showToast("success", "Review submitted! Thank you.");
+setReviewSubmitted(true);
+} catch (err: unknown) {
+showToast("error", err instanceof Error ? err.message : String(err));
+} finally {
+setIsSubmitting(false);
+}
+}}
+className="deal-review-submit"
+>
+{isSubmitting ? <span className="loading" /> : "Submit Review"}
+</Button>
+</div>
+)}
+{deal.status === "COMPLETED" && reviewSubmitted && (
+<div
+className="card flex items-center gap-3 rounded-lg mt-6 deal-review-success"
+>
+<span className="text-2xl"></span>
+<div>
+<strong>Review Submitted</strong>
+<p className="text-sm text-secondary m-0">
+{"".repeat(reviewRating)} Thank you for your feedback!
+</p>
+</div>
+</div>
+)}
+
+<DealModals
+showAddressModal={showAddressModal}
+setShowAddressModal={setShowAddressModal}
+showReviewModal={showReviewModal}
+setShowReviewModal={setShowReviewModal}
+showSubmitModal={showSubmitModal}
+setShowSubmitModal={setShowSubmitModal}
+showVerifyModal={showVerifyModal}
+setShowVerifyModal={setShowVerifyModal}
+deal={deal}
+shippingForm={shippingForm}
+setShippingForm={setShippingForm}
+itemizedUrls={itemizedUrls}
+setItemizedUrls={setItemizedUrls}
+contentForm={contentForm}
+setContentForm={setContentForm}
+postUrl={postUrl}
+setPostUrl={setPostUrl}
+isSubmitting={isSubmitting}
+handleAction={handleAction}
+showToast={showToast}
+handleReviewContent={handleReviewContent}
+itemizedReviews={itemizedReviews}
+setItemizedReviews={setItemizedReviews}
+isUploadingContent={isUploadingContent}
+uploadingField={uploadingField}
+setUploadingField={setUploadingField}
+fileInputRef={fileInputRef}
+handleContentUpload={handleContentUpload}
+/>
+</DashboardShell>
+);
 }

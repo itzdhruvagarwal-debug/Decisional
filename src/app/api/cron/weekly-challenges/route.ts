@@ -1,6 +1,6 @@
 /**
- * Weekly Challenges Cron — Generate new challenges every Monday
- */
+* Weekly Challenges Cron Generate new challenges every Monday
+*/
 
 import { NextRequest, NextResponse } from "next/server";
 import { apiWrapper } from "@/lib/api-wrapper";
@@ -9,18 +9,18 @@ import { logger } from "@/lib/logger";
 import { validateCronSecret } from "../guard";
 
 async function _handler_POST(_req: NextRequest) {
-  await validateCronSecret();
+await validateCronSecret();
 
-  const result = await generateWeeklyChallenges();
+const result = await generateWeeklyChallenges();
 
-  logger.info("Weekly challenges generated", result);
+logger.info("Weekly challenges generated", result);
 
-  return NextResponse.json({
-    success: true,
-    weekId: result.weekId,
-    influencerChallenges: result.influencerChallenges.length,
-    brandChallenges: result.brandChallenges.length,
-  });
+return NextResponse.json({
+success: true,
+weekId: result.weekId,
+influencerChallenges: result.influencerChallenges.length,
+brandChallenges: result.brandChallenges.length,
+});
 }
 
 export const POST = apiWrapper(_handler_POST);

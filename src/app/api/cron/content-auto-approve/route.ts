@@ -4,15 +4,15 @@ import { validateCronSecret } from "../guard";
 import { DealService } from "@/services/deal.service";
 
 async function _handler_POST(_req: NextRequest) {
-  await validateCronSecret();
+await validateCronSecret();
 
-  const result = await DealService.autoApproveExpiredContent();
+const result = await DealService.autoApproveExpiredContent();
 
-  return NextResponse.json({
-    success: true,
-    message: "Content auto-approval completed",
-    data: result,
-  });
+return NextResponse.json({
+success: true,
+message: "Content auto-approval completed",
+data: result,
+});
 }
 
 export const POST = apiWrapper(_handler_POST);

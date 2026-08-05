@@ -5,19 +5,19 @@ import { logger } from "@/lib/logger";
 import prisma from "@/lib/db";
 
 async function _handler_POST(_req: NextRequest) {
-  await validateCronSecret();
+await validateCronSecret();
 
-  const result = await prisma.oAuthState.deleteMany({
-    where: {
-      expiresAt: {
-        lt: new Date(),
-      },
-    },
-  });
+const result = await prisma.oAuthState.deleteMany({
+where: {
+expiresAt: {
+lt: new Date(),
+},
+},
+});
 
-  logger.info("Expired OAuthState records cleaned up", { count: result.count });
+logger.info("Expired OAuthState records cleaned up", { count: result.count });
 
-  return NextResponse.json({ success: true, message: `OAuthStates cleaned up: ${result.count}` });
+return NextResponse.json({ success: true, message: `OAuthStates cleaned up: ${result.count}` });
 }
 
 export const POST = apiWrapper(_handler_POST);

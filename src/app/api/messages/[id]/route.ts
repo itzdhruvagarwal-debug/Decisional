@@ -6,56 +6,56 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 
 const updateMessageSchema = z.object({
-  status: z.enum(["ACCEPTED", "DECLINED"]),
+status: z.enum(["ACCEPTED", "DECLINED"]),
 });
 
 export const PATCH = apiWrapper(async (req, { params }) => {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+const session = await auth();
+if (!session?.user?.id) {
+return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+}
 
-  const messageId = (await params).id as string;
-  if (!messageId) {
-    return NextResponse.json({ error: "Message ID is required" }, { status: 400 });
-  }
+const messageId = (await params).id as string;
+if (!messageId) {
+return NextResponse.json({ error: "Message ID is required" }, { status: 400 });
+}
 
-  const body = await req.json();
-  const { status } = updateMessageSchema.parse(body);
+const body = await req.json();
+const { status } = updateMessageSchema.parse(body);
 
-  const message = await prisma.message.findUnique({
-    where: { id: messageId },
-  });
+const message = await prisma.message.findUnique({
+where: { id: messageId },
+});
 
-  if (!message) {
-    return NextResponse.json({ error: "Message not found" }, { status: 404 });
-  }
+if (!message) {
+return NextResponse.json({ error: "Message not found" }, { status: 404 });
+}
 
-  // Ensure the receiver of the message is the one accepting/declining the offer
-  if (message.receiverId !== session.user.id) {
-    return NextResponse.json({ error: "Only the offer receiver can accept or decline it" }, { status: 403 });
-  }
+// Ensure the receiver of the message is the one accepting/declining the offer
+if (message.receiverId !== session.user.id) {
+return NextResponse.json({ error: "Only the offer receiver can accept or decline it" }, { status: 403 });
+}
 
-  if (message.messageType !== "OFFER") {
-    return NextResponse.json({ error: "Only offers can be updated" }, { status: 400 });
-  }
+if (message.messageType !== "OFFER") {
+return NextResponse.json({ error: "Only offers can be updated" }, { status: 400 });
+}
 
-  const currentMetadata = (message.metadata as Prisma.JsonObject) || {};
-  const updatedMetadata: Prisma.JsonObject = {
-    ...currentMetadata,
-    status,
-    updatedAt: new Date().toISOString(),
-  };
+const currentMetadata = (message.metadata as Prisma.JsonObject) || {};
+const updatedMetadata: Prisma.JsonObject = {
+...currentMetadata,
+status,
+updatedAt: new Date().toISOString(),
+};
 
-  const updatedMessage = await prisma.message.update({
-    where: { id: messageId },
-    data: {
-      metadata: updatedMetadata,
-    },
-  });
+const updatedMessage = await prisma.message.update({
+where: { id: messageId },
+data: {
+metadata: updatedMetadata,
+},
+});
 
-  return NextResponse.json({
-    success: true,
-    message: updatedMessage,
-  });
+return NextResponse.json({
+success: true,
+message: updatedMessage,
+});
 });

@@ -5,34 +5,34 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui";
 
 export default function AdminFinancialError({
-  error,
-  reset,
+error,
+reset,
 }: Readonly<{ error: Error & { digest?: string }; reset: () => void }>) {
-  useEffect(() => {
-    logger.error("Admin financial error:", error);
-  }, [error]);
+useEffect(() => {
+logger.error("Admin financial error:", error);
+}, [error]);
 
-  return (
-    <div
-      role="alert"
-      aria-live="assertive"
-      className="admin-page flex flex-col items-center justify-center gap-5 text-primary min-h-60vh"
-    >
-      <div className="text-3xl" aria-hidden="true">⚠️</div>
-      <h2 className="text-xl font-extrabold">Financial overview failed to load</h2>
-      <p className="text-secondary text-sm text-center max-w-400">
-        Treasury and platform fee data could not be fetched. Check service availability and try again.
-      </p>
-      {error.digest && (
-        <code className="text-xs text-muted font-mono">Ref: {error.digest}</code>
-      )}
-      <Button
-        variant="primary"
-        aria-label="Retry loading admin financial overview"
-        onClick={() => reset()}
-      >
-        Try again
-      </Button>
-    </div>
-  );
+return (
+<div
+role="alert"
+aria-live="assertive"
+className="admin-page flex flex-col items-center justify-center gap-5 text-primary min-h-60vh"
+>
+<div className="text-3xl" aria-hidden="true"></div>
+<h2 className="text-xl font-extrabold">Financial overview failed to load</h2>
+<p className="text-secondary text-sm text-center max-w-400">
+Treasury and platform fee data could not be fetched. Check service availability and try again.
+</p>
+{error.digest && (
+<code className="text-xs text-muted font-mono">Ref: {error.digest}</code>
+)}
+<Button
+variant="primary"
+aria-label="Retry loading admin financial overview"
+onClick={() => reset()}
+>
+Try again
+</Button>
+</div>
+);
 }

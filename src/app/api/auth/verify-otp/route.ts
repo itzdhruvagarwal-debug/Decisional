@@ -10,205 +10,205 @@ import { apiWrapper, ApiResponse } from "@/lib/api-wrapper";
 import { AppError } from "@/lib/errors";
 
 const sendRegistrationOtpSchema = z.object({
-  phone: z
-    .string()
-    .trim()
-    .regex(/^[6-9]\d{9}$/, "Must be a valid 10-digit Indian phone number"),
-  type: z.enum(["registration", "phone_verification"]).default("registration"),
+phone: z
+.string()
+.trim()
+.regex(/^[6-9]\d{9}$/, "Must be a valid 10-digit Indian phone number"),
+type: z.enum(["registration", "phone_verification"]).default("registration"),
 });
 
 const verifyRegistrationOtpSchema = z.object({
-  phone: z
-    .string()
-    .trim()
-    .regex(/^[6-9]\d{9}$/, "Must be a valid 10-digit Indian phone number"),
-  otp: z.string().regex(/^\d{6}$/, "OTP must be exactly 6 digits"),
-  type: z.enum(["registration", "phone_verification"]),
+phone: z
+.string()
+.trim()
+.regex(/^[6-9]\d{9}$/, "Must be a valid 10-digit Indian phone number"),
+otp: z.string().regex(/^\d{6}$/, "OTP must be exactly 6 digits"),
+type: z.enum(["registration", "phone_verification"]),
 });
 
 const verifyLegacyOtpSchema = z.object({
-  userId: z.string().cuid(),
-  code: z.string().length(6, "OTP must be exactly 6 characters"),
-  type: z.enum(["EMAIL_VERIFICATION", "PHONE_VERIFICATION", "LOGIN_OTP"]),
+userId: z.string().cuid(),
+code: z.string().length(6, "OTP must be exactly 6 characters"),
+type: z.enum(["EMAIL_VERIFICATION", "PHONE_VERIFICATION", "LOGIN_OTP"]),
 });
 
 function validatePutPayload(body: unknown) {
-  const parsed = sendRegistrationOtpSchema.safeParse(body);
-  if (!parsed.success) {
-    const firstIssue = parsed.error.issues[0];
-    const fieldName = firstIssue?.path.join(".") || "";
-    const issueMsg = firstIssue?.message || "Invalid value";
-    const prefix = fieldName ? `${fieldName} - ` : "";
-    return {
-      success: false,
-      message: `Invalid request payload: ${prefix}${issueMsg}`
-    };
-  }
-  return { success: true, data: parsed.data };
+const parsed = sendRegistrationOtpSchema.safeParse(body);
+if (!parsed.success) {
+const firstIssue = parsed.error.issues[0];
+const fieldName = firstIssue?.path.join(".") || "";
+const issueMsg = firstIssue?.message || "Invalid value";
+const prefix = fieldName ? `${fieldName} - ` : "";
+return {
+success: false,
+message: `Invalid request payload: ${prefix}${issueMsg}`
+};
+}
+return { success: true, data: parsed.data };
 }
 
 function handlePutError(error: unknown) {
-  logger.error("Phone OTP send failed", { error: (error instanceof Error ? error.message : String(error)) });
-  if (error instanceof AppError) {
-    return ApiResponse.error(error.message, error.statusCode);
-  }
-  return ApiResponse.error("Failed to send OTP", 500);
+logger.error("Phone OTP send failed", { error: (error instanceof Error ? error.message : String(error)) });
+if (error instanceof AppError) {
+return ApiResponse.error(error.message, error.statusCode);
+}
+return ApiResponse.error("Failed to send OTP", 500);
 }
 
 export const PUT = apiWrapper(async function PUT(request: NextRequest) {
-  try {
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return ApiResponse.error("Invalid request body");
-    }
+try {
+let body: unknown;
+try {
+body = await request.json();
+} catch {
+return ApiResponse.error("Invalid request body");
+}
 
-    const validation = validatePutPayload(body);
-    if (!validation.success) {
-      return ApiResponse.error(validation.message!);
-    }
+const validation = validatePutPayload(body);
+if (!validation.success) {
+return ApiResponse.error(validation.message!);
+}
 
-    const { phone, type } = validation.data!;
+const { phone, type } = validation.data!;
 
-    const ip =
-      (request as NextRequest & { ip?: string }).ip ||
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      "unknown";
-    const ipRateLimit = await checkRateLimit(ip, "AUTH");
-    if (!ipRateLimit.success) {
-      return ApiResponse.tooManyRequests("Too many OTP requests. Please try again later.");
-    }
+const ip =
+(request as NextRequest & { ip?: string }).ip ||
+request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+"unknown";
+const ipRateLimit = await checkRateLimit(ip, "AUTH");
+if (!ipRateLimit.success) {
+return ApiResponse.tooManyRequests("Too many OTP requests. Please try again later.");
+}
 
-    if (type === "registration") {
-      const existing = await prisma.user.findUnique({
-        where: { phone },
-        select: { id: true },
-      });
-      if (existing) {
-        return ApiResponse.success(
-          null,
-          "If this phone number can be registered, an OTP has been sent.",
-        );
-      }
-    }
+if (type === "registration") {
+const existing = await prisma.user.findUnique({
+where: { phone },
+select: { id: true },
+});
+if (existing) {
+return ApiResponse.success(
+null,
+"If this phone number can be registered, an OTP has been sent.",
+);
+}
+}
 
-    const sendResult = await sendOTP(phone, { purpose: type });
-    if (!sendResult.success) {
-      if (sendResult.retryAfterSeconds) {
-        return ApiResponse.tooManyRequests(sendResult.error || "Failed to send OTP", sendResult.retryAfterSeconds);
-      }
-      return ApiResponse.error(sendResult.error || "Failed to send OTP", 500);
-    }
+const sendResult = await sendOTP(phone, { purpose: type });
+if (!sendResult.success) {
+if (sendResult.retryAfterSeconds) {
+return ApiResponse.tooManyRequests(sendResult.error || "Failed to send OTP", sendResult.retryAfterSeconds);
+}
+return ApiResponse.error(sendResult.error || "Failed to send OTP", 500);
+}
 
-    const responseData = {
-      channel: sendResult.channel,
-      fallbackUsed: sendResult.fallbackUsed,
-      ...(process.env.NODE_ENV !== "production" && sendResult.otp ? { otp: sendResult.otp } : {}),
-    };
-    const message = sendResult.channel === "whatsapp" ? "OTP sent on WhatsApp" : "OTP sent by SMS";
-    return ApiResponse.success(responseData, message);
-  } catch (error: unknown) {
-    return handlePutError(error);
-  }
+const responseData = {
+channel: sendResult.channel,
+fallbackUsed: sendResult.fallbackUsed,
+...(process.env.NODE_ENV !== "production" && sendResult.otp ? { otp: sendResult.otp } : {}),
+};
+const message = sendResult.channel === "whatsapp" ? "OTP sent on WhatsApp" : "OTP sent by SMS";
+return ApiResponse.success(responseData, message);
+} catch (error: unknown) {
+return handlePutError(error);
+}
 });
 
 function validateLegacyPayload(body: unknown) {
-  const parsedLegacy = verifyLegacyOtpSchema.safeParse(body);
-  if (!parsedLegacy.success) {
-    const firstIssue = parsedLegacy.error.issues[0];
-    const fieldName = firstIssue?.path.join(".") || "";
-    const issueMsg = firstIssue?.message || "Invalid value";
-    const prefix = fieldName ? `${fieldName} - ` : "";
-    return {
-      success: false,
-      message: `Invalid request payload: ${prefix}${issueMsg}`
-    };
-  }
-  return { success: true, data: parsedLegacy.data };
+const parsedLegacy = verifyLegacyOtpSchema.safeParse(body);
+if (!parsedLegacy.success) {
+const firstIssue = parsedLegacy.error.issues[0];
+const fieldName = firstIssue?.path.join(".") || "";
+const issueMsg = firstIssue?.message || "Invalid value";
+const prefix = fieldName ? `${fieldName} - ` : "";
+return {
+success: false,
+message: `Invalid request payload: ${prefix}${issueMsg}`
+};
+}
+return { success: true, data: parsedLegacy.data };
 }
 
 function validateRegistrationPayload(body: unknown) {
-  const parsedRegistration = verifyRegistrationOtpSchema.safeParse(body);
-  if (!parsedRegistration.success) {
-    const firstIssue = parsedRegistration.error.issues[0];
-    const fieldName = firstIssue?.path.join(".") || "";
-    const issueMsg = firstIssue?.message || "Invalid value";
-    const prefix = fieldName ? `${fieldName} - ` : "";
-    return {
-      success: false,
-      message: `Invalid request payload: ${prefix}${issueMsg}`
-    };
-  }
-  return { success: true, data: parsedRegistration.data };
+const parsedRegistration = verifyRegistrationOtpSchema.safeParse(body);
+if (!parsedRegistration.success) {
+const firstIssue = parsedRegistration.error.issues[0];
+const fieldName = firstIssue?.path.join(".") || "";
+const issueMsg = firstIssue?.message || "Invalid value";
+const prefix = fieldName ? `${fieldName} - ` : "";
+return {
+success: false,
+message: `Invalid request payload: ${prefix}${issueMsg}`
+};
+}
+return { success: true, data: parsedRegistration.data };
 }
 
 function handlePostError(error: unknown) {
-  logger.warn("OTP verification failed", { error: (error instanceof Error ? error.message : String(error)) });
+logger.warn("OTP verification failed", { error: (error instanceof Error ? error.message : String(error)) });
 
-  if (error instanceof AppError) {
-    return ApiResponse.error(error.message, error.statusCode);
-  }
+if (error instanceof AppError) {
+return ApiResponse.error(error.message, error.statusCode);
+}
 
-  const errMsg = error instanceof Error ? error.message : String(error);
-  const safeErrorMessages = [
-    "Invalid or expired OTP",
-    "OTP has expired",
-    "Maximum attempts exceeded",
-    "Invalid OTP",
-  ];
+const errMsg = error instanceof Error ? error.message : String(error);
+const safeErrorMessages = [
+"Invalid or expired OTP",
+"OTP has expired",
+"Maximum attempts exceeded",
+"Invalid OTP",
+];
 
-  if (safeErrorMessages.includes(errMsg)) {
-    return ApiResponse.error(errMsg);
-  }
+if (safeErrorMessages.includes(errMsg)) {
+return ApiResponse.error(errMsg);
+}
 
-  return ApiResponse.error("Verification failed. Please try again.", 500);
+return ApiResponse.error("Verification failed. Please try again.", 500);
 }
 
 export const POST = apiWrapper(async function POST(request: NextRequest) {
-  try {
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return ApiResponse.error("Invalid request body");
-    }
+try {
+let body: unknown;
+try {
+body = await request.json();
+} catch {
+return ApiResponse.error("Invalid request body");
+}
 
-    if (body && typeof body === "object" && Object.hasOwn(body, "userId")) {
-      const validation = validateLegacyPayload(body);
-      if (!validation.success) {
-        return ApiResponse.error(validation.message!);
-      }
+if (body && typeof body === "object" && Object.hasOwn(body, "userId")) {
+const validation = validateLegacyPayload(body);
+if (!validation.success) {
+return ApiResponse.error(validation.message!);
+}
 
-      const { userId, code, type } = validation.data!;
-      await AuthService.verifyOtp(userId, code, type);
+const { userId, code, type } = validation.data!;
+await AuthService.verifyOtp(userId, code, type);
 
-      return ApiResponse.success(null, "OTP verified successfully.");
-    }
+return ApiResponse.success(null, "OTP verified successfully.");
+}
 
-    const validation = validateRegistrationPayload(body);
-    if (!validation.success) {
-      return ApiResponse.error(validation.message!);
-    }
+const validation = validateRegistrationPayload(body);
+if (!validation.success) {
+return ApiResponse.error(validation.message!);
+}
 
-    const { phone, otp, type } = validation.data!;
-    const key = `phone-otp:${type}:${phone}`;
-    const exists = await redis.get(key);
+const { phone, otp, type } = validation.data!;
+const key = `phone-otp:${type}:${phone}`;
+const exists = await redis.get(key);
 
-    if (!exists) {
-      return ApiResponse.error("OTP not found or expired. Please request a new OTP.");
-    }
+if (!exists) {
+return ApiResponse.error("OTP not found or expired. Please request a new OTP.");
+}
 
-    const verifyResult = await verifyOTP(phone, otp, { purpose: type });
-    if (!verifyResult.success) {
-      return ApiResponse.error(verifyResult.error || "Invalid OTP. Please try again.");
-    }
+const verifyResult = await verifyOTP(phone, otp, { purpose: type });
+if (!verifyResult.success) {
+return ApiResponse.error(verifyResult.error || "Invalid OTP. Please try again.");
+}
 
-    await redis.del(key);
-    await redis.setex(`phone-otp-verified:${phone}`, 15 * 60, "1");
+await redis.del(key);
+await redis.setex(`phone-otp-verified:${phone}`, 15 * 60, "1");
 
-    return ApiResponse.success({ verified: true }, "Phone verified successfully!");
-  } catch (error: unknown) {
-    return handlePostError(error);
-  }
+return ApiResponse.success({ verified: true }, "Phone verified successfully!");
+} catch (error: unknown) {
+return handlePostError(error);
+}
 });

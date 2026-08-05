@@ -5,169 +5,169 @@ import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Button } from "@/components/ui";
 
 interface Referral {
-  id: string;
-  name: string;
-  email: string;
-  joinedAt: string;
-  status: string;
-  type: string;
-  earnings: number;
+id: string;
+name: string;
+email: string;
+joinedAt: string;
+status: string;
+type: string;
+earnings: number;
 }
 
 interface ReferralsResponse {
-  referrals?: Referral[];
+referrals?: Referral[];
 }
 
 export default function ReferralList() {
-  const [filter, setFilter] = useState("ALL");
-  const { data, isLoading } = useSWR<ReferralsResponse>("/api/referrals/list", fetcher);
+const [filter, setFilter] = useState("ALL");
+const { data, isLoading } = useSWR<ReferralsResponse>("/api/referrals/list", fetcher);
 
-  const referrals = data?.referrals || [];
+const referrals = data?.referrals || [];
 
-  const filteredReferrals =
-    filter === "ALL" ? referrals : referrals.filter((r) => r.status === filter);
+const filteredReferrals =
+filter === "ALL" ? referrals : referrals.filter((r) => r.status === filter);
 
-  if (isLoading)
-    return (
-      <div className="card p-8 text-center">
-        <div className="loading"></div>
-      </div>
-    );
+if (isLoading)
+return (
+<div className="card p-8 text-center">
+<div className="loading"></div>
+</div>
+);
 
-  if (referrals.length === 0) {
-    return (
-      <EmptyState
-        emoji="👥"
-        title="No Referrals Yet"
-        description="Share your unique invite code to unlock fee discounts and GMV revenue share."
-      />
-    );
-  }
+if (referrals.length === 0) {
+return (
+<EmptyState
+emoji=""
+title="No Referrals Yet"
+description="Share your unique invite code to unlock fee discounts and GMV revenue share."
+/>
+);
+}
 
-  return (
-    <div className="card p-0 overflow-hidden border-card rounded-xl referral-list-card">
-      <div
-        className="p-6 border-b-card flex justify-between items-center flex-wrap gap-4"
-      >
-        <h3
-          className="text-lg font-bold flex items-center gap-2"
-        >
-          Referral History{" "}
-          <Badge variant="primary">{referrals.length}</Badge>
-        </h3>
+return (
+<div className="card p-0 overflow-hidden border-card rounded-xl referral-list-card">
+<div
+className="p-6 border-b-card flex justify-between items-center flex-wrap gap-4"
+>
+<h3
+className="text-lg font-bold flex items-center gap-2"
+>
+Referral History{" "}
+<Badge variant="primary">{referrals.length}</Badge>
+</h3>
 
-        <div className="scrollable-tabs flex gap-2">
-          {["ALL", "ACTIVE", "PENDING"].map((f) => (
-            <Button
-              key={f}
-              variant="ghost"
-              onClick={() => setFilter(f)}
-              className="text-xs font-semibold rounded-md border-none px-3-py-1 referral-filter-button"
-              data-active={filter === f ? "true" : "false"}
-            >
-              {f}
-            </Button>
-          ))}
-        </div>
-      </div>
+<div className="scrollable-tabs flex gap-2">
+{["ALL", "ACTIVE", "PENDING"].map((f) => (
+<Button
+key={f}
+variant="ghost"
+onClick={() => setFilter(f)}
+className="text-xs font-semibold rounded-md border-none px-3-py-1 referral-filter-button"
+data-active={filter === f ? "true" : "false"}
+>
+{f}
+</Button>
+))}
+</div>
+</div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr
-              className="p-4 font-semibold text-secondary bg-secondary"
-            >
-              <th className="p-4 text-left">User</th>
-              <th className="p-4 text-left">Type</th>
-              <th className="hide-mobile p-4 text-left">
-                Date Joined
-              </th>
-              <th className="p-4 text-center">Status</th>
-              <th
-                className="p-4 text-right"
-              >
-                Est. Earnings
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredReferrals.map((ref) => (
-              <tr
-                key={ref.id}
-                 className="border-b-card hover:bg-[var(--color-bg-tertiary)] text-sm referral-row"
-              >
-                <td className="p-4">
-                  <div
-                    className="flex items-center gap-3"
-                  >
-                    <div
-                      className="flex items-center justify-center font-bold text-sm rounded-full text-white w-36 h-36 referral-avatar"
-                    >
-                      {ref.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <div
-                        className="font-semibold text-primary"
-                      >
-                        {ref.name}
-                      </div>
-                      <div
-                        className="text-xs text-secondary"
-                      >
-                        {ref.email}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="p-4">
-                  <span
-                    className="font-bold rounded-2xl text-xs uppercase px-2-py-1 referral-type-badge"
-                    data-type={ref.type}
-                  >
-                    {ref.type}
-                  </span>
-                </td>
-                <td
-                  className="hide-mobile p-4 text-secondary text-sm"
-                >
-                  {new Date(ref.joinedAt).toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </td>
-                <td className="p-4 text-center">
-                  <span
-                    className="inline-flex items-center text-xs font-semibold rounded-lg gap-1-5 px-2-py-1 referral-status-badge"
-                    data-status={ref.status}
-                  >
-                    <span
-                      className="rounded-full h-6 referral-status-dot"
-                    ></span>
-                    {ref.status}
-                  </span>
-                </td>
-                <td
-                  className="p-4 text-right font-bold text-emerald"
-                >
-                  {ref.earnings > 0
-                    ? `₹${(ref.earnings / 100).toLocaleString("en-IN")}`
-                    : "-"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+<div className="overflow-x-auto">
+<table className="w-full border-collapse">
+<thead>
+<tr
+className="p-4 font-semibold text-secondary bg-secondary"
+>
+<th className="p-4 text-left">User</th>
+<th className="p-4 text-left">Type</th>
+<th className="hide-mobile p-4 text-left">
+Date Joined
+</th>
+<th className="p-4 text-center">Status</th>
+<th
+className="p-4 text-right"
+>
+Est. Earnings
+</th>
+</tr>
+</thead>
+<tbody>
+{filteredReferrals.map((ref) => (
+<tr
+key={ref.id}
+className="border-b-card hover:bg-[var(--color-bg-tertiary)] text-sm referral-row"
+>
+<td className="p-4">
+<div
+className="flex items-center gap-3"
+>
+<div
+className="flex items-center justify-center font-bold text-sm rounded-full text-white w-36 h-36 referral-avatar"
+>
+{ref.name.charAt(0).toUpperCase()}
+</div>
+<div>
+<div
+className="font-semibold text-primary"
+>
+{ref.name}
+</div>
+<div
+className="text-xs text-secondary"
+>
+{ref.email}
+</div>
+</div>
+</div>
+</td>
+<td className="p-4">
+<span
+className="font-bold rounded-2xl text-xs uppercase px-2-py-1 referral-type-badge"
+data-type={ref.type}
+>
+{ref.type}
+</span>
+</td>
+<td
+className="hide-mobile p-4 text-secondary text-sm"
+>
+{new Date(ref.joinedAt).toLocaleDateString(undefined, {
+year: "numeric",
+month: "short",
+day: "numeric",
+})}
+</td>
+<td className="p-4 text-center">
+<span
+className="inline-flex items-center text-xs font-semibold rounded-lg gap-1-5 px-2-py-1 referral-status-badge"
+data-status={ref.status}
+>
+<span
+className="rounded-full h-6 referral-status-dot"
+></span>
+{ref.status}
+</span>
+</td>
+<td
+className="p-4 text-right font-bold text-emerald"
+>
+{ref.earnings > 0
+? `${(ref.earnings / 100).toLocaleString("en-IN")}`
+: "-"}
+</td>
+</tr>
+))}
+</tbody>
+</table>
+</div>
 
-      {filteredReferrals.length === 0 && (
-        <EmptyState
-          emoji="🔍"
-          title="No Match"
-          description="No referrals found matching the selected filter."
-          compact
-        />
-      )}
-    </div >
-  );
+{filteredReferrals.length === 0 && (
+<EmptyState
+emoji=""
+title="No Match"
+description="No referrals found matching the selected filter."
+compact
+/>
+)}
+</div >
+);
 }

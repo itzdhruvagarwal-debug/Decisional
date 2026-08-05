@@ -10,94 +10,94 @@ import { parsePagination } from "@/lib/utils";
 import { AppError } from "@/lib/errors";
 
 async function _handler_GET(request: NextRequest) {
-  try {
-    const session = (request as AuthenticatedRequest).session;
+try {
+const session = (request as AuthenticatedRequest).session;
 
-    const { searchParams } = new URL(request.url);
-    const campaignId = searchParams.get("campaignId");
-    const { page, limit, skip: _skip } = parsePagination(searchParams);
+const { searchParams } = new URL(request.url);
+const campaignId = searchParams.get("campaignId");
+const { page, limit, skip: _skip } = parsePagination(searchParams);
 
-    const userType = session.user.userType || "INFLUENCER";
-    if (isAdmin(userType)) {
-      await requireActiveAdmin(session.user);
-    }
+const userType = session.user.userType || "INFLUENCER";
+if (isAdmin(userType)) {
+await requireActiveAdmin(session.user);
+}
 
-    const apps = await ApplicationService.listApplications(
-      session.user.id,
-      userType,
-      {
-        ...(campaignId ? { campaignId } : {}),
-        page,
-        limit,
-      },
-    );
+const apps = await ApplicationService.listApplications(
+session.user.id,
+userType,
+{
+...(campaignId ? { campaignId } : {}),
+page,
+limit,
+},
+);
 
-    return ApiResponse.success(apps, "Applications loaded");
-  } catch (error: unknown) {
-    logger.error("GET /api/applications error", { error: (error instanceof Error ? error.message : String(error)) });
-    return ApiResponse.error("Internal server error", 500);
-  }
+return ApiResponse.success(apps, "Applications loaded");
+} catch (error: unknown) {
+logger.error("GET /api/applications error", { error: (error instanceof Error ? error.message : String(error)) });
+return ApiResponse.error("Internal server error", 500);
+}
 }
 
 async function _handler_POST(request: NextRequest) {
-  try {
-    const session = (request as AuthenticatedRequest).session;
+try {
+const session = (request as AuthenticatedRequest).session;
 
-    const limit = await checkRateLimit(session.user.id, "APPLICATIONS");
-    if (!limit.success) {
-      return ApiResponse.tooManyRequests("Too many application requests");
-    }
+const limit = await checkRateLimit(session.user.id, "APPLICATIONS");
+if (!limit.success) {
+return ApiResponse.tooManyRequests("Too many application requests");
+}
 
-    const body = await request.json();
-    const parsed = createApplicationSchema.safeParse(body);
-    if (!parsed.success) {
-      const firstIssue = parsed.error.issues[0];
-      const fieldName = firstIssue?.path.join(".") || "";
-      const issueMsg = firstIssue?.message || "Invalid value";
-      const prefix = fieldName ? `${fieldName} - ` : "";
-      return ApiResponse.error(`Invalid payload: ${prefix}${issueMsg}`);
-    }
+const body = await request.json();
+const parsed = createApplicationSchema.safeParse(body);
+if (!parsed.success) {
+const firstIssue = parsed.error.issues[0];
+const fieldName = firstIssue?.path.join(".") || "";
+const issueMsg = firstIssue?.message || "Invalid value";
+const prefix = fieldName ? `${fieldName} - ` : "";
+return ApiResponse.error(`Invalid payload: ${prefix}${issueMsg}`);
+}
 
-    const application = await ApplicationService.createApplication(session.user.id, {
-      ...parsed.data,
-      ...(parsed.data.estimatedDeliveryDays
-        ? {
-          estimatedDelivery: new Date(
-            Date.now() + parsed.data.estimatedDeliveryDays * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-        }
-        : {}),
-    });
-    return ApiResponse.success(application, "Application submitted", 201);
-  } catch (error: unknown) {
-    logger.error("POST /api/applications error", { error: (error instanceof Error ? error.message : String(error)) });
+const application = await ApplicationService.createApplication(session.user.id, {
+...parsed.data,
+...(parsed.data.estimatedDeliveryDays
+? {
+estimatedDelivery: new Date(
+Date.now() + parsed.data.estimatedDeliveryDays * 24 * 60 * 60 * 1000,
+).toISOString(),
+}
+: {}),
+});
+return ApiResponse.success(application, "Application submitted", 201);
+} catch (error: unknown) {
+logger.error("POST /api/applications error", { error: (error instanceof Error ? error.message : String(error)) });
 
-    if (error instanceof AppError) {
-      return ApiResponse.error(error.message, error.statusCode);
-    }
+if (error instanceof AppError) {
+return ApiResponse.error(error.message, error.statusCode);
+}
 
-    const message = (error instanceof Error ? error.message : String(error)) || "Submission failed";
-    const isBusinessValidation =
-      message.includes("Already applied") ||
-      message.includes("already applied") ||
-      message.includes("complete your") ||
-      message.includes("must") ||
-      message.includes("required") ||
-      message.includes("not accepting") ||
-      message.includes("deadline") ||
-      message.includes("Verification") ||
-      message.includes("Trust score") ||
-      message.includes("Limited by") ||
-      message.includes("blocked") ||
-      message.includes("authenticity") ||
-      message.includes("Authenticity");
+const message = (error instanceof Error ? error.message : String(error)) || "Submission failed";
+const isBusinessValidation =
+message.includes("Already applied") ||
+message.includes("already applied") ||
+message.includes("complete your") ||
+message.includes("must") ||
+message.includes("required") ||
+message.includes("not accepting") ||
+message.includes("deadline") ||
+message.includes("Verification") ||
+message.includes("Trust score") ||
+message.includes("Limited by") ||
+message.includes("blocked") ||
+message.includes("authenticity") ||
+message.includes("Authenticity");
 
-    if (isBusinessValidation) {
-      return ApiResponse.error(message);
-    }
+if (isBusinessValidation) {
+return ApiResponse.error(message);
+}
 
-    return ApiResponse.error("Submission failed", 500);
-  }
+return ApiResponse.error("Submission failed", 500);
+}
 }
 
 

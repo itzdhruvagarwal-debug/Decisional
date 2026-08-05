@@ -4,9 +4,9 @@ import { getYouTubeOAuthUrl } from "@/lib/youtube";
 import { initiateOAuthFlow } from "@/lib/oauth-helper";
 
 async function _handler_GET(req: NextRequest) {
-  return initiateOAuthFlow(req, "youtube", (state, redirectUri) =>
-    getYouTubeOAuthUrl(redirectUri, state),
-  );
+return initiateOAuthFlow(req, "youtube", (state, redirectUri) =>
+getYouTubeOAuthUrl(redirectUri, state),
+);
 }
 
 // Wrapped handlers via apiWrapper

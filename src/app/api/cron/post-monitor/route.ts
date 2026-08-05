@@ -4,11 +4,11 @@ import { validateCronSecret } from "../guard";
 import { runDailyPostMonitoring } from "@/lib/post-monitor";
 
 async function _handler_POST(_req: NextRequest) {
-  await validateCronSecret();
+await validateCronSecret();
 
-  const penalties = await runDailyPostMonitoring();
+const penalties = await runDailyPostMonitoring();
 
-  return NextResponse.json({ success: true, message: "Post monitor routine complete", data: penalties });
+return NextResponse.json({ success: true, message: "Post monitor routine complete", data: penalties });
 }
 
 export const POST = apiWrapper(_handler_POST);
