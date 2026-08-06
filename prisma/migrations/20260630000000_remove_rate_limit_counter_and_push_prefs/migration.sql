@@ -1,4 +1,4 @@
--- Migration: remove_rate_limit_counter_and_push_prefs
+- Migration: remove_rate_limit_counter_and_push_prefs
 -- Removes the unused RateLimitCounter table (rate limiting is Redis-only)
 -- and removes push notification defaults from notificationPreferences
 -- (push notifications feature was removed from the codebase).

@@ -1,4 +1,4 @@
--- Recalculate completedDeals and totalDeals for all influencer profiles to correct historical double-increment errors.
+- Recalculate completedDeals and totalDeals for all influencer profiles to correct historical double-increment errors.
 UPDATE "InfluencerProfile" p
 SET "completedDeals" = (
   SELECT COUNT(*)

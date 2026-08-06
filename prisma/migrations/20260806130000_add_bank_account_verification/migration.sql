@@ -1,4 +1,4 @@
--- Migration: add_bank_account_verification
+- Migration: add_bank_account_verification
 -- Adds ownership-verification fields to the BankAccount table.
 -- isVerified: false until Razorpay Fund Account Validation (penny-drop) confirms
 --             account-holder name matches user KYC identity.

@@ -1,4 +1,4 @@
--- Migration: add_reconcile_failures_to_deal
+- Migration: add_reconcile_failures_to_deal
 -- Adds reconcileFailures integer field to Deal table.
 
 ALTER TABLE "Deal"

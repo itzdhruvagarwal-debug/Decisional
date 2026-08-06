@@ -1,4 +1,4 @@
--- AlterTable
+- AlterTable
 ALTER TABLE "Campaign" ADD COLUMN IF NOT EXISTS "reservedAmount" INTEGER NOT NULL DEFAULT 0;
 
 -- AlterTable

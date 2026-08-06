@@ -1,4 +1,4 @@
-DO $$ BEGIN
+O $$ BEGIN
   CREATE TYPE "ProductFulfillmentStatus" AS ENUM (
     'NOT_REQUIRED',
     'ADDRESS_PENDING',
