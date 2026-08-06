@@ -273,7 +273,7 @@ ru.influencerProfile?.totalEarnings || ru.brandProfile?.totalSpent || 0,
 }
 
 // Generate shareable link
-const shareableLink = `${process.env.NEXT_PUBLIC_APP_URL || "https://collabx.in"}/register?ref=${user.referralCode}`;
+  const shareableLink = `${process.env.NEXT_PUBLIC_APP_URL || "https://decisional.in"}/register?ref=${user.referralCode}`;
 
 const result = {
 totalReferrals,

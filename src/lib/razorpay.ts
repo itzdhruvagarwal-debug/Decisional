@@ -527,3 +527,110 @@ return await getRazorpay().orders.fetch(orderId);
 
 
 export default getRazorpay;
+
+// ==================== FUND ACCOUNT VALIDATION (Penny-Drop) ====================
+
+export interface FundAccountValidationResult {
+  /** Razorpay fund_account_id for this bank account */
+  fundAccountId: string;
+  /** Razorpay validation id — can be used to poll status */
+  validationId: string;
+  /** Registered account holder name returned by bank */
+  registeredName: string | null;
+  /** Whether the account passed validation */
+  isValid: boolean;
+}
+
+/**
+ * Validate bank account ownership via Razorpay Fund Account Validation API.
+ *
+ * Flow:
+ *   1. Create a Razorpay Contact for this user
+ *   2. Attach a Fund Account (bank/UPI) to that contact
+ *   3. Trigger Fund Account Validation (₹1 penny-drop)
+ *   4. Return registeredName from bank for name-match against KYC
+ *
+ * Reference: https://razorpay.com/docs/payments/fund-account-validation/
+ */
+export async function validateFundAccount(params: {
+  userId: string;
+  accountHolderName: string;
+  accountNumber: string;
+  ifscCode: string;
+}): Promise<FundAccountValidationResult> {
+  const { keyId, keySecret } = getRazorpayCredentials();
+  const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+  const baseUrl = "https://api.razorpay.com/v1";
+
+  async function razorpayPost<T>(path: string, body: Record<string, unknown>): Promise<T> {
+    const res = await fetch(`${baseUrl}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${auth}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: { description: res.statusText } }));
+      const description = (err as { error?: { description?: string } })?.error?.description ?? res.statusText;
+      throw AppError.internal(`Razorpay FAV error: ${description}`);
+    }
+    return res.json() as Promise<T>;
+  }
+
+  // Step 1: Create contact
+  const contact = await razorpayPost<{ id: string }>("/contacts", {
+    name: params.accountHolderName,
+    type: "employee",
+    reference_id: params.userId,
+  });
+
+  // Step 2: Create fund account linked to contact
+  const fundAccount = await razorpayPost<{ id: string }>("/fund_accounts", {
+    contact_id: contact.id,
+    account_type: "bank_account",
+    bank_account: {
+      name: params.accountHolderName,
+      ifsc: params.ifscCode,
+      account_number: params.accountNumber,
+    },
+  });
+
+  // Step 3: Trigger fund account validation (penny-drop)
+  const validation = await razorpayPost<{
+    id: string;
+    fund_account_id: string;
+    results?: {
+      account_status?: string;
+      registered_name?: string;
+    };
+  }>("/fund_accounts/validations", {
+    account_number: process.env.RAZORPAY_ACCOUNT_NUMBER, // Platform payout account
+    fund_account: { id: fundAccount.id },
+    amount: 100, // Re 1 in paise
+    currency: "INR",
+    description: "Bank account ownership verification",
+    receipt: `fav_${params.userId}_${Date.now()}`,
+    notes: { purpose: "bank_verification", user_id: params.userId },
+  });
+
+  const registeredName = validation.results?.registered_name ?? null;
+  const accountStatus = validation.results?.account_status ?? "unknown";
+  const isValid = accountStatus === "active";
+
+  logger.info("Fund account validation completed", {
+    userId: params.userId,
+    fundAccountId: fundAccount.id,
+    validationId: validation.id,
+    accountStatus,
+    registeredName,
+  });
+
+  return {
+    fundAccountId: fundAccount.id,
+    validationId: validation.id,
+    registeredName,
+    isValid,
+  };
+}

@@ -220,7 +220,7 @@ className="leaderboard-title font-extrabold text-3xl bg-gradient-amber-rose"
 Leaderboard
 </h1>
 <p className="text-secondary mt-2">
-Top performers on CollabX
+Top performers on Decisional
 </p>
 </div>
 

@@ -9,55 +9,21 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { AppError } from "@/lib/errors";
 import { claimIdempotencyKey, releaseIdempotencyKey, saveIdempotencyResponse, type IdempotencyCheckResult } from "@/lib/idempotency";
 
-function validateWithdrawalInput(data: { bankAccountId?: string | undefined; bankAccountName?: string | undefined; bankAccountNumber?: string | undefined; ifscCode?: string | undefined; upiId?: string | undefined }, ctx: z.RefinementCtx) {
-if (data.bankAccountId) return;
-
-const isUpiInline = !!data.upiId && !data.bankAccountNumber && !data.ifscCode;
-if (isUpiInline) {
-if (!/^[\w.-]{2,256}@[a-zA-Z]{2,64}$/.test(data.upiId!)) {
-ctx.addIssue({
-code: z.ZodIssueCode.custom,
-path: ["upiId"],
-message: "Invalid UPI ID format (e.g. name@bank)",
+const withdrawalSchema = z.object({
+  amount: z.preprocess(
+    Number,
+    z.number().int().positive().min(50000, "Minimum withdrawal is INR 500"),
+  ),
+  /**
+   * bankAccountId is the ONLY accepted payment destination.
+   * Freeform bank details (bankAccountName, bankAccountNumber, ifscCode) are
+   * intentionally NOT accepted here — they were a money-laundering vector that
+   * allowed routing funds to any unverified third-party account.
+   * All accounts must first be saved via POST /api/wallet/bank-accounts and then
+   * verified via POST /api/wallet/bank-accounts/verify (Razorpay penny-drop).
+   */
+  bankAccountId: z.string().min(1, "bankAccountId is required — use a verified saved bank account"),
 });
-}
-} else if (!data.bankAccountName || !data.bankAccountNumber || !data.ifscCode) {
-ctx.addIssue({
-code: z.ZodIssueCode.custom,
-message:
-"Provide either bankAccountId, full bank account details, or a UPI ID for withdrawal",
-});
-} else {
-if (!/^\d{9,18}$/.test(data.bankAccountNumber)) {
-ctx.addIssue({
-code: z.ZodIssueCode.custom,
-path: ["bankAccountNumber"],
-message: "Invalid account number",
-});
-}
-if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(data.ifscCode)) {
-ctx.addIssue({
-code: z.ZodIssueCode.custom,
-path: ["ifscCode"],
-message: "Invalid IFSC code",
-});
-}
-}
-}
-
-const withdrawalSchema = z
-.object({
-amount: z.preprocess(
-Number,
-z.number().int().positive().min(50000, "Minimum withdrawal is INR 500"),
-),
-bankAccountId: z.string().optional(),
-bankAccountName: z.string().min(2, "Invalid name").optional(),
-bankAccountNumber: z.string().optional(),
-ifscCode: z.string().optional(),
-upiId: z.string().optional(),
-})
-.superRefine(validateWithdrawalInput);
 
 function getWithdrawalIdempotencyKey(request: NextRequest, userId: string) {
 const headerKey = request.headers.get("Idempotency-Key")?.trim();
@@ -82,36 +48,50 @@ throw AppError.badRequest("PAN tax compliance is required before withdrawals");
 }
 }
 
-async function getPayoutDetailsFromDb(userId: string, bankAccountId: string) {
-const bankAccount = await prisma.bankAccount.findFirst({
-where: {
-id: bankAccountId,
-userId,
-},
-});
+async function getPayoutDetailsFromDb(
+  userId: string,
+  bankAccountId: string
+) {
+  const bankAccount = await prisma.bankAccount.findFirst({
+    where: {
+      id: bankAccountId,
+      userId,
+    },
+  });
 
-if (!bankAccount) {
-throw AppError.notFound("Bank account not found");
-}
+  if (!bankAccount) {
+    throw AppError.notFound("Bank account not found");
+  }
 
-let accountNumber = bankAccount.accountNumber;
-try {
-accountNumber = decrypt(bankAccount.accountNumber);
-} catch {
-// Support old plain-text records if they still exist.
-}
+  // SECURITY: Block withdrawals to unverified bank accounts.
+  // Accounts must pass Razorpay Fund Account Validation (penny-drop)
+  // before they can receive payouts — this prevents routing funds to
+  // unowned third-party accounts (money laundering / session-hijack drain).
+  if (!bankAccount.isVerified) {
+    throw AppError.badRequest(
+      "BANK_ACCOUNT_NOT_VERIFIED: This bank account has not been verified yet. " +
+      "Please complete bank account verification before withdrawing."
+    );
+  }
 
-const isUpiPayout = accountNumber === "UPI_PAYOUT" && bankAccount.ifscCode === "UPI00000000";
+  let accountNumber = bankAccount.accountNumber;
+  try {
+    accountNumber = decrypt(bankAccount.accountNumber);
+  } catch {
+    // Support old plain-text records if they still exist.
+  }
 
-if (!isUpiPayout && !/^\d{9,18}$/.test(accountNumber)) {
-throw AppError.badRequest(
-"Stored bank account is invalid or masked. Please re-add this account before withdrawing."
-);
-}
+  const isUpiPayout = accountNumber === "UPI_PAYOUT" && bankAccount.ifscCode === "UPI00000000";
 
-let upiId = bankAccount.upiId;
-if (upiId) {
-try {
+  if (!isUpiPayout && !/^\d{9,18}$/.test(accountNumber)) {
+    throw AppError.badRequest(
+      "Stored bank account is invalid or masked. Please re-add this account before withdrawing."
+    );
+  }
+
+  let upiId = bankAccount.upiId;
+  if (upiId) {
+    try {
 upiId = decrypt(upiId);
 } catch {
 // Support old plain-text records if they still exist.
@@ -134,31 +114,6 @@ details.upiId = upiId;
 return details;
 }
 
-function getPayoutDetailsFromInput(data: z.infer<typeof withdrawalSchema>) {
-const isUpiInline = !!data.upiId && !data.bankAccountNumber && !data.ifscCode;
-const details: {
-bankAccountName: string;
-bankAccountNumber: string;
-ifscCode: string;
-upiId?: string;
-} = {
-bankAccountName: data.bankAccountName || "UPI Payout",
-bankAccountNumber: isUpiInline ? "UPI_PAYOUT" : data.bankAccountNumber!,
-ifscCode: isUpiInline ? "UPI00000000" : data.ifscCode!,
-};
-if (data.upiId) {
-details.upiId = data.upiId;
-}
-return details;
-}
-
-async function getPayoutDetails(userId: string, data: z.infer<typeof withdrawalSchema>) {
-if (data.bankAccountId) {
-return getPayoutDetailsFromDb(userId, data.bankAccountId);
-}
-return getPayoutDetailsFromInput(data);
-}
-
 function handleWithdrawalPostError(error: unknown) {
 const errMsg = error instanceof Error ? error.message : String(error);
 logger.error("POST /api/payments/withdraw error", { error: errMsg });
@@ -167,7 +122,14 @@ if (errMsg === "WITHDRAWAL_BLOCK") {
 return ApiResponse.forbidden("Withdrawal is currently blocked. Please contact support.");
 }
 
-if (errMsg.includes("Insufficient funds") || errMsg.includes("INSUFFICIENT_FUNDS_OR_FROZEN")) {
+  if (errMsg.includes("BANK_ACCOUNT_NOT_VERIFIED")) {
+    return ApiResponse.error(
+      "This bank account has not been verified. Please verify your bank account before withdrawing.",
+      403
+    );
+  }
+
+  if (errMsg.includes("Insufficient funds") || errMsg.includes("INSUFFICIENT_FUNDS_OR_FROZEN")) {
 return ApiResponse.error("Insufficient funds or frozen balance. Please check your wallet.", 400);
 }
 
@@ -225,7 +187,7 @@ throw AppError.tooManyRequests(
 );
 }
 
-const payoutDetails = await getPayoutDetails(session.user.id, parsed.data);
+const payoutDetails = await getPayoutDetailsFromDb(session.user.id, parsed.data.bankAccountId);
 
 const withdrawal = await PaymentService.initiateWithdrawal(
 session.user.id,

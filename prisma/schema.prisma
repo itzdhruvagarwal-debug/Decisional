@@ -801,6 +801,8 @@ model BankAccount {
   upiId         String?
   upiIdHash     String?
   isDefault     Boolean   @default(false)
+  isVerified    Boolean   @default(false) // Set to true after Razorpay Fund Account Validation (penny-drop)
+  verifiedAt    DateTime?                 // Timestamp of successful verification
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
