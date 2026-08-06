@@ -135,52 +135,61 @@ const [customCategory, setCustomCategory] = useState("");
 const [customLanguage, setCustomLanguage] = useState("");
 
 const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-const file = e.target.files?.[0];
-if (!file) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-// Optimistic update: instantly render the selected image on the client side
-// using a temporary local Object URL to avoid visual lag while uploading.
-const objectUrl = URL.createObjectURL(file);
-setProfile((prev) => (prev ? { ...prev, profileImage: objectUrl } : null));
-setIsUploading(true);
+    // Client-side size guard — mirrors backend /api/upload limit for images (5 MB).
+    // Checked before the optimistic UI update to avoid flashing a broken Object URL.
+    const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB
+    if (file.size > MAX_IMAGE_SIZE) {
+      showToast("File too large. Maximum profile image size is 5 MB.", "error");
+      if (profileImageInputRef.current) profileImageInputRef.current.value = "";
+      return;
+    }
 
-const formData = new FormData();
-formData.append("file", file);
-formData.append("folder", isBrand(user?.userType) ? "logos" : "avatars");
+    // Optimistic update: instantly render the selected image on the client side
+    // using a temporary local Object URL to avoid visual lag while uploading.
+    const objectUrl = URL.createObjectURL(file);
+    setProfile((prev) => (prev ? { ...prev, profileImage: objectUrl } : null));
+    setIsUploading(true);
 
-try {
-const res = await fetch("/api/upload", {
-method: "POST",
-body: formData,
-});
-const data = await res.json();
-if (data.success) {
-setProfile((prev) =>
-prev ? { ...prev, profileImage: data.url } : null,
-);
-// Auto-save only the updated profile image field (prevents redundant/noop write of all other profile fields)
-const saveRes = await fetch("/api/settings", {
-method: "PUT",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ profileImage: data.url }),
-});
-if (saveRes.ok) {
-await update(); // Sync session to reflect new image URL on front-end
-showToast("Profile picture updated!", "success");
-} else {
-showToast("Failed to save profile picture to settings", "error");
-}
-} else {
-showToast("Upload failed: " + (data.error || "Unknown error"), "error");
-}
-} catch (error) {
-logger.error("[profile-tab] Failed to upload avatar:", error);
-showToast("Upload failed", "error");
-} finally {
-setIsUploading(false);
-if (profileImageInputRef.current) profileImageInputRef.current.value = "";
-}
-};
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", isBrand(user?.userType) ? "logos" : "avatars");
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        setProfile((prev) =>
+          prev ? { ...prev, profileImage: data.url } : null,
+        );
+        // Auto-save only the updated profile image field (prevents redundant/noop write of all other profile fields)
+        const saveRes = await fetch("/api/settings", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ profileImage: data.url }),
+        });
+        if (saveRes.ok) {
+          await update(); // Sync session to reflect new image URL on front-end
+          showToast("Profile picture updated!", "success");
+        } else {
+          showToast("Failed to save profile picture to settings", "error");
+        }
+      } else {
+        showToast("Upload failed: " + (data.error || "Unknown error"), "error");
+      }
+    } catch (error) {
+      logger.error("[profile-tab] Failed to upload avatar:", error);
+      showToast("Upload failed", "error");
+    } finally {
+      setIsUploading(false);
+      if (profileImageInputRef.current) profileImageInputRef.current.value = "";
+    }
+  };
 
 const toggleCategory = (category: string) => {
 if (profile.categories.includes(category)) {

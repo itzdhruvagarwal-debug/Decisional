@@ -2,9 +2,9 @@
 
 import React from "react";
 import { Deal, Prisma } from "@prisma/client";
+import { formatCurrency } from "@/lib/utils-client";
 
-export const formatCurrency = (amount: number) =>
-"INR " + (amount / 100).toLocaleString("en-IN");
+export { formatCurrency };
 
 export const formatPercent = (value: number | undefined) =>
 typeof value === "number" && Number.isFinite(value)

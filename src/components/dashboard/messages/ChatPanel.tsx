@@ -278,35 +278,50 @@ const [offerContentDeadline, setOfferContentDeadline] = React.useState("");
 const [offerPostingDeadline, setOfferPostingDeadline] = React.useState("");
 
 const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-const file = e.target.files?.[0];
-if (!file) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-setIsUploading(true);
-try {
-const formData = new FormData();
-formData.append("file", file);
-formData.append("folder", "chat");
+    // Client-side size guard — mirrors backend /api/upload limits exactly.
+    // Fail-fast before any network I/O to save bandwidth on slow/mobile connections.
+    const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50 MB
+    const MAX_IMAGE_SIZE = 5 * 1024 * 1024;  //  5 MB
+    const isVideo = file.type.startsWith("video/");
+    const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
+    if (file.size > maxSize) {
+      showToast(
+        "error",
+        `File too large. Maximum size is ${isVideo ? "50 MB" : "5 MB"} for ${isVideo ? "videos" : "images"}.`
+      );
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
-const response = await fetch("/api/upload", {
-method: "POST",
-body: formData,
-});
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "chat");
 
-const data = await response.json();
-if (!response.ok || !data.success) {
-throw new Error(data.message || data.error || "Failed to upload file");
-}
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-await handleSendFile?.(data.data.url, file.name, file.type);
-showToast("success", "File shared successfully!");
-} catch (err) {
-console.error("[chat] File upload failed:", err);
-showToast("error", err instanceof Error ? err.message : "File sharing failed");
-} finally {
-setIsUploading(false);
-if (fileInputRef.current) fileInputRef.current.value = "";
-}
-};
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || data.error || "Failed to upload file");
+      }
+
+      await handleSendFile?.(data.data.url, file.name, file.type);
+      showToast("success", "File shared successfully!");
+    } catch (err) {
+      console.error("[chat] File upload failed:", err);
+      showToast("error", err instanceof Error ? err.message : "File sharing failed");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
 const handleCreateOfferSubmit = async (e: React.FormEvent) => {
 e.preventDefault();
