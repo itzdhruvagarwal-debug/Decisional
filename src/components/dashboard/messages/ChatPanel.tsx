@@ -107,9 +107,16 @@ return (
 File Shared
 </div>
 {isImg && msg.fileUrl ? (
-<div className="relative w-full max-w-240 h-160 rounded-md overflow-hidden bg-dark-80 border-card mb-1">
-<img src={msg.fileUrl} alt={fileName} className="object-cover w-full h-full" />
-</div>
+        <div className="relative w-full max-w-240 h-160 rounded-md overflow-hidden bg-dark-80 border-card mb-1">
+          <Image
+            src={msg.fileUrl}
+            alt={fileName}
+            fill
+            sizes="(max-width: 768px) 100vw, 240px"
+            className="object-cover"
+            unoptimized={!/\.(jpg|jpeg|png|webp|gif)$/i.test(msg.fileUrl)}
+          />
+        </div>
 ) : null}
 {msg.fileUrl && (
 <a
