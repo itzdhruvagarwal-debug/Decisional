@@ -340,8 +340,10 @@ if (totalBudgetPaise < 0) {
 throw AppError.badRequest("totalBudget cannot be negative");
 }
 if (totalBudgetPaise === 0) {
-if (!productValuePaise || productValuePaise < 100000) {
-throw AppError.badRequest("A product-only campaign must specify a product value of at least 1,000");
+// MIN matches Zod schema (validations.ts) and frontend (CampaignCreateHelpers.ts): ₹500
+const MIN_PRODUCT_VALUE_PAISE = 50000; // ₹500 in paise
+if (!productValuePaise || productValuePaise < MIN_PRODUCT_VALUE_PAISE) {
+throw AppError.badRequest("A product-only campaign must specify a product value of at least 500");
 }
 if (minFollowers > 10000) {
 throw AppError.badRequest("A product-only campaign must target influencers with up to 10,000 followers");
