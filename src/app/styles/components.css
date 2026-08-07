@@ -222,11 +222,13 @@
   backdrop-filter: blur(4px);
   z-index: 90;
   opacity: 0;
+  pointer-events: none;
   transition: opacity var(--transition-normal);
 }
 
 .mobile-nav-overlay.active {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .mobile-nav {
@@ -1413,11 +1415,18 @@ input:checked+.slider:before {
 .messages-container {
   height: calc(100vh - 120px);
 }
+@media (max-width: 768px) {
+  .messages-container {
+    height: calc(100vh - 185px); /* topbar + bottom tabbar */
+  }
+}
 
 .bank-account-item {
   border: 1px solid var(--color-border);
   background: transparent;
   transition: all var(--transition-normal);
+  flex-wrap: wrap;
+  gap: 12px;
 }
 .bank-account-item.default {
   border: 1px solid rgba(99, 102, 241, 0.5);
@@ -1425,6 +1434,21 @@ input:checked+.slider:before {
 }
 .bank-account-badge-default {
   color: var(--color-accent-indigo);
+}
+.bank-account-item .bank-account-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+@media (max-width: 480px) {
+  .bank-account-item {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+  .bank-account-item .bank-account-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 .pt-5 {
   padding-top: 20px;

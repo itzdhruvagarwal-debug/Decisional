@@ -1004,4 +1004,86 @@ summary::-webkit-details-marker {
 .text-cyan { color: var(--color-accent-cyan) !important; }
 .text-primary-light { color: var(--color-primary-light) !important; }
 
+/* ==================== GRID UTILITIES ==================== */
+.grid { display: grid !important; }
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+.col-span-2 { grid-column: span 2 / span 2 !important; }
+.col-span-3 { grid-column: span 3 / span 3 !important; }
+.items-start { align-items: flex-start !important; }
+.flex-shrink-0 { flex-shrink: 0 !important; }
+.flex-nowrap { flex-wrap: nowrap !important; }
+.hidden { display: none !important; }
+.block { display: block !important; }
+.tracking-tight { letter-spacing: -0.025em !important; }
+.overflow-hidden { overflow: hidden !important; }
+.text-2xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+.text-3xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+.text-4xl { font-size: 2.25rem !important; line-height: 2.5rem !important; }
+.text-gray-400 { color: #9ca3af !important; }
+
+/* ==================== RESPONSIVE UTILITIES (sm: 640px, md: 768px, lg: 1024px) ==================== */
+
+/* sm: prefix (≥ 640px) */
+@media (min-width: 640px) {
+  .sm\:flex-row { flex-direction: row !important; }
+  .sm\:flex-col { flex-direction: column !important; }
+  .sm\:flex-nowrap { flex-wrap: nowrap !important; }
+  .sm\:items-center { align-items: center !important; }
+  .sm\:items-start { align-items: flex-start !important; }
+  .sm\:justify-between { justify-content: space-between !important; }
+  .sm\:text-right { text-align: right !important; }
+  .sm\:text-left { text-align: left !important; }
+  .sm\:text-center { text-align: center !important; }
+  .sm\:block { display: block !important; }
+  .sm\:hidden { display: none !important; }
+  .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .sm\:p-8 { padding: 32px !important; }
+  .sm\:gap-3 { gap: 12px !important; }
+  .sm\:mb-2 { margin-bottom: 8px !important; }
+  .sm\:pb-0 { padding-bottom: 0 !important; }
+  .sm\:border-none { border: none !important; }
+}
+
+/* md: prefix (≥ 768px) */
+@media (min-width: 768px) {
+  .md\:flex-row { flex-direction: row !important; }
+  .md\:flex-col { flex-direction: column !important; }
+  .md\:items-center { align-items: center !important; }
+  .md\:items-start { align-items: flex-start !important; }
+  .md\:justify-between { justify-content: space-between !important; }
+  .md\:text-right { text-align: right !important; }
+  .md\:text-left { text-align: left !important; }
+  .md\:text-center { text-align: center !important; }
+  .md\:block { display: block !important; }
+  .md\:hidden { display: none !important; }
+  .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .md\:col-span-2 { grid-column: span 2 / span 2 !important; }
+  .md\:col-span-3 { grid-column: span 3 / span 3 !important; }
+  .md\:p-8 { padding: 32px !important; }
+  .md\:text-3xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+  .md\:text-4xl { font-size: 2.25rem !important; line-height: 2.5rem !important; }
+  .md\:text-base { font-size: 1rem !important; line-height: 1.5rem !important; }
+  .md\:gap-6 { gap: 24px !important; }
+}
+
+/* lg: prefix (≥ 1024px) */
+@media (min-width: 1024px) {
+  .lg\:flex-row { flex-direction: row !important; }
+  .lg\:items-center { align-items: center !important; }
+  .lg\:block { display: block !important; }
+  .lg\:hidden { display: none !important; }
+  .lg\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .lg\:col-span-2 { grid-column: span 2 / span 2 !important; }
+  .lg\:col-span-3 { grid-column: span 3 / span 3 !important; }
+  .lg\:p-8 { padding: 32px !important; }
+  .lg\:gap-6 { gap: 24px !important; }
+}
 

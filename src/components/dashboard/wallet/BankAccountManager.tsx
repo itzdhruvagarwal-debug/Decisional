@@ -408,7 +408,7 @@ className="text-sm text-secondary"
 {getBankAccountDetailsText(acc)}
 </div>
 </div>
-<div className="flex gap-2">
+<div className="bank-account-actions">
 {onSelectAccount && (() => {
 const selectLabel = acc.bankName === "UPI"
 ? `UPI: ${acc.upiId}`
