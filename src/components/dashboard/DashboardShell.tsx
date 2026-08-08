@@ -451,6 +451,7 @@ setShowNotifications={setShowNotifications}
 unreadCount={unreadCount}
 notifications={notifications}
 notificationRef={notificationRef}
+notifPortalRef={notifPortalRef}
 markAsRead={markAsRead}
 setMobileSidebarOpen={setMobileSidebarOpen}
 />
@@ -600,31 +601,33 @@ width: ${xpPercent}%;
 SidebarComponent.displayName = "SidebarComponent";
 
 interface TopbarProps {
-readonly user?: DashboardUser | null | undefined;
-readonly isAdmin: boolean;
-readonly pathname: string;
-readonly subtitleText: string;
-readonly showNotifications: boolean;
-readonly setShowNotifications: (show: boolean) => void;
-readonly unreadCount: number;
-readonly notifications: Notification[];
-readonly notificationRef: React.RefObject<HTMLDivElement | null>;
-readonly markAsRead: (id?: string) => void;
-readonly setMobileSidebarOpen: (open: boolean) => void;
+  readonly user?: DashboardUser | null | undefined;
+  readonly isAdmin: boolean;
+  readonly pathname: string;
+  readonly subtitleText: string;
+  readonly showNotifications: boolean;
+  readonly setShowNotifications: (show: boolean) => void;
+  readonly unreadCount: number;
+  readonly notifications: Notification[];
+  readonly notificationRef: React.RefObject<HTMLDivElement | null>;
+  readonly notifPortalRef: React.RefObject<HTMLDivElement | null>;
+  readonly markAsRead: (id?: string) => void;
+  readonly setMobileSidebarOpen: (open: boolean) => void;
 }
 
 const TopbarComponent = memo(function TopbarComponent({
-user,
-isAdmin,
-pathname,
-subtitleText,
-showNotifications,
-setShowNotifications,
-unreadCount,
-notifications,
-notificationRef,
-markAsRead,
-setMobileSidebarOpen,
+  user,
+  isAdmin,
+  pathname,
+  subtitleText,
+  showNotifications,
+  setShowNotifications,
+  unreadCount,
+  notifications,
+  notificationRef,
+  notifPortalRef,
+  markAsRead,
+  setMobileSidebarOpen,
 }: TopbarProps) {
 return (
 <header className="dashboard-topbar glass">
