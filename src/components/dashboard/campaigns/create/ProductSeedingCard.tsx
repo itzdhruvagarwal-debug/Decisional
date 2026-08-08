@@ -32,7 +32,7 @@ Do you need to ship a physical product to the influencer?
 </p>
 </div>
 <label className="switch" aria-label="Requires physical product seeding">
-<Input
+<input
 type="checkbox"
 checked={formData.requiresProduct}
 onChange={(e) =>

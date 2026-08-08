@@ -616,6 +616,18 @@ input:checked+.slider:before {
   border-radius: 50%;
 }
 
+/* When a toggle switch is used inside a card, the card's overflow:hidden clips
+   the slider's absolutely-positioned knob. Override it for any card containing a switch. */
+.switch {
+  flex-shrink: 0;
+}
+
+/* Ensure the card containing a switch is not clipping the toggle visually */
+.card:has(.switch) {
+  overflow: visible;
+}
+
+
 /* ==================== PWA INSTALL BUTTON & DIALOG ==================== */
 
 .pwa-store-button {

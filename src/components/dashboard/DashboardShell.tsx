@@ -7,6 +7,8 @@ import EmptyState from "@/components/ui/EmptyState";
 import Logo from "../Logo";
 import PWAInstallButton from "@/components/pwa/PWAInstallButton";
 import React, { useState, useEffect, useRef, useCallback, memo, useMemo } from "react";
+import { createPortal } from "react-dom";
+
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { isAdmin as rbacIsAdmin, isBrand, isInfluencer } from "@/lib/rbac";
@@ -269,6 +271,7 @@ const notifications = notifData?.notifications || [];
 const unreadCount = notifData?.unreadCount || 0;
 const [showNotifications, setShowNotifications] = useState(false);
 const notificationRef = useRef<HTMLDivElement>(null);
+const notifPortalRef = useRef<HTMLDivElement | null>(null);
 
 
 // Close mobile sidebar on route change without a visual flash.
@@ -292,10 +295,10 @@ document.body.classList.remove("overflow-hidden");
 // Close notifications when clicking outside
 useEffect(() => {
 function handleClickOutside(event: MouseEvent) {
-if (
-notificationRef.current &&
-!notificationRef.current.contains(event.target as Node)
-) {
+const target = event.target as Node;
+const insideBell = notificationRef.current?.contains(target);
+const insidePortal = notifPortalRef.current?.contains(target);
+if (!insideBell && !insidePortal) {
 setShowNotifications(false);
 }
 }
@@ -677,9 +680,13 @@ aria-label={`${unreadCount} unread notifications`}
 )}
 </Button>
 
-{/* Notifications Dropdown */}
-{showNotifications && (
-<div className="card notif-dropdown animate-fade-in">
+{/* Notifications Dropdown rendered via portal to escape stacking context */}
+{showNotifications && typeof document !== "undefined" && createPortal(
+<div
+ref={notifPortalRef}
+className="notif-dropdown-portal animate-fade-in"
+style={{ position: "fixed", top: 64, right: 12, zIndex: 99999 }}
+>
 <div className="notif-dropdown-header">
 <h3>Notifications</h3>
 {unreadCount > 0 && (
@@ -714,7 +721,8 @@ className={`notif-item ${notif.isRead ? "" : "unread"}`}
 ))
 )}
 </div>
-</div>
+</div>,
+document.body
 )}
 </div>
 
