@@ -58,5 +58,6 @@ dump.rdb
 # Debug scripts artifacts
 scripts/*.png
 
-# Generated PWA service worker
-/public/sw.js
+# Generated PWA service worker (tracked manually now)
+# /public/sw.js
+

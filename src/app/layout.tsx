@@ -59,6 +59,19 @@ children: React.ReactNode;
 }>) {
 return (
 <html lang="en" className={inter.variable} data-scroll-behavior="smooth">
+<head>
+<script
+  dangerouslySetInnerHTML={{
+    __html: `
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.deferredPrompt = e;
+        window.dispatchEvent(new CustomEvent('deferredpromptready', { detail: e }));
+      });
+    `,
+  }}
+/>
+</head>
 <body className={inter.className}>
 <Providers>{children}</Providers>
 </body>
