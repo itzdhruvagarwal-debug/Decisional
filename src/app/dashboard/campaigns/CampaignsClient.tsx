@@ -247,8 +247,14 @@ description={error}
 content = (
 <EmptyState
 emoji=""
-title="No Campaigns Found"
-description="Try broadening your search query or changing category and budget filters."
+title={canCreateCampaign ? "No Campaigns Yet" : "No Campaigns Found"}
+description={
+canCreateCampaign
+? "You haven't created any campaigns yet. Launch your first campaign to find creators."
+: "Try broadening your search query or changing category and budget filters."
+}
+actionLabel={canCreateCampaign ? "Create Campaign" : undefined}
+actionHref={canCreateCampaign ? "/dashboard/campaigns/create" : undefined}
 />
 );
 } else {
@@ -356,21 +362,25 @@ return (
 <div
 className="flex justify-between items-center w-full"
 >
-<div>
-<h2 className="text-lg font-extrabold">Explore Campaigns</h2>
-<p className="text-sm text-secondary">
-Apply to active campaigns matching your niche.
-</p>
-</div>
-{canCreateCampaign && (
-<Button
-href="/dashboard/campaigns/create"
-variant="primary"
-aria-label="Create a new campaign"
->
-Create Campaign
-</Button>
-)}
+  <div>
+    <h2 className="text-lg font-extrabold">
+      {canCreateCampaign ? "My Campaigns" : "Explore Campaigns"}
+    </h2>
+    <p className="text-sm text-secondary">
+      {canCreateCampaign
+        ? "Manage your campaigns and track influencer applications."
+        : "Apply to active campaigns matching your niche."}
+    </p>
+  </div>
+  {canCreateCampaign && (
+    <Button
+      href="/dashboard/campaigns/create"
+      variant="primary"
+      aria-label="Create a new campaign"
+    >
+      Create Campaign
+    </Button>
+  )}
 </div>
 
 <div

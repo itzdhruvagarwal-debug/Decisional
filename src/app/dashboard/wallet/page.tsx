@@ -411,7 +411,9 @@ className="font-extrabold text-3xl bg-gradient-primary wallet-title"
 Wallet and Payments
 </h1>
 <p className="text-secondary">
-Manage earnings, transactions, and payouts.
+{userType === "BRAND"
+  ? "Manage campaign spending, top-ups, and payment history."
+  : "Manage earnings, transactions, and payouts."}
 </p>
 </div>
 

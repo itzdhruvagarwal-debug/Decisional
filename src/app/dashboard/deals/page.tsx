@@ -164,15 +164,15 @@ stats?: { active?: number; completed?: number; totalEarnings?: number };
 
 function getDeliverableIcon(type: string): string {
 const icons: Record<string, string> = {
-INSTAGRAM_POST: "",
-INSTAGRAM_REEL: "",
-INSTAGRAM_STORY: "",
-YOUTUBE_VIDEO: "",
-YOUTUBE_SHORT: "",
-TWITTER_POST: "",
-LINKEDIN_POST: "",
+INSTAGRAM_POST: "IG",
+INSTAGRAM_REEL: "IG",
+INSTAGRAM_STORY: "IG",
+YOUTUBE_VIDEO: "YT",
+YOUTUBE_SHORT: "YT",
+TWITTER_POST: "X",
+LINKEDIN_POST: "LI",
 };
-return icons[type] || "";
+return icons[type] || "POST";
 }
 
 function DealSkeleton() {
@@ -521,7 +521,7 @@ className="text-3xl font-extrabold gradient-text"
 <div
 className="text-secondary text-sm"
 >
-Total Earnings
+{isInfluencer ? "Total Earned" : "Total Spent"}
 </div>
 </div>
 </div>

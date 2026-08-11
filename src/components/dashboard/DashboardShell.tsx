@@ -400,8 +400,12 @@ const mobileNavItems = isAdmin
 { icon: "settings" as const, label: "Admin", href: "/admin", primary: true },
 ]
 : [
-{ icon: "home" as const, label: "Home", href: "/dashboard" },
-{ icon: "campaigns" as const, label: "Campaigns", href: "/dashboard/campaigns" },
+  { icon: "home" as const, label: "Home", href: "/dashboard" },
+  {
+    icon: "campaigns" as const,
+    label: isBrandOrIndividual ? "My Campaigns" : "Campaigns",
+    href: "/dashboard/campaigns",
+  },
 {
 icon: "plus" as const,
 label: mobilePrimaryLabel,
@@ -657,7 +661,7 @@ aria-label="Open sidebar"
 
 <div className="dashboard-topbar-right">
 {!isAdmin && <PWAInstallButton className="dashboard-icon-button" />}
-{!isAdmin && (
+{isInfluencer(user?.userType) && (
 <div className="dashboard-trust-chip">
 <span>Trust</span>
 <strong>{Number(user?.trustScore || 600)}</strong>
