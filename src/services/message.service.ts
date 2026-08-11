@@ -1,7 +1,8 @@
 import { AppError } from "@/lib/errors";
 import prisma from "@/lib/db";
-import { Message, Prisma } from "@prisma/client";
+import { Message, Prisma, DealStatus } from "@prisma/client";
 import { checkMessageForContacts, checkAttachmentForContacts } from "@/lib/contact-filter";
+import { ACTIVE_DEAL_STATUSES } from "@/lib/utils";
 import { redis } from "@/lib/redis";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { stripHtml } from "@/lib/sanitize";
@@ -181,14 +182,44 @@ skip: (params.page - 1) * params.limit,
 take: params.limit,
 });
 
-const presence = await getTypingPresence(access, userId);
-return {
-messages: rawMessages.map((message) =>
-redactMessage(message, access.isAdmin),
-),
-...(params.dealId ? { dealId: params.dealId } : {}),
-presence,
-};
+  const presence = await getTypingPresence(access, userId);
+
+  let hasActiveDeal = true;
+  if (!access.isAdmin) {
+    if (params.dealId) {
+      const deal = await prisma.deal.findUnique({
+        where: { id: params.dealId },
+        select: { status: true },
+      });
+      hasActiveDeal = Boolean(
+        deal && ACTIVE_DEAL_STATUSES.includes(deal.status),
+      );
+    } else if (params.with) {
+      const activeDeal = await prisma.deal.findFirst({
+        where: {
+          OR: [
+            { influencer: { userId }, brand: { userId: params.with } },
+            { brand: { userId }, influencer: { userId: params.with } },
+          ],
+          status: {
+            in: ACTIVE_DEAL_STATUSES as DealStatus[],
+          },
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+      hasActiveDeal = Boolean(activeDeal);
+    }
+  }
+
+  return {
+    messages: rawMessages.map((message) =>
+      redactMessage(message, access.isAdmin),
+    ),
+    ...(params.dealId ? { dealId: params.dealId } : {}),
+    presence,
+    hasActiveDeal,
+  };
 }
 
 static async listConversations(userId: string, page: number, limit: number) {
@@ -458,6 +489,36 @@ throw AppError.badRequest("Daily message limit reached.");
 }
 
 await MessageService.validateSenderAndReceiver(userId, data.receiverId);
+
+const { isAdmin: senderIsAdmin } = await getUserRole(userId);
+if (!senderIsAdmin) {
+  if (data.dealId) {
+    const deal = await prisma.deal.findUnique({
+      where: { id: data.dealId },
+      select: { status: true },
+    });
+    if (!deal || !ACTIVE_DEAL_STATUSES.includes(deal.status)) {
+      throw AppError.badRequest("Cannot send messages because this deal is completed or cancelled.");
+    }
+  } else {
+    const activeDeal = await prisma.deal.findFirst({
+      where: {
+        OR: [
+          { influencer: { userId }, brand: { userId: data.receiverId } },
+          { brand: { userId }, influencer: { userId: data.receiverId } },
+        ],
+        status: {
+          in: ACTIVE_DEAL_STATUSES as DealStatus[],
+        },
+        deletedAt: null,
+      },
+      select: { id: true },
+    });
+    if (!activeDeal) {
+      throw AppError.badRequest("Cannot send messages because there are no active deals between you and this user.");
+    }
+  }
+}
 
 if (data.dealId) {
 const access = await getConversationAccess(userId, { dealId: data.dealId });

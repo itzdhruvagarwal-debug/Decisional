@@ -37,6 +37,7 @@ const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 const [reportReason, setReportReason] = useState("");
 const [reportDescription, setReportDescription] = useState("");
 const [submittingReport, setSubmittingReport] = useState(false);
+const [hasActiveDeal, setHasActiveDeal] = useState(true);
 
 const [toasts, setToasts] = useState<ToastItem[]>([]);
 const removeToast = (toastId: string) => {
@@ -177,6 +178,7 @@ metadata: m.metadata || null,
 }));
 setMessages(mappedMessages);
 setIsPeerTyping(Boolean(data.presence?.isTyping));
+setHasActiveDeal(data.hasActiveDeal ?? true);
 } catch (err) {
 logger.error("[messages] Failed to fetch messages:", err);
 setMessages([]);
@@ -338,7 +340,7 @@ fetchMessages(false);
 logger.error("[messages] Failed to send message:", err);
 setMessages((prev) => prev.filter((m) => m.id !== tempId));
 setNewMessage(messageCopy);
-showToast("error", "Message send failed. Please try again.");
+showToast("error", err instanceof Error ? err.message : "Message send failed. Please try again.");
 }
 };
 
@@ -602,5 +604,6 @@ handleReportUserSubmit,
 selectedChat,
 showToast,
 publishTyping,
+hasActiveDeal,
 };
 }

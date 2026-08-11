@@ -261,16 +261,17 @@ Typing...
 }
 
 export function ChatInputArea({ state }: Readonly<ChatPanelProps>) {
-const {
-newMessage,
-isChatUserBlocked,
-handleInputChange,
-handleSend,
-showToast,
-publishTyping,
-handleSendFile,
-handleSendOffer,
-} = state;
+  const {
+    newMessage,
+    isChatUserBlocked,
+    handleInputChange,
+    handleSend,
+    showToast,
+    publishTyping,
+    handleSendFile,
+    handleSendOffer,
+    hasActiveDeal,
+  } = state;
 
 const fileInputRef = React.useRef<HTMLInputElement>(null);
 const [isUploading, setIsUploading] = React.useState(false);
@@ -367,18 +368,24 @@ showToast("error", message);
 };
 
 return (
-<div
-className="chat-input-area flex flex-col gap-2 border-top px-6 py-4 bg-primary"
-data-blocked={isChatUserBlocked}
->
-{isChatUserBlocked ? (
-<div
-className="chat-blocked-banner font-semibold text-sm text-rose px-4 py-2 bg-rose-subtle rounded-md"
->
-You cannot message this user because a block relationship exists.
-</div>
-) : (
-<div className="flex gap-3 items-center">
+  <div
+    className="chat-input-area flex flex-col gap-2 border-top px-6 py-4 bg-primary"
+    data-blocked={isChatUserBlocked || !hasActiveDeal}
+  >
+    {isChatUserBlocked ? (
+      <div
+        className="chat-blocked-banner font-semibold text-sm text-rose px-4 py-2 bg-rose-subtle rounded-md"
+      >
+        You cannot message this user because a block relationship exists.
+      </div>
+    ) : !hasActiveDeal ? (
+      <div
+        className="chat-blocked-banner font-semibold text-sm text-rose px-4 py-2 bg-rose-subtle rounded-md text-center"
+      >
+        Cannot send messages because there is no active deal.
+      </div>
+    ) : (
+      <div className="flex gap-3 items-center">
 <input
 type="file"
 ref={fileInputRef}
