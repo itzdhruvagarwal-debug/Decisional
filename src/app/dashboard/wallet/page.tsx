@@ -267,83 +267,111 @@ showToast("error", (error instanceof Error ? error.message : String(error)) || "
 const [isDownloading, setIsDownloading] = useState<Record<string, boolean>>({});
 
 // Period picker modal state
-type ModalConfig = { key: string; title: string; icon: string; type: "transactions" | "report"; urlBase: string; fallback: string; };
+type ModalConfig = { key: string; title: string; icon: React.ReactNode; type: "transactions" | "report"; urlBase: string; fallback: string; };
 const [activePicker, setActivePicker] = useState<ModalConfig | null>(null);
 
 const openPicker = (cfg: ModalConfig) => setActivePicker(cfg);
 const closePicker = () => setActivePicker(null);
 
 const downloadCsv = async (url: string, key: string, fallbackFilename: string) => {
-setIsDownloading(prev => ({ ...prev, [key]: true }));
-try {
-const res = await fetch(url);
-if (!res.ok) {
-const msg = await extractDownloadError(res);
-throw new Error(msg);
-}
-const blob = await res.blob();
-const disposition = res.headers.get("content-disposition") || "";
-const match = /filename="?([^";\n]+)"?/.exec(disposition);
-const filename = match?.[1]?.trim() ?? fallbackFilename;
+  setIsDownloading(prev => ({ ...prev, [key]: true }));
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const msg = await extractDownloadError(res);
+      throw new Error(msg);
+    }
+    const blob = await res.blob();
+    const disposition = res.headers.get("content-disposition") || "";
+    const match = /filename="?([^";\n]+)"?/.exec(disposition);
+    const filename = match?.[1]?.trim() ?? fallbackFilename;
 
-const blobUrl = URL.createObjectURL(blob);
-const a = document.createElement("a");
-a.href = blobUrl;
-a.download = filename;
-a.style.position = "fixed";
-a.style.left = "-9999px";
-a.style.top = "-9999px";
-document.body.appendChild(a);
-a.click();
-// Delay revoke so browser has time to start the download
-setTimeout(() => {
-URL.revokeObjectURL(blobUrl);
-a.remove();
-}, 5000);
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename;
+    a.style.position = "fixed";
+    a.style.left = "-9999px";
+    a.style.top = "-9999px";
+    document.body.appendChild(a);
+    a.click();
+    // Delay revoke so browser has time to start the download
+    setTimeout(() => {
+      URL.revokeObjectURL(blobUrl);
+      a.remove();
+    }, 5000);
 
-showToast("success", ` ${filename} downloaded`);
-} catch (err: unknown) {
-const msg = err instanceof Error ? err.message : "Download failed";
-showToast("error", msg);
-logger.error("[download]", err instanceof Error ? err : String(err));
-} finally {
-setIsDownloading(prev => ({ ...prev, [key]: false }));
-}
+    showToast("success", ` ${filename} downloaded`);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Download failed";
+    showToast("error", msg);
+    logger.error("[download]", err instanceof Error ? err : String(err));
+  } finally {
+    setIsDownloading(prev => ({ ...prev, [key]: false }));
+  }
 };
 
 const handlePeriodConfirm = (period: PeriodValue) => {
-if (!activePicker) return;
-const { key, urlBase, fallback, type } = activePicker;
-const params = new URLSearchParams({ format: "csv" });
-if (type === "report" && period.fy) {
-params.set("fy", period.fy);
-} else {
-if (period.startDate) params.set("startDate", period.startDate);
-if (period.endDate) params.set("endDate", period.endDate);
-}
-closePicker();
-downloadCsv(`${urlBase}?${params.toString()}`, key, fallback);
+  if (!activePicker) return;
+  const { key, urlBase, fallback, type } = activePicker;
+  const params = new URLSearchParams({ format: "csv" });
+  if (type === "report" && period.fy) {
+    params.set("fy", period.fy);
+  } else {
+    if (period.startDate) params.set("startDate", period.startDate);
+    if (period.endDate) params.set("endDate", period.endDate);
+  }
+  closePicker();
+  downloadCsv(`${urlBase}?${params.toString()}`, key, fallback);
 };
 
 const handleDownloadCSV = () => openPicker({
-key: "txn", type: "transactions", icon: "",
-title: "Download Transactions",
-urlBase: "/api/wallet/transactions",
-fallback: "transactions.csv",
+  key: "txn",
+  type: "transactions",
+  icon: (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  ),
+  title: "Download Transactions",
+  urlBase: "/api/wallet/transactions",
+  fallback: "transactions.csv",
 });
 
 const handleDownloadIncomeReport = () => openPicker({
-key: "income", type: "report", icon: "",
-title: "Income Report (ITR)",
-urlBase: "/api/reports/influencer/income",
-fallback: "income-report.csv",
+  key: "income",
+  type: "report",
+  icon: (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+      <polyline points="10 9 9 9 8 9" />
+    </svg>
+  ),
+  title: "Income Report (ITR)",
+  urlBase: "/api/reports/influencer/income",
+  fallback: "income-report.csv",
 });
 
 const handleDownloadSpendReport = () => openPicker({
-key: "spend", type: "report", icon: "",
-title: "Spend Report (GST)",
-urlBase: "/api/reports/brand/spend",
-fallback: "spend-report.csv",
+  key: "spend",
+  type: "report",
+  icon: (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+      <polyline points="10 9 9 9 8 9" />
+    </svg>
+  ),
+  title: "Spend Report (GST)",
+  urlBase: "/api/reports/brand/spend",
+  fallback: "spend-report.csv",
 });
 
 return {
