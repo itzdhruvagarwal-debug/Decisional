@@ -106,44 +106,28 @@ is: { userId },
 
 return conditions;
 }
-export async function getPlatformCompatibilityCondition(
-hasIg: boolean,
-hasYt: boolean,
-statusFilter: CampaignStatus | undefined,
-): Promise<Prisma.CampaignWhereInput> {
-const platforms: string[] = [];
-if (hasIg) platforms.push("INSTAGRAM");
-if (hasYt) platforms.push("YOUTUBE");
+export function getPlatformCompatibilityCondition(
+  hasIg: boolean,
+  hasYt: boolean,
+): Prisma.CampaignWhereInput {
+  const platforms: string[] = [];
+  if (hasIg) platforms.push("INSTAGRAM");
+  if (hasYt) platforms.push("YOUTUBE");
 
-if (platforms.length === 0) {
-return { id: { in: ["no_connected_platform"] } };
-}
+  if (platforms.length === 0) {
+    return { id: "no_connected_platform" };
+  }
 
-const platformConditions = platforms.map((p) => ({
-deliverables: {
-path: [],
-string_contains: p,
-},
-}));
+  const platformConditions = platforms.map((p) => ({
+    deliverables: {
+      path: [],
+      string_contains: p,
+    },
+  }));
 
-const candidateCampaigns = await prisma.campaign.findMany({
-where: {
-...(statusFilter ? { status: statusFilter } : {}),
-deletedAt: null,
-OR: platformConditions,
-},
-select: { id: true },
-take: 1000,
-});
-
-return {
-id: {
-in:
-candidateCampaigns.length > 0
-? candidateCampaigns.map((item: { id: string }) => item.id)
-: ["no_matching_platform_campaign"],
-},
-};
+  return {
+    OR: platformConditions,
+  };
 }
 export function getBudgetCondition(
 minInstagramRate: number | null,
@@ -192,10 +176,10 @@ if (profile) {
 const hasIg = Boolean(profile.instagramHandle);
 const hasYt = Boolean(profile.youtubeHandle);
 
-if (!hasIg || !hasYt) {
-const platCond = await getPlatformCompatibilityCondition(hasIg, hasYt, statusFilter);
-conditions.push(platCond);
-}
+    if (!hasIg || !hasYt) {
+      const platCond = getPlatformCompatibilityCondition(hasIg, hasYt);
+      conditions.push(platCond);
+    }
 
 const igFollowers = profile.instagramFollowers || 0;
 const ytSubs = profile.youtubeSubscribers || 0;
