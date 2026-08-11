@@ -31,7 +31,7 @@ userId: string,
 page: number = 1,
 limit: number = 20,
 ) {
-const [notifications, total] = await Promise.all([
+const [notifications, total, unreadCount] = await Promise.all([
 prisma.notification.findMany({
 where: { userId },
 orderBy: { createdAt: "desc" },
@@ -39,11 +39,8 @@ skip: (page - 1) * limit,
 take: limit,
 }),
 prisma.notification.count({ where: { userId } }),
+prisma.notification.count({ where: { userId, isRead: false } }),
 ]);
-
-const unreadCount = await prisma.notification.count({
-where: { userId, isRead: false },
-});
 
 return { notifications, total, unreadCount };
 }

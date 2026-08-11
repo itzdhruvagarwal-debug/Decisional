@@ -592,14 +592,15 @@ export async function getUserWeeklyChallenges(userId: string) {
 const now = new Date();
 const weekId = `${now.getUTCFullYear()}-W${getWeekNumber(now)}`;
 
-const challenges = await prisma.weeklyChallenge.findMany({
+const [challenges, progressRecords] = await Promise.all([
+prisma.weeklyChallenge.findMany({
 where: { weekId },
 orderBy: { difficulty: "asc" },
-});
-
-const progressRecords = await prisma.userChallengeProgress.findMany({
+}),
+prisma.userChallengeProgress.findMany({
 where: { userId, weekId },
-});
+}),
+]);
 
 const progressMap = new Map<string, { currentProgress: number; completed: boolean; completedAt: Date | null }>(
 progressRecords.map((p: { challengeId: string; currentProgress: number; completed: boolean; completedAt: Date | null }) => [p.challengeId, p]),

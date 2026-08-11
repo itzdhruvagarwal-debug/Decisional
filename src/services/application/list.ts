@@ -124,42 +124,43 @@ prisma.application.count({ where }),
 
 const applicationsWithScores = await Promise.all(
 applications.map(async (app) => {
-const matchResult = await MatchingService.calculateMatchScore(
-{
-id: app.campaign.id,
-targetCategories: app.campaign.targetCategories,
-perInfluencerBudget: app.campaign.perInfluencerBudget,
-},
-{
-id: app.influencer.id,
-categories: app.influencer.categories,
-instagramFollowers: app.influencer.instagramFollowers,
-instagramEngagementRate: app.influencer.instagramEngagementRate,
-youtubeSubscribers: app.influencer.youtubeSubscribers,
-youtubeEngagementRate: app.influencer.youtubeEngagementRate,
-followerAuthenticityScore: app.influencer.followerAuthenticityScore,
-averageRating: app.influencer.averageRating,
-xp: app.influencer.user.xp,
-},
-app.proposedRate
-);
+    const [matchResult, deal] = await Promise.all([
+      MatchingService.calculateMatchScore(
+        {
+          id: app.campaign.id,
+          targetCategories: app.campaign.targetCategories,
+          perInfluencerBudget: app.campaign.perInfluencerBudget,
+        },
+        {
+          id: app.influencer.id,
+          categories: app.influencer.categories,
+          instagramFollowers: app.influencer.instagramFollowers,
+          instagramEngagementRate: app.influencer.instagramEngagementRate,
+          youtubeSubscribers: app.influencer.youtubeSubscribers,
+          youtubeEngagementRate: app.influencer.youtubeEngagementRate,
+          followerAuthenticityScore: app.influencer.followerAuthenticityScore,
+          averageRating: app.influencer.averageRating,
+          xp: app.influencer.user.xp,
+        },
+        app.proposedRate
+      ),
+      app.status === "SELECTED" ? prisma.deal.findFirst({
+        where: {
+          campaignId: app.campaignId,
+          influencerId: app.influencerId,
+        },
+        select: {
+          amount: true,
+        },
+      }) : null,
+    ]);
 
-const deal = app.status === "SELECTED" ? await prisma.deal.findFirst({
-  where: {
-    campaignId: app.campaignId,
-    influencerId: app.influencerId,
-  },
-  select: {
-    amount: true,
-  },
-}) : null;
-
-return {
-...app,
-matchScore: matchResult.matchScore,
-matchBreakdown: matchResult.matchBreakdown,
-finalRate: deal ? deal.amount : null,
-};
+    return {
+      ...app,
+      matchScore: matchResult.matchScore,
+      matchBreakdown: matchResult.matchBreakdown,
+      finalRate: deal ? deal.amount : null,
+    };
 })
 );
 
