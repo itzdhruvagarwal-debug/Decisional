@@ -692,7 +692,6 @@ aria-label={`${unreadCount} unread notifications`}
 <div
 ref={notifPortalRef}
 className="notif-dropdown-portal animate-fade-in"
-style={{ position: "fixed", top: 64, right: 12, zIndex: 99999 }}
 >
 <div className="notif-dropdown-header">
 <h3>Notifications</h3>
