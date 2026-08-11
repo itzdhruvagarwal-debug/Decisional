@@ -1,9 +1,26 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import InfluencerDashboard, { type InfluencerAnalyticsData } from "@/components/analytics/InfluencerDashboard";
-import BrandDashboard, { type BrandAnalyticsData } from "@/components/analytics/BrandDashboard";
+import dynamic from "next/dynamic";
+import type { InfluencerAnalyticsData } from "@/components/analytics/InfluencerDashboard";
+import type { BrandAnalyticsData } from "@/components/analytics/BrandDashboard";
 import WeeklyChallenges from "@/components/dashboard/challenges/WeeklyChallenges";
+
+const InfluencerDashboard = dynamic(
+  () => import("@/components/analytics/InfluencerDashboard"),
+  {
+    loading: () => <div className="card p-8 h-96 skeleton animate-pulse rounded-xl bg-tertiary" />,
+    ssr: false,
+  }
+);
+
+const BrandDashboard = dynamic(
+  () => import("@/components/analytics/BrandDashboard"),
+  {
+    loading: () => <div className="card p-8 h-96 skeleton animate-pulse rounded-xl bg-tertiary" />,
+    ssr: false,
+  }
+);
 import { Select } from "@/components/ui";
 
 interface AnalyticsPageClientProps {
