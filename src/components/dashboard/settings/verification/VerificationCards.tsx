@@ -21,7 +21,13 @@ return (
 <div className="flex items-start justify-between gap-4 flex-wrap">
 <div className="flex-1 min-w-200">
 <div className="flex items-center mb-2 gap-2-5">
-<span className="text-2xl"></span>
+<span className="text-2xl flex items-center justify-center">
+  <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500">
+    <rect width="18" height="18" x="3" y="3" rx="2" />
+    <path d="M12 8v8" />
+    <path d="M8 12h8" />
+  </svg>
+</span>
 <div>
 <div className="font-bold text-sm">Instant Verification via DigiLocker</div>
 <div className="text-xs text-muted mt-1">Government of India</div>
@@ -42,7 +48,14 @@ onClick={handleDigiLockerConnect}
 disabled={isConnectingDigiLocker}
 className="border-none whitespace-nowrap min-w-180 bg-gradient-green"
 >
-{isConnectingDigiLocker ? "Connecting..." : " Connect DigiLocker"}
+{isConnectingDigiLocker ? "Connecting..." : (
+  <span className="flex items-center gap-1.5 justify-center">
+    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+    </svg>
+    Connect DigiLocker
+  </span>
+)}
 </Button>
 </div>
 </div>
@@ -67,15 +80,18 @@ className="flex items-center gap-2-5"
 <div
 className="flex items-center justify-center rounded-full w-30 h-30 bg-indigo-12"
 >
-
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500">
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
 </div>
 <div>
 <div className="font-bold">
-Tier 1 Basic Identity{" "}
+Tier 1 — Basic Identity{" "}
 <span
 className="font-normal text-secondary"
 >
-(up to 50,000/month)
+(up to ₹50,000/month)
 </span>
 </div>
 <div
@@ -121,16 +137,19 @@ className="flex items-center gap-2-5"
 <div
 className="flex items-center justify-center rounded-full w-30 h-30 bg-amber-12"
 >
-
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="text-amber-500">
+    <rect width="20" height="14" x="2" y="5" rx="2" />
+    <line x1="2" y1="10" x2="22" y2="10" />
+  </svg>
 </div>
 <div>
 <div className="font-bold">
-Tier 2 Financial Identity{" "}
+Tier 2 — Financial Identity{" "}
 <span
 className="font-normal text-secondary"
 >
 {isBrand
-? "(up to 1,00,000/month)"
+? "(up to ₹1,00,000/month)"
 : "(Unlimited for Influencers)"}
 </span>
 </div>
@@ -138,7 +157,7 @@ className="font-normal text-secondary"
 className="text-xs text-secondary"
 >
 PAN Card + Bank Statement
-{!isBrand ? " unlocks unlimited campaigns" : ""}
+{!isBrand ? " — unlocks unlimited campaigns" : ""}
 </div>
 </div>
 </div>
@@ -146,7 +165,7 @@ PAN Card + Bank Statement
 <span
 className="font-bold text-xs text-emerald rounded-2xl px-2-py-1 bg-emerald-subtle"
 >
-{isBrand ? "Unlocked" : "Unlimited All campaigns"}
+{isBrand ? "Unlocked" : "Unlimited — All campaigns"}
 </span>
 ) : (
 <span
@@ -159,7 +178,7 @@ className="font-bold text-xs text-amber rounded-2xl px-2-py-1 bg-amber-subtle"
 <div
 className="flex flex-col gap-2-5"
 >
-{renderDocRow("PAN_CARD", "PAN Card", "", "Clear photo of your PAN card required for transactions above 50,000")}
+{renderDocRow("PAN_CARD", "PAN Card", "", "Clear photo of your PAN card required for transactions above ₹50,000")}
 {renderDocRow("BANK_STATEMENT", "Bank Statement", "", "Latest 3-month bank statement (PDF or scanned image)")}
 </div>
 </div>
@@ -169,57 +188,55 @@ className="flex flex-col gap-2-5"
 export function Tier3CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "isBrand">) {
 return (
 <div className="verification-tier-card card" data-tier="3" data-unlocked={tier >= 3} data-disabled={tier < 2}>
-<div
-className="flex items-center justify-between flex-wrap mb-3 gap-2-5"
->
-<div
-className="flex items-center gap-2-5"
->
-<div
-className="flex items-center justify-center rounded-full w-30 h-30 bg-emerald-subtle"
->
-
+<div className="flex items-center justify-between flex-wrap mb-3 gap-2-5">
+<div className="flex items-center gap-2-5">
+<div className="flex items-center justify-center rounded-full w-30 h-30 bg-emerald-subtle">
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500">
+    <rect width="20" height="14" x="2" y="6" rx="2" />
+    <path d="M16 2v4M8 2v4M2 10h20" />
+  </svg>
 </div>
 <div>
 <div className="font-bold">
-Tier 3 Business Verification{" "}
-<span
-className="font-normal text-secondary"
->
-(Unlimited)
-</span>
+Tier 3 — Business Verification{" "}
+<span className="font-normal text-secondary">(Unlimited)</span>
 </div>
-<div
-className="text-xs text-secondary"
->
+<div className="text-xs text-secondary">
 Upload <strong>any one</strong> business document to unlock unlimited campaigns
 </div>
 </div>
 </div>
 {tier >= 3 ? (
-<span
-className="font-bold text-xs text-emerald rounded-2xl px-2-py-1 bg-emerald-subtle"
->
+<span className="font-bold text-xs text-emerald rounded-2xl px-2-py-1 bg-emerald-subtle">
 Unlimited
 </span>
 ) : (
-<span
-className="font-bold text-xs text-emerald rounded-2xl px-2-py-1 bg-emerald-subtle"
->
-{tier < 2
-? " Complete Tier 2 first"
-: " Upload any one below"}
+<span className="font-bold text-xs text-amber rounded-2xl px-2-py-1 bg-amber-subtle flex items-center gap-1">
+{tier < 2 ? (
+  <>
+    <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+    Complete Tier 2 first
+  </>
+) : (
+  <>
+    <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="18 15 12 9 6 15" />
+    </svg>
+    Upload any one below
+  </>
+)}
 </span>
 )}
 </div>
-<div
-className="text-xs text-secondary mb-3 rounded-sm px-3-py-2 bg-emerald-06"
->
-You only need <strong>one</strong> of the documents below to unlock the unlimited tier.
+<div className="text-xs text-secondary mb-3 rounded-sm px-3-py-2 bg-emerald-06 flex items-start gap-2">
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500 mt-0.5 flex-shrink-0">
+    <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
+  </svg>
+  <span>You only need <strong>one</strong> of the documents below to unlock the unlimited tier.</span>
 </div>
-<div
-className="flex flex-col gap-2-5"
->
+<div className="flex flex-col gap-2-5">
 {renderDocRow("GST_CERTIFICATE", "GST Registration Certificate", "", "GST certificate for your business entity")}
 {renderDocRow("MSME_CERTIFICATE", "MSME / Udyam Certificate", "", "Udyam/MSME registration certificate from Government portal")}
 {renderDocRow("STARTUP_CERTIFICATE", "Startup India Certificate", "", "DPIIT recognition letter or Startup India certificate")}
@@ -356,7 +373,7 @@ className="flex items-center justify-center rounded-full w-30 h-30 bg-indigo-12"
 </div>
 <div>
 <div className="font-bold">
-Step 1 Mandatory for ALL campaigns
+Step 1 — Mandatory for ALL campaigns
 </div>
 <div
 className="text-xs text-secondary"
@@ -412,7 +429,7 @@ className="text-muted text-xs"
 >
 {item.verified
 ? "Verified ✓"
-: "Verify via Settings Security"}
+: "Verify via Settings → Security"}
 </div>
 </div>
 </div>

@@ -404,7 +404,7 @@ postingDeadline: string;
 if (!selectedConversation) return;
 
 const tempId = `temp-${Date.now()}`;
-const displayContent = `Custom Offer: ${offerDetails.title} (${(offerDetails.amount / 100).toLocaleString()})`;
+const displayContent = `Custom Offer: ${offerDetails.title} (₹${(offerDetails.amount / 100).toLocaleString()})`;
 
 setMessages((prev) => [
 ...prev,

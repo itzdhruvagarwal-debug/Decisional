@@ -77,9 +77,9 @@ onUpload: (type: string) => void;
 }
 
 function getUploadButtonText(isUploading: boolean, uploadingDocType: string | null, type: string, hasDoc: boolean) {
-if (isUploading && uploadingDocType === type) return "";
-if (hasDoc) return " Re-upload";
-return " Upload";
+if (isUploading && uploadingDocType === type) return "⏳";
+if (hasDoc) return "↑ Re-upload";
+return "↑ Upload";
 }
 
 export function UploadBtn({
@@ -154,7 +154,7 @@ doc.rejectionReason && (
 <div
 className="mt-1 text-xs text-rose"
 >
-Rejected: {doc.rejectionReason}
+✗ Rejected: {doc.rejectionReason}
 </div>
 )}
 </div>
@@ -178,14 +178,14 @@ onUpload={onUpload}
 
 
 export function getMonthlyLimitText(isUnlimited: boolean, tier: number, tierLimit: number | null) {
-if (isUnlimited) return " Unlimited";
+if (isUnlimited) return "∞ Unlimited";
 if (tier === 0) return "Locked";
-if (tierLimit) return `${(tierLimit / 100).toLocaleString("en-IN")}`;
-return "";
+if (tierLimit) return `₹${(tierLimit / 100).toLocaleString("en-IN")}`;
+return "—";
 }
 
 export function getTierUpgradeActionText(tier: number, isBrand: boolean) {
-if (tier < 1) return " Complete Tier 1 first";
-if (isBrand) return " Upload to unlock 1L limit";
-return " Upload to unlock unlimited campaigns";
+if (tier < 1) return "🔒 Complete Tier 1 first";
+if (isBrand) return "📋 Upload to unlock ₹1L limit";
+return "🚀 Upload to unlock unlimited campaigns";
 }

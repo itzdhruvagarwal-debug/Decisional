@@ -247,7 +247,18 @@ new: !showPassword.new,
 }
 className="absolute cursor-pointer text-base border-none bg-none opacity-70 password-eye-button"
 >
-{showPassword.new ? "" : ""}
+{showPassword.new ? (
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+) : (
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-7-10-7a19.16 19.16 0 0 1 5.44-5.44M1 1l22 22" />
+    <path d="M12 12A3 3 0 0 0 12 6c-.34 0-.67.04-1 .12" />
+    <path d="M21.54 15A10 10 0 0 0 22 13c0 0-3-7-10-7-1.7 0-3.2.43-4.53 1.15" />
+  </svg>
+)}
 </Button>
 </div>
 </div>
@@ -279,14 +290,32 @@ confirm: !showPassword.confirm,
 }
 className="absolute cursor-pointer text-base border-none bg-none opacity-70 password-eye-button"
 >
-{showPassword.confirm ? "" : ""}
+{showPassword.confirm ? (
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+) : (
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-7-10-7a19.16 19.16 0 0 1 5.44-5.44M1 1l22 22" />
+    <path d="M12 12A3 3 0 0 0 12 6c-.34 0-.67.04-1 .12" />
+    <path d="M21.54 15A10 10 0 0 0 22 13c0 0-3-7-10-7-1.7 0-3.2.43-4.53 1.15" />
+  </svg>
+)}
 </Button>
 </div>
 </div>
 
 {passwordConfirmPending ? (
 <div className="flex flex-col gap-2 p-3 rounded-md password-confirm-card">
-<p className="text-sm font-semibold text-rose"> Are you sure you want to update your password?</p>
+<p className="text-sm font-semibold text-rose flex items-center gap-2">
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-rose">
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+  Are you sure you want to update your password?
+</p>
 <div className="flex gap-2">
 <Button type="submit" variant="danger" className="flex-1" disabled={isSaving}>
 {isSaving ? <span className="loading" /> : "Yes, Update Password"}
@@ -427,7 +456,18 @@ current: !prev.current,
 }
 className="absolute cursor-pointer text-base border-none bg-none opacity-70 password-eye-button"
 >
-{showPassword.current ? "" : ""}
+{showPassword.current ? (
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+) : (
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-7-10-7a19.16 19.16 0 0 1 5.44-5.44M1 1l22 22" />
+    <path d="M12 12A3 3 0 0 0 12 6c-.34 0-.67.04-1 .12" />
+    <path d="M21.54 15A10 10 0 0 0 22 13c0 0-3-7-10-7-1.7 0-3.2.43-4.53 1.15" />
+  </svg>
+)}
 </Button>
 </div>
 </div>

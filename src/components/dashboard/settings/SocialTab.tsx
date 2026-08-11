@@ -156,9 +156,13 @@ return (
 className="flex items-center gap-3 mb-5"
 >
 <div
-className="flex items-center justify-center text-2xl rounded-md w-48 h-48 bg-instagram"
+className="flex items-center justify-center text-2xl rounded-md w-48 h-48 bg-instagram flex-shrink-0"
 >
-
+  <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-white">
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+  </svg>
 </div>
 <div className="flex-1">
 <h2 className="text-base font-bold mb-1">
@@ -167,7 +171,22 @@ Instagram
 <div
 className={`text-xs ${socialConnections?.instagram?.connected ? "text-emerald" : "text-muted"}`}
 >
-{socialConnections?.instagram?.connected ? " Connected" : " Not Connected"}
+{socialConnections?.instagram?.connected ? (
+  <span className="flex items-center gap-1">
+    <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-emerald-500">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+    Connected
+  </span>
+) : (
+  <span className="flex items-center gap-1">
+    <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-secondary-muted">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+    Not Connected
+  </span>
+)}
 </div>
 </div>
 </div>
@@ -254,9 +273,12 @@ Disconnect
 className="flex items-center gap-3 mb-5"
 >
 <div
-className="flex items-center justify-center text-2xl rounded-md w-48 h-48 bg-youtube"
+className="flex items-center justify-center text-2xl rounded-md w-48 h-48 bg-youtube flex-shrink-0"
 >
-
+  <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-white">
+    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
+    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
+  </svg>
 </div>
 <div className="flex-1">
 <h2 className="text-base font-bold mb-1">
@@ -265,7 +287,22 @@ YouTube
 <div
 className={`text-xs ${socialConnections?.youtube?.connected ? "text-emerald" : "text-muted"}`}
 >
-{socialConnections?.youtube?.connected ? " Connected" : " Not Connected"}
+{socialConnections?.youtube?.connected ? (
+  <span className="flex items-center gap-1">
+    <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-emerald-500">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+    Connected
+  </span>
+) : (
+  <span className="flex items-center gap-1">
+    <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-secondary-muted">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+    Not Connected
+  </span>
+)}
 </div>
 </div>
 </div>
