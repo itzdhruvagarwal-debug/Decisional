@@ -408,19 +408,19 @@ userType: "BRAND" | "INFLUENCER",
 ): string {
 if (userType === "INFLUENCER") {
 if (tier === 2) {
-return "Standard Unlimited campaigns";
+return "Standard — Unlimited campaigns";
 } else if (tier === 1) {
-return "Basic Up to 50,000/month";
+return "Basic — Up to ₹50,000/month";
 }
-return "Unverified Please complete verification";
+return "Unverified — Please complete verification";
 }
 
 if (tier === 3) {
-return "Premium Unlimited campaigns";
+return "Premium — Unlimited campaigns";
 } else if (tier === 2) {
-return "Standard Up to 1,00,000/month";
+return "Standard — Up to ₹1,00,000/month";
 } else if (tier === 1) {
-return "Basic Up to 50,000/month";
+return "Basic — Up to ₹50,000/month";
 }
-return "Unverified Please complete verification";
+return "Unverified — Please complete verification";
 }

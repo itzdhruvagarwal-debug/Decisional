@@ -539,7 +539,13 @@ return (
 </>
 ) : (
 <div className="flex-1 flex items-center justify-center flex-col gap-4 text-secondary bg-tertiary">
-<div className="text-3xl opacity-50"></div>
+<div className="text-3xl opacity-50 flex items-center justify-center">
+  <svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    <line x1="9" y1="10" x2="15" y2="10" />
+    <line x1="12" y1="7" x2="12" y2="13" />
+  </svg>
+</div>
 <p>Select a conversation to start messaging</p>
 </div>
 )}

@@ -459,9 +459,9 @@ html: wrapInBrandedTemplate(
 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 24px;">
 ${[
-{ icon: "", step: "Complete your profile" },
-{ icon: "", step: "Upload verification documents" },
-{ icon: "", step: "Start exploring campaigns" },
+{ icon: "👤", step: "Complete your profile" },
+{ icon: "📝", step: "Upload verification documents" },
+{ icon: "💡", step: "Start exploring campaigns" },
 ]
 .map(
 (s) => `

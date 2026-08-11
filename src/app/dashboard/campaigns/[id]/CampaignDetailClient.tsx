@@ -68,7 +68,13 @@ return (
 if (error || !campaign) {
 return (
 <div className="p-6 text-center max-w-500 mx-auto">
-<div className="text-3xl mb-4"></div>
+<div className="text-3xl mb-4 flex justify-center text-rose">
+  <svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="opacity-70">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+</div>
 <h2 className="font-bold text-xl mb-2 text-primary">Error Loading Campaign</h2>
 <p className="text-secondary mb-6">{error || "Campaign not found"}</p>
 <Link href="/dashboard/campaigns" className="btn btn-primary">

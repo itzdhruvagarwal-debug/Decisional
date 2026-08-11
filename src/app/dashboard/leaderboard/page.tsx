@@ -351,7 +351,12 @@ initial={{ opacity: 0, scale: 0.95 }}
 animate={{ opacity: 1, scale: 1 }}
 className="leaderboard-weekly-banner flex items-center gap-4 mb-6 flex-wrap p-5 rounded-xl"
 >
-<div className="text-3xl"></div>
+<div className="text-3xl flex items-center">
+  <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-amber-400">
+    <path d="M2 20h20" />
+    <path d="m4 20 2-10 6 6 4-10 4 10-2-8-4 6-4-6-4 6-2 6z" />
+  </svg>
+</div>
 <div>
 <div
 className="font-bold text-xs text-amber uppercase tracking-wider"
@@ -419,7 +424,12 @@ animate={{ opacity: 1, y: 0 }}
 transition={{ delay, duration: 0.5 }}
 className="flex flex-col items-center gap-2"
 >
-{isFirst && <div className="text-3xl"></div>}
+{isFirst && <div className="text-3xl flex justify-center">
+  <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-amber-400">
+    <path d="M2 20h20" />
+    <path d="m4 20 2-10 6 6 4-10 4 10-2-8-4 6-4-6-4 6-2 6z" />
+  </svg>
+</div>}
 <div
 className="podium-avatar flex items-center justify-center font-bold overflow-hidden rounded-full text-white"
 data-rank={rank}

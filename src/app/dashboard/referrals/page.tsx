@@ -52,7 +52,7 @@ const channels: { id: string; label: string; icon: string; color: string; bg: st
 {
 id: "whatsapp",
 label: "WhatsApp",
-icon: "",
+icon: "💬",
 color: "#25d366",
 bg: "rgba(37,211,102,0.12)",
 href: `https://wa.me/?text=${encodeURIComponent(whatsappText)}`,
@@ -60,7 +60,7 @@ href: `https://wa.me/?text=${encodeURIComponent(whatsappText)}`,
 {
 id: "twitter",
 label: "X (Twitter)",
-icon: "",
+icon: "✕",
 color: "#e7e9ea",
 bg: "rgba(231,233,234,0.08)",
 href: `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(referralLink)}`,
