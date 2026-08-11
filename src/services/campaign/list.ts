@@ -80,31 +80,27 @@ budgetFilter.lte = Number(params.maxBudget);
 }
 return Object.keys(budgetFilter).length > 0 ? budgetFilter : null;
 }
-export function buildOwnershipFilter(
-params: ListCampaignsParams,
-userId: string,
-userType: string | undefined,
-statusFilter: CampaignStatus | undefined,
-): Prisma.CampaignWhereInput[] {
-const conditions: Prisma.CampaignWhereInput[] = [];
+export async function buildOwnershipFilter(
+  params: ListCampaignsParams,
+  userId: string,
+  userType: string | undefined,
+  statusFilter: CampaignStatus | undefined,
+): Promise<Prisma.CampaignWhereInput[]> {
+  const conditions: Prisma.CampaignWhereInput[] = [];
 
-if (statusFilter !== "ACTIVE" && isBrand(userType)) {
-conditions.push({
-brand: {
-is: { userId },
-},
-});
-}
+  if ((statusFilter !== "ACTIVE" && isBrand(userType)) || (params.ownerOnly && isBrand(userType))) {
+    const profile = await prisma.brandProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+    if (profile) {
+      conditions.push({ brandId: profile.id });
+    } else {
+      conditions.push({ brandId: "no_profile_found" });
+    }
+  }
 
-if (params.ownerOnly && isBrand(userType)) {
-conditions.push({
-brand: {
-is: { userId },
-},
-});
-}
-
-return conditions;
+  return conditions;
 }
 export function getPlatformCompatibilityCondition(
   hasIg: boolean,
@@ -265,7 +261,7 @@ where.perInfluencerBudget = budgetFilter;
 }
 
 if (userId) {
-andConditions.push(...buildOwnershipFilter(params, userId, userType, statusFilter));
+andConditions.push(...(await buildOwnershipFilter(params, userId, userType, statusFilter)));
 
 if (isInfluencer(userType)) {
 andConditions.push(
