@@ -144,10 +144,21 @@ xp: app.influencer.user.xp,
 app.proposedRate
 );
 
+const deal = app.status === "SELECTED" ? await prisma.deal.findFirst({
+  where: {
+    campaignId: app.campaignId,
+    influencerId: app.influencerId,
+  },
+  select: {
+    amount: true,
+  },
+}) : null;
+
 return {
 ...app,
 matchScore: matchResult.matchScore,
 matchBreakdown: matchResult.matchBreakdown,
+finalRate: deal ? deal.amount : null,
 };
 })
 );

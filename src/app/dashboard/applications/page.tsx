@@ -14,6 +14,7 @@ interface Application {
 id: string;
 status: string;
 proposedRate: number;
+finalRate?: number | null;
 createdAt: string;
 campaign: {
 id: string;
@@ -47,7 +48,7 @@ return "warning";
 }
 }
 
-/** Skeleton placeholder matching the 5-column applications table layout. */
+/** Skeleton placeholder matching the 6-column applications table layout. */
 function ApplicationsTableSkeleton() {
 return (
 <div className="card overflow-hidden p-0" aria-hidden="true">
@@ -55,7 +56,7 @@ return (
 <table className="w-full text-left border-collapse">
 <thead>
 <tr className="border-b-card bg-tertiary">
-{["CAMPAIGN", "PROPOSED RATE", "SUBMITTED ON", "STATUS", "ACTION"].map((col) => (
+{["CAMPAIGN", "PROPOSED RATE", "FINAL RATE", "SUBMITTED ON", "STATUS", "ACTION"].map((col) => (
 <th key={col} scope="col" className="p-4">
 <Skeleton height={10} width={col === "CAMPAIGN" ? 72 : 56} borderRadius={4} />
 </th>
@@ -74,6 +75,7 @@ return (
 </div>
 </div>
 </td>
+<td className="p-4"><Skeleton height={14} width={72} borderRadius={4} /></td>
 <td className="p-4"><Skeleton height={14} width={72} borderRadius={4} /></td>
 <td className="p-4"><Skeleton height={14} width={80} borderRadius={4} /></td>
 <td className="p-4"><Skeleton height={24} width={72} borderRadius={6} /></td>
@@ -162,6 +164,7 @@ applicationsList = (
 <tr className="border-b-card bg-tertiary">
 <th scope="col" className="p-4 text-xs font-bold text-secondary">CAMPAIGN</th>
 <th scope="col" className="p-4 text-xs font-bold text-secondary">PROPOSED RATE</th>
+<th scope="col" className="p-4 text-xs font-bold text-secondary">FINAL RATE</th>
 <th scope="col" className="p-4 text-xs font-bold text-secondary">SUBMITTED ON</th>
 <th scope="col" className="p-4 text-xs font-bold text-secondary">STATUS</th>
 <th scope="col" className="p-4 text-xs font-bold text-secondary text-right">ACTION</th>
@@ -198,6 +201,9 @@ by {app.campaign.brand?.companyName || "Unknown Brand"}
 </div>
 </td>
 <td className="p-4 font-bold">{formatCurrency(app.proposedRate)}</td>
+<td className="p-4 font-bold text-indigo-light">
+{app.finalRate ? formatCurrency(app.finalRate) : (app.status === "SELECTED" ? formatCurrency(app.proposedRate) : "—")}
+</td>
 <td className="p-4 text-secondary text-sm">
 {new Date(app.createdAt).toLocaleDateString("en-IN", {
 day: "numeric",
