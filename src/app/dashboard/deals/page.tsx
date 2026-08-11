@@ -541,6 +541,8 @@ className="scrollable-tabs flex gap-2 mb-6 pb-2"
 { key: "POSTED", label: "Post Submitted" },
 { key: "VERIFICATION_PENDING", label: "Verifying" },
 { key: "COMPLETED", label: "Completed" },
+{ key: "CANCELLED", label: "Cancelled" },
+{ key: "DISPUTED", label: "Disputed" },
 ].map((f) => (
 <Button
 key={f.key}
