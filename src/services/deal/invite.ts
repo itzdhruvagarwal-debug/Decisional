@@ -55,7 +55,7 @@ export async function cancelCampaignForDirectInvite(tx: Prisma.TransactionClient
 if (deal.campaign.isDirectInvite) {
 await tx.campaign.update({
 where: { id: deal.campaignId },
-data: { status: "CANCELLED", deletedAt: new Date() },
+data: { status: "CANCELLED" },
 });
 
 if (deal.campaign.brandId && deal.campaign.status === "ACTIVE") {

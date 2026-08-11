@@ -252,7 +252,6 @@ status: { notIn: ["COMPLETED", "CANCELLED", "DISPUTED"] },
 },
 data: {
 status: "CANCELLED",
-deletedAt: new Date(),
 },
 });
 if (cancelResult.count === 0) {

@@ -430,7 +430,6 @@ const updatedCampaign = await tx.campaign.update({
 where: { id: campaignId },
 data: {
 status: "CANCELLED",
-deletedAt: new Date(),
 },
 });
 
