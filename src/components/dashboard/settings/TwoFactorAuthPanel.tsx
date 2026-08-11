@@ -46,8 +46,15 @@ return (
 {recoveryCodes.length > 0 && (
 <div className="card card-amber-warning">
 <div className="flex justify-between items-center mb-3">
-<h3 className="text-base font-extrabold text-amber"> Save Your Recovery Codes</h3>
-<Button variant="ghost" onClick={() => setRecoveryCodes([])} className="text-xs">I've saved them </Button>
+<h3 className="text-base font-extrabold text-amber flex items-center gap-2">
+  <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4.5 h-4.5 text-amber">
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+  Save Your Recovery Codes
+</h3>
+<Button variant="ghost" onClick={() => setRecoveryCodes([])} className="text-xs">I've saved them ✓</Button>
 </div>
 <p className="text-sm text-secondary mb-3">
 These codes can be used to access your account if you lose your authenticator. Each code can only be used once. Store them somewhere safe they won't be shown again.
@@ -76,8 +83,11 @@ className="flex justify-between items-start mb-4"
 >
 <div>
 <h2
-className="text-lg font-bold mb-1"
+className="text-lg font-bold mb-1 flex items-center gap-2"
 >
+  <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4.5 h-4.5 text-indigo-500">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
 Two-Factor Authentication
 </h2>
 <p

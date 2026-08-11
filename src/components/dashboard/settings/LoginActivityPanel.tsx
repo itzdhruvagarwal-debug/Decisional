@@ -66,11 +66,20 @@ className={`flex justify-between items-center p-3 bg-tertiary rounded-sm ${login
 <div
 className="flex items-center gap-3"
 >
-<div className="text-xl">
+<div className="text-xl flex items-center justify-center">
 {login.device.includes("Android") ||
-login.device.includes("iPhone")
-? ""
-: ""}
+login.device.includes("iPhone") ? (
+<svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-indigo-500">
+<rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+<path d="M12 18h.01" />
+</svg>
+) : (
+<svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-indigo-500">
+<rect width="18" height="12" x="3" y="4" rx="2" ry="2" />
+<line x1="2" y1="20" x2="22" y2="20" />
+<line x1="12" y1="16" x2="12" y2="20" />
+</svg>
+)}
 </div>
 <div>
 <div className="text-sm font-semibold">
@@ -106,7 +115,7 @@ variant="secondary"
 onClick={() => setShowAllLogins(!showAllLogins)}
 className="flex items-center justify-center w-full mt-3 text-sm font-semibold cursor-pointer bg-tertiary border-card rounded-sm text-primary-light gap-1-5 login-activity-btn-more"
 >
-{showAllLogins ? " Show Less" : ` View All (${loginActivity.length})`}
+{showAllLogins ? "▲ Show Less" : `▼ View All (${loginActivity.length})`}
 </Button>
 )}
 </div>

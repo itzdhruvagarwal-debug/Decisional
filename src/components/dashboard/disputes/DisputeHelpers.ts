@@ -121,14 +121,14 @@ return "#6b7280";
 }
 
 export function getFindingIcon(result: string) {
-switch (result) {
-case "PASS":
-return "";
-case "FAIL":
-return "";
-case "WARNING":
-return "";
-default:
-return "";
-}
+  switch (result) {
+    case "PASS":
+      return "✓";
+    case "FAIL":
+      return "✗";
+    case "WARNING":
+      return "⚠";
+    default:
+      return "—";
+  }
 }

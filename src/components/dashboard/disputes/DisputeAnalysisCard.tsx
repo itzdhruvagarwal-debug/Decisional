@@ -54,7 +54,11 @@ return (
 <div className="card mb-6 dispute-analysis-card">
 <div className="flex justify-between items-center mb-4">
 <div className="flex items-center gap-3">
-<span className="text-2xl"></span>
+  <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-indigo-500">
+    <rect x="4" y="4" width="16" height="16" rx="2" />
+    <rect x="9" y="9" width="6" height="6" />
+    <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3" />
+  </svg>
 <div>
 <h2 className="text-lg font-bold">AI Mediator Analysis</h2>
 <span className="text-xs text-secondary">
@@ -153,24 +157,43 @@ data-result={f.result}
 
 {/* Action Buttons */}
 {canTakeAction && dispute.status !== "RESOLVED" && (
-<div className="flex gap-3 flex-wrap border-top pt-4">
-<Button
-variant="primary"
-onClick={() => handleDisputeAction("accept_resolution")}
-disabled={!!actionLoading}
-className="flex-1"
->
-{actionLoading === "accept_resolution" ? "Processing..." : " Accept Resolution"}
-</Button>
-<Button
-variant="secondary"
-onClick={() => handleDisputeAction("reject_resolution")}
-disabled={!!actionLoading}
-className="flex-1"
->
-{actionLoading === "reject_resolution" ? "Processing..." : " Reject & Escalate"}
-</Button>
-</div>
+  <div className="flex gap-3 flex-wrap border-top pt-4">
+    <Button
+      variant="primary"
+      onClick={() => handleDisputeAction("accept_resolution")}
+      disabled={!!actionLoading}
+      className="flex-1 flex items-center justify-center gap-2"
+    >
+      {actionLoading === "accept_resolution" ? (
+        "Processing..."
+      ) : (
+        <>
+          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Accept Resolution
+        </>
+      )}
+    </Button>
+    <Button
+      variant="secondary"
+      onClick={() => handleDisputeAction("reject_resolution")}
+      disabled={!!actionLoading}
+      className="flex-1 flex items-center justify-center gap-2"
+    >
+      {actionLoading === "reject_resolution" ? (
+        "Processing..."
+      ) : (
+        <>
+          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+          Reject & Escalate
+        </>
+      )}
+    </Button>
+  </div>
 )}
 </div>
 );

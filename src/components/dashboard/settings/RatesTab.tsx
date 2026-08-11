@@ -27,36 +27,36 @@ you with the right campaigns.
 className="grid-2 gap-4 mb-6"
 >
 <Input
-id="min-general-rate"
-label="Minimum General Rate ()"
-type="number"
-placeholder="10000"
-// Display value in Rupees: convert database value (stored in Paise) by dividing by 100.
-value={profile.minRate ? profile.minRate / 100 : ""}
-onChange={(e) =>
-setProfile({
-...profile,
-// Save value in Paise: convert user input in Rupees by multiplying by 100.
-minRate: Number.parseInt(e.target.value, 10) * 100 || 0,
-})
-}
-fullWidth
+    id="min-general-rate"
+    label="Minimum General Rate (₹)"
+    type="number"
+    placeholder="10000"
+    // Display value in Rupees: convert database value (stored in Paise) by dividing by 100.
+    value={profile.minRate ? profile.minRate / 100 : ""}
+    onChange={(e) =>
+        setProfile({
+            ...profile,
+            // Save value in Paise: convert user input in Rupees by multiplying by 100.
+            minRate: Number.parseInt(e.target.value, 10) * 100 || 0,
+        })
+    }
+    fullWidth
 />
 <Input
-id="max-general-rate"
-label="Maximum General Rate ()"
-type="number"
-placeholder="50000"
-// Display value in Rupees: convert database value (stored in Paise) by dividing by 100.
-value={profile.maxRate ? profile.maxRate / 100 : ""}
-onChange={(e) =>
-setProfile({
-...profile,
-// Save value in Paise: convert user input in Rupees by multiplying by 100.
-maxRate: Number.parseInt(e.target.value, 10) * 100 || 0,
-})
-}
-fullWidth
+    id="max-general-rate"
+    label="Maximum General Rate (₹)"
+    type="number"
+    placeholder="50000"
+    // Display value in Rupees: convert database value (stored in Paise) by dividing by 100.
+    value={profile.maxRate ? profile.maxRate / 100 : ""}
+    onChange={(e) =>
+        setProfile({
+            ...profile,
+            // Save value in Paise: convert user input in Rupees by multiplying by 100.
+            maxRate: Number.parseInt(e.target.value, 10) * 100 || 0,
+        })
+    }
+    fullWidth
 />
 </div>
 
@@ -67,32 +67,32 @@ Instagram Collaboration Rates
 className="grid-2 gap-4 mb-6"
 >
 <Input
-id="min-instagram-rate"
-label="Min Instagram Rate ()"
-type="number"
-placeholder="2000"
-value={profile.minInstagramRate ? profile.minInstagramRate / 100 : ""}
-onChange={(e) =>
-setProfile({
-...profile,
-minInstagramRate: Number.parseInt(e.target.value, 10) * 100 || 0,
-})
-}
-fullWidth
+    id="min-instagram-rate"
+    label="Min Instagram Rate (₹)"
+    type="number"
+    placeholder="2000"
+    value={profile.minInstagramRate ? profile.minInstagramRate / 100 : ""}
+    onChange={(e) =>
+        setProfile({
+            ...profile,
+            minInstagramRate: Number.parseInt(e.target.value, 10) * 100 || 0,
+        })
+    }
+    fullWidth
 />
 <Input
-id="max-instagram-rate"
-label="Max Instagram Rate ()"
-type="number"
-placeholder="10000"
-value={profile.maxInstagramRate ? profile.maxInstagramRate / 100 : ""}
-onChange={(e) =>
-setProfile({
-...profile,
-maxInstagramRate: Number.parseInt(e.target.value, 10) * 100 || 0,
-})
-}
-fullWidth
+    id="max-instagram-rate"
+    label="Max Instagram Rate (₹)"
+    type="number"
+    placeholder="10000"
+    value={profile.maxInstagramRate ? profile.maxInstagramRate / 100 : ""}
+    onChange={(e) =>
+        setProfile({
+            ...profile,
+            maxInstagramRate: Number.parseInt(e.target.value, 10) * 100 || 0,
+        })
+    }
+    fullWidth
 />
 </div>
 
@@ -103,44 +103,47 @@ YouTube Collaboration Rates
 className="grid-2 gap-4 mb-6"
 >
 <Input
-id="min-youtube-rate"
-label="Min YouTube Rate ()"
-type="number"
-placeholder="5000"
-value={profile.minYoutubeRate ? profile.minYoutubeRate / 100 : ""}
-onChange={(e) =>
-setProfile({
-...profile,
-minYoutubeRate: Number.parseInt(e.target.value, 10) * 100 || 0,
-})
-}
-fullWidth
+    id="min-youtube-rate"
+    label="Min YouTube Rate (₹)"
+    type="number"
+    placeholder="5000"
+    value={profile.minYoutubeRate ? profile.minYoutubeRate / 100 : ""}
+    onChange={(e) =>
+        setProfile({
+            ...profile,
+            minYoutubeRate: Number.parseInt(e.target.value, 10) * 100 || 0,
+        })
+    }
+    fullWidth
 />
 <Input
-id="max-youtube-rate"
-label="Max YouTube Rate ()"
-type="number"
-placeholder="25000"
-value={profile.maxYoutubeRate ? profile.maxYoutubeRate / 100 : ""}
-onChange={(e) =>
-setProfile({
-...profile,
-maxYoutubeRate: Number.parseInt(e.target.value, 10) * 100 || 0,
-})
-}
-fullWidth
+    id="max-youtube-rate"
+    label="Max YouTube Rate (₹)"
+    type="number"
+    placeholder="25000"
+    value={profile.maxYoutubeRate ? profile.maxYoutubeRate / 100 : ""}
+    onChange={(e) =>
+        setProfile({
+            ...profile,
+            maxYoutubeRate: Number.parseInt(e.target.value, 10) * 100 || 0,
+        })
+    }
+    fullWidth
 />
 </div>
 
 <div
 className="p-4 bg-tertiary rounded-md"
 >
-<p
-className="text-sm text-secondary"
->
-<strong>Tip:</strong> Based on your followers (
-{((profile.instagramFollowers || 0) / 1000).toFixed(0)}K), similar
-creators charge 8,000 - 35,000 per post/reel.
+<p className="text-sm text-secondary flex items-start gap-2">
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="16" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12.01" y2="8" />
+  </svg>
+  <span>
+    <strong>Tip:</strong> Based on your followers ({((profile.instagramFollowers || 0) / 1000).toFixed(0)}K), similar creators charge ₹8,000 - ₹35,000 per post/reel.
+  </span>
 </p>
 </div>
 </div>

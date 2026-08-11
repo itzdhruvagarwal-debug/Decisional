@@ -56,22 +56,22 @@ deliverables: Array<{ type: string; count: number; rate: number }>;
 type ValidationResult = { success: boolean; fieldErrors?: Record<string, string>; error?: string };
 
 function validateBudget(formData: CampaignFormData): ValidationResult | null {
-if (formData.requiresProduct && formData.totalBudget === 0) {
-if (formData.productValue < 500) {
-return { success: false, error: "Product-only campaigns must specify a product value of at least 500" };
-}
-if (formData.minFollowers > 10000) {
-return { success: false, error: "Product-only campaigns can only target influencers with up to 10,000 followers" };
-}
-} else {
-if (formData.perInfluencerBudget < 500) {
-return { success: false, error: "Minimum budget per influencer is 500" };
-}
-if (formData.totalBudget < 1000) {
-return { success: false, error: "Minimum campaign budget is 1,000" };
-}
-}
-return null;
+  if (formData.requiresProduct && formData.totalBudget === 0) {
+    if (formData.productValue < 500) {
+      return { success: false, error: "Product-only campaigns must specify a product value of at least ₹500" };
+    }
+    if (formData.minFollowers > 10000) {
+      return { success: false, error: "Product-only campaigns can only target influencers with up to 10,000 followers" };
+    }
+  } else {
+    if (formData.perInfluencerBudget < 500) {
+      return { success: false, error: "Minimum budget per influencer is ₹500" };
+    }
+    if (formData.totalBudget < 1000) {
+      return { success: false, error: "Minimum campaign budget is ₹1,000" };
+    }
+  }
+  return null;
 }
 
 function validateDeadlines(formData: CampaignFormData): ValidationResult | null {

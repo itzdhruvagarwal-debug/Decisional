@@ -251,7 +251,20 @@ className="object-cover"
 />
 ) : (
 <div className="text-3xl">
-{isBrand(user.userType) ? "" : ""}
+{isBrand(user.userType) ? (
+  <svg width={36} height={36} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-9 h-9 text-secondary">
+    <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+    <line x1="9" y1="22" x2="9" y2="16" />
+    <line x1="15" y1="22" x2="15" y2="16" />
+    <line x1="9" y1="16" x2="15" y2="16" />
+    <path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01" />
+  </svg>
+) : (
+  <svg width={36} height={36} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-9 h-9 text-secondary">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+)}
 </div>
 )}
 
@@ -268,7 +281,10 @@ className="loading profile-upload-spinner"
 <div
 className="absolute flex items-center justify-center text-sm rounded-full text-white bg-color-primary w-32 h-32 profile-camera-button"
 >
-
+<svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+  <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+  <circle cx="12" cy="13" r="3" />
+</svg>
 </div>
 </button>
 <input

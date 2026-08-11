@@ -151,8 +151,8 @@ className="rounded-full h-6 referral-status-dot"
 className="p-4 text-right font-bold text-emerald"
 >
 {ref.earnings > 0
-? `${(ref.earnings / 100).toLocaleString("en-IN")}`
-: "-"}
+  ? `₹${(ref.earnings / 100).toLocaleString("en-IN")}`
+  : "-"}
 </td>
 </tr>
 ))}

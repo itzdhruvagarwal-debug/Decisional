@@ -15,7 +15,7 @@ label: string;
 interface Props {
 readonly type: PeriodType;
 readonly title: string;
-readonly icon: string;
+readonly icon: React.ReactNode;
 readonly isLoading?: boolean;
 readonly onConfirm: (period: PeriodValue) => void;
 readonly onClose: () => void;
@@ -130,7 +130,7 @@ fullWidth
 <div className="period-picker-info">
 Report period:{" "}
 <strong className="text-text-primary">
-1 Apr {fy.split("-")[0]} 31 Mar 20{fy.split("-")[1]}
+1 Apr {fy.split("-")[0]} - 31 Mar 20{fy.split("-")[1]}
 </strong>
 </div>
 </>
@@ -195,11 +195,16 @@ End date must be after start date
 ) : (
 /* Period summary pill */
 selectedPreset && (
-<div className="period-picker-info">
-{" "}
-<strong className="text-text-primary">{toIso(selectedPreset.start)}</strong>
-{" "}
-<strong className="text-text-primary">{toIso(selectedPreset.end)}</strong>
+<div className="period-picker-info flex items-center gap-1.5">
+  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0">
+    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+  <strong className="text-text-primary">{toIso(selectedPreset.start)}</strong>
+  <span className="text-secondary-muted font-medium">to</span>
+  <strong className="text-text-primary">{toIso(selectedPreset.end)}</strong>
 </div>
 )
 )}
@@ -222,7 +227,7 @@ onClick={() => valid && onConfirm(resolve())}
 className="text-sm font-bold flex items-center gap-2 rounded-lg border-none text-white period-picker-confirm"
 data-valid={valid && !isLoading ? "true" : "false"}
 >
-{isLoading ? <> Generating</> : <>{icon} Download</>}
+{isLoading ? <>Generating...</> : <>{icon} Download</>}
 </Button>
 </div>
 </Modal>

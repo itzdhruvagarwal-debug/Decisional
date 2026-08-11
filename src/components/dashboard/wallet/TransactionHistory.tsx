@@ -418,7 +418,20 @@ return (
 <PeriodPickerModal
 type="transactions"
 title={pickerTarget === "csv" ? "Export CSV" : "Print Ledger"}
-icon={pickerTarget === "csv" ? "" : ""}
+icon={
+  pickerTarget === "csv" ? (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+      <polyline points="14 2 14 8 20 8" />
+    </svg>
+  ) : (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <polyline points="6 9 6 2 18 2 18 9" />
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+      <rect x="6" y="14" width="12" height="8" />
+    </svg>
+  )
+}
 isLoading={pickerTarget === "csv" ? csvLoading : false}
 onConfirm={handlePeriodConfirm}
 onClose={() => setPickerTarget(null)}
@@ -439,16 +452,29 @@ variant="secondary"
 onClick={() => setPickerTarget("csv")}
 disabled={csvLoading}
 title="Download CSV for a specific period"
-className="text-xs"
+className="text-xs flex items-center gap-1.5"
 >
-{csvLoading ? "" : " CSV"}
+{csvLoading ? (
+  <span className="loading w-3 h-3" />
+) : (
+  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+    <polyline points="14 2 14 8 20 8" />
+  </svg>
+)}
+CSV
 </Button>
 <Button
 variant="secondary"
 onClick={() => setPickerTarget("print")}
 title="Print ledger for a specific period"
-className="text-xs"
+className="text-xs flex items-center gap-1.5"
 >
+<svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+  <polyline points="6 9 6 2 18 2 18 9" />
+  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+  <rect x="6" y="14" width="12" height="8" />
+</svg>
 Print
 </Button>
 

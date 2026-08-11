@@ -66,8 +66,11 @@ className="flex items-center flex-wrap mb-2 gap-2-5"
 <Badge variant="ghost">{formatCurrency(application.proposedRate)}</Badge>
 {matchScore !== undefined && (
 <span title={`Match Score Details:\n- Niche Fit: ${application.matchBreakdown?.categoryScore}%\n- Engagement Fit: ${application.matchBreakdown?.engagementScore}%\n- Authenticity Fit: ${application.matchBreakdown?.authenticityScore}%\n- Reputation Fit: ${application.matchBreakdown?.qualityScore}%\n- ROI/CPV Fit (Projected): ${application.matchBreakdown?.roiScore}%\n- Est. Views (Modelled): ${application.matchBreakdown?.estimatedViews}\n- Est. CPV (Modelled): \u20b9${((application.matchBreakdown?.estimatedCpvPaise || 0) / 100).toFixed(2)}`}>
-<Badge variant={matchVariant}>
-{matchScore}% Match
+<Badge variant={matchVariant} className="flex items-center gap-1">
+  <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-orange-500 fill-current">
+    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+  </svg>
+  {matchScore}% Match
 </Badge>
 </span>
 )}
@@ -92,7 +95,7 @@ Category: {application.influencer.categories?.split(",")[0] || "Other"}
 </span>
 {application.matchBreakdown && (
 <span className="text-emerald font-semibold" title="This is a modelled projection based on follower stats and campaign budget, not verified API statistics.">
-Projected CPV: {((application.matchBreakdown.estimatedCpvPaise || 0) / 100).toFixed(2)} / view (Est.)
+Projected CPV: ₹{((application.matchBreakdown.estimatedCpvPaise || 0) / 100).toFixed(2)} / view (Est.)
 </span>
 )}
 </div>

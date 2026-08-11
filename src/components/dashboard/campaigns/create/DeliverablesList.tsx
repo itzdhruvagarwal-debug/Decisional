@@ -131,7 +131,7 @@ className="w-110"
 aria-label="Rate in Rupees"
 />
 <span className="text-muted whitespace-nowrap text-2xs">
-Rec: {getRecommendedRate(item.type, formData.minFollowers).toLocaleString("en-IN")}
+Rec: ₹{getRecommendedRate(item.type, formData.minFollowers).toLocaleString("en-IN")}
 </span>
 </div>
 

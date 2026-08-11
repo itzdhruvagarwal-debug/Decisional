@@ -289,35 +289,47 @@ return (
 <h2 className="text-xl font-bold mb-6">
 Contact Verification
 </h2>
-<div className="flex flex-col gap-4">
-{/* Email Verification */}
-<div className={`flex justify-between items-center p-3 rounded-sm ${user?.emailVerified && user?.email ? "bg-emerald-subtle border-emerald-subtle" : "bg-tertiary border-inactive-login"}`}>
-<div>
-<div className="font-semibold text-sm"> Email Address</div>
-<div className="text-xs text-muted">{user?.email || 'N/A'}</div>
-</div>
-{renderEmailAction()}
-</div>
+    <div className="flex flex-col gap-4">
+      {/* Email Verification */}
+      <div className={`flex justify-between items-center p-3 rounded-sm ${user?.emailVerified && user?.email ? "bg-emerald-subtle border-emerald-subtle" : "bg-tertiary border-inactive-login"}`}>
+        <div>
+          <div className="font-semibold text-sm flex items-center gap-2">
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-indigo-500">
+              <rect width="20" height="16" x="2" y="4" rx="2" />
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+            </svg>
+            Email Address
+          </div>
+          <div className="text-xs text-muted">{user?.email || 'N/A'}</div>
+        </div>
+        {renderEmailAction()}
+      </div>
 
-{/* Phone Verification */}
-<div className={`flex justify-between items-center p-3 rounded-sm ${user?.phoneVerified && user?.phone ? "bg-emerald-subtle border-emerald-subtle" : "bg-tertiary border-inactive-login"}`}>
-<div>
-<div className="font-semibold text-sm"> Phone Number</div>
-<div className="text-xs text-muted">
-{user?.phoneVerified && user?.phone ? `+91-${user.phone}` : 'Required for campaign payout calls'}
-</div>
-</div>
-{renderPhoneAction()}
-</div>
-</div>
+      {/* Phone Verification */}
+      <div className={`flex justify-between items-center p-3 rounded-sm ${user?.phoneVerified && user?.phone ? "bg-emerald-subtle border-emerald-subtle" : "bg-tertiary border-inactive-login"}`}>
+        <div>
+          <div className="font-semibold text-sm flex items-center gap-2">
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-indigo-500">
+              <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+              <path d="M12 18h.01" />
+            </svg>
+            Phone Number
+          </div>
+          <div className="text-xs text-muted">
+            {user?.phoneVerified && user?.phone ? `+91-${user.phone}` : 'Required for campaign payout calls'}
+          </div>
+        </div>
+        {renderPhoneAction()}
+      </div>
+    </div>
 
-{/* Change Contact Inline UI */}
-{changeContactState.active && (
-<div className="p-4 bg-tertiary rounded-md border-card mt-5">
-<div className="flex justify-between items-center mb-4">
-<h4 className="text-base font-semibold m-0">Change {changeContactState.type === 'email' ? 'Email Address' : 'Phone Number'}</h4>
-<Button variant="ghost" aria-label="Dismiss contact change dialog" className="text-muted cursor-pointer border-none bg-none" onClick={() => setChangeContactState({ active: false, type: null, step: 'idle', currentEmailOtp: '', currentPhoneOtp: '', newContact: '', newOtp: '' })}></Button>
-</div>
+    {/* Change Contact Inline UI */}
+    {changeContactState.active && (
+      <div className="p-4 bg-tertiary rounded-md border-card mt-5">
+        <div className="flex justify-between items-center mb-4">
+          <h4 className="text-base font-semibold m-0">Change {changeContactState.type === 'email' ? 'Email Address' : 'Phone Number'}</h4>
+          <Button variant="ghost" aria-label="Dismiss contact change dialog" className="text-muted cursor-pointer border-none bg-none" onClick={() => setChangeContactState({ active: false, type: null, step: 'idle', currentEmailOtp: '', currentPhoneOtp: '', newContact: '', newOtp: '' })}>✕</Button>
+        </div>
 
 {changeContactState.step === 'verify-current' && (
 <div className="flex flex-col gap-3">

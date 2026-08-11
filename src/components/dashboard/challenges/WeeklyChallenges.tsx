@@ -101,7 +101,7 @@ challenge.completed
 {challenge.title}
 {challenge.completed && (
 <span className="ml-2 text-green-600 dark:text-green-400 text-sm">
-Completed
+✓ Completed
 </span>
 )}
 </h3>

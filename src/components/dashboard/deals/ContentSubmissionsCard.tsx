@@ -55,7 +55,7 @@ target="_blank"
 rel="noopener noreferrer"
 className="text-xs font-bold text-primary hover:underline"
 >
-View File
+View File ↗
 </a>
 </div>
 </div>
