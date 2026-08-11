@@ -55,7 +55,11 @@ className={`flex items-center gap-4 ${liOpacity}`}
 <div
 className={`deal-progress-step-circle flex items-center justify-center font-bold text-sm rounded-full ${circleStatus}`}
 >
-{isCompleted ? "" : idx + 1}
+{isCompleted ? (
+<svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+<polyline points="20 6 9 17 4 12" />
+</svg>
+) : idx + 1}
 </div>
 <div>
 <div

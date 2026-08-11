@@ -349,7 +349,10 @@ className="flex items-center gap-2-5 mb-3"
 <div
 className="flex items-center justify-center rounded-full w-30 h-30 bg-indigo-12"
 >
-
+  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500">
+    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
 </div>
 <div>
 <div className="font-bold">
@@ -368,12 +371,22 @@ className="flex flex-col gap-2-5"
 {[
 {
 label: "Email Address",
-icon: "",
+icon: (
+  <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500">
+    <rect width="20" height="16" x="2" y="4" rx="2" />
+    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+  </svg>
+),
 verified: emailVerified,
 },
 {
 label: "Phone Number",
-icon: "",
+icon: (
+  <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500">
+    <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+    <path d="M12 18h.01" />
+  </svg>
+),
 verified: phoneVerified,
 },
 ].map((item) => (
@@ -385,7 +398,7 @@ data-verified={item.verified}
 <div
 className="flex items-center gap-2-5"
 >
-<span className="text-lg">
+<span className="flex items-center justify-center">
 {item.icon}
 </span>
 <div>
@@ -398,7 +411,7 @@ className="font-semibold text-sm"
 className="text-muted text-xs"
 >
 {item.verified
-? "Verified "
+? "Verified ✓"
 : "Verify via Settings Security"}
 </div>
 </div>
@@ -407,13 +420,13 @@ className="text-muted text-xs"
 <span
 className="text-lg font-bold text-emerald"
 >
-
+✓
 </span>
 ) : (
 <span
-className="text-xs font-semibold text-amber rounded-2xl px-2-py-1 bg-amber-subtle"
+className="text-xs font-semibold text-amber rounded-2xl px-2-py-1 bg-amber-subtle flex items-center gap-1"
 >
-Pending
+⚠ Pending
 </span>
 )}
 </div>

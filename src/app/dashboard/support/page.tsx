@@ -180,9 +180,19 @@ aria-label="Upload screenshot for your report"
 disabled={uploadingScreenshot}
 onClick={() => fileInputRef.current?.click()}
 variant="ghost"
-className="w-full p-3 text-secondary text-center font-semibold border-dashed"
+className="w-full p-3 text-secondary text-center font-semibold border-dashed flex items-center justify-center"
 >
-{uploadingScreenshot ? "Uploading screenshot..." : " Upload Screenshot (Max 5MB)"}
+{uploadingScreenshot ? (
+"Uploading screenshot..."
+) : (
+<span className="flex items-center justify-center gap-2">
+<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+<circle cx="12" cy="13" r="3" />
+</svg>
+Upload Screenshot (Max 5MB)
+</span>
+)}
 </Button>
 <Input
 type="file"
@@ -210,7 +220,13 @@ className="hidden"
 
 {badgeAwarded && (
 <div className="flex items-center gap-4 p-4 rounded-md badge-earning-panel">
-<span className="text-3xl"></span>
+<svg width={36} height={36} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-9 h-9 text-amber flex-shrink-0">
+<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+<path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+<path d="M4 22h16" />
+<path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34" />
+<path d="M12 2a5 5 0 0 1 5 5v3.5a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5z" />
+</svg>
 <div>
 <h4 className="font-extrabold text-amber">New Badge Earned!</h4>
 <p className="text-sm text-primary mt-1">
