@@ -393,25 +393,37 @@ onChange={handleFileChange}
 className="hidden"
 id="chat-file-upload-input"
 />
-<Button
-variant="ghost"
-title="Share File"
-aria-label="Share a file"
-onClick={() => fileInputRef.current?.click()}
-disabled={isUploading}
-className="text-lg cursor-pointer font-extrabold"
->
-{isUploading ? "" : ""}
-</Button>
-<Button
-variant="ghost"
-title="Create Offer"
-aria-label="Create an offer"
-onClick={() => setIsOfferModalOpen(true)}
-className="text-lg cursor-pointer font-extrabold"
->
-
-</Button>
+          <Button
+            variant="ghost"
+            title="Share File"
+            aria-label="Share a file"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="text-lg cursor-pointer font-extrabold flex items-center justify-center"
+          >
+            {isUploading ? (
+              <span className="loading w-4 h-4" />
+            ) : (
+              <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+              </svg>
+            )}
+          </Button>
+          <Button
+            variant="ghost"
+            title="Create Offer"
+            aria-label="Create an offer"
+            onClick={() => setIsOfferModalOpen(true)}
+            className="text-lg cursor-pointer font-extrabold flex items-center justify-center"
+          >
+            <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+              <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+              <path d="M10 9H8" />
+              <path d="M16 13H8" />
+              <path d="M16 17H8" />
+            </svg>
+          </Button>
 <Input
 type="text"
 id="chat-message-input"
