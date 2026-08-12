@@ -119,6 +119,16 @@ for (const doc of verificationDocs) {
 fileUrlsToDelete.push(doc.documentUrl);
 }
 
+const sentMessagesWithFiles = await tx.message.findMany({
+  where: { senderId: userId, fileUrl: { not: null } },
+  select: { fileUrl: true },
+});
+for (const msg of sentMessagesWithFiles) {
+  if (msg.fileUrl) {
+    fileUrlsToDelete.push(msg.fileUrl);
+  }
+}
+
 await tx.user.update({
 where: { id: userId },
 data: {
@@ -178,6 +188,23 @@ await tx.verificationDocument.deleteMany({ where: { userId } });
 await tx.userChallengeProgress.deleteMany({ where: { userId } });
 // Retain IndiaTaxCompliance record to satisfy 7-year tax audit compliance (TDS vs PAN/GSTIN)
 // Legal retention under DPDP Act Sec 8(4) overrides right-to-erasure for tax records.
+
+// Anonymize user messages content and files
+await tx.message.updateMany({
+  where: { senderId: userId },
+  data: {
+    content: "[deleted]",
+    fileUrl: null,
+  },
+});
+
+// Anonymize user reviews comments
+await tx.review.updateMany({
+  where: { reviewerId: userId },
+  data: {
+    comment: "[deleted]",
+  },
+});
 
 // Delete block / report records
 await tx.userBlock.deleteMany({
