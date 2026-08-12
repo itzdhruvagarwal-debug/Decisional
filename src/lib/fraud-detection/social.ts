@@ -321,15 +321,15 @@ if (comments.length === 0) {
 return { passed: true, flags: [], riskScore: 0, action: "ALLOW" };
 }
 
-// Bot patterns
-const botPatterns = [
-/^(nice|great|wow|amazing|beautiful|love it|cool|awesome|fire||||||){1,3}$/i,
-/^follow me/i,
-/^check (my|out)/i,
-/^dm me for/i,
-/^(earn|make) \$?\d+ (per|a) (day|hour)/i,
-/^interested\?? (dm|message|text)/i,
-];
+  // Bot patterns
+  const botPatterns = [
+    /^(nice|great|wow|amazing|beautiful|love it|cool|awesome|fire|\u{1F525}|\u{2764}\u{FE0F}|\u{1F44D}|\u{1F4AF}|\u{1F60D}|\u{1F44F}){1,3}$/ui,
+    /^follow me/i,
+    /^check (my|out)/i,
+    /^dm me for/i,
+    /^(earn|make) \$?\d+ (per|a) (day|hour)/i,
+    /^interested\?? (dm|message|text)/i,
+  ];
 
 const uniqueComments = new Set(comments.map((c) => c.trim().toLowerCase()));
 const duplicateRatio = 1 - uniqueComments.size / comments.length;
