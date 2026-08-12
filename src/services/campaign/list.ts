@@ -148,9 +148,9 @@ OR: [
 return null;
 }
 export async function buildInfluencerEligibilityFilter(
-userId: string,
-params: ListCampaignsParams,
-statusFilter: CampaignStatus | undefined,
+  userId: string,
+  params: ListCampaignsParams,
+  _statusFilter: CampaignStatus | undefined,
 ): Promise<Prisma.CampaignWhereInput[]> {
 const conditions: Prisma.CampaignWhereInput[] = [];
 

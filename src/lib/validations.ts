@@ -261,7 +261,17 @@ status: z.enum(["DRAFT", "ACTIVE"]).optional(),
   validateProductSettings(value, ctx);
   validateBudgetLimitsAndAges(value, ctx);
 })
-function validateBudgetSettings(value: any, ctx: z.RefinementCtx) {
+interface CampaignValidationValue {
+  requiresProduct?: boolean | undefined;
+  totalBudget: number;
+  perInfluencerBudget?: number | undefined;
+  productValue?: number | undefined;
+  minFollowers?: number | undefined;
+  targetAgeMin?: number | null | undefined;
+  targetAgeMax?: number | null | undefined;
+}
+
+function validateBudgetSettings(value: CampaignValidationValue, ctx: z.RefinementCtx) {
   const isProductOnly = value.requiresProduct && value.totalBudget === 0;
   if (!isProductOnly) {
     if (value.totalBudget < 1000) {
@@ -281,7 +291,7 @@ function validateBudgetSettings(value: any, ctx: z.RefinementCtx) {
   }
 }
 
-function validateProductSettings(value: any, ctx: z.RefinementCtx) {
+function validateProductSettings(value: CampaignValidationValue, ctx: z.RefinementCtx) {
   if (value.requiresProduct && value.totalBudget === 0) {
     if (value.productValue === undefined || value.productValue < 500) {
       ctx.addIssue({
@@ -300,7 +310,7 @@ function validateProductSettings(value: any, ctx: z.RefinementCtx) {
   }
 }
 
-function validateBudgetLimitsAndAges(value: any, ctx: z.RefinementCtx) {
+function validateBudgetLimitsAndAges(value: CampaignValidationValue, ctx: z.RefinementCtx) {
   if (
     value.perInfluencerBudget !== undefined &&
     value.perInfluencerBudget > value.totalBudget

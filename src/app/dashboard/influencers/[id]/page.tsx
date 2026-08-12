@@ -5,6 +5,7 @@ import { fetcher } from "@/lib/fetcher";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import type { Session } from "next-auth";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 
 interface InfluencerProfile {
@@ -66,7 +67,7 @@ return null;
 interface InfluencerProfileLayoutProps {
   readonly profile: InfluencerProfile;
   readonly wallet: ViewerWallet | null;
-  readonly session: any;
+  readonly session: Session | null;
   readonly id: string;
 }
 
@@ -88,7 +89,7 @@ function InfluencerProfileLayout({ profile, wallet, session, id }: InfluencerPro
   const budgetNoticeTone = budgetNotice?.tone || "success";
 
   return (
-    <DashboardShell user={session.user}>
+    <DashboardShell user={session?.user}>
       <div className="flex flex-col gap-6 max-w-900 mx-auto">
         {/* Header / Bio */}
         <div className="card flex gap-6 flex-wrap p-8">
