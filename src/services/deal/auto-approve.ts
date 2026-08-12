@@ -1,12 +1,11 @@
 import { PaymentService } from "@/services/payment.service";
 import { redis } from "@/lib/redis";
-import { invalidateDealCache } from "./helpers";
+import { invalidateDealCache, ExpiredDealCandidate } from "./helpers";
 import prisma from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { logger } from "@/lib/logger";
 import { sendDealNotificationEmail } from "@/lib/email";
 import { NotificationService } from "@/services/notification.service";
-import { ExpiredDealCandidate } from "./helpers";
 
 export async function sendAutoApproveEmails(deal: ExpiredDealCandidate) {
 try {

@@ -1,11 +1,9 @@
-import { ListCampaignsParams, TierError } from "./campaign/types";
-
 import { listCampaigns } from "./campaign/list";
 import { createCampaign } from "./campaign/create";
 import { getCampaignById, updateDraftCampaign, activateDraftCampaign, cancelCampaign } from "./campaign/manage";
 
-export type { ListCampaignsParams };
-export { TierError };
+export type { ListCampaignsParams } from "./campaign/types";
+export { TierError } from "./campaign/types";
 
 export class CampaignService {
 static readonly listCampaigns = listCampaigns;

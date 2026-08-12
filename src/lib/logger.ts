@@ -98,8 +98,9 @@ format: isDevelopment
 ],
 });
 
-import { LogLevel, LogContext, safeStringCommon, buildWithContext } from "./logger-common";
-export type { LogLevel, LogContext };
+import { safeStringCommon, buildWithContext } from "./logger-common";
+import type { LogLevel, LogContext } from "./logger-common";
+export type { LogLevel, LogContext } from "./logger-common";
 
 function safeString(message: unknown): string {
 return safeStringCommon(message, (obj) => inspect(obj));

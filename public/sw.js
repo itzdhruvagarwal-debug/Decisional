@@ -75,7 +75,7 @@ self.addEventListener("fetch", (event) => {
 
       return fetch(request)
         .then((networkResponse) => {
-          const isValidResponse = networkResponse && networkResponse.status === 200;
+          const isValidResponse = networkResponse?.status === 200;
           if (isValidResponse) {
             const cacheControl =
               networkResponse.headers.get("cache-control")?.toLowerCase() || "";

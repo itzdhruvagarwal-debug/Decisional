@@ -42,14 +42,14 @@ return (
 const canAct = ["PENDING", "SHORTLISTED"].includes(application.status);
 const matchScore = application.matchScore;
 
-const matchVariant =
-matchScore === undefined
-? "danger"
-: matchScore >= 80
-? "success"
-: matchScore >= 50
-? "warning"
-: "danger";
+    let matchVariant: "danger" | "success" | "warning" = "danger";
+    if (matchScore !== undefined) {
+      if (matchScore >= 80) {
+        matchVariant = "success";
+      } else if (matchScore >= 50) {
+        matchVariant = "warning";
+      }
+    }
 
 return (
 <article

@@ -1,9 +1,8 @@
-import { UserType } from "@prisma/client";
 import { isInfluencer, isBrand } from "@/lib/rbac";
 import { logger } from "@/lib/logger";
 import { AppError } from "@/lib/errors";
 import prisma from "@/lib/db";
-import { Prisma, DealStatus } from "@prisma/client";
+import { UserType, Prisma, DealStatus } from "@prisma/client";
 import { ACTIVE_DEAL_STATUSES } from "@/lib/utils";
 
 export async function listDeals(

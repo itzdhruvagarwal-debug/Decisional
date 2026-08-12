@@ -143,7 +143,10 @@ export default function PWAInstallButton({
 
   if (isInstalled) return null;
 
-  const resolvedPlatform = !isMounted ? "desktop" : (platform === "auto" ? detectPlatform() : platform);
+  let resolvedPlatform: Exclude<InstallPlatform, "auto"> | "desktop" = "desktop";
+  if (isMounted) {
+    resolvedPlatform = platform === "auto" ? detectPlatform() : platform;
+  }
   const copy = getPlatformCopy(resolvedPlatform === "desktop" ? "auto" : resolvedPlatform);
   const resolvedVariant = variant || (label ? "store" : "icon");
 
@@ -184,7 +187,7 @@ export default function PWAInstallButton({
         </button>
 
         {showFallback && (
-          <div className="pwa-install-overlay" role="dialog" aria-modal="true">
+          <dialog open className="pwa-install-overlay" aria-modal="true">
             <div className="pwa-install-dialog">
               <div className="pwa-install-icon">
                 <DownloadIcon />
@@ -203,7 +206,7 @@ export default function PWAInstallButton({
                 <Button variant="secondary" onClick={() => setShowFallback(false)}>Close</Button>
               </div>
             </div>
-          </div>
+          </dialog>
         )}
       </>
     );
@@ -228,7 +231,7 @@ export default function PWAInstallButton({
       </Button>
 
       {showFallback && (
-        <div className="pwa-install-overlay" role="dialog" aria-modal="true">
+        <dialog open className="pwa-install-overlay" aria-modal="true">
           <div className="pwa-install-dialog">
             <div className="pwa-install-icon">
               <DownloadIcon />
@@ -247,7 +250,7 @@ export default function PWAInstallButton({
               <Button variant="secondary" onClick={() => setShowFallback(false)}>Close</Button>
             </div>
           </div>
-        </div>
+        </dialog>
       )}
     </>
   );

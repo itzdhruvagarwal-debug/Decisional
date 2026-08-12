@@ -1,5 +1,5 @@
 import { addUserXp } from "@/lib/gamification-engine";
-import { ContractTerms } from "@/lib/contract-engine";
+import { ContractTerms, checkRevisionLimit } from "@/lib/contract-engine";
 import { assertSufficientBalance } from "@/lib/utils";
 import { checkMessageForContacts } from "@/lib/contact-filter";
 import { updateTrustAndLevel } from "@/lib/trust-engine";
@@ -7,7 +7,6 @@ import { recalculateSocialProof } from "@/lib/social-proof-calculator";
 import prisma from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { AppError } from "@/lib/errors";
-import { checkRevisionLimit } from "@/lib/contract-engine";
 import { NotificationService } from "@/services/notification.service";
 import { PaymentService } from "@/services/payment.service";
 import { logger } from "@/lib/logger";

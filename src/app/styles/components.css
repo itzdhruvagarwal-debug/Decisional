@@ -697,6 +697,16 @@ input:checked+.slider:before {
   animation: fadeIn 0.3s ease;
 }
 
+dialog.pwa-install-overlay {
+  border: none;
+  color: inherit;
+  margin: 0;
+  max-width: none;
+  max-height: none;
+  width: 100vw;
+  height: 100vh;
+}
+
 .pwa-install-dialog {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);

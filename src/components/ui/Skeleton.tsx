@@ -19,11 +19,28 @@ circle = false,
 const randomId = React.useId().replace(/:/g, "");
 const skeletonClass = `skeleton-${randomId}`;
 
-const styleContent = `
+  let widthCss = "";
+  if (width !== undefined) {
+    widthCss = `width: ${typeof width === "number" ? `${width}px` : width};`;
+  }
+
+  let heightCss = "";
+  if (height !== undefined) {
+    heightCss = `height: ${typeof height === "number" ? `${height}px` : height};`;
+  }
+
+  let radiusCss = "";
+  if (circle) {
+    radiusCss = "border-radius: 50%;";
+  } else if (borderRadius !== undefined) {
+    radiusCss = `border-radius: ${typeof borderRadius === "number" ? `${borderRadius}px` : borderRadius};`;
+  }
+
+  const styleContent = `
 .${skeletonClass} {
-${width !== undefined ? `width: ${typeof width === "number" ? `${width}px` : width};` : ""}
-${height !== undefined ? `height: ${typeof height === "number" ? `${height}px` : height};` : ""}
-${circle ? "border-radius: 50%;" : borderRadius !== undefined ? `border-radius: ${typeof borderRadius === "number" ? `${borderRadius}px` : borderRadius};` : ""}
+  ${widthCss}
+  ${heightCss}
+  ${radiusCss}
 }
 `.trim();
 

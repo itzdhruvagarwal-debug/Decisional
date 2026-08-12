@@ -2,9 +2,7 @@
 
 import React from "react";
 import { Deal, Prisma } from "@prisma/client";
-import { formatCurrency } from "@/lib/utils-client";
-
-export { formatCurrency };
+export { formatCurrency } from "@/lib/utils-client";
 
 export const formatPercent = (value: number | undefined) =>
 typeof value === "number" && Number.isFinite(value)

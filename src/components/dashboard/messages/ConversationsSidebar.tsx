@@ -49,11 +49,13 @@ key={conv.userId}
 onClick={() => setSelectedConversation(conv.userId)}
 type="button"
 aria-label={(() => {
-const unreadText = conv.unread > 0
-? `, ${conv.unread} unread message${conv.unread === 1 ? "" : "s"}`
-: "";
-return `Chat with ${conv.name}${unreadText}`;
-})()}
+        let unreadText = "";
+        if (conv.unread > 0) {
+          const pluralSuffix = conv.unread === 1 ? "" : "s";
+          unreadText = `, ${conv.unread} unread message${pluralSuffix}`;
+        }
+        return `Chat with ${conv.name}${unreadText}`;
+      })()}
 {...(selectedConversation === conv.userId ? { "aria-current": "true" as const } : {})}
 className="conversation-item"
 >

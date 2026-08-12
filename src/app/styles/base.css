@@ -1016,7 +1016,7 @@ summary::-webkit-details-marker {
 .flex-nowrap { flex-wrap: nowrap !important; }
 .hidden { display: none !important; }
 .block { display: block !important; }
-.tracking-tight { letter-spacing: -0.025em !important; }
+.tracking-tight { letter-spacing: -0.025em; }
 .overflow-hidden { overflow: hidden !important; }
 .text-2xl { font-size: 1.5rem !important; line-height: 2rem !important; }
 .text-3xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }

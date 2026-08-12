@@ -1,6 +1,10 @@
 import React from "react";
 import Link from "next/link";
 
+type AriaExpandedType = boolean | "true" | "false";
+type AriaHasPopupType = boolean | "true" | "false" | "menu" | "listbox" | "tree" | "grid" | "dialog";
+type AriaPressedType = boolean | "true" | "false" | "mixed";
+
 export interface ButtonProps {
 readonly children?: React.ReactNode;
 readonly className?: string | undefined;
@@ -21,10 +25,10 @@ readonly name?: string;
 readonly value?: string;
 readonly id?: string;
 readonly "aria-label"?: string;
-readonly "aria-expanded"?: boolean | "true" | "false";
-readonly "aria-haspopup"?: boolean | "true" | "false" | "menu" | "listbox" | "tree" | "grid" | "dialog";
+readonly "aria-expanded"?: AriaExpandedType;
+readonly "aria-haspopup"?: AriaHasPopupType;
 readonly "aria-controls"?: string;
-readonly "aria-pressed"?: boolean | "true" | "false" | "mixed";
+readonly "aria-pressed"?: AriaPressedType;
 readonly tabIndex?: number;
 // Link-specific (only used when href is provided)
 readonly href?: string;

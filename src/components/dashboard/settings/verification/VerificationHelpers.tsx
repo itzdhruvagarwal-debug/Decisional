@@ -20,16 +20,17 @@ const icons: Record<string, string> = {
   PENDING: "⚠",
   REJECTED: "✗",
 };
-return (
-<span
-className={`font-semibold text-xs rounded-2xl px-2-py-05 ${
-doc.status === "VERIFIED"
-? "text-emerald bg-emerald-subtle border-emerald-subtle"
-: doc.status === "REJECTED"
-? "text-rose bg-rose-subtle border-rose-subtle"
-: "text-amber bg-amber-subtle border-amber-subtle"
-}`}
->
+  let statusClass = "text-amber bg-amber-subtle border-amber-subtle";
+  if (doc.status === "VERIFIED") {
+    statusClass = "text-emerald bg-emerald-subtle border-emerald-subtle";
+  } else if (doc.status === "REJECTED") {
+    statusClass = "text-rose bg-rose-subtle border-rose-subtle";
+  }
+
+  return (
+    <span
+      className={`font-semibold text-xs rounded-2xl px-2-py-05 ${statusClass}`}
+    >
 {icons[doc.status]} {doc.status}
 </span>
 );
@@ -126,16 +127,17 @@ isUploading,
 uploadingDocType,
 onUpload,
 }: Readonly<DocRowProps>) {
-return (
-<div
-className={`flex items-center justify-between rounded-md px-4-py-3 ${
-doc?.status === "VERIFIED"
-? "bg-emerald-subtle border-emerald-subtle"
-: doc?.status === "REJECTED"
-? "bg-tertiary border-rose-subtle"
-: "bg-tertiary border-card"
-}`}
->
+  let rowClass = "bg-tertiary border-card";
+  if (doc?.status === "VERIFIED") {
+    rowClass = "bg-emerald-subtle border-emerald-subtle";
+  } else if (doc?.status === "REJECTED") {
+    rowClass = "bg-tertiary border-rose-subtle";
+  }
+
+  return (
+    <div
+      className={`flex items-center justify-between rounded-md px-4-py-3 ${rowClass}`}
+    >
 <div
 className="flex items-center gap-2-5"
 >

@@ -17,22 +17,24 @@ createResolutionNotifications,
 } from "./transaction-helpers";
 
 // Resolution transaction execution types
+type AcceptedByType = "AUTO" | "INFLUENCER" | "BRAND" | "ADMIN";
+
 interface ResolutionTransactionConfig {
-tx: Prisma.TransactionClient;
-disputeId: string;
-dispute: FullDispute;
-deal: FullDeal;
-analysis: MediatorAnalysis;
-brandUserId: string | null;
-influencerUserId: string;
-brandRefund: number;
-influencerClawback: number;
-treasuryClawback: number;
-influencerShare: number;
-settlementCharge: number;
-totalAmount: number;
-acceptedBy: "AUTO" | "INFLUENCER" | "BRAND" | "ADMIN";
-feeRatio: number;
+  tx: Prisma.TransactionClient;
+  disputeId: string;
+  dispute: FullDispute;
+  deal: FullDeal;
+  analysis: MediatorAnalysis;
+  brandUserId: string | null;
+  influencerUserId: string;
+  brandRefund: number;
+  influencerClawback: number;
+  treasuryClawback: number;
+  influencerShare: number;
+  settlementCharge: number;
+  totalAmount: number;
+  acceptedBy: AcceptedByType;
+  feeRatio: number;
 }
 
 interface ResolutionResults {

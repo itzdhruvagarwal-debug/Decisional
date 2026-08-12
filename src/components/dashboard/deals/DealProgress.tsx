@@ -36,11 +36,19 @@ className="deal-progress-list flex flex-col gap-6"
 const isCompleted = currentIndex > idx;
 const isCurrent = currentIndex === idx;
 
-const circleStatus = isCompleted
-? "completed"
-: isCurrent && !isCancelled
-? "current"
-: "pending";
+let circleStatus = "pending";
+if (isCompleted) {
+  circleStatus = "completed";
+} else if (isCurrent && !isCancelled) {
+  circleStatus = "current";
+}
+
+let labelStatusSuffix = "Pending";
+if (isCompleted) {
+  labelStatusSuffix = "Completed";
+} else if (isCurrent) {
+  labelStatusSuffix = "Current step";
+}
 
 const labelStatus = isCompleted || isCurrent ? "current" : "pending";
 const liOpacity = isCancelled ? "opacity-50" : "";
@@ -49,7 +57,7 @@ return (
 <li
 key={step.s}
 aria-current={isCurrent ? "step" : undefined}
-aria-label={`${idx + 1}. ${step.label} ${isCompleted ? "Completed" : isCurrent ? "Current step" : "Pending"}`}
+aria-label={`${idx + 1}. ${step.label} ${labelStatusSuffix}`}
 className={`flex items-center gap-4 ${liOpacity}`}
 >
 <div

@@ -6,8 +6,7 @@ PaymentHold,
 Prisma,
 UserType,
 } from "@prisma/client";
-import { ContractSignature as ContractSig } from "../contract-engine";
-export type { ContractSig };
+export type { ContractSignature as ContractSig } from "../contract-engine";
 
 export type FullDeal = Deal & {
 campaign: { title: string; deliverables: Prisma.JsonValue; requirements: string };
