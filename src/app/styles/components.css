@@ -1894,3 +1894,30 @@ input:checked+.slider:before {
 .recharts-legend-custom {
   padding-top: 20px !important;
 }
+
+/* Custom Select Dropdown Portal styles */
+.select-portal-dropdown {
+  background: var(--color-bg-card) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 8px 16px -6px rgba(0, 0, 0, 0.4) !important;
+  overflow: hidden !important;
+  padding: 4px !important;
+}
+
+.select-portal-options-container {
+  max-height: 240px !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+
+.select-portal-option {
+  transition: all var(--transition-fast) !important;
+}
+
+.select-portal-option:hover:not([aria-disabled="true"]) {
+  background-color: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+}
