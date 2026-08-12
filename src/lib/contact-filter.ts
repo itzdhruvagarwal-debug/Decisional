@@ -14,17 +14,17 @@ upi: /\b[a-z0-9._-]+@(?!google\b)(?:paytm|federal|icici|barodampay|postbank|ok[a
 };
 
 function normalizeHomoglyphs(str: string): string {
-const homoglyphsMap: Record<string, string> = {
-// lowercase cyrillic/greek
-"": "a", "": "e", "": "o", "": "p", "": "c", "": "y", "": "x", "": "i", "": "s", "": "a",
-// uppercase cyrillic/greek
-"": "A", "": "B", "": "E", "": "K", "": "M", "": "H", "": "O", "": "P", "": "C", "": "T", "": "X", "": "I",
-// other common lookalikes/accents
-"": "a", "": "a", "": "a", "": "a", "": "a", "": "a", "": "ae", "": "c", "": "e", "": "e", "": "e", "": "e", "": "i",
-"": "i", "": "i", "": "i", "": "n", "": "o", "": "o", "": "o", "": "o", "": "o", "": "u", "": "u", "": "u", "": "u",
-"": "y", "": "y",
-};
-return str.split("").map((char) => homoglyphsMap[char] || char).join("");
+  const homoglyphsMap: Record<string, string> = {
+    // lowercase cyrillic/greek
+    "\u0430": "a", "\u0435": "e", "\u043e": "o", "\u0440": "p", "\u0441": "c", "\u0443": "y", "\u0445": "x", "\u0456": "i", "\u0455": "s", "\u03b1": "a",
+    // uppercase cyrillic/greek
+    "\u0410": "A", "\u0412": "B", "\u0415": "E", "\u041a": "K", "\u041c": "M", "\u041d": "H", "\u041e": "O", "\u0420": "P", "\u0421": "C", "\u0422": "T", "\u0425": "X", "\u0406": "I",
+    // other common lookalikes/accents
+    "\u00e0": "a", "\u00e1": "a", "\u00e2": "a", "\u00e3": "a", "\u00e4": "a", "\u00e5": "a", "\u00e6": "ae", "\u00e7": "c", "\u00e8": "e", "\u00e9": "e", "\u00ea": "e", "\u00eb": "e", "\u00ec": "i",
+    "\u00ed": "i", "\u00ee": "i", "\u00ef": "i", "\u00f1": "n", "\u00f2": "o", "\u00f3": "o", "\u00f4": "o", "\u00f5": "o", "\u00f6": "o", "\u00f9": "u", "\u00fa": "u", "\u00fb": "u", "\u00fc": "u",
+    "\u00fd": "y", "\u00ff": "y",
+  };
+  return str.split("").map((char) => homoglyphsMap[char] || char).join("");
 }
 
 function cleanAndNormalizeText(str: string): string {

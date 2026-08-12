@@ -214,6 +214,12 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
                   <div
                     key={opt.value}
                     onClick={() => !opt.disabled && handleSelectOption(opt.value)}
+                    onKeyDown={(e) => {
+                      if (!opt.disabled && (e.key === "Enter" || e.key === " ")) {
+                        e.preventDefault();
+                        handleSelectOption(opt.value);
+                      }
+                    }}
                     className={`select-portal-option p-2.5 px-4 text-sm rounded-md cursor-pointer transition-colors flex items-center justify-between ${
                       isSelected
                         ? "bg-[var(--color-primary)] text-white font-medium"
@@ -224,6 +230,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
                     role="option"
                     aria-selected={isSelected}
                     aria-disabled={opt.disabled}
+                    tabIndex={opt.disabled ? -1 : 0}
                   >
                     <span className="truncate">{opt.label}</span>
                     {isSelected && (

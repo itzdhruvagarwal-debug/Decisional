@@ -237,7 +237,6 @@ const onActionClick = !isAll ? () => setStatusFilter("all") : undefined;
 
 return (
 <EmptyState
-emoji={isAll ? "" : ""}
 title={title}
 description={message}
 actionLabel={actionLabel}

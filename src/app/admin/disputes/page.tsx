@@ -120,12 +120,11 @@ Could not load disputes right now. Please retry after checking database connecti
 );
 }
 if (disputes.length === 0) {
-const emoji = showHistory ? "" : "";
 const title = showHistory ? "No Historical Disputes" : "No Active Disputes";
 const description = showHistory
 ? "No historical disputes have been recorded."
 : "There are no active disputes at the moment.";
-return <EmptyState emoji={emoji} title={title} description={description} compact />;
+return <EmptyState title={title} description={description} compact />;
 }
 return (
 <div className="grid gap-4">
