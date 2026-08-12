@@ -287,24 +287,24 @@ Progress
 </div>
 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
 {(() => {
-const randomId = Math.random().toString(36).substring(2, 9);
-const progressClass = `challenge-progress-${randomId}`;
-return (
-<>
-<style>{`
-.${progressClass} {
-width: ${progressPercentage}%;
-}
-`}</style>
-<div
-className={`h-3 rounded-full transition-all ${progressClass} ${
-challenge.completed
-? "bg-green-500"
-: "bg-[var(--color-accent)]"
-}`}
-/>
-</>
-);
+  const safeId = challenge.challengeId.toLowerCase().replace(/[^a-z0-9]/g, "-");
+  const progressClass = `challenge-progress-${safeId}`;
+  return (
+    <>
+      <style>{`
+        .${progressClass} {
+          width: ${progressPercentage}%;
+        }
+      `}</style>
+      <div
+        className={`h-3 rounded-full transition-all ${progressClass} ${
+          challenge.completed
+            ? "bg-green-500"
+            : "bg-[var(--color-accent)]"
+        }`}
+      />
+    </>
+  );
 })()}
 </div>
 </div>

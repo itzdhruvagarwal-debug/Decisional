@@ -26,7 +26,9 @@ const isVercel = process.env.VERCEL === "1";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  allowedDevOrigins: ["192.168.1.66"],
+  allowedDevOrigins: process.env.ALLOWED_DEV_ORIGINS
+    ? process.env.ALLOWED_DEV_ORIGINS.split(",")
+    : [],
   ...(isVercel ? {} : { output: "standalone" as const }),
   compress: true,
   experimental: {
