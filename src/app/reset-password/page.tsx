@@ -107,14 +107,14 @@ Enter a strong password for your account
 </p>
 
 {message && (
-<div
+<output
 role={status === "error" ? "alert" : "status"}
 aria-live={status === "error" ? "assertive" : "polite"}
 aria-atomic="true"
-className={`text-sm mb-6 ${status === "success" ? "auth-banner" : "auth-error-banner"}`}
+className={`text-sm mb-6 block ${status === "success" ? "auth-banner" : "auth-error-banner"}`}
 >
 {message}
-</div>
+</output>
 )}
 
 <form onSubmit={handleSubmit}>

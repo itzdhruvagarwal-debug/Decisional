@@ -210,6 +210,13 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             <div className="select-portal-options-container max-h-60 overflow-y-auto">
               {parsedOptions.map((opt) => {
                 const isSelected = opt.value === activeValue;
+                let optionClass = "hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)]";
+                if (isSelected) {
+                  optionClass = "bg-[var(--color-primary)] text-white font-medium";
+                } else if (opt.disabled) {
+                  optionClass = "opacity-40 cursor-not-allowed";
+                }
+
                 return (
                   <div
                     key={opt.value}
@@ -220,13 +227,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
                         handleSelectOption(opt.value);
                       }
                     }}
-                    className={`select-portal-option p-2.5 px-4 text-sm rounded-md cursor-pointer transition-colors flex items-center justify-between ${
-                      isSelected
-                        ? "bg-[var(--color-primary)] text-white font-medium"
-                        : opt.disabled
-                        ? "opacity-40 cursor-not-allowed"
-                        : "hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)]"
-                    }`}
+                    className={`select-portal-option p-2.5 px-4 text-sm rounded-md cursor-pointer transition-colors flex items-center justify-between ${optionClass}`}
                     role="option"
                     aria-selected={isSelected}
                     aria-disabled={opt.disabled}

@@ -140,6 +140,61 @@ return { isTyping: false, users: [] };
 }
 }
 
+async function validateBasicAndRateLimits(userId: string, receiverId: string) {
+  if (receiverId === userId) throw AppError.badRequest("Cannot message yourself");
+
+  if (await BlockService.isBlocked(userId, receiverId)) {
+    throw AppError.forbidden("You cannot message this user because a block relationship exists.");
+  }
+
+  // Enterprise-grade Redis sliding-window check for high concurrency rate-limiting
+  const [minLimit, dayLimit] = await Promise.all([
+    checkRateLimit(userId, "MESSAGES_MIN"),
+    checkRateLimit(userId, "MESSAGES_DAY"),
+  ]);
+
+  if (!minLimit.success) {
+    throw AppError.badRequest("You are sending messages too fast. Please wait a moment.");
+  }
+  if (!dayLimit.success) {
+    throw AppError.badRequest("Daily message limit reached.");
+  }
+
+  await MessageService.validateSenderAndReceiver(userId, receiverId);
+}
+
+async function validateDealAccess(userId: string, receiverId: string, dealId?: string) {
+  const { isAdmin: senderIsAdmin } = await getUserRole(userId);
+  if (!senderIsAdmin) {
+    if (dealId) {
+      const deal = await prisma.deal.findUnique({
+        where: { id: dealId },
+        select: { status: true },
+      });
+      if (!deal || !ACTIVE_DEAL_STATUSES.includes(deal.status)) {
+        throw AppError.badRequest("Cannot send messages because this deal is completed or cancelled.");
+      }
+    } else {
+      const activeDeal = await prisma.deal.findFirst({
+        where: {
+          OR: [
+            { influencer: { userId }, brand: { userId: receiverId } },
+            { brand: { userId }, influencer: { userId: receiverId } },
+          ],
+          status: {
+            in: ACTIVE_DEAL_STATUSES as DealStatus[],
+          },
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+      if (!activeDeal) {
+        throw AppError.badRequest("Cannot send messages because there are no active deals between you and this user.");
+      }
+    }
+  }
+}
+
 export class MessageService {
 static async listMessages(
 userId: string,
@@ -380,7 +435,7 @@ refreshAfterSeconds: TYPING_REFRESH_SECONDS,
 };
 }
 
-private static async validateSenderAndReceiver(userId: string, receiverId: string): Promise<void> {
+static async validateSenderAndReceiver(userId: string, receiverId: string): Promise<void> {
 const receiver = await prisma.user.findUnique({
 where: { id: receiverId },
 select: { status: true },
@@ -459,66 +514,18 @@ findings,
 }
 
 static async sendMessage(
-userId: string,
-data: {
-dealId?: string;
-receiverId: string;
-content: string;
-messageType?: string;
-fileUrl?: string;
-metadata?: Record<string, unknown>;
-},
+  userId: string,
+  data: {
+    dealId?: string;
+    receiverId: string;
+    content: string;
+    messageType?: string;
+    fileUrl?: string;
+    metadata?: Record<string, unknown>;
+  },
 ) {
-if (data.receiverId === userId) throw AppError.badRequest("Cannot message yourself");
-
-if (await BlockService.isBlocked(userId, data.receiverId)) {
-throw AppError.forbidden("You cannot message this user because a block relationship exists.");
-}
-
-// Enterprise-grade Redis sliding-window check for high concurrency rate-limiting
-const [minLimit, dayLimit] = await Promise.all([
-checkRateLimit(userId, "MESSAGES_MIN"),
-checkRateLimit(userId, "MESSAGES_DAY"),
-]);
-
-if (!minLimit.success) {
-throw AppError.badRequest("You are sending messages too fast. Please wait a moment.");
-}
-if (!dayLimit.success) {
-throw AppError.badRequest("Daily message limit reached.");
-}
-
-await MessageService.validateSenderAndReceiver(userId, data.receiverId);
-
-const { isAdmin: senderIsAdmin } = await getUserRole(userId);
-if (!senderIsAdmin) {
-  if (data.dealId) {
-    const deal = await prisma.deal.findUnique({
-      where: { id: data.dealId },
-      select: { status: true },
-    });
-    if (!deal || !ACTIVE_DEAL_STATUSES.includes(deal.status)) {
-      throw AppError.badRequest("Cannot send messages because this deal is completed or cancelled.");
-    }
-  } else {
-    const activeDeal = await prisma.deal.findFirst({
-      where: {
-        OR: [
-          { influencer: { userId }, brand: { userId: data.receiverId } },
-          { brand: { userId }, influencer: { userId: data.receiverId } },
-        ],
-        status: {
-          in: ACTIVE_DEAL_STATUSES as DealStatus[],
-        },
-        deletedAt: null,
-      },
-      select: { id: true },
-    });
-    if (!activeDeal) {
-      throw AppError.badRequest("Cannot send messages because there are no active deals between you and this user.");
-    }
-  }
-}
+  await validateBasicAndRateLimits(userId, data.receiverId);
+  await validateDealAccess(userId, data.receiverId, data.dealId);
 
 if (data.dealId) {
 const access = await getConversationAccess(userId, { dealId: data.dealId });

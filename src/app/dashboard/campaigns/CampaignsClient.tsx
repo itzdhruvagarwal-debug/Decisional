@@ -119,232 +119,236 @@ return (
 );
 }
 
+function buildCampaignQueryParams(
+  canCreateCampaign: boolean,
+  selectedCategory: string,
+  debouncedSearch: string,
+  sortBy: string,
+  page: number
+): string {
+  const queryParams = new URLSearchParams();
+
+  if (canCreateCampaign) {
+    queryParams.set("scope", "mine");
+    queryParams.set("status", "ALL");
+  } else {
+    queryParams.set("status", "ACTIVE");
+  }
+
+  if (selectedCategory !== "All") {
+    queryParams.set("category", selectedCategory);
+  }
+
+  if (debouncedSearch.trim()) {
+    queryParams.set("search", debouncedSearch.trim());
+  }
+
+  if (sortBy === "budget_high") {
+    queryParams.set("sortBy", "perInfluencerBudget");
+    queryParams.set("sortOrder", "desc");
+  } else if (sortBy === "budget_low") {
+    queryParams.set("sortBy", "perInfluencerBudget");
+    queryParams.set("sortOrder", "asc");
+  } else if (sortBy === "deadline") {
+    queryParams.set("sortBy", "applicationDeadline");
+    queryParams.set("sortOrder", "asc");
+  } else {
+    queryParams.set("sortBy", "createdAt");
+    queryParams.set("sortOrder", "desc");
+  }
+
+  queryParams.set("page", String(page));
+  queryParams.set("limit", "12");
+
+  return queryParams.toString();
+}
+
+function mapRawCampaigns(rawCampaigns: RawCampaign[]): Campaign[] {
+  return rawCampaigns.map((campaign: RawCampaign) => ({
+    id: campaign.id || '',
+    title: campaign.title || "Untitled Campaign",
+    description: campaign.description || "",
+    createdAt: campaign.createdAt || new Date(0).toISOString(),
+    perInfluencerBudget: Number(campaign.perInfluencerBudget || 0),
+    minFollowers: Number(campaign.minFollowers || 0),
+    postingDeadline: campaign.postingDeadline || new Date(0).toISOString(),
+    targetCategories: normalizeStringArray(campaign.targetCategories),
+    totalApplications: Number(campaign.totalApplications || campaign._count?.applications || 0),
+    brand: {
+      companyName: campaign.brand?.companyName || "Unknown Brand",
+      logo: campaign.brand?.logo || null,
+      avgRating: Number(campaign.brand?.avgRating || campaign.brand?.averageRating || 0) / 100,
+    },
+    deliverables: normalizeDeliverables(campaign.deliverables),
+    maxInfluencers: campaign.maxInfluencers ?? null,
+    acceptedCount: Array.isArray(campaign.applications) ? campaign.applications.length : 0,
+  }));
+}
+
+function CampaignCard({ campaign }: { readonly campaign: Campaign }) {
+  return (
+    <article key={campaign.id} className="card campaign-card p-18px">
+      <div className="campaign-card-brand-row">
+        <div className="campaign-card-logo" aria-hidden={!campaign.brand.logo}>
+          {campaign.brand.logo ? (
+            <Image src={campaign.brand.logo} alt={campaign.brand.companyName} fill unoptimized className="object-cover" />
+          ) : (
+            campaign.brand.companyName.slice(0, 2).toUpperCase()
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="campaign-card-brand-name">
+            {campaign.brand.companyName}
+          </div>
+          <h3>{campaign.title}</h3>
+        </div>
+        <Badge variant="success" className="campaign-card-rate">
+          {formatCurrency(campaign.perInfluencerBudget)}
+        </Badge>
+      </div>
+
+      <p className="campaign-card-description text-secondary text-sm leading-normal campaign-desc-min-h-42">
+        {campaign.description}
+      </p>
+
+      <div className="campaign-card-tags flex flex-wrap gap-1-5 campaign-tags-margin">
+        {campaign.deliverables.slice(0, 2).map((item, index) => (
+          <Badge key={`${campaign.id}-del-${index}`} variant="primary">
+            {item.count}x {deliverableLabels[item.type] || item.type}
+          </Badge>
+        ))}
+        {campaign.targetCategories.slice(0, 2).map((category) => (
+          <Badge key={`${campaign.id}-${category}`} variant="ghost">
+            {category}
+          </Badge>
+        ))}
+      </div>
+
+      <div className="campaign-card-metrics grid gap-2 mb-3 grid-cols-3">
+        <div>
+          <div className="text-xs text-muted">Slots</div>
+          <div className="text-sm font-semibold">
+            {campaign.maxInfluencers !== null && campaign.maxInfluencers !== undefined
+              ? `${campaign.acceptedCount}/${campaign.maxInfluencers} filled`
+              : "Unlimited"}
+          </div>
+        </div>
+        <div>
+          <div className="text-xs text-muted">Followers</div>
+          <div className="text-sm font-semibold">
+            {formatNumber(campaign.minFollowers)}+
+          </div>
+        </div>
+        <div>
+          <div className="text-xs text-muted">Applied</div>
+          <div className="text-sm font-semibold">{campaign.totalApplications}</div>
+        </div>
+      </div>
+
+      <div className="campaign-card-footer flex items-center justify-between gap-2-5">
+        <span className="text-xs text-secondary">
+          Post by {new Date(campaign.postingDeadline).toLocaleDateString("en-IN")}
+        </span>
+        <Button
+          href={`/dashboard/campaigns/${campaign.id}`}
+          variant="primary"
+          size="sm"
+          aria-label={`View details for campaign: ${campaign.title}`}
+        >
+          View Details
+        </Button>
+      </div>
+    </article>
+  );
+}
+
 export default function CampaignsClient({ user }: { readonly user: { readonly userType?: string } }) {
-const [selectedCategory, setSelectedCategory] = useState("All");
-const [searchQuery, setSearchQuery] = useState("");
-const [debouncedSearch, setDebouncedSearch] = useState("");
-const [sortBy, setSortBy] = useState("newest");
-const [page, setPage] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+  const [page, setPage] = useState(1);
 
-const canCreateCampaign = user?.userType === "BRAND";
+  const canCreateCampaign = user?.userType === "BRAND";
 
-// Debounce search input
-useEffect(() => {
-const handler = setTimeout(() => {
-setDebouncedSearch(searchQuery);
-setPage(1);
-}, 400);
-return () => clearTimeout(handler);
-}, [searchQuery]);
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
-const queryParams = new URLSearchParams();
+  const queryString = buildCampaignQueryParams(
+    canCreateCampaign,
+    selectedCategory,
+    debouncedSearch,
+    sortBy,
+    page
+  );
 
-if (canCreateCampaign) {
-queryParams.set("scope", "mine");
-queryParams.set("status", "ALL");
-} else {
-queryParams.set("status", "ACTIVE");
-}
+  const { data: payload, isLoading: loading, error: fetchErr } = useSWR<CampaignsPayload>(
+    `/api/campaigns?${queryString}`,
+    fetcher
+  );
 
-if (selectedCategory !== "All") {
-queryParams.set("category", selectedCategory);
-}
+  const { campaigns, totalPages } = useMemo(() => {
+    const rawCampaigns: RawCampaign[] = payload?.data?.campaigns ?? payload?.campaigns ?? [];
+    const pages = payload?.data?.totalPages ?? payload?.totalPages ?? 1;
+    const mapped = mapRawCampaigns(rawCampaigns);
+    return { campaigns: mapped, totalPages: pages };
+  }, [payload]);
 
-if (debouncedSearch.trim()) {
-queryParams.set("search", debouncedSearch.trim());
-}
+  const error = fetchErr ? "Unable to load campaigns right now." : null;
 
-if (sortBy === "budget_high") {
-queryParams.set("sortBy", "perInfluencerBudget");
-queryParams.set("sortOrder", "desc");
-} else if (sortBy === "budget_low") {
-queryParams.set("sortBy", "perInfluencerBudget");
-queryParams.set("sortOrder", "asc");
-} else if (sortBy === "deadline") {
-queryParams.set("sortBy", "applicationDeadline");
-queryParams.set("sortOrder", "asc");
-} else {
-queryParams.set("sortBy", "createdAt");
-queryParams.set("sortOrder", "desc");
-}
+  const filteredCampaigns = useMemo(() => {
+    return campaigns;
+  }, [campaigns]);
 
-queryParams.set("page", String(page));
-queryParams.set("limit", "12");
+  /** Stable handler avoids re-creating on every render */
+  const handleCategoryChange = useCallback((category: string) => {
+    setSelectedCategory(category);
+    setPage(1);
+  }, []);
 
-const { data: payload, isLoading: loading, error: fetchErr } = useSWR<CampaignsPayload>(
-`/api/campaigns?${queryParams.toString()}`,
-fetcher
-);
+  const handleSortChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortBy(e.target.value);
+    setPage(1);
+  }, []);
 
-const { campaigns, totalPages } = useMemo(() => {
-const rawCampaigns: RawCampaign[] = payload?.data?.campaigns ?? payload?.campaigns ?? [];
-const pages = payload?.data?.totalPages ?? payload?.totalPages ?? 1;
-
-const mapped: Campaign[] = rawCampaigns.map((campaign: RawCampaign) => ({
-id: campaign.id || '',
-title: campaign.title || "Untitled Campaign",
-description: campaign.description || "",
-createdAt: campaign.createdAt || new Date(0).toISOString(),
-perInfluencerBudget: Number(campaign.perInfluencerBudget || 0),
-minFollowers: Number(campaign.minFollowers || 0),
-postingDeadline: campaign.postingDeadline || new Date(0).toISOString(),
-targetCategories: normalizeStringArray(campaign.targetCategories),
-totalApplications: Number(campaign.totalApplications || campaign._count?.applications || 0),
-brand: {
-companyName: campaign.brand?.companyName || "Unknown Brand",
-logo: campaign.brand?.logo || null,
-avgRating: Number(campaign.brand?.avgRating || campaign.brand?.averageRating || 0) / 100,
-},
-deliverables: normalizeDeliverables(campaign.deliverables),
-maxInfluencers: campaign.maxInfluencers ?? null,
-acceptedCount: Array.isArray(campaign.applications) ? campaign.applications.length : 0,
-}));
-
-return { campaigns: mapped, totalPages: pages };
-}, [payload]);
-
-const error = fetchErr ? "Unable to load campaigns right now." : null;
-
-const filteredCampaigns = useMemo(() => {
-return campaigns;
-}, [campaigns]);
-
-/** Stable handler avoids re-creating on every render */
-const handleCategoryChange = useCallback((category: string) => {
-setSelectedCategory(category);
-setPage(1);
-}, []);
-
-const handleSortChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-setSortBy(e.target.value);
-setPage(1);
-}, []);
-
-
-
-let content;
-if (loading) {
-content = <CampaignCardSkeleton />;
-} else if (error) {
-content = (
-<EmptyState
-emoji=""
-title="Error Loading Campaigns"
-description={error}
-/>
-);
-} else if (filteredCampaigns.length === 0) {
-content = (
-<EmptyState
-emoji=""
-title={canCreateCampaign ? "No Campaigns Yet" : "No Campaigns Found"}
-description={
-canCreateCampaign
-? "You haven't created any campaigns yet. Launch your first campaign to find creators."
-: "Try broadening your search query or changing category and budget filters."
-}
-actionLabel={canCreateCampaign ? "Create Campaign" : undefined}
-actionHref={canCreateCampaign ? "/dashboard/campaigns/create" : undefined}
-/>
-);
-} else {
-content = (
-<div
-className="campaign-card-grid grid gap-4 grid-auto-280"
->
-{filteredCampaigns.map((campaign) => (
-<article key={campaign.id} className="card campaign-card p-18px">
-<div className="campaign-card-brand-row">
-<div className="campaign-card-logo" aria-hidden={!campaign.brand.logo}>
-{campaign.brand.logo ? (
-<Image src={campaign.brand.logo} alt={campaign.brand.companyName} fill unoptimized className="object-cover" />
-) : (
-campaign.brand.companyName.slice(0, 2).toUpperCase()
-)}
-</div>
-<div className="flex-1 min-w-0">
-<div className="campaign-card-brand-name">
-{campaign.brand.companyName}
-</div>
-<h3>{campaign.title}</h3>
-</div>
-<Badge variant="success" className="campaign-card-rate">
-{formatCurrency(campaign.perInfluencerBudget)}
-</Badge>
-</div>
-
-<p
-className="campaign-card-description text-secondary text-sm leading-normal campaign-desc-min-h-42"
->
-{campaign.description}
-</p>
-
-<div
-className="campaign-card-tags flex flex-wrap gap-1-5 campaign-tags-margin"
->
-{campaign.deliverables.slice(0, 2).map((item, index) => (
-<Badge key={`${campaign.id}-del-${index}`} variant="primary">
-{item.count}x {deliverableLabels[item.type] || item.type}
-</Badge>
-))}
-{campaign.targetCategories.slice(0, 2).map((category) => (
-<Badge key={`${campaign.id}-${category}`} variant="ghost">
-{category}
-</Badge>
-))}
-</div>
-
-<div
-className="campaign-card-metrics grid gap-2 mb-3 grid-cols-3"
->
-<div>
-<div className="text-xs text-muted">
-Slots
-</div>
-<div className="text-sm font-semibold">
-{campaign.maxInfluencers !== null && campaign.maxInfluencers !== undefined
-? `${campaign.acceptedCount}/${campaign.maxInfluencers} filled`
-: "Unlimited"}
-</div>
-</div>
-<div>
-<div className="text-xs text-muted">
-Followers
-</div>
-<div className="text-sm font-semibold">
-{formatNumber(campaign.minFollowers)}+
-</div>
-</div>
-<div>
-<div className="text-xs text-muted">
-Applied
-</div>
-<div className="text-sm font-semibold">
-{campaign.totalApplications}
-</div>
-</div>
-</div>
-
-<div
-className="campaign-card-footer flex items-center justify-between gap-2-5"
->
-<span className="text-xs text-secondary">
-Post by {new Date(campaign.postingDeadline).toLocaleDateString("en-IN")}
-</span>
-<Button
-href={`/dashboard/campaigns/${campaign.id}`}
-variant="primary"
-size="sm"
-aria-label={`View details for campaign: ${campaign.title}`}
->
-View Details
-</Button>
-</div>
-</article>
-))}
-</div>
-);
-}
+  let content;
+  if (loading) {
+    content = <CampaignCardSkeleton />;
+  } else if (error) {
+    content = (
+      <EmptyState
+        title="Error Loading Campaigns"
+        description={error}
+      />
+    );
+  } else if (filteredCampaigns.length === 0) {
+    content = (
+      <EmptyState
+        title={canCreateCampaign ? "No Campaigns Yet" : "No Campaigns Found"}
+        description={
+          canCreateCampaign
+            ? "You haven't created any campaigns yet. Launch your first campaign to find creators."
+            : "Try broadening your search query or changing category and budget filters."
+        }
+        actionLabel={canCreateCampaign ? "Create Campaign" : undefined}
+        actionHref={canCreateCampaign ? "/dashboard/campaigns/create" : undefined}
+      />
+    );
+  } else {
+    content = (
+      <div className="campaign-card-grid grid gap-4 grid-auto-280">
+        {filteredCampaigns.map((campaign) => (
+          <CampaignCard key={campaign.id} campaign={campaign} />
+        ))}
+      </div>
+    );
+  }
 
 return (
 <div>

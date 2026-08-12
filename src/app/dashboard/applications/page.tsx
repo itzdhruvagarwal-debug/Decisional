@@ -171,63 +171,72 @@ applicationsList = (
 </tr>
 </thead>
 <tbody>
-{applications.map((app) => (
-<tr key={app.id} className="border-b-card">
-<td className="p-4">
-<div className="flex items-center gap-3">
-<div
-className="flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden relative rounded-sm text-white w-36 h-36 bg-gradient-card"
->
-{app.campaign.brand?.logo ? (
-<Image
-src={app.campaign.brand.logo}
-alt={app.campaign.brand?.companyName ?? "Brand logo"}
-fill
-unoptimized
-className="object-cover"
-/>
-) : (
-(app.campaign.brand?.companyName || "DC").slice(0, 2).toUpperCase()
-)}
-</div>
-<div>
-<div className="font-bold text-sm">
-{app.campaign.title}
-</div>
-<div className="text-xs text-secondary">
-by {app.campaign.brand?.companyName || "Unknown Brand"}
-</div>
-</div>
-</div>
-</td>
-<td className="p-4 font-bold">{formatCurrency(app.proposedRate)}</td>
-<td className="p-4 font-bold text-indigo-light">
-{app.finalRate ? formatCurrency(app.finalRate) : (app.status === "SELECTED" ? formatCurrency(app.proposedRate) : "—")}
-</td>
-<td className="p-4 text-secondary text-sm">
-{new Date(app.createdAt).toLocaleDateString("en-IN", {
-day: "numeric",
-month: "short",
-year: "numeric",
-})}
-</td>
-<td className="p-4">
-<Badge variant={getStatusVariant(app.status)} className="text-xs font-extrabold">
-{app.status}
-</Badge>
-</td>
-<td className="p-4 text-right">
-<Button
-href={`/dashboard/campaigns/${app.campaign.id}`}
-variant="ghost"
-size="sm"
-aria-label={`View campaign: ${app.campaign.title}`}
->
-View Campaign
-</Button>
-</td>
-</tr>
-))}
+          {applications.map((app) => {
+            let displayRate = "—";
+            if (app.finalRate) {
+              displayRate = formatCurrency(app.finalRate);
+            } else if (app.status === "SELECTED") {
+              displayRate = formatCurrency(app.proposedRate);
+            }
+
+            return (
+              <tr key={app.id} className="border-b-card">
+                <td className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden relative rounded-sm text-white w-36 h-36 bg-gradient-card"
+                    >
+                      {app.campaign.brand?.logo ? (
+                        <Image
+                          src={app.campaign.brand.logo}
+                          alt={app.campaign.brand?.companyName ?? "Brand logo"}
+                          fill
+                          unoptimized
+                          className="object-cover"
+                        />
+                      ) : (
+                        (app.campaign.brand?.companyName || "DC").slice(0, 2).toUpperCase()
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm">
+                        {app.campaign.title}
+                      </div>
+                      <div className="text-secondary text-xs">
+                        by {app.campaign.brand?.companyName || "Unknown Brand"}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td className="p-4 font-bold">{formatCurrency(app.proposedRate)}</td>
+                <td className="p-4 font-bold text-indigo-light">
+                  {displayRate}
+                </td>
+                <td className="p-4 text-secondary text-sm">
+                  {new Date(app.createdAt).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </td>
+                <td className="p-4">
+                  <Badge variant={getStatusVariant(app.status)} className="text-xs font-extrabold">
+                    {app.status}
+                  </Badge>
+                </td>
+                <td className="p-4 text-right">
+                  <Button
+                    href={`/dashboard/campaigns/${app.campaign.id}`}
+                    variant="ghost"
+                    size="sm"
+                    aria-label={`View campaign: ${app.campaign.title}`}
+                  >
+                    View Campaign
+                  </Button>
+                </td>
+              </tr>
+            );
+          })}
 </tbody>
 </table>
 </div>

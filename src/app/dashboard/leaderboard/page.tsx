@@ -240,9 +240,12 @@ data-active={tab === t}
 <div
 className="flex bg-secondary rounded-lg p-1"
 >
-{(["all-time", "weekly"] as const).map((f) => {
-const btnVariant = filter === f ? (f === "weekly" ? "warning" : "primary") : "ghost";
-return (
+      {(["all-time", "weekly"] as const).map((f) => {
+        let btnVariant: "warning" | "primary" | "ghost" = "ghost";
+        if (filter === f) {
+          btnVariant = f === "weekly" ? "warning" : "primary";
+        }
+        return (
 <Button
 key={f}
 onClick={() => setFilter(f)}

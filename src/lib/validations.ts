@@ -257,66 +257,77 @@ invitedInfluencerId: dbIdSchema.optional(),
 status: z.enum(["DRAFT", "ACTIVE"]).optional(),
 })
 .superRefine((value, ctx) => {
-const isProductOnly = value.requiresProduct && value.totalBudget === 0;
-if (!isProductOnly) {
-if (value.totalBudget < 1000) {
-ctx.addIssue({
-code: z.ZodIssueCode.custom,
-path: ["totalBudget"],
-message: "Minimum campaign budget is 1,000",
-});
-}
-if (value.perInfluencerBudget !== undefined && value.perInfluencerBudget < 500) {
-ctx.addIssue({
-code: z.ZodIssueCode.custom,
-path: ["perInfluencerBudget"],
-message: "Minimum per-influencer budget is 500",
-});
-}
-}
-
-if (value.requiresProduct && value.totalBudget === 0) {
-if (value.productValue === undefined || value.productValue < 500) {
-ctx.addIssue({
-code: z.ZodIssueCode.custom,
-path: ["productValue"],
-message: "Product-only campaigns must specify a product value of at least 500",
-});
-}
-if (value.minFollowers !== undefined && value.minFollowers > 10000) {
-ctx.addIssue({
-code: z.ZodIssueCode.custom,
-path: ["minFollowers"],
-message: "Product-only campaigns must target influencers with up to 10,000 followers",
-});
-}
+  validateBudgetSettings(value, ctx);
+  validateProductSettings(value, ctx);
+  validateBudgetLimitsAndAges(value, ctx);
+})
+function validateBudgetSettings(value: any, ctx: z.RefinementCtx) {
+  const isProductOnly = value.requiresProduct && value.totalBudget === 0;
+  if (!isProductOnly) {
+    if (value.totalBudget < 1000) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["totalBudget"],
+        message: "Minimum campaign budget is 1,000",
+      });
+    }
+    if (value.perInfluencerBudget !== undefined && value.perInfluencerBudget < 500) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["perInfluencerBudget"],
+        message: "Minimum per-influencer budget is 500",
+      });
+    }
+  }
 }
 
-if (
-value.perInfluencerBudget !== undefined &&
-value.perInfluencerBudget > value.totalBudget
-) {
-ctx.addIssue({
-code: z.ZodIssueCode.custom,
-path: ["perInfluencerBudget"],
-message: "Per influencer budget cannot exceed total budget",
-});
+function validateProductSettings(value: any, ctx: z.RefinementCtx) {
+  if (value.requiresProduct && value.totalBudget === 0) {
+    if (value.productValue === undefined || value.productValue < 500) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["productValue"],
+        message: "Product-only campaigns must specify a product value of at least 500",
+      });
+    }
+    if (value.minFollowers !== undefined && value.minFollowers > 10000) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["minFollowers"],
+        message: "Product-only campaigns must target influencers with up to 10,000 followers",
+      });
+    }
+  }
 }
 
-if (
-value.targetAgeMin !== null &&
-value.targetAgeMin !== undefined &&
-value.targetAgeMax !== null &&
-value.targetAgeMax !== undefined &&
-value.targetAgeMin > value.targetAgeMax
-) {
-ctx.addIssue({
-code: z.ZodIssueCode.custom,
-path: ["targetAgeMax"],
-message: "Maximum age must be greater than or equal to minimum age",
-});
+function validateBudgetLimitsAndAges(value: any, ctx: z.RefinementCtx) {
+  if (
+    value.perInfluencerBudget !== undefined &&
+    value.perInfluencerBudget > value.totalBudget
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["perInfluencerBudget"],
+      message: "Per influencer budget cannot exceed total budget",
+    });
+  }
+
+  if (
+    value.targetAgeMin !== null &&
+    value.targetAgeMin !== undefined &&
+    value.targetAgeMax !== null &&
+    value.targetAgeMax !== undefined &&
+    value.targetAgeMin > value.targetAgeMax
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["targetAgeMax"],
+      message: "Maximum age must be greater than or equal to minimum age",
+    });
+  }
 }
-});
+
+
 
 // ==================== APPLICATION SCHEMAS ====================
 

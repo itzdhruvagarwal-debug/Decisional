@@ -84,15 +84,15 @@ Enter your email to receive a reset link
 </p>
 
 {message && (
-<div
-role={status === "error" ? "alert" : "status"}
-aria-live={status === "error" ? "assertive" : "polite"}
-aria-atomic="true"
-className="text-sm mb-6 rounded-md px-4-py-3 forgot-password-message"
-data-status={status === "success" ? "success" : "error"}
+<output
+  role={status === "error" ? "alert" : "status"}
+  aria-live={status === "error" ? "assertive" : "polite"}
+  aria-atomic="true"
+  className="text-sm mb-6 rounded-md px-4-py-3 forgot-password-message block"
+  data-status={status === "success" ? "success" : "error"}
 >
-{message}
-</div>
+  {message}
+</output>
 )}
 
 {resetLink && (

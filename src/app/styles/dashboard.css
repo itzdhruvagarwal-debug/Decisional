@@ -1670,16 +1670,13 @@
   height: 130px;
 }
 
-.podium-base[data-rank="2"] {
-  height: 100px;
-}
-
 .podium-base[data-rank="1"] {
   background: linear-gradient(to top, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.07));
   border: 1px solid rgba(255, 215, 0, 0.27);
 }
 
 .podium-base[data-rank="2"] {
+  height: 100px;
   background: linear-gradient(to top, rgba(192, 192, 192, 0.2), rgba(192, 192, 192, 0.07));
   border: 1px solid rgba(192, 192, 192, 0.27);
 }

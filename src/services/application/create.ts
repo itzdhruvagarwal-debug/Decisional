@@ -65,64 +65,72 @@ throw AppError.badRequest(
 
 return { profile, maxRelevantFollowers, hasHiddenSubscribers };
 }
+function validateFollowerThresholds(
+  campaign: { minFollowers: number; maxFollowers: number | null; requiresProduct: boolean; totalBudget: number },
+  maxRelevantFollowers: number,
+  hasHiddenSubscribers: boolean
+) {
+  const isProductOnly = campaign.requiresProduct && campaign.totalBudget === 0;
+  if (isProductOnly) {
+    if (!hasHiddenSubscribers && maxRelevantFollowers > 10000) {
+      throw AppError.badRequest(
+        "Product-only campaigns are only available for influencers with 10,000 or fewer followers/subscribers."
+      );
+    }
+  }
+
+  if (!hasHiddenSubscribers && maxRelevantFollowers < campaign.minFollowers) {
+    throw AppError.badRequest(`Minimum ${campaign.minFollowers.toLocaleString()} followers required`);
+  }
+  if (!hasHiddenSubscribers && campaign.maxFollowers && maxRelevantFollowers > campaign.maxFollowers) {
+    throw AppError.badRequest(`Maximum ${campaign.maxFollowers.toLocaleString()} followers allowed`);
+  }
+}
+
 export async function getAndValidateCampaign(
-campaignId: string,
-maxRelevantFollowers: number,
-hasHiddenSubscribers: boolean
+  campaignId: string,
+  maxRelevantFollowers: number,
+  hasHiddenSubscribers: boolean
 ) {
-const campaign = await prisma.campaign.findUnique({
-where: { id: campaignId },
-select: {
-id: true,
-status: true,
-minFollowers: true,
-maxFollowers: true,
-applicationDeadline: true,
-perInfluencerBudget: true,
-maxInfluencers: true,
-selectedInfluencers: true,
-requiresProduct: true,
-totalBudget: true,
-productValue: true,
-},
-});
+  const campaign = await prisma.campaign.findUnique({
+    where: { id: campaignId },
+    select: {
+      id: true,
+      status: true,
+      minFollowers: true,
+      maxFollowers: true,
+      applicationDeadline: true,
+      perInfluencerBudget: true,
+      maxInfluencers: true,
+      selectedInfluencers: true,
+      requiresProduct: true,
+      totalBudget: true,
+      productValue: true,
+    },
+  });
 
-if (!campaign) throw AppError.notFound("Campaign not found");
-if (campaign.status !== "ACTIVE") {
-throw AppError.badRequest("Campaign is not accepting applications");
-}
-if (
-campaign.maxInfluencers !== null &&
-campaign.maxInfluencers !== undefined &&
-campaign.selectedInfluencers >= campaign.maxInfluencers
-) {
-throw AppError.badRequest("This campaign has reached its maximum number of influencer slots.");
-}
-if (campaign.applicationDeadline) {
-const todayStart = new Date();
-todayStart.setUTCHours(0, 0, 0, 0);
-if (todayStart > campaign.applicationDeadline) {
-throw AppError.badRequest("Application deadline has passed");
-}
-}
+  if (!campaign) throw AppError.notFound("Campaign not found");
+  if (campaign.status !== "ACTIVE") {
+    throw AppError.badRequest("Campaign is not accepting applications");
+  }
+  if (
+    campaign.maxInfluencers !== null &&
+    campaign.maxInfluencers !== undefined &&
+    campaign.selectedInfluencers >= campaign.maxInfluencers
+  ) {
+    throw AppError.badRequest("This campaign has reached its maximum number of influencer slots.");
+  }
+  if (campaign.applicationDeadline) {
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+    if (todayStart > campaign.applicationDeadline) {
+      throw AppError.badRequest("Application deadline has passed");
+    }
+  }
 
-const isProductOnly = campaign.requiresProduct && campaign.totalBudget === 0;
-if (isProductOnly) {
-if (!hasHiddenSubscribers && maxRelevantFollowers > 10000) {
-throw AppError.badRequest(
-"Product-only campaigns are only available for influencers with 10,000 or fewer followers/subscribers."
-);
-}
-}
+  validateFollowerThresholds(campaign, maxRelevantFollowers, hasHiddenSubscribers);
 
-if (!hasHiddenSubscribers && maxRelevantFollowers < campaign.minFollowers) {
-throw AppError.badRequest(`Minimum ${campaign.minFollowers.toLocaleString()} followers required`);
-}
-if (!hasHiddenSubscribers && campaign.maxFollowers && maxRelevantFollowers > campaign.maxFollowers) {
-throw AppError.badRequest(`Maximum ${campaign.maxFollowers.toLocaleString()} followers allowed`);
-}
-
-return campaign;
+  return campaign;
 }
 export async function checkVerificationAndGates(
 userId: string,

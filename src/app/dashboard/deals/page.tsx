@@ -231,8 +231,14 @@ const title = statusFilter === "all"
 : `No ${statusFilter.replaceAll("_", " ").toLowerCase()} deals`;
 
 const isAll = statusFilter === "all";
-const actionLabel = isAll ? (isInfluencer ? "Browse Campaigns" : "Create Campaign") : "View All Deals";
-const actionHref = isAll ? (isInfluencer ? "/dashboard/campaigns" : "/dashboard/campaigns/create") : undefined;
+let actionLabel = "View All Deals";
+let actionHref: string | undefined = undefined;
+
+if (isAll) {
+  actionLabel = isInfluencer ? "Browse Campaigns" : "Create Campaign";
+  actionHref = isInfluencer ? "/dashboard/campaigns" : "/dashboard/campaigns/create";
+}
+
 const onActionClick = !isAll ? () => setStatusFilter("all") : undefined;
 
 return (

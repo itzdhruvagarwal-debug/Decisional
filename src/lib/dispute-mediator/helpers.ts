@@ -147,93 +147,107 @@ detail: isOnTime ? "Posted on time" : "Posted after deadline",
 }
 }
 
-export function determineTimelineVerdict(
-dispute: FullDispute,
-deal: FullDeal,
-hasSubmission: boolean,
-submissionDeadline: Date | null,
-submittedAt: Date | null,
-brandApprovedLate: { late: boolean; detail: string },
-findings: Finding[]
+function getInfluencerFavoredVerdict(disputeId: string, findings: Finding[]): MediatorAnalysis {
+  return {
+    disputeId,
+    tier: 1,
+    verdict: "INFLUENCER_FAVORED",
+    confidence: "HIGH",
+    refundPercentage: 0,
+    influencerPayoutPercentage: 100,
+    trustScoreChanges: { influencer: 0, brand: -45 },
+    explanation: `Brand failed to review content within the 48-hour review window. Per contract terms, content is auto-approved and influencer receives full payment. Brand receives a trust score penalty.`,
+    findings,
+    suggestedAction: "Auto-approve content and release payment to influencer. Apply 10% late fee from brand.",
+    autoResolvable: true,
+  };
+}
+
+function getBrandFavoredOrSplitVerdict(
+  disputeId: string,
+  hasSubmission: boolean,
+  submissionDeadline: Date | null,
+  submittedAt: Date | null,
+  findings: Finding[]
 ): MediatorAnalysis {
-const raisedByInfluencer = dispute.raisedBy.userType === "INFLUENCER";
+  const hoursLate =
+    submissionDeadline && submittedAt
+      ? Math.round((submittedAt.getTime() - submissionDeadline.getTime()) / (3600 * 1000))
+      : 999;
 
-const subDeadlineStart = submissionDeadline ? new Date(submissionDeadline) : null;
-if (subDeadlineStart) subDeadlineStart.setUTCHours(0, 0, 0, 0);
-const submittedStart = submittedAt ? new Date(submittedAt) : null;
-if (submittedStart) submittedStart.setUTCHours(0, 0, 0, 0);
-
-const influencerMissedDeadline =
-!hasSubmission ||
-(subDeadlineStart && submittedStart && submittedStart > subDeadlineStart);
-const brandDelayed = brandApprovedLate.late;
-
-if (raisedByInfluencer && brandDelayed) {
-return {
-disputeId: dispute.id,
-tier: 1,
-verdict: "INFLUENCER_FAVORED",
-confidence: "HIGH",
-refundPercentage: 0,
-influencerPayoutPercentage: 100,
-trustScoreChanges: { influencer: 0, brand: -45 },
-explanation: `Brand failed to review content within the 48-hour review window. Per contract terms, content is auto-approved and influencer receives full payment. Brand receives a trust score penalty.`,
-findings,
-suggestedAction: "Auto-approve content and release payment to influencer. Apply 10% late fee from brand.",
-autoResolvable: true,
-};
+  if (hoursLate > 48 || !hasSubmission) {
+    return {
+      disputeId,
+      tier: 1,
+      verdict: "BRAND_FAVORED",
+      confidence: "HIGH",
+      refundPercentage: 100,
+      influencerPayoutPercentage: 0,
+      trustScoreChanges: { influencer: -90, brand: 0 },
+      explanation: `Influencer ${hasSubmission ? "missed the submission deadline by more than 48 hours" : "did not submit any content"}. Full refund issued to brand.`,
+      findings,
+      suggestedAction: "Release pre-authorized payment back to brand. Penalize influencer trust score.",
+      autoResolvable: true,
+    };
+  } else {
+    return {
+      disputeId,
+      tier: 1,
+      verdict: "SPLIT",
+      confidence: "MEDIUM",
+      refundPercentage: 50,
+      influencerPayoutPercentage: 50,
+      trustScoreChanges: { influencer: -45, brand: 0 },
+      explanation: `Influencer submitted content ${hoursLate}h after deadline. A 50/50 split is suggested since delivery was late but content was provided.`,
+      findings,
+      suggestedAction: "50% refund to brand, 50% payment to influencer. Minor trust score penalty for influencer.",
+      autoResolvable: true,
+    };
+  }
 }
 
-if (!raisedByInfluencer && influencerMissedDeadline) {
-const hoursLate =
-submissionDeadline && submittedAt
-? Math.round((submittedAt.getTime() - submissionDeadline.getTime()) / (3600 * 1000))
-: 999;
+export function determineTimelineVerdict(
+  dispute: FullDispute,
+  deal: FullDeal,
+  hasSubmission: boolean,
+  submissionDeadline: Date | null,
+  submittedAt: Date | null,
+  brandApprovedLate: { late: boolean; detail: string },
+  findings: Finding[]
+): MediatorAnalysis {
+  const raisedByInfluencer = dispute.raisedBy.userType === "INFLUENCER";
 
-if (hoursLate > 48 || !hasSubmission) {
-return {
-disputeId: dispute.id,
-tier: 1,
-verdict: "BRAND_FAVORED",
-confidence: "HIGH",
-refundPercentage: 100,
-influencerPayoutPercentage: 0,
-trustScoreChanges: { influencer: -90, brand: 0 },
-explanation: `Influencer ${hasSubmission ? "missed the submission deadline by more than 48 hours" : "did not submit any content"}. Full refund issued to brand.`,
-findings,
-suggestedAction: "Release pre-authorized payment back to brand. Penalize influencer trust score.",
-autoResolvable: true,
-};
-} else {
-return {
-disputeId: dispute.id,
-tier: 1,
-verdict: "SPLIT",
-confidence: "MEDIUM",
-refundPercentage: 50,
-influencerPayoutPercentage: 50,
-trustScoreChanges: { influencer: -45, brand: 0 },
-explanation: `Influencer submitted content ${hoursLate}h after deadline. A 50/50 split is suggested since delivery was late but content was provided.`,
-findings,
-suggestedAction: "50% refund to brand, 50% payment to influencer. Minor trust score penalty for influencer.",
-autoResolvable: true,
-};
-}
-}
+  const subDeadlineStart = submissionDeadline ? new Date(submissionDeadline) : null;
+  if (subDeadlineStart) subDeadlineStart.setUTCHours(0, 0, 0, 0);
+  const submittedStart = submittedAt ? new Date(submittedAt) : null;
+  if (submittedStart) submittedStart.setUTCHours(0, 0, 0, 0);
 
-return {
-disputeId: dispute.id,
-tier: 1,
-verdict: "ESCALATE",
-confidence: "LOW",
-refundPercentage: 0,
-influencerPayoutPercentage: 0,
-trustScoreChanges: { influencer: 0, brand: 0 },
-explanation: `Timeline dispute could not be auto-resolved. Both parties appear to have met some deadlines but the situation is ambiguous. Escalating to human mediation.`,
-findings,
-suggestedAction: "Escalate to Tier 2 human mediation for detailed review.",
-autoResolvable: false,
-};
+  const influencerMissedDeadline =
+    !hasSubmission ||
+    (subDeadlineStart && submittedStart && submittedStart > subDeadlineStart);
+  const brandDelayed = brandApprovedLate.late;
+
+  if (raisedByInfluencer && brandDelayed) {
+    return getInfluencerFavoredVerdict(dispute.id, findings);
+  }
+
+  if (!raisedByInfluencer && influencerMissedDeadline) {
+    return getBrandFavoredOrSplitVerdict(dispute.id, hasSubmission, submissionDeadline, submittedAt, findings);
+  }
+
+  return {
+    disputeId: dispute.id,
+    tier: 1,
+    verdict: "ESCALATE",
+    confidence: "LOW",
+    refundPercentage: 0,
+    influencerPayoutPercentage: 0,
+    trustScoreChanges: { influencer: 0, brand: 0 },
+    explanation: `Timeline dispute could not be auto-resolved. Both parties appear to have met some deadlines but the situation is ambiguous. Escalating to human mediation.`,
+    findings,
+    suggestedAction: "Escalate to Tier 2 human mediation for detailed review.",
+    autoResolvable: false,
+  };
 }
 
 

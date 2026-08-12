@@ -75,27 +75,23 @@ self.addEventListener("fetch", (event) => {
 
       return fetch(request)
         .then((networkResponse) => {
-          if (!networkResponse || networkResponse.status !== 200) {
-            return networkResponse;
+          const isValidResponse = networkResponse && networkResponse.status === 200;
+          if (isValidResponse) {
+            const cacheControl =
+              networkResponse.headers.get("cache-control")?.toLowerCase() || "";
+            const hasSetCookie = networkResponse.headers.has("set-cookie");
+            const shouldSkipCache =
+              hasSetCookie ||
+              cacheControl.includes("no-store") ||
+              cacheControl.includes("private");
+
+            if (!shouldSkipCache) {
+              const cloned = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(request, cloned);
+              });
+            }
           }
-
-          const cacheControl =
-            networkResponse.headers.get("cache-control")?.toLowerCase() || "";
-          const hasSetCookie = networkResponse.headers.has("set-cookie");
-          const shouldSkipCache =
-            hasSetCookie ||
-            cacheControl.includes("no-store") ||
-            cacheControl.includes("private");
-
-          if (shouldSkipCache) {
-            return networkResponse;
-          }
-
-          const cloned = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, cloned);
-          });
-
           return networkResponse;
         })
         .catch(() => {
