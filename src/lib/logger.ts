@@ -99,7 +99,7 @@ format: isDevelopment
 });
 
 import { safeStringCommon, buildWithContext } from "./logger-common";
-import type { LogLevel, LogContext } from "./logger-common";
+import type { LogContext } from "./logger-common";
 export type { LogLevel, LogContext } from "./logger-common";
 
 function safeString(message: unknown): string {

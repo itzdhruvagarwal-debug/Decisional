@@ -21,19 +21,22 @@ const skeletonClass = `skeleton-${randomId}`;
 
   let widthCss = "";
   if (width !== undefined) {
-    widthCss = `width: ${typeof width === "number" ? `${width}px` : width};`;
+    const widthVal = typeof width === "number" ? width + "px" : width;
+    widthCss = `width: ${widthVal};`;
   }
 
   let heightCss = "";
   if (height !== undefined) {
-    heightCss = `height: ${typeof height === "number" ? `${height}px` : height};`;
+    const heightVal = typeof height === "number" ? height + "px" : height;
+    heightCss = `height: ${heightVal};`;
   }
 
   let radiusCss = "";
   if (circle) {
     radiusCss = "border-radius: 50%;";
   } else if (borderRadius !== undefined) {
-    radiusCss = `border-radius: ${typeof borderRadius === "number" ? `${borderRadius}px` : borderRadius};`;
+    const radiusVal = typeof borderRadius === "number" ? borderRadius + "px" : borderRadius;
+    radiusCss = `border-radius: ${radiusVal};`;
   }
 
   const styleContent = `
