@@ -1,5 +1,6 @@
 import prisma from "@/lib/db";
 import { Prisma } from "@prisma/client";
+import { logger } from "@/lib/logger";
 
 export type NotificationType =
 | "deal_update"
@@ -62,47 +63,57 @@ return { success: true };
 
 // Internal use for system events
 static async createNotification(
-data: {
-userId: string;
-type: NotificationType | (string & {});
-title: string;
-message: string;
-data?: Record<string, unknown>;
-},
-tx?: Prisma.TransactionClient
+  data: {
+    userId: string;
+    type: NotificationType | (string & {});
+    title: string;
+    message: string;
+    data?: Record<string, unknown>;
+  },
+  _tx?: Prisma.TransactionClient
 ) {
-const client = tx || prisma;
-return await client.notification.create({
-data: {
-userId: data.userId,
-type: data.type,
-title: data.title,
-message: data.message,
-data: (data.data || {}) as Prisma.InputJsonValue,
-},
-});
+  // Execute outside transaction context using base prisma client to avoid poisoning main transaction
+  try {
+    return await prisma.notification.create({
+      data: {
+        userId: data.userId,
+        type: data.type,
+        title: data.title,
+        message: data.message,
+        data: (data.data || {}) as Prisma.InputJsonValue,
+      },
+    });
+  } catch (error) {
+    logger.error("[Notification Service] Failed to create notification", error, { data });
+    return null;
+  }
 }
 
 // Support for batch notification creation (createMany)
 static async createNotifications(
-data: Array<{
-userId: string;
-type: NotificationType | (string & {});
-title: string;
-message: string;
-data?: Record<string, unknown>;
-}>,
-tx?: Prisma.TransactionClient
+  data: Array<{
+    userId: string;
+    type: NotificationType | (string & {});
+    title: string;
+    message: string;
+    data?: Record<string, unknown>;
+  }>,
+  _tx?: Prisma.TransactionClient
 ) {
-const client = tx || prisma;
-return await client.notification.createMany({
-data: data.map((n) => ({
-userId: n.userId,
-type: n.type,
-title: n.title,
-message: n.message,
-data: (n.data || {}) as Prisma.InputJsonValue,
-})),
-});
+  // Execute outside transaction context using base prisma client to avoid poisoning main transaction
+  try {
+    return await prisma.notification.createMany({
+      data: data.map((n) => ({
+        userId: n.userId,
+        type: n.type,
+        title: n.title,
+        message: n.message,
+        data: (n.data || {}) as Prisma.InputJsonValue,
+      })),
+    });
+  } catch (error) {
+    logger.error("[Notification Service] Failed to create batch notifications", error, { count: data.length });
+    return null;
+  }
 }
 }
