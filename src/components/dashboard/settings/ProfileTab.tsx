@@ -9,6 +9,7 @@ import { useSession } from "next-auth/react";
 import { type NotificationPreferences } from "./NotificationPreferencesPanel";
 import { isBrand, isInfluencer } from "@/lib/rbac";
 import { Button, Input, Select, Textarea } from "@/components/ui";
+import { ALL_CATEGORIES } from "@/lib/categories";
 
 
 export interface Profile {
@@ -62,26 +63,7 @@ badgesCount: number;
 showToast: (message: string, type?: "success" | "error" | "info") => void;
 }
 
-const allCategories = [
-"Fashion",
-"Beauty",
-"Lifestyle",
-"Food",
-"Travel",
-"Fitness",
-"Technology",
-"Gaming",
-"Entertainment",
-"Education",
-"Business",
-"Finance",
-"Health",
-"Parenting",
-"Pets",
-"Sports",
-"Music",
-"Art",
-];
+const allCategories = ALL_CATEGORIES;
 
 const allLanguages = [
 "Hindi",

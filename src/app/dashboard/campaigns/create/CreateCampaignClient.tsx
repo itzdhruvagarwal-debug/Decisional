@@ -12,6 +12,7 @@ validateCampaignForm,
 } from "@/components/dashboard/campaigns/create/CampaignCreateHelpers";
 import { ProductSeedingCard } from "@/components/dashboard/campaigns/create/ProductSeedingCard";
 import { DeliverablesList } from "@/components/dashboard/campaigns/create/DeliverablesList";
+import { ALL_CATEGORIES } from "@/lib/categories";
 
 interface DraftCampaignData {
 status?: string;
@@ -146,28 +147,7 @@ deliverables: [{ type: "INSTAGRAM_POST", count: 1, rate: 1000 }],
 const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
 const [customCategory, setCustomCategory] = useState("");
-const [categories, setCategories] = useState([
-"Fashion",
-"Beauty",
-"Lifestyle",
-"Food",
-"Travel",
-"Fitness",
-"Technology",
-"Gaming",
-"Entertainment",
-"Education",
-"Finance",
-"Health",
-"Parenting",
-"Sports",
-"Art",
-"Music",
-"Automotive",
-"Pets",
-"Real Estate",
-"Business"
-]);
+  const [categories, setCategories] = useState<string[]>([...ALL_CATEGORIES]);
 
 const handleCategoryToggle = (cat: string) => {
 setFormData((prev) => {

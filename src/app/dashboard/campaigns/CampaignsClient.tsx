@@ -8,6 +8,7 @@ import { formatCurrency, formatNumber, normalizeStringArray } from "@/lib/utils-
 import { Pagination } from "@/components/ui/pagination";
 import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Button, Input, Select, Skeleton } from "@/components/ui";
+import { ALL_CATEGORIES } from "@/lib/categories";
 
 interface Campaign {
 id: string;
@@ -29,18 +30,7 @@ maxInfluencers: number | null;
 acceptedCount: number;
 }
 
-const categories = [
-"All",
-"Fashion",
-"Beauty",
-"Lifestyle",
-"Food",
-"Travel",
-"Fitness",
-"Technology",
-"Gaming",
-"Entertainment",
-];
+const categories = ["All", ...ALL_CATEGORIES];
 
 const deliverableLabels: Record<string, string> = {
 INSTAGRAM_POST: "IG Post",

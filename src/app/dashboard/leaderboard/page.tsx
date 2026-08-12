@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import EmptyState from "@/components/ui/EmptyState";
 import { Button, Select } from "@/components/ui";
+import { ALL_CATEGORIES } from "@/lib/categories";
 
 interface LeaderboardUser {
 id: string;
@@ -41,17 +42,7 @@ const [filter, setFilter] = useState<"all-time" | "weekly">("all-time");
 const [city, setCity] = useState("");
 const [category, setCategory] = useState("");
 
-const categories = [
-"Fashion",
-"Tech",
-"Food",
-"Fitness",
-"Beauty",
-"Travel",
-"Gaming",
-"Education",
-"Lifestyle",
-];
+const categories = ALL_CATEGORIES;
 const cities = [
 "Mumbai",
 "Delhi",
