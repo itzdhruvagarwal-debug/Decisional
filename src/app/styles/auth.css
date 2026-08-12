@@ -276,8 +276,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(16, 185, 129, 0.1);
-  color: #064e3b;
+  background-color: #152631;
+  color: #10b981;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 13px;
@@ -383,15 +383,15 @@
 }
 
 .auth-otp-status-banner.verified {
-  background: rgba(16, 185, 129, 0.08);
+  background-color: #161e2f;
   border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #064e3b;
+  color: #10b981;
 }
 
 .auth-otp-status-banner.warning {
-  background: rgba(245, 158, 11, 0.08);
+  background-color: #272126;
   border: 1px solid rgba(245, 158, 11, 0.3);
-  color: #78350f;
+  color: #fbbf24;
 }
 
 .flex-grow-220 {
