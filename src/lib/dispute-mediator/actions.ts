@@ -221,15 +221,34 @@ if (
 analysis.verdict !== "ESCALATE" &&
 analysis.verdict !== "DISMISSED"
 ) {
+const payoutPctInput = analysis.influencerPayoutPercentage ?? 0;
+const refundPctInput = analysis.refundPercentage ?? 0;
+let payoutPct = Math.min(100, Math.max(0, payoutPctInput));
+let refundPct = Math.min(100, Math.max(0, refundPctInput));
+
+if (payoutPct + refundPct !== 100) {
+  const total = payoutPct + refundPct;
+  if (total > 0) {
+    payoutPct = Math.round((payoutPct / total) * 100);
+    refundPct = 100 - payoutPct;
+  } else {
+    payoutPct = 50;
+    refundPct = 50;
+  }
+}
+
+analysis.influencerPayoutPercentage = payoutPct;
+analysis.refundPercentage = refundPct;
+
 totalAmount = getDealTotalAmount(deal);
-feeRatio = Math.min(1, Math.max(0, analysis.influencerPayoutPercentage / 100));
+feeRatio = payoutPct / 100;
 const payoutBase = deal.influencerPayout ?? deal.amount;
 const feeBase = (deal.platformFee || 0) + (deal.gatewayFee || 0);
 influencerShare = Math.round(payoutBase * feeRatio);
 const feeShare = Math.round(feeBase * feeRatio);
 settlementCharge = influencerShare + feeShare;
-brandRefund = Math.round(totalAmount * (analysis.refundPercentage / 100));
-influencerClawback = Math.round(payoutBase * (analysis.refundPercentage / 100));
+brandRefund = Math.round(totalAmount * (refundPct / 100));
+influencerClawback = Math.round(payoutBase * (refundPct / 100));
 treasuryClawback = Math.max(0, brandRefund - influencerClawback);
 }
 
