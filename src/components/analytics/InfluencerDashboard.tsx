@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { calculateLevel, getPlatformFeePercentage } from "@/lib/drs-score";
+import { calculateLevel } from "@/lib/drs-score";
 import {
 AreaChart,
 Area,
@@ -204,15 +204,11 @@ Your Creator Level is determined by your total XP. Complete campaigns, refer oth
 </p>
 </div>
 <div className="level-perks-stats">
-<div className="stat-chip">
-<div className="stat-chip-label">Platform Fee</div>
-<div className="stat-chip-value-lg text-emerald">
-{getPlatformFeePercentage(overview.level)}%
-</div>
-<div className="stat-chip-sub">
-Level-reduced rate
-</div>
-</div>
+            <div className="stat-chip">
+              <div className="stat-chip-label">Platform Fee</div>
+              <div className="stat-chip-value-lg text-emerald">0%</div>
+              <div className="stat-chip-sub">Always free for creators</div>
+            </div>
 <div className="stat-chip">
 <div className="stat-chip-label">Search Boost</div>
 <div className="stat-chip-value-lg text-amber">
