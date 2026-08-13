@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z, ZodError } from "zod";
 import { randomUUID } from "node:crypto";
 import { logger } from "./logger";
+import * as Sentry from "@sentry/nextjs";
 import { rateLimit } from "./rate-limit";
 import { auth } from "./auth";
 import { requireActiveAdmin } from "./admin-auth";
@@ -119,10 +120,10 @@ const start = Date.now();
 const requestId = randomUUID();
 const method = req.method;
 const url = req.nextUrl.pathname;
-const ip =
-(req as NextRequest & { ip?: string }).ip ||
-req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-"unknown";
+    const forwardedFor = req.headers.get("x-forwarded-for");
+    const ip = forwardedFor
+      ? forwardedFor.split(",").pop()?.trim() || "unknown"
+      : req.headers.get("x-real-ip") || "unknown";
 
 // Request body size protection: reject bodies > 2MB
 const contentLength = req.headers.get("content-length");
@@ -522,6 +523,7 @@ return NextResponse.json(
 logger.error(`[API] Unhandled Error on ${url}`, error as Error, {
 requestId,
 });
+Sentry.captureException(error, { tags: { route: sanitizedUrl }, extra: { requestId } });
 systemErrorsTotal
 .labels({ error_type: "unhandled_api_error", route: sanitizedUrl })
 .inc();

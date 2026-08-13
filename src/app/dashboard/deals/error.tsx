@@ -18,7 +18,7 @@ role="alert"
 aria-live="assertive"
 className="flex flex-col items-center justify-center gap-5 text-primary flex-1 min-h-60vh"
 >
-<div className="text-3xl" aria-hidden="true"></div>
+<svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-rose mb-2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
 <h2 className="text-xl font-extrabold">Deals failed to load</h2>
 <p className="text-secondary text-sm text-center max-w-380">
 Your deals could not be fetched. Please try again.
