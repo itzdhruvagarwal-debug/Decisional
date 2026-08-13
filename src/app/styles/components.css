@@ -1432,6 +1432,12 @@ dialog.pwa-install-overlay {
   grid-template-columns: minmax(0, 1fr) auto;
 }
 
+@media (max-width: 640px) {
+  .application-item-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 .conversation-item[aria-current="true"] {
   background: rgba(99, 102, 241, 0.1) !important;
 }
