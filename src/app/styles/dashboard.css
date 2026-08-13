@@ -413,6 +413,27 @@
   .dashboard-sub-header select {
     width: 100% !important;
   }
+
+  /* Campaigns/Explore search and sort wrapper: stack vertically on mobile */
+  .dashboard-sub-header > div:nth-child(2) {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  .dashboard-sub-header .input-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .dashboard-sub-header .input,
+  .dashboard-sub-header input,
+  .dashboard-sub-header .select-trigger {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
 }
 
 /* ── CAMPAIGN CARD GRID ── */
@@ -517,6 +538,8 @@
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   /* Firefox */
+  max-width: 100%;
+  width: 100%;
 }
 
 .scrollable-tabs::-webkit-scrollbar {
@@ -551,6 +574,8 @@
   display: flex;
   min-height: 100vh;
   background: var(--color-bg-primary);
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Sidebar header row (logo + collapse toggle) */
@@ -1104,7 +1129,12 @@
 }
 
 /* Brand campaign table */
-.overflow-x-auto { overflow-x: auto; }
+.overflow-x-auto {
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
 
 /* Brand micro vs macro comparison */
 .influencer-type-grid {
