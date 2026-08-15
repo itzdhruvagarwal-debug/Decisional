@@ -687,11 +687,19 @@
 }
 
 .auth-otp-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
   flex-wrap: wrap;
 }
 
-.auth-otp-row > .input {
+.auth-otp-row > .input-wrapper {
+  flex: 1 1 180px;
   min-width: 0;
+}
+
+.auth-otp-row > .input-wrapper .input {
+  width: 100%;
 }
 
 .auth-otp-row > button {
@@ -701,6 +709,10 @@
 @media (max-width: 420px) {
   .auth-otp-row > button {
     width: 100%;
+  }
+
+  .auth-otp-row > .input-wrapper {
+    flex: 1 1 100%;
   }
 
   .auth-phone-row > span {
