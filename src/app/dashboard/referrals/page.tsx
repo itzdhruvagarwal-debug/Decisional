@@ -116,7 +116,7 @@ onClick={onClose}
 aria-label="Close share modal"
 className="text-lg flex-shrink-0 p-0 w-36 h-36"
 >
-
+&times;
 </Button>
 </div>
 

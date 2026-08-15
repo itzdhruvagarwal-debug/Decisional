@@ -160,7 +160,7 @@ aria-pressed={(hoverRating || reviewRating) >= star ? "true" : "false"}
 className="deal-rating-star"
 data-active={(hoverRating || reviewRating) >= star ? "true" : "false"}
 >
-
+★
 </Button>
 ))}
 {reviewRating > 0 && (

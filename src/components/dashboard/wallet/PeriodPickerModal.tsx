@@ -111,7 +111,7 @@ variant="ghost"
 onClick={onClose}
 aria-label="Close period picker"
 className="cursor-pointer flex-shrink-0 border-none leading-none p-1 bg-none text-2xl text-secondary-muted"
-></Button>
+>&times;</Button>
 </div>
 
 {/* Body */}

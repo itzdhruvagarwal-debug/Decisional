@@ -86,7 +86,7 @@ className="modal-close-btn"
 onClick={onClose}
 aria-label="Close modal"
 >
-
+&times;
 </button>
 </div>
 )}
