@@ -251,14 +251,14 @@ PAN, GST, ITR, TDS, and invoice readiness for India operations.
 </div>
 </div>
 
-{(summary?.blocking.length || summary?.advisories.length) ? (
+{(summary?.blocking?.length || summary?.advisories?.length) ? (
 <div className="grid gap-2 mb-1">
-{summary.blocking.map((item) => (
+{summary.blocking?.map((item) => (
 <div key={item} className="text-sm font-bold text-rose">
 {item}
 </div>
 ))}
-{summary.advisories.map((item) => (
+{summary.advisories?.map((item) => (
 <div key={item} className="text-secondary text-sm">
 {item}
 </div>
