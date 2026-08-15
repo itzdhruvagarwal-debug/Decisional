@@ -18,9 +18,9 @@ user?: { isTwoFactorEnabled?: boolean };
 }
 
 export default function TwoFactorAuthPanel({
-isSaving: _isSaving,
-setIsSaving,
-showToast,
+  isSaving,
+  setIsSaving,
+  showToast,
 }: Readonly<TwoFactorAuthPanelProps>) {
 const { data: settingsData, mutate: refreshSettings } = useSWR<SettingsResponse>("/api/settings", fetcher);
 const [override2FA, setOverride2FA] = useState<boolean | null>(null);
@@ -107,19 +107,26 @@ Add an extra layer of security to your account.
 <Button
 variant="secondary"
 className="w-full"
+disabled={isSaving}
 onClick={async () => {
-setIsSaving(true);
-const res = await fetch("/api/user/2fa/setup", {
-method: "POST",
-});
-const data = await res.json();
-setIsSaving(false);
-if (data.qrCodeUrl) {
-setQrCodeData(data);
-setIs2FASetupVisible(true);
-} else {
-showToast("Failed to initiate 2FA setup", "error");
-}
+  setIsSaving(true);
+  try {
+    const res = await fetch("/api/user/2fa/setup", {
+      method: "POST",
+    });
+    const data = await res.json();
+    if (data.qrCodeUrl) {
+      setQrCodeData(data);
+      setIs2FASetupVisible(true);
+    } else {
+      showToast(data.error || "Failed to initiate 2FA setup", "error");
+    }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Network error";
+    showToast(msg, "error");
+  } finally {
+    setIsSaving(false);
+  }
 }}
 >
 Enable 2FA
@@ -168,33 +175,40 @@ setSetupCode(e.target.value.replace(/\D/g, ""))
 />
 <Button
 variant="primary"
+disabled={isSaving}
 onClick={async () => {
-if (setupCode.length !== 6) {
-showToast("Enter 6 digit code", "error");
-return;
-}
-setIsSaving(true);
-const res = await fetch("/api/user/2fa/verify", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ code: setupCode }),
-});
-const data = await res.json();
-setIsSaving(false);
-if (data.success) {
-setIs2FAEnabled(true);
-setIs2FASetupVisible(false);
-setSetupCode("");
-if (Array.isArray(data.recoveryCodes)) {
-setRecoveryCodes(data.recoveryCodes);
-}
-showToast(
-"Two-Factor Authentication successfully enabled! Save your recovery codes.",
-"success",
-);
-} else {
-showToast(data.error || "Invalid code", "error");
-}
+  if (setupCode.length !== 6) {
+    showToast("Enter 6 digit code", "error");
+    return;
+  }
+  setIsSaving(true);
+  try {
+    const res = await fetch("/api/user/2fa/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: setupCode }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      setIs2FAEnabled(true);
+      setIs2FASetupVisible(false);
+      setSetupCode("");
+      if (Array.isArray(data.recoveryCodes)) {
+        setRecoveryCodes(data.recoveryCodes);
+      }
+      showToast(
+        "Two-Factor Authentication successfully enabled! Save your recovery codes.",
+        "success",
+      );
+    } else {
+      showToast(data.error || "Invalid code", "error");
+    }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Network error";
+    showToast(msg, "error");
+  } finally {
+    setIsSaving(false);
+  }
 }}
 >
 Verify & Enable
@@ -225,31 +239,38 @@ fullWidth
 />
 <Button
 variant="danger"
+disabled={isSaving}
 onClick={async () => {
-if (!disable2FAPassword) {
-showToast("Password required", "error");
-return;
-}
-setIsSaving(true);
-const res = await fetch("/api/user/2fa/disable", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-password: disable2FAPassword,
-}),
-});
-const data = await res.json();
-setIsSaving(false);
-if (data.success) {
-setIs2FAEnabled(false);
-setDisable2FAPassword("");
-showToast(
-"Two-Factor Authentication successfully disabled.",
-"success",
-);
-} else {
-showToast(data.error || "Failed to disable 2FA", "error");
-}
+  if (!disable2FAPassword) {
+    showToast("Password required", "error");
+    return;
+  }
+  setIsSaving(true);
+  try {
+    const res = await fetch("/api/user/2fa/disable", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        password: disable2FAPassword,
+      }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      setIs2FAEnabled(false);
+      setDisable2FAPassword("");
+      showToast(
+        "Two-Factor Authentication successfully disabled.",
+        "success",
+      );
+    } else {
+      showToast(data.error || "Failed to disable 2FA", "error");
+    }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Network error";
+    showToast(msg, "error");
+  } finally {
+    setIsSaving(false);
+  }
 }}
 >
 Disable 2FA

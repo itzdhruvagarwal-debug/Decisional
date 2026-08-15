@@ -169,14 +169,29 @@ if (verifyContactState.type === 'email' && verifyContactState.step === 'code') {
 return (
 <div className="flex gap-2">
 <Input type="text" id="email-verify-code" placeholder="OTP" aria-label="Email verification code" className="text-xs px-2-py-1 w-80" value={contactVerifyCode} onChange={(e) => setContactVerifyCode(e.target.value)} />
-<Button variant="primary" onClick={async () => {
-const res = await fetch('/api/user/verify-contact', { method: 'POST', body: JSON.stringify({ type: 'email', code: contactVerifyCode }) });
-if (res.ok) {
-showToast('Email Verified!', 'success');
-setVerifyContactState({ type: null, step: 'idle' });
-setContactVerifyCode('');
-setUser(prev => prev ? { ...prev, emailVerified: true } : null);
-} else { showToast('Invalid code', 'error'); }
+<Button variant="primary" disabled={isSaving} onClick={async () => {
+  setIsSaving(true);
+  try {
+    const res = await fetch('/api/user/verify-contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'email', code: contactVerifyCode })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast('Email Verified!', 'success');
+      setVerifyContactState({ type: null, step: 'idle' });
+      setContactVerifyCode('');
+      setUser(prev => prev ? { ...prev, emailVerified: true } : null);
+    } else {
+      showToast(data.error || 'Invalid code', 'error');
+    }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Error occurred';
+    showToast(msg, 'error');
+  } finally {
+    setIsSaving(false);
+  }
 }} className="text-xs px-2-py-1">Verify</Button>
 </div>
 );
@@ -224,20 +239,35 @@ if (verifyContactState.type === 'phone' && verifyContactState.step === 'code') {
 return (
 <div className="flex gap-2">
 <Input type="text" id="phone-verify-code" placeholder="OTP" aria-label="Phone verification code" className="text-xs px-2-py-1 w-80" value={contactVerifyCode} onChange={(e) => setContactVerifyCode(e.target.value)} />
-<Button variant="primary" onClick={async () => {
-const res = await fetch('/api/user/verify-contact', { method: 'POST', body: JSON.stringify({ type: 'phone', code: contactVerifyCode }) });
-if (res.ok) {
-showToast('Phone Verified!', 'success');
-setVerifyContactState({ type: null, step: 'idle' });
-setContactVerifyCode('');
-setUser(prev => {
-if (!prev) return null;
-const nextUser: User = { ...prev, phoneVerified: true };
-const p = pendingContact || prev.phone;
-if (p) nextUser.phone = p;
-return nextUser;
-});
-} else { showToast('Invalid code', 'error'); }
+<Button variant="primary" disabled={isSaving} onClick={async () => {
+  setIsSaving(true);
+  try {
+    const res = await fetch('/api/user/verify-contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'phone', code: contactVerifyCode })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast('Phone Verified!', 'success');
+      setVerifyContactState({ type: null, step: 'idle' });
+      setContactVerifyCode('');
+      setUser(prev => {
+        if (!prev) return null;
+        const nextUser: User = { ...prev, phoneVerified: true };
+        const p = pendingContact || prev.phone;
+        if (p) nextUser.phone = p;
+        return nextUser;
+      });
+    } else {
+      showToast(data.error || 'Invalid code', 'error');
+    }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Error occurred';
+    showToast(msg, 'error');
+  } finally {
+    setIsSaving(false);
+  }
 }} className="text-xs px-2-py-1">Verify</Button>
 </div>
 );
