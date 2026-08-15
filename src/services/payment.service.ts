@@ -402,6 +402,94 @@ await redis.del(lockKey);
     return { w, t };
   }
 
+  static async handlePayoutError(
+    error: unknown,
+    withdrawalId: string,
+    userId: string,
+    idempotencyKey: string,
+  ): Promise<never | { success: boolean; status: string }> {
+    const errorMsg = getErrorMessage(error) || "";
+    logger.error("PAYOUT_FAILED: Payout creation failed", { userId, error });
+
+    const isConnectionNeverEstablished =
+      errorMsg.includes("ECONNREFUSED") ||
+      errorMsg.includes("ENOTFOUND");
+
+    if (isConnectionNeverEstablished) {
+      // Request never reached Razorpay — definitely safe to restore balance
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+        await PaymentService.refundFailedWithdrawal(
+          withdrawalId,
+          tx,
+          errorMsg || "Connection never established",
+          undefined,
+          false
+        );
+      });
+      // Release idempotency key since request never reached Razorpay
+      await releaseIdempotencyKey(idempotencyKey, userId);
+      throw AppError.badRequest(`Payout failed: connection error. Funds returned to wallet.`);
+    }
+
+    const isAmbiguousTimeout =
+      errorMsg.includes("timeout") ||
+      errorMsg.includes("fetch") ||
+      errorMsg.includes("network") ||
+      errorMsg.includes("Circuit is OPEN");
+
+    if (isAmbiguousTimeout) {
+      // Genuinely ambiguous — keep as PROCESSING for webhook reconciliation
+      logger.warn("Payout request timed out or network error occurred. Keeping status as PROCESSING for background/webhook reconciliation.", { userId, withdrawalId });
+      return { success: true, status: "PROCESSING" };
+    }
+
+    // Determine if this is a deterministic client 4xx rejection from Razorpay.
+    // For 4xx: Razorpay rejected before creating a payout entity, so no webhook will ever be fired.
+    const is4xxGatewayError =
+      errorMsg.includes("STATUS_CODE:400") ||
+      errorMsg.includes("STATUS_CODE:422") ||
+      errorMsg.includes("STATUS_CODE:404") ||
+      errorMsg.includes("bad request") ||
+      errorMsg.includes("invalid account") ||
+      errorMsg.includes("invalid ifsc");
+
+    if (is4xxGatewayError) {
+      logger.warn("PAYOUT_REJECTED: Razorpay rejected with 4xx — immediately refunding wallet", {
+        userId,
+        withdrawalId,
+        error: errorMsg,
+      });
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+        await PaymentService.refundFailedWithdrawal(
+          withdrawalId,
+          tx,
+          `Gateway 4xx rejection: ${errorMsg}`,
+          undefined,
+          false
+        );
+      });
+      await releaseIdempotencyKey(idempotencyKey, userId);
+      throw AppError.badRequest(`Payout rejected by gateway: ${errorMsg}. Funds returned to wallet.`);
+    }
+
+    // Non-connection, non-timeout, non-deterministic error from Razorpay.
+    // Strategy: Keep withdrawal in PROCESSING status with ambiguous=true.
+    // The payout webhook will reconcile the final state.
+    await prisma.withdrawal.update({
+      where: { id: withdrawalId },
+      data: {
+        failureReason: `Ambiguous gateway error awaiting webhook reconciliation: ${errorMsg}`,
+        adminNotes: `Ambiguous gateway error at ${new Date().toISOString()}: ${errorMsg}`,
+      },
+    });
+    logger.error("PAYOUT_AMBIGUOUS: Non-connection error from Razorpay keeping PROCESSING, awaiting webhook", {
+      userId,
+      withdrawalId,
+      error: errorMsg,
+    });
+    throw AppError.badRequest(`GATEWAY_AMBIGUOUS`);
+  }
+
   static async initiateWithdrawal(userId: string, data: { amount: number; bankAccountName: string; bankAccountNumber: string; ifscCode: string; upiId?: string }, idempotencyKey: string) {
     // Guard: amount must be a positive integer (in paise). Negative or float values
     // would bypass the balance >= check and execute decrement(negative) = balance inflation.
@@ -465,139 +553,60 @@ await redis.del(lockKey);
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
     });
 
-if ("alreadyProcessed" in withdrawal) {
-return { success: true, alreadyProcessed: true };
-}
-
-if (withdrawal.w.status === "PENDING_REVIEW") {
-return { success: true, status: "PENDING_REVIEW" };
-}
-
-try {
-const payout = await createPayout({
-accountNumber: data.bankAccountNumber,
-ifscCode: data.ifscCode,
-beneficiaryName: data.bankAccountName,
-amount: data.amount,
-referenceId: withdrawal.w.id,
-userId,
-...(data.upiId ? { upiId: data.upiId } : {}),
-});
-
-await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-if (payout.status === "processed") {
-await tx.withdrawal.update({
-where: { id: withdrawal.w.id },
-data: { status: "COMPLETED", processedAt: new Date(), razorpayPayoutId: payout.payoutId }
-});
-await tx.transaction.update({
-where: { id: withdrawal.t.id },
-data: { status: "COMPLETED" }
-});
-await tx.wallet.update({
-where: { userId },
-data: { totalWithdrawn: { increment: data.amount } }
-});
-} else if (["rejected", "failed", "reversed"].includes(payout.status)) {
-await PaymentService.refundFailedWithdrawal(
-withdrawal.w.id,
-tx,
-`Payout rejected/failed immediately with status ${payout.status}`,
-payout.payoutId,
-false
-);
-} else {
-await tx.withdrawal.update({
-where: { id: withdrawal.w.id },
-data: { status: "PROCESSING", razorpayPayoutId: payout.payoutId }
-});
-}
-});
-
-return { success: true, status: payout.status };
-} catch (error: unknown) {
-const errorMsg = getErrorMessage(error) || "";
-const isAmbiguousTimeout =
-errorMsg.includes("timeout") ||
-errorMsg.includes("fetch") ||
-errorMsg.includes("network") ||
-errorMsg.includes("Circuit is OPEN");
-
-const isConnectionNeverEstablished =
-errorMsg.includes("ECONNREFUSED") ||
-errorMsg.includes("ENOTFOUND");
-
-logger.error("PAYOUT_FAILED: Payout creation failed", { userId, error });
-
-if (isConnectionNeverEstablished) {
-// Request never reached Razorpay definitely safe to restore balance
-await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-await PaymentService.refundFailedWithdrawal(
-withdrawal.w.id,
-tx,
-errorMsg || "Connection never established",
-undefined,
-false
-);
-});
-    // Release idempotency key since request never reached Razorpay
-    await releaseIdempotencyKey(idempotencyKey, userId);
-    throw AppError.badRequest(`Payout failed: connection error. Funds returned to wallet.`);
-} else if (isAmbiguousTimeout) {
-// Genuinely ambiguous keep as PROCESSING for webhook reconciliation
-logger.warn("Payout request timed out or network error occurred. Keeping status as PROCESSING for background/webhook reconciliation.", { userId, withdrawalId: withdrawal.w.id });
-return { success: true, status: "PROCESSING" };
-} else {
-    // Determine if this is a deterministic client 4xx rejection from Razorpay.
-    // For 4xx: Razorpay rejected the request before creating a payout entity, so
-    // no webhook will ever be fired — funds would be frozen indefinitely in PROCESSING.
-    // Safe to immediately refund for status codes 400, 422, 404 (client validation errors).
-    const is4xxGatewayError =
-      errorMsg.includes("STATUS_CODE:400") ||
-      errorMsg.includes("STATUS_CODE:422") ||
-      errorMsg.includes("STATUS_CODE:404") ||
-      errorMsg.includes("bad request") ||
-      errorMsg.includes("invalid account") ||
-      errorMsg.includes("invalid ifsc");
-
-    if (is4xxGatewayError) {
-      logger.warn("PAYOUT_REJECTED: Razorpay rejected with 4xx — immediately refunding wallet", {
-        userId,
-        withdrawalId: withdrawal.w.id,
-        error: errorMsg,
-      });
-      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-        await PaymentService.refundFailedWithdrawal(
-          withdrawal.w.id,
-          tx,
-          `Gateway 4xx rejection: ${errorMsg}`,
-          undefined,
-          false
-        );
-      });
-      await releaseIdempotencyKey(idempotencyKey, userId);
-      throw AppError.badRequest(`Payout rejected by gateway: ${errorMsg}. Funds returned to wallet.`);
+    if ("alreadyProcessed" in withdrawal) {
+      return { success: true, alreadyProcessed: true };
     }
 
-    // Non-connection, non-timeout, non-deterministic error from Razorpay.
-    // Strategy: Keep withdrawal in PROCESSING status with ambiguous=true.
-    // The payout webhook will reconcile the final state.
-    await prisma.withdrawal.update({
-      where: { id: withdrawal.w.id },
-      data: {
-        failureReason: `Ambiguous gateway error awaiting webhook reconciliation: ${errorMsg}`,
-        adminNotes: `Ambiguous gateway error at ${new Date().toISOString()}: ${errorMsg}`,
-      },
-    });
-    logger.error("PAYOUT_AMBIGUOUS: Non-connection error from Razorpay keeping PROCESSING, awaiting webhook", {
-      userId,
-      withdrawalId: withdrawal.w.id,
-      error: errorMsg,
-    });
-    throw AppError.badRequest(`GATEWAY_AMBIGUOUS`);
+    if (withdrawal.w.status === "PENDING_REVIEW") {
+      return { success: true, status: "PENDING_REVIEW" };
+    }
+
+    try {
+      const payout = await createPayout({
+        accountNumber: data.bankAccountNumber,
+        ifscCode: data.ifscCode,
+        beneficiaryName: data.bankAccountName,
+        amount: data.amount,
+        referenceId: withdrawal.w.id,
+        userId,
+        ...(data.upiId ? { upiId: data.upiId } : {}),
+      });
+
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+        if (payout.status === "processed") {
+          await tx.withdrawal.update({
+            where: { id: withdrawal.w.id },
+            data: { status: "COMPLETED", processedAt: new Date(), razorpayPayoutId: payout.payoutId }
+          });
+          await tx.transaction.update({
+            where: { id: withdrawal.t.id },
+            data: { status: "COMPLETED" }
+          });
+          await tx.wallet.update({
+            where: { userId },
+            data: { totalWithdrawn: { increment: data.amount } }
+          });
+        } else if (["rejected", "failed", "reversed"].includes(payout.status)) {
+          await PaymentService.refundFailedWithdrawal(
+            withdrawal.w.id,
+            tx,
+            `Payout rejected/failed immediately with status ${payout.status}`,
+            payout.payoutId,
+            false
+          );
+        } else {
+          await tx.withdrawal.update({
+            where: { id: withdrawal.w.id },
+            data: { status: "PROCESSING", razorpayPayoutId: payout.payoutId }
+          });
+        }
+      });
+
+      return { success: true, status: payout.status };
+    } catch (error: unknown) {
+      return await PaymentService.handlePayoutError(error, withdrawal.w.id, userId, idempotencyKey);
+    }
   }
-}
-}
 
 static async refundFailedWithdrawal(
 withdrawalId: string,
