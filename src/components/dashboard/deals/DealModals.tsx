@@ -76,7 +76,7 @@ onClose={() => setShowAddressModal(false)}
 title="Shipping Address"
 maxWidth="500px"
 >
-<div className="grid gap-3 mb-4 grid-cols-2">
+<div className="grid gap-3 mb-4 grid-cols-1 sm:grid-cols-2">
 {([
 ["fullName", "Full name"],
 ["phone", "Phone"],
