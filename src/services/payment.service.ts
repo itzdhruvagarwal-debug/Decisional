@@ -491,9 +491,9 @@ undefined,
 false
 );
 });
-// Release idempotency key since request never reached Razorpay
-await releaseIdempotencyKey(`withdrawal:${withdrawal.w.id}`, userId);
-throw AppError.badRequest(`Payout failed: connection error. Funds returned to wallet.`);
+    // Release idempotency key since request never reached Razorpay
+    await releaseIdempotencyKey(idempotencyKey, userId);
+    throw AppError.badRequest(`Payout failed: connection error. Funds returned to wallet.`);
 } else if (isAmbiguousTimeout) {
 // Genuinely ambiguous keep as PROCESSING for webhook reconciliation
 logger.warn("Payout request timed out or network error occurred. Keeping status as PROCESSING for background/webhook reconciliation.", { userId, withdrawalId: withdrawal.w.id });
