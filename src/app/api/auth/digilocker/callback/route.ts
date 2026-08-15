@@ -42,40 +42,53 @@ const documentsData = await documentsResponse.json();
 
 if (documentsData.documents && Array.isArray(documentsData.documents)) {
 for (const doc of documentsData.documents) {
-if (doc.type === "AADHAAR" || doc.type === "PAN") {
-const docResponse = await fetch(
-`https://api.digilocker.gov.in/account/documents/${doc.id}`,
-{
-headers: {
-Authorization: `Bearer ${accessToken}`,
-},
-}
-);
+    if (doc.type === "AADHAAR" || doc.type === "PAN") {
+      try {
+        const docResponse = await fetch(
+          `https://api.digilocker.gov.in/account/documents/${doc.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
 
-const docData = await docResponse.json();
+        if (!docResponse.ok) {
+          throw new Error(`Failed to fetch document: ${docResponse.statusText}`);
+        }
 
-await prisma.verificationDocument.create({
-data: {
-userId,
-type: doc.type === "AADHAAR" ? "AADHAAR" : "PAN_CARD",
-documentUrl: docData.url || doc.uri,
-status: "VERIFIED",
-verifiedAt: new Date(),
-metadata: {
-source: "digilocker",
-documentId: doc.id,
-issuer: doc.issuer,
-issueDate: doc.issueDate,
-},
-},
-});
+        const docData = await docResponse.json();
 
-logger.info("DigiLocker document fetched and stored", {
-userId,
-documentType: doc.type,
-documentId: doc.id,
-});
-}
+        await prisma.verificationDocument.create({
+          data: {
+            userId,
+            type: doc.type === "AADHAAR" ? "AADHAAR" : "PAN_CARD",
+            documentUrl: docData.url || doc.uri,
+            status: "VERIFIED",
+            verifiedAt: new Date(),
+            metadata: {
+              source: "digilocker",
+              documentId: doc.id,
+              issuer: doc.issuer,
+              issueDate: doc.issueDate,
+            },
+          },
+        });
+
+        logger.info("DigiLocker document fetched and stored", {
+          userId,
+          documentType: doc.type,
+          documentId: doc.id,
+        });
+      } catch (singleDocError) {
+        logger.error("Failed to process specific DigiLocker document", {
+          userId,
+          documentType: doc.type,
+          documentId: doc.id,
+          error: singleDocError instanceof Error ? singleDocError.message : String(singleDocError),
+        });
+      }
+    }
 }
 }
 } catch (docError) {
