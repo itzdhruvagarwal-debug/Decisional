@@ -3,6 +3,7 @@
 */
 
 import { NextRequest, NextResponse } from "next/server";
+import { getSecureClientIp } from "@/lib/ip";
 import { randomInt, createHash, timingSafeEqual } from "node:crypto";
 import redis from "@/lib/redis";
 import { logger } from "@/lib/logger";
@@ -41,9 +42,7 @@ return NextResponse.json(
 );
 }
 
-const ip =
-request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-"unknown";
+const ip = getSecureClientIp(request);
 const ipRateLimit = await checkRateLimit(ip, "AUTH");
 if (!ipRateLimit.success) {
 return NextResponse.json(

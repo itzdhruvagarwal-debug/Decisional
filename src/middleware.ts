@@ -6,6 +6,7 @@ import { NextResponse, NextRequest } from "next/server";
 import NextAuth from "next-auth";
 import { authConfig } from "./auth.config";
 import { logger } from "@/lib/logger-client";
+import { getSecureClientIp } from "@/lib/ip";
 
 // Edge-safe auth instance
 const { auth } = NextAuth(authConfig);
@@ -170,10 +171,7 @@ if (checkWafPatterns(requestFingerprint)) {
 return applyCSP(NextResponse.json({ error: "Forbidden" }, { status: 403 }));
 }
 
-const ip =
-(req as unknown as { ip?: string }).ip ||
-req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-"unknown";
+const ip = getSecureClientIp(req);
 if (ip !== "unknown" && (await checkEdgeIpBlacklist(ip))) {
 return applyCSP(
 NextResponse.json({ error: "Access Denied: Your IP is banned." }, { status: 403 }),

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getMetrics, getMetricsContentType } from "@/lib/metrics";
+import { getSecureClientIp } from "@/lib/ip";
 import { logger } from "@/lib/logger";
 import crypto from "node:crypto";
 
@@ -28,7 +29,7 @@ if (!crypto.timingSafeEqual(expectedHash, actualHash)) {
 logger.warn(
 "[Metrics] Unauthorized attempt to access metrics endpoint",
 {
-ip: request.headers.get("x-forwarded-for"),
+ip: getSecureClientIp(request),
 },
 );
 return new NextResponse("Unauthorized", { status: 401 });

@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
+import { getSecureClientIp } from "@/lib/ip";
 import { AuthService } from "@/services/auth.service";
 import { logger } from "@/lib/logger";
 import prisma from "@/lib/db";
@@ -71,10 +72,7 @@ return ApiResponse.error(validation.message!);
 
 const { phone, type } = validation.data!;
 
-const ip =
-(request as NextRequest & { ip?: string }).ip ||
-request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-"unknown";
+const ip = getSecureClientIp(request);
 const ipRateLimit = await checkRateLimit(ip, "AUTH");
 if (!ipRateLimit.success) {
 return ApiResponse.tooManyRequests("Too many OTP requests. Please try again later.");

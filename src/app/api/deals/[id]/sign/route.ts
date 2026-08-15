@@ -1,5 +1,6 @@
 import { apiWrapper } from "@/lib/api-wrapper";
 import { NextRequest, NextResponse } from "next/server";
+import { getSecureClientIp } from "@/lib/ip";
 import { auth } from "@/lib/auth";
 import { AppError } from "@/lib/errors";
 import prisma from "@/lib/db";
@@ -153,11 +154,7 @@ return NextResponse.json(
 const { deal, isInfluencer } = await validateAndGetDealToSign(dealId, session.user.id);
 const role: "INFLUENCER" | "BRAND" = isInfluencer ? "INFLUENCER" : "BRAND";
 
-const ipAddress =
-(request as NextRequest & { ip?: string }).ip ||
-request.headers.get("x-real-ip") ||
-request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-"unknown";
+const ipAddress = getSecureClientIp(request);
 const userAgent = request.headers.get("user-agent") || "unknown";
 
 let result;

@@ -1,5 +1,6 @@
 import { apiWrapper } from "@/lib/api-wrapper";
 import { NextRequest, NextResponse } from "next/server";
+import { getSecureClientIp } from "@/lib/ip";
 import { z } from "zod";
 import { AuthService } from "@/services/auth.service";
 import { logger } from "@/lib/logger";
@@ -37,10 +38,7 @@ data: parsed.error.format(),
 );
 }
 
-const ip =
-(request as NextRequest & { ip?: string }).ip ||
-request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-"unknown";
+const ip = getSecureClientIp(request);
 
 const [ipLimit, emailLimit] = await Promise.all([
 checkRateLimit(ip, "PASSWORD_RESET"),

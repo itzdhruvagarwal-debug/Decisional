@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { getSecureClientIp } from "@/lib/ip";
 import { createActivityLog } from "@/lib/audit";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
@@ -133,7 +134,7 @@ metadata: {
 field: type, // 'email' or 'phone'
 newValue: type === "email" ? user.email : user.phone,
 changedAt: new Date().toISOString(),
-ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
+ipAddress: getSecureClientIp(req),
 },
 });
 }

@@ -1,6 +1,7 @@
 import { AppError } from "@/lib/errors";
 import prisma from "../db";
 import { logger } from "../logger";
+import { getSecureClientIp } from "../ip";
 import { redis } from "../redis";
 import { verify } from "otplib";
 import { isVPNOrProxy, getIpDetails } from "../ipinfo";
@@ -23,14 +24,10 @@ throw error;
 }
 
 export function resolveClientIpAndAgent(request: unknown) {
-let ip = "unknown";
-const req = request as Request & { ip?: string };
-const headers = request instanceof Request ? request.headers : null;
-if (req && typeof req.ip === "string" && req.ip) {
-ip = req.ip;
-} else if (headers) {
-ip = headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-}
+  let ip = "unknown";
+  if (request instanceof Request) {
+    ip = getSecureClientIp(request);
+  }
 
 const userAgent =
 request instanceof Request

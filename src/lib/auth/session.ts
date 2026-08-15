@@ -1,5 +1,6 @@
 import prisma from "../db";
 import { logger } from "../logger";
+import { getSecureClientIp } from "../ip";
 import { redis } from "../redis";
 import { rotateRefreshToken } from "../tokens";
 import { randomUUID } from "node:crypto";
@@ -94,10 +95,7 @@ token.jti = token.jti || randomUUID();
 try {
 const { headers } = await import("next/headers");
 const headerList = await headers();
-token.ip =
-headerList.get("x-real-ip") ||
-headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-"unknown";
+token.ip = getSecureClientIp({ headers: headerList });
 token.ua = headerList.get("user-agent") || "unknown";
 } catch (_e) {
 logger.debug("Failed to get request headers for JWT enrichment", { error: _e });

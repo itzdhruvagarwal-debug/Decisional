@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { AuthService } from "@/services/auth.service";
 import { logger } from "@/lib/logger";
+import { getSecureClientIp } from "@/lib/ip";
 import { registerSchema } from "@/lib/validations";
 import redis from "@/lib/redis";
 import { apiWrapper, ApiResponse } from "@/lib/api-wrapper";
@@ -8,11 +9,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { AppError } from "@/lib/errors";
 
 function getRequestIp(request: NextRequest): string {
-return (
-(request as NextRequest & { ip?: string }).ip ||
-request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-"unknown"
-);
+  return getSecureClientIp(request);
 }
 
 function validateRegisterInput(body: unknown) {
