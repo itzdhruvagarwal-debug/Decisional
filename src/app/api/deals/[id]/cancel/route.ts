@@ -201,28 +201,16 @@ where: { userId: deal.brand.userId },
 });
 
   if (brandWallet) {
-    if (deal.reservedFromWallet) {
-      // Wallet-reserved deals: shift pendingBalance -> balance
-      brandWallet = await tx.wallet.update({
-        where: { id: brandWallet.id },
-        data: {
-          balance: { increment: refundAmount },
-          pendingBalance: { decrement: deal.totalAmount ?? deal.amount },
-        },
-      });
-    } else {
-      // H5 FIX: Non-wallet deals: refundAmount must be credited to balance.
-      // Previously only decremented pendingBalance, losing the brand's refund entirely
-      // and potentially driving pendingBalance negative.
-      brandWallet = await tx.wallet.update({
-        where: { id: brandWallet.id },
-        data: {
-          balance: { increment: refundAmount },
-          pendingBalance: { decrement: deal.totalAmount ?? deal.amount },
-        },
-      });
-    }
-} else {
+    // Refund amount must be credited to balance, and pendingBalance decremented.
+    // This is identical for both wallet-reserved and non-wallet deals.
+    brandWallet = await tx.wallet.update({
+      where: { id: brandWallet.id },
+      data: {
+        balance: { increment: refundAmount },
+        pendingBalance: { decrement: deal.totalAmount ?? deal.amount },
+      },
+    });
+  } else {
 brandWallet = await tx.wallet.create({
 data: {
 userId: deal.brand.userId,

@@ -184,14 +184,20 @@ return { id, errorResponse: null };
 
 async function _handler_DELETE(req: NextRequest) {
 try {
-const { userId, errorResponse } = await requireInfluencerSession(req);
-if (errorResponse) return errorResponse;
+  const { userId, errorResponse } = await requireInfluencerSession(req);
+  if (errorResponse) {
+    return errorResponse;
+  }
 
-const rateLimitError = await checkBankAccountRateLimit(userId);
-if (rateLimitError) return rateLimitError;
+  const rateLimitError = await checkBankAccountRateLimit(userId);
+  if (rateLimitError) {
+    return rateLimitError;
+  }
 
-const verification = await verifyAndGetBankAccount(req, userId);
-if (verification.errorResponse) return verification.errorResponse;
+  const verification = await verifyAndGetBankAccount(req, userId);
+  if (verification.errorResponse) {
+    return verification.errorResponse;
+  }
 
   // L4 FIX: Soft-delete instead of hard delete to preserve audit trail.
   // Hard delete loses the record entirely; soft-delete keeps it for reconciliation and fraud investigation.

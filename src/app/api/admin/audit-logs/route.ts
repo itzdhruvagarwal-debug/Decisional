@@ -18,8 +18,8 @@ const entityId = searchParams.get("entityId") || undefined;
   const parsedStartDate = rawStartDate ? new Date(rawStartDate) : undefined;
   const parsedEndDate = rawEndDate ? new Date(rawEndDate) : undefined;
 
-  const startDate = (parsedStartDate && !isNaN(parsedStartDate.getTime())) ? parsedStartDate : undefined;
-  const endDate = (parsedEndDate && !isNaN(parsedEndDate.getTime())) ? parsedEndDate : undefined;
+  const startDate = (parsedStartDate && !Number.isNaN(parsedStartDate.getTime())) ? parsedStartDate : undefined;
+  const endDate = (parsedEndDate && !Number.isNaN(parsedEndDate.getTime())) ? parsedEndDate : undefined;
 
 const filter: Parameters<typeof AdminService.listAuditLogs>[0] = {};
 if (actorId) filter.actorId = actorId;

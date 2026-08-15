@@ -102,30 +102,145 @@ return;
 throw error;
 }
 }
+async function handleProcessedPayout(
+  tx: Prisma.TransactionClient,
+  withdrawal: Prisma.WithdrawalGetPayload<{ include: { wallet: { include: { user: true } } } }>,
+  transaction: { id: string },
+  payoutId: string,
+) {
+  const updateResult = await tx.withdrawal.updateMany({
+    where: { id: withdrawal.id, status: { not: "COMPLETED" } },
+    data: { status: "COMPLETED", processedAt: new Date(), razorpayPayoutId: payoutId }
+  });
+
+  if (updateResult.count === 0) {
+    logger.info("Withdrawal already completed, skipping totalWithdrawn increment", { withdrawalId: withdrawal.id });
+    return;
+  }
+
+  await tx.transaction.update({
+    where: { id: transaction.id },
+    data: { status: "COMPLETED" }
+  });
+  await tx.wallet.update({
+    where: { id: withdrawal.walletId },
+    data: { totalWithdrawn: { increment: withdrawal.amount } }
+  });
+  await NotificationService.createNotification({
+    userId: withdrawal.wallet.userId,
+    type: "payout",
+    title: "Withdrawal Successful ",
+    message: `Your withdrawal of ${(withdrawal.amount / 100).toLocaleString("en-IN")} was successfully processed.`,
+  }, tx);
+}
+
+async function handleFailedPayout(
+  tx: Prisma.TransactionClient,
+  withdrawal: Prisma.WithdrawalGetPayload<{ include: { wallet: { include: { user: true } } } }>,
+  transaction: { id: string },
+  payoutId: string,
+  event: string,
+  payout: { failure_reason?: string },
+  freshWithdrawalStatus: string,
+) {
+  // Check for existing refund transaction or terminal linked transaction status
+  const refundTx = await tx.transaction.findFirst({
+    where: {
+      withdrawalId: withdrawal.id,
+      OR: [
+        { type: "REFUND" },
+        { status: { in: ["FAILED", "REVERSED"] } }
+      ]
+    },
+  });
+  if (refundTx) {
+    logger.info("Withdrawal already refunded/failed, skipping balance restore", { withdrawalId: withdrawal.id });
+    return;
+  }
+
+  const targetStatus = event === "payout.reversed" ? "REVERSED" : "FAILED";
+
+  const updateResult = await tx.withdrawal.updateMany({
+    where: {
+      id: withdrawal.id,
+      status: { notIn: ["FAILED", "REVERSED"] }
+    },
+    data: {
+      status: targetStatus,
+      failureReason: `Payout failed with event ${event}. Reason: ${payout.failure_reason || "unknown"}`,
+      razorpayPayoutId: payoutId,
+      processedAt: new Date(),
+    }
+  });
+
+  if (updateResult.count === 0) {
+    logger.info("Withdrawal already failed/reversed, skipping refund", { withdrawalId: withdrawal.id });
+    return;
+  }
+
+  // Failed / Rejected / Reversed -> Refund Wallet
+  await tx.wallet.update({
+    where: { id: withdrawal.walletId },
+    data: {
+      balance: { increment: withdrawal.amount },
+      ...(freshWithdrawalStatus === "COMPLETED"
+        ? { totalWithdrawn: { decrement: withdrawal.amount } }
+        : {})
+    }
+  });
+
+  if (freshWithdrawalStatus === "COMPLETED") {
+    // M7 FIX: If the withdrawal was already completed, keep the original transaction as COMPLETED
+    // to preserve historical ledger records. Instead, create a new COMPLETED REFUND transaction.
+    await tx.transaction.create({
+      data: {
+        walletId: withdrawal.walletId,
+        withdrawalId: withdrawal.id,
+        type: "REFUND",
+        amount: withdrawal.amount,
+        status: "COMPLETED",
+        description: `Refund for reversed withdrawal Ref: ${withdrawal.id}. Reason: ${payout.failure_reason || "Reversed by gateway"}`,
+        metadata: { source: "payout_reversal", event }
+      }
+    });
+  } else {
+    // If the withdrawal was never completed, mutate the original transaction to FAILED / REVERSED
+    await tx.transaction.update({
+      where: { id: transaction.id },
+      data: { status: targetStatus }
+    });
+  }
+  await NotificationService.createNotification({
+    userId: withdrawal.wallet.userId,
+    type: "payout",
+    title: "Withdrawal Failed ",
+    message: `Your withdrawal of ${(withdrawal.amount / 100).toLocaleString("en-IN")} failed. The amount has been refunded to your wallet.`,
+  }, tx);
+}
+
 async function handlePayoutWebhook(payload: { event?: string; payload?: { payout?: { entity?: { reference_id?: string; id: string; failure_reason?: string } } } }) {
-const event = payload?.event ?? "";
-if (!["payout.processed", "payout.failed", "payout.rejected", "payout.reversed"].includes(event)) {
-return;
-}
+  const event = payload?.event ?? "";
+  if (!["payout.processed", "payout.failed", "payout.rejected", "payout.reversed"].includes(event)) {
+    return;
+  }
 
-const payout = payload?.payload?.payout?.entity;
-if (!payout) return;
+  const payout = payload?.payload?.payout?.entity;
+  if (!payout) return;
 
-const withdrawalId = payout.reference_id;
-const payoutId = payout.id;
+  const withdrawalId = payout.reference_id;
+  const payoutId = payout.id;
 
-if (!withdrawalId) {
-logger.warn("Skipping payout webhook: missing reference_id", { payoutId });
-return;
-}
+  if (!withdrawalId) {
+    logger.warn("Skipping payout webhook: missing reference_id", { payoutId });
+    return;
+  }
 
-const withdrawal = await prisma.withdrawal.findUnique({
-where: { id: withdrawalId },
-include: { wallet: { include: { user: true } } },
-});
+  const withdrawal = await prisma.withdrawal.findUnique({
+    where: { id: withdrawalId },
+    include: { wallet: { include: { user: true } } },
+  });
 
   if (!withdrawal) {
-    // M8 FIX: Return 200 for orphan withdrawal webhook (e.g. test event, deleted record)
     logger.warn("Webhook: Withdrawal not found — acknowledged as orphan event", { withdrawalId, payoutId });
     return;
   }
@@ -142,136 +257,41 @@ include: { wallet: { include: { user: true } } },
     return;
   }
 
-try {
-await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-const freshWithdrawal = await tx.withdrawal.findUnique({
-where: { id: withdrawal.id },
-select: { status: true },
-});
+  try {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      const freshWithdrawal = await tx.withdrawal.findUnique({
+        where: { id: withdrawal.id },
+        select: { status: true },
+      });
 
-if (!freshWithdrawal || freshWithdrawal.status === "FAILED" || freshWithdrawal.status === "REVERSED") {
-logger.info("Withdrawal already processed, ignoring webhook", { withdrawalId, status: freshWithdrawal?.status });
-return;
-}
+      if (!freshWithdrawal || freshWithdrawal.status === "FAILED" || freshWithdrawal.status === "REVERSED") {
+        logger.info("Withdrawal already processed, ignoring webhook", { withdrawalId, status: freshWithdrawal?.status });
+        return;
+      }
 
-if (freshWithdrawal.status === "COMPLETED" && event !== "payout.reversed") {
-logger.info("Withdrawal already processed, ignoring webhook", { withdrawalId, status: freshWithdrawal?.status });
-return;
-}
+      if (freshWithdrawal.status === "COMPLETED" && event !== "payout.reversed") {
+        logger.info("Withdrawal already processed, ignoring webhook", { withdrawalId, status: freshWithdrawal?.status });
+        return;
+      }
 
-if (event === "payout.processed") {
-const updateResult = await tx.withdrawal.updateMany({
-where: { id: withdrawal.id, status: { not: "COMPLETED" } },
-data: { status: "COMPLETED", processedAt: new Date(), razorpayPayoutId: payoutId }
-});
-
-if (updateResult.count === 0) {
-logger.info("Withdrawal already completed, skipping totalWithdrawn increment", { withdrawalId });
-return;
-}
-
-await tx.transaction.update({
-where: { id: transaction.id },
-data: { status: "COMPLETED" }
-});
-await tx.wallet.update({
-where: { id: withdrawal.walletId },
-data: { totalWithdrawn: { increment: withdrawal.amount } }
-});
-await NotificationService.createNotification({
-userId: withdrawal.wallet.userId,
-type: "payout",
-title: "Withdrawal Successful ",
-message: `Your withdrawal of ${(withdrawal.amount / 100).toLocaleString("en-IN")} was successfully processed.`,
-}, tx);
-} else {
-// Check for existing refund transaction or terminal linked transaction status
-const refundTx = await tx.transaction.findFirst({
-where: {
-withdrawalId: withdrawal.id,
-OR: [
-{ type: "REFUND" },
-{ status: { in: ["FAILED", "REVERSED"] } }
-]
-},
-});
-if (refundTx) {
-logger.info("Withdrawal already refunded/failed, skipping balance restore", { withdrawalId });
-return;
-}
-
-const targetStatus = event === "payout.reversed" ? "REVERSED" : "FAILED";
-
-const updateResult = await tx.withdrawal.updateMany({
-where: {
-id: withdrawal.id,
-status: { notIn: ["FAILED", "REVERSED"] }
-},
-data: {
-status: targetStatus,
-failureReason: `Payout failed with event ${event}. Reason: ${payout.failure_reason || "unknown"}`,
-razorpayPayoutId: payoutId,
-processedAt: new Date(),
-}
-});
-
-if (updateResult.count === 0) {
-logger.info("Withdrawal already failed/reversed, skipping refund", { withdrawalId });
-return;
-}
-
-    // Failed / Rejected / Reversed -> Refund Wallet
-    await tx.wallet.update({
-      where: { id: withdrawal.walletId },
-      data: {
-        balance: { increment: withdrawal.amount },
-        ...(freshWithdrawal.status === "COMPLETED"
-          ? { totalWithdrawn: { decrement: withdrawal.amount } }
-          : {})
+      if (event === "payout.processed") {
+        await handleProcessedPayout(tx, withdrawal, transaction, payoutId);
+      } else {
+        await handleFailedPayout(tx, withdrawal, transaction, payoutId, event, payout, freshWithdrawal.status);
       }
     });
 
-    if (freshWithdrawal.status === "COMPLETED") {
-      // M7 FIX: If the withdrawal was already completed, keep the original transaction as COMPLETED
-      // to preserve historical ledger records. Instead, create a new COMPLETED REFUND transaction.
-      await tx.transaction.create({
-        data: {
-          walletId: withdrawal.walletId,
-          withdrawalId: withdrawal.id,
-          type: "REFUND",
-          amount: withdrawal.amount,
-          status: "COMPLETED",
-          description: `Refund for reversed withdrawal Ref: ${withdrawal.id}. Reason: ${payout.failure_reason || "Reversed by gateway"}`,
-          metadata: { source: "payout_reversal", event }
-        }
+    const emailStatus = event === "payout.processed" ? "success" : "failed";
+    sendWithdrawalEmail(withdrawal.wallet.user.email, withdrawal.amount, emailStatus).catch((err) => {
+      logger.error("Failed to send withdrawal email", {
+        withdrawalId,
+        error: err instanceof Error ? err.message : String(err),
       });
-    } else {
-      // If the withdrawal was never completed, mutate the original transaction to FAILED / REVERSED
-      await tx.transaction.update({
-        where: { id: transaction.id },
-        data: { status: targetStatus }
-      });
-    }
-await NotificationService.createNotification({
-userId: withdrawal.wallet.userId,
-type: "payout",
-title: "Withdrawal Failed ",
-message: `Your withdrawal of ${(withdrawal.amount / 100).toLocaleString("en-IN")} failed. The amount has been refunded to your wallet.`,
-}, tx);
-}
-});
-
-const emailStatus = event === "payout.processed" ? "success" : "failed";
-sendWithdrawalEmail(withdrawal.wallet.user.email, withdrawal.amount, emailStatus).catch((err) => {
-logger.error("Failed to send withdrawal email", {
-withdrawalId,
-error: err instanceof Error ? err.message : String(err),
-});
-});
-} catch (error: unknown) {
-logger.error("Error processing payout webhook in transaction", error, { withdrawalId });
-throw error;
-}
+    });
+  } catch (error: unknown) {
+    logger.error("Error processing payout webhook in transaction", error, { withdrawalId });
+    throw error;
+  }
 }
 
 async function _handler_POST(request: NextRequest) {

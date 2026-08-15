@@ -4,7 +4,6 @@ import prisma from "./db";
 import { logger } from "./logger";
 import { createActivityLog } from "./audit";
 import { redis } from "./redis";
-import { WalletService } from "@/services/wallet.service";
 
 const CREDIT_TYPES = new Set(["CREDIT", "REFUND"]);
 const DEBIT_TYPES = new Set([

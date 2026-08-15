@@ -28,7 +28,7 @@ export class PaymentService {
 
     // L9 FIX: Enforce a max single top-up of ₹10,00,000 (100,000,000 paise = 10 lakh).
     // Without this, a single request can create an arbitrarily large Razorpay order.
-    const MAX_TOPUP_PAISE = 10_000_000_00; // 10 crore paise = ₹10 lakh
+    const MAX_TOPUP_PAISE = 100_000_000; // 100 million paise = ₹10 lakh
     if (amountInPaise > MAX_TOPUP_PAISE) {
       throw AppError.badRequest("Top-up amount exceeds maximum allowed (₹10,00,000 per transaction)");
     }
@@ -318,6 +318,90 @@ await redis.del(lockKey);
 }
 }
 
+  static async executeWithdrawalDbTransaction(
+    tx: Prisma.TransactionClient,
+    userId: string,
+    data: { amount: number; bankAccountName: string; bankAccountNumber: string; ifscCode: string; upiId?: string },
+    idempotencyKey: string,
+    fraudAction: string,
+    fraudRiskScore: number,
+    trustBasedManualReview: boolean
+  ) {
+    const existing = await tx.transaction.findUnique({
+      where: { razorpayPaymentId: idempotencyKey },
+      include: { wallet: { select: { userId: true } } },
+    });
+    if (existing) {
+      if (existing.wallet.userId !== userId) {
+        logger.warn("Withdrawal idempotency owner mismatch", {
+          userId,
+          transactionId: existing.id,
+        });
+        throw AppError.badRequest("IDEMPOTENCY_KEY_OWNER_MISMATCH");
+      }
+
+      if (existing.status === "FAILED") {
+        if (existing.amount !== data.amount) {
+          logger.warn("Withdrawal retry amount mismatch", {
+            userId,
+            existingAmount: existing.amount,
+            requestedAmount: data.amount,
+          });
+          throw AppError.badRequest("IDEMPOTENCY_KEY_AMOUNT_MISMATCH");
+        }
+        // Free up the unique constraint slot while preserving the failed transaction audit trail
+        await tx.transaction.update({
+          where: { id: existing.id },
+          data: { razorpayPaymentId: `failed:${existing.id}:${idempotencyKey}` },
+        });
+      } else {
+        return { alreadyProcessed: true };
+      }
+    }
+
+    const updateResult = await tx.wallet.updateMany({
+      where: { userId, balance: { gte: data.amount }, isFrozen: false },
+      data: { balance: { decrement: data.amount } }
+    });
+
+    if (updateResult.count === 0) throw AppError.badRequest("INSUFFICIENT_FUNDS_OR_FROZEN");
+
+    const wallet = await tx.wallet.findUnique({ where: { userId } });
+    const encryptedAcc = encrypt(data.bankAccountNumber);
+    const bankAccountHash = hashForDuplicateDetection(data.bankAccountNumber);
+    const upiIdHash = data.upiId ? hashForDuplicateDetection(data.upiId) : null;
+
+    const w = await tx.withdrawal.create({
+      data: {
+        walletId: wallet!.id,
+        amount: data.amount,
+        bankAccountName: data.bankAccountName,
+        bankAccountNumber: encryptedAcc,
+        bankAccountHash,
+        ifscCode: data.ifscCode,
+        upiId: data.upiId ? encrypt(data.upiId) : null,
+        upiIdHash,
+        status: (fraudAction === "REVIEW" || trustBasedManualReview) ? "PENDING_REVIEW" : "PROCESSING",
+        isManualReview: fraudAction === "REVIEW" || trustBasedManualReview,
+        riskScore: fraudRiskScore,
+      }
+    });
+
+    const t = await tx.transaction.create({
+      data: {
+        walletId: wallet!.id,
+        withdrawalId: w.id,
+        type: "WITHDRAWAL",
+        amount: data.amount,
+        status: "PENDING",
+        description: `Withdrawal Ref: ${w.id}`,
+        razorpayPaymentId: idempotencyKey,
+      }
+    });
+
+    return { w, t };
+  }
+
   static async initiateWithdrawal(userId: string, data: { amount: number; bankAccountName: string; bankAccountNumber: string; ifscCode: string; upiId?: string }, idempotencyKey: string) {
     // Guard: amount must be a positive integer (in paise). Negative or float values
     // would bypass the balance >= check and execute decrement(negative) = balance inflation.
@@ -326,124 +410,60 @@ await redis.del(lockKey);
     }
 
     const user = await prisma.user.findUnique({
-where: { id: userId },
-select: { status: true, trustScore: true },
-});
+      where: { id: userId },
+      select: { status: true, trustScore: true },
+    });
 
-if (!user || ["SUSPENDED", "BANNED", "FLAGGED", "DELETED"].includes(user.status || "")) {
-logger.warn("Withdrawal blocked: user account is suspended, banned, flagged, or deleted", {
-userId,
-status: user?.status,
-});
-throw AppError.badRequest("WITHDRAWAL_BLOCK");
-}
+    if (!user || ["SUSPENDED", "BANNED", "FLAGGED", "DELETED"].includes(user.status || "")) {
+      logger.warn("Withdrawal blocked: user account is suspended, banned, flagged, or deleted", {
+        userId,
+        status: user?.status,
+      });
+      throw AppError.badRequest("WITHDRAWAL_BLOCK");
+    }
 
-// Determine withdrawal processing speed based on trust score
-const withdrawalSpeed = getWithdrawalSpeed(user.trustScore);
-const trustBasedManualReview = withdrawalSpeed === "MANUAL_REVIEW";
-if (trustBasedManualReview) {
-logger.warn("Withdrawal routed to manual review due to low trust score", {
-userId,
-trustScore: user.trustScore,
-withdrawalSpeed,
-});
-} else {
-logger.info("Withdrawal speed tier determined", { userId, withdrawalSpeed, trustScore: user.trustScore });
-}
+    // Determine withdrawal processing speed based on trust score
+    const withdrawalSpeed = getWithdrawalSpeed(user.trustScore);
+    const trustBasedManualReview = withdrawalSpeed === "MANUAL_REVIEW";
+    if (trustBasedManualReview) {
+      logger.warn("Withdrawal routed to manual review due to low trust score", {
+        userId,
+        trustScore: user.trustScore,
+        withdrawalSpeed,
+      });
+    } else {
+      logger.info("Withdrawal speed tier determined", { userId, withdrawalSpeed, trustScore: user.trustScore });
+    }
 
-const fraudCheck = await checkPaymentFraud({
-userId,
-amount: data.amount,
-bankAccount: data.bankAccountNumber,
-upiId: data.upiId,
-});
+    const fraudCheck = await checkPaymentFraud({
+      userId,
+      amount: data.amount,
+      bankAccount: data.bankAccountNumber,
+      upiId: data.upiId,
+    });
 
-if (fraudCheck.action === "BLOCK") {
-logger.warn("Withdrawal blocked by fraud check", {
-userId,
-amount: data.amount,
-flags: fraudCheck.flags.map((f) => f.description).join(", "),
-});
-throw AppError.badRequest("WITHDRAWAL_BLOCK");
-}
+    if (fraudCheck.action === "BLOCK") {
+      logger.warn("Withdrawal blocked by fraud check", {
+        userId,
+        amount: data.amount,
+        flags: fraudCheck.flags.map((f) => f.description).join(", "),
+      });
+      throw AppError.badRequest("WITHDRAWAL_BLOCK");
+    }
 
-const withdrawal = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-const existing = await tx.transaction.findUnique({
-where: { razorpayPaymentId: idempotencyKey },
-include: { wallet: { select: { userId: true } } },
-});
-if (existing) {
-if (existing.wallet.userId !== userId) {
-logger.warn("Withdrawal idempotency owner mismatch", {
-userId,
-transactionId: existing.id,
-});
-throw AppError.badRequest("IDEMPOTENCY_KEY_OWNER_MISMATCH");
-}
-
-if (existing.status === "FAILED") {
-if (existing.amount !== data.amount) {
-logger.warn("Withdrawal retry amount mismatch", {
-userId,
-existingAmount: existing.amount,
-requestedAmount: data.amount,
-});
-throw AppError.badRequest("IDEMPOTENCY_KEY_AMOUNT_MISMATCH");
-}
-// Free up the unique constraint slot while preserving the failed transaction audit trail
-await tx.transaction.update({
-where: { id: existing.id },
-data: { razorpayPaymentId: `failed:${existing.id}:${idempotencyKey}` },
-});
-} else {
-return { alreadyProcessed: true };
-}
-}
-
-const updateResult = await tx.wallet.updateMany({
-where: { userId, balance: { gte: data.amount }, isFrozen: false },
-data: { balance: { decrement: data.amount } }
-});
-
-if (updateResult.count === 0) throw AppError.badRequest("INSUFFICIENT_FUNDS_OR_FROZEN");
-
-const wallet = await tx.wallet.findUnique({ where: { userId } });
-const encryptedAcc = encrypt(data.bankAccountNumber);
-const bankAccountHash = hashForDuplicateDetection(data.bankAccountNumber);
-const upiIdHash = data.upiId ? hashForDuplicateDetection(data.upiId) : null;
-
-const w = await tx.withdrawal.create({
-data: {
-walletId: wallet!.id,
-amount: data.amount,
-bankAccountName: data.bankAccountName,
-bankAccountNumber: encryptedAcc,
-bankAccountHash,
-ifscCode: data.ifscCode,
-upiId: data.upiId ? encrypt(data.upiId) : null,
-upiIdHash,
-status: (fraudCheck.action === "REVIEW" || trustBasedManualReview) ? "PENDING_REVIEW" : "PROCESSING",
-isManualReview: fraudCheck.action === "REVIEW" || trustBasedManualReview,
-riskScore: fraudCheck.riskScore,
-}
-});
-
-const t = await tx.transaction.create({
-data: {
-walletId: wallet!.id,
-withdrawalId: w.id,
-type: "WITHDRAWAL",
-amount: data.amount,
-status: "PENDING",
-description: `Withdrawal Ref: ${w.id}`,
-razorpayPaymentId: idempotencyKey,
-}
-});
-
-return { w, t };
-}, {
-isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-});
+    const withdrawal = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      return await PaymentService.executeWithdrawalDbTransaction(
+        tx,
+        userId,
+        data,
+        idempotencyKey,
+        fraudCheck.action,
+        fraudCheck.riskScore,
+        trustBasedManualReview
+      );
+    }, {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+    });
 
 if ("alreadyProcessed" in withdrawal) {
 return { success: true, alreadyProcessed: true };
