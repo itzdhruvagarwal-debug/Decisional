@@ -132,7 +132,8 @@ const printLedger = async (period?: PeriodValue) => {
     alert("Pop-up blocked. Please allow pop-ups for this site to print the ledger.");
     return;
   }
-  printWindow.document.write("<html><head><title>Loading Ledger...</title></head><body><p style='font-family:sans-serif;text-align:center;margin-top:100px;font-size:14px;color:#4b5563;'>Generating print preview, please wait...</p></body></html>");
+  printWindow.document.title = "Loading Ledger...";
+  printWindow.document.body.innerHTML = "<p style='font-family:sans-serif;text-align:center;margin-top:100px;font-size:14px;color:#4b5563;'>Generating print preview, please wait...</p>";
 
   // Fetch user profile for the print header
   let userName = session?.user?.name || "";

@@ -173,9 +173,23 @@ return;
 
 setIsWithdrawing(true);
 try {
-  const idempotencyKey = typeof window !== "undefined" && window.crypto && typeof window.crypto.randomUUID === "function"
-      ? window.crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+  const generateIdempotencyKey = (): string => {
+    if (typeof window !== "undefined" && window.crypto) {
+      if (typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID();
+      }
+      if (typeof window.crypto.getRandomValues === "function") {
+        const array = new Uint32Array(2);
+        window.crypto.getRandomValues(array);
+        const r1 = array[0] ?? 0;
+        const r2 = array[1] ?? 0;
+        return `${Date.now()}-${r1.toString(36)}-${r2.toString(36)}`;
+      }
+    }
+    return `${Date.now()}-${Date.now() % 1000000}`;
+  };
+
+  const idempotencyKey = generateIdempotencyKey();
 
     const res = await fetch("/api/payments/withdraw", {
       method: "POST",
