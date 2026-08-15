@@ -407,7 +407,7 @@ await redis.del(lockKey);
     withdrawalId: string,
     userId: string,
     idempotencyKey: string,
-  ): Promise<never | { success: boolean; status: string }> {
+  ): Promise<{ success: boolean; status: string }> {
     const errorMsg = getErrorMessage(error) || "";
     logger.error("PAYOUT_FAILED: Payout creation failed", { userId, error });
 
