@@ -173,12 +173,16 @@ return;
 
 setIsWithdrawing(true);
 try {
-const res = await fetch("/api/payments/withdraw", {
-method: "POST",
-headers: {
-"Content-Type": "application/json",
-"Idempotency-Key": crypto.randomUUID(),
-},
+  const idempotencyKey = typeof window !== "undefined" && window.crypto && typeof window.crypto.randomUUID === "function"
+      ? window.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+
+    const res = await fetch("/api/payments/withdraw", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Idempotency-Key": idempotencyKey,
+      },
 body: JSON.stringify({
 amount: withdrawPaise,
 bankAccountId: selectedAccount.id,

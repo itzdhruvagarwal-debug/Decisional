@@ -127,49 +127,55 @@ if (pickerTarget === "print") printLedger(period);
 
 
 const printLedger = async (period?: PeriodValue) => {
-// Fetch user profile for the print header
-let userName = session?.user?.name || "";
-let userEmail = session?.user?.email || "";
-let userType = session?.user?.userType || "";
+  const printWindow = window.open("", "_blank", "width=1000,height=750");
+  if (!printWindow) {
+    alert("Pop-up blocked. Please allow pop-ups for this site to print the ledger.");
+    return;
+  }
+  printWindow.document.write("<html><head><title>Loading Ledger...</title></head><body><p style='font-family:sans-serif;text-align:center;margin-top:100px;font-size:14px;color:#4b5563;'>Generating print preview, please wait...</p></body></html>");
 
-try {
-const res = await fetch("/api/settings");
-if (res.ok) {
-const data = await res.json();
-const p = data.profile;
-const u = data.user;
-userName = p?.displayName || p?.companyName || userName;
-userEmail = u?.email || userEmail;
-userType = u?.userType || userType;
-}
-} catch {
-// fallback to session values
-}
+  // Fetch user profile for the print header
+  let userName = session?.user?.name || "";
+  let userEmail = session?.user?.email || "";
+  let userType = session?.user?.userType || "";
 
-// Fetch transactions for the selected period (max 1000)
-let printTxns = transactions;
-const query = new URLSearchParams({ page: "1", limit: "1000" });
-if (filters.type) query.set("type", filters.type);
-if (filters.status) query.set("status", filters.status);
-const start = period?.startDate || filters.startDate;
-const end = period?.endDate || filters.endDate;
-if (start) query.set("startDate", start);
-if (end) query.set("endDate", end);
+  try {
+    const res = await fetch("/api/settings");
+    if (res.ok) {
+      const data = await res.json();
+      const p = data.profile;
+      const u = data.user;
+      userName = p?.displayName || p?.companyName || userName;
+      userEmail = u?.email || userEmail;
+      userType = u?.userType || userType;
+    }
+  } catch {
+    // fallback to session values
+  }
 
-try {
-const res = await fetch(`/api/wallet/transactions?${query.toString()}`);
-if (res.ok) {
-const data = await res.json();
-if (data.transactions) {
-printTxns = data.transactions;
-}
-}
-} catch (err) {
-logger.error("Failed to fetch transactions for printing:", err);
-}
+  // Fetch transactions for the selected period (max 1000)
+  let printTxns = transactions;
+  const query = new URLSearchParams({ page: "1", limit: "1000" });
+  if (filters.type) query.set("type", filters.type);
+  if (filters.status) query.set("status", filters.status);
+  const start = period?.startDate || filters.startDate;
+  const end = period?.endDate || filters.endDate;
+  if (start) query.set("startDate", start);
+  if (end) query.set("endDate", end);
 
-const printWindow = window.open("", "_blank", "width=1000,height=750");
-if (!printWindow) return;
+  try {
+    const res = await fetch(`/api/wallet/transactions?${query.toString()}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.transactions) {
+        printTxns = data.transactions;
+      }
+    }
+  } catch (err) {
+    logger.error("Failed to fetch transactions for printing:", err);
+    printWindow.document.body.innerHTML = "<p style='font-family:sans-serif;text-align:center;margin-top:100px;font-size:14px;color:#dc2626;'>Failed to generate print preview. Please check your network connection.</p>";
+    return;
+  }
 
 const today = new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
 const time = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
