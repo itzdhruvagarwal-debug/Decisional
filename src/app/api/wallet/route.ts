@@ -27,7 +27,9 @@ balance: w.balance,
 pendingBalance: w.pendingBalance,
 totalEarned: w.totalEarned,
 totalWithdrawn: w.totalWithdrawn,
-totalHeld: 0, // totalHeld field doesn't exist in Wallet schema
+    // M3 FIX: totalHeld was hardcoded to 0, discarding WalletService's escrow calculation.
+    // Use the value from the wallet object if present (set by getBrandEscrowHeld for brands).
+    totalHeld: (w as unknown as Record<string, number>).totalHeld ?? 0,
 totalSpent: w.totalSpent,
 totalDeposited: w.totalDeposited,
 isFrozen: w.isFrozen,

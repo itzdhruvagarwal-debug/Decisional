@@ -7,95 +7,114 @@ import { validateCronSecret } from "../guard";
 import { getDealTotalAmount } from "@/lib/utils";
 import { AppError } from "@/lib/errors";
 
+import { redis } from "@/lib/redis";
+
 export type ExpiredSignatureDeal = Prisma.DealGetPayload<{
-include: {
-brand: { select: { id: true; userId: true; companyName: true } };
-campaign: {
-select: {
-id: true;
-title: true;
-isDirectInvite: true;
-totalBudget: true;
-status: true;
-brandId: true;
-};
-};
-influencer: {
-select: { id: true; userId: true; displayName: true };
-};
-};
+  include: {
+    brand: { select: { id: true; userId: true; companyName: true } };
+    campaign: {
+      select: {
+        id: true;
+        title: true;
+        isDirectInvite: true;
+        totalBudget: true;
+        status: true;
+        brandId: true;
+      };
+    };
+    influencer: {
+      select: { id: true; userId: true; displayName: true };
+    };
+  };
 }>;
 
 
 async function _handler_POST(_req: NextRequest) {
-await validateCronSecret();
+  await validateCronSecret();
 
-const now = new Date();
-const BATCH_SIZE = 50;
-const MAX_PROCESS_LIMIT = 200;
-let processedCount = 0;
-const results: Array<{ dealId: string; success: boolean; error?: string }> = [];
+  // M11 FIX: Acquire distributed lock to prevent concurrent cron execution
+  const lockKey = "cron:expire-signatures:lock";
+  const acquired = await redis.set(lockKey, "LOCKED", "EX", 300, "NX");
+  if (!acquired) {
+    logger.warn("cron:expire-signatures: Lock acquisition failed, execution skipped.");
+    return NextResponse.json({
+      success: true,
+      message: "Another instance is already running.",
+    });
+  }
 
-while (processedCount < MAX_PROCESS_LIMIT) {
-const currentTake = Math.min(BATCH_SIZE, MAX_PROCESS_LIMIT - processedCount);
-const expiredDeals = await prisma.deal.findMany({
-where: {
-status: "PENDING_SIGNATURE",
-signDeadline: { lt: now },
-},
-include: {
-brand: { select: { id: true, userId: true, companyName: true } },
-campaign: {
-select: {
-id: true,
-title: true,
-isDirectInvite: true,
-totalBudget: true,
-status: true,
-brandId: true,
-},
-},
-influencer: {
-select: { id: true, userId: true, displayName: true },
-},
-},
-take: currentTake,
-});
+  try {
+    const now = new Date();
+    const BATCH_SIZE = 50;
+    const MAX_PROCESS_LIMIT = 200;
+    let processedCount = 0;
+    const results: Array<{ dealId: string; success: boolean; error?: string }> = [];
 
-if (expiredDeals.length === 0) {
-break;
-}
+    while (processedCount < MAX_PROCESS_LIMIT) {
+      const currentTake = Math.min(BATCH_SIZE, MAX_PROCESS_LIMIT - processedCount);
+      const expiredDeals = await prisma.deal.findMany({
+        where: {
+          status: "PENDING_SIGNATURE",
+          signDeadline: { lt: now },
+          deletedAt: null, // M11 & L10 FIX: Ignore soft-deleted deals
+        },
+        include: {
+          brand: { select: { id: true, userId: true, companyName: true } },
+          campaign: {
+            select: {
+              id: true,
+              title: true,
+              isDirectInvite: true,
+              totalBudget: true,
+              status: true,
+              brandId: true,
+            },
+          },
+          influencer: {
+            select: { id: true, userId: true, displayName: true },
+          },
+        },
+        take: currentTake,
+      });
 
-for (const deal of expiredDeals) {
-try {
-await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-await expireSingleDealSignature(tx, deal);
-});
+      if (expiredDeals.length === 0) {
+        break;
+      }
 
-results.push({
-dealId: deal.id,
-success: true,
-});
-} catch (err: unknown) {
-logger.error("Failed to expire deal signature", err, { dealId: deal.id });
-results.push({
-dealId: deal.id,
-success: false,
-error: err instanceof Error ? err.message : String(err),
-});
-}
-}
+      for (const deal of expiredDeals) {
+        try {
+          await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+            await expireSingleDealSignature(tx, deal);
+          });
 
-processedCount += expiredDeals.length;
-}
+          results.push({
+            dealId: deal.id,
+            success: true,
+          });
+        } catch (err: unknown) {
+          logger.error("Failed to expire deal signature", err, { dealId: deal.id });
+          results.push({
+            dealId: deal.id,
+            success: false,
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
+      }
 
-logger.info("Expire signatures cron run completed", { expiredCount: processedCount });
+      processedCount += expiredDeals.length;
+    }
 
-return NextResponse.json({
-success: true,
-scanned: processedCount,
-results,
-});
+    logger.info("Expire signatures cron run completed", { expiredCount: processedCount });
+
+    return NextResponse.json({
+      success: true,
+      scanned: processedCount,
+      results,
+    });
+  } finally {
+    // Release lock safely
+    await redis.del(lockKey).catch(() => {});
+  }
 }
 
 export const POST = apiWrapper(_handler_POST);
@@ -107,31 +126,32 @@ select: { id: true },
 });
 
 if (wallet && deal.amount > 0) {
-const refundAmount = getDealTotalAmount(deal);
-const isCampaignPoolRefund = !deal.campaign.isDirectInvite;
-await tx.wallet.update({
-where: { id: wallet.id },
-data: {
-...(isCampaignPoolRefund
-? { pendingBalance: { increment: refundAmount } }
-: { balance: { increment: refundAmount } }),
-},
-});
+    const refundAmount = getDealTotalAmount(deal);
+    // Always shift funds from pendingBalance -> balance.
+    // incrementing pendingBalance would create phantom escrow; incrementing
+    // balance alone without decrementing pendingBalance would duplicate money.
+    await tx.wallet.update({
+      where: { id: wallet.id },
+      data: {
+        pendingBalance: { decrement: refundAmount },
+        balance: { increment: refundAmount },
+      },
+    });
 
-await tx.transaction.create({
-data: {
-walletId: wallet.id,
-dealId: deal.id,
-type: "REFUND",
-amount: refundAmount,
-status: "COMPLETED",
-description: `Refund for expired invite: ${deal.campaign.title}`,
-metadata: {
-balanceImpact: !isCampaignPoolRefund,
-source: isCampaignPoolRefund ? "campaign_pool_refund" : "direct_invite_refund",
-},
-},
-});
+  await tx.transaction.create({
+    data: {
+      walletId: wallet.id,
+      dealId: deal.id,
+      type: "REFUND",
+      amount: refundAmount,
+      status: "COMPLETED",
+      description: `Refund for expired invite: ${deal.campaign.title}`,
+      metadata: {
+        balanceImpact: true,
+        source: "wallet_reserved_refund",
+      },
+    },
+  });
 }
 }
 

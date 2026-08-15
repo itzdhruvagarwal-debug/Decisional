@@ -12,11 +12,12 @@ if (!configuredSecret) {
 throw AppError.internal("CRON_SECRET is not configured");
 }
 
-// 1. Verify standard Authorization: Bearer <secret>
-const expectedAuth = `Bearer ${configuredSecret}`;
-const expectedAuthHash = createHash("sha256").update(expectedAuth).digest();
-const actualAuthHash = createHash("sha256").update(authHeader || "").digest();
-const isAuthValid = authHeader && timingSafeEqual(actualAuthHash, expectedAuthHash);
+  // 1. Verify standard Authorization: Bearer <secret> (case-insensitive per RFC-7235)
+  const authHeaderNormalized = authHeader ? authHeader.replace(/^bearer /i, `Bearer `) : "";
+  const expectedAuth = `Bearer ${configuredSecret}`;
+  const expectedAuthHash = createHash("sha256").update(expectedAuth).digest();
+  const actualAuthHash = createHash("sha256").update(authHeaderNormalized || "").digest();
+  const isAuthValid = authHeader && timingSafeEqual(actualAuthHash, expectedAuthHash);
 
 // 2. Verify fallback x-cron-secret: <secret>
 const expectedXCronHash = createHash("sha256").update(configuredSecret).digest();

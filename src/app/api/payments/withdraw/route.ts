@@ -228,15 +228,24 @@ body: successRes,
 }, session.user.id);
 
 return ApiResponse.success(withdrawal, responseMessage);
-} catch (error: unknown) {
-// Release key on failure so user can retry
-await releaseIdempotencyKey(idempotencyKey, session.user.id);
+  } catch (error: unknown) {
+    // IMPORTANT: Only release the idempotency key for deterministic / unambiguous failures.
+    // If the withdrawal was saved in PROCESSING state (e.g. gateway timeout), the key must
+    // remain held until the webhook reconciles the payout outcome. Releasing early would let
+    // the user resubmit immediately and create a second withdrawal / double-payout.
+    const isAmbiguousGatewayState =
+      error instanceof AppError &&
+      (error.message === "GATEWAY_TIMEOUT" || error.message === "GATEWAY_AMBIGUOUS");
 
-if (error instanceof AppError) {
-return ApiResponse.error(error.message, error.statusCode);
-}
-return handleWithdrawalPostError(error);
-}
+    if (!isAmbiguousGatewayState) {
+      await releaseIdempotencyKey(idempotencyKey, session.user.id);
+    }
+
+    if (error instanceof AppError) {
+      return ApiResponse.error(error.message, error.statusCode);
+    }
+    return handleWithdrawalPostError(error);
+  }
 }
 
 // Wrapped handlers via apiWrapper

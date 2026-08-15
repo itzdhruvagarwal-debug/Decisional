@@ -278,22 +278,31 @@ return { success: true, url, key, size: file.length };
 }
 
 async function deleteFromLocal(key: string): Promise<DeleteResult> {
-const fs = await import("node:fs/promises");
-const path = await import("node:path");
-const filePath = path.join(process.cwd(), "public", "uploads", key);
-try {
-await fs.unlink(filePath);
-logger.debug("Local file deleted", { filePath });
-return { success: true };
-} catch (err: unknown) {
-const code = (err as NodeJS.ErrnoException).code;
-if (code === "ENOENT") {
-// File already gone treat as success
-return { success: true };
-}
-logger.error("Local file delete failed", err, { filePath });
-return { success: false, error: "Local file deletion failed" };
-}
+  const fs = await import("node:fs/promises");
+  const path = await import("node:path");
+
+  // SECURITY: Resolve and strictly verify path stays within uploadsRoot.
+  // path.join alone does not prevent traversal (e.g. key = "../../.env").
+  const uploadsRoot = path.resolve(process.cwd(), "public", "uploads");
+  const filePath = path.resolve(uploadsRoot, key);
+  if (!filePath.startsWith(uploadsRoot + path.sep) && filePath !== uploadsRoot) {
+    logger.error("Path traversal attempt blocked in deleteFromLocal", { key, filePath });
+    return { success: false, error: "Invalid storage key" };
+  }
+
+  try {
+    await fs.unlink(filePath);
+    logger.debug("Local file deleted", { filePath });
+    return { success: true };
+  } catch (err: unknown) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") {
+      // File already gone treat as success
+      return { success: true };
+    }
+    logger.error("Local file delete failed", err, { filePath });
+    return { success: false, error: "Local file deletion failed" };
+  }
 }
 
 async function deleteFromS3(key: string): Promise<DeleteResult> {

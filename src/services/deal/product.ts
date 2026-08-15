@@ -16,6 +16,10 @@ const deal = await lockAndFetchDealForAction(tx, dealId);
 
 if (deal.influencer.userId !== userId) throw AppError.forbidden("Unauthorized");
 if (!deal.requiresProduct) throw AppError.badRequest("This deal does not require product shipping");
+// Guard: no product actions on terminal or disputed deals
+if (["CANCELLED", "COMPLETED", "DISPUTED"].includes(deal.status)) {
+  throw AppError.badRequest(`Cannot submit shipping address on a deal in ${deal.status} status`);
+}
 if (!["ADDRESS_PENDING", "READY_TO_DISPATCH"].includes(deal.productFulfillmentStatus)) {
 throw AppError.badRequest("Shipping address cannot be changed after dispatch");
 }
@@ -62,6 +66,10 @@ const deal = await lockAndFetchDealForAction(tx, dealId);
 
 if (deal.brand?.userId !== userId) throw AppError.forbidden("Unauthorized");
 if (!deal.requiresProduct) throw AppError.badRequest("This deal does not require product shipping");
+// Guard: dispatch only permitted when deal is active and payment held
+if (["CANCELLED", "COMPLETED", "DISPUTED", "PENDING_SIGNATURE", "PAYMENT_PENDING"].includes(deal.status)) {
+  throw AppError.badRequest(`Cannot dispatch product on a deal in ${deal.status} status`);
+}
 if (deal.productFulfillmentStatus !== "READY_TO_DISPATCH" || !deal.shippingAddress) {
 throw AppError.badRequest("Influencer shipping address is required before dispatch");
 }
@@ -98,6 +106,10 @@ const deal = await lockAndFetchDealForAction(tx, dealId);
 
 if (deal.influencer.userId !== userId) throw AppError.forbidden("Unauthorized");
 if (!deal.requiresProduct) throw AppError.badRequest("This deal does not require product shipping");
+// Guard: receiving not valid on terminal deals
+if (["CANCELLED", "COMPLETED", "DISPUTED"].includes(deal.status)) {
+  throw AppError.badRequest(`Cannot confirm receipt on a deal in ${deal.status} status`);
+}
 if (deal.productFulfillmentStatus !== "DISPATCHED") {
 throw AppError.badRequest("Product must be dispatched before it can be marked received");
 }

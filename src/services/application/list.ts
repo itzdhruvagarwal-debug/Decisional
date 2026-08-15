@@ -47,15 +47,16 @@ where.influencerId = profile.id;
 if (params.campaignId) {
 where.campaignId = params.campaignId;
 await checkCampaignOwnership(params.campaignId, userId, userType);
-} else if (!isInfluencer(userType) && isBrand(userType)) {
-const profile = await prisma.brandProfile.findUnique({
-where: { userId },
-select: { id: true },
-});
-if (profile) {
-where.campaign = { brandId: profile.id };
-}
-}
+  } else if (!isInfluencer(userType) && isBrand(userType)) {
+    const profile = await prisma.brandProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+    // SECURITY: if brand has no profile, return null immediately.
+    // Without this guard, where stays as {} and exposes ALL applications to this user.
+    if (!profile) return null;
+    where.campaign = { brandId: profile.id };
+  }
 
 if (params.status) where.status = params.status as ApplicationStatus;
 

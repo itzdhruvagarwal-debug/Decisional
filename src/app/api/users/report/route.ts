@@ -8,8 +8,8 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 const reportBodySchema = z.object({
 reportedUserId: z.string().cuid(),
-reason: z.string().min(3),
-description: z.string().optional(),
+reason: z.string().min(3).max(300, "Reason must be at most 300 characters"),
+description: z.string().max(2000, "Description must be at most 2000 characters").optional(),
 });
 
 async function _handler_POST(request: NextRequest) {

@@ -53,16 +53,18 @@ publishedAt: string;
 }
 
 export interface YouTubeVideo {
-id: string;
-title: string;
-description: string;
-thumbnail: string;
-publishedAt: string;
-viewCount: number;
-likeCount: number;
-commentCount: number;
-duration: string;
-isLive: boolean;
+  id: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  publishedAt: string;
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+  duration: string;
+  isLive: boolean;
+  /** Privacy status from YouTube API snippet ("public" | "private" | "unlisted"). Optional — only present when fetched with status part. */
+  privacyStatus?: string;
 }
 
 export interface YouTubeInsights {

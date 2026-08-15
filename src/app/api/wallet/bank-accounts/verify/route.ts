@@ -66,14 +66,20 @@ async function _handler_POST(req: NextRequest) {
     });
   }
 
-  // 3. UPI accounts — skip penny-drop (not supported for VPA)
+  // 3. UPI accounts — auto-verify (penny-drop FAV is not applicable for VPA).
+  //    Previously this returned HTTP 400, leaving isVerified=false and permanently
+  //    blocking UPI users from withdrawing (withdraw route requires isVerified=true).
   const isUpiAccount =
     bankAccount.ifscCode === "UPI00000000" || bankAccount.accountNumber === "UPI_PAYOUT";
   if (isUpiAccount) {
-    return NextResponse.json(
-      { error: "UPI accounts do not require bank-level penny-drop verification." },
-      { status: 400 }
-    );
+    await prisma.bankAccount.update({
+      where: { id: bankAccountId },
+      data: { isVerified: true, verifiedAt: new Date() },
+    });
+    return NextResponse.json({
+      success: true,
+      message: "UPI account auto-verified successfully.",
+    });
   }
 
   // 4. Decrypt stored account number for FAV

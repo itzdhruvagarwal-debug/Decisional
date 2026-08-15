@@ -98,7 +98,7 @@ data: { updatedAt: new Date() },
 const existingDispute = await tx.dispute.findFirst({
 where: {
 dealId: data.dealId,
-status: { in: ["OPEN", "TIER1_AUTO", "TIER2_MEDIATION"] },
+status: { notIn: ["RESOLVED", "CLOSED"] },
 },
 });
 

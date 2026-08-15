@@ -181,6 +181,7 @@ type: "DEBIT",
 amount: debtPaid,
 status: "COMPLETED",
 description: `Debt recovery auto-deduction for outstanding clawback balance`,
+metadata: { balanceImpact: false, source: "debt_recovery" },
 },
 });
 

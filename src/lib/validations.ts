@@ -342,10 +342,12 @@ function validateBudgetLimitsAndAges(value: CampaignValidationValue, ctx: z.Refi
 // ==================== APPLICATION SCHEMAS ====================
 
 export const createApplicationSchema = z.object({
-campaignId: dbIdSchema,
-proposal: z.string().min(10, "Proposal must be at least 10 characters"),
-proposedRate: z.number().positive("Proposed rate must be positive"),
-estimatedDeliveryDays: z.number().int().positive().max(90).optional(),
+  campaignId: dbIdSchema,
+  proposal: z.string().min(10, "Proposal must be at least 10 characters"),
+  // M22 FIX: Must be a positive integer (paise); floats and overflow values rejected.
+  // Max 1,00,00,000 paise = ₹1,00,000 (1 lakh) to prevent integer overflow and unrealistic rates.
+  proposedRate: z.number().int("Proposed rate must be a whole number").positive("Proposed rate must be positive").max(10_000_000, "Proposed rate exceeds maximum allowed value"),
+  estimatedDeliveryDays: z.number().int().positive().max(90).optional(),
 });
 
 export const contentSubmissionItemSchema = z.object({

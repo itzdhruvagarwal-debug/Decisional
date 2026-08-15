@@ -79,23 +79,29 @@ parsed.contentUrls,
 return ApiResponse.success(result, "Content submitted");
 }
 
-if (action === "review_content") {
-if (!hasPermission(session.user.userType, "REVIEW_CONTENT")) {
-return ApiResponse.forbidden("Brand access required");
-}
-const parsed = contentApprovalSchema.parse(body);
-if (parsed.approved && !parsed.reviews) {
-await DealService.approveContent(session.user.id, parsed.dealId);
-return ApiResponse.success(null, "Content approved");
-} else {
-const result = await DealService.reviewContent(
-session.user.id,
-parsed.dealId,
-parsed.reviews || []
-);
-return ApiResponse.success(result, "Content reviewed");
-}
-}
+  if (action === "review_content") {
+    if (!hasPermission(session.user.userType, "REVIEW_CONTENT")) {
+      return ApiResponse.forbidden("Brand access required");
+    }
+    const parsed = contentApprovalSchema.parse(body);
+    if (parsed.approved && !parsed.reviews) {
+      await DealService.approveContent(session.user.id, parsed.dealId);
+      return ApiResponse.success(null, "Content approved");
+    } else {
+      // M18 FIX: When rejecting (approved=false), reviews are required.
+      // Without this guard, an empty reviews array would silently call reviewContent
+      // with no feedback — the influencer would never know why their content was rejected.
+      if (!parsed.approved && (!parsed.reviews || parsed.reviews.length === 0)) {
+        return ApiResponse.error("At least one review comment is required when rejecting content", 400);
+      }
+      const result = await DealService.reviewContent(
+        session.user.id,
+        parsed.dealId,
+        parsed.reviews || []
+      );
+      return ApiResponse.success(result, "Content reviewed");
+    }
+  }
 
 if (action === "verify_post") {
 if (!isInfluencer(session.user.userType)) {

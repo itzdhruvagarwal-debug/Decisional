@@ -114,6 +114,9 @@ let score = 0;
 const todayWithdrawals = await prisma.withdrawal.count({
 where: {
 wallet: { userId },
+// M15 FIX: Exclude failed/reversed withdrawals from velocity count.
+// Counting failed attempts penalized users unfairly when bank/gateway was down.
+status: { notIn: ["FAILED", "REVERSED"] },
 createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
 },
 });
@@ -130,6 +133,7 @@ score += 60;
 const last24hWithdrawals = await prisma.withdrawal.findMany({
 where: {
 wallet: { userId },
+status: { notIn: ["FAILED", "REVERSED"] },
 createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
 },
 select: { amount: true },
@@ -162,6 +166,11 @@ const duplicateBank = await prisma.withdrawal.findFirst({
 where: {
 bankAccountHash,
 wallet: { userId: { not: userId } },
+// M16 FIX: Only check COMPLETED/PROCESSING withdrawals.
+// Including FAILED attempts caused false positives: a malicious actor's
+// failed attempt with someone else's account would permanently block the
+// legitimate owner with DUPLICATE_BANK_ACCOUNT_REUSE.
+status: { in: ["COMPLETED", "PROCESSING"] },
 },
 select: { id: true },
 });

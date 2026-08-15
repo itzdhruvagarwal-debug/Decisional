@@ -6,6 +6,7 @@ import { cache } from "@/lib/cache";
 import { NextResponse } from "next/server";
 import { routeParamsSchema } from "@/lib/validations";
 import { getDealParticipantRole } from "@/lib/utils";
+import { isAdmin } from "@/lib/rbac";
 
 const paramsSchema = routeParamsSchema;
 
@@ -74,13 +75,15 @@ if (!deal) {
 return NextResponse.json({ error: "Deal not found" }, { status: 404 });
 }
 
-// Verify access
+// Verify access: admins can inspect any deal; participants can only view their own.
 // Note: If cached deal is stale and permissions changed, this might need re-check against DB for sensitive ops.
 // However, for read-only view, caching the deal object is acceptable.
 const { isInfluencer, isBrand } = getDealParticipantRole(deal, session.user.id);
 
-if (!isInfluencer && !isBrand) {
-return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+// M19 FIX: admins were incorrectly blocked from viewing deals by ID.
+// isAdmin check must come before the participant check.
+if (!isAdmin(session.user.userType) && !isInfluencer && !isBrand) {
+  return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 }
 
 return NextResponse.json({ deal });

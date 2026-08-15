@@ -46,18 +46,25 @@ where: { id: latestSubmission.id, status: "PENDING" },
 data: { status: "APPROVED", reviewedAt: now },
 });
 
-if (submissionUpdate.count === 0) return false;
+    if (submissionUpdate.count === 0) {
+      // H12 FIX: Must throw (not return false) to trigger Prisma transaction rollback.
+      // Returning false COMMITS the transaction, leaving contentSubmission=APPROVED
+      // while deal status remains unchanged — a permanently inconsistent state.
+      throw new Error("SUBMISSION_ALREADY_PROCESSED");
+    }
 
-const dealUpdate = await tx.deal.updateMany({
-where: { id: deal.id, status: "CONTENT_SUBMITTED" },
-data: {
-status: "CONTENT_APPROVED",
-approvedAt: now,
-rejectionReason: null,
-},
-});
+    const dealUpdate = await tx.deal.updateMany({
+      where: { id: deal.id, status: "CONTENT_SUBMITTED" },
+      data: {
+        status: "CONTENT_APPROVED",
+        approvedAt: now,
+        rejectionReason: null,
+      },
+    });
 
-if (dealUpdate.count === 0) return false;
+    if (dealUpdate.count === 0) {
+      throw new Error("DEAL_NOT_ELIGIBLE_FOR_AUTO_APPROVE");
+    }
 
 await NotificationService.createNotification({
 userId: deal.influencer.userId,

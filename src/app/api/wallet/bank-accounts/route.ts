@@ -193,8 +193,13 @@ if (rateLimitError) return rateLimitError;
 const verification = await verifyAndGetBankAccount(req, userId);
 if (verification.errorResponse) return verification.errorResponse;
 
-await prisma.bankAccount.delete({ where: { id: verification.id } });
-return NextResponse.json({ success: true });
+  // L4 FIX: Soft-delete instead of hard delete to preserve audit trail.
+  // Hard delete loses the record entirely; soft-delete keeps it for reconciliation and fraud investigation.
+  await prisma.bankAccount.update({
+    where: { id: verification.id },
+    data: { deletedAt: new Date() },
+  });
+  return NextResponse.json({ success: true });
 } catch (error) {
 logger.error("Failed to delete bank account", error);
 if (error instanceof AppError) {

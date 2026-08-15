@@ -434,7 +434,13 @@ const finalRows = [
 ...platformFooter,
 ];
 
-const filename = `decisional-contract-${deal.campaign.title.replace(/\s+/g, "_")}-${dealId.slice(0, 8)}-${Date.now()}.csv`;
+  // L5 FIX: Sanitize campaign title before embedding in Content-Disposition filename.
+  // Raw titles with quotes, semicolons, or newlines could break the header or enable header injection.
+  const safeTitle = deal.campaign.title
+    .replace(/[^\w\s-]/g, "") // strip non-word chars except spaces and hyphens
+    .replace(/\s+/g, "_")
+    .slice(0, 80);
+  const filename = `decisional-contract-${safeTitle}-${dealId.slice(0, 8)}-${Date.now()}.csv`;
 const response = csvResponse(toCsv(finalRows), filename);
 
 // Surface verification status as a response header for programmatic callers.

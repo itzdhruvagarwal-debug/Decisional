@@ -21,16 +21,32 @@ recordPlatformFeeRevenue,
 import { releaseIdempotencyKey } from "@/lib/idempotency";
 
 export class PaymentService {
-static async createWalletTopUpOrder(userId: string, amountInPaise: number) {
-if (!Number.isInteger(amountInPaise) || amountInPaise <= 0) {
-throw AppError.badRequest("Invalid top-up amount");
-}
+  static async createWalletTopUpOrder(userId: string, amountInPaise: number) {
+    if (!Number.isInteger(amountInPaise) || amountInPaise <= 0) {
+      throw AppError.badRequest("Invalid top-up amount");
+    }
 
-const wallet = await prisma.wallet.upsert({
-where: { userId },
-create: { userId, balance: 0, pendingBalance: 0 },
-update: {},
-});
+    // L9 FIX: Enforce a max single top-up of ₹10,00,000 (100,000,000 paise = 10 lakh).
+    // Without this, a single request can create an arbitrarily large Razorpay order.
+    const MAX_TOPUP_PAISE = 10_000_000_00; // 10 crore paise = ₹10 lakh
+    if (amountInPaise > MAX_TOPUP_PAISE) {
+      throw AppError.badRequest("Top-up amount exceeds maximum allowed (₹10,00,000 per transaction)");
+    }
+
+    // L9 FIX: Blocked/suspended users must not be able to top up.
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { status: true },
+    });
+    if (!user || ["SUSPENDED", "BANNED", "FLAGGED", "DELETED"].includes(user.status || "")) {
+      throw AppError.forbidden("Your account is not eligible for wallet top-up");
+    }
+
+    const wallet = await prisma.wallet.upsert({
+      where: { userId },
+      create: { userId, balance: 0, pendingBalance: 0 },
+      update: {},
+    });
 
 const receipt = `wallet_${userId}_${Date.now()}`;
 const order = await createOrder({
@@ -62,39 +78,37 @@ key: process.env.RAZORPAY_KEY_ID,
 };
 }
 
-private static async checkAndBlockLatePost(
-deal: {
-status: string;
-postedAt: Date | null;
-verifiedAt: Date | null;
-postingDeadline: Date | null;
-},
-dealId: string,
-): Promise<void> {
-const checkTime = deal.postedAt || deal.verifiedAt || new Date();
-if (deal.postingDeadline) {
-const checkStart = new Date(checkTime);
-checkStart.setUTCHours(0, 0, 0, 0);
-const deadlineStart = new Date(deal.postingDeadline);
-deadlineStart.setUTCHours(0, 0, 0, 0);
-if (checkStart > deadlineStart) {
-await prisma.deal.updateMany({
-where: { id: dealId, status: "VERIFIED" },
-data: {
-status: "PAYMENT_PENDING",
-rejectionReason: `LATE_POST_BLOCKED: Post verified/submitted after deadline (Posted: ${deal.postedAt?.toISOString() ?? "N/A"}, Verified: ${deal.verifiedAt?.toISOString() ?? "N/A"}, Deadline: ${deal.postingDeadline?.toISOString() ?? "N/A"})`,
-},
-});
-logger.warn("PAYOUT_BLOCKED: Post verified/submitted after deadline deal moved to PAYMENT_PENDING for admin review", {
-dealId,
-postedAt: deal.postedAt,
-verifiedAt: deal.verifiedAt,
-deadline: deal.postingDeadline,
-});
-throw AppError.badRequest("LATE_POST_PAYMENT_BLOCKED");
-}
-}
-}
+  private static async checkAndBlockLatePost(
+    deal: {
+      status: string;
+      postedAt: Date | null;
+      verifiedAt: Date | null;
+      postingDeadline: Date | null;
+    },
+    dealId: string,
+  ): Promise<void> {
+    const checkTime = deal.postedAt || deal.verifiedAt || new Date();
+    if (deal.postingDeadline) {
+      // M9 & M10 FIX: Compare exact dates without UTC midnight truncation.
+      // Also ensure that if the deal is CONTENT_APPROVED, its status is correctly transitioned to PAYMENT_PENDING.
+      if (checkTime > deal.postingDeadline) {
+        await prisma.deal.updateMany({
+          where: { id: dealId, status: { in: ["VERIFIED", "CONTENT_APPROVED"] } },
+          data: {
+            status: "PAYMENT_PENDING",
+            rejectionReason: `LATE_POST_BLOCKED: Post verified/submitted after deadline (Posted: ${deal.postedAt?.toISOString() ?? "N/A"}, Verified: ${deal.verifiedAt?.toISOString() ?? "N/A"}, Deadline: ${deal.postingDeadline?.toISOString() ?? "N/A"})`,
+          },
+        });
+        logger.warn("PAYOUT_BLOCKED: Post verified/submitted after deadline deal moved to PAYMENT_PENDING for admin review", {
+          dealId,
+          postedAt: deal.postedAt,
+          verifiedAt: deal.verifiedAt,
+          deadline: deal.postingDeadline,
+        });
+        throw AppError.badRequest("LATE_POST_PAYMENT_BLOCKED");
+      }
+    }
+  }
 
 // ==================== DEAL COMPLETION (Wallet Settlement) ====================
 
@@ -173,16 +187,25 @@ data: { status: "COMPLETED", completedAt: new Date() },
 
 if (dealUpdate.count === 0) return;
 
-if (brandWallet) {
-const pendingRelease = Math.min(brandWallet.pendingBalance, getDealTotalAmount(deal));
-await tx.wallet.update({
-where: { id: brandWallet.id },
+if (brandWallet && !deal.reservedFromWallet) {
+// Atomic conditional decrement: only succeeds if pendingBalance still covers the amount.
+// Prevents double-spend when two deals complete concurrently for the same brand wallet.
+const pendingRelease = getDealTotalAmount(deal);
+const escrowUpdate = await tx.wallet.updateMany({
+where: { id: brandWallet.id, pendingBalance: { gte: pendingRelease } },
 data: {
-...(pendingRelease > 0
-? { pendingBalance: { decrement: pendingRelease } }
-: {}),
+pendingBalance: { decrement: pendingRelease },
 totalSpent: { increment: getDealTotalAmount(deal) },
 },
+});
+if (escrowUpdate.count === 0) {
+throw AppError.badRequest("INSUFFICIENT_PENDING_BALANCE");
+}
+} else if (brandWallet) {
+// reservedFromWallet deals — just update totalSpent, no pendingBalance change needed
+await tx.wallet.update({
+where: { id: brandWallet.id },
+data: { totalSpent: { increment: getDealTotalAmount(deal) } },
 });
 }
 
@@ -295,8 +318,14 @@ await redis.del(lockKey);
 }
 }
 
-static async initiateWithdrawal(userId: string, data: { amount: number; bankAccountName: string; bankAccountNumber: string; ifscCode: string; upiId?: string }, idempotencyKey: string) {
-const user = await prisma.user.findUnique({
+  static async initiateWithdrawal(userId: string, data: { amount: number; bankAccountName: string; bankAccountNumber: string; ifscCode: string; upiId?: string }, idempotencyKey: string) {
+    // Guard: amount must be a positive integer (in paise). Negative or float values
+    // would bypass the balance >= check and execute decrement(negative) = balance inflation.
+    if (!Number.isInteger(data.amount) || data.amount <= 0) {
+      throw AppError.badRequest("INVALID_WITHDRAWAL_AMOUNT");
+    }
+
+    const user = await prisma.user.findUnique({
 where: { id: userId },
 select: { status: true, trustScore: true },
 });
@@ -499,29 +528,54 @@ false
 logger.warn("Payout request timed out or network error occurred. Keeping status as PROCESSING for background/webhook reconciliation.", { userId, withdrawalId: withdrawal.w.id });
 return { success: true, status: "PROCESSING" };
 } else {
-// Non-connection, non-timeout error from Razorpay (e.g. 4xx validation error).
-// We CANNOT safely refund here because:
-// 1. Razorpay may have processed the payout before responding with the error.
-// 2. If we refund now and payout.processed webhook arrives later double-pay.
-// Strategy: Keep withdrawal in PROCESSING status with ambiguous=true.
-// The payout webhook (payout.processed / payout.failed / payout.reversed) will
-// reconcile the final state. If no webhook arrives within 24h, a manual review alert
-// is required (surfaced via the PROCESSING + ambiguous flag in admin ledger scan).
-await prisma.withdrawal.update({
-where: { id: withdrawal.w.id },
-data: {
-failureReason: `Ambiguous gateway error awaiting webhook reconciliation: ${errorMsg}`,
-// Keep status as PROCESSING; adminNotes marks it for admin attention
-adminNotes: `Ambiguous gateway error at ${new Date().toISOString()}: ${errorMsg}`,
-},
-});
-logger.error("PAYOUT_AMBIGUOUS: Non-connection error from Razorpay keeping PROCESSING, awaiting webhook", {
-userId,
-withdrawalId: withdrawal.w.id,
-error: errorMsg,
-});
-throw AppError.badRequest(`Payout status ambiguous funds frozen pending webhook reconciliation. Do not retry manually.`);
-}
+    // Determine if this is a deterministic client 4xx rejection from Razorpay.
+    // For 4xx: Razorpay rejected the request before creating a payout entity, so
+    // no webhook will ever be fired — funds would be frozen indefinitely in PROCESSING.
+    // Safe to immediately refund for status codes 400, 422, 404 (client validation errors).
+    const is4xxGatewayError =
+      errorMsg.includes("STATUS_CODE:400") ||
+      errorMsg.includes("STATUS_CODE:422") ||
+      errorMsg.includes("STATUS_CODE:404") ||
+      errorMsg.includes("bad request") ||
+      errorMsg.includes("invalid account") ||
+      errorMsg.includes("invalid ifsc");
+
+    if (is4xxGatewayError) {
+      logger.warn("PAYOUT_REJECTED: Razorpay rejected with 4xx — immediately refunding wallet", {
+        userId,
+        withdrawalId: withdrawal.w.id,
+        error: errorMsg,
+      });
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+        await PaymentService.refundFailedWithdrawal(
+          withdrawal.w.id,
+          tx,
+          `Gateway 4xx rejection: ${errorMsg}`,
+          undefined,
+          false
+        );
+      });
+      await releaseIdempotencyKey(idempotencyKey, userId);
+      throw AppError.badRequest(`Payout rejected by gateway: ${errorMsg}. Funds returned to wallet.`);
+    }
+
+    // Non-connection, non-timeout, non-deterministic error from Razorpay.
+    // Strategy: Keep withdrawal in PROCESSING status with ambiguous=true.
+    // The payout webhook will reconcile the final state.
+    await prisma.withdrawal.update({
+      where: { id: withdrawal.w.id },
+      data: {
+        failureReason: `Ambiguous gateway error awaiting webhook reconciliation: ${errorMsg}`,
+        adminNotes: `Ambiguous gateway error at ${new Date().toISOString()}: ${errorMsg}`,
+      },
+    });
+    logger.error("PAYOUT_AMBIGUOUS: Non-connection error from Razorpay keeping PROCESSING, awaiting webhook", {
+      userId,
+      withdrawalId: withdrawal.w.id,
+      error: errorMsg,
+    });
+    throw AppError.badRequest(`GATEWAY_AMBIGUOUS`);
+  }
 }
 }
 

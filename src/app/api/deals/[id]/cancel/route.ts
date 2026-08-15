@@ -63,31 +63,34 @@ if (["COMPLETED", "CANCELLED", "DISPUTED"].includes(deal.status)) {
 return NextResponse.json({ success: false, message: `Deal cannot be cancelled in status ${deal.status}` }, { status: 400 });
 }
 
-const cancelSummary = await calculateCancellation(dealId);
-const { refundAmount, payoutAmount, platformFeeKept, reason } = cancelSummary;
-
 // DB updates in transaction
 try {
-await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-await executeCancellationTransaction(tx, deal, cancelSummary, session.user.id);
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    // H4 FIX: calculateCancellation must run inside the transaction after locking the deal row.
+    // Calling it outside is a TOCTOU race — deal status can change between calculation
+    // and execution, causing stale payout amounts to be used for financial settlement.
+    const cancelSummary = await calculateCancellation(dealId, tx);
+    const { refundAmount, payoutAmount, platformFeeKept, reason } = cancelSummary;
 
-await createActivityLog({
-userId: session.user.id,
-action: "CANCEL_DEAL",
-entityType: "Deal",
-entityId: dealId,
-metadata: {
-payoutAmount,
-refundAmount,
-platformFeeKept,
-reason,
-},
-}, tx);
-}, {
-isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-});
+    await executeCancellationTransaction(tx, deal, cancelSummary, session.user.id);
 
-return NextResponse.json({ success: true, message: `Deal cancelled successfully. Payout: ${payoutAmount}, Refund: ${refundAmount}` });
+    await createActivityLog({
+      userId: session.user.id,
+      action: "CANCEL_DEAL",
+      entityType: "Deal",
+      entityId: dealId,
+      metadata: {
+        payoutAmount,
+        refundAmount,
+        platformFeeKept,
+        reason,
+      },
+    }, tx);
+  }, {
+    isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+  });
+
+  return NextResponse.json({ success: true, message: `Deal cancelled successfully.` });
 } catch (txError) {
 if (txError instanceof AppError) throw txError;
 logger.error("Database transaction failed during cancellation", txError);
@@ -197,20 +200,28 @@ let brandWallet = await tx.wallet.findUnique({
 where: { userId: deal.brand.userId },
 });
 
-if (brandWallet) {
-const updateData = deal.reservedFromWallet
-? {
-balance: { increment: refundAmount },
-pendingBalance: { decrement: deal.totalAmount ?? deal.amount },
-}
-: {
-pendingBalance: { decrement: deal.totalAmount ?? deal.amount },
-};
-
-brandWallet = await tx.wallet.update({
-where: { id: brandWallet.id },
-data: updateData,
-});
+  if (brandWallet) {
+    if (deal.reservedFromWallet) {
+      // Wallet-reserved deals: shift pendingBalance -> balance
+      brandWallet = await tx.wallet.update({
+        where: { id: brandWallet.id },
+        data: {
+          balance: { increment: refundAmount },
+          pendingBalance: { decrement: deal.totalAmount ?? deal.amount },
+        },
+      });
+    } else {
+      // H5 FIX: Non-wallet deals: refundAmount must be credited to balance.
+      // Previously only decremented pendingBalance, losing the brand's refund entirely
+      // and potentially driving pendingBalance negative.
+      brandWallet = await tx.wallet.update({
+        where: { id: brandWallet.id },
+        data: {
+          balance: { increment: refundAmount },
+          pendingBalance: { decrement: deal.totalAmount ?? deal.amount },
+        },
+      });
+    }
 } else {
 brandWallet = await tx.wallet.create({
 data: {

@@ -340,23 +340,24 @@ version: 3,
 
 // ==================== FEE CALCULATORS ====================
 
-export async function calculateCancellation(dealId: string): Promise<{
-refundAmount: number;
-payoutAmount: number;
-platformFeeKept: number;
-reason: string;
+export async function calculateCancellation(dealId: string, tx?: Prisma.TransactionClient): Promise<{
+  refundAmount: number;
+  payoutAmount: number;
+  platformFeeKept: number;
+  reason: string;
 }> {
-const deal = await prisma.deal.findUnique({
-where: { id: dealId },
-select: {
-id: true,
-amount: true,
-totalAmount: true,
-status: true,
-platformFee: true,
-contractTerms: true,
-},
-});
+  const client = tx || prisma;
+  const deal = await client.deal.findUnique({
+    where: { id: dealId },
+    select: {
+      id: true,
+      amount: true,
+      totalAmount: true,
+      status: true,
+      platformFee: true,
+      contractTerms: true,
+    },
+  });
 
 if (!deal) {
 throw AppError.notFound("Deal not found");

@@ -8,8 +8,8 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 const feedbackSchema = z.object({
 type: z.enum(["BUG", "FEEDBACK"]),
-title: z.string().min(5, "Title must be at least 5 characters long"),
-description: z.string().min(10, "Description must be at least 10 characters long"),
+title: z.string().min(5, "Title must be at least 5 characters long").max(200, "Title must be at most 200 characters"),
+description: z.string().min(10, "Description must be at least 10 characters long").max(5000, "Description must be at most 5000 characters"),
 screenshotUrl: z
 .string()
 .trim()

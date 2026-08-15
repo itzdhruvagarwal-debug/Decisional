@@ -31,30 +31,34 @@ campaign: { select: { title: true } };
 const paramsSchema = routeParamsSchema;
 
 async function validateAndGetDealToSign(dealId: string, userId: string) {
-const deal = await prisma.deal.findUnique({
-where: { id: dealId },
-include: {
-influencer: { select: { userId: true, displayName: true } },
-brand: { select: { userId: true, companyName: true } },
-campaign: { select: { title: true } },
-},
-});
+  const deal = await prisma.deal.findFirst({
+    where: { id: dealId, deletedAt: null },
+    include: {
+      influencer: { select: { userId: true, displayName: true } },
+      brand: { select: { userId: true, companyName: true } },
+      campaign: { select: { title: true } },
+    },
+  });
 
-if (!deal) {
-throw AppError.notFound("Deal not found");
-}
+  if (!deal) {
+    throw AppError.notFound("Deal not found");
+  }
 
-if (deal.status !== "PENDING_SIGNATURE") {
-throw AppError.badRequest("Deal is not pending signature");
-}
+  if (deal.status !== "PENDING_SIGNATURE") {
+    throw AppError.badRequest("Deal is not pending signature");
+  }
 
-const { isInfluencer, isBrand } = getDealParticipantRole(deal, userId);
+  if (deal.signDeadline && new Date() > new Date(deal.signDeadline)) {
+    throw AppError.badRequest("Contract signature deadline has expired");
+  }
 
-if (!isInfluencer && !isBrand) {
-throw AppError.forbidden("You are not a party to this deal");
-}
+  const { isInfluencer, isBrand } = getDealParticipantRole(deal, userId);
 
-return { deal, isInfluencer };
+  if (!isInfluencer && !isBrand) {
+    throw AppError.forbidden("You are not a party to this deal");
+  }
+
+  return { deal, isInfluencer };
 }
 
 function handleSignContractError(error: unknown) {

@@ -80,19 +80,20 @@ select: { accessToken: true },
 const decryptedAccessToken = oauth?.accessToken ? decrypt(oauth.accessToken) : null;
 if (decryptedAccessToken) {
 const igPost = await findPostByUrl(decryptedAccessToken, postUrl);
-if (igPost) {
-return {
-isPublic: await checkIsInstagramPostPublic(igPost.permalink),
-caption: igPost.caption,
-isPaidPartnership: igPost.isPaidPartnership ?? false,
-mentions: [...(igPost.caption.match(/@(\w+)/g) || [])].map((m) => m.slice(1)),
-hashtags: [...(igPost.caption.match(/#(\w+)/g) || [])].map((h) => h.slice(1)),
-postTimestamp: new Date(igPost.timestamp),
-likeCount: igPost.likeCount,
-commentCount: igPost.commentsCount,
-// viewCount: not available in basic IG Graph API without Insights scope
-};
-}
+        if (igPost) {
+          const caption = igPost.caption ?? "";
+          return {
+            isPublic: await checkIsInstagramPostPublic(igPost.permalink),
+            caption,
+            isPaidPartnership: igPost.isPaidPartnership ?? false,
+            mentions: [...(caption.match(/@(\w+)/g) || [])].map((m) => m.slice(1)),
+            hashtags: [...(caption.match(/#(\w+)/g) || [])].map((h) => h.slice(1)),
+            postTimestamp: new Date(igPost.timestamp),
+            likeCount: igPost.likeCount,
+            commentCount: igPost.commentsCount,
+            // viewCount: not available in basic IG Graph API without Insights scope
+          };
+        }
 }
 } catch (apiError) {
 logger.warn("Instagram official verification failed", {

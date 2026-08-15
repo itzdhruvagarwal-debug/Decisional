@@ -164,16 +164,34 @@ throw error;
 }
 
 /**
-* Batch cleanup for expired keys
-* Should be called by a cron job.
-*/
+ * Batch cleanup for expired keys
+ * Should be called by a cron job.
+ * L2 FIX: Batched in chunks of 1000 to avoid long table locks on large datasets.
+ */
 export async function cleanupExpiredIdempotencyKeys(): Promise<number> {
-const result = await prisma.idempotencyKey.deleteMany({
-where: {
-expiresAt: { lt: new Date() }
-}
-});
-return result.count;
+  const BATCH_SIZE = 1000;
+  let totalDeleted = 0;
+
+  // Process in batches to avoid long-running table locks
+  while (true) {
+    // Find IDs to delete first (read lock is lighter than write lock)
+    const toDelete = await prisma.idempotencyKey.findMany({
+      where: { expiresAt: { lt: new Date() } },
+      select: { id: true },
+      take: BATCH_SIZE,
+    });
+
+    if (toDelete.length === 0) break;
+
+    const result = await prisma.idempotencyKey.deleteMany({
+      where: { id: { in: toDelete.map((r: { id: string }) => r.id) } },
+    });
+    totalDeleted += result.count;
+
+    if (toDelete.length < BATCH_SIZE) break; // Last batch processed
+  }
+
+  return totalDeleted;
 }
 
 export async function saveIdempotencyResponse(

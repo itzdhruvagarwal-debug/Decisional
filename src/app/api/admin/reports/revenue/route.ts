@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 import { apiWrapper, ApiResponse } from "@/lib/api-wrapper";
+import { auth } from "@/lib/auth";
+import { requireActiveAdmin } from "@/lib/admin-auth";
 import prisma from "@/lib/db";
 import { toCsv, csvResponse, paiseToRupees, getIndianFYBounds, getCurrentFY } from "@/lib/csv-export";
 import { format } from "date-fns";
@@ -7,12 +9,17 @@ import { RATE_LIMIT_CONFIGS } from "@/lib/rate-limit";
 import { getPlatformHeader, getPlatformFooter } from "@/lib/platform-config";
 
 async function _handler(req: NextRequest) {
-const { searchParams } = new URL(req.url);
-const fy = searchParams.get("fy") ?? getCurrentFY();
-const fmt = searchParams.get("format") === "csv" ? "csv" : "json";
+  // M23 FIX: Re-verify admin status against DB on every request.
+  // JWT-only checks allow demoted admins to still access this route until token expiry.
+  const session = await auth();
+  await requireActiveAdmin(session?.user);
 
-const bounds = getIndianFYBounds(fy);
-if (!bounds) return ApiResponse.error("Invalid FY format. Use YYYY-YY e.g. 2025-26");
+  const { searchParams } = new URL(req.url);
+  const fy = searchParams.get("fy") ?? getCurrentFY();
+  const fmt = searchParams.get("format") === "csv" ? "csv" : "json";
+
+  const bounds = getIndianFYBounds(fy);
+  if (!bounds) return ApiResponse.error("Invalid FY format. Use YYYY-YY e.g. 2025-26");
 
 // Get monthly revenue data for the FY (12 months)
 const startDate = bounds.start;

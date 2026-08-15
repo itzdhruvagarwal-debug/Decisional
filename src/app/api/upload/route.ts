@@ -379,11 +379,11 @@ logger.warn("Failed to parse form data in upload API", { error });
 return ApiResponse.error("Invalid multipart payload");
 }
 
-if (!formData.has("file") && !formData.has("randomData")) {
+if (!formData.has("file")) {
 return ApiResponse.error("Empty multipart body");
 }
 
-const file = formData.get("file") as File | null;
+const rawFile = formData.get("file");
 const folder = (formData.get("folder") as string) || "misc";
 
 const allowedFolders = ["avatars", "logos", "content", "posts", "feedback", "chat"];
@@ -391,9 +391,11 @@ if (!allowedFolders.includes(folder)) {
 return ApiResponse.error("Invalid upload folder");
 }
 
-if (!file) {
-return ApiResponse.error("No file provided");
+if (!(rawFile instanceof File)) {
+return ApiResponse.error("No file provided or invalid file field");
 }
+
+const file = rawFile;
 
 if (!canUploadToFolder(session.user.userType, folder, file.type)) {
 logger.warn("Blocked unauthorized upload folder or MIME combination", {

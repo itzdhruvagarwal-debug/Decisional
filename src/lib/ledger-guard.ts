@@ -85,112 +85,119 @@ pendingDrift?: number;
 
 /**
 * Recalculate and verify a specific user's wallet balance.
-* Returns null if everything is correct, or anomaly data ifdrift exists.
+* Returns null if everything is correct, or anomaly data if drift exists.
 */
 export async function verifyWalletBalance(userId: string): Promise<VerificationAnomaly | null> {
-const wallet = await WalletService.getWalletBasic(userId);
-if (!wallet) {
-return null;
-}
-const transactions = await prisma.transaction.findMany({
-where: {
-wallet: { userId },
-status: "COMPLETED",
-deletedAt: null,
-},
-select: {
-type: true,
-amount: true,
-description: true,
-metadata: true,
-razorpayPaymentId: true,
-},
-});
+  return prisma.$transaction(async (tx) => {
+    // 1. Lock the wallet row to prevent concurrent updates during verification
+    await tx.$queryRaw`SELECT id FROM "Wallet" WHERE "userId" = ${userId} FOR UPDATE`;
 
-const balanceTransactions = (transactions as LedgerTransaction[]).filter(
-impactsStoredWalletBalance,
-);
-const totalCredits = balanceTransactions.reduce(
-(sum: number, transaction: LedgerTransaction) =>
-CREDIT_TYPES.has(transaction.type) ? sum + transaction.amount : sum,
-0,
-);
-const totalDebits = balanceTransactions.reduce(
-(sum: number, transaction: LedgerTransaction) =>
-DEBIT_TYPES.has(transaction.type) ? sum + transaction.amount : sum,
-0,
-);
-const calculatedBalance = totalCredits - totalDebits;
+    const wallet = await tx.wallet.findUnique({
+      where: { userId },
+    });
+    if (!wallet) {
+      return null;
+    }
 
-const pendingDrift = Math.min(wallet.pendingBalance, 0);
+    const transactions = await tx.transaction.findMany({
+      where: {
+        wallet: { userId },
+        status: "COMPLETED",
+        deletedAt: null,
+      },
+      select: {
+        type: true,
+        amount: true,
+        description: true,
+        metadata: true,
+        razorpayPaymentId: true,
+      },
+    });
 
-if (calculatedBalance !== wallet.balance || pendingDrift !== 0) {
-const drift = wallet.balance - calculatedBalance;
-const anomaly = {
-walletId: wallet.id,
-userId: wallet.userId,
-calculatedBalance,
-storedBalance: wallet.balance,
-drift,
-storedPendingBalance: wallet.pendingBalance,
-pendingDrift,
-};
+    const balanceTransactions = (transactions as LedgerTransaction[]).filter(
+      impactsStoredWalletBalance,
+    );
+    const totalCredits = balanceTransactions.reduce(
+      (sum: number, transaction: LedgerTransaction) =>
+        CREDIT_TYPES.has(transaction.type) ? sum + transaction.amount : sum,
+      0,
+    );
+    const totalDebits = balanceTransactions.reduce(
+      (sum: number, transaction: LedgerTransaction) =>
+        DEBIT_TYPES.has(transaction.type) ? sum + transaction.amount : sum,
+      0,
+    );
+    const calculatedBalance = totalCredits - totalDebits;
 
-await handleLedgerDriftAnomaly(wallet, calculatedBalance, drift, anomaly);
-return anomaly;
-}
+    const pendingDrift = Math.min(wallet.pendingBalance, 0);
 
-return null;
+    if (calculatedBalance !== wallet.balance || pendingDrift !== 0) {
+      const drift = wallet.balance - calculatedBalance;
+      const anomaly = {
+        walletId: wallet.id,
+        userId: wallet.userId,
+        calculatedBalance,
+        storedBalance: wallet.balance,
+        drift,
+        storedPendingBalance: wallet.pendingBalance,
+        pendingDrift,
+      };
+
+      await handleLedgerDriftAnomaly(tx, wallet, calculatedBalance, drift, anomaly);
+      return anomaly;
+    }
+
+    return null;
+  });
 }
 
 async function handleLedgerDriftAnomaly(
-wallet: { id: string; userId: string },
-calculatedBalance: number,
-drift: number,
-anomaly: VerificationAnomaly
+  tx: Prisma.TransactionClient,
+  wallet: { id: string; userId: string },
+  calculatedBalance: number,
+  drift: number,
+  anomaly: VerificationAnomaly
 ): Promise<void> {
-// Securely log the anomaly. Auto-correction is gated by env so production
-// teams can require manual review unless an incident runbook enables it.
-logger.error("CRITICAL LEDGER DRIFT DETECTED", anomaly);
+  // Securely log the anomaly. Auto-correction is gated by env so production
+  // teams can require manual review unless an incident runbook enables it.
+  logger.error("CRITICAL LEDGER DRIFT DETECTED", anomaly);
 
-// CRITICAL: Await the audit log ledger drift MUST be recorded
-try {
-await createActivityLog({
-userId: wallet.userId,
-action: "SECURITY_LEDGER_ALERT",
-metadata: {
-...anomaly,
-reason: "Total ledger sum does not match stored balance"
-}
-});
-} catch (auditErr) {
-// If even the audit log fails, emit a critical log so monitoring catches it
-logger.error("CRITICAL: Failed to record ledger drift audit log", auditErr, {
-walletId: wallet.id,
-userId: wallet.userId,
-drift,
-});
-}
+  // CRITICAL: Await the audit log ledger drift MUST be recorded
+  try {
+    await createActivityLog({
+      userId: wallet.userId,
+      action: "SECURITY_LEDGER_ALERT",
+      metadata: {
+        ...anomaly,
+        reason: "Total ledger sum does not match stored balance"
+      }
+    }, tx);
+  } catch (auditErr) {
+    // If even the audit log fails, emit a critical log so monitoring catches it
+    logger.error("CRITICAL: Failed to record ledger drift audit log", auditErr, {
+      walletId: wallet.id,
+      userId: wallet.userId,
+      drift,
+    });
+  }
 
-if (process.env.AUTO_CORRECT_LEDGER_DRIFT === "true") {
-await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-await tx.wallet.update({
-where: { id: wallet.id },
-data: { balance: calculatedBalance },
-});
+  if (process.env.AUTO_CORRECT_LEDGER_DRIFT === "true") {
+    await tx.wallet.update({
+      where: { id: wallet.id },
+      data: { balance: calculatedBalance },
+    });
 
-await createActivityLog({
-userId: wallet.userId,
-action: "SECURITY_LEDGER_AUTO_CORRECTED",
-entityType: "Wallet",
-entityId: wallet.id,
-metadata: {
-...anomaly,
-correctedBalance: calculatedBalance,
-},
-}, tx);
-});
-}
+    await createActivityLog({
+      userId: wallet.userId,
+      action: "SECURITY_LEDGER_AUTO_CORRECTED",
+      entityType: "Wallet",
+      entityId: wallet.id,
+      metadata: {
+        ...anomaly,
+        correctedBalance: calculatedBalance,
+      },
+    }, tx);
+  }
 }
 
 /**
@@ -222,46 +229,37 @@ select: { id: true, userId: true }
 }
 
 export async function scanAllWalletsForDrift(maxScanCount: number = 500): Promise<VerificationAnomaly[]> {
-const batchSize = 100;
-let cursor = (await redis.get(LEDGER_SCAN_CURSOR_KEY)) || undefined;
-let totalScanned = 0;
-let wrapped = false;
+  const batchSize = 100;
+  let cursor = (await redis.get(LEDGER_SCAN_CURSOR_KEY)) || undefined;
+  let totalScanned = 0;
 
-const anomalies: VerificationAnomaly[] = [];
-while (totalScanned < maxScanCount) {
-const remainingToScan = maxScanCount - totalScanned;
-const currentTake = Math.min(batchSize, remainingToScan);
+  const anomalies: VerificationAnomaly[] = [];
+  while (totalScanned < maxScanCount) {
+    const remainingToScan = maxScanCount - totalScanned;
+    const currentTake = Math.min(batchSize, remainingToScan);
 
-const wallets = await fetchWalletBatchForScan(currentTake, cursor);
+    const wallets = await fetchWalletBatchForScan(currentTake, cursor);
 
-if (wallets.length === 0) {
-if (cursor && !wrapped) {
-cursor = undefined;
-wrapped = true;
-continue;
-}
-break;
-}
+    if (wallets.length === 0) {
+      cursor = undefined;
+      break;
+    }
 
-await scanWalletsBatch(wallets, anomalies);
+    await scanWalletsBatch(wallets, anomalies);
 
-totalScanned += wallets.length;
-cursor = wallets[wallets.length - 1]?.id;
-if (wallets.length < currentTake) {
-if (!wrapped) {
-cursor = undefined;
-wrapped = true;
-continue;
-}
-break;
-}
-}
+    totalScanned += wallets.length;
+    cursor = wallets[wallets.length - 1]?.id;
+    if (wallets.length < currentTake) {
+      cursor = undefined;
+      break;
+    }
+  }
 
-if (cursor) {
-await redis.set(LEDGER_SCAN_CURSOR_KEY, cursor);
-} else {
-await redis.del(LEDGER_SCAN_CURSOR_KEY);
-}
+  if (cursor) {
+    await redis.set(LEDGER_SCAN_CURSOR_KEY, cursor);
+  } else {
+    await redis.del(LEDGER_SCAN_CURSOR_KEY);
+  }
 
-return anomalies;
+  return anomalies;
 }

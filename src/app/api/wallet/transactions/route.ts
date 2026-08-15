@@ -173,9 +173,13 @@ parsed.endDate ? `To: ${parsed.endDate}` : null,
 ].filter(Boolean).join(" | ") || "All Transactions";
 
 const CREDIT_TYPES = new Set<string>(["CREDIT", "REFUND"]);
-const DEBIT_TYPES = new Set<string>(["DEBIT", "WITHDRAWAL", "PLATFORM_FEE", "CHARGEBACK"]);
-const totalCredit = txns.filter(t => CREDIT_TYPES.has(t.type)).reduce((s, t) => s + t.amount, 0);
-const totalDebit = txns.filter(t => DEBIT_TYPES.has(t.type)).reduce((s, t) => s + t.amount, 0);
+// M1 FIX: Added CLAWBACK to DEBIT_TYPES — was previously omitted, excluding clawback debits from totals
+const DEBIT_TYPES = new Set<string>(["DEBIT", "WITHDRAWAL", "PLATFORM_FEE", "CLAWBACK", "CHARGEBACK"]);
+// M2 FIX: Only count COMPLETED transactions in statement totals.
+// Including PENDING/FAILED/REVERSED transactions corrupted exported financial summaries.
+const completedTxns = txns.filter(t => t.status === "COMPLETED");
+const totalCredit = completedTxns.filter(t => CREDIT_TYPES.has(t.type)).reduce((s, t) => s + t.amount, 0);
+const totalDebit = completedTxns.filter(t => DEBIT_TYPES.has(t.type)).reduce((s, t) => s + t.amount, 0);
 
 const csv = buildTransactionsCsv(user, displayName || "", location || "", txns, filterDesc, totalCredit, totalDebit);
 const safeName = displayName?.replaceAll(/\s+/g, "_") ?? userId;

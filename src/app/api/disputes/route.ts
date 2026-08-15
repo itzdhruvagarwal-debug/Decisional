@@ -98,6 +98,18 @@ return NextResponse.json(
 );
 }
 
+// L8 FIX: Validate action against allowed enum values before passing to service layer.
+// Without this, an unknown action string would be silently forwarded to handleAction,
+// potentially causing unexpected behavior or hitting an unhandled code path.
+const ALLOWED_DISPUTE_ACTIONS = ["accept", "reject", "withdraw", "escalate"] as const;
+type AllowedDisputeAction = typeof ALLOWED_DISPUTE_ACTIONS[number];
+if (!ALLOWED_DISPUTE_ACTIONS.includes(action as AllowedDisputeAction)) {
+  return NextResponse.json(
+    { error: `Invalid action. Allowed values: ${ALLOWED_DISPUTE_ACTIONS.join(", ")}` },
+    { status: 400 },
+  );
+}
+
 const result = await DisputeService.handleAction(session.user.id, {
 disputeId,
 action,

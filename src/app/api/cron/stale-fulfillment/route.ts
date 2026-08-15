@@ -51,14 +51,15 @@ return Math.floor((Date.now() - anchor.getTime()) / MS_PER_DAY);
 }
 
 async function hasOpenDispute(dealId: string): Promise<boolean> {
-const existing = await prisma.dispute.findFirst({
-where: {
-dealId,
-status: { in: ["OPEN", "TIER1_AUTO", "TIER2_MEDIATION"] },
-},
-select: { id: true },
-});
-return existing !== null;
+  const existing = await prisma.dispute.findFirst({
+    where: {
+      dealId,
+      // M13 FIX: TIER3_ARBITRATION was missing — deals in arbitration were being re-escalated
+      status: { notIn: ["RESOLVED", "CLOSED"] },
+    },
+    select: { id: true },
+  });
+  return existing !== null;
 }
 
 function addDispatchOverdueNotifications(
@@ -128,227 +129,255 @@ data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_rem
 }
 
 async function sendReminderNotifications(deal: StaleDeal, staleDays: number) {
-const campaignTitle = deal.campaign.title;
-const influencerName = deal.influencer.displayName || "Influencer";
-const brandName = deal.brand?.companyName || "Brand";
-const dealLink = `/dashboard/deals/${deal.id}`;
+  const campaignTitle = deal.campaign.title;
+  const influencerName = deal.influencer.displayName || "Influencer";
+  const brandName = deal.brand?.companyName || "Brand";
+  const dealLink = `/dashboard/deals/${deal.id}`;
 
-const notifications: Parameters<typeof NotificationService.createNotifications>[0] = [];
+  // M12 FIX: Prevent duplicate reminder notifications on the same day for a deal.
+  // Check if a reminder notification was already sent to either participant in the last 22 hours.
+  const userIds = [deal.brand?.userId, deal.influencer.userId].filter(Boolean) as string[];
+  const recentNotifications = await prisma.notification.findMany({
+    where: {
+      userId: { in: userIds },
+      type: "deal_update",
+      createdAt: { gte: new Date(Date.now() - 22 * 60 * 60 * 1000) },
+    },
+    select: { data: true },
+  });
 
-if (deal.productFulfillmentStatus === "READY_TO_DISPATCH") {
-addDispatchOverdueNotifications(deal, staleDays, campaignTitle, influencerName, brandName, dealLink, notifications);
-} else {
-addTransitOverdueNotifications(deal, staleDays, campaignTitle, influencerName, brandName, dealLink, notifications);
+  const alreadySent = recentNotifications.some((n) => {
+    const payload = n.data as Record<string, unknown> | null;
+    return payload?.dealId === deal.id && payload?.type === "stale_fulfillment_reminder";
+  });
+
+  if (alreadySent) {
+    logger.info("STALE_FULFILLMENT: Skipping reminder notification as one was recently sent", { dealId: deal.id });
+    return;
+  }
+
+  const notifications: Parameters<typeof NotificationService.createNotifications>[0] = [];
+
+  if (deal.productFulfillmentStatus === "READY_TO_DISPATCH") {
+    addDispatchOverdueNotifications(deal, staleDays, campaignTitle, influencerName, brandName, dealLink, notifications);
+  } else {
+    addTransitOverdueNotifications(deal, staleDays, campaignTitle, influencerName, brandName, dealLink, notifications);
+  }
+
+  if (notifications.length > 0) {
+    await NotificationService.createNotifications(notifications);
+  }
 }
 
-if (notifications.length > 0) {
-await NotificationService.createNotifications(notifications);
-}
-}
+async function autoEscalateToDispute(
+  deal: StaleDeal,
+  staleDays: number,
+  firstAdminId: string | null,
+  allAdminIds: string[]
+) {
+  const campaignTitle = deal.campaign.title;
+  const dealLink = `/dashboard/deals/${deal.id}`;
 
-async function autoEscalateToDispute(deal: StaleDeal, staleDays: number) {
-const campaignTitle = deal.campaign.title;
-const dealLink = `/dashboard/deals/${deal.id}`;
+  try {
+    if (!firstAdminId) {
+      logger.error("STALE_FULFILLMENT: Cannot auto-escalate no admin users found", {
+        dealId: deal.id,
+      });
+      return false;
+    }
 
-try {
-// Find a system admin to raise the dispute on behalf of the system
-const adminUser = await prisma.user.findFirst({
-where: { userType: "ADMIN" },
-select: { id: true },
-});
+    // Create dispute inside a transaction
+    await prisma.$transaction(async (tx) => {
+      // Check once more inside transaction that there's no open dispute
+      const existingDispute = await tx.dispute.findFirst({
+        where: {
+          dealId: deal.id,
+          status: { notIn: ["RESOLVED", "CLOSED"] }, // M13 FIX
+        },
+        select: { id: true },
+      });
+      if (existingDispute) return;
 
-if (!adminUser) {
-logger.error("STALE_FULFILLMENT: Cannot auto-escalate no admin users found", {
-dealId: deal.id,
-});
-return false;
-}
+      // Flip the deal status to DISPUTED
+      await tx.deal.update({
+        where: { id: deal.id },
+        data: { status: "DISPUTED" },
+      });
 
-// Create dispute inside a transaction
-await prisma.$transaction(async (tx) => {
-// Check once more inside transaction that there's no open dispute
-const existingDispute = await tx.dispute.findFirst({
-where: {
-dealId: deal.id,
-status: { in: ["OPEN", "TIER1_AUTO", "TIER2_MEDIATION"] },
-},
-select: { id: true },
-});
-if (existingDispute) return;
+      // Create the dispute record
+      await tx.dispute.create({
+        data: {
+          dealId: deal.id,
+          raisedByUserId: firstAdminId,
+          type: "TERMS_VIOLATION" as DisputeType,
+          status: "TIER1_AUTO",
+          description:
+            `Auto-escalated by system after ${staleDays} days with no fulfillment progress. ` +
+            `Fulfillment status was "${deal.productFulfillmentStatus}" at time of escalation. ` +
+            `Admin review required to resolve.`,
+          dealStatusAtCreation: "PAYMENT_HELD",
+        },
+      });
 
-// Flip the deal status to DISPUTED
-await tx.deal.update({
-where: { id: deal.id },
-data: { status: "DISPUTED" },
-});
+      // Notify both parties
+      const escalationNotifications: Parameters<
+        typeof NotificationService.createNotifications
+      >[0] = [];
 
-// Create the dispute record
-await tx.dispute.create({
-data: {
-dealId: deal.id,
-raisedByUserId: adminUser.id,
-type: "OTHER" as DisputeType,
-status: "TIER1_AUTO",
-description:
-`Auto-escalated by system after ${staleDays} days with no fulfillment progress. ` +
-`Fulfillment status was "${deal.productFulfillmentStatus}" at time of escalation. ` +
-`Admin review required to resolve.`,
-dealStatusAtCreation: deal.productFulfillmentStatus,
-},
-});
+      if (deal.brand?.userId) {
+        escalationNotifications.push({
+          userId: deal.brand.userId,
+          type: "dispute",
+          title: ` Deal auto-escalated to dispute`,
+          message: `The deal "${campaignTitle}" has been automatically escalated to a dispute after ${staleDays} days without fulfillment progress. An admin will review and resolve this.`,
+          data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_escalation" },
+        });
+      }
 
-// Notify both parties
-const escalationNotifications: Parameters<
-typeof NotificationService.createNotifications
->[0] = [];
+      if (deal.influencer?.userId) {
+        escalationNotifications.push({
+          userId: deal.influencer.userId,
+          type: "dispute",
+          title: ` Deal auto-escalated to dispute`,
+          message: `The deal "${campaignTitle}" has been automatically escalated to a dispute after ${staleDays} days without fulfillment progress. An admin will review and resolve this.`,
+          data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_escalation" },
+        });
+      }
 
-if (deal.brand?.userId) {
-escalationNotifications.push({
-userId: deal.brand.userId,
-type: "dispute",
-title: ` Deal auto-escalated to dispute`,
-message: `The deal "${campaignTitle}" has been automatically escalated to a dispute after ${staleDays} days without fulfillment progress. An admin will review and resolve this.`,
-data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_escalation" },
-});
-}
+      if (escalationNotifications.length > 0) {
+        await NotificationService.createNotifications(escalationNotifications, tx);
+      }
+    });
 
-if (deal.influencer?.userId) {
-escalationNotifications.push({
-userId: deal.influencer.userId,
-type: "dispute",
-title: ` Deal auto-escalated to dispute`,
-message: `The deal "${campaignTitle}" has been automatically escalated to a dispute after ${staleDays} days without fulfillment progress. An admin will review and resolve this.`,
-data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_escalation" },
-});
-}
+    // Notify all admins about the escalation
+    if (allAdminIds.length > 0) {
+      await NotificationService.createNotifications(
+        allAdminIds.map((adminId) => ({
+          userId: adminId,
+          type: "admin_alert" as const,
+          title: ` System auto-escalated stale deal`,
+          message: `Deal ${deal.id} ("${campaignTitle}") was stuck in "${deal.productFulfillmentStatus}" for ${staleDays} days and has been auto-escalated to a TIER1_AUTO dispute. Manual review required.`,
+          data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_escalation" },
+        })),
+      );
+    }
 
-if (escalationNotifications.length > 0) {
-await NotificationService.createNotifications(escalationNotifications, tx);
-}
-});
-
-// Notify all admins about the escalation
-const allAdmins = await prisma.user.findMany({
-where: { userType: "ADMIN" },
-select: { id: true },
-});
-
-if (allAdmins.length > 0) {
-await NotificationService.createNotifications(
-allAdmins.map((admin) => ({
-userId: admin.id,
-type: "admin_alert" as const,
-title: ` System auto-escalated stale deal`,
-message: `Deal ${deal.id} ("${campaignTitle}") was stuck in "${deal.productFulfillmentStatus}" for ${staleDays} days and has been auto-escalated to a TIER1_AUTO dispute. Manual review required.`,
-data: { link: dealLink, dealId: deal.id, staleDays, type: "stale_fulfillment_escalation" },
-})),
-);
-}
-
-return true;
-} catch (err) {
-logger.error("STALE_FULFILLMENT: Auto-escalation failed", { dealId: deal.id, error: err });
-return false;
-}
+    return true;
+  } catch (err) {
+    logger.error("STALE_FULFILLMENT: Auto-escalation failed", { dealId: deal.id, error: err });
+    return false;
+  }
 }
 
 interface ProcessDealResult {
-reminded: boolean;
-escalated: boolean;
-skipped: boolean;
+  reminded: boolean;
+  escalated: boolean;
+  skipped: boolean;
 }
 
-async function processSingleStaleDeal(deal: StaleDeal): Promise<ProcessDealResult> {
-const staleDays = getStaleDays(deal);
+async function processSingleStaleDeal(
+  deal: StaleDeal,
+  firstAdminId: string | null,
+  allAdminIds: string[]
+): Promise<ProcessDealResult> {
+  const staleDays = getStaleDays(deal);
 
-if (staleDays < REMINDER_DAYS) {
-return { reminded: false, escalated: false, skipped: true };
-}
+  if (staleDays < REMINDER_DAYS) {
+    return { reminded: false, escalated: false, skipped: true };
+  }
 
-// Check for existing open dispute skip if already in dispute
-const alreadyDisputed = await hasOpenDispute(deal.id);
-if (alreadyDisputed) {
-return { reminded: false, escalated: false, skipped: true };
-}
+  // Check for existing open dispute skip if already in dispute
+  const alreadyDisputed = await hasOpenDispute(deal.id);
+  if (alreadyDisputed) {
+    return { reminded: false, escalated: false, skipped: true };
+  }
 
-if (staleDays >= ESCALATION_DAYS) {
-const escalated_ = await autoEscalateToDispute(deal, staleDays);
-if (escalated_) {
-logger.info("STALE_FULFILLMENT: Auto-escalated deal", {
-dealId: deal.id,
-staleDays,
-status: deal.productFulfillmentStatus,
-});
-return { reminded: false, escalated: true, skipped: false };
-} else {
-return { reminded: false, escalated: false, skipped: true };
-}
-} else {
-// 713 days: send reminder
-await sendReminderNotifications(deal, staleDays);
-logger.info("STALE_FULFILLMENT: Sent reminder for stale deal", {
-dealId: deal.id,
-staleDays,
-status: deal.productFulfillmentStatus,
-});
-return { reminded: true, escalated: false, skipped: false };
-}
+  if (staleDays >= ESCALATION_DAYS) {
+    const escalated_ = await autoEscalateToDispute(deal, staleDays, firstAdminId, allAdminIds);
+    if (escalated_) {
+      logger.info("STALE_FULFILLMENT: Auto-escalated deal", {
+        dealId: deal.id,
+        staleDays,
+        status: deal.productFulfillmentStatus,
+      });
+      return { reminded: false, escalated: true, skipped: false };
+    } else {
+      return { reminded: false, escalated: false, skipped: true };
+    }
+  } else {
+    // 7-13 days: send reminder
+    await sendReminderNotifications(deal, staleDays);
+    logger.info("STALE_FULFILLMENT: Sent reminder for stale deal", {
+      dealId: deal.id,
+      staleDays,
+      status: deal.productFulfillmentStatus,
+    });
+    return { reminded: true, escalated: false, skipped: false };
+  }
 }
 
 async function scanStaleFulfillmentDeals(): Promise<{
-scanned: number;
-reminded: number;
-escalated: number;
-skipped: number;
+  scanned: number;
+  reminded: number;
+  escalated: number;
+  skipped: number;
 }> {
-let scanned = 0;
-let reminded = 0;
-let escalated = 0;
-let skipped = 0;
-let cursor: string | undefined = undefined;
-let hasMore = true;
+  let scanned = 0;
+  let reminded = 0;
+  let escalated = 0;
+  let skipped = 0;
+  let cursor: string | undefined = undefined;
+  let hasMore = true;
 
-while (hasMore) {
-const batch = (await prisma.deal.findMany({
-where: {
-requiresProduct: true,
-productFulfillmentStatus: { in: ["READY_TO_DISPATCH", "DISPATCHED"] },
-status: "PAYMENT_HELD",
-deletedAt: null,
-...(cursor ? { id: { gt: cursor } } : {}),
-},
-select: {
-id: true,
-productFulfillmentStatus: true,
-updatedAt: true,
-dispatchedAt: true,
-campaign: { select: { title: true } },
-influencer: { select: { userId: true, displayName: true } },
-brand: { select: { userId: true, companyName: true } },
-},
-orderBy: { id: "asc" },
-take: BATCH_SIZE,
-})) as StaleDeal[];
+  // M14 FIX: Pre-fetch admin details to avoid N+1 queries during deal processing loop
+  const admins = await prisma.user.findMany({
+    where: { userType: "ADMIN" },
+    select: { id: true },
+  });
+  const allAdminIds = admins.map((a) => a.id);
+  const firstAdminId = allAdminIds[0] || null;
 
-scanned += batch.length;
-hasMore = batch.length === BATCH_SIZE;
-if (batch.length > 0) {
-cursor = batch.at(-1)!.id;
-}
+  while (hasMore) {
+    const batch = (await prisma.deal.findMany({
+      where: {
+        requiresProduct: true,
+        productFulfillmentStatus: { in: ["READY_TO_DISPATCH", "DISPATCHED"] },
+        status: "PAYMENT_HELD",
+        deletedAt: null,
+        ...(cursor ? { id: { gt: cursor } } : {}),
+      },
+      select: {
+        id: true,
+        productFulfillmentStatus: true,
+        updatedAt: true,
+        dispatchedAt: true,
+        campaign: { select: { title: true } },
+        influencer: { select: { userId: true, displayName: true } },
+        brand: { select: { userId: true, companyName: true } },
+      },
+      orderBy: { id: "asc" },
+      take: BATCH_SIZE,
+    })) as StaleDeal[];
 
-for (const deal of batch) {
-const res = await processSingleStaleDeal(deal);
-if (res.reminded) {
-reminded++;
-} else if (res.escalated) {
-escalated++;
-} else if (res.skipped) {
-skipped++;
-}
-}
-}
+    scanned += batch.length;
+    hasMore = batch.length === BATCH_SIZE;
+    if (batch.length > 0) {
+      cursor = batch.at(-1)!.id;
+    }
 
-return { scanned, reminded, escalated, skipped };
+    for (const deal of batch) {
+      const res = await processSingleStaleDeal(deal, firstAdminId, allAdminIds);
+      if (res.reminded) {
+        reminded++;
+      } else if (res.escalated) {
+        escalated++;
+      } else if (res.skipped) {
+        skipped++;
+      }
+    }
+  }
+
+  return { scanned, reminded, escalated, skipped };
 }
 
 async function _handler_POST(_req: NextRequest) {

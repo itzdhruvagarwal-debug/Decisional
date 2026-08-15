@@ -44,9 +44,12 @@ status: true,
 },
 });
 
-if (!transaction) {
-throw new Error(`Transaction not found for orderId: ${orderId}`);
-}
+  if (!transaction) {
+    // M8 FIX: Throwing here causes HTTP 500 which Razorpay retries for 24-48 hours.
+    // Return 200 to acknowledge receipt — orphan events (e.g. test webhooks) cannot be resolved.
+    logger.warn(`Webhook: Transaction not found for orderId — acknowledged as orphan event`, { orderId });
+    return;
+  }
 
 if (transaction.status !== "PENDING") {
 logger.info("Transaction already processed, ignoring webhook", {
@@ -121,21 +124,23 @@ where: { id: withdrawalId },
 include: { wallet: { include: { user: true } } },
 });
 
-if (!withdrawal) {
-const errorMsg = `Withdrawal not found for webhook: reference_id=${withdrawalId}`;
-logger.error(errorMsg, { withdrawalId, payoutId });
-throw new Error(errorMsg);
-}
+  if (!withdrawal) {
+    // M8 FIX: Return 200 for orphan withdrawal webhook (e.g. test event, deleted record)
+    logger.warn("Webhook: Withdrawal not found — acknowledged as orphan event", { withdrawalId, payoutId });
+    return;
+  }
 
-const transaction = await prisma.transaction.findFirst({
-where: { withdrawalId: withdrawal.id },
-});
+  // M6 FIX: Must filter by type:"WITHDRAWAL" — without this, if a REFUND transaction exists
+  // for the same withdrawal, findFirst may return it instead of the WITHDRAWAL record,
+  // causing status mutations on the wrong transaction row.
+  const transaction = await prisma.transaction.findFirst({
+    where: { withdrawalId: withdrawal.id, type: "WITHDRAWAL" },
+  });
 
-if (!transaction) {
-const errorMsg = `Transaction not found for withdrawal: id=${withdrawal.id}`;
-logger.error(errorMsg, { withdrawalId });
-throw new Error(errorMsg);
-}
+  if (!transaction) {
+    logger.warn("Webhook: WITHDRAWAL transaction not found — acknowledged as orphan event", { withdrawalId });
+    return;
+  }
 
 try {
 await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
@@ -215,21 +220,38 @@ logger.info("Withdrawal already failed/reversed, skipping refund", { withdrawalI
 return;
 }
 
-// Failed / Rejected / Reversed -> Refund Wallet
-await tx.wallet.update({
-where: { id: withdrawal.walletId },
-data: {
-balance: { increment: withdrawal.amount },
-...(freshWithdrawal.status === "COMPLETED"
-? { totalWithdrawn: { decrement: withdrawal.amount } }
-: {})
-}
-});
+    // Failed / Rejected / Reversed -> Refund Wallet
+    await tx.wallet.update({
+      where: { id: withdrawal.walletId },
+      data: {
+        balance: { increment: withdrawal.amount },
+        ...(freshWithdrawal.status === "COMPLETED"
+          ? { totalWithdrawn: { decrement: withdrawal.amount } }
+          : {})
+      }
+    });
 
-await tx.transaction.update({
-where: { id: transaction.id },
-data: { status: targetStatus }
-});
+    if (freshWithdrawal.status === "COMPLETED") {
+      // M7 FIX: If the withdrawal was already completed, keep the original transaction as COMPLETED
+      // to preserve historical ledger records. Instead, create a new COMPLETED REFUND transaction.
+      await tx.transaction.create({
+        data: {
+          walletId: withdrawal.walletId,
+          withdrawalId: withdrawal.id,
+          type: "REFUND",
+          amount: withdrawal.amount,
+          status: "COMPLETED",
+          description: `Refund for reversed withdrawal Ref: ${withdrawal.id}. Reason: ${payout.failure_reason || "Reversed by gateway"}`,
+          metadata: { source: "payout_reversal", event }
+        }
+      });
+    } else {
+      // If the withdrawal was never completed, mutate the original transaction to FAILED / REVERSED
+      await tx.transaction.update({
+        where: { id: transaction.id },
+        data: { status: targetStatus }
+      });
+    }
 await NotificationService.createNotification({
 userId: withdrawal.wallet.userId,
 type: "payout",
@@ -269,20 +291,23 @@ payload = JSON.parse(rawBody);
 return NextResponse.json({ success: false, message: "Malformed JSON" }, { status: 400 });
 }
 
-// Prefer explicit Razorpay event id header; fallback to payload ids.
-const eventId =
-headerList.get("x-razorpay-event-id") ||
-payload?.payload?.payment?.entity?.id ||
-payload?.payload?.order?.entity?.id ||
-payload?.payload?.payout?.entity?.id ||
-"";
-const eventType = typeof payload?.event === "string" ? payload.event : "unknown";
-const result = await processSecureWebhook(
-rawBody,
-signature,
-eventId,
-eventType,
-);
+  // H11 FIX: Always prefix event key with event type so that multiple lifecycle
+  // events for the same entity (payout.processed -> payout.reversed) get distinct keys.
+  // Previously using bare entity IDs caused the second event to be flagged as a replay.
+  const eventType = typeof payload?.event === "string" ? payload.event : "unknown";
+  const rawEntityId =
+    payload?.payload?.payment?.entity?.id ||
+    payload?.payload?.order?.entity?.id ||
+    payload?.payload?.payout?.entity?.id ||
+    "";
+  const headerEventId = headerList.get("x-razorpay-event-id");
+  const eventId = headerEventId || (rawEntityId ? `${eventType}:${rawEntityId}` : "");
+  const result = await processSecureWebhook(
+    rawBody,
+    signature,
+    eventId,
+    eventType,
+  );
 
 if (!result.isValid) {
 logger.warn("Webhook rejected: invalid signature", {
@@ -302,31 +327,43 @@ return NextResponse.json(
 );
 }
 
-// Acquire Redis-based distributed lock to prevent concurrent webhook execution collisions.
-const lockKey = `webhook:lock:${result.eventKey}`;
-const acquired = await redis.set(lockKey, "LOCKED", "EX", 60, "NX");
-if (!acquired) {
-logger.warn("Webhook collision detected, concurrent processing locked", { eventKey: result.eventKey });
-return NextResponse.json(
-{ success: true, message: "Webhook is currently processing elsewhere" },
-{ status: 200 },
-);
-}
+  // M5 FIX: Use a random UUID as lock value so we can verify ownership before deletion.
+  // With a static "LOCKED" string, if processing exceeds 60s and the lock auto-expires,
+  // another worker acquires it with the same value — then our finally block deletes their lock.
+  const lockToken = crypto.randomUUID();
+  const lockKey = `webhook:lock:${result.eventKey}`;
+  const acquired = await redis.set(lockKey, lockToken, "EX", 60, "NX");
+  if (!acquired) {
+    logger.warn("Webhook collision detected, concurrent processing locked", { eventKey: result.eventKey });
+    return NextResponse.json(
+      { success: true, message: "Webhook is currently processing elsewhere" },
+      { status: 200 },
+    );
+  }
 
-try {
-try {
-await handleWalletTopupWebhook(payload);
-await handlePayoutWebhook(payload);
-await markWebhookProcessed(result.eventKey, eventType, payload);
+  // Lua script: only delete the lock if it still holds our token
+  const releaseLua = `
+    if redis.call('get', KEYS[1]) == ARGV[1] then
+      return redis.call('del', KEYS[1])
+    else
+      return 0
+    end
+  `;
 
-logger.info("Webhook processed successfully", {
-eventType: payload?.event,
-eventKey: result.eventKey,
-});
-} finally {
-// Safely release the lock after completion or failure.
-await redis.del(lockKey).catch(() => {});
-}
+  try {
+    try {
+      await handleWalletTopupWebhook(payload);
+      await handlePayoutWebhook(payload);
+      await markWebhookProcessed(result.eventKey, eventType, payload);
+
+      logger.info("Webhook processed successfully", {
+        eventType: payload?.event,
+        eventKey: result.eventKey,
+      });
+    } finally {
+      // Safely release only OUR lock via Lua CAS to avoid deleting another worker's lock
+      await redis.eval(releaseLua, 1, lockKey, lockToken).catch(() => {});
+    }
 } catch (error: unknown) {
 if (error instanceof Error && error.message === "Webhook already processed") {
 return NextResponse.json({ success: true, message: "Idempotency caught" }, { status: 200 });

@@ -153,6 +153,7 @@ model OAuthState {
 
   @@unique([state])
   @@index([userId])
+  @@index([expiresAt]) // L3 FIX: cleanup-oauth cron filters by expiresAt; without this index, it causes full table scans
 }
 
 model LoginAttempt {
