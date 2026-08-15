@@ -715,6 +715,10 @@
     flex: 1 1 100%;
   }
 
+  .auth-phone-row > .input-wrapper {
+    flex: 1 1 150px !important;
+  }
+
   .auth-phone-row > span {
     flex: 0 0 auto;
   }
