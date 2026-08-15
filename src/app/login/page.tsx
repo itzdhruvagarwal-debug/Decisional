@@ -305,7 +305,18 @@ onClick={() => setShowPassword(!showPassword)}
 aria-label={showPassword ? "Hide password" : "Show password"}
 className="auth-field-password-toggle"
 >
-{showPassword ? "Hide" : "Show"}
+{showPassword ? (
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-7-10-7a19.16 19.16 0 0 1 5.44-5.44M1 1l22 22" />
+    <path d="M12 12A3 3 0 0 0 12 6c-.34 0-.67.04-1 .12" />
+    <path d="M21.54 15A10 10 0 0 0 22 13c0 0-3-7-10-7-1.7 0-3.2.43-4.53 1.15" />
+  </svg>
+) : (
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+)}
 </Button>
 </div>
 </div>
