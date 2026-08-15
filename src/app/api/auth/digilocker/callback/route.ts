@@ -27,59 +27,65 @@ code_verifier: codeVerifier,
 return await tokenResponse.json();
 }
 
-async function fetchAndStoreDigiLockerDocs(accessToken: string, userId: string) {
-try {
-const documentsResponse = await fetch(
-"https://api.digilocker.gov.in/account/documents",
-{
-headers: {
-Authorization: `Bearer ${accessToken}`,
-},
+const SUPPORTED_DOC_TYPES = new Set(["AADHAAR", "PAN"]);
+
+async function processDigiLockerDoc(
+  accessToken: string,
+  userId: string,
+  doc: { id: string; type: string; uri?: string; issuer?: string; issueDate?: string }
+) {
+  const docResponse = await fetch(
+    `https://api.digilocker.gov.in/account/documents/${doc.id}`,
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+
+  if (!docResponse.ok) {
+    throw new Error(`Failed to fetch document: ${docResponse.statusText}`);
+  }
+
+  const docData = await docResponse.json();
+
+  await prisma.verificationDocument.create({
+    data: {
+      userId,
+      type: doc.type === "AADHAAR" ? "AADHAAR" : "PAN_CARD",
+      documentUrl: docData.url || doc.uri,
+      status: "VERIFIED",
+      verifiedAt: new Date(),
+      metadata: {
+        source: "digilocker",
+        documentId: doc.id,
+        issuer: doc.issuer,
+        issueDate: doc.issueDate,
+      },
+    },
+  });
+
+  logger.info("DigiLocker document fetched and stored", {
+    userId,
+    documentType: doc.type,
+    documentId: doc.id,
+  });
 }
-);
 
-const documentsData = await documentsResponse.json();
+async function fetchAndStoreDigiLockerDocs(accessToken: string, userId: string) {
+  try {
+    const documentsResponse = await fetch(
+      "https://api.digilocker.gov.in/account/documents",
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
 
-if (documentsData.documents && Array.isArray(documentsData.documents)) {
-for (const doc of documentsData.documents) {
-    if (doc.type === "AADHAAR" || doc.type === "PAN") {
+    if (!documentsResponse.ok) {
+      throw new Error(`Failed to fetch document list: ${documentsResponse.statusText}`);
+    }
+
+    const documentsData = await documentsResponse.json();
+    const docs: { id: string; type: string }[] = documentsData.documents ?? [];
+
+    for (const doc of docs) {
+      if (!SUPPORTED_DOC_TYPES.has(doc.type)) continue;
       try {
-        const docResponse = await fetch(
-          `https://api.digilocker.gov.in/account/documents/${doc.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-
-        if (!docResponse.ok) {
-          throw new Error(`Failed to fetch document: ${docResponse.statusText}`);
-        }
-
-        const docData = await docResponse.json();
-
-        await prisma.verificationDocument.create({
-          data: {
-            userId,
-            type: doc.type === "AADHAAR" ? "AADHAAR" : "PAN_CARD",
-            documentUrl: docData.url || doc.uri,
-            status: "VERIFIED",
-            verifiedAt: new Date(),
-            metadata: {
-              source: "digilocker",
-              documentId: doc.id,
-              issuer: doc.issuer,
-              issueDate: doc.issueDate,
-            },
-          },
-        });
-
-        logger.info("DigiLocker document fetched and stored", {
-          userId,
-          documentType: doc.type,
-          documentId: doc.id,
-        });
+        await processDigiLockerDoc(accessToken, userId, doc);
       } catch (singleDocError) {
         logger.error("Failed to process specific DigiLocker document", {
           userId,
@@ -89,15 +95,14 @@ for (const doc of documentsData.documents) {
         });
       }
     }
+  } catch (docError) {
+    logger.warn(
+      "Failed to fetch documents from DigiLocker",
+      docError instanceof Error ? { error: docError.message } : { error: String(docError) }
+    );
+  }
 }
-}
-} catch (docError) {
-logger.warn(
-"Failed to fetch documents from DigiLocker",
-docError instanceof Error ? { error: docError.message } : { error: String(docError) }
-);
-}
-}
+
 
 async function _handler_GET(req: NextRequest) {
 const { searchParams } = new URL(req.url);
