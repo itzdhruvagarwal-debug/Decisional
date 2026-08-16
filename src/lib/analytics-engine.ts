@@ -116,9 +116,18 @@ campaign: { select: { title: true } },
 });
 
 // 7. Category Breakdown
+// Fix #13: Select only targetCategories and take 1000 max to prevent memory bloat (OOM)
 const allDeals = await prisma.deal.findMany({
-where: { influencerId: profile.id, status: "COMPLETED" },
-include: { campaign: { select: { targetCategories: true } } },
+  where: { influencerId: profile.id, status: "COMPLETED" },
+  select: {
+    id: true,
+    campaign: {
+      select: {
+        targetCategories: true,
+      },
+    },
+  },
+  take: 1000,
 });
 const categoryMap = new Map<string, number>();
 allDeals.forEach((d) => {
@@ -309,18 +318,17 @@ take: 10,
 });
 
 // 4. ROI Calculation
-const completedDeals = await prisma.deal.findMany({
-where: { brandId: profile.id, status: "COMPLETED" },
-select: { amount: true, totalAmount: true },
+// Fix #13: Use database-level aggregate to calculate total deal spend and average deal cost
+const aggregateResult = await prisma.deal.aggregate({
+  where: { brandId: profile.id, status: "COMPLETED" },
+  _sum: { totalAmount: true },
+  _count: { id: true },
 });
-const totalDealSpend = completedDeals.reduce(
-(sum: number, d) => sum + d.totalAmount,
-0,
-);
+const totalDealSpend = aggregateResult._sum.totalAmount ?? 0;
 const avgDealCost =
-completedDeals.length > 0
-? Math.round(totalDealSpend / completedDeals.length)
-: 0;
+  aggregateResult._count.id > 0
+    ? Math.round(totalDealSpend / aggregateResult._count.id)
+    : 0;
 
 // 5. Content Type Performance
 const categoryPerf = await prisma.deal.groupBy({
@@ -331,18 +339,19 @@ _sum: { amount: true },
 });
 
 // 6. Micro vs Macro comparison
+// Fix #13: Limit results and select only required fields to prevent memory bloat (OOM)
 const influencerDeals = await prisma.deal.findMany({
-where: { brandId: profile.id, status: "COMPLETED" },
-select: {
-amount: true,
-influencer: {
-select: {
-instagramFollowers: true,
-totalEarnings: true,
-averageRating: true,
-},
-},
-},
+  where: { brandId: profile.id, status: "COMPLETED" },
+  select: {
+    amount: true,
+    influencer: {
+      select: {
+        instagramFollowers: true,
+        averageRating: true,
+      },
+    },
+  },
+  take: 1000,
 });
 
 const micro = influencerDeals.filter(
@@ -403,7 +412,7 @@ activeCampaigns,
 totalCampaigns,
 activeDeals,
 trustScore: Math.min(profile.user.trustScore, 900),
-completedDeals: completedDeals.length,
+completedDeals: aggregateResult._count.id,
 avgDealCost,
 memberSince: profile.user.createdAt,
 },

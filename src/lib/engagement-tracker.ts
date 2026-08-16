@@ -361,15 +361,15 @@ clicks: number;
 const totalEngagements =
 snapshot.likes + snapshot.comments + snapshot.shares + snapshot.saves;
 
-// Cost per metrics (in paise)
-const costPerView =
-snapshot.views > 0 ? Math.round(dealAmountPaise / snapshot.views) : 0;
+  // Cost per metrics (in paise)
+  const costPerView =
+    snapshot.views > 0 ? Math.round(dealAmountPaise / snapshot.views) : dealAmountPaise;
 
-const costPerEngagement =
-totalEngagements > 0 ? Math.round(dealAmountPaise / totalEngagements) : 0;
+  const costPerEngagement =
+    totalEngagements > 0 ? Math.round(dealAmountPaise / totalEngagements) : dealAmountPaise;
 
-const costPerClick =
-snapshot.clicks > 0 ? Math.round(dealAmountPaise / snapshot.clicks) : 0;
+  const costPerClick =
+    snapshot.clicks > 0 ? Math.round(dealAmountPaise / snapshot.clicks) : dealAmountPaise;
 
 // Estimated value (EMV) using weighted coefficients: views = 0.20 (20 paise), engagement = 1.00 (100 paise), clicks = 5.00 (500 paise)
 const estimatedValue = Math.round(

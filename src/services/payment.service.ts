@@ -574,18 +574,21 @@ await redis.del(lockKey);
 
       await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         if (payout.status === "processed") {
-          await tx.withdrawal.update({
-            where: { id: withdrawal.w.id },
+          // Guard against concurrent webhook having already set the status
+          const updateCount = await tx.withdrawal.updateMany({
+            where: { id: withdrawal.w.id, status: { notIn: ["COMPLETED", "FAILED", "REVERSED"] } },
             data: { status: "COMPLETED", processedAt: new Date(), razorpayPayoutId: payout.payoutId }
           });
-          await tx.transaction.update({
-            where: { id: withdrawal.t.id },
-            data: { status: "COMPLETED" }
-          });
-          await tx.wallet.update({
-            where: { userId },
-            data: { totalWithdrawn: { increment: data.amount } }
-          });
+          if (updateCount.count > 0) {
+            await tx.transaction.update({
+              where: { id: withdrawal.t.id },
+              data: { status: "COMPLETED" }
+            });
+            await tx.wallet.update({
+              where: { userId },
+              data: { totalWithdrawn: { increment: data.amount } }
+            });
+          }
         } else if (["rejected", "failed", "reversed"].includes(payout.status)) {
           await PaymentService.refundFailedWithdrawal(
             withdrawal.w.id,
@@ -595,8 +598,9 @@ await redis.del(lockKey);
             false
           );
         } else {
-          await tx.withdrawal.update({
-            where: { id: withdrawal.w.id },
+          // Guard against concurrent webhook having already finalized the status
+          await tx.withdrawal.updateMany({
+            where: { id: withdrawal.w.id, status: { notIn: ["COMPLETED", "FAILED", "REVERSED"] } },
             data: { status: "PROCESSING", razorpayPayoutId: payout.payoutId }
           });
         }

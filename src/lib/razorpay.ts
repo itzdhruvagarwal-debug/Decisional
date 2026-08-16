@@ -515,7 +515,16 @@ return crypto.timingSafeEqual(sigBuffer, expectedBuffer);
 * Get payment details
 */
 export async function getPayment(paymentId: string) {
-return await getRazorpay().payments.fetch(paymentId);
+  return await getRazorpay().payments.fetch(paymentId);
+}
+
+/**
+ * Capture a Razorpay payment authorization.
+ * Must be called before paying the influencer on card-funded deals
+ * when the dispute is resolved in the influencer's favor.
+ */
+export async function capturePayment(paymentId: string, amount: number): Promise<void> {
+  await getRazorpay().payments.capture(paymentId, amount, "INR");
 }
 
 /**

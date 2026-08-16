@@ -60,9 +60,9 @@ productHandlingFee,
 );
 
 const alreadyCommittedTotal =
-application.campaign.reservedTotalAmount ||
-application.campaign.reservedAmount ||
-0;
+  application.campaign.reservedTotalAmount ??
+  application.campaign.reservedAmount ??
+  0;
 const fundedAmount =
 application.campaign.fundedAmount || application.campaign.totalBudget;
 if (alreadyCommittedTotal + paymentAmounts.totalAmount > fundedAmount) {

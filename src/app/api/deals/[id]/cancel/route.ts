@@ -189,37 +189,31 @@ brandUserId: deal.brand?.userId,
 }
 
 async function processBrandCancellationRefund(
-tx: Prisma.TransactionClient,
-deal: DealWithProfile,
-cancelSummary: CancellationSummary,
+  tx: Prisma.TransactionClient,
+  deal: DealWithProfile,
+  cancelSummary: CancellationSummary,
 ) {
-const { refundAmount, reason } = cancelSummary;
-if (!deal.brand?.userId) return;
+  const { refundAmount, reason } = cancelSummary;
+  if (!deal.brand?.userId) return;
 
-let brandWallet = await tx.wallet.findUnique({
-where: { userId: deal.brand.userId },
-});
+  if (deal.reservedFromWallet) {
+    // Wallet-reserved deal: refund returns to brand's withdrawable balance.
+    // pendingBalance was already decremented in executeCancellationTransaction via campaign.reservedTotalAmount,
+    // so only increment balance here.
+    let brandWallet = await tx.wallet.findUnique({ where: { userId: deal.brand.userId } });
 
-  if (brandWallet) {
-    // Refund amount must be credited to balance, and pendingBalance decremented ONLY if not reserved from wallet.
-    brandWallet = await tx.wallet.update({
-      where: { id: brandWallet.id },
-      data: {
-        balance: { increment: refundAmount },
-        ...(deal.reservedFromWallet ? {} : { pendingBalance: { decrement: deal.totalAmount ?? deal.amount } }),
-      },
-    });
-  } else {
-    brandWallet = await tx.wallet.create({
-      data: {
-        userId: deal.brand.userId,
-        balance: refundAmount,
-        pendingBalance: 0,
-      },
-    });
-}
+    if (brandWallet) {
+      brandWallet = await tx.wallet.update({
+        where: { id: brandWallet.id },
+        data: { balance: { increment: refundAmount } },
+      });
+    } else {
+      brandWallet = await tx.wallet.create({
+        data: { userId: deal.brand.userId, balance: refundAmount, pendingBalance: 0 },
+      });
+    }
 
-if (refundAmount > 0) {
+    if (refundAmount > 0) {
       await tx.transaction.create({
         data: {
           walletId: brandWallet.id,
@@ -227,14 +221,25 @@ if (refundAmount > 0) {
           type: "REFUND",
           amount: refundAmount,
           status: "COMPLETED",
-          description: `Cancellation refund: ${reason}`,
-          metadata: {
-            balanceImpact: true,
-            source: "wallet_cancellation_refund",
-          },
+          description: `Cancellation refund (wallet): ${reason}`,
+          metadata: { balanceImpact: true, source: "wallet_cancellation_refund" },
         },
       });
-}
+    }
+  } else {
+    // Campaign-funded deal: funds were never in brand's personal wallet.
+    // Deduct platform fees consumed from the campaign's fundedAmount so the
+    // campaign's available budget (pendingBalance) is correctly reduced.
+    const feesConsumed = (deal.totalAmount ?? deal.amount) - refundAmount;
+    if (feesConsumed > 0) {
+      await tx.campaign.update({
+        where: { id: deal.campaignId },
+        data: { fundedAmount: { decrement: feesConsumed } },
+      });
+    }
+    // No balance change on brand wallet — refund amount stays in campaign pool
+    // (it was already freed up via reservedTotalAmount decrement above).
+  }
 }
 
 async function executeCancellationTransaction(

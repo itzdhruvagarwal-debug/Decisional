@@ -316,11 +316,11 @@ thumbnail:
 channel.snippet.thumbnails?.high?.url ||
 channel.snippet.thumbnails?.default?.url ||
 "",
-subscriberCount: channel.statistics.hiddenSubscriberCount === true || channel.statistics.hiddenSubscriberCount === "true"
+subscriberCount: channel.statistics?.hiddenSubscriberCount === true || channel.statistics?.hiddenSubscriberCount === "true"
 ? -1
-: Number.parseInt(channel.statistics.subscriberCount || "0", 10),
-videoCount: Number.parseInt(channel.statistics.videoCount || "0", 10),
-viewCount: Number.parseInt(channel.statistics.viewCount || "0", 10),
+: Number.parseInt(channel.statistics?.subscriberCount || "0", 10),
+videoCount: Number.parseInt(channel.statistics?.videoCount || "0", 10),
+viewCount: Number.parseInt(channel.statistics?.viewCount || "0", 10),
 country: channel.snippet.country,
 publishedAt: channel.snippet.publishedAt,
 };
@@ -347,20 +347,20 @@ mine: "true",
 if (data.error || !data.items || data.items.length === 0) return null;
 
 const channel = data.items[0];
-return {
-id: channel.id,
-title: channel.snippet.title,
-description: channel.snippet.description || "",
-customUrl: channel.snippet.customUrl || "",
-thumbnail: channel.snippet.thumbnails?.high?.url || "",
-subscriberCount: channel.statistics.hiddenSubscriberCount === true || channel.statistics.hiddenSubscriberCount === "true"
-? -1
-: Number.parseInt(channel.statistics.subscriberCount || "0", 10),
-videoCount: Number.parseInt(channel.statistics.videoCount || "0", 10),
-viewCount: Number.parseInt(channel.statistics.viewCount || "0", 10),
-country: channel.snippet.country,
-publishedAt: channel.snippet.publishedAt,
-};
+  return {
+    id: channel.id,
+    title: channel.snippet.title,
+    description: channel.snippet.description || "",
+    customUrl: channel.snippet.customUrl || "",
+    thumbnail: channel.snippet.thumbnails?.high?.url || "",
+    subscriberCount: channel.statistics?.hiddenSubscriberCount === true || channel.statistics?.hiddenSubscriberCount === "true"
+      ? -1
+      : Number.parseInt(channel.statistics?.subscriberCount || "0", 10),
+    videoCount: Number.parseInt(channel.statistics?.videoCount || "0", 10),
+    viewCount: Number.parseInt(channel.statistics?.viewCount || "0", 10),
+    country: channel.snippet.country,
+    publishedAt: channel.snippet.publishedAt,
+  };
 } catch (error) {
 logger.error("YouTube mine channel fetch error", error);
 return null;
@@ -427,22 +427,22 @@ return null;
 }
 
 const video = data.items[0];
-return {
-id: video.id,
-title: video.snippet.title,
-description: video.snippet.description || "",
-thumbnail:
-video.snippet.thumbnails?.high?.url ||
-video.snippet.thumbnails?.default?.url ||
-"",
-publishedAt: video.snippet.publishedAt,
-viewCount: Number.parseInt(video.statistics.viewCount || "0", 10),
-likeCount: Number.parseInt(video.statistics.likeCount || "0", 10),
-commentCount: Number.parseInt(video.statistics.commentCount || "0", 10),
-duration: video.contentDetails.duration,
-isLive: video.status?.privacyStatus === "public",
-privacyStatus: video.status?.privacyStatus,
-};
+  return {
+    id: video.id,
+    title: video.snippet.title,
+    description: video.snippet.description || "",
+    thumbnail:
+      video.snippet.thumbnails?.high?.url ||
+      video.snippet.thumbnails?.default?.url ||
+      "",
+    publishedAt: video.snippet.publishedAt,
+    viewCount: Number.parseInt(video.statistics?.viewCount || "0", 10),
+    likeCount: Number.parseInt(video.statistics?.likeCount || "0", 10),
+    commentCount: Number.parseInt(video.statistics?.commentCount || "0", 10),
+    duration: video.contentDetails.duration,
+    isLive: video.status?.privacyStatus === "public",
+    privacyStatus: video.status?.privacyStatus,
+  };
 } catch (error) {
 logger.error("YouTube video fetch error", error, { videoId });
 return null;

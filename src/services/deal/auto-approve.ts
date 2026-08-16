@@ -182,14 +182,22 @@ return now.getTime() - deal.submittedAt.getTime() >= reviewWindowMs;
 
 let batchSkipped = 0;
 
-for (const deal of expiredDeals) {
-const approved = await autoApproveSingleExpiredDeal(deal, now);
-if (approved) {
-processed += 1;
-} else {
-batchSkipped += 1;
-}
-}
+      for (const deal of expiredDeals) {
+        try {
+          const approved = await autoApproveSingleExpiredDeal(deal, now);
+          if (approved) {
+            processed += 1;
+          } else {
+            batchSkipped += 1;
+          }
+        } catch (err) {
+          logger.error("auto-approve: failed to process deal, skipping to next", {
+            dealId: (deal as { id?: string }).id,
+            error: err instanceof Error ? err.message : String(err),
+          });
+          batchSkipped += 1;
+        }
+      }
 
 skipped += batchSkipped;
 }

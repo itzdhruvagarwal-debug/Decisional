@@ -62,7 +62,8 @@ status: "COMPLETED",
 completedAt: { gte: currentIndianFinancialYearStart() },
 id: { not: dealId },
 },
-select: { influencerPayout: true, amount: true },
+// tdsDeducted required to avoid re-taxing previously withheld amounts
+select: { influencerPayout: true, amount: true, tdsDeducted: true },
 });
 
 const previousFyEarnings = fyDeals.reduce(
@@ -70,9 +71,17 @@ const previousFyEarnings = fyDeals.reduce(
 0,
 );
 
-return previousFyEarnings + grossPayout >= TDS_THRESHOLD
-? Math.round(grossPayout * TDS_RATE)
-: 0;
+const totalEarnings = previousFyEarnings + grossPayout;
+if (totalEarnings < TDS_THRESHOLD) return 0;
+
+// Calculate total TDS required on entire FY earnings, then subtract already-deducted amounts.
+// This prevents under-withholding when the threshold is crossed mid-year on a large payout.
+const previousFyTdsAlreadyDeducted = fyDeals.reduce(
+(sum, deal) => sum + (deal.tdsDeducted ?? 0),
+0,
+);
+const totalRequiredTds = Math.round(totalEarnings * TDS_RATE);
+return Math.max(0, totalRequiredTds - previousFyTdsAlreadyDeducted);
 }
 
 export async function creditInfluencerPayoutWithTax(

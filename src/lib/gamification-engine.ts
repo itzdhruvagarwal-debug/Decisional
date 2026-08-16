@@ -33,19 +33,12 @@ totalEarnings: { increment: amount },
 // Award XP for completing deal
 await addUserXp(userId, 100, "DEAL_COMPLETED", tx);
 
-let referralResult;
-if (!options?.skipReferral) {
-try {
-const { processReferralReward } = await import("./referral-engine");
-referralResult = await processReferralReward(userId, amount, tx, options?.treasuryWalletId, options?.dealId);
-} catch (err) {
-logger.warn("Non-blocking referral reward processing failed", {
-error: err instanceof Error ? err.message : String(err),
-userId,
-dealId: options?.dealId,
-});
-}
-}
+  let referralResult;
+  if (!options?.skipReferral) {
+    const { processReferralReward } = await import("./referral-engine");
+    // Do not catch and swallow errors. Let them propagate to safely roll back the transaction
+    referralResult = await processReferralReward(userId, amount, tx, options?.treasuryWalletId, options?.dealId);
+  }
 
 await checkAndAwardBadges(userId, "DEAL_COMPLETED", tx);
 return referralResult;
@@ -223,69 +216,78 @@ userId,
 badgeId: dbb.id,
 }));
 
-await db.userBadge.createMany({
-data: userBadgesToCreate,
-skipDuplicates: true,
-});
+  await db.userBadge.createMany({
+    data: userBadgesToCreate,
+    skipDuplicates: true,
+  });
 
-let totalXp = 0;
-for (const dbb of newDbBadges) {
-const badgeDef = badges.find((b) => b.name === dbb.name);
-if (!badgeDef) continue;
-totalXp += badgeDef.xpReward;
+  // Verify which user badges were actually inserted (in case skipDuplicates skipped some due to concurrent awards)
+  const createdIds = userBadgesToCreate.map((ub) => ub.id);
+  const insertedUserBadges = await db.userBadge.findMany({
+    where: { id: { in: createdIds } },
+    select: { badgeId: true },
+  });
+  const insertedBadgeIds = new Set(insertedUserBadges.map((ub) => ub.badgeId));
+  const actuallyNewDbBadges = newDbBadges.filter((dbb) => insertedBadgeIds.has(dbb.id));
 
-// Notification
-await NotificationService.createNotification({
-userId,
-type: "badge_earned",
-title: `New Badge Unlocked: ${dbb.name} ${dbb.icon}`,
-message: `Congratulations! You've earned the "${dbb.name}" badge and ${badgeDef.xpReward} XP!`,
-data: { badgeId: dbb.id },
-}, db);
-}
+  let totalXp = 0;
+  for (const dbb of actuallyNewDbBadges) {
+    const badgeDef = badges.find((b) => b.name === dbb.name);
+    if (!badgeDef) continue;
+    totalXp += badgeDef.xpReward;
 
-// 5. Update User XP
-if (totalXp > 0) {
-await addUserXp(userId, totalXp, "BADGE_EARNED", db);
-}
+    // Notification
+    await NotificationService.createNotification({
+      userId,
+      type: "badge_earned",
+      title: `New Badge Unlocked: ${dbb.name} ${dbb.icon}`,
+      message: `Congratulations! You've earned the "${dbb.name}" badge and ${badgeDef.xpReward} XP!`,
+      data: { badgeId: dbb.id },
+    }, db);
+  }
+
+  // 5. Update User XP
+  if (totalXp > 0) {
+    await addUserXp(userId, totalXp, "BADGE_EARNED", db);
+  }
 }
 
 export async function addUserXp(
-userId: string,
-amount: number,
-reason: string,
-db: Prisma.TransactionClient | typeof prisma = prisma,
+  userId: string,
+  amount: number,
+  reason: string,
+  db: Prisma.TransactionClient | typeof prisma = prisma,
 ) {
-if (!Number.isInteger(amount) || amount <= 0) return null;
+  if (!Number.isInteger(amount) || amount <= 0) return null;
 
-const updatedUser = await db.user.update({
-where: { id: userId },
-data: { xp: { increment: amount } },
-select: { xp: true, level: true },
-});
+  const updatedUser = await db.user.update({
+    where: { id: userId },
+    data: { xp: { increment: amount } },
+    select: { xp: true, level: true },
+  });
 
-const nextLevel = calculateLevel(updatedUser.xp).level;
-if (nextLevel !== updatedUser.level) {
-await db.user.update({
-where: { id: userId },
-data: { level: nextLevel },
-});
-}
+  const nextLevel = calculateLevel(updatedUser.xp).level;
+  if (nextLevel !== updatedUser.level) {
+    // Fix #22: Only update if the level is actually increasing to prevent race conditions from downgrading the level
+    await db.user.updateMany({
+      where: { id: userId, level: { lt: nextLevel } },
+      data: { level: nextLevel },
+    });
+  }
 
-await createActivityLog({
-userId,
-action: "XP_AWARDED",
-metadata: {
-reason,
-xpAwarded: amount,
-totalXp: updatedUser.xp,
-oldLevel: updatedUser.level,
-newLevel: nextLevel,
-},
-}, db);
+  await createActivityLog({
+    userId,
+    action: "XP_AWARDED",
+    metadata: {
+      reason,
+      xpAwarded: amount,
+      totalXp: updatedUser.xp,
+      oldLevel: updatedUser.level,
+      newLevel: nextLevel,
+    },
+  }, db);
 
-return { xp: updatedUser.xp, level: nextLevel };
+  return { xp: updatedUser.xp, level: nextLevel };
 }
 
 // --- HELPERS ---
-

@@ -530,7 +530,7 @@ return deals.filter((d) => {
 if (!d.submittedAt || !d.approvedAt) return false;
 const submitted = new Date(d.submittedAt).getTime();
 const approved = new Date(d.approvedAt).getTime();
-const allowedDuration = (d.reviewPeriodHours || 48) * 3600 * 1000;
+const allowedDuration = (d.reviewPeriodHours ?? 48) * 3600 * 1000;
 return approved - submitted > allowedDuration;
 }).length;
 }

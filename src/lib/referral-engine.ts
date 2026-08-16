@@ -531,9 +531,15 @@ where: { id: userId },
 select: { referredBy: true },
 });
 
-if (!user?.referredBy) return;
+  if (!user?.referredBy) return;
 
-const referrerId = user.referredBy;
+  const referrerId = user.referredBy;
+
+  // Block self-referral: user cannot earn cashback by referring themselves
+  if (referrerId === userId) {
+    logger.warn("Self-referral attempt detected and blocked", { userId, referrerId });
+    return;
+  }
 
 // Invalidate platform fee cache for referrer
 if (!tx) {
@@ -599,10 +605,10 @@ await addUserXp(referrerId, currentTier.xpReward, "REFERRAL_TIER_UP", db);
 if (isFirstActiveEvent) {
 await checkAndAwardBadges(referrerId, "REFERRAL", db);
 
-// Track weekly challenge progress for referral
-await checkChallengeProgress(referrerId, "REFERRALS", 1).catch((err) => {
-logger.error("Failed to track challenge progress for referral", { referrerId, userId, error: err });
-});
+    // Track weekly challenge progress for referral
+    await checkChallengeProgress(referrerId, "REFERRALS", 1, db).catch((err) => {
+      logger.error("Failed to track challenge progress for referral", { referrerId, userId, error: err });
+    });
 }
 
 // If there's no monetary reward but they leveled up, we still want to notify them

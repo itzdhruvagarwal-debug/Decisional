@@ -122,7 +122,7 @@ const method = req.method;
 const url = req.nextUrl.pathname;
     const forwardedFor = req.headers.get("x-forwarded-for");
     const ip = forwardedFor
-      ? forwardedFor.split(",").pop()?.trim() || "unknown"
+      ? forwardedFor.split(",")[0]?.trim() || "unknown"
       : req.headers.get("x-real-ip") || "unknown";
 
 // Request body size protection: reject bodies > 2MB

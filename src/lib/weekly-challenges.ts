@@ -8,6 +8,7 @@
 */
 
 import prisma from "./db";
+import { Prisma } from "@prisma/client";
 import { logger } from "./logger";
 import { addUserXp, awardBadgeIfNotExists } from "./gamification-engine";
 import { NotificationService } from "@/services/notification.service";
@@ -371,12 +372,14 @@ export async function checkChallengeProgress(
 userId: string,
 eventType: ChallengeType,
 incrementBy: number = 1,
+tx?: Prisma.TransactionClient,
 ): Promise<{ completed: string[]; updated: string[] }> {
+const db = tx || prisma;
 const now = new Date();
 const weekId = `${now.getUTCFullYear()}-W${getWeekNumber(now)}`;
 
 // Get active challenges for this week
-const activeChallenges = await prisma.weeklyChallenge.findMany({
+const activeChallenges = await db.weeklyChallenge.findMany({
 where: {
 weekId,
 type: eventType,
@@ -390,7 +393,7 @@ const updated: string[] = [];
 
 for (const challenge of activeChallenges) {
 // Pre-check to filter out already completed
-const existing = await prisma.userChallengeProgress.findUnique({
+const existing = await db.userChallengeProgress.findUnique({
 where: {
 userId_challengeId_weekId: {
 userId,
@@ -404,7 +407,7 @@ select: { completed: true },
 if (existing?.completed) continue;
 
 // Atomic increment/upsert
-const progress = await prisma.userChallengeProgress.upsert({
+const progress = await db.userChallengeProgress.upsert({
 where: {
 userId_challengeId_weekId: {
 userId,
@@ -429,7 +432,7 @@ currentProgress: { increment: incrementBy },
 // If it is now completed, mark it completed atomically.
 // This handles both new creations and updates, using updateMany count as the single-award coordinator.
 if (progress.currentProgress >= challenge.goal) {
-const updateRes = await prisma.userChallengeProgress.updateMany({
+const updateRes = await db.userChallengeProgress.updateMany({
 where: {
 id: progress.id,
 completed: false,
@@ -442,7 +445,7 @@ completedAt: now,
 
 if (updateRes.count > 0) {
 completed.push(challenge.challengeId);
-await awardChallengeReward(userId, challenge);
+await awardChallengeReward(userId, challenge, db);
 } else {
 updated.push(challenge.challengeId);
 }
@@ -482,85 +485,99 @@ days = parsed;
 return days;
 }
 
-async function awardFeaturedCreatorPerk(userId: string, bonusPerk: string) {
-const days = parseFeaturedDays(bonusPerk);
+async function awardFeaturedCreatorPerk(
+  userId: string,
+  bonusPerk: string,
+  db: Prisma.TransactionClient | typeof prisma = prisma,
+) {
+  const days = parseFeaturedDays(bonusPerk);
 
-await prisma.$transaction(async (tx) => {
-// Row lock to prevent race condition when multiple challenges complete simultaneously
-await tx.$queryRaw`SELECT id FROM "InfluencerProfile" WHERE "userId" = ${userId} FOR UPDATE`;
+  const execute = async (tx: Prisma.TransactionClient) => {
+    // Row lock to prevent race condition when multiple challenges complete simultaneously
+    await tx.$queryRaw`SELECT id FROM "InfluencerProfile" WHERE "userId" = ${userId} FOR UPDATE`;
 
-const influencer = await tx.influencerProfile.findUnique({
-where: { userId },
-});
+    const influencer = await tx.influencerProfile.findUnique({
+      where: { userId },
+    });
 
-if (influencer) {
-const now = new Date();
-const currentFeaturedUntil = influencer.featuredUntil ? new Date(influencer.featuredUntil) : null;
-const baseDate = (currentFeaturedUntil && currentFeaturedUntil > now) ? currentFeaturedUntil : now;
-const featuredUntil = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000);
+    if (influencer) {
+      const now = new Date();
+      const currentFeaturedUntil = influencer.featuredUntil ? new Date(influencer.featuredUntil) : null;
+      const baseDate = (currentFeaturedUntil && currentFeaturedUntil > now) ? currentFeaturedUntil : now;
+      const featuredUntil = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000);
 
-await tx.influencerProfile.update({
-where: { id: influencer.id },
-data: {
-isFeatured: true,
-featuredUntil,
-},
-});
+      await tx.influencerProfile.update({
+        where: { id: influencer.id },
+        data: {
+          isFeatured: true,
+          featuredUntil,
+        },
+      });
 
-logger.info("Awarded Featured Creator perk to influencer", {
-userId,
-influencerId: influencer.id,
-days,
-featuredUntil,
-});
-}
-});
+      logger.info("Awarded Featured Creator perk to influencer", {
+        userId,
+        influencerId: influencer.id,
+        days,
+        featuredUntil,
+      });
+    }
+  };
+
+  if (db === prisma) {
+    await prisma.$transaction(async (tx) => {
+      await execute(tx);
+    });
+  } else {
+    await execute(db as Prisma.TransactionClient);
+  }
 }
 
 async function awardChallengeReward(
-userId: string,
-challenge: {
-challengeId: string;
-title: string;
-xpReward: number;
-bonusPerk?: string | null;
-},
+  userId: string,
+  challenge: {
+    challengeId: string;
+    title: string;
+    xpReward: number;
+    bonusPerk?: string | null;
+  },
+  db: Prisma.TransactionClient | typeof prisma = prisma,
 ) {
-try {
-// 1. Award XP
-await addUserXp(userId, challenge.xpReward, "WEEKLY_CHALLENGE");
+  try {
+    const { addUserXp } = await import("./gamification-engine");
+    // 1. Award XP using the passed transaction/Prisma client
+    await addUserXp(userId, challenge.xpReward, "WEEKLY_CHALLENGE", db);
 
-// 1.5. If the reward includes "Featured Creator" perk, grant it (with stacked days support)
-if (challenge.bonusPerk?.toLowerCase().includes("featured creator")) {
-await awardFeaturedCreatorPerk(userId, challenge.bonusPerk);
-}
+    // 1.5. If the reward includes "Featured Creator" perk, grant it (with stacked days support)
+    if (challenge.bonusPerk?.toLowerCase().includes("featured creator")) {
+      await awardFeaturedCreatorPerk(userId, challenge.bonusPerk, db);
+    }
 
-// 2. Notify user
-const perkMsg = challenge.bonusPerk
-? ` Bonus: ${challenge.bonusPerk}!`
-: "";
-await NotificationService.createNotification({
-userId,
-type: "badge",
-title: ` Challenge Complete: ${challenge.title}`,
-message: `You earned +${challenge.xpReward} XP for completing the weekly challenge!${perkMsg}`,
-data: structuredClone({
-challengeId: challenge.challengeId,
-xpReward: challenge.xpReward,
-bonusPerk: challenge.bonusPerk,
-}),
-});
+    // 2. Notify user
+    const perkMsg = challenge.bonusPerk
+      ? ` Bonus: ${challenge.bonusPerk}!`
+      : "";
+    await NotificationService.createNotification({
+      userId,
+      type: "badge",
+      title: ` Challenge Complete: ${challenge.title}`,
+      message: `You earned +${challenge.xpReward} XP for completing the weekly challenge!${perkMsg}`,
+      data: structuredClone({
+        challengeId: challenge.challengeId,
+        xpReward: challenge.xpReward,
+        bonusPerk: challenge.bonusPerk,
+      }),
+    }, db);
 
-// 3. Log activity
-await createActivityLog({
-userId,
-action: "CHALLENGE_COMPLETED",
-metadata: {
-challengeId: challenge.challengeId,
-title: challenge.title,
-xpReward: challenge.xpReward,
-},
-});
+    // 3. Log activity
+    await createActivityLog({
+      userId,
+      action: "CHALLENGE_COMPLETED",
+      metadata: {
+        challengeId: challenge.challengeId,
+        title: challenge.title,
+        xpReward: challenge.xpReward,
+      },
+    }, db);
 
 logger.info("Challenge reward awarded", {
 userId,

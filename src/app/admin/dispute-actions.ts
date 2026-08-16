@@ -15,7 +15,7 @@ import {
 creditInfluencerPayoutWithTax,
 recordPlatformFeeRevenue,
 } from "@/lib/deal-settlement";
-import { refundPayment } from "@/lib/razorpay";
+import { refundPayment, capturePayment } from "@/lib/razorpay";
 
 export type DisputeWithDeal = Prisma.DisputeGetPayload<{
 include: {
@@ -110,18 +110,20 @@ const brandWallet = await tx.wallet.findUnique({ where: { userId: brandUserId } 
 if (!brandWallet) return;
 
 const refundAmount = dispute.deal.totalAmount || dispute.deal.amount;
+  // FIX: Logic was inverted — wallet-reserved deals MUST decrement pendingBalance + increment balance.
+  // Card-funded deals only increment balance (gateway handles the actual card refund separately).
   const updateResult = dispute.deal.reservedFromWallet
     ? await tx.wallet.updateMany({
-        where: { id: brandWallet.id },
-        data: {
-          balance: { increment: refundAmount },
-        },
-      })
-    : await tx.wallet.updateMany({
         where: { id: brandWallet.id, pendingBalance: { gte: refundAmount } },
         data: {
           balance: { increment: refundAmount },
           pendingBalance: { decrement: refundAmount },
+        },
+      })
+    : await tx.wallet.updateMany({
+        where: { id: brandWallet.id },
+        data: {
+          balance: { increment: refundAmount },
         },
       });
 
@@ -129,24 +131,24 @@ const refundAmount = dispute.deal.totalAmount || dispute.deal.amount;
     throw AppError.badRequest("Invalid deal state: missing refundable wallet reserve.");
   }
 
-await tx.transaction.create({
-data: {
-walletId: brandWallet.id,
-type: "REFUND",
-amount: refundAmount,
-description: `Refund for disputed deal: ${dispute.deal.campaignId} (Reason: ${reason})`,
-status: "COMPLETED",
-metadata: {
-balanceImpact: true,
-reservedFromWallet: dispute.deal.reservedFromWallet,
-source: "admin_dispute_refund",
-},
-},
-});
+  await tx.transaction.create({
+    data: {
+      walletId: brandWallet.id,
+      type: "REFUND",
+      amount: refundAmount,
+      description: `Refund for disputed deal: ${dispute.deal.campaignId} (Reason: ${reason})`,
+      status: "COMPLETED",
+      metadata: {
+        balanceImpact: true,
+        reservedFromWallet: dispute.deal.reservedFromWallet,
+        source: "admin_dispute_refund",
+      },
+    },
+  });
 
-if (!dispute.deal.reservedFromWallet) {
-await performGatewayRefund(tx, dispute.dealId, refundAmount, reason);
-}
+  if (!dispute.deal.reservedFromWallet) {
+    await performGatewayRefund(tx, dispute.dealId, refundAmount, reason);
+  }
 }
 
 async function handleRefundBrand(tx: Prisma.TransactionClient, dispute: DisputeWithDeal, reason: string) {
@@ -211,18 +213,43 @@ const influencer = await tx.influencerProfile.findUnique({
 where: { id: dispute.deal.influencerId },
 });
 if (influencer) {
-// STRICT DEBT REQUIREMENT: Decrement pendingBalance from brand's wallet first!
-if (dispute.deal.brand?.userId && dispute.deal.reservedFromWallet) {
-const reserveAmount = dispute.deal.totalAmount || dispute.deal.amount;
-const debitResult = await tx.wallet.updateMany({
-where: { userId: dispute.deal.brand.userId, pendingBalance: { gte: reserveAmount } },
-data: { pendingBalance: { decrement: reserveAmount } }
-});
+  // STRICT DEBT REQUIREMENT: Decrement pendingBalance from brand's wallet first!
+  if (dispute.deal.brand?.userId && dispute.deal.reservedFromWallet) {
+    const reserveAmount = dispute.deal.totalAmount || dispute.deal.amount;
+    const debitResult = await tx.wallet.updateMany({
+      where: { userId: dispute.deal.brand.userId, pendingBalance: { gte: reserveAmount } },
+      data: { pendingBalance: { decrement: reserveAmount } }
+    });
 
-if (debitResult.count === 0) {
-throw AppError.badRequest("Invalid deal state: Missing pending balance in brand's wallet. Concurrent process detected.");
-}
-}
+    if (debitResult.count === 0) {
+      throw AppError.badRequest("Invalid deal state: Missing pending balance in brand's wallet. Concurrent process detected.");
+    }
+  } else if (!dispute.deal.reservedFromWallet) {
+    // Card-funded deal: capture the Razorpay payment authorization so the
+    // platform actually collects the money before paying the influencer.
+    const paymentHold = await tx.paymentHold.findUnique({
+      where: { dealId: dispute.dealId },
+      select: { razorpayPaymentId: true },
+    });
+    if (paymentHold?.razorpayPaymentId) {
+      try {
+        const captureAmount = dispute.deal.totalAmount || dispute.deal.amount;
+        await capturePayment(paymentHold.razorpayPaymentId, captureAmount);
+        logger.info("Razorpay payment captured for card-funded dispute resolution", {
+          dealId: dispute.dealId,
+          paymentId: paymentHold.razorpayPaymentId,
+          captureAmount,
+        });
+      } catch (captureErr) {
+        logger.error("Razorpay capture failed during dispute resolution", captureErr instanceof Error ? captureErr : new Error(String(captureErr)), {
+          dealId: dispute.dealId,
+        });
+        throw AppError.badRequest("Failed to capture brand payment — cannot release influencer payout without confirmed funds.");
+      }
+    } else {
+      logger.warn("No PaymentHold found for card-funded deal during dispute release", { dealId: dispute.dealId });
+    }
+  }
 
 await creditInfluencerPayoutWithTax(
 tx,

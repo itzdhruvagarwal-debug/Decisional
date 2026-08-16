@@ -98,34 +98,34 @@ export async function verifyWalletBalance(userId: string): Promise<VerificationA
       return null;
     }
 
-    const transactions = await tx.transaction.findMany({
-      where: {
-        wallet: { userId },
-        status: "COMPLETED",
-        deletedAt: null,
-      },
-      select: {
-        type: true,
-        amount: true,
-        description: true,
-        metadata: true,
-        razorpayPaymentId: true,
-      },
-    });
+    // Fix #12: Fetch aggregations directly from the DB rather than retrieving thousands of rows into memory
+    const [creditsResult, debitsResult] = await Promise.all([
+      tx.transaction.aggregate({
+        where: {
+          wallet: { userId },
+          status: "COMPLETED",
+          deletedAt: null,
+          type: { in: ["CREDIT", "REFUND"] },
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+      tx.transaction.aggregate({
+        where: {
+          wallet: { userId },
+          status: "COMPLETED",
+          deletedAt: null,
+          type: { in: ["DEBIT", "WITHDRAWAL", "PLATFORM_FEE", "CLAWBACK", "CHARGEBACK"] },
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+    ]);
 
-    const balanceTransactions = (transactions as LedgerTransaction[]).filter(
-      impactsStoredWalletBalance,
-    );
-    const totalCredits = balanceTransactions.reduce(
-      (sum: number, transaction: LedgerTransaction) =>
-        CREDIT_TYPES.has(transaction.type) ? sum + transaction.amount : sum,
-      0,
-    );
-    const totalDebits = balanceTransactions.reduce(
-      (sum: number, transaction: LedgerTransaction) =>
-        DEBIT_TYPES.has(transaction.type) ? sum + transaction.amount : sum,
-      0,
-    );
+    const totalCredits = creditsResult._sum.amount ?? 0;
+    const totalDebits = debitsResult._sum.amount ?? 0;
     const calculatedBalance = totalCredits - totalDebits;
 
     let expectedPendingBalance = 0;
@@ -259,16 +259,24 @@ async function handleLedgerDriftAnomaly(
 const LEDGER_SCAN_CURSOR_KEY = "ledger:scan:last-wallet-id";
 
 async function scanWalletsBatch(wallets: { id: string; userId: string }[], anomalies: VerificationAnomaly[]) {
-const CONCURRENCY_LIMIT = 5;
-for (let i = 0; i < wallets.length; i += CONCURRENCY_LIMIT) {
-const batch = wallets.slice(i, i + CONCURRENCY_LIMIT);
-const batchResults = await Promise.all(
-batch.map(wallet => verifyWalletBalance(wallet.userId))
-);
-for (const anomaly of batchResults) {
-if (anomaly) anomalies.push(anomaly);
-}
-}
+  const CONCURRENCY_LIMIT = 5;
+  for (let i = 0; i < wallets.length; i += CONCURRENCY_LIMIT) {
+    const batch = wallets.slice(i, i + CONCURRENCY_LIMIT);
+    const batchResults = await Promise.all(
+      batch.map(wallet =>
+        verifyWalletBalance(wallet.userId).catch(err => {
+          logger.error("Ledger scan failed for wallet verification", {
+            userId: wallet.userId,
+            error: err instanceof Error ? err.message : String(err),
+          });
+          return null;
+        })
+      )
+    );
+    for (const anomaly of batchResults) {
+      if (anomaly) anomalies.push(anomaly);
+    }
+  }
 }
 
 async function fetchWalletBatchForScan(currentTake: number, cursor: string | undefined) {

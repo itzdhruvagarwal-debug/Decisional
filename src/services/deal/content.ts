@@ -68,6 +68,11 @@ feedback: item.feedback || "",
 // Determine fallback contentUrl for backward-compatibility
 const finalContentUrl = contentUrl || (contentUrls?.[0]?.url) || "";
 
+// Validate that at least one content URL is provided
+if (!finalContentUrl && (!formattedUrls || formattedUrls.length === 0)) {
+  throw AppError.badRequest("At least one content URL is required");
+}
+
 await tx.contentSubmission.create({
 data: {
 dealId,
@@ -278,11 +283,9 @@ if (hasRevision) {
 updatedStatus = "REVISION_REQUESTED";
 await handleRevisionCharge(tx, deal, userId, dealId);
 } else if (!overallApproved) {
-return {
-success: true,
-statusUpdated: false,
-dealStatus: deal.status,
-};
+// Partial review: some items still PENDING — persist partial feedback to DB
+// but keep deal status unchanged so the brand can complete the review later.
+updatedStatus = deal.status as "CONTENT_APPROVED" | "REVISION_REQUESTED";
 }
 
 const allFeedback = updatedUrls
