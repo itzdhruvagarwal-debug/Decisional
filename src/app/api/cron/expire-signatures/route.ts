@@ -50,6 +50,7 @@ async function _handler_POST(_req: NextRequest) {
     let processedCount = 0;
     const results: Array<{ dealId: string; success: boolean; error?: string }> = [];
 
+    const failedIds: string[] = [];
     while (processedCount < MAX_PROCESS_LIMIT) {
       const currentTake = Math.min(BATCH_SIZE, MAX_PROCESS_LIMIT - processedCount);
       const expiredDeals = await prisma.deal.findMany({
@@ -57,6 +58,7 @@ async function _handler_POST(_req: NextRequest) {
           status: "PENDING_SIGNATURE",
           signDeadline: { lt: now },
           deletedAt: null, // M11 & L10 FIX: Ignore soft-deleted deals
+          ...(failedIds.length > 0 ? { id: { notIn: failedIds } } : {}),
         },
         include: {
           brand: { select: { id: true, userId: true, companyName: true } },
@@ -93,6 +95,7 @@ async function _handler_POST(_req: NextRequest) {
           });
         } catch (err: unknown) {
           logger.error("Failed to expire deal signature", err, { dealId: deal.id });
+          failedIds.push(deal.id);
           results.push({
             dealId: deal.id,
             success: false,

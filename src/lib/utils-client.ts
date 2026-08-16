@@ -44,7 +44,7 @@ return { page, limit, skip: (page - 1) * limit };
 export function roundPaise(amountInPaise: number): number { return Math.round(amountInPaise); }
 
 export function getDealTotalAmount(deal: { totalAmount?: number | null; amount: number }): number {
-return deal.totalAmount || deal.amount;
+return deal.totalAmount ?? deal.amount;
 }
 
 export const ACTIVE_DEAL_STATUSES = ["PENDING_SIGNATURE","ACTIVE","PAYMENT_PENDING","PAYMENT_HELD","CONTENT_SUBMITTED","REVISION_REQUESTED","CONTENT_APPROVED","POSTED","VERIFICATION_PENDING","VERIFIED","DISPUTED"];

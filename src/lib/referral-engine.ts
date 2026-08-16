@@ -573,14 +573,12 @@ select: { referredBy: true },
     return;
   }
 
-// Invalidate platform fee cache for referrer
-if (!tx) {
-try {
-await redis.del(`platform_fee:effective:${referrerId}`);
-} catch (err) {
-logger.warn("Redis invalidation failed in processReferralReward", { error: getErrorMessage(err) });
-}
-}
+  // Invalidate platform fee cache for referrer
+  try {
+    await redis.del(`platform_fee:effective:${referrerId}`);
+  } catch (err) {
+    logger.warn("Redis invalidation failed in processReferralReward", { error: getErrorMessage(err) });
+  }
 
 // Security gate: Check if referrer has a high enough trust score to earn rewards
 const referrerUser = await db.user.findUnique({

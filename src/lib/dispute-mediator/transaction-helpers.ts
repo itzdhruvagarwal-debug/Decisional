@@ -101,72 +101,74 @@ balance: { decrement: treasuryClawback },
 });
 }
 
-// Credit Brand Wallet (Refund) up to brandRefundActual
-if (brandUserId && brandRefundActual > 0) {
-const brandWallet = await tx.wallet.upsert({
-where: { userId: brandUserId },
-create: { userId: brandUserId, balance: brandRefundActual, pendingBalance: 0 },
-update: { balance: { increment: brandRefundActual } },
-});
+  const transactions = [];
 
-if (debtPending > 0) {
-await tx.debtClaim.create({
-data: {
-debtorWalletId: influencerWallet.id,
-creditorUserId: brandUserId,
-dealId: deal.id,
-amount: debtPending,
-originalAmount: debtPending,
-status: "PENDING",
-},
-});
-}
+  if (actualDeduct > 0 || debtPending > 0) {
+    const debtSuffix = debtPending > 0 ? ` (Pending debt: ${debtPending} Paise)` : "";
+    const description = `Dispute clawback for brand refund (${analysis.refundPercentage}%)${debtSuffix}`;
+    transactions.push({
+      walletId: influencerWallet.id,
+      dealId: deal.id,
+      type: "CLAWBACK" as TransactionType,
+      amount: actualDeduct,
+      status: "COMPLETED" as TransactionStatus,
+      description,
+    });
+  }
 
-const debtSuffix = debtPending > 0 ? ` (Pending debt: ${debtPending} Paise)` : "";
-const description = `Dispute clawback for brand refund (${analysis.refundPercentage}%)${debtSuffix}`;
+  if (treasuryClawback > 0) {
+    await ensurePlatformTreasury(tx);
+    const treasuryWallet = await tx.wallet.findUnique({
+      where: { userId: "PLATFORM_TREASURY" },
+      select: { id: true }
+    });
+    if (treasuryWallet) {
+      transactions.push({
+        walletId: treasuryWallet.id,
+        dealId: deal.id,
+        type: "CLAWBACK" as TransactionType,
+        amount: treasuryClawback,
+        status: "COMPLETED" as TransactionStatus,
+        description: `Platform fee clawback for dispute resolution (${analysis.refundPercentage}%)`,
+      });
+    }
+  }
 
-const transactions = [
-{
-walletId: influencerWallet.id,
-dealId: deal.id,
-type: "CLAWBACK" as TransactionType,
-amount: actualDeduct,
-status: "COMPLETED" as TransactionStatus,
-description,
-}
-];
+  if (brandUserId && brandRefundActual > 0) {
+    const brandWallet = await tx.wallet.upsert({
+      where: { userId: brandUserId },
+      create: { userId: brandUserId, balance: brandRefundActual, pendingBalance: 0 },
+      update: { balance: { increment: brandRefundActual } },
+    });
 
-if (treasuryClawback > 0) {
-await ensurePlatformTreasury(tx);
-const treasuryWallet = await tx.wallet.findUnique({
-where: { userId: "PLATFORM_TREASURY" },
-select: { id: true }
-});
-if (treasuryWallet) {
-transactions.push({
-walletId: treasuryWallet.id,
-dealId: deal.id,
-type: "CLAWBACK" as TransactionType,
-amount: treasuryClawback,
-status: "COMPLETED" as TransactionStatus,
-description: `Platform fee clawback for dispute resolution (${analysis.refundPercentage}%)`,
-});
-}
-}
+    if (debtPending > 0) {
+      await tx.debtClaim.create({
+        data: {
+          debtorWalletId: influencerWallet.id,
+          creditorUserId: brandUserId,
+          dealId: deal.id,
+          amount: debtPending,
+          originalAmount: debtPending,
+          status: "PENDING",
+        },
+      });
+    }
 
-transactions.push({
-walletId: brandWallet.id,
-dealId: deal.id,
-type: "REFUND" as TransactionType,
-amount: brandRefundActual,
-status: "COMPLETED" as TransactionStatus,
-description: `Dispute refund from influencer clawback and platform fee refund (${analysis.refundPercentage}%)`,
-});
+    transactions.push({
+      walletId: brandWallet.id,
+      dealId: deal.id,
+      type: "REFUND" as TransactionType,
+      amount: brandRefundActual,
+      status: "COMPLETED" as TransactionStatus,
+      description: `Dispute refund from influencer clawback and platform fee refund (${analysis.refundPercentage}%)`,
+    });
+  }
 
-await tx.transaction.createMany({
-data: transactions,
-});
-}
+  if (transactions.length > 0) {
+    await tx.transaction.createMany({
+      data: transactions,
+    });
+  }
 }
 
 export async function handleActiveDealBrandRefund(
@@ -300,34 +302,66 @@ totalAmount,
 analysis,
 } = config;
 
-if (!deal.reservedFromWallet) {
-if (!brandUserId) {
-throw AppError.badRequest("Brand owner missing during wallet dispute settlement");
-}
+  if (!deal.reservedFromWallet) {
+    if (!brandUserId) {
+      throw AppError.badRequest("Brand owner missing during wallet dispute settlement");
+    }
 
-await handleActiveDealBrandRefund(tx, brandUserId, totalAmount, brandRefund);
-await handleRazorpayGatewayRefund(deal, brandRefund, analysis);
-}
+    // 1. Release the full escrow pending balance from the brand's wallet (decrement pendingBalance only, do not credit balance)
+    await tx.wallet.updateMany({
+      where: { userId: brandUserId, pendingBalance: { gte: totalAmount } },
+      data: { pendingBalance: { decrement: totalAmount } },
+    });
 
-if (influencerShare > 0) {
-await creditInfluencerPayoutWithTax(
-tx,
-{
-userId: influencerUserId,
-dealId: deal.id,
-grossPayout: influencerShare,
-description: `Dispute resolution wallet payout (${analysis.influencerPayoutPercentage}%)`,
-metadata: {
-balanceImpact: true,
-source: "wallet_dispute_resolution",
-refundPercentage: analysis.refundPercentage,
-reservedFromWallet: deal.reservedFromWallet,
-},
-},
-);
-}
+    // 2. Refund to card via Razorpay
+    await handleRazorpayGatewayRefund(deal, brandRefund, analysis);
 
-await handleBrandWalletRefund(tx, deal, brandUserId, brandRefund, influencerShare, analysis);
+    // 3. Create a ledger audit transaction for the card refund (balanceImpact: false)
+    if (brandRefund > 0) {
+      const brandWallet = await tx.wallet.findUnique({ where: { userId: brandUserId } });
+      if (brandWallet) {
+        await tx.transaction.create({
+          data: {
+            walletId: brandWallet.id,
+            dealId: deal.id,
+            type: "REFUND",
+            amount: brandRefund,
+            status: "COMPLETED",
+            description: `Dispute card refund via Razorpay (${analysis.refundPercentage}%)`,
+            metadata: {
+              balanceImpact: false, // Card refund does not impact wallet balance!
+              source: "razorpay_gateway_dispute_resolution",
+              influencerShare,
+              reservedFromWallet: false,
+            },
+          },
+        });
+      }
+    }
+  }
+
+  if (influencerShare > 0) {
+    await creditInfluencerPayoutWithTax(
+      tx,
+      {
+        userId: influencerUserId,
+        dealId: deal.id,
+        grossPayout: influencerShare,
+        description: `Dispute resolution wallet payout (${analysis.influencerPayoutPercentage}%)`,
+        metadata: {
+          balanceImpact: true,
+          source: "wallet_dispute_resolution",
+          refundPercentage: analysis.refundPercentage,
+          reservedFromWallet: deal.reservedFromWallet,
+        },
+      },
+    );
+  }
+
+  // Only call handleBrandWalletRefund for wallet-funded deals!
+  if (deal.reservedFromWallet) {
+    await handleBrandWalletRefund(tx, deal, brandUserId, brandRefund, influencerShare, analysis);
+  }
 }
 
 interface ResolutionResults {

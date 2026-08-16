@@ -35,6 +35,10 @@ if (!user) {
 return NextResponse.json({ error: "User not found" }, { status: 404 });
 }
 
+if (!user.passwordHash) {
+  return NextResponse.json({ error: "OAuth account. Please set a password first to disable 2FA." }, { status: 400 });
+}
+
 // Verify that the user knows their password before disabling security settings
 const isValidPassword = await bcrypt.compare(password, user.passwordHash);
 if (!isValidPassword) {

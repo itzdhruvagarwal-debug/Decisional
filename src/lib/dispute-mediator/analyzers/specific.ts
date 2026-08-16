@@ -322,23 +322,23 @@ detail: "Wallet escrow system secures funds prior to deal activation",
 }
 );
 
-return {
-disputeId: dispute.id,
-tier: 1,
-verdict: isPaymentSecured ? "INFLUENCER_FAVORED" : "ESCALATE",
-confidence: isPaymentSecured ? "HIGH" : "LOW",
-refundPercentage: 0,
-influencerPayoutPercentage: isPaymentSecured ? 100 : 0,
-trustScoreChanges: { influencer: 0, brand: 0 },
-explanation: isPaymentSecured
-? `Payment is secured and held in wallet escrow. If deal conditions are met, payment will release. No payment dispute is valid while escrow is active.`
-: `Payment dispute detected with status "${deal.status}". This is unusual. Escalating for manual investigation.`,
-findings,
-suggestedAction: isPaymentSecured
-? "Dismiss dispute. Payment is secured via wallet escrow."
-: "Escalate to Tier 2 for technical payment investigation.",
-autoResolvable: isPaymentSecured,
-};
+  return {
+    disputeId: dispute.id,
+    tier: 1,
+    verdict: isPaymentSecured ? "DISMISSED" : "ESCALATE",
+    confidence: isPaymentSecured ? "HIGH" : "LOW",
+    refundPercentage: 0,
+    influencerPayoutPercentage: 0,
+    trustScoreChanges: { influencer: 0, brand: 0 },
+    explanation: isPaymentSecured
+      ? `Payment is secured and held in wallet escrow. If deal conditions are met, payment will release. No payment dispute is valid while escrow is active.`
+      : `Payment dispute detected with status "${deal.status}". This is unusual. Escalating for manual investigation.`,
+    findings,
+    suggestedAction: isPaymentSecured
+      ? "Dismiss dispute. Payment is secured via wallet escrow."
+      : "Escalate to Tier 2 for technical payment investigation.",
+    autoResolvable: isPaymentSecured,
+  };
 }
 
 // ==================== TERMS VIOLATION DISPUTE ====================

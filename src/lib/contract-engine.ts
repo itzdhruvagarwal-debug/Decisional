@@ -61,6 +61,7 @@ postingDeadline: string; // ISO Date
 // Revisions
 includedRevisions: number; // Default 2
 costPerExtraRevision: number; // Default 50000 (INR 500)
+maxRevisionsLimit?: number; // Optional hard limit cap for revisions
 
 // Cancellation Policy
 cancellationFee: {
@@ -420,19 +421,27 @@ reason = "Cancellation before approval";
 }
 
 export function checkRevisionLimit(
-deal: { revisionsUsed: number; maxRevisions: number },
-contract: ContractTerms,
+  deal: { revisionsUsed: number; maxRevisions: number },
+  contract: ContractTerms,
 ): { allowed: boolean; cost: number; message?: string } {
-if (deal.revisionsUsed < deal.maxRevisions) {
-return { allowed: true, cost: 0 };
-}
+  if (contract.maxRevisionsLimit !== undefined && deal.revisionsUsed >= contract.maxRevisionsLimit) {
+    return {
+      allowed: false,
+      cost: 0,
+      message: `Maximum revision limit of ${contract.maxRevisionsLimit} reached. No further revisions are allowed.`,
+    };
+  }
 
-// Extra revision
-return {
-allowed: true, // Allowed but paid
-cost: contract.costPerExtraRevision,
-message: `Free revisions used. This revision will cost INR ${(contract.costPerExtraRevision / 100).toFixed(2)}.`,
-};
+  if (deal.revisionsUsed < deal.maxRevisions) {
+    return { allowed: true, cost: 0 };
+  }
+
+  // Extra revision
+  return {
+    allowed: true, // Allowed but paid
+    cost: contract.costPerExtraRevision,
+    message: `Free revisions used. This revision will cost INR ${(contract.costPerExtraRevision / 100).toFixed(2)}.`,
+  };
 }
 
 // ==================== DIGITAL SIGNATURES ====================

@@ -54,16 +54,31 @@ if (filter === "weekly") {
 // For weekly, we'll get top performers by recent deal completions
 const weekAgo = subDays(new Date(), 7);
 
-const weeklyTopInfluencers = await prisma.deal.groupBy({
-by: ["influencerId"],
-where: {
-status: "COMPLETED",
-completedAt: { gte: weekAgo },
-},
-_count: { id: true },
-orderBy: { _count: { id: "desc" } },
-take: limit,
-});
+      const weeklyTopInfluencers = await prisma.deal.groupBy({
+        by: ["influencerId"],
+        where: {
+          status: "COMPLETED",
+          completedAt: { gte: weekAgo },
+          deletedAt: null,
+          influencer: {
+            user: { trustScore: { gte: 51 } },
+            ...(city
+              ? { city: { contains: city, mode: "insensitive" as const } }
+              : {}),
+            ...(category
+              ? {
+                  categories: {
+                    contains: category,
+                    mode: "insensitive" as const,
+                  },
+                }
+              : {}),
+          },
+        },
+        _count: { id: true },
+        orderBy: { _count: { id: "desc" } },
+        take: limit,
+      });
 
 const influencerIds = weeklyTopInfluencers.map(
 (d: { influencerId: string }) => d.influencerId,

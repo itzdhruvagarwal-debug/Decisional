@@ -51,7 +51,9 @@ where: { influencerId: userId, status: "COMPLETED", submittedAt: { not: null } }
 select: { submittedAt: true },
 });
 return nightDeals.some((d: { submittedAt: Date | null }) => {
-const hour = new Date(d.submittedAt!).getHours();
+// Convert UTC to IST (+5:30)
+const istTime = new Date(new Date(d.submittedAt!).getTime() + (5.5 * 60 * 60 * 1000));
+const hour = istTime.getUTCHours();
 return hour >= 2 && hour < 5;
 });
 }
@@ -60,7 +62,12 @@ const weekendDeals = await db.deal.findMany({
 where: { influencerId: userId, status: "COMPLETED", completedAt: { not: null } },
 select: { completedAt: true },
 });
-return weekendDeals.some((d: { completedAt: Date | null }) => new Date(d.completedAt!).getDay() === 0);
+return weekendDeals.some((d: { completedAt: Date | null }) => {
+// Convert UTC to IST (+5:30)
+const istTime = new Date(new Date(d.completedAt!).getTime() + (5.5 * 60 * 60 * 1000));
+const day = istTime.getUTCDay();
+return day === 0 || day === 6; // Sunday (0) or Saturday (6)
+});
 }
 return false;
 }
@@ -159,8 +166,9 @@ const catProfiles = allProfiles.filter((p: { categories?: string | null; complet
 .map((c: string) => c.trim().toLowerCase())
 .includes(cat)
 );
-const maxCompleted = Math.max(...catProfiles.map((p: { completedDeals?: number }) => p.completedDeals || 0));
-return myCompleted >= maxCompleted;
+      if (catProfiles.length === 0) return false;
+      const maxCompleted = Math.max(...catProfiles.map((p: { completedDeals?: number }) => p.completedDeals || 0));
+      return myCompleted >= maxCompleted;
 });
 }
 if (badgeId === "city_champion") {
@@ -173,8 +181,9 @@ const sameCityProfiles = await db.influencerProfile.findMany({
 where: { city: { mode: "insensitive", equals: myCity } },
 select: { completedDeals: true },
 });
-const maxCompletedDeals = Math.max(...sameCityProfiles.map((p: { completedDeals?: number }) => p.completedDeals || 0));
-return myCompletedDeals >= maxCompletedDeals;
+    if (sameCityProfiles.length === 0) return false;
+    const maxCompletedDeals = Math.max(...sameCityProfiles.map((p: { completedDeals?: number }) => p.completedDeals || 0));
+    return myCompletedDeals >= maxCompletedDeals;
 }
 if (badgeId === "comeback_kid") {
 const logins = await db.loginAttempt.findMany({
@@ -218,7 +227,8 @@ db: DbClient,
 completedDealsCount: number,
 influencerProfile: GamificationUser["influencerProfile"]
 ): Promise<boolean> {
-const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const nowIST = new Date(Date.now() + 5.5 * 60 * 60 * 1000);
+  const startOfMonth = new Date(Date.UTC(nowIST.getUTCFullYear(), nowIST.getUTCMonth(), 1, 0, 0, 0) - 5.5 * 60 * 60 * 1000);
 if (badgeId === "first_login") return true;
 if (badgeId === "highly_responsive") {
 const messageCount = await db.message.count({ where: { senderId: userId } });

@@ -95,19 +95,14 @@ const submissionDeadline = deal.submissionDeadline ? new Date(deal.submissionDea
 const latestSubmission = deal.contentSubmissions?.[0];
 const submittedAt = latestSubmission?.submittedAt ? new Date(latestSubmission.submittedAt) : null;
 
-if (submissionDeadline && submittedAt) {
-const subDeadlineStart = new Date(submissionDeadline);
-subDeadlineStart.setUTCHours(0, 0, 0, 0);
-const submittedStart = new Date(submittedAt);
-submittedStart.setUTCHours(0, 0, 0, 0);
-
-const isOnTime = submittedStart <= subDeadlineStart;
-const hoursLate = isOnTime ? 0 : Math.round((submittedAt.getTime() - submissionDeadline.getTime()) / (3600 * 1000));
-findings.push({
-check: "Submitted before deadline",
-result: isOnTime ? "PASS" : "FAIL",
-detail: isOnTime ? `Submitted on time` : `Submitted ${hoursLate}h after deadline`,
-});
+  if (submissionDeadline && submittedAt) {
+    const isOnTime = submittedAt.getTime() <= submissionDeadline.getTime();
+    const hoursLate = isOnTime ? 0 : Math.round((submittedAt.getTime() - submissionDeadline.getTime()) / (3600 * 1000));
+    findings.push({
+      check: "Submitted before deadline",
+      result: isOnTime ? "PASS" : "FAIL",
+      detail: isOnTime ? `Submitted on time` : `Submitted ${hoursLate}h after deadline`,
+    });
 } else {
 findings.push({
 check: "Submitted before deadline",
@@ -132,18 +127,13 @@ return brandApprovedLate;
 export function checkPostingDeadline(deal: FullDeal, findings: Finding[]) {
 const postingDeadline = deal.postingDeadline ? new Date(deal.postingDeadline) : null;
 const postedAt = deal.postedAt ? new Date(deal.postedAt) : null;
-if (postingDeadline && postedAt) {
-const postDeadlineStart = new Date(postingDeadline);
-postDeadlineStart.setUTCHours(0, 0, 0, 0);
-const postedStart = new Date(postedAt);
-postedStart.setUTCHours(0, 0, 0, 0);
-
-const isOnTime = postedStart <= postDeadlineStart;
-findings.push({
-check: "Posted before posting deadline",
-result: isOnTime ? "PASS" : "FAIL",
-detail: isOnTime ? "Posted on time" : "Posted after deadline",
-});
+  if (postingDeadline && postedAt) {
+    const isOnTime = postedAt.getTime() <= postingDeadline.getTime();
+    findings.push({
+      check: "Posted before posting deadline",
+      result: isOnTime ? "PASS" : "FAIL",
+      detail: isOnTime ? "Posted on time" : "Posted after deadline",
+    });
 }
 }
 
@@ -265,7 +255,7 @@ detail: "No submission timestamp",
 };
 
 const submittedAt = new Date(deal.submittedAt);
-const reviewPeriodHours = deal.reviewPeriodHours || 48;
+const reviewPeriodHours = deal.reviewPeriodHours ?? 48;
 
 if (deal.approvedAt) {
 const approvedAt = new Date(deal.approvedAt);
