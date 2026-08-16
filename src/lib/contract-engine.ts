@@ -379,32 +379,35 @@ let payoutPercent: number;
 let reason: string;
 
 switch (deal.status) {
-case "PENDING_SIGNATURE":
-case "PAYMENT_PENDING":
-case "PAYMENT_HELD":
-case "ACTIVE":
-payoutPercent = policy.beforeApproval ?? 0;
-reason = `Cancelled before content submission (${payoutPercent}% cancellation fee)`;
-break;
-  case "CONTENT_SUBMITTED":
-  case "REVISION_REQUESTED":
-  case "DISPUTED":
-    payoutPercent = policy.afterApproval ?? 30;
-    reason = `Cancelled after content submission (${payoutPercent}% payout)`;
-    break;
-  case "CONTENT_APPROVED":
-    payoutPercent = policy.afterSubmission ?? 70;
-    reason = `Cancelled after content approval by brand (${payoutPercent}% payout)`;
-break;
-case "POSTED":
-case "VERIFIED":
-case "COMPLETED":
-payoutPercent = "afterPosting" in policy ? policy.afterPosting : 100;
-reason = `Cancelled after content posted or verified (${payoutPercent}% payout)`;
-break;
-default:
-payoutPercent = 0;
-reason = "Cancellation before approval";
+    case "PENDING_SIGNATURE":
+    case "PAYMENT_PENDING":
+    case "PAYMENT_HELD":
+      payoutPercent = policy.beforeApproval ?? 0;
+      reason = `Cancelled before deal activation (${payoutPercent}% cancellation fee)`;
+      break;
+    case "ACTIVE":
+      payoutPercent = policy.afterApproval ?? 30;
+      reason = `Cancelled after deal activation but before content submission (${payoutPercent}% payout)`;
+      break;
+    case "CONTENT_SUBMITTED":
+    case "REVISION_REQUESTED":
+    case "DISPUTED":
+      payoutPercent = policy.afterSubmission ?? 70;
+      reason = `Cancelled after content submission but before approval (${payoutPercent}% payout)`;
+      break;
+    case "CONTENT_APPROVED":
+      payoutPercent = policy.afterSubmission ?? 70;
+      reason = `Cancelled after content approval by brand (${payoutPercent}% payout)`;
+      break;
+    case "POSTED":
+    case "VERIFIED":
+    case "COMPLETED":
+      payoutPercent = "afterPosting" in policy ? policy.afterPosting : 100;
+      reason = `Cancelled after content posted or verified (${payoutPercent}% payout)`;
+      break;
+    default:
+      payoutPercent = 0;
+      reason = "Cancellation before approval";
 }
 
   const payoutAmount = Math.round(dealAmount * (payoutPercent / 100));

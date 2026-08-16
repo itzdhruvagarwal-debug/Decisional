@@ -89,6 +89,14 @@ null,
 "If this phone number can be registered, an OTP has been sent.",
 );
 }
+} else if (type === "phone_verification") {
+const existing = await prisma.user.findUnique({
+where: { phone },
+select: { id: true },
+});
+if (existing) {
+return ApiResponse.error("Phone number is already in use.", 400);
+}
 }
 
 const sendResult = await sendOTP(phone, { purpose: type });

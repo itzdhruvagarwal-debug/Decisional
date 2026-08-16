@@ -129,15 +129,18 @@ debt: { decrement: debtPaid },
 },
 });
 
-const pendingClaims = await tx.debtClaim.findMany({
-where: {
-debtorWalletId: wallet.id,
-status: "PENDING",
-amount: { gt: 0 },
-},
-orderBy: { createdAt: "asc" },
-select: { id: true, amount: true, creditorUserId: true, dealId: true },
-});
+  // Lock the debt claim rows to serialize concurrent debt recovery distributions for this wallet
+  await tx.$queryRaw`SELECT id FROM "DebtClaim" WHERE "debtorWalletId" = ${wallet.id} AND "status" = 'PENDING' AND "amount" > 0 FOR UPDATE`;
+
+  const pendingClaims = await tx.debtClaim.findMany({
+    where: {
+      debtorWalletId: wallet.id,
+      status: "PENDING",
+      amount: { gt: 0 },
+    },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, amount: true, creditorUserId: true, dealId: true },
+  });
 
 const remainingDebtPaid = await distributeRecoveredDebtToCreditors(
 tx,

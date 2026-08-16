@@ -371,7 +371,7 @@ if (shouldRefundHeldBudget && wallet) {
 const alreadyCommitted = campaign.reservedTotalAmount ?? campaign.reservedAmount ?? 0;
 const campaignReservedBudget = Math.max(
 0,
-(campaign.fundedAmount || campaign.totalBudget) - alreadyCommitted,
+(campaign.fundedAmount ?? campaign.totalBudget) - alreadyCommitted,
 );
 const refundableAmount = Math.min(wallet.pendingBalance, campaignReservedBudget);
 

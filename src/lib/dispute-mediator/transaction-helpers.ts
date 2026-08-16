@@ -80,15 +80,19 @@ if (!influencerWallet) {
 throw AppError.badRequest("Influencer wallet missing during clawback");
 }
 
-// Debit Influencer (Enforce Debt) up to actualDeduct, increment debt by debtPending
-await tx.wallet.update({
-where: { userId: influencerUserId },
-data: {
-balance: { decrement: actualDeduct },
-totalEarned: { decrement: Math.min(actualDeduct, influencerWallet.totalEarned ?? 0) },
-debt: { increment: debtPending },
-},
-});
+  // Debit Influencer (Enforce Debt) up to actualDeduct, increment debt by debtPending
+  const debitResult = await tx.wallet.updateMany({
+    where: { userId: influencerUserId, balance: { gte: actualDeduct } },
+    data: {
+      balance: { decrement: actualDeduct },
+      totalEarned: { decrement: Math.min(actualDeduct, influencerWallet.totalEarned ?? 0) },
+      debt: { increment: debtPending },
+    },
+  });
+
+  if (debitResult.count === 0) {
+    throw AppError.badRequest("Insufficient wallet balance for clawback deduction.");
+  }
 
 // Debit Platform Treasury for platform's portion of the refund
 if (treasuryClawback > 0) {

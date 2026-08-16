@@ -64,7 +64,7 @@ const alreadyCommittedTotal =
   application.campaign.reservedAmount ??
   0;
 const fundedAmount =
-application.campaign.fundedAmount || application.campaign.totalBudget;
+  application.campaign.fundedAmount ?? application.campaign.totalBudget;
 if (alreadyCommittedTotal + paymentAmounts.totalAmount > fundedAmount) {
 throw AppError.badRequest("Campaign funded amount exceeded. Add funds or reduce selected deal value.");
 }

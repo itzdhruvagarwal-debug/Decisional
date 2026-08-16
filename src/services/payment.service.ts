@@ -450,9 +450,9 @@ await redis.del(lockKey);
       return { success: true, status: "PROCESSING" };
     }
 
-    // Determine if this is a deterministic client 4xx rejection from Razorpay.
-    // For 4xx: Razorpay rejected before creating a payout entity, so no webhook will ever be fired.
+    const statusCode = (error as { statusCode?: number })?.statusCode;
     const is4xxGatewayError =
+      (statusCode !== undefined && statusCode >= 400 && statusCode < 500) ||
       errorMsg.includes("STATUS_CODE:400") ||
       errorMsg.includes("STATUS_CODE:422") ||
       errorMsg.includes("STATUS_CODE:404") ||
@@ -504,49 +504,49 @@ await redis.del(lockKey);
       throw AppError.badRequest("INVALID_WITHDRAWAL_AMOUNT");
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { status: true, trustScore: true },
-    });
-
-    if (!user || ["SUSPENDED", "BANNED", "FLAGGED", "DELETED"].includes(user.status || "")) {
-      logger.warn("Withdrawal blocked: user account is suspended, banned, flagged, or deleted", {
-        userId,
-        status: user?.status,
+    const withdrawal = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: { status: true, trustScore: true },
       });
-      throw AppError.badRequest("WITHDRAWAL_BLOCK");
-    }
 
-    // Determine withdrawal processing speed based on trust score
-    const withdrawalSpeed = getWithdrawalSpeed(user.trustScore);
-    const trustBasedManualReview = withdrawalSpeed === "MANUAL_REVIEW";
-    if (trustBasedManualReview) {
-      logger.warn("Withdrawal routed to manual review due to low trust score", {
-        userId,
-        trustScore: user.trustScore,
-        withdrawalSpeed,
-      });
-    } else {
-      logger.info("Withdrawal speed tier determined", { userId, withdrawalSpeed, trustScore: user.trustScore });
-    }
+      if (!user || ["SUSPENDED", "BANNED", "FLAGGED", "DELETED"].includes(user.status || "")) {
+        logger.warn("Withdrawal blocked: user account is suspended, banned, flagged, or deleted", {
+          userId,
+          status: user?.status,
+        });
+        throw AppError.badRequest("WITHDRAWAL_BLOCK");
+      }
 
-    const fraudCheck = await checkPaymentFraud({
-      userId,
-      amount: data.amount,
-      bankAccount: data.bankAccountNumber,
-      upiId: data.upiId,
-    });
+      // Determine withdrawal processing speed based on trust score
+      const withdrawalSpeed = getWithdrawalSpeed(user.trustScore);
+      const trustBasedManualReview = withdrawalSpeed === "MANUAL_REVIEW";
+      if (trustBasedManualReview) {
+        logger.warn("Withdrawal routed to manual review due to low trust score", {
+          userId,
+          trustScore: user.trustScore,
+          withdrawalSpeed,
+        });
+      } else {
+        logger.info("Withdrawal speed tier determined", { userId, withdrawalSpeed, trustScore: user.trustScore });
+      }
 
-    if (fraudCheck.action === "BLOCK") {
-      logger.warn("Withdrawal blocked by fraud check", {
+      const fraudCheck = await checkPaymentFraud({
         userId,
         amount: data.amount,
-        flags: fraudCheck.flags.map((f) => f.description).join(", "),
+        bankAccount: data.bankAccountNumber,
+        upiId: data.upiId,
       });
-      throw AppError.badRequest("WITHDRAWAL_BLOCK");
-    }
 
-    const withdrawal = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      if (fraudCheck.action === "BLOCK") {
+        logger.warn("Withdrawal blocked by fraud check", {
+          userId,
+          amount: data.amount,
+          flags: fraudCheck.flags.map((f) => f.description).join(", "),
+        });
+        throw AppError.badRequest("WITHDRAWAL_BLOCK");
+      }
+
       return await PaymentService.executeWithdrawalDbTransaction(
         tx,
         userId,

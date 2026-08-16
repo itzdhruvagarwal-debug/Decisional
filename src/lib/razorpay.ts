@@ -1,4 +1,4 @@
-import { AppError } from "@/lib/errors";
+import { AppError, ApiErrorCode } from "@/lib/errors";
 /**
 * Razorpay SDK Wrapper
 * Handles all Razorpay payment operations
@@ -402,11 +402,12 @@ reference_id: params.referenceId,
 }),
 });
 });
-const payout = await payoutRes.json();
+  const payout = await payoutRes.json();
 
-if (payout.error) {
-throw AppError.badRequest(payout.error.description || "Payout creation failed");
-}
+  if (payout.error || !payoutRes.ok) {
+    const errorDescription = payout.error?.description || "Payout creation failed";
+    throw new AppError(errorDescription, payoutRes.status, ApiErrorCode.GATEWAY_ERROR);
+  }
 
 return {
 payoutId: payout.id,

@@ -205,7 +205,7 @@ select: { id: true },
 if (existing && existing.id !== userId) {
 return { success: false, errorResponse: ApiResponse.conflict("Contact is already in use") };
 }
-updateData.email = newContact;
+updateData.email = newContact.toLowerCase().trim();
 updateData.emailVerified = true;
 } else {
 const normalizedPhone = normalizeIndianPhone(newContact);

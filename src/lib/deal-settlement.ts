@@ -41,8 +41,9 @@ grossPayout: number,
 ) {
 if (grossPayout <= 0) return 0;
 
-// Lock the influencer user record to serialize concurrent TDS evaluations
-await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
+  // Lock the influencer user record and their wallet to serialize concurrent TDS and balance updates
+  await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
+  await tx.$queryRaw`SELECT id FROM "Wallet" WHERE "userId" = ${userId} FOR UPDATE`;
 
 const taxCompliance = await tx.indiaTaxCompliance.findUnique({
 where: { userId },
@@ -159,15 +160,18 @@ const ratio = Math.min(1, Math.max(0, params.feeRatio ?? 1));
 const platformFee = Math.round((params.deal.platformFee || 0) * ratio);
 const gatewayFee = Math.round((params.deal.gatewayFee || 0) * ratio);
 
-if (!params.brandUserId || (platformFee <= 0 && gatewayFee <= 0)) return;
+  if (!params.brandUserId || (platformFee <= 0 && gatewayFee <= 0)) return;
 
-const existingTransactions = await tx.transaction.findMany({
-where: {
-dealId: params.deal.id,
-type: "PLATFORM_FEE",
-},
-select: { metadata: true },
-});
+  // Lock the deal row to serialize concurrent platform fee recordings for the same deal
+  await tx.$queryRaw`SELECT id FROM "Deal" WHERE id = ${params.deal.id} FOR UPDATE`;
+
+  const existingTransactions = await tx.transaction.findMany({
+    where: {
+      dealId: params.deal.id,
+      type: "PLATFORM_FEE",
+    },
+    select: { metadata: true },
+  });
 
 const hasDuplicateFee = existingTransactions.some((t) => {
 const meta = t.metadata as Record<string, unknown> | null;

@@ -24,13 +24,16 @@ if (!["ADDRESS_PENDING", "READY_TO_DISPATCH"].includes(deal.productFulfillmentSt
 throw AppError.badRequest("Shipping address cannot be changed after dispatch");
 }
 
-const updated = await tx.deal.update({
-where: { id: dealId },
-data: {
-shippingAddress,
-productFulfillmentStatus: "READY_TO_DISPATCH",
-},
-});
+    const updated = await tx.deal.update({
+      where: { id: dealId },
+      data: {
+        shippingAddress: {
+          ...(shippingAddress as Record<string, unknown>),
+          submittedAt: new Date().toISOString(),
+        },
+        productFulfillmentStatus: "READY_TO_DISPATCH",
+      },
+    });
 
 if (deal.brand?.userId) {
 await NotificationService.createNotification({

@@ -329,36 +329,14 @@ async function checkWasActiveBefore(
     return (triggeringUser.influencerProfile?.completedDeals ?? 0) > 1;
   }
   if (triggeringUser?.userType === "BRAND" && triggeringUser?.brandProfile) {
-    let currentCampaignId: string | null = null;
-    let dealTotalAmount = dealAmount; // fallback
-    if (dealId) {
-      const deal = await db.deal.findUnique({
-        where: { id: dealId },
-        select: { campaignId: true, totalAmount: true, amount: true },
-      });
-      if (deal) {
-        currentCampaignId = deal.campaignId;
-        dealTotalAmount = deal.totalAmount ?? deal.amount;
-      }
-    }
-
-    const brandProfile = await db.brandProfile.findUnique({
-      where: { id: triggeringUser.brandProfile.id },
-      select: { totalSpent: true },
-    });
-    const currentTotalSpent = brandProfile?.totalSpent ?? 0;
-    // FIX: Subtract the correct dealTotalAmount (includes platform/gateway fees) instead of just deal.amount
-    const previousTotalSpent = currentTotalSpent - dealTotalAmount;
-
-    // FIX: Exclude the current campaign ID to avoid first-completed campaign evaluating as active before
-    const completedCampaignsCount = await db.campaign.count({
+    const otherCompletedDealsCount = await db.deal.count({
       where: {
         brandId: triggeringUser.brandProfile.id,
         status: "COMPLETED",
-        ...(currentCampaignId ? { id: { not: currentCampaignId } } : {}),
+        ...(dealId ? { id: { not: dealId } } : {}),
       },
     });
-    return previousTotalSpent > 0 || completedCampaignsCount > 0;
+    return otherCompletedDealsCount > 0;
   }
   return false;
 }
@@ -572,6 +550,28 @@ select: { referredBy: true },
   if (referrerId === userId) {
     logger.warn("Self-referral attempt detected and blocked", { userId, referrerId });
     return;
+  }
+
+  // Double-payment / double-gamification protection: check if a referral transaction already exists
+  if (dealId) {
+    const referrerWallet = await db.wallet.findUnique({
+      where: { userId: referrerId },
+      select: { id: true },
+    });
+    if (referrerWallet) {
+      const existing = await db.transaction.findFirst({
+        where: {
+          dealId,
+          walletId: referrerWallet.id,
+          type: "CREDIT",
+          description: { startsWith: "Referral Bonus" },
+        },
+      });
+      if (existing) {
+        logger.info("Referral reward already processed for this deal", { dealId, referrerId });
+        return { referrerId };
+      }
+    }
   }
 
   // Invalidate platform fee cache for referrer

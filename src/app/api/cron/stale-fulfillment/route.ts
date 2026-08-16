@@ -31,23 +31,27 @@ const LOCK_KEY = "cron:stale_fulfillment:lock";
 const LOCK_TTL_SECS = 300;
 
 interface StaleDeal {
-id: string;
-productFulfillmentStatus: string;
-updatedAt: Date;
-dispatchedAt: Date | null;
-campaign: { title: string };
-influencer: { userId: string; displayName: string | null };
-brand: { userId: string; companyName: string | null } | null;
+  id: string;
+  productFulfillmentStatus: string;
+  updatedAt: Date;
+  dispatchedAt: Date | null;
+  shippingAddress: any;
+  campaign: { title: string };
+  influencer: { userId: string; displayName: string | null };
+  brand: { userId: string; companyName: string | null } | null;
 }
 
 function getStaleDays(deal: StaleDeal): number {
-// For DISPATCHED, measure from when it was dispatched.
-// For READY_TO_DISPATCH, measure from last status change (updatedAt).
-const anchor =
-deal.productFulfillmentStatus === "DISPATCHED" && deal.dispatchedAt
-? deal.dispatchedAt
-: deal.updatedAt;
-return Math.floor((Date.now() - anchor.getTime()) / MS_PER_DAY);
+  // For DISPATCHED, measure from when it was dispatched.
+  // For READY_TO_DISPATCH, measure from when address was submitted.
+  if (deal.productFulfillmentStatus === "DISPATCHED" && deal.dispatchedAt) {
+    return Math.floor((Date.now() - new Date(deal.dispatchedAt).getTime()) / MS_PER_DAY);
+  }
+  const shippingAddressObj = deal.shippingAddress as Record<string, unknown> | null;
+  const anchor = shippingAddressObj?.submittedAt
+    ? new Date(shippingAddressObj.submittedAt as string)
+    : deal.updatedAt;
+  return Math.floor((Date.now() - anchor.getTime()) / MS_PER_DAY);
 }
 
 async function hasOpenDispute(dealId: string): Promise<boolean> {
@@ -351,6 +355,7 @@ async function scanStaleFulfillmentDeals(): Promise<{
         productFulfillmentStatus: true,
         updatedAt: true,
         dispatchedAt: true,
+        shippingAddress: true,
         campaign: { select: { title: true } },
         influencer: { select: { userId: true, displayName: true } },
         brand: { select: { userId: true, companyName: true } },
