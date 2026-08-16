@@ -654,7 +654,7 @@ data: { balance: { increment: w.amount } },
 
 await tx.transaction.updateMany({
 where: { withdrawalId, type: "WITHDRAWAL", status: "PENDING" },
-data: { status: "FAILED" },
+data: { status },
 });
 
 if (createRefundTx) {
