@@ -156,7 +156,7 @@ findings.push("hybrid_obfuscated_phone");
 export function checkMessageForContacts(content: string, options?: { allowUrls?: boolean }) {
 const findings: string[] = [];
 const normalizedContent = cleanAndNormalizeText(content);
-const phonePatternMatch = CONTACT_REGEX.phone.exec(content);
+  const phonePatternMatch = new RegExp(CONTACT_REGEX.phone.source, "g").exec(content);
 
 checkBasicContacts(content, findings, options);
 checkSocialAndUpi(content, normalizedContent, findings);

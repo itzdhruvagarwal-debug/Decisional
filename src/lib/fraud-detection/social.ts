@@ -70,7 +70,7 @@ description:
 },
 ],
 riskScore: 20,
-action: "REVIEW",
+action: "FLAG",
 };
 }
 
@@ -438,14 +438,14 @@ severity: "CRITICAL",
 description: "Official platform API no longer returns the post as public",
 });
 riskScore += 80;
-} else if (verifiedLive === null) {
-flags.push({
-rule: "OFFICIAL_VERIFICATION_UNAVAILABLE",
-severity: "HIGH",
-description: "Official platform API verification is unavailable",
-});
-riskScore += 50;
-}
+  } else if (verifiedLive === null) {
+    flags.push({
+      rule: "OFFICIAL_VERIFICATION_UNAVAILABLE",
+      severity: "MEDIUM",
+      description: "Official platform API verification is unavailable",
+    });
+    riskScore += 15;
+  }
 
 let action: FraudCheckResult["action"] = "ALLOW";
 if (riskScore >= 80) action = "BLOCK";

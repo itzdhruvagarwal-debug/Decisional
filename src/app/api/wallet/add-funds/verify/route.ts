@@ -5,6 +5,7 @@ import prisma from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
+import { PaymentService } from "@/services/payment.service";
 
 const verifyTopUpSchema = z.object({
 razorpay_payment_id: z.string().min(5).max(128),
@@ -120,29 +121,14 @@ return NextResponse.json({ error: "Amount mismatch detected" }, { status: 400 })
 }
 
 // 4. Update wallet and transaction atomically.
-await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-// Mark transaction as COMPLETED atomically
-const updateResult = await tx.transaction.updateMany({
-where: { id: transaction.id, status: "PENDING" },
-data: {
-status: "COMPLETED",
-razorpayPaymentId: razorpay_payment_id,
-},
-});
-
-if (updateResult.count === 0) {
-return; // Already processed
-}
-
-// Credit Wallet Balance
-await tx.wallet.update({
-where: { id: transaction.walletId },
-data: {
-balance: { increment: transaction.amount },
-totalDeposited: { increment: transaction.amount },
-},
-});
-});
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    await PaymentService.completeWalletTopUp(tx, {
+      transactionId: transaction.id,
+      walletId: transaction.walletId,
+      amount: transaction.amount,
+      razorpayPaymentId: razorpay_payment_id,
+    });
+  });
 
 const duration = Date.now() - start;
 logger.info("Payment verified and wallet credited", {

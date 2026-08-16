@@ -320,29 +320,47 @@ brandProfile?: { id: string } | null;
 }
 
 async function checkWasActiveBefore(
-triggeringUser: ReferralTriggerUser | null | undefined,
-dealAmount: number,
-db: Prisma.TransactionClient | typeof prisma
+  triggeringUser: ReferralTriggerUser | null | undefined,
+  dealAmount: number,
+  db: Prisma.TransactionClient | typeof prisma,
+  dealId?: string,
 ): Promise<boolean> {
-if (triggeringUser?.userType === "INFLUENCER") {
-return (triggeringUser.influencerProfile?.completedDeals ?? 0) > 1;
-}
-if (triggeringUser?.userType === "BRAND" && triggeringUser?.brandProfile) {
-const brandProfile = await db.brandProfile.findUnique({
-where: { id: triggeringUser.brandProfile.id },
-select: { totalSpent: true },
-});
-const currentTotalSpent = brandProfile?.totalSpent ?? 0;
-const previousTotalSpent = currentTotalSpent - dealAmount;
-const completedCampaignsCount = await db.campaign.count({
-where: {
-brandId: triggeringUser.brandProfile.id,
-status: "COMPLETED",
-},
-});
-return previousTotalSpent > 0 || completedCampaignsCount > 0;
-}
-return false;
+  if (triggeringUser?.userType === "INFLUENCER") {
+    return (triggeringUser.influencerProfile?.completedDeals ?? 0) > 1;
+  }
+  if (triggeringUser?.userType === "BRAND" && triggeringUser?.brandProfile) {
+    let currentCampaignId: string | null = null;
+    let dealTotalAmount = dealAmount; // fallback
+    if (dealId) {
+      const deal = await db.deal.findUnique({
+        where: { id: dealId },
+        select: { campaignId: true, totalAmount: true, amount: true },
+      });
+      if (deal) {
+        currentCampaignId = deal.campaignId;
+        dealTotalAmount = deal.totalAmount ?? deal.amount;
+      }
+    }
+
+    const brandProfile = await db.brandProfile.findUnique({
+      where: { id: triggeringUser.brandProfile.id },
+      select: { totalSpent: true },
+    });
+    const currentTotalSpent = brandProfile?.totalSpent ?? 0;
+    // FIX: Subtract the correct dealTotalAmount (includes platform/gateway fees) instead of just deal.amount
+    const previousTotalSpent = currentTotalSpent - dealTotalAmount;
+
+    // FIX: Exclude the current campaign ID to avoid first-completed campaign evaluating as active before
+    const completedCampaignsCount = await db.campaign.count({
+      where: {
+        brandId: triggeringUser.brandProfile.id,
+        status: "COMPLETED",
+        ...(currentCampaignId ? { id: { not: currentCampaignId } } : {}),
+      },
+    });
+    return previousTotalSpent > 0 || completedCampaignsCount > 0;
+  }
+  return false;
 }
 
 interface PayoutReferralMonetaryRewardConfig {
@@ -518,13 +536,27 @@ OR: [
 }
 
 export async function processReferralReward(
-userId: string,
-dealAmount: number,
-tx?: Prisma.TransactionClient,
-treasuryWalletId?: string,
-dealId?: string,
+  userId: string,
+  dealAmount: number,
+  tx?: Prisma.TransactionClient,
+  treasuryWalletId?: string,
+  dealId?: string,
 ): Promise<{ referrerId: string } | undefined> {
-const db = tx || prisma;
+  // If called without a transaction, wrap in a transaction immediately to ensure isolation
+  // and prevent duplicate/stale reads outside of the transaction context.
+  if (!tx) {
+    return prisma.$transaction(async (txClient) => {
+      return processReferralReward(
+        userId,
+        dealAmount,
+        txClient,
+        treasuryWalletId,
+        dealId
+      );
+    });
+  }
+
+  const db = tx;
 
 const user = await db.user.findUnique({
 where: { id: userId },
@@ -572,8 +604,8 @@ brandProfile: { select: { id: true, totalCampaigns: true } },
 },
 });
 
-const wasActiveBefore = await checkWasActiveBefore(triggeringUser, dealAmount, db);
-const isFirstActiveEvent = !wasActiveBefore;
+  const wasActiveBefore = await checkWasActiveBefore(triggeringUser, dealAmount, db, dealId);
+  const isFirstActiveEvent = !wasActiveBefore;
 
 // Recount active referrals currently (which already includes the completed deal in the DB transaction)
 const activeReferralsCurrent = await db.user.count({
@@ -624,18 +656,7 @@ message: `Congratulations! You unlocked the ${currentTier.label} tier and earned
 return { referrerId };
 }
 
-// If called without a transaction, wrap the payout operations in a transaction
-if (!tx) {
-return prisma.$transaction(async (txClient) => {
-return processReferralReward(
-userId,
-dealAmount,
-txClient,
-treasuryWalletId,
-dealId
-);
-});
-}
+
 
 await payoutReferralMonetaryReward({
 db,

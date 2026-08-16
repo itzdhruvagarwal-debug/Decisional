@@ -84,9 +84,13 @@ key: process.env.RAZORPAY_KEY_ID,
       postedAt: Date | null;
       verifiedAt: Date | null;
       postingDeadline: Date | null;
+      requiresPostVerification?: boolean;
     },
     dealId: string,
   ): Promise<void> {
+    if (deal.requiresPostVerification === false) {
+      return; // Skip checking if post verification is not required for this deal
+    }
     const checkTime = deal.postedAt || deal.verifiedAt || new Date();
     if (deal.postingDeadline) {
       // M9 & M10 FIX: Compare exact dates without UTC midnight truncation.
@@ -666,6 +670,46 @@ description: reason,
 });
 }
 
-return true;
-}
+  return true;
+  }
+
+  /**
+   * Shared helper: atomically marks a pending top-up transaction as COMPLETED and
+   * increments the wallet balance + totalDeposited.
+   *
+   * Used by both the Razorpay webhook handler and the client-side verify endpoint
+   * to eliminate duplicate payment-completion logic.
+   *
+   * @returns true if the transaction was updated (first caller), false if it was
+   *   already processed (idempotent guard — the updateMany matched 0 rows).
+   */
+  static async completeWalletTopUp(
+    tx: Prisma.TransactionClient,
+    params: {
+      transactionId: string;
+      walletId: string;
+      amount: number;
+      razorpayPaymentId: string;
+    },
+  ): Promise<boolean> {
+    const updated = await tx.transaction.updateMany({
+      where: { id: params.transactionId, status: "PENDING" },
+      data: {
+        status: "COMPLETED",
+        razorpayPaymentId: params.razorpayPaymentId,
+      },
+    });
+
+    if (updated.count === 0) return false;
+
+    await tx.wallet.update({
+      where: { id: params.walletId },
+      data: {
+        balance: { increment: params.amount },
+        totalDeposited: { increment: params.amount },
+      },
+    });
+
+    return true;
+  }
 }

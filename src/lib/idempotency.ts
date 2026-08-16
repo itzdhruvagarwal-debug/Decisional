@@ -58,7 +58,7 @@ return { isDuplicate: true, ownerMismatch: true };
 }
 return { isDuplicate: true, savedResponse: existingAfterRace.response };
 }
-return { isDuplicate: true };
+  return claimIdempotencyKey(key, normalizedUserId);
 }
 
 export async function claimIdempotencyKey(

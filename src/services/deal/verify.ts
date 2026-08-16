@@ -15,8 +15,12 @@ where: { id: dealId },
 include: { influencer: { select: { userId: true } }, campaign: true },
 });
 
-if (deal?.influencer.userId !== userId)
-throw AppError.forbidden("Unauthorized");
+  if (!deal) {
+    throw AppError.notFound("Deal not found");
+  }
+  if (deal.influencer.userId !== userId) {
+    throw AppError.forbidden("Unauthorized");
+  }
 if (!["CONTENT_APPROVED", "POSTED"].includes(deal.status))
 throw AppError.badRequest("Content must be approved before posting");
 

@@ -485,27 +485,62 @@ return false;
 
 // Spec: Influencer complaints open/resolved disputes raised by influencers against this brand
 const influencerComplaints = await prisma.dispute.count({
-where: {
-...disputeWhere,
-raisedBy: { userType: "INFLUENCER" },
-},
+  where: {
+    ...disputeWhere,
+    raisedBy: { userType: "INFLUENCER" },
+  },
 });
 
+const [termsViolations, totalPayments, failedPayments, fastApprovals] = await Promise.all([
+  prisma.userViolation.count({ where: { userId, type: "TERMS_VIOLATION" } }),
+  prisma.transaction.count({ where: { wallet: { userId }, type: "CREDIT" } }),
+  prisma.transaction.count({ where: { wallet: { userId }, type: "CREDIT", status: "FAILED" } }),
+  calculateFastApprovals(dealWhereForBrand),
+]);
+
+const paymentReliability = totalPayments > 0 ? (totalPayments - failedPayments) / totalPayments : 1.0;
+
 const factors: BrandDRSFactors = {
-completedCampaigns: completedCampaigns,
-fastApprovals: completedCampaigns, // Assume efficient until we have real timing data
-lateApprovals: await calculateLateApprovals(userId, dealWhereForBrand),
-fairReviews,
-disputesLost,
-companyVerified: isVerified,
-paymentReliability: 1.0,
-termsViolations: 0,
-longTermPartnerships,
-unfairRejections,
-influencerComplaints,
+  completedCampaigns: completedCampaigns,
+  fastApprovals: fastApprovals,
+  lateApprovals: await calculateLateApprovals(userId, dealWhereForBrand),
+  fairReviews,
+  disputesLost,
+  companyVerified: isVerified,
+  paymentReliability,
+  termsViolations,
+  longTermPartnerships,
+  unfairRejections,
+  influencerComplaints,
 };
 
 return calculateBrandDRS(factors);
+}
+
+async function calculateFastApprovals(
+  dealWhere: Prisma.DealWhereInput,
+): Promise<number> {
+  const deals = await prisma.deal.findMany({
+    where: {
+      ...dealWhere,
+      status: { in: ["COMPLETED", "VERIFIED", "CONTENT_APPROVED"] },
+      submittedAt: { not: null },
+      approvedAt: { not: null },
+    },
+    select: {
+      submittedAt: true,
+      approvedAt: true,
+      reviewPeriodHours: true,
+    },
+  });
+
+  return deals.filter((d) => {
+    if (!d.submittedAt || !d.approvedAt) return false;
+    const submitted = new Date(d.submittedAt).getTime();
+    const approved = new Date(d.approvedAt).getTime();
+    const allowedDuration = (d.reviewPeriodHours ?? 48) * 3600 * 1000;
+    return approved - submitted <= allowedDuration;
+  }).length;
 }
 
 async function calculateLateApprovals(

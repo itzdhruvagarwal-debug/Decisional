@@ -65,8 +65,8 @@ costPerExtraRevision: number; // Default 50000 (INR 500)
 // Cancellation Policy
 cancellationFee: {
 beforeApproval: number; // 0%
-afterApproval: number; // 20%
-afterSubmission: number; // 50%
+afterApproval: number; // 30% — payout when cancelled after submission but before approval
+afterSubmission: number; // 70% — payout when cancelled after brand approval
 afterPosting: number; // 100%
 };
 
@@ -366,7 +366,7 @@ throw AppError.notFound("Deal not found");
 const totalHeld = getDealTotalAmount(deal);
 const dealAmount = deal.amount;
 
-const policy = (deal.contractTerms as { cancellationFee?: { beforeApproval: number; afterApproval: number; afterSubmission: number } } | null)?.cancellationFee || {
+const policy = (deal.contractTerms as { cancellationFee?: { beforeApproval: number; afterApproval: number; afterSubmission: number; afterPosting: number } } | null)?.cancellationFee || {
 beforeApproval: 0,
 afterApproval: 30,
 afterSubmission: 70,
@@ -385,15 +385,15 @@ case "ACTIVE":
 payoutPercent = policy.beforeApproval ?? 0;
 reason = `Cancelled before content submission (${payoutPercent}% cancellation fee)`;
 break;
-case "CONTENT_SUBMITTED":
-case "REVISION_REQUESTED":
-case "DISPUTED":
-payoutPercent = policy.afterSubmission ?? 70;
-reason = `Cancelled after content submission or under dispute (${payoutPercent}% payout)`;
-break;
-case "CONTENT_APPROVED":
-payoutPercent = policy.afterApproval ?? 30;
-reason = `Cancelled after content approval but before posting (${payoutPercent}% payout)`;
+  case "CONTENT_SUBMITTED":
+  case "REVISION_REQUESTED":
+  case "DISPUTED":
+    payoutPercent = policy.afterApproval ?? 30;
+    reason = `Cancelled after content submission (${payoutPercent}% payout)`;
+    break;
+  case "CONTENT_APPROVED":
+    payoutPercent = policy.afterSubmission ?? 70;
+    reason = `Cancelled after content approval by brand (${payoutPercent}% payout)`;
 break;
 case "POSTED":
 case "VERIFIED":

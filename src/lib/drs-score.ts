@@ -44,7 +44,7 @@ maxDealAmount: number;
 } {
 if (score <= 450) {
 return { tier: "FLAGGED", maxDealAmount: 0 };
-} else if (score <= 600) {
+} else if (score < 550) {
 return { tier: "LIMITED", maxDealAmount: 500000 }; // 5K
 } else if (score <= 750) {
 return { tier: "NORMAL", maxDealAmount: 2500000 }; // 25K

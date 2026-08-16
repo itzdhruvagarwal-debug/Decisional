@@ -98,34 +98,32 @@ export async function verifyWalletBalance(userId: string): Promise<VerificationA
       return null;
     }
 
-    // Fix #12: Fetch aggregations directly from the DB rather than retrieving thousands of rows into memory
-    const [creditsResult, debitsResult] = await Promise.all([
-      tx.transaction.aggregate({
-        where: {
-          wallet: { userId },
-          status: "COMPLETED",
-          deletedAt: null,
-          type: { in: ["CREDIT", "REFUND"] },
-        },
-        _sum: {
-          amount: true,
-        },
-      }),
-      tx.transaction.aggregate({
-        where: {
-          wallet: { userId },
-          status: "COMPLETED",
-          deletedAt: null,
-          type: { in: ["DEBIT", "WITHDRAWAL", "PLATFORM_FEE", "CLAWBACK", "CHARGEBACK"] },
-        },
-        _sum: {
-          amount: true,
-        },
-      }),
-    ]);
+    // FIX: Use findMany to allow impactsStoredWalletBalance filtering, which correctly excludes
+    // TDS deductions, escrow rows, and other non-balance-impacting transactions.
+    const allTransactions = await tx.transaction.findMany({
+      where: {
+        wallet: { userId },
+        status: "COMPLETED",
+        deletedAt: null,
+        type: { in: ["CREDIT", "REFUND", "DEBIT", "WITHDRAWAL", "PLATFORM_FEE", "CLAWBACK", "CHARGEBACK"] },
+      },
+      select: {
+        type: true,
+        amount: true,
+        description: true,
+        metadata: true,
+        razorpayPaymentId: true,
+      },
+    });
 
-    const totalCredits = creditsResult._sum.amount ?? 0;
-    const totalDebits = debitsResult._sum.amount ?? 0;
+    const balanceImpacting = allTransactions.filter(impactsStoredWalletBalance);
+
+    let totalCredits = 0;
+    let totalDebits = 0;
+    for (const t of balanceImpacting) {
+      if (CREDIT_TYPES.has(t.type)) totalCredits += t.amount;
+      else if (DEBIT_TYPES.has(t.type)) totalDebits += t.amount;
+    }
     const calculatedBalance = totalCredits - totalDebits;
 
     let expectedPendingBalance = 0;

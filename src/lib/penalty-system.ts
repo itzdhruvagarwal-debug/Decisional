@@ -216,66 +216,66 @@ requiresManualReview: strikeNumber >= 4,
 // ==================== ACTIVE PAYOUT HOLD ====================
 
 async function holdActivePayouts(userId: string) {
-try {
-// Find active deals where the influencer has pending payouts
-// Select status so we can record it before overwriting with DISPUTED
-const activeDeals = await prisma.deal.findMany({
-where: {
-influencer: { userId },
-status: { in: ["PAYMENT_HELD", "CONTENT_SUBMITTED", "REVISION_REQUESTED", "CONTENT_APPROVED", "POSTED", "VERIFICATION_PENDING", "VERIFIED"] },
-reservedFromWallet: true,
-},
-select: { id: true, status: true },
-});
+  try {
+    // Find active deals where the influencer has pending payouts
+    // Select status so we can record it before overwriting with DISPUTED
+    const activeDeals = await prisma.deal.findMany({
+      where: {
+        influencer: { userId },
+        status: { in: ["PAYMENT_HELD", "CONTENT_SUBMITTED", "REVISION_REQUESTED", "CONTENT_APPROVED", "POSTED", "VERIFICATION_PENDING", "VERIFIED"] },
+        reservedFromWallet: true,
+      },
+      select: { id: true, status: true },
+    });
 
-for (const deal of activeDeals) {
-// Capture current status BEFORE overwriting needed for dispute resolution restoration
-const statusBeforeHold = deal.status;
+    for (const deal of activeDeals) {
+      // Capture current status BEFORE overwriting needed for dispute resolution restoration
+      const statusBeforeHold = deal.status;
 
-const updated = await prisma.deal.updateMany({
-where: {
-id: deal.id,
-status: { notIn: ["COMPLETED", "CANCELLED", "DISPUTED"] },
-},
-data: {
-status: "DISPUTED",
-rejectionReason: "Payout held due to account violation review.",
-},
-});
+      const updated = await prisma.deal.updateMany({
+        where: {
+          id: deal.id,
+          status: { notIn: ["COMPLETED", "CANCELLED", "DISPUTED"] },
+        },
+        data: {
+          status: "DISPUTED",
+          rejectionReason: "Payout held due to account violation review.",
+        },
+      });
 
-// Only create dispute record if we actually changed the deal status
-if (updated.count > 0) {
-// Create a proper Dispute record so dispute-mediator can restore status on dismissal
-await prisma.dispute.create({
-data: {
-dealId: deal.id,
-raisedByUserId: userId,
-type: "TERMS_VIOLATION",
-description: "Payout automatically held pending account violation review by admin.",
-status: "OPEN",
-dealStatusAtCreation: statusBeforeHold,
-},
-});
-}
+      // Only create dispute record and log if we actually changed the deal status
+      if (updated.count > 0) {
+        // Create a proper Dispute record so dispute-mediator can restore status on dismissal
+        await prisma.dispute.create({
+          data: {
+            dealId: deal.id,
+            raisedByUserId: userId,
+            type: "TERMS_VIOLATION",
+            description: "Payout automatically held pending account violation review by admin.",
+            status: "OPEN",
+            dealStatusAtCreation: statusBeforeHold,
+          },
+        });
 
-await createActivityLog({
-userId,
-action: "PAYOUT_HELD_DUE_TO_VIOLATION",
-metadata: {
-dealId: deal.id,
-reason: "Account under review due to violations",
-previousDealStatus: statusBeforeHold,
-},
-});
-}
+        await createActivityLog({
+          userId,
+          action: "PAYOUT_HELD_DUE_TO_VIOLATION",
+          metadata: {
+            dealId: deal.id,
+            reason: "Account under review due to violations",
+            previousDealStatus: statusBeforeHold,
+          },
+        });
+      }
+    }
 
-logger.info("Active payouts held for user under penalty", {
-userId,
-dealsAffected: activeDeals.length,
-});
-} catch (error) {
-logger.error("Failed to hold active payouts", error instanceof Error ? error : new Error(String(error)), { userId });
-}
+    logger.info("Active payouts held for user under penalty", {
+      userId,
+      dealsAffected: activeDeals.length,
+    });
+  } catch (error) {
+    logger.error("Failed to hold active payouts", error instanceof Error ? error : new Error(String(error)), { userId });
+  }
 }
 
 
@@ -312,7 +312,7 @@ return { lifted: 0 };
       userId: { in: userIdsToCheck },
       OR: [
         { action: "PERMANENT_BAN" },
-        { expiresAt: null, action: { not: "TEMP_SUSPENSION" } },
+        { expiresAt: null, action: { notIn: ["TEMP_SUSPENSION", "WARNING"] } },
         { expiresAt: { gt: now }, action: "TEMP_SUSPENSION" },
       ],
     },

@@ -9,6 +9,7 @@ import { logger } from "@/lib/logger";
 import { redis } from "@/lib/redis";
 import { sendWithdrawalEmail } from "@/lib/email";
 import { NotificationService } from "@/services/notification.service";
+import { PaymentService } from "@/services/payment.service";
 
 // Next.js config to allow raw body for Razorpay crypto verification
 export const dynamic = "force-dynamic";
@@ -73,23 +74,12 @@ throw new Error(errorMsg);
 
 try {
 await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-const updated = await tx.transaction.updateMany({
-where: { id: transaction.id, status: "PENDING" },
-data: {
-status: "COMPLETED",
-razorpayPaymentId: paymentId,
-},
-});
-
-if (updated.count === 0) return;
-
-await tx.wallet.update({
-where: { id: transaction.walletId },
-data: {
-balance: { increment: transaction.amount },
-totalDeposited: { increment: transaction.amount },
-},
-});
+  await PaymentService.completeWalletTopUp(tx, {
+    transactionId: transaction.id,
+    walletId: transaction.walletId,
+    amount: transaction.amount,
+    razorpayPaymentId: paymentId,
+  });
 });
 } catch (error: unknown) {
 if ((error as { code?: string })?.code === "P2002") {
