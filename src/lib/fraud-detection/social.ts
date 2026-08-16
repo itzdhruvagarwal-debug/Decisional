@@ -428,7 +428,7 @@ verifiedLive = Boolean(post);
   if (verifiedLive === null && youtubeId) {
     const video = await getYouTubeVideo(youtubeId);
     // Use video existence and explicit privacyStatus public check.
-    verifiedLive = Boolean(video && video.privacyStatus === "public");
+    verifiedLive = Boolean(video?.privacyStatus === "public");
   }
 
 if (verifiedLive === false) {

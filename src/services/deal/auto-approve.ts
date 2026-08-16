@@ -120,21 +120,55 @@ return false;
 }
 
 
-export async function autoApproveExpiredContent(now: Date = new Date()) {
-const lockKey = "cron:auto_approve_expired_content:lock";
-const acquired = await redis.set(lockKey, "LOCKED", "EX", 300, "NX");
-if (!acquired) {
-logger.info("autoApproveExpiredContent already running, skipping to avoid race condition.");
-return { processed: 0, skipped: 0, scanned: 0, locked: true };
+async function processBatchOfCandidateDeals(
+  candidateDeals: any[],
+  now: Date,
+): Promise<{ processed: number; skipped: number }> {
+  let processed = 0;
+  let skipped = 0;
+
+  const expiredDeals = candidateDeals.filter((deal) => {
+    if (!deal.submittedAt) return false;
+    const reviewWindowMs =
+      Math.max(deal.reviewPeriodHours || 48, 1) * 60 * 60 * 1000;
+    return now.getTime() - deal.submittedAt.getTime() >= reviewWindowMs;
+  });
+
+  for (const deal of expiredDeals) {
+    try {
+      const approved = await autoApproveSingleExpiredDeal(deal, now);
+      if (approved) {
+        processed += 1;
+      } else {
+        skipped += 1;
+      }
+    } catch (err) {
+      logger.error("auto-approve: failed to process deal, skipping to next", {
+        dealId: deal.id,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      skipped += 1;
+    }
+  }
+
+  return { processed, skipped };
 }
 
-try {
-// Batch processing to prevent OOM - process 200 deals at a time
-const BATCH_SIZE = 200;
-let processed = 0;
-let skipped = 0;
-let scanned = 0;
-let hasMore = true;
+export async function autoApproveExpiredContent(now: Date = new Date()) {
+  const lockKey = "cron:auto_approve_expired_content:lock";
+  const acquired = await redis.set(lockKey, "LOCKED", "EX", 300, "NX");
+  if (!acquired) {
+    logger.info("autoApproveExpiredContent already running, skipping to avoid race condition.");
+    return { processed: 0, skipped: 0, scanned: 0, locked: true };
+  }
+
+  try {
+    // Batch processing to prevent OOM - process 200 deals at a time
+    const BATCH_SIZE = 200;
+    let processed = 0;
+    let skipped = 0;
+    let scanned = 0;
+    let hasMore = true;
     let cursor: string | undefined = undefined;
 
     while (hasMore) {
@@ -170,46 +204,19 @@ let hasMore = true;
         cursor = candidateDeals[candidateDeals.length - 1]?.id as string;
       }
 
-const expiredDeals = candidateDeals.filter((deal: {
-submittedAt: Date | null;
-reviewPeriodHours: number;
-}) => {
-if (!deal.submittedAt) return false;
-const reviewWindowMs =
-Math.max(deal.reviewPeriodHours || 48, 1) * 60 * 60 * 1000;
-return now.getTime() - deal.submittedAt.getTime() >= reviewWindowMs;
-});
+      const result = await processBatchOfCandidateDeals(candidateDeals, now);
+      processed += result.processed;
+      skipped += result.skipped;
+    }
 
-let batchSkipped = 0;
-
-      for (const deal of expiredDeals) {
-        try {
-          const approved = await autoApproveSingleExpiredDeal(deal, now);
-          if (approved) {
-            processed += 1;
-          } else {
-            batchSkipped += 1;
-          }
-        } catch (err) {
-          logger.error("auto-approve: failed to process deal, skipping to next", {
-            dealId: (deal as { id?: string }).id,
-            error: err instanceof Error ? err.message : String(err),
-          });
-          batchSkipped += 1;
-        }
-      }
-
-skipped += batchSkipped;
-}
-
-return {
-processed,
-skipped,
-scanned,
-};
-} finally {
-await redis.del("cron:auto_approve_expired_content:lock");
-}
+    return {
+      processed,
+      skipped,
+      scanned,
+    };
+  } finally {
+    await redis.del("cron:auto_approve_expired_content:lock");
+  }
 }
 export function accumulateVerificationFlags(
 verificationResult: { action: string; passed: boolean; flags: Array<{ rule?: string; description?: string }> },

@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { BADGES, BadgeDefinition } from "./badges";
 import { calculateLevel } from "./drs-score";
 import { NotificationService } from "@/services/notification.service";
-import { logger } from "./logger";
+
 import { createActivityLog } from "./audit";
 
 import { TRIGGER_TO_BADGES } from "./gamification/types";

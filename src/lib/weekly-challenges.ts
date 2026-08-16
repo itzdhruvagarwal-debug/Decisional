@@ -10,7 +10,7 @@
 import prisma from "./db";
 import { Prisma } from "@prisma/client";
 import { logger } from "./logger";
-import { addUserXp, awardBadgeIfNotExists } from "./gamification-engine";
+import { awardBadgeIfNotExists } from "./gamification-engine";
 import { NotificationService } from "@/services/notification.service";
 import { createActivityLog } from "./audit";
 

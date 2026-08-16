@@ -184,6 +184,46 @@ async function handleRefundBrand(tx: Prisma.TransactionClient, dispute: DisputeW
   });
 }
 
+async function secureBrandFundsForRelease(
+  tx: Prisma.TransactionClient,
+  deal: DisputeWithDeal["deal"],
+) {
+  if (deal.brand?.userId && deal.reservedFromWallet) {
+    const reserveAmount = deal.totalAmount || deal.amount;
+    const debitResult = await tx.wallet.updateMany({
+      where: { userId: deal.brand.userId, pendingBalance: { gte: reserveAmount } },
+      data: { pendingBalance: { decrement: reserveAmount } },
+    });
+
+    if (debitResult.count === 0) {
+      throw AppError.badRequest("Invalid deal state: Missing pending balance in brand's wallet. Concurrent process detected.");
+    }
+  } else if (!deal.reservedFromWallet) {
+    const paymentHold = await tx.paymentHold.findUnique({
+      where: { dealId: deal.id },
+      select: { razorpayPaymentId: true },
+    });
+    if (paymentHold?.razorpayPaymentId) {
+      try {
+        const captureAmount = deal.totalAmount || deal.amount;
+        await capturePayment(paymentHold.razorpayPaymentId, captureAmount);
+        logger.info("Razorpay payment captured for card-funded dispute resolution", {
+          dealId: deal.id,
+          paymentId: paymentHold.razorpayPaymentId,
+          captureAmount,
+        });
+      } catch (captureErr) {
+        logger.error("Razorpay capture failed during dispute resolution", captureErr instanceof Error ? captureErr : new Error(String(captureErr)), {
+          dealId: deal.id,
+        });
+        throw AppError.badRequest("Failed to capture brand payment — cannot release influencer payout without confirmed funds.");
+      }
+    } else {
+      logger.warn("No PaymentHold found for card-funded deal during dispute release", { dealId: deal.id });
+    }
+  }
+}
+
 async function handleReleaseInfluencer(tx: Prisma.TransactionClient, dispute: DisputeWithDeal, payoutAmount: number) {
   // Mark Deal as Completed atomically with status check
   const completeResult = await tx.deal.updateMany({
@@ -205,77 +245,41 @@ async function handleReleaseInfluencer(tx: Prisma.TransactionClient, dispute: Di
     });
   }
 
-let gamificationReferrerId: string | null = null;
+  let gamificationReferrerId: string | null = null;
 
-// Credit Influencer Wallet (Internal Wallet Deal)
-if (dispute.deal.influencerId) {
-const influencer = await tx.influencerProfile.findUnique({
-where: { id: dispute.deal.influencerId },
-});
-if (influencer) {
-  // STRICT DEBT REQUIREMENT: Decrement pendingBalance from brand's wallet first!
-  if (dispute.deal.brand?.userId && dispute.deal.reservedFromWallet) {
-    const reserveAmount = dispute.deal.totalAmount || dispute.deal.amount;
-    const debitResult = await tx.wallet.updateMany({
-      where: { userId: dispute.deal.brand.userId, pendingBalance: { gte: reserveAmount } },
-      data: { pendingBalance: { decrement: reserveAmount } }
+  // Credit Influencer Wallet (Internal Wallet Deal)
+  if (dispute.deal.influencerId) {
+    const influencer = await tx.influencerProfile.findUnique({
+      where: { id: dispute.deal.influencerId },
     });
+    if (influencer) {
+      await secureBrandFundsForRelease(tx, dispute.deal);
 
-    if (debitResult.count === 0) {
-      throw AppError.badRequest("Invalid deal state: Missing pending balance in brand's wallet. Concurrent process detected.");
-    }
-  } else if (!dispute.deal.reservedFromWallet) {
-    // Card-funded deal: capture the Razorpay payment authorization so the
-    // platform actually collects the money before paying the influencer.
-    const paymentHold = await tx.paymentHold.findUnique({
-      where: { dealId: dispute.dealId },
-      select: { razorpayPaymentId: true },
-    });
-    if (paymentHold?.razorpayPaymentId) {
-      try {
-        const captureAmount = dispute.deal.totalAmount || dispute.deal.amount;
-        await capturePayment(paymentHold.razorpayPaymentId, captureAmount);
-        logger.info("Razorpay payment captured for card-funded dispute resolution", {
-          dealId: dispute.dealId,
-          paymentId: paymentHold.razorpayPaymentId,
-          captureAmount,
-        });
-      } catch (captureErr) {
-        logger.error("Razorpay capture failed during dispute resolution", captureErr instanceof Error ? captureErr : new Error(String(captureErr)), {
-          dealId: dispute.dealId,
-        });
-        throw AppError.badRequest("Failed to capture brand payment — cannot release influencer payout without confirmed funds.");
-      }
-    } else {
-      logger.warn("No PaymentHold found for card-funded deal during dispute release", { dealId: dispute.dealId });
+      await creditInfluencerPayoutWithTax(
+        tx,
+        {
+          userId: influencer.userId,
+          dealId: dispute.deal.id,
+          grossPayout: payoutAmount,
+          description: `Dispute Resolved in Favor: ${dispute.deal.campaignId}`,
+          metadata: {
+            balanceImpact: true,
+            source: "admin_wallet_dispute_resolution",
+          },
+        },
+      );
+
+      await recordPlatformFeeRevenue(tx, {
+        brandUserId: dispute.deal.brand?.userId,
+        deal: dispute.deal,
+        source: "admin_dispute_resolution",
+      });
+      const gamificationResult = await finalizeDealGamification(influencer.userId, payoutAmount, tx);
+      gamificationReferrerId = gamificationResult?.referrerId ?? null;
     }
   }
 
-await creditInfluencerPayoutWithTax(
-tx,
-{
-userId: influencer.userId,
-dealId: dispute.deal.id,
-grossPayout: payoutAmount,
-description: `Dispute Resolved in Favor: ${dispute.deal.campaignId}`,
-metadata: {
-balanceImpact: true,
-source: "admin_wallet_dispute_resolution",
-},
-},
-);
-
-await recordPlatformFeeRevenue(tx, {
-brandUserId: dispute.deal.brand?.userId,
-deal: dispute.deal,
-source: "admin_dispute_resolution",
-});
-const gamificationResult = await finalizeDealGamification(influencer.userId, payoutAmount, tx);
-gamificationReferrerId = gamificationResult?.referrerId ?? null;
-}
-}
-
-return { gamificationReferrerId };
+  return { gamificationReferrerId };
 }
 
 export async function resolveDispute(
