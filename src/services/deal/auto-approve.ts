@@ -121,7 +121,7 @@ return false;
 
 
 async function processBatchOfCandidateDeals(
-  candidateDeals: any[],
+  candidateDeals: ExpiredDealCandidate[],
   now: Date,
 ): Promise<{ processed: number; skipped: number }> {
   let processed = 0;
@@ -172,6 +172,9 @@ export async function autoApproveExpiredContent(now: Date = new Date()) {
     let cursor: string | undefined = undefined;
 
     while (hasMore) {
+      // Extend the lock for another 5 minutes during processing to prevent expiration under heavy backlog
+      await redis.expire(lockKey, 300);
+
       const candidateDeals = await prisma.deal.findMany({
         where: {
           status: "CONTENT_SUBMITTED",

@@ -109,26 +109,29 @@ reason: string
 const brandWallet = await tx.wallet.findUnique({ where: { userId: brandUserId } });
 if (!brandWallet) return;
 
-const refundAmount = dispute.deal.totalAmount || dispute.deal.amount;
-  // FIX: Logic was inverted — wallet-reserved deals MUST decrement pendingBalance + increment balance.
-  // Card-funded deals only increment balance (gateway handles the actual card refund separately).
-  const updateResult = dispute.deal.reservedFromWallet
-    ? await tx.wallet.updateMany({
-        where: { id: brandWallet.id, pendingBalance: { gte: refundAmount } },
-        data: {
-          balance: { increment: refundAmount },
-          pendingBalance: { decrement: refundAmount },
-        },
-      })
-    : await tx.wallet.updateMany({
-        where: { id: brandWallet.id },
-        data: {
-          balance: { increment: refundAmount },
-        },
-      });
+  const refundAmount = dispute.deal.totalAmount || dispute.deal.amount;
 
-  if (updateResult.count === 0) {
-    throw AppError.badRequest("Invalid deal state: missing refundable wallet reserve.");
+  if (dispute.deal.reservedFromWallet) {
+    const updateResult = await tx.wallet.updateMany({
+      where: { id: brandWallet.id, pendingBalance: { gte: refundAmount } },
+      data: {
+        balance: { increment: refundAmount },
+        pendingBalance: { decrement: refundAmount },
+      },
+    });
+    if (updateResult.count === 0) {
+      throw AppError.badRequest("Invalid deal state: missing refundable wallet reserve.");
+    }
+  } else {
+    const updateResult = await tx.wallet.updateMany({
+      where: { id: brandWallet.id, pendingBalance: { gte: refundAmount } },
+      data: {
+        pendingBalance: { decrement: refundAmount },
+      },
+    });
+    if (updateResult.count === 0) {
+      throw AppError.badRequest("Invalid deal state: missing refundable card reserve.");
+    }
   }
 
   await tx.transaction.create({
@@ -139,7 +142,7 @@ const refundAmount = dispute.deal.totalAmount || dispute.deal.amount;
       description: `Refund for disputed deal: ${dispute.deal.campaignId} (Reason: ${reason})`,
       status: "COMPLETED",
       metadata: {
-        balanceImpact: true,
+        balanceImpact: dispute.deal.reservedFromWallet,
         reservedFromWallet: dispute.deal.reservedFromWallet,
         source: "admin_dispute_refund",
       },

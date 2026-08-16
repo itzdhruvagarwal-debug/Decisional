@@ -29,7 +29,7 @@ async function _handler_POST(req: NextRequest) {
   const userId = session.user.id;
 
   // Rate-limit: max 3 bank verifications per hour per user
-  const limit = await checkRateLimit(userId, "PROFILE_UPDATE");
+  const limit = await checkRateLimit(userId, "BANK_ACCOUNT");
   if (!limit.success) {
     return NextResponse.json(
       { error: "Too many verification attempts. Please wait before retrying." },

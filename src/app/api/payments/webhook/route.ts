@@ -60,17 +60,23 @@ status: transaction.status,
 return;
 }
 
-if (transaction.amount !== amount) {
-const errorMsg = `Webhook amount mismatch: expected ${transaction.amount}, received ${amount}`;
-logger.error(errorMsg, {
-transactionId: transaction.id,
-expectedAmount: transaction.amount,
-receivedAmount: amount,
-orderId,
-paymentId,
-});
-throw new Error(errorMsg);
-}
+  if (transaction.amount !== amount) {
+    logger.error("Webhook amount mismatch: expected different amount than captured", {
+      transactionId: transaction.id,
+      expectedAmount: transaction.amount,
+      receivedAmount: amount,
+      orderId,
+      paymentId,
+    });
+    await prisma.transaction.update({
+      where: { id: transaction.id },
+      data: {
+        status: "FAILED",
+        description: `Failed due to top-up amount mismatch: expected ${transaction.amount} Paise, got ${amount} Paise`,
+      },
+    });
+    return;
+  }
 
 try {
 await prisma.$transaction(async (tx: Prisma.TransactionClient) => {

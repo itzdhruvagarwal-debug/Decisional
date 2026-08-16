@@ -56,6 +56,7 @@ async function getPayoutDetailsFromDb(
     where: {
       id: bankAccountId,
       userId,
+      deletedAt: null,
     },
   });
 

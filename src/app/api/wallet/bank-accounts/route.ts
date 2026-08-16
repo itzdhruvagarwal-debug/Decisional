@@ -61,11 +61,11 @@ return { userId: session.user.id!, errorResponse: null };
 
 /** Shared: rate-limit guard for bank account mutation endpoints. */
 async function checkBankAccountRateLimit(userId: string): Promise<NextResponse | null> {
-const limit = await checkRateLimit(userId, "PROFILE_UPDATE");
-if (!limit.success) {
-return NextResponse.json({ error: "Too many bank account updates" }, { status: 429 });
-}
-return null;
+  const limit = await checkRateLimit(userId, "BANK_ACCOUNT");
+  if (!limit.success) {
+    return NextResponse.json({ error: "Too many bank account updates" }, { status: 429 });
+  }
+  return null;
 }
 
 /** Mask sensitive fields on a BankAccount record before sending to client. */
@@ -82,10 +82,10 @@ try {
 const { userId, errorResponse } = await requireInfluencerSession(req);
 if (errorResponse) return errorResponse;
 
-const accounts = await prisma.bankAccount.findMany({
-where: { userId },
-orderBy: { createdAt: "desc" },
-});
+  const accounts = await prisma.bankAccount.findMany({
+    where: { userId, deletedAt: null },
+    orderBy: { createdAt: "desc" },
+  });
 
 return NextResponse.json({ accounts: accounts.map(maskAccount) });
 } catch (error) {
@@ -117,27 +117,50 @@ return NextResponse.json(
 
 const { accountName, accountNumber, ifscCode, bankName, upiId, isDefault } = result.data;
 
-// Enforce maximum 5 bank accounts per user (DoS & abuse prevention)
-const existingCount = await prisma.bankAccount.count({ where: { userId } });
-if (existingCount >= 5) {
-return NextResponse.json(
-{ error: "Maximum of 5 bank accounts allowed per user" },
-{ status: 400 },
-);
-}
+  // Enforce maximum 5 bank accounts per user (excluding soft-deleted ones)
+  const existingCount = await prisma.bankAccount.count({ where: { userId, deletedAt: null } });
+  if (existingCount >= 5) {
+    return NextResponse.json(
+      { error: "Maximum of 5 bank accounts allowed per user" },
+      { status: 400 },
+    );
+  }
 
-// If setting as default, unset others first
-if (isDefault) {
-await prisma.bankAccount.updateMany({ where: { userId }, data: { isDefault: false } });
-}
+  // If setting as default, unset others first
+  if (isDefault) {
+    await prisma.bankAccount.updateMany({ where: { userId }, data: { isDefault: false } });
+  }
 
-const finalAccountNumber = accountNumber || "UPI_PAYOUT";
-const finalIfscCode = ifscCode || "UPI00000000";
-const finalBankName = bankName || "UPI";
-const encryptedAccountNumber = encrypt(finalAccountNumber);
-const accountNumberHash = hashForDuplicateDetection(finalAccountNumber);
-const encryptedUpiId = upiId ? encrypt(upiId) : null;
-const upiIdHash = upiId ? hashForDuplicateDetection(upiId) : null;
+  const finalAccountNumber = accountNumber || "UPI_PAYOUT";
+  const finalIfscCode = ifscCode || "UPI00000000";
+  const finalBankName = bankName || "UPI";
+  const encryptedAccountNumber = encrypt(finalAccountNumber);
+  const accountNumberHash = hashForDuplicateDetection(finalAccountNumber);
+  const encryptedUpiId = upiId ? encrypt(upiId) : null;
+  const upiIdHash = upiId ? hashForDuplicateDetection(upiId) : null;
+
+  // Duplicate check: verify if this user already has this account number or UPI ID registered (excluding soft-deleted ones)
+  if (upiId) {
+    const duplicateUpi = await prisma.bankAccount.findFirst({
+      where: { userId, upiIdHash, deletedAt: null },
+    });
+    if (duplicateUpi) {
+      return NextResponse.json(
+        { error: "This UPI ID has already been added to your profile." },
+        { status: 400 },
+      );
+    }
+  } else {
+    const duplicateBank = await prisma.bankAccount.findFirst({
+      where: { userId, accountNumberHash, ifscCode: finalIfscCode, deletedAt: null },
+    });
+    if (duplicateBank) {
+      return NextResponse.json(
+        { error: "This bank account has already been added to your profile." },
+        { status: 400 },
+      );
+    }
+  }
 
 const account = await prisma.bankAccount.create({
 data: {
@@ -174,10 +197,10 @@ if (!id) {
 return { id: "", errorResponse: NextResponse.json({ error: "ID is required" }, { status: 400 }) };
 }
 
-const account = await prisma.bankAccount.findUnique({ where: { id } });
-if (account?.userId !== userId) {
-return { id: "", errorResponse: NextResponse.json({ error: "Account not found" }, { status: 404 }) };
-}
+  const account = await prisma.bankAccount.findUnique({ where: { id } });
+  if (account?.userId !== userId || account?.deletedAt !== null) {
+    return { id: "", errorResponse: NextResponse.json({ error: "Account not found" }, { status: 404 }) };
+  }
 
 return { id, errorResponse: null };
 }

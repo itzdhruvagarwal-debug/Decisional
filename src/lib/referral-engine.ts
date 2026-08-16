@@ -390,10 +390,11 @@ treasuryWalletId,
 tierUpgraded,
 } = config;
 
-const referrerWallet = await db.wallet.findUnique({
-where: { userId: referrerId },
-});
-if (!referrerWallet) return;
+  const referrerWallet = await db.wallet.upsert({
+    where: { userId: referrerId },
+    create: { userId: referrerId, balance: 0, pendingBalance: 0 },
+    update: {},
+  });
 
 // Double-payment protection
 if (dealId) {

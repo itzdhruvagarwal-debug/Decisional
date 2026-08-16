@@ -91,7 +91,10 @@ key: process.env.RAZORPAY_KEY_ID,
     if (deal.requiresPostVerification === false) {
       return; // Skip checking if post verification is not required for this deal
     }
-    const checkTime = deal.postedAt || deal.verifiedAt || new Date();
+    const checkTime = deal.postedAt || deal.verifiedAt;
+    if (!checkTime) {
+      return; // Skip if not posted or verified yet
+    }
     if (deal.postingDeadline) {
       // M9 & M10 FIX: Compare exact dates without UTC midnight truncation.
       // Also ensure that if the deal is CONTENT_APPROVED, its status is correctly transitioned to PAYMENT_PENDING.

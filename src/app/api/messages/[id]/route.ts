@@ -41,6 +41,13 @@ return NextResponse.json({ error: "Only offers can be updated" }, { status: 400 
 }
 
 const currentMetadata = (message.metadata as Prisma.JsonObject) || {};
+if (currentMetadata.status === "ACCEPTED" || currentMetadata.status === "DECLINED") {
+  return NextResponse.json(
+    { error: `Offer has already been ${(currentMetadata.status as string).toLowerCase()}` },
+    { status: 400 },
+  );
+}
+
 const updatedMetadata: Prisma.JsonObject = {
 ...currentMetadata,
 status,

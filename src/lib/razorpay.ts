@@ -24,6 +24,24 @@ throw AppError.internal("RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment var
 return { keyId, keySecret };
 }
 
+function isFuzzyNameMatch(submittedName: string, registeredName: string | null): boolean {
+  if (!registeredName) return false;
+  
+  const clean = (s: string) => s
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .trim();
+
+  const cSubmitted = clean(submittedName);
+  const cRegistered = clean(registeredName);
+
+  if (cSubmitted === cRegistered) return true;
+
+  if (cSubmitted.includes(cRegistered) || cRegistered.includes(cSubmitted)) return true;
+
+  return false;
+}
+
 function getRazorpay(): Razorpay {
 if (!_razorpay) {
 const { keyId, keySecret } = getRazorpayCredentials();
@@ -626,7 +644,11 @@ export async function validateFundAccount(params: {
 
   const registeredName = validation.results?.registered_name ?? null;
   const accountStatus = validation.results?.account_status ?? "unknown";
-  const isValid = accountStatus === "active";
+  let isValid = accountStatus === "active";
+
+  if (isValid && registeredName) {
+    isValid = isFuzzyNameMatch(params.accountHolderName, registeredName);
+  }
 
   logger.info("Fund account validation completed", {
     userId: params.userId,

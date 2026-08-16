@@ -50,12 +50,13 @@ await validateCronSecret();
 // NOTE: Late-post-blocked deals are moved to PAYMENT_PENDING (adminFlag=LATE_POST_BLOCKED)
 // by processDealCompletion before throwing, so they are automatically excluded here.
 const verifiedDeals = await prisma.deal.findMany({
-where: {
-status: { in: ["VERIFIED", "CONTENT_APPROVED"] },
-completedAt: null,
-deletedAt: null,
-},
-select: { id: true },
+    where: {
+      status: { in: ["VERIFIED", "CONTENT_APPROVED"] },
+      completedAt: null,
+      deletedAt: null,
+      reconcileFailures: { lt: 3 },
+    },
+    select: { id: true },
 });
 
 logger.info("Found verified deals needing payout reconciliation", { count: verifiedDeals.length });
