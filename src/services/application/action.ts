@@ -12,6 +12,7 @@ import { logger } from "@/lib/logger";
 import { resolveApplicationDealAmount } from "./types";
 import { validateApplicationCanBeAccepted } from "./create";
 import { createDealAndReserveFunds } from "@/services/deal/helpers";
+import { checkChallengeProgress } from "@/lib/weekly-challenges";
 
 export async function calculateDealFinancials(
 application: {
@@ -258,18 +259,28 @@ dealId: deal.id,
 },
 }, tx);
 
-await createActivityLog({
-userId,
-action: "ACCEPT_APPLICATION",
-entityType: "Application",
-entityId: application.id,
-metadata: {
-campaignId: application.campaignId,
-dealId: deal.id,
-},
-}, tx);
+      // Track brand weekly challenge (select_5_influencers)
+      await checkChallengeProgress(userId, "DEALS", 1, tx).catch((err) => {
+        logger.error("Failed to track brand challenge progress for select_5_influencers", { userId, error: err });
+      });
 
-return deal;
+      // Track influencer weekly challenge (accept_3_deals)
+      await checkChallengeProgress(application.influencer.userId, "DEALS", 1, tx).catch((err) => {
+        logger.error("Failed to track influencer challenge progress for accept_3_deals", { userId: application.influencer.userId, error: err });
+      });
+
+      await createActivityLog({
+        userId,
+        action: "ACCEPT_APPLICATION",
+        entityType: "Application",
+        entityId: application.id,
+        metadata: {
+          campaignId: application.campaignId,
+          dealId: deal.id,
+        },
+      }, tx);
+
+      return deal;
 },
 {
 // Serializable isolation prevents the budget-aggregate TOCTOU race:

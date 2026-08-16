@@ -117,7 +117,12 @@ wallet: { userId },
 // M15 FIX: Exclude failed/reversed withdrawals from velocity count.
 // Counting failed attempts penalized users unfairly when bank/gateway was down.
 status: { notIn: ["FAILED", "REVERSED"] },
-createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+createdAt: {
+          gte: (() => {
+            const nowIST = new Date(Date.now() + 5.5 * 60 * 60 * 1000);
+            return new Date(Date.UTC(nowIST.getUTCFullYear(), nowIST.getUTCMonth(), nowIST.getUTCDate(), 0, 0, 0) - 5.5 * 60 * 60 * 1000);
+          })()
+        },
 },
 });
 

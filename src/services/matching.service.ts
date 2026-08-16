@@ -71,13 +71,17 @@ const totalInteractions = uniqueSnaps.reduce(
 0
 );
 
-if (totalViews > 0) {
-return { rate: (totalInteractions / totalViews) * 100, hasData: true };
-}
+  // Safe scale calculations:
+  // - Path A: Direct calculation based on aggregated views/interactions. Expressed as percentage (%).
+  // - Path B (Fallback): Average of pre-computed basis points (BP) engagement rates across snapshots. 
+  //   Since engagementRate is stored in basis points (e.g. 450 = 4.5%), dividing by 100 converts it back to standard percentage scale.
+  if (totalViews > 0) {
+    return { rate: (totalInteractions / totalViews) * 100, hasData: true };
+  }
 
-const totalBP = uniqueSnaps.reduce((sum, s) => sum + s.engagementRate, 0);
-const rate = uniqueSnaps.length > 0 ? totalBP / uniqueSnaps.length / 100 : 0;
-return { rate, hasData: rate > 0 };
+  const totalBP = uniqueSnaps.reduce((sum, s) => sum + s.engagementRate, 0);
+  const rate = uniqueSnaps.length > 0 ? totalBP / uniqueSnaps.length / 100 : 0;
+  return { rate, hasData: rate > 0 };
 }
 
 private static async calculateQualityScore(

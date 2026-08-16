@@ -143,54 +143,64 @@ if (!reviewerUser) throw AppError.notFound("Reviewer not found");
 
 // Transaction: Create Review + Update Aggregates (averageRating) + Check Badges
 try {
-const review = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-const newReview = await tx.review.create({
-data: {
-dealId: data.dealId,
-reviewerId: reviewerId,
-receiverId: receiverId,
-reviewerType: reviewerUser.userType,
-rating: data.rating,
-comment: data.comment ?? null,
-},
-});
+    const review = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      // 1. Fetch Receiver's Profile first to resolve reviewee type foreign keys
+      const receiver = await tx.user.findUnique({
+        where: { id: receiverId },
+        include: {
+          influencerProfile: true,
+          brandProfile: true,
+        },
+      });
 
-// Update Receiver's Profile Stats (averageRating logic needed)
-const receiver = await tx.user.findUnique({
-where: { id: receiverId },
-include: {
-influencerProfile: true,
-brandProfile: true,
-},
-});
+      if (!receiver) throw AppError.notFound("Receiver not found");
 
-if (!receiver) throw AppError.notFound("Receiver not found");
+      const influencerRevieweeId = receiver.userType === "INFLUENCER" ? (receiver.influencerProfile?.id ?? null) : null;
+      const brandRevieweeId = receiver.userType === "BRAND" ? (receiver.brandProfile?.id ?? null) : null;
 
-// Improved Average Rating Calculation
-const { _avg, _count } = await tx.review.aggregate({
-where: { receiverId: receiverId },
-_avg: { rating: true },
-_count: { rating: true },
-});
+      const newReview = await tx.review.create({
+        data: {
+          dealId: data.dealId,
+          reviewerId: reviewerId,
+          receiverId: receiverId,
+          reviewerType: reviewerUser.userType,
+          rating: data.rating,
+          comment: data.comment ?? null,
+          influencerRevieweeId,
+          brandRevieweeId,
+        },
+      });
 
-const newAverage = _avg.rating || data.rating; // fallback if somehow null
+      // Improved Average Rating Calculation
+      const { _avg, _count } = await tx.review.aggregate({
+        where: { receiverId: receiverId },
+        _avg: { rating: true },
+        _count: { rating: true },
+      });
 
-const updateData = {
-averageRating: newAverage,
-totalReviews: _count.rating,
-};
+      const newAverage = _avg.rating || data.rating; // fallback if somehow null
 
-if (receiver.userType === "INFLUENCER" && receiver.influencerProfile) {
-await tx.influencerProfile.update({
-where: { id: receiver.influencerProfile.id },
-data: updateData,
-});
-} else if (receiver.userType === "BRAND" && receiver.brandProfile) {
-await tx.brandProfile.update({
-where: { id: receiver.brandProfile.id },
-data: updateData,
-});
-}
+      const updateData = {
+        averageRating: Math.round(newAverage * 100), // Store on 0-500 scale as defined in schema
+        totalReviews: _count.rating,
+      };
+
+      if (receiver.userType === "INFLUENCER" && receiver.influencerProfile) {
+        await tx.influencerProfile.update({
+          where: { id: receiver.influencerProfile.id },
+          data: updateData,
+        });
+      } else if (receiver.userType === "BRAND" && receiver.brandProfile) {
+        await tx.brandProfile.update({
+          where: { id: receiver.brandProfile.id },
+          data: updateData,
+        });
+      }
+
+      // Track community challenge progress for leaving a review
+      await checkChallengeProgress(reviewerId, "COMMUNITY", 1, tx).catch((err) => {
+        logger.error("Failed to track challenge progress for community review", { reviewerId, error: err });
+      });
 
 // Gamification
 await checkAndAwardBadges(reviewerId, "FIRST_REVIEW", tx);

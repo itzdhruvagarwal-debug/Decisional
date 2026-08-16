@@ -58,9 +58,8 @@ async function getMonthlySpend(
 userId: string,
 userType: "BRAND" | "INFLUENCER",
 ): Promise<number> {
-const startOfMonth = new Date();
-startOfMonth.setDate(1);
-startOfMonth.setHours(0, 0, 0, 0);
+  const nowIST = new Date(Date.now() + 5.5 * 60 * 60 * 1000);
+  const startOfMonth = new Date(Date.UTC(nowIST.getUTCFullYear(), nowIST.getUTCMonth(), 1, 0, 0, 0) - 5.5 * 60 * 60 * 1000);
 
 if (userType === "BRAND") {
 const [profile, campaigns] = await Promise.all([

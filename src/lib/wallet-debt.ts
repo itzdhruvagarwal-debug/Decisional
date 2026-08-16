@@ -46,11 +46,11 @@ status: newAmount === 0 ? "RECOVERED" : "PENDING",
 });
 
 // 2. Credit the creditor's wallet directly
-const creditorWallet = await tx.wallet.upsert({
-where: { userId: claim.creditorUserId },
-create: { userId: claim.creditorUserId, balance: payForThisClaim, pendingBalance: 0 },
-update: { balance: { increment: payForThisClaim } },
-});
+    const creditorWallet = await tx.wallet.upsert({
+      where: { userId: claim.creditorUserId },
+      create: { userId: claim.creditorUserId, balance: payForThisClaim, pendingBalance: 0, totalEarned: payForThisClaim },
+      update: { balance: { increment: payForThisClaim }, totalEarned: { increment: payForThisClaim } },
+    });
 
 // 3. Record transaction for the creditor's wallet (REFUND)
 await tx.transaction.create({

@@ -12,6 +12,7 @@ import { checkVerificationTierForAmount, tierErrorResponse } from "@/lib/verific
 import { calculateTotalAmount } from "@/lib/razorpay";
 import { assertAccountCanTransact, calculateProductHandlingFee, assertSufficientBalance, normalizeStringArray } from "@/lib/utils";
 import { checkAndAwardBadges } from "@/lib/gamification-engine";
+import { checkChallengeProgress } from "@/lib/weekly-challenges";
 import { validateCampaignInputAndBudgets } from "./list";
 import { TierError, DirectInviteParams, estimateCampaignDealSlots, safeStringCast, safeStringOrNullCast } from "./types";
 import { createDealAndReserveFunds } from "@/services/deal/helpers";
@@ -504,6 +505,12 @@ data: profileUpdateData,
 });
 
 await checkAndAwardBadges(userId, "CAMPAIGN_CREATED", tx);
+
+if (!isDraft) {
+  await checkChallengeProgress(userId, "DEALS", 1, tx).catch((err) => {
+    logger.error("Failed to track brand challenge progress for launch_campaign", { userId, error: err });
+  });
+}
 
 if (!isDraft && wallet) {
 await tx.transaction.create({

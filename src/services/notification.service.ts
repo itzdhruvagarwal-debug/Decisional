@@ -72,9 +72,9 @@ static async createNotification(
   },
   _tx?: Prisma.TransactionClient
 ) {
-  // Execute outside transaction context using base prisma client to avoid poisoning main transaction
+  const client = _tx || prisma;
   try {
-    return await prisma.notification.create({
+    return await client.notification.create({
       data: {
         userId: data.userId,
         type: data.type,
@@ -100,9 +100,9 @@ static async createNotifications(
   }>,
   _tx?: Prisma.TransactionClient
 ) {
-  // Execute outside transaction context using base prisma client to avoid poisoning main transaction
+  const client = _tx || prisma;
   try {
-    return await prisma.notification.createMany({
+    return await client.notification.createMany({
       data: data.map((n) => ({
         userId: n.userId,
         type: n.type,

@@ -464,10 +464,10 @@ return { completed, updated };
 */
 function parseFeaturedDays(bonusPerk: string): number {
 let days = 3;
-const parts = bonusPerk
-.replace("-", " ")
-.replace("(", " ")
-.replace(")", " ")
+  const parts = bonusPerk
+    .replace(/-/g, " ")
+    .replace(/\(/g, " ")
+    .replace(/\)/g, " ")
 .split(" ")
 .map((p) => p.trim())
 .filter(Boolean);
@@ -634,9 +634,9 @@ completedAt: progressMap.get(c.challengeId)?.completedAt || null,
 // ==================== UTILITY FUNCTIONS ====================
 
 function getWeekNumber(date: Date): number {
-const d = new Date(
-Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
-);
+  const d = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
 const dayNum = d.getUTCDay() || 7;
 d.setUTCDate(d.getUTCDate() + 4 - dayNum);
 const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));

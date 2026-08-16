@@ -1,6 +1,7 @@
 import { assertAccountCanTransact } from "@/lib/utils";
 import { TierError } from "@/services/campaign.service";
 import { addUserXp } from "@/lib/gamification-engine";
+import { checkChallengeProgress } from "@/lib/weekly-challenges";
 import { createActivityLog } from "@/lib/audit";
 import prisma from "@/lib/db";
 import { Prisma } from "@prisma/client";
@@ -121,9 +122,7 @@ export async function getAndValidateCampaign(
     throw AppError.badRequest("This campaign has reached its maximum number of influencer slots.");
   }
   if (campaign.applicationDeadline) {
-    const todayStart = new Date();
-    todayStart.setUTCHours(0, 0, 0, 0);
-    if (todayStart > campaign.applicationDeadline) {
+    if (new Date() > campaign.applicationDeadline) {
       throw AppError.badRequest("Application deadline has passed");
     }
   }
@@ -237,6 +236,10 @@ data: { totalApplications: { increment: 1 } },
 });
 
 await addUserXp(userId, 10, "SUBMIT_APPLICATION", tx);
+
+await checkChallengeProgress(userId, "DEALS", 1, tx).catch((err) => {
+  logger.error("Failed to track influencer challenge progress for apply_5_campaigns", { userId, error: err });
+});
 
 await createActivityLog({
 userId,

@@ -4,6 +4,7 @@ import prisma from "./db";
 import { logger } from "./logger";
 import { createActivityLog } from "./audit";
 import { redis } from "./redis";
+import { ACTIVE_DEAL_STATUSES } from "./utils";
 
 const CREDIT_TYPES = new Set(["CREDIT", "REFUND"]);
 const DEBIT_TYPES = new Set([
@@ -150,17 +151,7 @@ export async function verifyWalletBalance(userId: string): Promise<VerificationA
           tx.deal.aggregate({
             where: {
               brandId: brandProfile.id,
-              status: { in: [
-                "PENDING_SIGNATURE",
-                "PAYMENT_PENDING",
-                "PAYMENT_HELD",
-                "CONTENT_SUBMITTED",
-                "REVISION_REQUESTED",
-                "CONTENT_APPROVED",
-                "POSTED",
-                "VERIFIED",
-                "DISPUTED"
-              ] },
+              status: { in: ACTIVE_DEAL_STATUSES as any[] },
               reservedFromWallet: false,
             },
             _sum: { totalAmount: true },

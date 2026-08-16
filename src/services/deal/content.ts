@@ -1,4 +1,5 @@
 import { addUserXp } from "@/lib/gamification-engine";
+import { checkChallengeProgress } from "@/lib/weekly-challenges";
 import { ContractTerms, checkRevisionLimit } from "@/lib/contract-engine";
 import { assertSufficientBalance } from "@/lib/utils";
 import { checkMessageForContacts } from "@/lib/contact-filter";
@@ -94,6 +95,20 @@ submittedAt: new Date(),
 });
 
 await addUserXp(userId, 15, "CONTENT_SUBMITTED", tx);
+
+// Track influencer weekly challenge (submit_early_2)
+if (deal.submissionDeadline && new Date() < new Date(deal.submissionDeadline)) {
+  await checkChallengeProgress(userId, "SPEED", 1, tx).catch((err) => {
+    logger.error("Failed to track influencer challenge progress for submit_early_2", { userId, error: err });
+  });
+}
+
+// Track influencer weekly challenge (submit_24h)
+if (deal.startedAt && new Date().getTime() - new Date(deal.startedAt).getTime() <= 24 * 60 * 60 * 1000) {
+  await checkChallengeProgress(userId, "SPEED", 1, tx).catch((err) => {
+    logger.error("Failed to track influencer challenge progress for submit_24h", { userId, error: err });
+  });
+}
 
 if (deal.brand?.userId) {
 await NotificationService.createNotification({
@@ -308,7 +323,21 @@ status: updatedStatus,
 rejectionReason: updatedStatus === "REVISION_REQUESTED" ? allFeedback : null,
 };
 if (updatedStatus === "CONTENT_APPROVED") {
-dealUpdatePayload.approvedAt = new Date();
+  dealUpdatePayload.approvedAt = new Date();
+
+  // Track brand weekly challenge (approve_fast_3)
+  if (latestSubmission.submittedAt && new Date().getTime() - new Date(latestSubmission.submittedAt).getTime() <= 12 * 60 * 60 * 1000) {
+    await checkChallengeProgress(userId, "SPEED", 1, tx).catch((err) => {
+      logger.error("Failed to track brand challenge progress for approve_fast_3", { userId, error: err });
+    });
+  }
+
+  // Track influencer weekly challenge (zero_revision_3)
+  if (deal.revisionsUsed === 0) {
+    await checkChallengeProgress(deal.influencer.userId, "QUALITY", 1, tx).catch((err) => {
+      logger.error("Failed to track influencer challenge progress for zero_revision_3", { userId: deal.influencer.userId, error: err });
+    });
+  }
 }
 if (updatedStatus === "REVISION_REQUESTED") {
 dealUpdatePayload.revisionsUsed = { increment: 1 };

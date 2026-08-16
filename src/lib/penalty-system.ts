@@ -18,6 +18,7 @@ import { logger } from "./logger";
 import { applyResolution } from "./dispute-mediator";
 import { NotificationService } from "@/services/notification.service";
 import { createActivityLog } from "./audit";
+import { ESCROW_HELD_STATUSES } from "./utils";
 
 // ==================== TYPES ====================
 
@@ -222,7 +223,7 @@ async function holdActivePayouts(userId: string) {
     const activeDeals = await prisma.deal.findMany({
       where: {
         influencer: { userId },
-        status: { in: ["PAYMENT_HELD", "CONTENT_SUBMITTED", "REVISION_REQUESTED", "CONTENT_APPROVED", "POSTED", "VERIFICATION_PENDING", "VERIFIED"] },
+        status: { in: ESCROW_HELD_STATUSES as any[] },
         reservedFromWallet: true,
       },
       select: { id: true, status: true },

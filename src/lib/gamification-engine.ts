@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { BADGES, BadgeDefinition } from "./badges";
 import { calculateLevel } from "./drs-score";
 import { NotificationService } from "@/services/notification.service";
+import { checkChallengeProgress } from "./weekly-challenges";
 
 import { createActivityLog } from "./audit";
 
@@ -32,6 +33,13 @@ totalEarnings: { increment: amount },
 
 // Award XP for completing deal
 await addUserXp(userId, 100, "DEAL_COMPLETED", tx);
+
+// Track influencer weekly challenges (earn_5k_week, earn_25k_week)
+// amount is stored in paise, matching the challenge template goals (e.g. 500000 paise = 5000 INR)
+await checkChallengeProgress(userId, "EARNINGS", amount, tx).catch((err) => {
+  const { logger } = require("./logger");
+  logger.error("Failed to track influencer challenge progress for weekly earnings", { userId, error: err });
+});
 
   let referralResult;
   if (!options?.skipReferral) {

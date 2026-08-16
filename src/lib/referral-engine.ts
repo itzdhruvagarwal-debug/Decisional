@@ -314,9 +314,10 @@ return result;
 * Includes commission + revenue share for Platinum/Diamond tiers.
 */
 interface ReferralTriggerUser {
-userType: string;
-influencerProfile?: { completedDeals: number } | null;
-brandProfile?: { id: string } | null;
+  id: string;
+  userType: string;
+  influencerProfile?: { id: string; completedDeals: number } | null;
+  brandProfile?: { id: string } | null;
 }
 
 async function checkWasActiveBefore(
@@ -325,8 +326,15 @@ async function checkWasActiveBefore(
   db: Prisma.TransactionClient | typeof prisma,
   dealId?: string,
 ): Promise<boolean> {
-  if (triggeringUser?.userType === "INFLUENCER") {
-    return (triggeringUser.influencerProfile?.completedDeals ?? 0) > 1;
+  if (triggeringUser?.userType === "INFLUENCER" && triggeringUser.influencerProfile) {
+    const otherCompletedDealsCount = await db.deal.count({
+      where: {
+        influencerId: triggeringUser.influencerProfile.id,
+        status: "COMPLETED",
+        ...(dealId ? { id: { not: dealId } } : {}),
+      },
+    });
+    return otherCompletedDealsCount > 0;
   }
   if (triggeringUser?.userType === "BRAND" && triggeringUser?.brandProfile) {
     const otherCompletedDealsCount = await db.deal.count({
