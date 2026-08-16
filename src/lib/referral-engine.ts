@@ -514,6 +514,69 @@ OR: [
 };
 }
 
+async function checkDuplicateReferral(
+  db: Prisma.TransactionClient,
+  referrerId: string,
+  dealId: string | undefined,
+): Promise<boolean> {
+  if (!dealId) return false;
+  const referrerWallet = await db.wallet.findUnique({
+    where: { userId: referrerId },
+    select: { id: true },
+  });
+  if (referrerWallet) {
+    const existing = await db.transaction.findFirst({
+      where: {
+        dealId,
+        walletId: referrerWallet.id,
+        type: "CREDIT",
+        description: { startsWith: "Referral Bonus" },
+      },
+    });
+    if (existing) {
+      return true;
+    }
+  }
+  return false;
+}
+
+async function checkReferrerEligibility(
+  db: Prisma.TransactionClient,
+  referrerId: string,
+): Promise<boolean> {
+  const referrerUser = await db.user.findUnique({
+    where: { id: referrerId },
+    select: { trustScore: true },
+  });
+  if (!referrerUser || !isEligibleForReferralEarnings(referrerUser.trustScore)) {
+    return false;
+  }
+  return true;
+}
+
+async function handleReferralGamification(
+  db: Prisma.TransactionClient,
+  referrerId: string,
+  userId: string,
+  isFirstActiveEvent: boolean,
+  currentTier: ReferralTier,
+  previousTier: ReferralTier,
+): Promise<boolean> {
+  let tierUpgraded = false;
+  if (currentTier.name !== previousTier.name && currentTier.xpReward > 0) {
+    tierUpgraded = true;
+    await addUserXp(referrerId, currentTier.xpReward, "REFERRAL_TIER_UP", db);
+  }
+
+  if (isFirstActiveEvent) {
+    await checkAndAwardBadges(referrerId, "REFERRAL", db);
+    await checkChallengeProgress(referrerId, "REFERRALS", 1, db).catch((err) => {
+      logger.error("Failed to track challenge progress for referral", { referrerId, userId, error: err });
+    });
+  }
+  return tierUpgraded;
+}
+
 export async function processReferralReward(
   userId: string,
   dealAmount: number,
@@ -521,8 +584,6 @@ export async function processReferralReward(
   treasuryWalletId?: string,
   dealId?: string,
 ): Promise<{ referrerId: string } | undefined> {
-  // If called without a transaction, wrap in a transaction immediately to ensure isolation
-  // and prevent duplicate/stale reads outside of the transaction context.
   if (!tx) {
     return prisma.$transaction(async (txClient) => {
       return processReferralReward(
@@ -537,140 +598,104 @@ export async function processReferralReward(
 
   const db = tx;
 
-const user = await db.user.findUnique({
-where: { id: userId },
-select: { referredBy: true },
-});
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { referredBy: true },
+  });
 
   if (!user?.referredBy) return;
 
   const referrerId = user.referredBy;
 
-  // Block self-referral: user cannot earn cashback by referring themselves
   if (referrerId === userId) {
     logger.warn("Self-referral attempt detected and blocked", { userId, referrerId });
     return;
   }
 
-  // Double-payment / double-gamification protection: check if a referral transaction already exists
-  if (dealId) {
-    const referrerWallet = await db.wallet.findUnique({
-      where: { userId: referrerId },
-      select: { id: true },
-    });
-    if (referrerWallet) {
-      const existing = await db.transaction.findFirst({
-        where: {
-          dealId,
-          walletId: referrerWallet.id,
-          type: "CREDIT",
-          description: { startsWith: "Referral Bonus" },
-        },
-      });
-      if (existing) {
-        logger.info("Referral reward already processed for this deal", { dealId, referrerId });
-        return { referrerId };
-      }
-    }
+  const isDuplicate = await checkDuplicateReferral(db, referrerId, dealId);
+  if (isDuplicate) {
+    logger.info("Referral reward already processed for this deal", { dealId, referrerId });
+    return { referrerId };
   }
 
-  // Invalidate platform fee cache for referrer
   try {
     await redis.del(`platform_fee:effective:${referrerId}`);
   } catch (err) {
     logger.warn("Redis invalidation failed in processReferralReward", { error: getErrorMessage(err) });
   }
 
-// Security gate: Check if referrer has a high enough trust score to earn rewards
-const referrerUser = await db.user.findUnique({
-where: { id: referrerId },
-select: { trustScore: true },
-});
+  const isEligible = await checkReferrerEligibility(db, referrerId);
+  if (!isEligible) {
+    logger.warn(`Referrer ${referrerId} trust score too low to earn referral rewards. Deal ignored.`);
+    return { referrerId };
+  }
 
-if (!referrerUser || !isEligibleForReferralEarnings(referrerUser.trustScore)) {
-logger.warn(`Referrer ${referrerId} trust score too low to earn referral rewards. Deal ignored.`);
-return { referrerId };
-}
-
-// Find out if this is the user's first active referral event (deal/campaign)
-const triggeringUser = await db.user.findUnique({
-where: { id: userId },
-select: {
-id: true,
-userType: true,
-influencerProfile: { select: { id: true, completedDeals: true } },
-brandProfile: { select: { id: true, totalCampaigns: true } },
-},
-});
+  const triggeringUser = await db.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      userType: true,
+      influencerProfile: { select: { id: true, completedDeals: true } },
+      brandProfile: { select: { id: true, totalCampaigns: true } },
+    },
+  });
 
   const wasActiveBefore = await checkWasActiveBefore(triggeringUser, dealAmount, db, dealId);
   const isFirstActiveEvent = !wasActiveBefore;
 
-// Recount active referrals currently (which already includes the completed deal in the DB transaction)
-const activeReferralsCurrent = await db.user.count({
-where: buildActiveReferralWhere(referrerId),
-});
+  const activeReferralsCurrent = await db.user.count({
+    where: buildActiveReferralWhere(referrerId),
+  });
 
-// Calculate active referrals before this transaction.
-const activeReferralsBefore = isFirstActiveEvent
-? Math.max(0, activeReferralsCurrent - 1)
-: activeReferralsCurrent;
+  const activeReferralsBefore = isFirstActiveEvent
+    ? Math.max(0, activeReferralsCurrent - 1)
+    : activeReferralsCurrent;
 
-const previousTier = getTierFromCount(activeReferralsBefore);
-const currentTier = getTierFromCount(activeReferralsCurrent);
+  const previousTier = getTierFromCount(activeReferralsBefore);
+  const currentTier = getTierFromCount(activeReferralsCurrent);
 
-const revenueShareAmount =
-currentTier.revenueShare > 0
-? Math.round(dealAmount * currentTier.revenueShare)
-: 0;
+  const revenueShareAmount =
+    currentTier.revenueShare > 0
+      ? Math.round(dealAmount * currentTier.revenueShare)
+      : 0;
 
-const totalReward = revenueShareAmount;
+  const totalReward = revenueShareAmount;
 
-// Award XP if tier upgraded
-let tierUpgraded = false;
-if (currentTier.name !== previousTier.name && currentTier.xpReward > 0) {
-tierUpgraded = true;
-await addUserXp(referrerId, currentTier.xpReward, "REFERRAL_TIER_UP", db);
-}
+  const tierUpgraded = await handleReferralGamification(
+    db,
+    referrerId,
+    userId,
+    isFirstActiveEvent,
+    currentTier,
+    previousTier,
+  );
 
-if (isFirstActiveEvent) {
-await checkAndAwardBadges(referrerId, "REFERRAL", db);
+  if (totalReward <= 0) {
+    if (tierUpgraded) {
+      await NotificationService.createNotification({
+        userId: referrerId,
+        type: "referral_tier_up",
+        title: `${currentTier.icon} Reached ${currentTier.label} Tier!`,
+        message: `Congratulations! You unlocked the ${currentTier.label} tier and earned ${currentTier.xpReward} XP. Enjoy your ${currentTier.feeDiscount}% fee discount!`,
+      }, db);
+    }
+    return { referrerId };
+  }
 
-    // Track weekly challenge progress for referral
-    await checkChallengeProgress(referrerId, "REFERRALS", 1, db).catch((err) => {
-      logger.error("Failed to track challenge progress for referral", { referrerId, userId, error: err });
-    });
-}
+  await payoutReferralMonetaryReward({
+    db,
+    referrerId,
+    userId,
+    dealId,
+    dealAmount,
+    totalReward,
+    revenueShareAmount,
+    currentTier,
+    treasuryWalletId,
+    tierUpgraded,
+  });
 
-// If there's no monetary reward but they leveled up, we still want to notify them
-if (totalReward <= 0) {
-if (tierUpgraded) {
-await NotificationService.createNotification({
-userId: referrerId,
-type: "referral_tier_up",
-title: `${currentTier.icon} Reached ${currentTier.label} Tier!`,
-message: `Congratulations! You unlocked the ${currentTier.label} tier and earned ${currentTier.xpReward} XP. Enjoy your ${currentTier.feeDiscount}% fee discount!`,
-}, db);
-}
-return { referrerId };
-}
-
-
-
-await payoutReferralMonetaryReward({
-db,
-referrerId,
-userId,
-dealId,
-dealAmount,
-totalReward,
-revenueShareAmount,
-currentTier,
-treasuryWalletId,
-tierUpgraded,
-});
-
-return { referrerId };
+  return { referrerId };
 }
 
 // ==================== FEE DISCOUNT CALCULATOR ====================

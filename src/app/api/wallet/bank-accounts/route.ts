@@ -80,7 +80,9 @@ upiId: account.upiId ? maskUpiId(account.upiId) : null,
 async function _handler_GET(req: NextRequest) {
 try {
 const { userId, errorResponse } = await requireInfluencerSession(req);
-if (errorResponse) return errorResponse;
+    if (errorResponse) {
+      return errorResponse;
+    }
 
   const accounts = await prisma.bankAccount.findMany({
     where: { userId, deletedAt: null },
@@ -97,50 +99,14 @@ return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
 }
 }
 
-async function _handler_POST(req: NextRequest) {
-try {
-const { userId, errorResponse } = await requireInfluencerSession(req);
-if (errorResponse) return errorResponse;
-
-const rateLimitError = await checkBankAccountRateLimit(userId);
-if (rateLimitError) return rateLimitError;
-
-const body = await req.json();
-const result = bankAccountSchema.safeParse(body);
-
-if (!result.success) {
-return NextResponse.json(
-{ error: "Invalid input", details: result.error.format() },
-{ status: 400 },
-);
-}
-
-const { accountName, accountNumber, ifscCode, bankName, upiId, isDefault } = result.data;
-
-  // Enforce maximum 5 bank accounts per user (excluding soft-deleted ones)
-  const existingCount = await prisma.bankAccount.count({ where: { userId, deletedAt: null } });
-  if (existingCount >= 5) {
-    return NextResponse.json(
-      { error: "Maximum of 5 bank accounts allowed per user" },
-      { status: 400 },
-    );
-  }
-
-  // If setting as default, unset others first
-  if (isDefault) {
-    await prisma.bankAccount.updateMany({ where: { userId }, data: { isDefault: false } });
-  }
-
-  const finalAccountNumber = accountNumber || "UPI_PAYOUT";
-  const finalIfscCode = ifscCode || "UPI00000000";
-  const finalBankName = bankName || "UPI";
-  const encryptedAccountNumber = encrypt(finalAccountNumber);
-  const accountNumberHash = hashForDuplicateDetection(finalAccountNumber);
-  const encryptedUpiId = upiId ? encrypt(upiId) : null;
-  const upiIdHash = upiId ? hashForDuplicateDetection(upiId) : null;
-
-  // Duplicate check: verify if this user already has this account number or UPI ID registered (excluding soft-deleted ones)
+async function checkDuplicateAccount(
+  userId: string,
+  upiId: string | undefined,
+  accountNumberHash: string,
+  ifscCode: string,
+): Promise<NextResponse | null> {
   if (upiId) {
+    const upiIdHash = hashForDuplicateDetection(upiId);
     const duplicateUpi = await prisma.bankAccount.findFirst({
       where: { userId, upiIdHash, deletedAt: null },
     });
@@ -152,7 +118,7 @@ const { accountName, accountNumber, ifscCode, bankName, upiId, isDefault } = res
     }
   } else {
     const duplicateBank = await prisma.bankAccount.findFirst({
-      where: { userId, accountNumberHash, ifscCode: finalIfscCode, deletedAt: null },
+      where: { userId, accountNumberHash, ifscCode, deletedAt: null },
     });
     if (duplicateBank) {
       return NextResponse.json(
@@ -161,6 +127,55 @@ const { accountName, accountNumber, ifscCode, bankName, upiId, isDefault } = res
       );
     }
   }
+  return null;
+}
+
+async function _handler_POST(req: NextRequest) {
+  try {
+    const { userId, errorResponse } = await requireInfluencerSession(req);
+    if (errorResponse) return errorResponse;
+
+    const rateLimitError = await checkBankAccountRateLimit(userId);
+    if (rateLimitError) return rateLimitError;
+
+    const body = await req.json();
+    const result = bankAccountSchema.safeParse(body);
+
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Invalid input", details: result.error.format() },
+        { status: 400 },
+      );
+    }
+
+    const { accountName, accountNumber, ifscCode, bankName, upiId, isDefault } = result.data;
+
+    // Enforce maximum 5 bank accounts per user (excluding soft-deleted ones)
+    const existingCount = await prisma.bankAccount.count({ where: { userId, deletedAt: null } });
+    if (existingCount >= 5) {
+      return NextResponse.json(
+        { error: "Maximum of 5 bank accounts allowed per user" },
+        { status: 400 },
+      );
+    }
+
+    // If setting as default, unset others first
+    if (isDefault) {
+      await prisma.bankAccount.updateMany({ where: { userId }, data: { isDefault: false } });
+    }
+
+    const finalAccountNumber = accountNumber || "UPI_PAYOUT";
+    const finalIfscCode = ifscCode || "UPI00000000";
+    const finalBankName = bankName || "UPI";
+    const encryptedAccountNumber = encrypt(finalAccountNumber);
+    const accountNumberHash = hashForDuplicateDetection(finalAccountNumber);
+    const encryptedUpiId = upiId ? encrypt(upiId) : null;
+    const upiIdHash = upiId ? hashForDuplicateDetection(upiId) : null;
+
+    const duplicateError = await checkDuplicateAccount(userId, upiId, accountNumberHash, finalIfscCode);
+    if (duplicateError) {
+      return duplicateError;
+    }
 
 const account = await prisma.bankAccount.create({
 data: {

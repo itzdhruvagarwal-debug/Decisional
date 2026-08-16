@@ -39,7 +39,9 @@ userId: string,
 dealId: string,
 grossPayout: number,
 ) {
-if (grossPayout <= 0) return 0;
+  if (grossPayout <= 0) {
+    return 0;
+  }
 
   // Lock the influencer user record and their wallet to serialize concurrent TDS and balance updates
   await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;

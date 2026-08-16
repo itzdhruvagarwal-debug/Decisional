@@ -56,48 +56,60 @@ return ApiResponse.error(error.message, error.statusCode);
 return ApiResponse.error("Failed to send OTP", 500);
 }
 
+async function checkExistingPhoneForOtp(phone: string, type: "registration" | "phone_verification") {
+  const existing = await prisma.user.findUnique({
+    where: { phone },
+    select: { id: true },
+  });
+
+  if (type === "registration") {
+    if (existing) {
+      return {
+        handled: true,
+        response: ApiResponse.success(
+          null,
+          "If this phone number can be registered, an OTP has been sent.",
+        ),
+      };
+    }
+  } else if (type === "phone_verification") {
+    if (existing) {
+      return {
+        handled: true,
+        response: ApiResponse.error("Phone number is already in use.", 400),
+      };
+    }
+  }
+
+  return { handled: false };
+}
+
 export const PUT = apiWrapper(async function PUT(request: NextRequest) {
-try {
-let body: unknown;
-try {
-body = await request.json();
-} catch {
-return ApiResponse.error("Invalid request body");
-}
+  try {
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return ApiResponse.error("Invalid request body");
+    }
 
-const validation = validatePutPayload(body);
-if (!validation.success) {
-return ApiResponse.error(validation.message!);
-}
+    const validation = validatePutPayload(body);
+    if (!validation.success) {
+      return ApiResponse.error(validation.message!);
+    }
 
-const { phone, type } = validation.data!;
+    const { phone, type } = validation.data!;
 
-const ip = getSecureClientIp(request);
-const ipRateLimit = await checkRateLimit(ip, "AUTH");
-if (!ipRateLimit.success) {
-return ApiResponse.tooManyRequests("Too many OTP requests. Please try again later.");
-}
+    const ip = getSecureClientIp(request);
+    const ipRateLimit = await checkRateLimit(ip, "AUTH");
+    if (!ipRateLimit.success) {
+      return ApiResponse.tooManyRequests("Too many OTP requests. Please try again later.");
+    }
 
-if (type === "registration") {
-const existing = await prisma.user.findUnique({
-where: { phone },
-select: { id: true },
-});
-if (existing) {
-return ApiResponse.success(
-null,
-"If this phone number can be registered, an OTP has been sent.",
-);
-}
-} else if (type === "phone_verification") {
-const existing = await prisma.user.findUnique({
-where: { phone },
-select: { id: true },
-});
-if (existing) {
-return ApiResponse.error("Phone number is already in use.", 400);
-}
-}
+    const checkResult = await checkExistingPhoneForOtp(phone, type);
+    if (checkResult.handled) {
+      return checkResult.response!;
+    }
 
 const sendResult = await sendOTP(phone, { purpose: type });
 if (!sendResult.success) {

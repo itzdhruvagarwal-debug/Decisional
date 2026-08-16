@@ -107,7 +107,9 @@ dispute: DisputeWithDeal,
 reason: string
 ) {
 const brandWallet = await tx.wallet.findUnique({ where: { userId: brandUserId } });
-if (!brandWallet) return;
+  if (!brandWallet) {
+    return;
+  }
 
   const refundAmount = dispute.deal.totalAmount || dispute.deal.amount;
 
