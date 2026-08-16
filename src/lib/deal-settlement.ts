@@ -30,7 +30,7 @@ const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
 const istNow = new Date(now.getTime() + IST_OFFSET_MS);
 const year = istNow.getUTCFullYear();
 const month = istNow.getUTCMonth();
-return new Date(Date.UTC(month >= 3 ? year : year - 1, 3, 1, 0, 0, 0, 0));
+return new Date(Date.UTC(month >= 3 ? year : year - 1, 3, 1, 0, 0, 0, 0) - IST_OFFSET_MS);
 }
 
 export async function calculateTdsForPayout(
