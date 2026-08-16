@@ -63,14 +63,16 @@ itrAssessmentYear: "",
 }
 
 function StatusPill({ status }: Readonly<{ status: string }>) {
-const ready = status === "READY";
-return (
-<span
-className={`inline-flex items-center text-xs font-extrabold rounded-full ${ready ? "badge-tax-ready" : "badge-tax-action"}`}
->
-{ready ? "Ready" : "Action required"}
-</span>
-);
+  if (status === "READY") {
+    return <span className="inline-flex items-center text-xs font-extrabold rounded-full badge-tax-ready">Ready</span>;
+  }
+  if (status === "PENDING_REVIEW") {
+    return <span className="inline-flex items-center text-xs font-extrabold rounded-full badge-tax-pending">Under Review</span>;
+  }
+  if (status === "REJECTED") {
+    return <span className="inline-flex items-center text-xs font-extrabold rounded-full badge-tax-rejected">Rejected</span>;
+  }
+  return <span className="inline-flex items-center text-xs font-extrabold rounded-full badge-tax-action">Action Required</span>;
 }
 
 function validateComplianceDraft(draft: Draft) {
@@ -224,32 +226,40 @@ PAN, GST, ITR, TDS, and invoice readiness for India operations.
 <StatusPill status={status} />
 </div>
 
-<div className="grid-2 gap-3 mb-4">
-<div className="bg-tertiary rounded-md border-card p-3.5">
-<div className="text-xs text-muted mb-1">PAN</div>
-<div className="font-extrabold">
-{compliance?.panNumberMasked || (data?.verifiedPanDocument ? "Document verified, number needed" : "Missing")}
-</div>
-</div>
-<div className="bg-tertiary rounded-md border-card p-3.5">
-<div className="text-xs text-muted mb-1">GSTIN</div>
-<div className="font-extrabold">
-{compliance?.gstinMasked || compliance?.gstRegistrationType || "Not declared"}
-</div>
-</div>
-<div className="bg-tertiary rounded-md border-card p-3.5">
-<div className="text-xs text-muted mb-1">ITR acknowledgement</div>
-<div className="font-extrabold">
-{compliance?.itrAcknowledgementMasked || "Not provided"}
-</div>
-</div>
-<div className="bg-tertiary rounded-md border-card p-3.5">
-<div className="text-xs text-muted mb-1">E-invoice</div>
-<div className="font-extrabold">
-{compliance?.eInvoiceApplicable ? "Applicable" : "Not marked"}
-</div>
-</div>
-</div>
+      <div className="grid-2 gap-3 mb-4">
+        <div className="bg-tertiary rounded-md border-card p-3.5">
+          <div className="text-xs text-muted mb-1">PAN</div>
+          <div className="font-extrabold">
+            {compliance?.panNumberMasked || (data?.verifiedPanDocument ? "Document verified, number needed" : "Missing")}
+          </div>
+        </div>
+        <div className="bg-tertiary rounded-md border-card p-3.5">
+          <div className="text-xs text-muted mb-1">GSTIN</div>
+          <div className="font-extrabold">
+            {compliance?.gstinMasked || compliance?.gstRegistrationType || "Not declared"}
+          </div>
+        </div>
+        <div className="bg-tertiary rounded-md border-card p-3.5">
+          <div className="text-xs text-muted mb-1">ITR acknowledgement</div>
+          <div className="font-extrabold">
+            {compliance?.itrAcknowledgementMasked || "Not provided"}
+          </div>
+        </div>
+        <div className="bg-tertiary rounded-md border-card p-3.5">
+          <div className="text-xs text-muted mb-1">TDS Section</div>
+          <div className="font-extrabold">
+            {compliance?.tdsSection
+              ? compliance.tdsSection.replace("_REVIEW", " (Under Review)")
+              : "Not determined"}
+          </div>
+        </div>
+        <div className="bg-tertiary rounded-md border-card p-3.5">
+          <div className="text-xs text-muted mb-1">E-invoice</div>
+          <div className="font-extrabold">
+            {compliance?.eInvoiceApplicable ? "Applicable" : "Not marked"}
+          </div>
+        </div>
+      </div>
 
 {(summary?.blocking?.length || summary?.advisories?.length) ? (
 <div className="grid gap-2 mb-1">

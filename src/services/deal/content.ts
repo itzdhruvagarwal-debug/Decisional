@@ -13,127 +13,148 @@ import { PaymentService } from "@/services/payment.service";
 import { logger } from "@/lib/logger";
 import { DealWithRelations, invalidateDealCache, lockAndFetchDealForAction } from "./helpers";
 
+function validateSubmissionEligibility(
+  deal: Awaited<ReturnType<typeof lockAndFetchDealForAction>>,
+  userId: string,
+  dealId: string,
+) {
+  if (deal.influencer.userId !== userId) {
+    logger.warn("Unauthorized content submission attempt", {
+      userId,
+      dealId,
+    });
+    throw AppError.forbidden("Unauthorized");
+  }
+
+  // PAYMENT GUARD: Only allow submission when brand's payment is secured
+  // in escrow (PAYMENT_HELD) or when a revision was requested.
+  // ACTIVE alone is NOT sufficient it means contract signed but no payment yet.
+  if (!["PAYMENT_HELD", "REVISION_REQUESTED"].includes(deal.status)) {
+    throw AppError.badRequest("Payment must be secured before content submission");
+  }
+
+  if (
+    deal.requiresProduct &&
+    deal.productFulfillmentStatus !== "RECEIVED" &&
+    deal.status !== "REVISION_REQUESTED"
+  ) {
+    throw AppError.badRequest("Product must be received before content submission");
+  }
+}
+
+function formatAndValidateSubmissionUrls(
+  contentUrl: string,
+  contentUrls?: Array<{ type: string; url: string; status?: string; feedback?: string }>,
+) {
+  // Initialize statuses on new submission: all pending unless pre-approved
+  const formattedUrls = contentUrls?.map((item) => ({
+    type: item.type,
+    url: item.url,
+    status: item.status || "PENDING",
+    feedback: item.feedback || "",
+  })) || null;
+
+  // Determine fallback contentUrl for backward-compatibility
+  const finalContentUrl = contentUrl || (contentUrls?.[0]?.url) || "";
+
+  // Validate that at least one content URL is provided
+  if (!finalContentUrl && (!formattedUrls || formattedUrls.length === 0)) {
+    throw AppError.badRequest("At least one content URL is required");
+  }
+
+  return { formattedUrls, finalContentUrl };
+}
+
+async function trackSubmissionChallenges(
+  tx: Prisma.TransactionClient,
+  deal: Awaited<ReturnType<typeof lockAndFetchDealForAction>>,
+  userId: string,
+) {
+  // Track influencer weekly challenge (submit_early_2)
+  if (deal.submissionDeadline && new Date() < new Date(deal.submissionDeadline)) {
+    await checkChallengeProgress(userId, "SPEED", 1, tx).catch((err) => {
+      logger.error("Failed to track influencer challenge progress for submit_early_2", { userId, error: err });
+    });
+  }
+
+  // Track influencer weekly challenge (submit_24h)
+  if (deal.startedAt && Date.now() - new Date(deal.startedAt).getTime() <= 24 * 60 * 60 * 1000) {
+    await checkChallengeProgress(userId, "SPEED", 1, tx).catch((err) => {
+      logger.error("Failed to track influencer challenge progress for submit_24h", { userId, error: err });
+    });
+  }
+}
+
 export async function submitContent(
-userId: string,
-dealId: string,
-contentUrl: string,
-notes?: string,
-contentUrls?: Array<{ type: string; url: string; status?: string; feedback?: string }>,
+  userId: string,
+  dealId: string,
+  contentUrl: string,
+  notes?: string,
+  contentUrls?: Array<{ type: string; url: string; status?: string; feedback?: string }>,
 ) {
-if (notes && checkMessageForContacts(notes).hasContactInfo) {
-throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in submission notes.");
-}
+  if (notes && checkMessageForContacts(notes).hasContactInfo) {
+    throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in submission notes.");
+  }
 
-try {
-const updatedDeal = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-// LOCK: Lock and fetch deal using helper
-const deal = await lockAndFetchDealForAction(tx, dealId);
+  try {
+    const updatedDeal = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      // LOCK: Lock and fetch deal using helper
+      const deal = await lockAndFetchDealForAction(tx, dealId);
 
-if (deal?.influencer.userId !== userId) {
-logger.warn("Unauthorized content submission attempt", {
-userId,
-dealId,
-});
-throw AppError.forbidden("Unauthorized");
-}
+      validateSubmissionEligibility(deal, userId, dealId);
 
-// PAYMENT GUARD: Only allow submission when brand's payment is secured
-// in escrow (PAYMENT_HELD) or when a revision was requested.
-// ACTIVE alone is NOT sufficient it means contract signed but no payment yet.
-if (
-!["PAYMENT_HELD", "REVISION_REQUESTED"].includes(
-deal.status,
-)
-) {
-throw AppError.badRequest("Payment must be secured before content submission");
-}
+      const nextVersion = (deal.contentSubmissions[0]?.version || 0) + 1;
 
-if (
-deal.requiresProduct &&
-deal.productFulfillmentStatus !== "RECEIVED" &&
-deal.status !== "REVISION_REQUESTED"
-) {
-throw AppError.badRequest("Product must be received before content submission");
-}
+      const { formattedUrls, finalContentUrl } = formatAndValidateSubmissionUrls(contentUrl, contentUrls);
 
-const nextVersion = (deal.contentSubmissions[0]?.version || 0) + 1;
+      await tx.contentSubmission.create({
+        data: {
+          dealId,
+          version: nextVersion,
+          contentUrl: finalContentUrl,
+          contentUrls: formattedUrls ? (formattedUrls as Prisma.InputJsonValue) : Prisma.DbNull,
+          notes: notes ?? null,
+          status: "PENDING",
+        },
+      });
 
-// Initialize statuses on new submission: all pending unless pre-approved
-const formattedUrls = contentUrls?.map((item) => ({
-type: item.type,
-url: item.url,
-status: item.status || "PENDING",
-feedback: item.feedback || "",
-})) || null;
+      const updatedDeal = await tx.deal.update({
+        where: { id: dealId },
+        data: {
+          status: "CONTENT_SUBMITTED",
+          submittedContentUrl: finalContentUrl,
+          submittedAt: new Date(),
+        },
+      });
 
-// Determine fallback contentUrl for backward-compatibility
-const finalContentUrl = contentUrl || (contentUrls?.[0]?.url) || "";
+      await addUserXp(userId, 15, "CONTENT_SUBMITTED", tx);
 
-// Validate that at least one content URL is provided
-if (!finalContentUrl && (!formattedUrls || formattedUrls.length === 0)) {
-  throw AppError.badRequest("At least one content URL is required");
-}
+      await trackSubmissionChallenges(tx, deal, userId);
 
-await tx.contentSubmission.create({
-data: {
-dealId,
-version: nextVersion,
-contentUrl: finalContentUrl,
-contentUrls: formattedUrls ? (formattedUrls as Prisma.InputJsonValue) : Prisma.DbNull,
-notes: notes ?? null,
-status: "PENDING",
-},
-});
+      if (deal.brand?.userId) {
+        await NotificationService.createNotification({
+          userId: deal.brand.userId,
+          type: "deal_update",
+          title: nextVersion === 1 ? "Content submitted" : `Revision ${nextVersion} submitted`,
+          message: `${deal.influencer.displayName || "Influencer"} has submitted ${nextVersion > 1 ? "revised " : ""}content for "${deal.campaign.title}". Please review within 48 hours.`,
+          data: { link: `/dashboard/deals/${dealId}` },
+        }, tx);
+      }
 
-const updatedDeal = await tx.deal.update({
-where: { id: dealId },
-data: {
-status: "CONTENT_SUBMITTED",
-submittedContentUrl: finalContentUrl,
-submittedAt: new Date(),
-},
-});
+      logger.info("Content submitted successfully", {
+        userId,
+        dealId,
+        version: nextVersion,
+      });
+      return updatedDeal;
+    });
 
-await addUserXp(userId, 15, "CONTENT_SUBMITTED", tx);
-
-// Track influencer weekly challenge (submit_early_2)
-if (deal.submissionDeadline && new Date() < new Date(deal.submissionDeadline)) {
-  await checkChallengeProgress(userId, "SPEED", 1, tx).catch((err) => {
-    logger.error("Failed to track influencer challenge progress for submit_early_2", { userId, error: err });
-  });
-}
-
-// Track influencer weekly challenge (submit_24h)
-if (deal.startedAt && new Date().getTime() - new Date(deal.startedAt).getTime() <= 24 * 60 * 60 * 1000) {
-  await checkChallengeProgress(userId, "SPEED", 1, tx).catch((err) => {
-    logger.error("Failed to track influencer challenge progress for submit_24h", { userId, error: err });
-  });
-}
-
-if (deal.brand?.userId) {
-await NotificationService.createNotification({
-userId: deal.brand.userId,
-type: "deal_update",
-title: nextVersion === 1 ? "Content submitted" : `Revision ${nextVersion} submitted`,
-message: `${deal.influencer.displayName || "Influencer"} has submitted ${nextVersion > 1 ? "revised " : ""}content for "${deal.campaign.title}". Please review within 48 hours.`,
-data: { link: `/dashboard/deals/${dealId}` },
-}, tx);
-}
-
-logger.info("Content submitted successfully", {
-userId,
-dealId,
-version: nextVersion,
-});
-return updatedDeal;
-});
-
-await invalidateDealCache(dealId);
-return updatedDeal;
-} catch (error) {
-logger.error("Error submitting content", error, { userId, dealId });
-throw error;
-}
+    await invalidateDealCache(dealId);
+    return updatedDeal;
+  } catch (error) {
+    logger.error("Error submitting content", error, { userId, dealId });
+    throw error;
+  }
 }
 
 
@@ -268,65 +289,22 @@ costPerExtraRevision: contract.costPerExtraRevision,
 }
 
 
-export async function reviewContent(
-userId: string,
-dealId: string,
-reviews: Array<{ type: string; status: "APPROVED" | "REVISION_REQUESTED"; feedback?: string | undefined }>,
+function validateReviewEligibility(
+  deal: Awaited<ReturnType<typeof lockAndFetchDealForAction>>,
+  userId: string,
 ) {
-for (const r of reviews) {
-if (r.feedback && checkMessageForContacts(r.feedback).hasContactInfo) {
-throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in review feedback.");
-}
+  const ownerId = deal.brand?.userId;
+  if (ownerId !== userId) throw AppError.forbidden("Unauthorized");
 }
 
-const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-const deal = await lockAndFetchDealForAction(tx, dealId);
-if (!deal) throw AppError.notFound("Deal not found");
-
-const ownerId = deal.brand?.userId;
-if (ownerId !== userId) throw AppError.forbidden("Unauthorized");
-
-const { latestSubmission, currentUrls } = validateAndGetSubmissionUrls(deal);
-const { updatedUrls, overallApproved, hasRevision } = processContentUrlsReview(
-currentUrls,
-reviews
-);
-
-let updatedStatus: "CONTENT_APPROVED" | "REVISION_REQUESTED" = "CONTENT_APPROVED";
-
-if (hasRevision) {
-updatedStatus = "REVISION_REQUESTED";
-await handleRevisionCharge(tx, deal, userId, dealId);
-} else if (!overallApproved) {
-// Partial review: some items still PENDING — persist partial feedback to DB
-// but keep deal status unchanged so the brand can complete the review later.
-updatedStatus = deal.status as "CONTENT_APPROVED" | "REVISION_REQUESTED";
-}
-
-const allFeedback = updatedUrls
-.filter((item) => item.status === "REVISION_REQUESTED" && item.feedback)
-.map((item) => `[${item.type}]: ${item.feedback}`)
-.join(" | ");
-
-await tx.contentSubmission.update({
-where: { id: latestSubmission.id },
-data: {
-status: updatedStatus === "CONTENT_APPROVED" ? "APPROVED" : "REVISION_REQUESTED",
-contentUrls: updatedUrls as Prisma.InputJsonValue,
-feedback: allFeedback || null,
-reviewedAt: new Date(),
-},
-});
-
-const dealUpdatePayload: Prisma.DealUpdateInput = {
-status: updatedStatus,
-rejectionReason: updatedStatus === "REVISION_REQUESTED" ? allFeedback : null,
-};
-if (updatedStatus === "CONTENT_APPROVED") {
-  dealUpdatePayload.approvedAt = new Date();
-
+async function trackReviewChallenges(
+  tx: Prisma.TransactionClient,
+  deal: Awaited<ReturnType<typeof lockAndFetchDealForAction>>,
+  userId: string,
+  latestSubmission: any,
+) {
   // Track brand weekly challenge (approve_fast_3)
-  if (latestSubmission.submittedAt && new Date().getTime() - new Date(latestSubmission.submittedAt).getTime() <= 12 * 60 * 60 * 1000) {
+  if (latestSubmission.submittedAt && Date.now() - new Date(latestSubmission.submittedAt).getTime() <= 12 * 60 * 60 * 1000) {
     await checkChallengeProgress(userId, "SPEED", 1, tx).catch((err) => {
       logger.error("Failed to track brand challenge progress for approve_fast_3", { userId, error: err });
     });
@@ -339,65 +317,122 @@ if (updatedStatus === "CONTENT_APPROVED") {
     });
   }
 }
-if (updatedStatus === "REVISION_REQUESTED") {
-dealUpdatePayload.revisionsUsed = { increment: 1 };
+
+export async function reviewContent(
+  userId: string,
+  dealId: string,
+  reviews: Array<{ type: string; status: "APPROVED" | "REVISION_REQUESTED"; feedback?: string | undefined }>,
+) {
+  for (const r of reviews) {
+    if (r.feedback && checkMessageForContacts(r.feedback).hasContactInfo) {
+      throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in review feedback.");
+    }
+  }
+
+  const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const deal = await lockAndFetchDealForAction(tx, dealId);
+    if (!deal) throw AppError.notFound("Deal not found");
+
+    validateReviewEligibility(deal, userId);
+
+    const { latestSubmission, currentUrls } = validateAndGetSubmissionUrls(deal);
+    const { updatedUrls, overallApproved, hasRevision } = processContentUrlsReview(
+      currentUrls,
+      reviews
+    );
+
+    let updatedStatus: "CONTENT_APPROVED" | "REVISION_REQUESTED" = "CONTENT_APPROVED";
+
+    if (hasRevision) {
+      updatedStatus = "REVISION_REQUESTED";
+      await handleRevisionCharge(tx, deal, userId, dealId);
+    } else if (!overallApproved) {
+      // Partial review: some items still PENDING — persist partial feedback to DB
+      // but keep deal status unchanged so the brand can complete the review later.
+      updatedStatus = deal.status as "CONTENT_APPROVED" | "REVISION_REQUESTED";
+    }
+
+    const allFeedback = updatedUrls
+      .filter((item) => item.status === "REVISION_REQUESTED" && item.feedback)
+      .map((item) => `[${item.type}]: ${item.feedback}`)
+      .join(" | ");
+
+    await tx.contentSubmission.update({
+      where: { id: latestSubmission.id },
+      data: {
+        status: updatedStatus === "CONTENT_APPROVED" ? "APPROVED" : "REVISION_REQUESTED",
+        contentUrls: updatedUrls as Prisma.InputJsonValue,
+        feedback: allFeedback || null,
+        reviewedAt: new Date(),
+      },
+    });
+
+    const dealUpdatePayload: Prisma.DealUpdateInput = {
+      status: updatedStatus,
+      rejectionReason: updatedStatus === "REVISION_REQUESTED" ? allFeedback : null,
+    };
+    if (updatedStatus === "CONTENT_APPROVED") {
+      dealUpdatePayload.approvedAt = new Date();
+      await trackReviewChallenges(tx, deal, userId, latestSubmission);
+    }
+    if (updatedStatus === "REVISION_REQUESTED") {
+      dealUpdatePayload.revisionsUsed = { increment: 1 };
+    }
+
+    await tx.deal.update({
+      where: { id: dealId },
+      data: dealUpdatePayload,
+    });
+
+    if (deal.influencer?.userId) {
+      await NotificationService.createNotification({
+        userId: deal.influencer.userId,
+        type: "deal_update",
+        title: updatedStatus === "CONTENT_APPROVED" ? "Content Approved" : "Revision Requested",
+        message: updatedStatus === "CONTENT_APPROVED"
+          ? `Your content submission for "${deal.campaign.title}" was approved.`
+          : `The brand has requested revision on your submission for "${deal.campaign.title}".`,
+        data: { link: `/dashboard/deals/${dealId}` },
+      }, tx);
+    }
+
+    return {
+      success: true,
+      statusUpdated: true,
+      dealStatus: updatedStatus,
+      ownerId: deal.brand?.userId,
+      influencerUserId: deal.influencer.userId,
+      requiresPostVerification: deal.requiresPostVerification,
+    };
+  });
+
+  if (result.statusUpdated && result.dealStatus === "CONTENT_APPROVED") {
+    if (result.influencerUserId) {
+      await updateTrustAndLevel(result.influencerUserId, "CONTENT_APPROVED");
+      recalculateSocialProof(result.influencerUserId).catch((err) => {
+        logger.warn("[SocialProof] Real-time recalc failed after deal completion", {
+          userId: result.influencerUserId,
+          error: err,
+        });
+      });
+    }
+
+    await invalidateDealCache(dealId);
+
+    if (result.requiresPostVerification === false) {
+      try {
+        await PaymentService.processDealCompletion(dealId);
+        await invalidateDealCache(dealId);
+      } catch (error) {
+        logger.error("Failed to process deal payment immediately for no-verification deal", {
+          dealId,
+          error,
+        });
+      }
+    }
+  } else {
+    await invalidateDealCache(dealId);
+  }
+
+  return { success: true };
 }
-
-await tx.deal.update({
-where: { id: dealId },
-data: dealUpdatePayload,
-});
-
-if (deal.influencer?.userId) {
-await NotificationService.createNotification({
-userId: deal.influencer.userId,
-type: "deal_update",
-title: updatedStatus === "CONTENT_APPROVED" ? "Content Approved" : "Revision Requested",
-message: updatedStatus === "CONTENT_APPROVED"
-? `Your content submission for "${deal.campaign.title}" was approved.`
-: `The brand has requested revision on your submission for "${deal.campaign.title}".`,
-data: { link: `/dashboard/deals/${dealId}` },
-}, tx);
-}
-
-return {
-success: true,
-statusUpdated: true,
-dealStatus: updatedStatus,
-ownerId,
-influencerUserId: deal.influencer.userId,
-requiresPostVerification: deal.requiresPostVerification,
-};
-});
-
-if (result.statusUpdated && result.dealStatus === "CONTENT_APPROVED") {
-if (result.influencerUserId) {
-await updateTrustAndLevel(result.influencerUserId, "CONTENT_APPROVED");
-recalculateSocialProof(result.influencerUserId).catch((err) => {
-logger.warn("[SocialProof] Real-time recalc failed after deal completion", {
-userId: result.influencerUserId,
-error: err,
-});
-});
-}
-
-await invalidateDealCache(dealId);
-
-if (result.requiresPostVerification === false) {
-try {
-await PaymentService.processDealCompletion(dealId);
-await invalidateDealCache(dealId);
-} catch (error) {
-logger.error("Failed to process deal payment immediately for no-verification deal", {
-dealId,
-error,
-});
-}
-}
-} else {
-await invalidateDealCache(dealId);
-}
-
-return { success: true };
-}
-

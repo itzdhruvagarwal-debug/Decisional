@@ -43,32 +43,33 @@ autoResolvable: boolean;
 }
 
 export interface DisputeDetail {
-id: string;
-status: string;
-tier: number;
-type: string;
-reason: string;
-description: string;
-createdAt: string;
-resolvedAt?: string | null;
-resolution?: string | null;
-deal: {
-id: string;
-amount: number;
-campaign: {
-title: string;
-};
-};
-evidence: Array<{
-id: string;
-type: string;
-url?: string;
-description?: string;
-submittedAt?: string;
-submittedByUserId?: string;
-}>;
-influencerOutcome?: string | null;
-brandOutcome?: string | null;
+  id: string;
+  status: string;
+  tier: number;
+  type: string;
+  reason: string;
+  description: string;
+  createdAt: string;
+  resolvedAt?: string | null;
+  resolution?: string | null;
+  raisedByUserId: string;
+  deal: {
+    id: string;
+    amount: number;
+    campaign: {
+      title: string;
+    };
+  };
+  evidence: Array<{
+    id: string;
+    type: string;
+    url?: string;
+    description?: string;
+    submittedAt?: string;
+    submittedByUserId?: string;
+  }>;
+  influencerOutcome?: string | null;
+  brandOutcome?: string | null;
 }
 
 export function getStatusColor(status: string) {

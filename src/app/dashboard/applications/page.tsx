@@ -221,7 +221,13 @@ applicationsList = (
                 </td>
                 <td className="p-4">
                   <Badge variant={getStatusVariant(app.status)} className="text-xs font-extrabold">
-                    {app.status}
+                    {app.status === "SELECTED" || app.status === "ACCEPTED"
+                      ? "Approved"
+                      : app.status === "REJECTED"
+                      ? "Rejected"
+                      : app.status === "PENDING"
+                      ? "Pending"
+                      : app.status}
                   </Badge>
                 </td>
                 <td className="p-4 text-right">

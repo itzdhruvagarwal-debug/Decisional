@@ -17,8 +17,15 @@ Not uploaded
 );
 const icons: Record<string, string> = {
   VERIFIED: "✓",
-  PENDING: "⚠",
+  PENDING: "⏳",
+  UNDER_REVIEW: "⏳",
   REJECTED: "✗",
+};
+const labels: Record<string, string> = {
+  VERIFIED: "Verified",
+  PENDING: "Under Review",
+  UNDER_REVIEW: "Under Review",
+  REJECTED: "Rejected",
 };
   let statusClass = "text-amber bg-amber-subtle border-amber-subtle";
   if (doc.status === "VERIFIED") {
@@ -31,9 +38,9 @@ const icons: Record<string, string> = {
     <span
       className={`font-semibold text-xs rounded-2xl px-2-py-05 ${statusClass}`}
     >
-{icons[doc.status]} {doc.status}
-</span>
-);
+      {icons[doc.status] ?? "•"} {labels[doc.status] ?? doc.status}
+    </span>
+  );
 }
 
 export function getTierIcon(tier: number): React.ReactNode {

@@ -286,6 +286,39 @@ await verifyGstDetails(data.gstin, registeredName);
 }
 }
 
+function populatePanDetails(updateData: Record<string, unknown>, panNumber?: string | null) {
+  if (panNumber) {
+    updateData.panNumber = encrypt(panNumber);
+    updateData.panLast4 = panNumber.slice(-4);
+  }
+}
+
+function populateGstDetails(updateData: Record<string, unknown>, registeredForGst: boolean, gstin?: string | null) {
+  if (registeredForGst && gstin) {
+    updateData.gstin = encrypt(gstin);
+    updateData.gstinLast4 = gstin.slice(-4);
+    updateData.gstStateCode = getGstinStateCode(gstin);
+  } else if (!registeredForGst) {
+    updateData.gstin = null;
+    updateData.gstinLast4 = null;
+    updateData.gstStateCode = null;
+  }
+}
+
+function populateItrDetails(
+  updateData: Record<string, unknown>,
+  itrAcknowledgementNumber?: string | null,
+  itrAssessmentYear?: string | null
+) {
+  if (itrAcknowledgementNumber) {
+    updateData.itrAcknowledgementNumber = encrypt(itrAcknowledgementNumber);
+    updateData.itrAcknowledgementLast4 = itrAcknowledgementNumber.slice(-4);
+  }
+  if (itrAssessmentYear) {
+    updateData.itrAssessmentYear = itrAssessmentYear;
+  }
+}
+
 function buildComplianceUpdatePayload(
   data: IndiaTaxInput,
   registeredForGst: boolean,
@@ -303,13 +336,12 @@ function buildComplianceUpdatePayload(
   const gstTypeChanged = data.gstRegistrationType !== undefined && data.gstRegistrationType !== current?.gstRegistrationType;
 
   const isCriticalInfoChanged = panChanged || gstinChanged || gstTypeChanged;
+  const defaultReviewSection = isBrand(userType) ? "194J_OR_194O_REVIEW" : "194J_REVIEW";
 
   const updateData: Record<string, unknown> = {
     gstRegistrationType: nextRegistrationType,
     gstTurnoverSlab: nextSlab,
-    tdsSection: isCriticalInfoChanged 
-      ? (isBrand(userType) ? "194J_OR_194O_REVIEW" : "194J_REVIEW")
-      : (current?.tdsSection ?? (isBrand(userType) ? "194J_OR_194O_REVIEW" : "194J_REVIEW")),
+    tdsSection: isCriticalInfoChanged ? defaultReviewSection : (current?.tdsSection ?? defaultReviewSection),
     eInvoiceApplicable: isEInvoiceApplicable(nextSlab),
     status: isCriticalInfoChanged ? summaryStatus : (current?.status ?? summaryStatus),
     submittedAt: new Date(),
@@ -317,31 +349,11 @@ function buildComplianceUpdatePayload(
     rejectionReason: isCriticalInfoChanged ? null : (current?.rejectionReason ?? null),
   };
 
-if (data.panNumber) {
-updateData.panNumber = encrypt(data.panNumber);
-updateData.panLast4 = data.panNumber.slice(-4);
-}
+  populatePanDetails(updateData, data.panNumber);
+  populateGstDetails(updateData, registeredForGst, data.gstin);
+  populateItrDetails(updateData, data.itrAcknowledgementNumber, data.itrAssessmentYear);
 
-if (registeredForGst && data.gstin) {
-updateData.gstin = encrypt(data.gstin);
-updateData.gstinLast4 = data.gstin.slice(-4);
-updateData.gstStateCode = getGstinStateCode(data.gstin);
-} else if (!registeredForGst) {
-updateData.gstin = null;
-updateData.gstinLast4 = null;
-updateData.gstStateCode = null;
-}
-
-if (data.itrAcknowledgementNumber) {
-updateData.itrAcknowledgementNumber = encrypt(data.itrAcknowledgementNumber);
-updateData.itrAcknowledgementLast4 = data.itrAcknowledgementNumber.slice(-4);
-}
-
-if (data.itrAssessmentYear) {
-updateData.itrAssessmentYear = data.itrAssessmentYear;
-}
-
-return updateData;
+  return updateData;
 }
 
 async function _handler_PUT(request: NextRequest) {

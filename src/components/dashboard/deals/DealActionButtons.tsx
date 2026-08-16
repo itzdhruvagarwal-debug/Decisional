@@ -13,6 +13,7 @@ readonly deal: DealDetail;
 readonly handleSignContract: () => void;
 readonly handleRejectInvite: () => void;
 readonly handleCancelDeal: () => void;
+readonly handleAction: (action: string, payload?: Record<string, unknown>) => Promise<boolean>;
 readonly setItemizedUrls: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 readonly setContentForm: React.Dispatch<React.SetStateAction<{ contentUrl: string; notes: string }>>;
 readonly setShowSubmitModal: (v: boolean) => void;
@@ -32,6 +33,7 @@ deal,
 handleSignContract,
 handleRejectInvite,
 handleCancelDeal,
+handleAction,
 setItemizedUrls,
 setContentForm,
 setShowSubmitModal,
@@ -114,6 +116,19 @@ setShowReviewModal(true);
 }}
 >
 Review Content
+</Button>
+)}
+
+{isClient && dealStatus === "POSTED" && (
+<Button
+variant="primary"
+onClick={() => {
+if (!confirm("Release payment to the influencer? This will mark the deal as complete and transfer funds. This cannot be undone.")) return;
+handleAction("complete_deal");
+}}
+disabled={isSubmitting}
+>
+Release Payment
 </Button>
 )}
 

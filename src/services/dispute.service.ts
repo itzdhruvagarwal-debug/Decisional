@@ -263,7 +263,7 @@ return { evidence, message: "Evidence added successfully" };
 
     // Handle withdrawal (requires transaction to restore deal status)
     if (action === "withdraw") {
-      const openStatuses = ["OPEN", "TIER1_AUTO", "TIER2_MEDIATION"];
+      const openStatuses = new Set(["OPEN", "TIER1_AUTO", "TIER2_MEDIATION"]);
       return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const dispute = await tx.dispute.findUnique({
           where: { id: data.disputeId },
@@ -271,7 +271,7 @@ return { evidence, message: "Evidence added successfully" };
         });
 
         if (!dispute) throw AppError.notFound("Dispute not found");
-        if (!openStatuses.includes(dispute.status)) {
+        if (!openStatuses.has(dispute.status)) {
           throw AppError.badRequest(`Cannot withdraw a ${dispute.status} dispute`);
         }
         if (dispute.raisedByUserId !== userId) {

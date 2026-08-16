@@ -156,15 +156,18 @@ data-result={f.result}
 )}
 
 {/* Action Buttons */}
-{canTakeAction && dispute.status !== "RESOLVED" && (
+{canTakeAction && dispute.status !== "RESOLVED" && dispute.status !== "CLOSED" && (
   <div className="flex gap-3 flex-wrap border-top pt-4">
     <Button
       variant="primary"
-      onClick={() => handleDisputeAction("accept_resolution")}
+      onClick={() => {
+        if (!confirm("Accept the AI mediator's resolution? This action is final and will apply the proposed financial outcome.")) return;
+        handleDisputeAction("accept");
+      }}
       disabled={!!actionLoading}
       className="flex-1 flex items-center justify-center gap-2"
     >
-      {actionLoading === "accept_resolution" ? (
+      {actionLoading === "accept" ? (
         "Processing..."
       ) : (
         <>
@@ -177,11 +180,14 @@ data-result={f.result}
     </Button>
     <Button
       variant="secondary"
-      onClick={() => handleDisputeAction("reject_resolution")}
+      onClick={() => {
+        if (!confirm("Reject this resolution and escalate to the next tier? You cannot undo this.")) return;
+        handleDisputeAction("reject");
+      }}
       disabled={!!actionLoading}
       className="flex-1 flex items-center justify-center gap-2"
     >
-      {actionLoading === "reject_resolution" ? (
+      {actionLoading === "reject" ? (
         "Processing..."
       ) : (
         <>

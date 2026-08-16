@@ -21,17 +21,27 @@ async function _handler(req: NextRequest) {
   const bounds = getIndianFYBounds(fy);
   if (!bounds) return ApiResponse.error("Invalid FY format. Use YYYY-YY e.g. 2025-26");
 
-// Get monthly revenue data for the FY (12 months)
   const startDate = bounds.start;
-  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+  // Use Intl.DateTimeFormat with IST timezone so labels are correct regardless of server TZ.
+  // Do NOT manually add IST_OFFSET_MS — getIndianFYBounds() already returns UTC dates
+  // that represent IST midnight, so adding the offset again would shift labels by +5.5h.
+  const istFormatter = new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    month: "short",
+    year: "numeric",
+  });
+  const getISTMonthLabel = (d: Date) => {
+    const parts = istFormatter.formatToParts(d);
+    const month = parts.find((p) => p.type === "month")?.value ?? "";
+    const year = parts.find((p) => p.type === "year")?.value ?? "";
+    return `${month} ${year}`;
+  };
   const months = Array.from({ length: 12 }, (_, i) => {
     const d = new Date(startDate);
     d.setMonth(d.getMonth() + i);
-    // Add IST offset before formatting label
-    const istLabelDate = new Date(d.getTime() + IST_OFFSET_MS);
     return {
       date: d,
-      month: format(istLabelDate, "MMM yyyy"),
+      month: getISTMonthLabel(d),
       revenue: 0,
       gmv: 0,
       deals: 0,
@@ -48,9 +58,7 @@ async function _handler(req: NextRequest) {
   });
 
   transactions.forEach((tx: { amount: number; createdAt: Date }) => {
-    // Add IST offset before formatting
-    const istDate = new Date(tx.createdAt.getTime() + IST_OFFSET_MS);
-    const monthStr = format(istDate, "MMM yyyy");
+    const monthStr = getISTMonthLabel(tx.createdAt);
     const monthObj = months.find((m) => m.month === monthStr);
     if (monthObj) monthObj.revenue += tx.amount;
   });
@@ -66,9 +74,7 @@ async function _handler(req: NextRequest) {
 
   deals.forEach((deal: { totalAmount: number; completedAt: Date | null }) => {
     if (!deal.completedAt) return;
-    // Add IST offset before formatting
-    const istDate = new Date(deal.completedAt.getTime() + IST_OFFSET_MS);
-    const monthStr = format(istDate, "MMM yyyy");
+    const monthStr = getISTMonthLabel(deal.completedAt);
     const monthObj = months.find((m) => m.month === monthStr);
     if (monthObj) {
       monthObj.gmv += deal.totalAmount;

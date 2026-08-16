@@ -3,6 +3,7 @@
 import React, { useState, use, useCallback, useMemo } from "react";
 import useSWR from "swr";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { fetcher } from "@/lib/fetcher";
 import { logger } from "@/lib/logger-client";
 import { ToastContainer, type ToastItem, type ToastType } from "@/components/ui/toast";
@@ -22,7 +23,8 @@ readonly params: Promise<{ readonly id: string }>;
 }
 
 export default function DisputeDetailPage({ params }: Readonly<DisputeDetailPageProps>) {
-const { id } = use(params);
+  const { id } = use(params);
+  const { data: session } = useSession();
 const { data: disputeData, isLoading, mutate: fetchDispute } = useSWR<{ dispute?: DisputeDetail; analysis?: MediatorAnalysis }>(
 id ? `/api/disputes/${id}` : null,
 fetcher
@@ -73,7 +75,7 @@ return null;
 
 const [evidenceUrl, setEvidenceUrl] = useState("");
 const [evidenceDesc, setEvidenceDesc] = useState("");
-const [evidenceType, setEvidenceType] = useState("SCREENSHOT");
+const [evidenceType, setEvidenceType] = useState("CONTRACT");
 const [isSubmitting, setIsSubmitting] = useState(false);
 const [showEvidenceForm, setShowEvidenceForm] = useState(false);
 const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -179,11 +181,19 @@ return <div className="loading text-center p-10">Loading dispute details...</div
 }
 
 if (!dispute) {
-return <div className="text-center p-10">Dispute not found</div>;
+return (
+<div className="text-center p-10">
+<p className="text-lg font-bold mb-4">Dispute not found</p>
+<Link href="/dashboard/disputes" className="text-sm text-primary font-semibold">
+← Back to Disputes
+</Link>
+</div>
+);
 }
 
 const canTakeAction = ["TIER1_AUTO", "OPEN"].includes(dispute.status);
 const canEscalate = ["TIER1_AUTO", "TIER2_MEDIATION"].includes(dispute.status);
+const canWithdraw = dispute.status === "OPEN" && dispute.raisedByUserId === (session?.user as { id?: string } | undefined)?.id;
 
 return (
 <div className="flex flex-col min-h-screen">
@@ -254,8 +264,30 @@ Resolved on {new Date(dispute.resolvedAt).toLocaleDateString()}
 </div>
 )}
 
-{/* Escalate Button */}
-{canEscalate && dispute.status !== "RESOLVED" && (
+        {/* Withdraw Dispute */}
+        {canWithdraw && (
+          <div className="card mb-6">
+            <h2 className="text-base font-bold mb-3">Withdraw Dispute</h2>
+            <p className="text-sm text-secondary mb-3">
+              Have you resolved the issue directly? You can withdraw this dispute.
+              This will close the case and restore the deal to its previous state.
+            </p>
+            <Button
+              variant="danger"
+              onClick={() => {
+                if (!confirm("Withdraw this dispute? The case will be closed and no further action can be taken.")) return;
+                handleDisputeAction("withdraw");
+              }}
+              disabled={!!actionLoading}
+              className="w-full"
+            >
+              {actionLoading === "withdraw" ? "Withdrawing..." : "Withdraw Dispute"}
+            </Button>
+          </div>
+        )}
+
+        {/* Escalate Button */}
+        {canEscalate && dispute.status !== "RESOLVED" && (
 <div className="card mb-6">
 <h2 className="text-base font-bold mb-3"> Escalate Dispute</h2>
 <p className="text-sm text-secondary mb-3">

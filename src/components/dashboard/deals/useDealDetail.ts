@@ -185,14 +185,15 @@ const payable =
 typeof terms?.totalAmount === "number" && terms.totalAmount > 0
 ? terms.totalAmount
 : (deal?.totalAmount || 0) || (deal?.amount || 0) + fee + gateway;
-const signSummary = [
-"You are signing this Decisional deal contract.",
-`Creator payout: ${formatCurrency(payout)}`,
-`Brand payable: ${formatCurrency(payable)}`,
-`Submission deadline: ${formatContractDate(terms?.submissionDeadline)}`,
-`Posting deadline: ${formatContractDate(terms?.postingDeadline || deal?.postingDeadline)}`,
-"Only sign if deliverables, usage rights, revisions, and payment terms are correct.",
-].join("\n");
+  const signSummary = [
+    "You are signing this Decisional deal contract.",
+    `Creator payout: ${formatCurrency(payout)}`,
+    payout > 0 ? `Estimated TDS deduction (~10% if 194J / ~0.1% if 194-O): deducted at settlement` : "",
+    `Brand payable: ${formatCurrency(payable)}`,
+    `Submission deadline: ${formatContractDate(terms?.submissionDeadline)}`,
+    `Posting deadline: ${formatContractDate(terms?.postingDeadline || deal?.postingDeadline)}`,
+    "Only sign if deliverables, usage rights, revisions, and payment terms are correct.",
+  ].filter(Boolean).join("\n");
 if (!confirm(signSummary)) return;
 
 setIsSubmitting(true);
@@ -390,10 +391,11 @@ typeof contractTerms?.productHandlingFee === "number"
 ? (contractTerms.productHandlingFee as number)
 : deal.productHandlingFee || 0;
 const requiresProduct = Boolean(deal.requiresProduct || contractTerms?.requiresProduct);
-const canSubmitContent =
-!requiresProduct ||
-deal.productFulfillmentStatus === "RECEIVED" ||
-deal.status === "REVISION_REQUESTED";
+  const canSubmitContent =
+    (!requiresProduct ||
+      deal.productFulfillmentStatus === "RECEIVED" ||
+      deal.status === "REVISION_REQUESTED") &&
+    (!deal.submissionDeadline || new Date() <= new Date(deal.submissionDeadline));
 const contractSignature = deal.contractSignature as Record<string, unknown>;
 const brandSigned = Boolean(contractSignature?.brandSignature);
 const influencerSigned = Boolean(contractSignature?.influencerSignature);

@@ -408,6 +408,19 @@ showToast(
 return;
 }
 
+// Validate URL format for non-approved items
+const invalidUrls = submissionUrls.filter(
+(item) =>
+item.status !== "APPROVED" &&
+item.url &&
+!item.url.startsWith("http://") &&
+!item.url.startsWith("https://")
+);
+if (invalidUrls.length > 0) {
+showToast("error", "Please enter valid URLs starting with http:// or https://");
+return;
+}
+
 await handleAction("submit_content", {
 contentUrls: submissionUrls,
 notes: contentForm.notes,

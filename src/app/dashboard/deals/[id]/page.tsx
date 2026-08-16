@@ -117,6 +117,7 @@ deal={deal}
 handleSignContract={() => dealState.handleSignContract()}
 handleRejectInvite={() => dealState.handleRejectInvite()}
 handleCancelDeal={() => dealState.handleCancelDeal()}
+handleAction={dealState.handleAction}
 setItemizedUrls={setItemizedUrls}
 setContentForm={setContentForm}
 setShowSubmitModal={setShowSubmitModal}

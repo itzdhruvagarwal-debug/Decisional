@@ -63,8 +63,6 @@ const totalNet = tdsTransactions.reduce((s, t) => s + ((t.metadata as Record<str
       const calculatedRate = (t.amount / gross) * 100;
       if (calculatedRate > 4) {
         rateStr = calculatedRate > 8 ? "10%" : "5%";
-      } else if (calculatedRate > 0.05) {
-        rateStr = "0.1%";
       }
     } else {
       rateStr = is194J ? "10%" : "0.1%";

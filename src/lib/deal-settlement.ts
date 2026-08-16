@@ -77,7 +77,7 @@ grossPayout: number,
   );
 
   const totalEarnings = previousFyEarnings + grossPayout;
-  const tdsThreshold = is194J ? 3_000_000 : 50_00_000; // Rs 30,000 for 194J, Rs 5,00,000 for 194-O
+  const tdsThreshold = is194J ? 3_000_000 : 5_000_000; // Rs 30,000 for 194J, Rs 50,000 for 194-O
   if (totalEarnings < tdsThreshold) return 0;
 
   // Calculate total TDS required on entire FY earnings, then subtract already-deducted amounts.
@@ -122,14 +122,20 @@ params.razorpayPaymentId ?? null,
 params.metadata as Record<string, unknown> | undefined,
 );
 
-if (tdsAmount > 0) {
+  if (tdsAmount > 0) {
     const taxCompliance = await tx.indiaTaxCompliance.findUnique({
       where: { userId: params.userId },
       select: { panLast4: true, tdsSection: true },
     });
     const is194J = taxCompliance?.tdsSection?.startsWith("194J") ?? false;
     const appliedSection = is194J ? "194J" : "194-O";
-    const appliedRatePercent = !taxCompliance?.panLast4 ? (is194J ? "20%" : "5%") : (is194J ? "10%" : "0.1%");
+    
+    let appliedRatePercent = "0.1%";
+    if (!taxCompliance?.panLast4) {
+      appliedRatePercent = is194J ? "20%" : "5%";
+    } else {
+      appliedRatePercent = is194J ? "10%" : "0.1%";
+    }
 
     await tx.transaction.create({
       data: {

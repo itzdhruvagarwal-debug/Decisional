@@ -50,6 +50,7 @@ const searchParams = useSearchParams();
 const invitedInfluencerId = searchParams.get("invite");
 const [isLoading, setIsLoading] = useState(false);
 const [error, setError] = useState("");
+const [isEditDraftLoading, setIsEditDraftLoading] = useState(!!searchParams.get("edit"));
 const [invitedInfluencer, setInvitedInfluencer] = useState<{
 displayName: string;
 instagramHandle?: string;
@@ -118,6 +119,7 @@ rate: (d.rate || 0) / 100,
 })),
 });
 }
+setIsEditDraftLoading(false);
 }, [draftData]);
 
 // Form State
@@ -169,7 +171,11 @@ const calculatedPerInfluencer = formData.deliverables.reduce(
 (sum, d: { rate?: number; count?: number }) => sum + (d.rate || 0) * (d.count || 0),
 0
 );
-const calculatedTotal = calculatedPerInfluencer * (formData.maxInfluencers || 1);
+// When maxInfluencers is null (unlimited), totalBudget equals one influencer's budget.
+// The brand will add more budget when publishing or setting a cap.
+const calculatedTotal = formData.maxInfluencers !== null
+? calculatedPerInfluencer * formData.maxInfluencers
+: calculatedPerInfluencer;
 
 setFormData((prev) => {
 if (
@@ -246,21 +252,25 @@ publishButtonContent = <span className="loading" />;
 } else if (editCampaignId) {
 publishButtonContent = "Save & Publish";
 }
-
 return (
-<div className="w-full max-w-800 mx-auto campaign-create-wrap">
-<h1
-className="font-black mb-2 text-3xl bg-gradient-primary campaign-create-title"
->
-{editCampaignId ? "Edit Draft Campaign" : "Create New Campaign"}
-</h1>
-<p
-className="text-secondary mb-8 text-base"
->
-{editCampaignId
-? "Update your draft campaign details before launching"
-: "Launch your campaign and connect with influencers"}
-</p>
+  isEditDraftLoading ? (
+    <div className="flex justify-center items-center p-20">
+      <span className="loading" aria-label="Loading campaign draft..." />
+    </div>
+  ) : (
+    <div className="w-full max-w-800 mx-auto campaign-create-wrap">
+      <h1
+        className="font-black mb-2 text-3xl bg-gradient-primary campaign-create-title"
+      >
+        {editCampaignId ? "Edit Draft Campaign" : "Create New Campaign"}
+      </h1>
+      <p
+        className="text-secondary mb-8 text-base"
+      >
+        {editCampaignId
+          ? "Update your draft campaign details before launching"
+          : "Launch your campaign and connect with influencers"}
+      </p>
 
 {invitedInfluencer && (
 <div
@@ -616,6 +626,7 @@ disabled={isLoading}
 </div>
 </form>
 </Card>
-</div>
+    </div>
+  )
 );
 }

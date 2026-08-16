@@ -131,6 +131,17 @@ const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) 
 
     // Optimistic update: instantly render the selected image on the client side
     // using a temporary local Object URL to avoid visual lag while uploading.
+    const previousImage = profile?.profileImage; // string | undefined
+    // With exactOptionalPropertyTypes, we cannot spread { profileImage: undefined }.
+    // Build a revert helper that omits the key when there's no previous image.
+    const revertProfileImage = (prev: Profile): Profile => {
+      if (previousImage !== undefined) {
+        return { ...prev, profileImage: previousImage };
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { profileImage: _omit, ...rest } = prev;
+      return rest as Profile;
+    };
     const objectUrl = URL.createObjectURL(file);
     setProfile((prev) => (prev ? { ...prev, profileImage: objectUrl } : null));
     setIsUploading(true);
@@ -159,13 +170,19 @@ const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) 
           await update(); // Sync session to reflect new image URL on front-end
           showToast("Profile picture updated!", "success");
         } else {
+          // Revert optimistic update — settings save failed
+          setProfile((prev) => (prev ? revertProfileImage(prev) : null));
           showToast("Failed to save profile picture to settings", "error");
         }
       } else {
+        // Revert optimistic update — upload failed
+        setProfile((prev) => (prev ? revertProfileImage(prev) : null));
         showToast("Upload failed: " + (data.error || "Unknown error"), "error");
       }
     } catch (error) {
       logger.error("[profile-tab] Failed to upload avatar:", error);
+      // Revert optimistic update — network error
+      setProfile((prev) => (prev ? revertProfileImage(prev) : null));
       showToast("Upload failed", "error");
     } finally {
       setIsUploading(false);

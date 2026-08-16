@@ -59,19 +59,18 @@ onSubmit={onSubmit}
 className="card mb-6 p-4 bg-tertiary"
 >
 <Select
-label="Type"
-id="evidence-type-select"
-value={evidenceType}
-onChange={(e) => setEvidenceType(e.target.value)}
-className="mb-3"
-fullWidth
+  label="Type"
+  id="evidence-type-select"
+  value={evidenceType}
+  onChange={(e) => setEvidenceType(e.target.value)}
+  className="mb-3"
+  fullWidth
 >
-<option value="SCREENSHOT">Screenshot</option>
-<option value="DOCUMENT">Document</option>
-<option value="MESSAGE_LOG">Message Log</option>
-<option value="SCREEN_RECORDING">Screen Recording</option>
-<option value="CONTRACT">Contract</option>
-<option value="OTHER">Other</option>
+  <option value="CONTRACT">Contract / Agreement</option>
+  <option value="DELIVERABLE">Deliverable / Content File</option>
+  <option value="CHAT_LOG">Chat Log / Messages</option>
+  <option value="PAYMENT_PROOF">Payment Proof</option>
+  <option value="OTHER">Other</option>
 </Select>
 
 <Input

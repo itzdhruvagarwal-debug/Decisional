@@ -89,7 +89,7 @@ verifiedAt: new Date(),
       });
       if (taxCompliance) {
         let nextTdsSection = taxCompliance.tdsSection;
-        if (nextTdsSection && nextTdsSection.endsWith("_REVIEW")) {
+        if (nextTdsSection?.endsWith("_REVIEW")) {
           nextTdsSection = nextTdsSection.replace("_REVIEW", "");
         }
         await tx.indiaTaxCompliance.update({
@@ -207,7 +207,7 @@ async (tx: Prisma.TransactionClient) => {
         });
         if (taxCompliance) {
           let nextTdsSection = taxCompliance.tdsSection;
-          if (nextTdsSection && nextTdsSection.endsWith("_REVIEW")) {
+          if (nextTdsSection?.endsWith("_REVIEW")) {
             nextTdsSection = nextTdsSection.replace("_REVIEW", "");
           }
           await tx.indiaTaxCompliance.update({

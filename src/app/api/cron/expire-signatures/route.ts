@@ -251,7 +251,7 @@ async function handlePendingBalanceRefund(
         status: "COMPLETED",
         description: opts.description,
         metadata: {
-          ...(opts.metadata || {}),
+          ...opts.metadata,
           shortfall,
         },
       },
