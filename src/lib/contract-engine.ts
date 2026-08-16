@@ -406,18 +406,17 @@ payoutPercent = 0;
 reason = "Cancellation before approval";
 }
 
-const payoutAmount = Math.round(dealAmount * (payoutPercent / 100));
-const refundAmount = totalHeld - payoutAmount;
+  const payoutAmount = Math.round(dealAmount * (payoutPercent / 100));
+  // Platform keeps proportional amount of the actual platform fee
+  const platformFeeKept = Math.round((deal.platformFee ?? Math.round(dealAmount * 0.1)) * (payoutPercent / 100));
+  const refundAmount = totalHeld - payoutAmount - platformFeeKept;
 
-// Platform keeps proportional amount of the actual platform fee
-const platformFeeKept = Math.round((deal.platformFee ?? Math.round(dealAmount * 0.1)) * (payoutPercent / 100));
-
-return {
-refundAmount,
-payoutAmount,
-platformFeeKept,
-reason,
-};
+  return {
+    refundAmount,
+    payoutAmount,
+    platformFeeKept,
+    reason,
+  };
 }
 
 export function checkRevisionLimit(

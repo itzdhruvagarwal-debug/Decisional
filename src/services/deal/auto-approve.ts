@@ -135,40 +135,40 @@ let processed = 0;
 let skipped = 0;
 let scanned = 0;
 let hasMore = true;
-let cursor: Date | undefined = undefined;
+    let cursor: string | undefined = undefined;
 
-while (hasMore) {
-const candidateDeals = await prisma.deal.findMany({
-where: {
-status: "CONTENT_SUBMITTED",
-submittedAt: { not: null },
-deletedAt: null,
-...(cursor ? { submittedAt: { lt: cursor } } : {}),
-},
-select: {
-id: true,
-submittedAt: true,
-reviewPeriodHours: true,
-requiresPostVerification: true,
-campaign: { select: { title: true } },
-influencer: { select: { userId: true } },
-brand: { select: { userId: true } },
-contentSubmissions: {
-orderBy: { version: "desc" },
-take: 1,
-select: { id: true, status: true },
-},
-},
-orderBy: { submittedAt: "desc" },
-take: BATCH_SIZE,
-});
+    while (hasMore) {
+      const candidateDeals = await prisma.deal.findMany({
+        where: {
+          status: "CONTENT_SUBMITTED",
+          submittedAt: { not: null },
+          deletedAt: null,
+          ...(cursor ? { id: { gt: cursor } } : {}),
+        },
+        select: {
+          id: true,
+          submittedAt: true,
+          reviewPeriodHours: true,
+          requiresPostVerification: true,
+          campaign: { select: { title: true } },
+          influencer: { select: { userId: true } },
+          brand: { select: { userId: true } },
+          contentSubmissions: {
+            orderBy: { version: "desc" },
+            take: 1,
+            select: { id: true, status: true },
+          },
+        },
+        orderBy: { id: "asc" },
+        take: BATCH_SIZE,
+      });
 
-scanned += candidateDeals.length;
-hasMore = candidateDeals.length === BATCH_SIZE;
+      scanned += candidateDeals.length;
+      hasMore = candidateDeals.length === BATCH_SIZE;
 
-if (candidateDeals.length > 0) {
-cursor = candidateDeals[candidateDeals.length - 1]?.submittedAt as Date;
-}
+      if (candidateDeals.length > 0) {
+        cursor = candidateDeals[candidateDeals.length - 1]?.id as string;
+      }
 
 const expiredDeals = candidateDeals.filter((deal: {
 submittedAt: Date | null;

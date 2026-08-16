@@ -128,7 +128,60 @@ export async function verifyWalletBalance(userId: string): Promise<VerificationA
     );
     const calculatedBalance = totalCredits - totalDebits;
 
-    const pendingDrift = Math.min(wallet.pendingBalance, 0);
+    let expectedPendingBalance = 0;
+    const user = await tx.user.findUnique({
+      where: { id: wallet.userId },
+      select: { userType: true },
+    });
+
+    if (user?.userType === "BRAND") {
+      const brandProfile = await tx.brandProfile.findUnique({
+        where: { userId: wallet.userId },
+        select: { id: true },
+      });
+
+      if (brandProfile) {
+        const [campaignEscrow, dealEscrow] = await Promise.all([
+          tx.campaign.findMany({
+            where: {
+              brandId: brandProfile.id,
+              status: { notIn: ["COMPLETED", "CANCELLED"] },
+            },
+            select: { fundedAmount: true, reservedTotalAmount: true },
+          }),
+          tx.deal.aggregate({
+            where: {
+              brandId: brandProfile.id,
+              status: { in: [
+                "PENDING_SIGNATURE",
+                "PAYMENT_PENDING",
+                "PAYMENT_HELD",
+                "CONTENT_SUBMITTED",
+                "REVISION_REQUESTED",
+                "CONTENT_APPROVED",
+                "POSTED",
+                "VERIFIED",
+                "DISPUTED"
+              ] },
+              reservedFromWallet: false,
+            },
+            _sum: { totalAmount: true },
+          }),
+        ]);
+
+        const campaignUnallocated = campaignEscrow.reduce(
+          (sum, c) => sum + Math.max(0, (c.fundedAmount || 0) - (c.reservedTotalAmount || 0)),
+          0,
+        );
+        const dealUnreleased = dealEscrow._sum.totalAmount || 0;
+
+        expectedPendingBalance = campaignUnallocated + dealUnreleased;
+      }
+    }
+
+    const pendingDrift = wallet.pendingBalance < 0
+      ? wallet.pendingBalance
+      : wallet.pendingBalance - expectedPendingBalance;
 
     if (calculatedBalance !== wallet.balance || pendingDrift !== 0) {
       const drift = wallet.balance - calculatedBalance;

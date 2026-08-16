@@ -110,22 +110,24 @@ const brandWallet = await tx.wallet.findUnique({ where: { userId: brandUserId } 
 if (!brandWallet) return;
 
 const refundAmount = dispute.deal.totalAmount || dispute.deal.amount;
-const updateResult = dispute.deal.reservedFromWallet
-? await tx.wallet.updateMany({
-where: { id: brandWallet.id, pendingBalance: { gte: refundAmount } },
-data: {
-balance: { increment: refundAmount },
-pendingBalance: { decrement: refundAmount },
-},
-})
-: await tx.wallet.updateMany({
-where: { id: brandWallet.id },
-data: { balance: { increment: refundAmount } },
-});
+  const updateResult = dispute.deal.reservedFromWallet
+    ? await tx.wallet.updateMany({
+        where: { id: brandWallet.id },
+        data: {
+          balance: { increment: refundAmount },
+        },
+      })
+    : await tx.wallet.updateMany({
+        where: { id: brandWallet.id, pendingBalance: { gte: refundAmount } },
+        data: {
+          balance: { increment: refundAmount },
+          pendingBalance: { decrement: refundAmount },
+        },
+      });
 
-if (updateResult.count === 0) {
-throw AppError.badRequest("Invalid deal state: missing refundable wallet reserve.");
-}
+  if (updateResult.count === 0) {
+    throw AppError.badRequest("Invalid deal state: missing refundable wallet reserve.");
+  }
 
 await tx.transaction.create({
 data: {
@@ -148,44 +150,58 @@ await performGatewayRefund(tx, dispute.dealId, refundAmount, reason);
 }
 
 async function handleRefundBrand(tx: Prisma.TransactionClient, dispute: DisputeWithDeal, reason: string) {
-// Cancel Deal
-await tx.deal.update({
-where: { id: dispute.dealId },
-data: { status: "CANCELLED" },
-});
+  // Cancel Deal atomically with status check
+  const cancelResult = await tx.deal.updateMany({
+    where: {
+      id: dispute.dealId,
+      status: { notIn: ["COMPLETED", "CANCELLED"] },
+    },
+    data: { status: "CANCELLED" },
+  });
 
-// Handle Funds (Internal Wallet Deal)
-if (dispute.deal.brandId) {
-const brand = await tx.brandProfile.findUnique({
-where: { id: dispute.deal.brandId },
-});
-if (brand) {
-await processBrandWalletRefund(tx, brand.userId, dispute, reason);
-}
-}
+  if (cancelResult.count === 0) {
+    throw AppError.badRequest("Invalid deal state for brand refund. The deal may have already been completed or cancelled.");
+  }
 
-await tx.campaign.update({
-where: { id: dispute.deal.campaignId },
-data: {
-reservedAmount: { decrement: dispute.deal.amount },
-reservedTotalAmount: { decrement: dispute.deal.totalAmount || dispute.deal.amount },
-},
-});
+  // Handle Funds (Internal Wallet Deal)
+  if (dispute.deal.brandId) {
+    const brand = await tx.brandProfile.findUnique({
+      where: { id: dispute.deal.brandId },
+    });
+    if (brand) {
+      await processBrandWalletRefund(tx, brand.userId, dispute, reason);
+    }
+  }
+
+  await tx.campaign.update({
+    where: { id: dispute.deal.campaignId },
+    data: {
+      reservedAmount: { decrement: dispute.deal.amount },
+      reservedTotalAmount: { decrement: dispute.deal.totalAmount || dispute.deal.amount },
+    },
+  });
 }
 
 async function handleReleaseInfluencer(tx: Prisma.TransactionClient, dispute: DisputeWithDeal, payoutAmount: number) {
-// Mark Deal as Completed
-await tx.deal.update({
-where: { id: dispute.dealId },
-data: { status: "COMPLETED", completedAt: new Date() },
-});
+  // Mark Deal as Completed atomically with status check
+  const completeResult = await tx.deal.updateMany({
+    where: {
+      id: dispute.dealId,
+      status: { notIn: ["COMPLETED", "CANCELLED"] },
+    },
+    data: { status: "COMPLETED", completedAt: new Date() },
+  });
 
-if (dispute.deal.brandId) {
-await tx.brandProfile.update({
-where: { id: dispute.deal.brandId },
-data: { totalSpent: { increment: dispute.deal.totalAmount || dispute.deal.amount } },
-});
-}
+  if (completeResult.count === 0) {
+    throw AppError.badRequest("Invalid deal state for influencer release. The deal may have already been completed or cancelled.");
+  }
+
+  if (dispute.deal.brandId) {
+    await tx.brandProfile.update({
+      where: { id: dispute.deal.brandId },
+      data: { totalSpent: { increment: dispute.deal.totalAmount || dispute.deal.amount } },
+    });
+  }
 
 let gamificationReferrerId: string | null = null;
 
@@ -255,8 +271,11 @@ brand: { select: { userId: true } },
 });
 
 if (!dispute) throw AppError.notFound("Dispute not found");
-if (dispute.deal.status === "COMPLETED" && decision === "RELEASE_INFLUENCER") {
-throw AppError.badRequest("Cannot release payout for an already completed deal.");
+if (dispute.deal.status === "COMPLETED") {
+  throw AppError.badRequest("Cannot resolve dispute for an already completed deal.");
+}
+if (dispute.deal.status === "CANCELLED") {
+  throw AppError.badRequest("Cannot resolve dispute for an already cancelled deal.");
 }
 
 const confidence = await determineDisputeConfidence(disputeId, dispute);

@@ -441,6 +441,7 @@ likeCount: Number.parseInt(video.statistics.likeCount || "0", 10),
 commentCount: Number.parseInt(video.statistics.commentCount || "0", 10),
 duration: video.contentDetails.duration,
 isLive: video.status?.privacyStatus === "public",
+privacyStatus: video.status?.privacyStatus,
 };
 } catch (error) {
 logger.error("YouTube video fetch error", error, { videoId });

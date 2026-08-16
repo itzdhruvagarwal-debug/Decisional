@@ -108,15 +108,15 @@ return NextResponse.json({ success: false, message: "Internal server error" }, {
 export const POST = apiWrapper(_handler_POST);
 
 async function processPayoutAndPlatformFees(
-tx: Prisma.TransactionClient,
-deal: DealWithProfile,
-cancelSummary: CancellationSummary,
+  tx: Prisma.TransactionClient,
+  deal: DealWithProfile,
+  cancelSummary: CancellationSummary,
 ) {
-const { payoutAmount, platformFeeKept, reason } = cancelSummary;
-if (payoutAmount <= 0) return;
+  const { payoutAmount, platformFeeKept, reason } = cancelSummary;
+  if (payoutAmount <= 0) return;
 
-const grossPayout = payoutAmount - platformFeeKept;
-if (grossPayout > 0) {
+  const grossPayout = payoutAmount;
+  if (grossPayout > 0) {
 // Credit influencer payout
 await creditInfluencerPayoutWithTax(tx, {
 userId: deal.influencer.userId,
@@ -201,40 +201,39 @@ where: { userId: deal.brand.userId },
 });
 
   if (brandWallet) {
-    // Refund amount must be credited to balance, and pendingBalance decremented.
-    // This is identical for both wallet-reserved and non-wallet deals.
+    // Refund amount must be credited to balance, and pendingBalance decremented ONLY if not reserved from wallet.
     brandWallet = await tx.wallet.update({
       where: { id: brandWallet.id },
       data: {
         balance: { increment: refundAmount },
-        pendingBalance: { decrement: deal.totalAmount ?? deal.amount },
+        ...(deal.reservedFromWallet ? {} : { pendingBalance: { decrement: deal.totalAmount ?? deal.amount } }),
       },
     });
   } else {
-brandWallet = await tx.wallet.create({
-data: {
-userId: deal.brand.userId,
-balance: deal.reservedFromWallet ? refundAmount : 0,
-pendingBalance: 0,
-},
-});
+    brandWallet = await tx.wallet.create({
+      data: {
+        userId: deal.brand.userId,
+        balance: refundAmount,
+        pendingBalance: 0,
+      },
+    });
 }
 
 if (refundAmount > 0) {
-await tx.transaction.create({
-data: {
-walletId: brandWallet.id,
-dealId: deal.id,
-type: "REFUND",
-amount: refundAmount,
-status: "COMPLETED",
-description: `Cancellation refund: ${reason}`,
-metadata: {
-balanceImpact: deal.reservedFromWallet,
-source: "wallet_cancellation_refund",
-},
-},
-});
+      await tx.transaction.create({
+        data: {
+          walletId: brandWallet.id,
+          dealId: deal.id,
+          type: "REFUND",
+          amount: refundAmount,
+          status: "COMPLETED",
+          description: `Cancellation refund: ${reason}`,
+          metadata: {
+            balanceImpact: true,
+            source: "wallet_cancellation_refund",
+          },
+        },
+      });
 }
 }
 

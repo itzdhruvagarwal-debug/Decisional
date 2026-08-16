@@ -254,16 +254,16 @@ tx.user.findUnique({ where: { id: brandUserId }, select: { referredBy: true } })
 ]);
 
 // Influencer side use actual payout (not gross amount)
-influencerRefResult = await processReferralReward(deal.influencer.userId, influencerPayout, tx, treasuryWalletId);
+influencerRefResult = await processReferralReward(deal.influencer.userId, influencerPayout, tx, treasuryWalletId, deal.id);
 
 // Brand side only reward if brand's referrer is a DIFFERENT person than influencer's referrer
 const sameReferrer =
-influencerReferrer?.referredBy &&
-brandReferrer?.referredBy &&
-influencerReferrer.referredBy === brandReferrer.referredBy;
+  influencerReferrer?.referredBy &&
+  brandReferrer?.referredBy &&
+  influencerReferrer.referredBy === brandReferrer.referredBy;
 
 if (!sameReferrer) {
-brandRefResult = await processReferralReward(brandUserId, deal.amount, tx, treasuryWalletId);
+  brandRefResult = await processReferralReward(brandUserId, deal.amount, tx, treasuryWalletId, deal.id);
 } else {
 logger.warn("Skipping duplicate referral reward: influencer and brand share the same referrer", {
 dealId: deal.id,

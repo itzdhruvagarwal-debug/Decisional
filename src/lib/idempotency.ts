@@ -206,6 +206,7 @@ where: { key },
 data: {
 userId: normalizedUserId,
 response,
+expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Extend TTL to 24 hours on completion
 },
 });
 } catch (error) {

@@ -116,14 +116,20 @@ rejectionReason: reasonText,
 },
 });
 
-await tx.campaign.updateMany({
-where: { id: deal.campaignId, selectedInfluencers: { gt: 0 } },
-data: {
-selectedInfluencers: { decrement: 1 },
-reservedAmount: { decrement: deal.amount },
-reservedTotalAmount: { decrement: getDealTotalAmount(deal) },
-},
-});
+  const campaignForRelease = await tx.campaign.findUnique({
+    where: { id: deal.campaignId },
+    select: { selectedInfluencers: true },
+  });
+  const selectedCount = campaignForRelease?.selectedInfluencers ?? 0;
+
+  await tx.campaign.update({
+    where: { id: deal.campaignId },
+    data: {
+      selectedInfluencers: { decrement: selectedCount > 0 ? 1 : 0 },
+      reservedAmount: { decrement: deal.amount },
+      reservedTotalAmount: { decrement: getDealTotalAmount(deal) },
+    },
+  });
 
 await refundRejectPendingInvite(tx, deal);
 await cancelCampaignForDirectInvite(tx, deal);

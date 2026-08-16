@@ -399,21 +399,23 @@ status: "PENDING",
 });
 }
 
-if (deductAmount > 0) {
-const debtSuffix = debtPending > 0 ? ` (Pending debt: ${debtPending} Paise)` : "";
-const description = `Clawback (${clawbackPercentage}%) Post ${reason} on day ${monitoringDay} of 30-day window${debtSuffix}`;
+  const debtSuffix = debtPending > 0 ? ` (Pending debt: ${debtPending} Paise)` : "";
+  const description = `Clawback (${clawbackPercentage}%) Post ${reason} on day ${monitoringDay} of 30-day window${debtSuffix}`;
 
-await tx.transaction.create({
-data: {
-walletId: influencerWallet.id,
-amount: deductAmount,
-type: "DEBIT",
-dealId,
-description,
-status: "COMPLETED",
-},
-});
-}
+  await tx.transaction.create({
+    data: {
+      walletId: influencerWallet.id,
+      amount: deductAmount,
+      type: "DEBIT",
+      dealId,
+      description,
+      status: "COMPLETED",
+      metadata: {
+        balanceImpact: deductAmount > 0,
+        source: "post_monitoring_clawback",
+      },
+    },
+  });
 }
 
 async function creditBrandForClawback(
@@ -542,23 +544,30 @@ reason: deal ? "Deal is not completed; clawback skipped" : "Deal not found",
 };
 }
 
-// Idempotency guard: if a clawback transaction already exists for this deal, skip.
-// Prevents double-deduction when two concurrent cron instances both see isPostAlive=true
-// before either has written isPostAlive=false.
-const existingClawback = await prisma.transaction.findFirst({
-where: { dealId, type: "DEBIT", description: { contains: "Clawback" } },
-select: { id: true },
-});
-if (existingClawback) {
-logger.warn("Clawback already executed for deal; skipping duplicate", { dealId });
-return {
-dealId,
-triggered: false,
-clawbackPercentage,
-clawbackAmountPaise: 0,
-reason: "Clawback already recorded idempotency guard triggered",
-};
-}
+  // Idempotency guard: if a clawback transaction or debt claim already exists for this deal, skip.
+  // Prevents double-deduction when two concurrent cron instances both see isPostAlive=true
+  // before either has written isPostAlive=false.
+  const [existingClawback, existingDebtClaim] = await Promise.all([
+    prisma.transaction.findFirst({
+      where: { dealId, type: "DEBIT", description: { contains: "Clawback" } },
+      select: { id: true },
+    }),
+    prisma.debtClaim.findFirst({
+      where: { dealId },
+      select: { id: true },
+    }),
+  ]);
+
+  if (existingClawback || existingDebtClaim) {
+    logger.warn("Clawback already executed for deal; skipping duplicate", { dealId });
+    return {
+      dealId,
+      triggered: false,
+      clawbackPercentage,
+      clawbackAmountPaise: 0,
+      reason: "Clawback already recorded idempotency guard triggered",
+    };
+  }
 
 // Use influencerPayout (net, after platform fee) as the clawback base.
 // deal.amount is the gross creator fee which includes the platform fee portion;

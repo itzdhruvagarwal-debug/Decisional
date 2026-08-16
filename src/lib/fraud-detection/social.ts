@@ -427,9 +427,8 @@ verifiedLive = Boolean(post);
   const youtubeId = extractVideoId(postUrl);
   if (verifiedLive === null && youtubeId) {
     const video = await getYouTubeVideo(youtubeId);
-    // video.isLive indicates an active live stream (false for normal uploaded videos & Shorts).
-    // Use video existence as the public check instead — if the API returns the video, it's accessible/public.
-    verifiedLive = Boolean(video && (!video.privacyStatus || video.privacyStatus === "public"));
+    // Use video existence and explicit privacyStatus public check.
+    verifiedLive = Boolean(video && video.privacyStatus === "public");
   }
 
 if (verifiedLive === false) {

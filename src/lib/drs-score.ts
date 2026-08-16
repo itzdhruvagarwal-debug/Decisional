@@ -127,16 +127,26 @@ reason: `Healthy engagement rate detected`,
 
 // === ZERO DISPUTES BONUS ===
 if (
-factors.completedDeals >= 50 &&
-factors.disputesLost === 0 &&
-factors.disputesWon === 0
+  factors.completedDeals >= 50 &&
+  factors.disputesLost === 0
 ) {
-score += 90;
-breakdown.push({
-factor: "Dispute-Free Record",
-impact: 90,
-reason: `50+ deals with zero disputes`,
-});
+  score += 90;
+  breakdown.push({
+    factor: "Dispute-Free Record",
+    impact: 90,
+    reason: `50+ deals with zero lost disputes`,
+  });
+}
+
+// === DISPUTES WON BONUS ===
+const disputeWonBonus = factors.disputesWon * 15;
+if (disputeWonBonus > 0) {
+  score += disputeWonBonus;
+  breakdown.push({
+    factor: "Disputes Resolved in Favor",
+    impact: disputeWonBonus,
+    reason: `${factors.disputesWon} disputes resolved in favor`,
+  });
 }
 
 // === NEGATIVE FACTORS (Penalties - STRICT) ===

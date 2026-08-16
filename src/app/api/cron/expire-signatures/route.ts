@@ -120,39 +120,43 @@ async function _handler_POST(_req: NextRequest) {
 export const POST = apiWrapper(_handler_POST);
 
 async function handleWalletRefund(tx: Prisma.TransactionClient, deal: ExpiredSignatureDeal, brandUserId: string) {
-const wallet = await tx.wallet.findUnique({
-where: { userId: brandUserId },
-select: { id: true },
-});
-
-if (wallet && deal.amount > 0) {
-    const refundAmount = getDealTotalAmount(deal);
-    // Always shift funds from pendingBalance -> balance.
-    // incrementing pendingBalance would create phantom escrow; incrementing
-    // balance alone without decrementing pendingBalance would duplicate money.
-    await tx.wallet.update({
-      where: { id: wallet.id },
-      data: {
-        pendingBalance: { decrement: refundAmount },
-        balance: { increment: refundAmount },
-      },
-    });
-
-  await tx.transaction.create({
-    data: {
-      walletId: wallet.id,
-      dealId: deal.id,
-      type: "REFUND",
-      amount: refundAmount,
-      status: "COMPLETED",
-      description: `Refund for expired invite: ${deal.campaign.title}`,
-      metadata: {
-        balanceImpact: true,
-        source: "wallet_reserved_refund",
-      },
-    },
+  const wallet = await tx.wallet.findUnique({
+    where: { userId: brandUserId },
+    select: { id: true, pendingBalance: true },
   });
-}
+
+  if (wallet && deal.amount > 0) {
+    const refundAmount = getDealTotalAmount(deal);
+    const refundableAmount = Math.min(wallet.pendingBalance, refundAmount);
+
+    if (refundableAmount > 0) {
+      // Always shift funds from pendingBalance -> balance.
+      // incrementing pendingBalance would create phantom escrow; incrementing
+      // balance alone without decrementing pendingBalance would duplicate money.
+      await tx.wallet.update({
+        where: { id: wallet.id },
+        data: {
+          pendingBalance: { decrement: refundableAmount },
+          balance: { increment: refundableAmount },
+        },
+      });
+
+      await tx.transaction.create({
+        data: {
+          walletId: wallet.id,
+          dealId: deal.id,
+          type: "REFUND",
+          amount: refundableAmount,
+          status: "COMPLETED",
+          description: `Refund for expired invite: ${deal.campaign.title}`,
+          metadata: {
+            balanceImpact: true,
+            source: "wallet_reserved_refund",
+          },
+        },
+      });
+    }
+  }
 }
 
 async function handleDirectInviteRefund(tx: Prisma.TransactionClient, deal: ExpiredSignatureDeal, brandUserId: string) {
@@ -233,14 +237,20 @@ rejectionReason: "Invite signature deadline expired",
 },
 });
 
-await tx.campaign.updateMany({
-where: { id: deal.campaignId, selectedInfluencers: { gt: 0 } },
-data: {
-selectedInfluencers: { decrement: 1 },
-reservedAmount: { decrement: deal.amount },
-reservedTotalAmount: { decrement: getDealTotalAmount(deal) },
-},
-});
+  const campaignForRelease = await tx.campaign.findUnique({
+    where: { id: deal.campaignId },
+    select: { selectedInfluencers: true },
+  });
+  const selectedCount = campaignForRelease?.selectedInfluencers ?? 0;
+
+  await tx.campaign.update({
+    where: { id: deal.campaignId },
+    data: {
+      selectedInfluencers: { decrement: selectedCount > 0 ? 1 : 0 },
+      reservedAmount: { decrement: deal.amount },
+      reservedTotalAmount: { decrement: getDealTotalAmount(deal) },
+    },
+  });
 
 const brandUserId = deal.brand?.userId;
 if (brandUserId) {
