@@ -128,9 +128,30 @@ async function handleWalletRefund(tx: Prisma.TransactionClient, deal: ExpiredSig
     select: { id: true, pendingBalance: true },
   });
 
-  if (wallet && deal.amount > 0) {
-    const refundAmount = getDealTotalAmount(deal);
+  const refundAmount = getDealTotalAmount(deal);
+  if (!wallet) {
+    logger.error("CRITICAL SIGNATURE EXPIRY INTEGRITY VIOLATION: Wallet not found for brand user during signature-expiry refund", {
+      dealId: deal.id,
+      brandUserId,
+      expectedRefund: refundAmount,
+    });
+    return;
+  }
+
+  if (deal.amount > 0) {
     const refundableAmount = Math.min(wallet.pendingBalance, refundAmount);
+    const shortfall = refundAmount - refundableAmount;
+
+    if (shortfall > 0) {
+      logger.error("CRITICAL SIGNATURE EXPIRY INTEGRITY VIOLATION: Wallet pendingBalance is insufficient for full signature-expiry refund. Shortfall logged.", {
+        dealId: deal.id,
+        brandUserId,
+        walletId: wallet.id,
+        pendingBalance: wallet.pendingBalance,
+        expectedRefund: refundAmount,
+        shortfall,
+      });
+    }
 
     if (refundableAmount > 0) {
       // Always shift funds from pendingBalance -> balance.
@@ -155,6 +176,7 @@ async function handleWalletRefund(tx: Prisma.TransactionClient, deal: ExpiredSig
           metadata: {
             balanceImpact: true,
             source: "wallet_reserved_refund",
+            shortfall,
           },
         },
       });
@@ -163,59 +185,81 @@ async function handleWalletRefund(tx: Prisma.TransactionClient, deal: ExpiredSig
 }
 
 async function handleDirectInviteRefund(tx: Prisma.TransactionClient, deal: ExpiredSignatureDeal, brandUserId: string) {
-await handlePendingBalanceRefund(tx, deal, brandUserId, {
-description: `Refund for expired invite: ${deal.campaign.title}`,
-});
+  await handlePendingBalanceRefund(tx, deal, brandUserId, {
+    description: `Refund for expired invite: ${deal.campaign.title}`,
+  });
 }
 
 async function handleFallbackRefund(tx: Prisma.TransactionClient, deal: ExpiredSignatureDeal, brandUserId: string) {
-await handlePendingBalanceRefund(tx, deal, brandUserId, {
-description: `Refund for expired deal signature: ${deal.campaign.title}`,
-metadata: { balanceImpact: true, source: "non_wallet_pool_refund" },
-});
+  await handlePendingBalanceRefund(tx, deal, brandUserId, {
+    description: `Refund for expired deal signature: ${deal.campaign.title}`,
+    metadata: { balanceImpact: true, source: "non_wallet_pool_refund" },
+  });
 }
 
 /** Shared: moves up to refundableAmount from pendingBalance balance and creates a REFUND transaction. */
 async function handlePendingBalanceRefund(
-tx: Prisma.TransactionClient,
-deal: ExpiredSignatureDeal,
-brandUserId: string,
-opts: { description: string; metadata?: Prisma.InputJsonObject },
+  tx: Prisma.TransactionClient,
+  deal: ExpiredSignatureDeal,
+  brandUserId: string,
+  opts: { description: string; metadata?: Prisma.InputJsonObject },
 ) {
-const wallet = await tx.wallet.findUnique({
-where: { userId: brandUserId },
-select: { id: true, pendingBalance: true },
-});
+  const wallet = await tx.wallet.findUnique({
+    where: { userId: brandUserId },
+    select: { id: true, pendingBalance: true },
+  });
 
-const refundableAmount = wallet
-? Math.min(wallet.pendingBalance, getDealTotalAmount(deal))
-: 0;
+  const refundAmount = getDealTotalAmount(deal);
+  if (!wallet) {
+    logger.error("CRITICAL SIGNATURE EXPIRY INTEGRITY VIOLATION: Wallet not found for brand user during signature-expiry pending balance refund", {
+      dealId: deal.id,
+      brandUserId,
+      expectedRefund: refundAmount,
+    });
+    return;
+  }
 
-if (wallet && refundableAmount > 0) {
-await tx.wallet.update({
-where: { id: wallet.id },
-data: {
-pendingBalance: { decrement: refundableAmount },
-balance: { increment: refundableAmount },
-},
-});
+  const refundableAmount = Math.min(wallet.pendingBalance, refundAmount);
+  const shortfall = refundAmount - refundableAmount;
 
-await tx.transaction.create({
-data: {
-walletId: wallet.id,
-dealId: deal.id,
-type: "REFUND",
-amount: refundableAmount,
-status: "COMPLETED",
-description: opts.description,
-...(opts.metadata !== undefined ? { metadata: opts.metadata as Prisma.InputJsonValue } : {}),
-},
-});
-}
+  if (shortfall > 0) {
+    logger.error("CRITICAL SIGNATURE EXPIRY INTEGRITY VIOLATION: Wallet pendingBalance is insufficient for full signature-expiry pending balance refund. Shortfall logged.", {
+      dealId: deal.id,
+      brandUserId,
+      walletId: wallet.id,
+      pendingBalance: wallet.pendingBalance,
+      expectedRefund: refundAmount,
+      shortfall,
+    });
+  }
+
+  if (wallet && refundableAmount > 0) {
+    await tx.wallet.update({
+      where: { id: wallet.id },
+      data: {
+        pendingBalance: { decrement: refundableAmount },
+        balance: { increment: refundableAmount },
+      },
+    });
+
+    await tx.transaction.create({
+      data: {
+        walletId: wallet.id,
+        dealId: deal.id,
+        type: "REFUND",
+        amount: refundableAmount,
+        status: "COMPLETED",
+        description: opts.description,
+        metadata: {
+          ...(opts.metadata || {}),
+          shortfall,
+        },
+      },
+    });
+  }
 }
 
 async function expireSingleDealSignature(tx: Prisma.TransactionClient, deal: ExpiredSignatureDeal) {
-// Atomic status update guard
 const lockResult = await tx.deal.updateMany({
 where: { id: deal.id, status: "PENDING_SIGNATURE" },
 data: {
@@ -239,6 +283,9 @@ status: "WITHDRAWN",
 rejectionReason: "Invite signature deadline expired",
 },
 });
+
+  // Lock campaign row to serialize concurrent updates
+  await tx.$queryRaw`SELECT id FROM "Campaign" WHERE id = ${deal.campaignId} FOR UPDATE`;
 
   const campaignForRelease = await tx.campaign.findUnique({
     where: { id: deal.campaignId },

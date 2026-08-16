@@ -106,16 +106,17 @@ if (existingDispute) {
 throw AppError.badRequest("An open dispute already exists for this deal");
 }
 
-const newDispute = await tx.dispute.create({
-data: {
-dealId: data.dealId,
-raisedByUserId: userId,
-type: data.type,
-description: data.description,
-status: "TIER1_AUTO",
-tier: 1,
-},
-});
+      const newDispute = await tx.dispute.create({
+        data: {
+          dealId: data.dealId,
+          raisedByUserId: userId,
+          type: data.type,
+          description: data.description,
+          status: "TIER1_AUTO",
+          tier: 1,
+          dealStatusAtCreation: deal.status,
+        },
+      });
 
 // Update deal status
 await tx.deal.update({
@@ -246,47 +247,86 @@ description: data.description ?? null,
 return { evidence, message: "Evidence added successfully" };
 }
 
-static async handleAction(
-userId: string,
-data: {
-disputeId: string;
-action: "accept_resolution" | "reject_resolution" | "escalate";
-reason?: string;
-},
-) {
-if (data.reason && checkMessageForContacts(data.reason).hasContactInfo) {
-throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in dispute action reasons.");
-}
+  static async handleAction(
+    userId: string,
+    data: {
+      disputeId: string;
+      action: "accept" | "accept_resolution" | "reject" | "reject_resolution" | "withdraw" | "escalate";
+      reason?: string;
+    },
+  ) {
+    if (data.reason && checkMessageForContacts(data.reason).hasContactInfo) {
+      throw AppError.badRequest("Contact details (phone, email, links, social handles, or UPI) are not allowed in dispute action reasons.");
+    }
 
-const dispute = await DisputeService.getAndValidateDispute(data.disputeId, userId, "update");
+    const action = data.action;
 
-if (data.action === "accept_resolution") {
-if (dispute.status === "TIER2_MEDIATION") {
-throw AppError.badRequest("Dispute is under mediation review. Please wait for the mediator's decision.");
-}
-// Re-run analysis and apply
-const analysis = await analyzeDispute(data.disputeId);
-const userType =
-userId === dispute.deal.influencer.userId ? "INFLUENCER" : "BRAND";
+    // Handle withdrawal (requires transaction to restore deal status)
+    if (action === "withdraw") {
+      const openStatuses = ["OPEN", "TIER1_AUTO", "TIER2_MEDIATION"];
+      return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+        const dispute = await tx.dispute.findUnique({
+          where: { id: data.disputeId },
+          include: { deal: true },
+        });
 
-const result = await applyResolution(data.disputeId, analysis, userType);
-return { success: result.success, message: result.message };
-}
+        if (!dispute) throw AppError.notFound("Dispute not found");
+        if (!openStatuses.includes(dispute.status)) {
+          throw AppError.badRequest(`Cannot withdraw a ${dispute.status} dispute`);
+        }
+        if (dispute.raisedByUserId !== userId) {
+          throw AppError.forbidden("Only the raiser of the dispute can withdraw it");
+        }
 
-if (data.action === "reject_resolution" || data.action === "escalate") {
-const escalation = await escalateDispute(
-data.disputeId,
-data.reason || "Party rejected AI resolution",
-);
-return {
-success: escalation.success,
-newTier: escalation.newTier,
-message: `Dispute escalated to Tier ${escalation.newTier}`,
-};
-}
+        // Restore deal status to the status at creation of the dispute (defaulting to PAYMENT_HELD)
+        const targetStatus = (dispute.dealStatusAtCreation || "PAYMENT_HELD") as any;
+        await tx.deal.update({
+          where: { id: dispute.dealId },
+          data: { status: targetStatus },
+        });
 
-throw AppError.badRequest("Invalid action");
-}
+        const updatedDispute = await tx.dispute.update({
+          where: { id: dispute.id },
+          data: {
+            status: "CLOSED",
+            resolution: data.reason || "Dispute withdrawn by the raiser",
+            resolvedAt: new Date(),
+          },
+        });
+
+        return { success: true, dispute: updatedDispute, message: "Dispute successfully withdrawn" };
+      });
+    }
+
+    const dispute = await DisputeService.getAndValidateDispute(data.disputeId, userId, "update");
+
+    if (action === "accept" || action === "accept_resolution") {
+      if (dispute.status === "TIER2_MEDIATION") {
+        throw AppError.badRequest("Dispute is under mediation review. Please wait for the mediator's decision.");
+      }
+      // Re-run analysis and apply
+      const analysis = await analyzeDispute(data.disputeId);
+      const userType =
+        userId === dispute.deal.influencer.userId ? "INFLUENCER" : "BRAND";
+
+      const result = await applyResolution(data.disputeId, analysis, userType);
+      return { success: result.success, message: result.message };
+    }
+
+    if (action === "reject" || action === "reject_resolution" || action === "escalate") {
+      const escalation = await escalateDispute(
+        data.disputeId,
+        data.reason || "Party rejected AI resolution",
+      );
+      return {
+        success: escalation.success,
+        newTier: escalation.newTier,
+        message: `Dispute escalated to Tier ${escalation.newTier}`,
+      };
+    }
+
+    throw AppError.badRequest("Invalid action");
+  }
 
 static async getDisputeDetails(
 userId: string,

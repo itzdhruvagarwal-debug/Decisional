@@ -114,7 +114,7 @@ if (existingInviteDeal) {
 throw AppError.badRequest("A deal already exists for this influencer");
 }
 
-const dealAmount = perInfluencerBudgetPaise || totalBudgetPaise;
+const dealAmount = perInfluencerBudgetPaise ?? totalBudgetPaise;
 const inviteTrustGate = await checkTrustGate(invitedInfluencer.userId, dealAmount);
 if (!inviteTrustGate.allowed) {
 throw AppError.badRequest(inviteTrustGate.reason || "Influencer trust score too low for this invite");

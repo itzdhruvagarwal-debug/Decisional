@@ -58,42 +58,51 @@ await awardBadgeIfNotExists(user.id, "og_member");
 
 // 4. hot_creator: Topped the weekly leaderboard (highest completed deals in the last 7 days)
 const sevenDaysAgo = subDays(now, 7);
-const topInfluencerDeals = await prisma.deal.groupBy({
-by: ["influencerId"],
-where: {
-status: "COMPLETED",
-completedAt: { gte: sevenDaysAgo },
-},
-_count: { id: true },
-orderBy: { _count: { id: "desc" } },
-take: 1,
-});
+  const topInfluencerDeals = await prisma.deal.groupBy({
+    by: ["influencerId"],
+    where: {
+      status: "COMPLETED",
+      completedAt: { gte: sevenDaysAgo },
+    },
+    _count: { id: true },
+    orderBy: { _count: { id: "desc" } },
+  });
 
-let hotCreatorUserId: string | null = null;
-if (topInfluencerDeals.length > 0 && topInfluencerDeals[0]?.influencerId) {
-const influencer = await prisma.influencerProfile.findUnique({
-where: { id: topInfluencerDeals[0].influencerId },
-select: { userId: true },
-});
-if (influencer) {
-hotCreatorUserId = influencer.userId;
-await awardBadgeIfNotExists(influencer.userId, "hot_creator");
-}
-}
+  const hotCreatorUserIds: string[] = [];
+  if (topInfluencerDeals.length > 0) {
+    const firstDeal = topInfluencerDeals[0];
+    if (firstDeal?._count?.id !== undefined) {
+      const maxCount = firstDeal._count.id;
+      const tiedInfluencers = topInfluencerDeals.filter(item => item._count?.id === maxCount);
+
+      for (const item of tiedInfluencers) {
+        if (item.influencerId) {
+          const influencer = await prisma.influencerProfile.findUnique({
+            where: { id: item.influencerId },
+            select: { userId: true },
+          });
+          if (influencer) {
+            hotCreatorUserIds.push(influencer.userId);
+            await awardBadgeIfNotExists(influencer.userId, "hot_creator");
+          }
+        }
+      }
+    }
+  }
 
 logger.info("Tenure and leaderboard badges cron execution complete", {
 veteransAwarded: veterans.length,
 brandAmbassadorsAwarded: brandAmbassadors.length,
 ogMembersAwarded: ogMembers.length,
-hotCreatorAwardedTo: hotCreatorUserId,
-});
+    hotCreatorAwardedTo: hotCreatorUserIds.join(", "),
+  });
 
-return NextResponse.json({
-success: true,
-veteransAwarded: veterans.length,
-brandAmbassadorsAwarded: brandAmbassadors.length,
-ogMembersAwarded: ogMembers.length,
-hotCreatorAwardedTo: hotCreatorUserId,
+  return NextResponse.json({
+    success: true,
+    veteransAwarded: veterans.length,
+    brandAmbassadorsAwarded: brandAmbassadors.length,
+    ogMembersAwarded: ogMembers.length,
+    hotCreatorAwardedTo: hotCreatorUserIds.join(", "),
 });
 }
 

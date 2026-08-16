@@ -51,19 +51,23 @@ export type IndiaTaxCompliance = Prisma.IndiaTaxComplianceGetPayload<Record<stri
 import { verifyPAN, verifyGST } from "@/lib/kyc";
 
 function namesMatch(registeredName: string, kycName: string): boolean {
-const normalize = (value: string) =>
-value
-.toLowerCase()
-.replace(/[^a-z0-9\s]/g, "")
-.split(/\s+/)
-.filter((token) => token.length >= 3);
-const regTokens = normalize(registeredName);
-const kycTokens = normalize(kycName);
-if (regTokens.length === 0 || kycTokens.length === 0) return false;
+  const commonTokens = new Set([
+    "kumar", "singh", "devi", "prasad", "sri", "shree", "mr", "mrs", "miss", "dr", 
+    "and", "co", "ltd", "pvt", "private", "limited"
+  ]);
+  const normalize = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, "")
+      .split(/\s+/)
+      .filter((token) => token.length >= 3 && !commonTokens.has(token));
+  const regTokens = normalize(registeredName);
+  const kycTokens = normalize(kycName);
+  if (regTokens.length === 0 || kycTokens.length === 0) return false;
 
-const matches = regTokens.filter((token) => kycTokens.includes(token));
-const matchRatio = matches.length / Math.max(regTokens.length, kycTokens.length);
-return matches.length >= 2 || matchRatio >= 0.6;
+  const matches = regTokens.filter((token) => kycTokens.includes(token));
+  const matchRatio = matches.length / Math.max(regTokens.length, kycTokens.length);
+  return matches.length >= 2 || matchRatio >= 0.8;
 }
 
 function isInvoiceProfileComplete(user: {
@@ -283,23 +287,35 @@ await verifyGstDetails(data.gstin, registeredName);
 }
 
 function buildComplianceUpdatePayload(
-data: IndiaTaxInput,
-registeredForGst: boolean,
-nextRegistrationType: GstRegistrationType,
-nextSlab: GstTurnoverSlab | null,
-userType: string,
-summaryStatus: string
+  data: IndiaTaxInput,
+  registeredForGst: boolean,
+  nextRegistrationType: GstRegistrationType,
+  nextSlab: GstTurnoverSlab | null,
+  userType: string,
+  summaryStatus: string,
+  current: IndiaTaxCompliance | null
 ) {
-const updateData: Record<string, unknown> = {
-gstRegistrationType: nextRegistrationType,
-gstTurnoverSlab: nextSlab,
-tdsSection: isBrand(userType) ? "194J_OR_194O_REVIEW" : "194J_REVIEW",
-eInvoiceApplicable: isEInvoiceApplicable(nextSlab),
-status: summaryStatus,
-submittedAt: new Date(),
-verifiedAt: null,
-rejectionReason: null,
-};
+  const currentPan = tryDecrypt(current?.panNumber);
+  const currentGstin = tryDecrypt(current?.gstin);
+
+  const panChanged = data.panNumber !== undefined && data.panNumber !== currentPan;
+  const gstinChanged = data.gstin !== undefined && data.gstin !== currentGstin;
+  const gstTypeChanged = data.gstRegistrationType !== undefined && data.gstRegistrationType !== current?.gstRegistrationType;
+
+  const isCriticalInfoChanged = panChanged || gstinChanged || gstTypeChanged;
+
+  const updateData: Record<string, unknown> = {
+    gstRegistrationType: nextRegistrationType,
+    gstTurnoverSlab: nextSlab,
+    tdsSection: isCriticalInfoChanged 
+      ? (isBrand(userType) ? "194J_OR_194O_REVIEW" : "194J_REVIEW")
+      : (current?.tdsSection ?? (isBrand(userType) ? "194J_OR_194O_REVIEW" : "194J_REVIEW")),
+    eInvoiceApplicable: isEInvoiceApplicable(nextSlab),
+    status: isCriticalInfoChanged ? summaryStatus : (current?.status ?? summaryStatus),
+    submittedAt: new Date(),
+    verifiedAt: isCriticalInfoChanged ? null : (current?.verifiedAt ?? null),
+    rejectionReason: isCriticalInfoChanged ? null : (current?.rejectionReason ?? null),
+  };
 
 if (data.panNumber) {
 updateData.panNumber = encrypt(data.panNumber);
@@ -409,12 +425,13 @@ isBrand(user.userType) ? isInvoiceProfileComplete(user) : true,
 });
 
 const updateData = buildComplianceUpdatePayload(
-data,
-registeredForGst,
-nextRegistrationType,
-nextSlab,
-user.userType,
-summary.status
+  data,
+  registeredForGst,
+  nextRegistrationType,
+  nextSlab,
+  user.userType,
+  summary.status,
+  current
 );
 
 const compliance = await prisma.indiaTaxCompliance.upsert({

@@ -47,44 +47,49 @@ grossPayout: number,
   await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
   await tx.$queryRaw`SELECT id FROM "Wallet" WHERE "userId" = ${userId} FOR UPDATE`;
 
-const taxCompliance = await tx.indiaTaxCompliance.findUnique({
-where: { userId },
-select: { panLast4: true },
-});
+  const taxCompliance = await tx.indiaTaxCompliance.findUnique({
+    where: { userId },
+    select: { panLast4: true, tdsSection: true },
+  });
 
-if (!taxCompliance?.panLast4) {
-// Under Section 206AA, if PAN is not provided, TDS rate is 5% for Section 194-O (payouts)
-const penalTdsRate = 0.05;
-return Math.round(grossPayout * penalTdsRate);
-}
+  const is194J = taxCompliance?.tdsSection?.startsWith("194J") ?? false;
 
-const fyDeals = await tx.deal.findMany({
-where: {
-influencer: { userId },
-status: "COMPLETED",
-completedAt: { gte: currentIndianFinancialYearStart() },
-id: { not: dealId },
-},
-// tdsDeducted required to avoid re-taxing previously withheld amounts
-select: { influencerPayout: true, amount: true, tdsDeducted: true },
-});
+  if (!taxCompliance?.panLast4) {
+    // Under Section 206AA, if PAN is not provided, apply penal TDS rate (20% for 194J, 5% for 194-O)
+    const penalTdsRate = is194J ? 0.20 : 0.05;
+    return Math.round(grossPayout * penalTdsRate);
+  }
 
-const previousFyEarnings = fyDeals.reduce(
-(sum, deal) => sum + (deal.influencerPayout ?? deal.amount),
-0,
-);
+  const fyDeals = await tx.deal.findMany({
+    where: {
+      influencer: { userId },
+      status: "COMPLETED",
+      completedAt: { gte: currentIndianFinancialYearStart() },
+      id: { not: dealId },
+    },
+    // tdsDeducted required to avoid re-taxing previously withheld amounts
+    select: { influencerPayout: true, amount: true, tdsDeducted: true },
+  });
 
-const totalEarnings = previousFyEarnings + grossPayout;
-if (totalEarnings < TDS_THRESHOLD) return 0;
+  const previousFyEarnings = fyDeals.reduce(
+    (sum, deal) => sum + (deal.influencerPayout ?? deal.amount),
+    0,
+  );
 
-// Calculate total TDS required on entire FY earnings, then subtract already-deducted amounts.
-// This prevents under-withholding when the threshold is crossed mid-year on a large payout.
-const previousFyTdsAlreadyDeducted = fyDeals.reduce(
-(sum, deal) => sum + (deal.tdsDeducted ?? 0),
-0,
-);
-const totalRequiredTds = Math.round(totalEarnings * TDS_RATE);
-return Math.max(0, totalRequiredTds - previousFyTdsAlreadyDeducted);
+  const totalEarnings = previousFyEarnings + grossPayout;
+  const tdsThreshold = is194J ? 3_000_000 : 50_00_000; // Rs 30,000 for 194J, Rs 5,00,000 for 194-O
+  if (totalEarnings < tdsThreshold) return 0;
+
+  // Calculate total TDS required on entire FY earnings, then subtract already-deducted amounts.
+  // This prevents under-withholding when the threshold is crossed mid-year on a large payout.
+  const previousFyTdsAlreadyDeducted = fyDeals.reduce(
+    (sum, deal) => sum + (deal.tdsDeducted ?? 0),
+    0,
+  );
+  
+  const tdsRate = is194J ? 0.10 : 0.001; // 10% for 194J, 0.1% for 194-O
+  const totalRequiredTds = Math.round(totalEarnings * tdsRate);
+  return Math.max(0, totalRequiredTds - previousFyTdsAlreadyDeducted);
 }
 
 export async function creditInfluencerPayoutWithTax(
@@ -118,23 +123,33 @@ params.metadata as Record<string, unknown> | undefined,
 );
 
 if (tdsAmount > 0) {
-await tx.transaction.create({
-data: {
-walletId: wallet.id,
-dealId: params.dealId,
-type: "DEBIT",
-amount: tdsAmount,
-status: "COMPLETED",
-description: `TDS deduction (Section 194-O, 0.1%) for deal: ${params.dealId}`,
-metadata: {
-balanceImpact: false,
-source: "tds_withholding",
-grossPayout,
-netPayout,
-},
-},
-});
-}
+    const taxCompliance = await tx.indiaTaxCompliance.findUnique({
+      where: { userId: params.userId },
+      select: { panLast4: true, tdsSection: true },
+    });
+    const is194J = taxCompliance?.tdsSection?.startsWith("194J") ?? false;
+    const appliedSection = is194J ? "194J" : "194-O";
+    const appliedRatePercent = !taxCompliance?.panLast4 ? (is194J ? "20%" : "5%") : (is194J ? "10%" : "0.1%");
+
+    await tx.transaction.create({
+      data: {
+        walletId: wallet.id,
+        dealId: params.dealId,
+        type: "DEBIT",
+        amount: tdsAmount,
+        status: "COMPLETED",
+        description: `TDS deduction (Section ${appliedSection}, ${appliedRatePercent}) for deal: ${params.dealId}`,
+        metadata: {
+          balanceImpact: false,
+          source: "tds_withholding",
+          grossPayout,
+          netPayout,
+          tdsSection: appliedSection,
+          tdsRate: is194J ? 0.10 : 0.001,
+        },
+      },
+    });
+  }
 
 // Populate tax fields on Deal for financial reporting
 await tx.deal.update({

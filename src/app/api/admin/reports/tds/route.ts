@@ -32,9 +32,9 @@ influencer: {
 include: {
 user: {
 include: {
-taxCompliance: {
-select: { panLast4: true }
-}
+          taxCompliance: {
+            select: { panLast4: true, tdsSection: true }
+          }
 },
 },
 },
@@ -50,64 +50,96 @@ const totalGross = tdsTransactions.reduce((s, t) => s + ((t.metadata as Record<s
 const totalTDS = tdsTransactions.reduce((s, t) => s + t.amount, 0);
 const totalNet = tdsTransactions.reduce((s, t) => s + ((t.metadata as Record<string, number | undefined>)?.netPayout ?? 0), 0);
 
-if (fmt === "csv") {
-// CSV output for CA/tax consultant
-const rows = tdsTransactions.map((t) => ({
-"Deal ID": t.dealId,
-"Influencer": t.deal?.influencer?.displayName ?? "",
-"PAN (last 4)": t.deal?.influencer?.user?.taxCompliance?.panLast4 ?? "",
-"Gross ()": paiseToRupees((t.metadata as Record<string, number | undefined>)?.grossPayout ?? 0),
-"TDS Rate": "0.1%",
-"TDS ()": paiseToRupees(t.amount),
-"Net ()": paiseToRupees((t.metadata as Record<string, number | undefined>)?.netPayout ?? 0),
-"Date": format(new Date(t.createdAt), "dd/MM/yyyy"),
-"Section": "194-O",
-}));
+  // Map rows with dynamic section and rates
+  const getTransactionTdsDetails = (t: typeof tdsTransactions[number]) => {
+    const meta = t.metadata as any;
+    const userTdsSection = t.deal?.influencer?.user?.taxCompliance?.tdsSection;
+    const is194J = userTdsSection?.startsWith("194J") ?? false;
+    const appliedSection = meta?.tdsSection ?? (is194J ? "194J" : "194-O");
 
-// Add summary rows
-rows.push(
-{ "Deal ID": "", "Influencer": "", "PAN (last 4)": "", "Gross ()": "", "TDS Rate": "", "TDS ()": "", "Net ()": "", "Date": "", "Section": "" },
-{ "Deal ID": "TOTAL", "Influencer": `${tdsTransactions.length} deals`, "PAN (last 4)": "", "Gross ()": paiseToRupees(totalGross), "TDS Rate": "", "TDS ()": paiseToRupees(totalTDS), "Net ()": paiseToRupees(totalNet), "Date": `FY ${fy}`, "Section": "194-O" }
-);
+    const gross = meta?.grossPayout ?? 0;
+    let rateStr = "0.1%";
+    if (gross > 0) {
+      const calculatedRate = (t.amount / gross) * 100;
+      if (calculatedRate > 4) {
+        rateStr = calculatedRate > 8 ? "10%" : "5%";
+      } else if (calculatedRate > 0.05) {
+        rateStr = "0.1%";
+      }
+    } else {
+      rateStr = is194J ? "10%" : "0.1%";
+    }
 
-// Add platform header and footer
-const platformHeader = getPlatformHeader().map((line) => ({ "Platform Info": line }));
-const platformFooter = getPlatformFooter().map((line) => ({ "Platform Info": line }));
+    return { section: appliedSection, rate: rateStr };
+  };
 
-const finalRows = [
-...platformHeader,
-{ "Deal ID": "", "Influencer": "", "PAN (last 4)": "", "Gross ()": "", "TDS Rate": "", "TDS ()": "", "Net ()": "", "Date": "", "Section": "" },
-...rows,
-...platformFooter,
-];
+  const uniqueSections = Array.from(new Set(tdsTransactions.map(t => getTransactionTdsDetails(t).section)));
+  const summaryTdsSection = uniqueSections.length > 0 ? uniqueSections.join(" / ") : "194-O";
 
-const filename = `decisional-tds-summary-${fy}-${Date.now()}.csv`;
-return csvResponse(toCsv(finalRows), filename);
-}
+  if (fmt === "csv") {
+    // CSV output for CA/tax consultant
+    const rows = tdsTransactions.map((t) => {
+      const details = getTransactionTdsDetails(t);
+      return {
+        "Deal ID": t.dealId,
+        "Influencer": t.deal?.influencer?.displayName ?? "",
+        "PAN (last 4)": t.deal?.influencer?.user?.taxCompliance?.panLast4 ?? "",
+        "Gross ()": paiseToRupees((t.metadata as Record<string, number | undefined>)?.grossPayout ?? 0),
+        "TDS Rate": details.rate,
+        "TDS ()": paiseToRupees(t.amount),
+        "Net ()": paiseToRupees((t.metadata as Record<string, number | undefined>)?.netPayout ?? 0),
+        "Date": format(new Date(t.createdAt), "dd/MM/yyyy"),
+        "Section": details.section,
+      };
+    });
 
-// JSON response
-return ApiResponse.success({
-fy,
-period: { from: bounds.start, to: bounds.end },
-summary: {
-totalGrossRupees: paiseToRupees(totalGross),
-totalTDSRupees: paiseToRupees(totalTDS),
-totalNetRupees: paiseToRupees(totalNet),
-dealCount: tdsTransactions.length,
-tdsSection: "194-O (0.1% above 50L threshold)",
-},
-transactions: tdsTransactions.map((t) => ({
-dealId: t.dealId,
-influencer: t.deal?.influencer?.displayName,
-panLast4: t.deal?.influencer?.user?.taxCompliance?.panLast4,
-grossRupees: paiseToRupees((t.metadata as Record<string, number | undefined>)?.grossPayout ?? 0),
-tdsRate: "0.1%",
-tdsRupees: paiseToRupees(t.amount),
-netRupees: paiseToRupees((t.metadata as Record<string, number | undefined>)?.netPayout ?? 0),
-date: t.createdAt,
-section: "194-O",
-})),
-}, "TDS summary generated");
+    // Add summary rows
+    rows.push(
+      { "Deal ID": "", "Influencer": "", "PAN (last 4)": "", "Gross ()": "", "TDS Rate": "", "TDS ()": "", "Net ()": "", "Date": "", "Section": "" },
+      { "Deal ID": "TOTAL", "Influencer": `${tdsTransactions.length} deals`, "PAN (last 4)": "", "Gross ()": paiseToRupees(totalGross), "TDS Rate": "", "TDS ()": paiseToRupees(totalTDS), "Net ()": paiseToRupees(totalNet), "Date": `FY ${fy}`, "Section": summaryTdsSection }
+    );
+
+    // Add platform header and footer
+    const platformHeader = getPlatformHeader().map((line) => ({ "Platform Info": line }));
+    const platformFooter = getPlatformFooter().map((line) => ({ "Platform Info": line }));
+
+    const finalRows = [
+      ...platformHeader,
+      { "Deal ID": "", "Influencer": "", "PAN (last 4)": "", "Gross ()": "", "TDS Rate": "", "TDS ()": "", "Net ()": "", "Date": "", "Section": "" },
+      ...rows,
+      ...platformFooter,
+    ];
+
+    const filename = `decisional-tds-summary-${fy}-${Date.now()}.csv`;
+    return csvResponse(toCsv(finalRows), filename);
+  }
+
+  // JSON response
+  return ApiResponse.success({
+    fy,
+    period: { from: bounds.start, to: bounds.end },
+    summary: {
+      totalGrossRupees: paiseToRupees(totalGross),
+      totalTDSRupees: paiseToRupees(totalTDS),
+      totalNetRupees: paiseToRupees(totalNet),
+      dealCount: tdsTransactions.length,
+      tdsSection: summaryTdsSection,
+    },
+    transactions: tdsTransactions.map((t) => {
+      const details = getTransactionTdsDetails(t);
+      return {
+        dealId: t.dealId,
+        influencer: t.deal?.influencer?.displayName,
+        panLast4: t.deal?.influencer?.user?.taxCompliance?.panLast4,
+        grossRupees: paiseToRupees((t.metadata as Record<string, number | undefined>)?.grossPayout ?? 0),
+        tdsRate: details.rate,
+        tdsRupees: paiseToRupees(t.amount),
+        netRupees: paiseToRupees((t.metadata as Record<string, number | undefined>)?.netPayout ?? 0),
+        date: t.createdAt,
+        section: details.section,
+      };
+    }),
+  }, "TDS summary generated");
 }
 
 

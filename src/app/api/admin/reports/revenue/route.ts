@@ -22,52 +22,59 @@ async function _handler(req: NextRequest) {
   if (!bounds) return ApiResponse.error("Invalid FY format. Use YYYY-YY e.g. 2025-26");
 
 // Get monthly revenue data for the FY (12 months)
-const startDate = bounds.start;
-const months = Array.from({ length: 12 }, (_, i) => {
-const d = new Date(startDate);
-d.setMonth(d.getMonth() + i);
-return {
-date: d,
-month: format(d, "MMM yyyy"),
-revenue: 0,
-gmv: 0,
-deals: 0,
-};
-});
+  const startDate = bounds.start;
+  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(startDate);
+    d.setMonth(d.getMonth() + i);
+    // Add IST offset before formatting label
+    const istLabelDate = new Date(d.getTime() + IST_OFFSET_MS);
+    return {
+      date: d,
+      month: format(istLabelDate, "MMM yyyy"),
+      revenue: 0,
+      gmv: 0,
+      deals: 0,
+    };
+  });
 
-// Query platform fee transactions within FY
-const transactions = await prisma.transaction.findMany({
-where: {
-type: "PLATFORM_FEE",
-status: "COMPLETED",
-createdAt: { gte: bounds.start, lte: bounds.end },
-},
-});
+  // Query platform fee transactions within FY
+  const transactions = await prisma.transaction.findMany({
+    where: {
+      type: "PLATFORM_FEE",
+      status: "COMPLETED",
+      createdAt: { gte: bounds.start, lte: bounds.end },
+    },
+  });
 
-transactions.forEach((tx: { amount: number; createdAt: Date }) => {
-const monthStr = format(tx.createdAt, "MMM yyyy");
-const monthObj = months.find((m) => m.month === monthStr);
-if (monthObj) monthObj.revenue += tx.amount;
-});
+  transactions.forEach((tx: { amount: number; createdAt: Date }) => {
+    // Add IST offset before formatting
+    const istDate = new Date(tx.createdAt.getTime() + IST_OFFSET_MS);
+    const monthStr = format(istDate, "MMM yyyy");
+    const monthObj = months.find((m) => m.month === monthStr);
+    if (monthObj) monthObj.revenue += tx.amount;
+  });
 
-// Query completed deals within FY
-const deals = await prisma.deal.findMany({
-where: {
-status: "COMPLETED",
-completedAt: { gte: bounds.start, lte: bounds.end },
-},
-select: { totalAmount: true, completedAt: true },
-});
+  // Query completed deals within FY
+  const deals = await prisma.deal.findMany({
+    where: {
+      status: "COMPLETED",
+      completedAt: { gte: bounds.start, lte: bounds.end },
+    },
+    select: { totalAmount: true, completedAt: true },
+  });
 
-deals.forEach((deal: { totalAmount: number; completedAt: Date | null }) => {
-if (!deal.completedAt) return;
-const monthStr = format(deal.completedAt, "MMM yyyy");
-const monthObj = months.find((m) => m.month === monthStr);
-if (monthObj) {
-monthObj.gmv += deal.totalAmount;
-monthObj.deals += 1;
-}
-});
+  deals.forEach((deal: { totalAmount: number; completedAt: Date | null }) => {
+    if (!deal.completedAt) return;
+    // Add IST offset before formatting
+    const istDate = new Date(deal.completedAt.getTime() + IST_OFFSET_MS);
+    const monthStr = format(istDate, "MMM yyyy");
+    const monthObj = months.find((m) => m.month === monthStr);
+    if (monthObj) {
+      monthObj.gmv += deal.totalAmount;
+      monthObj.deals += 1;
+    }
+  });
 
 // Summary totals
 const totalRevenue = months.reduce((s, m) => s + m.revenue, 0);

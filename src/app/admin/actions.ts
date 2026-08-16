@@ -82,9 +82,28 @@ data: {
 status: "VERIFIED",
 verifiedAt: new Date(),
 },
-});
+      });
 
-const user = await tx.user.findUnique({
+      const taxCompliance = await tx.indiaTaxCompliance.findUnique({
+        where: { userId },
+      });
+      if (taxCompliance) {
+        let nextTdsSection = taxCompliance.tdsSection;
+        if (nextTdsSection && nextTdsSection.endsWith("_REVIEW")) {
+          nextTdsSection = nextTdsSection.replace("_REVIEW", "");
+        }
+        await tx.indiaTaxCompliance.update({
+          where: { userId },
+          data: {
+            status: "VERIFIED",
+            verifiedAt: new Date(),
+            rejectionReason: null,
+            tdsSection: nextTdsSection,
+          },
+        });
+      }
+
+      const user = await tx.user.findUnique({
 where: { id: userId },
 include: { verificationDocs: true },
 });
@@ -173,14 +192,35 @@ const _session = await requireAdmin();
 
 await prisma.$transaction(
 async (tx: Prisma.TransactionClient) => {
-await tx.verificationDocument.update({
-where: { id: docId },
-data: {
-status: "VERIFIED",
-verifiedAt: new Date(),
-rejectionReason: null,
-},
-});
+      const doc = await tx.verificationDocument.update({
+        where: { id: docId },
+        data: {
+          status: "VERIFIED",
+          verifiedAt: new Date(),
+          rejectionReason: null,
+        },
+      });
+
+      if (doc.type === "PAN_CARD" || doc.type === "GST_CERTIFICATE") {
+        const taxCompliance = await tx.indiaTaxCompliance.findUnique({
+          where: { userId },
+        });
+        if (taxCompliance) {
+          let nextTdsSection = taxCompliance.tdsSection;
+          if (nextTdsSection && nextTdsSection.endsWith("_REVIEW")) {
+            nextTdsSection = nextTdsSection.replace("_REVIEW", "");
+          }
+          await tx.indiaTaxCompliance.update({
+            where: { userId },
+            data: {
+              status: "VERIFIED",
+              verifiedAt: new Date(),
+              rejectionReason: null,
+              tdsSection: nextTdsSection,
+            },
+          });
+        }
+      }
 
 const user = await tx.user.findUnique({
 where: { id: userId },
@@ -215,10 +255,21 @@ reason: string,
 ) {
 const _session = await requireAdmin();
 
-const doc = await prisma.verificationDocument.update({
-where: { id: docId },
-data: { status: "REJECTED", rejectionReason: reason },
-});
+  const doc = await prisma.verificationDocument.update({
+    where: { id: docId },
+    data: { status: "REJECTED", rejectionReason: reason },
+  });
+
+  if (doc.type === "PAN_CARD" || doc.type === "GST_CERTIFICATE") {
+    await prisma.indiaTaxCompliance.updateMany({
+      where: { userId },
+      data: {
+        status: "REJECTED",
+        rejectionReason: reason,
+        verifiedAt: null,
+      },
+    });
+  }
 
 const user = await prisma.user.findUnique({
 where: { id: userId },
