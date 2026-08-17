@@ -263,11 +263,17 @@ applicationId: result.id,
 });
 return result;
 } catch (error) {
-logger.error("Error creating application", error, {
-userId,
-campaignId: data.campaignId,
-});
-throw error;
+  logger.error("Error creating application", error, {
+    userId,
+    campaignId: data.campaignId,
+  });
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002"
+  ) {
+    throw AppError.badRequest("You have already applied to this campaign");
+  }
+  throw error;
 }
 }
 export function validateApplicationCanBeAccepted(

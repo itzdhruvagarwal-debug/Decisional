@@ -77,7 +77,7 @@ grossPayout: number,
   );
 
   const totalEarnings = previousFyEarnings + grossPayout;
-  const tdsThreshold = is194J ? 3_000_000 : 5_000_000; // Rs 30,000 for 194J, Rs 50,000 for 194-O
+  const tdsThreshold = is194J ? 3_000_000 : TDS_THRESHOLD; // Rs 30,000 for 194J, Rs 5,00,000 (50,000,000 paise) for 194-O
   if (totalEarnings < tdsThreshold) return 0;
 
   // Calculate total TDS required on entire FY earnings, then subtract already-deducted amounts.

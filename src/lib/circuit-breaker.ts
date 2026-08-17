@@ -39,24 +39,30 @@ redis.del(failureKey).catch((e) => logger.error(`[CircuitBreaker] Failed to dele
 
 return result;
 
-} catch (error: unknown) {
-// Ignore normal business errors if they aren't network/timeout related.
-// For Razorpay, network or 5xx errors usually throw exceptions or give no response.
-// 4xx responses (Bad Request) shouldn't necessarily trip the circuit breaker,
-// but in node sdk they are thrown as errors.
-// We will count all thrown errors as failures for simplicity, or we could filter them:
-interface RazorpayError { code?: string; statusCode?: number; }
-const typedErr = error as RazorpayError;
-const isNetworkOrServerError =
-typedErr.code === 'ETIMEDOUT' ||
-typedErr.code === 'ECONNREFUSED' ||
-(typedErr.statusCode !== undefined && typedErr.statusCode >= 500) ||
-typedErr.statusCode === undefined;
+  } catch (error: unknown) {
+    // Exclude AppError (client/validation errors 4xx) from tripping the circuit breaker
+    if (error instanceof AppError && error.statusCode < 500) {
+      throw error;
+    }
 
-// If it's a structural error (like incorrect arguments 400), don't trip circuit breaker
-if (!isNetworkOrServerError && typedErr.statusCode !== undefined && typedErr.statusCode < 500) {
-throw error;
-}
+    interface GatewayError { code?: string; statusCode?: number; }
+    const typedErr = error as GatewayError;
+    
+    // If it's a 4xx error from downstream gateway, don't trip circuit breaker
+    if (typedErr.statusCode !== undefined && typedErr.statusCode >= 400 && typedErr.statusCode < 500) {
+      throw error;
+    }
+
+    const isNetworkOrServerError =
+      typedErr.code === 'ETIMEDOUT' ||
+      typedErr.code === 'ECONNREFUSED' ||
+      typedErr.code === 'ENOTFOUND' ||
+      (typedErr.statusCode !== undefined && typedErr.statusCode >= 500) ||
+      (error instanceof Error && (error.message.includes('fetch') || error.message.includes('timeout') || error.message.includes('network')));
+
+    if (!isNetworkOrServerError && error instanceof AppError) {
+      throw error;
+    }
 
 try {
 // 4. Action failed (Server/Network issue): Increment failure count

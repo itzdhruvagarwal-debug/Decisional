@@ -265,19 +265,31 @@ ifsc_details: true,
 
 const data = await res.json();
 
-if (data.success && data.data) {
-const bankName = data.data.full_name || "";
-const nameMatch = bankName
-.toLowerCase()
-.includes(params.beneficiaryName.toLowerCase().split(" ")[0]);
+    if (data.success && data.data) {
+      const bankName = String(data.data.full_name || "");
+      const cleanTokens = (n: string) =>
+        n
+          .toLowerCase()
+          .replace(/^(mr|ms|mrs|dr|prof|ca|adv|shri|smt|m\/s)\.?\s+/i, "")
+          .split(/\s+/)
+          .filter((t) => t.length >= 2);
 
-return {
-success: true,
-nameMatch,
-accountExists: data.data.account_exists,
-beneficiaryName: bankName,
-};
-}
+      const bankTokens = cleanTokens(bankName);
+      const beneficiaryTokens = cleanTokens(params.beneficiaryName);
+
+      const nameMatch =
+        bankTokens.length > 0 &&
+        beneficiaryTokens.length > 0 &&
+        (beneficiaryTokens.some((bt) => bankTokens.includes(bt)) ||
+          bankTokens.some((bkt) => beneficiaryTokens.includes(bkt)));
+
+      return {
+        success: true,
+        nameMatch,
+        accountExists: data.data.account_exists,
+        beneficiaryName: bankName,
+      };
+    }
 
 return {
 success: false,
@@ -371,23 +383,37 @@ email?: string | null;
 const dlLast4 = dlAadhaar.slice(-4);
 const userLast4 = aadhaarNumber.slice(-4);
 
-if (!dlAadhaar || dlAadhaar.length < 4) {
-const dlName = String(profile.name || "").trim().toLowerCase();
-const dbName = String(
-dbUser?.influencerProfile?.displayName ||
-dbUser?.brandProfile?.companyName ||
-dbUser?.email?.split("@")[0] ||
-"",
-).trim().toLowerCase();
+  if (!dlAadhaar || dlAadhaar.length < 4) {
+    const cleanTokens = (n: string) =>
+      n
+        .toLowerCase()
+        .replace(/^(mr|ms|mrs|dr|prof|ca|adv|shri|smt|m\/s)\.?\s+/i, "")
+        .split(/\s+/)
+        .filter((t) => t.length >= 2);
 
-if (!dlName || !dbName || (!dlName.includes(dbName.split(" ")[0]!) && !dbName.includes(dlName.split(" ")[0]!))) {
-return {
-success: false,
-status: "REJECTED",
-error: "The name on the connected DigiLocker profile does not match your registered name.",
-};
-}
-} else {
+    const dlTokens = cleanTokens(String(profile.name || ""));
+    const dbRaw = String(
+      dbUser?.influencerProfile?.displayName ||
+      dbUser?.brandProfile?.companyName ||
+      dbUser?.email?.split("@")[0] ||
+      "",
+    );
+    const dbTokens = cleanTokens(dbRaw);
+
+    const isMatch =
+      dlTokens.length > 0 &&
+      dbTokens.length > 0 &&
+      (dbTokens.some((dt) => dlTokens.includes(dt)) ||
+        dlTokens.some((dlt) => dbTokens.includes(dlt)));
+
+    if (!isMatch) {
+      return {
+        success: false,
+        status: "REJECTED",
+        error: "The name on the connected DigiLocker profile does not match your registered name.",
+      };
+    }
+  } else {
 const isMismatch = dlAadhaar.length === 12
 ? dlAadhaar !== aadhaarNumber
 : dlLast4 !== userLast4;

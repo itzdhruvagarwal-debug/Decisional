@@ -195,21 +195,28 @@ export async function cleanupExpiredIdempotencyKeys(): Promise<number> {
 }
 
 export async function saveIdempotencyResponse(
-key: string,
-response: Prisma.InputJsonValue,
-userId: string | null = null,
+  key: string,
+  response: Prisma.InputJsonValue,
+  userId: string | null = null,
 ): Promise<void> {
-const normalizedUserId = userId;
-try {
-await prisma.idempotencyKey.update({
-where: { key },
-data: {
-userId: normalizedUserId,
-response,
-expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Extend TTL to 24 hours on completion
-},
-});
-} catch (error) {
-logger.error("[Idempotency] Failed to save response", error, { key });
-}
+  const normalizedUserId = userId;
+  try {
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // Extend TTL to 24 hours on completion
+    await prisma.idempotencyKey.upsert({
+      where: { key },
+      create: {
+        key,
+        userId: normalizedUserId,
+        response,
+        expiresAt,
+      },
+      update: {
+        userId: normalizedUserId,
+        response,
+        expiresAt,
+      },
+    });
+  } catch (error) {
+    logger.error("[Idempotency] Failed to save response", error, { key });
+  }
 }

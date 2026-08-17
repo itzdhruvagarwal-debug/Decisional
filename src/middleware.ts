@@ -138,21 +138,22 @@ return isAdminPath && userType !== "ADMIN";
 * Returns true if the provided secret matches the expected value.
 */
 async function verifyCronSecret(
-cronSecret: string | null,
-expectedSecret: string,
+  cronSecret: string | null,
+  expectedSecret: string,
 ): Promise<boolean> {
-const encoder = new TextEncoder();
-const expectedHash = new Uint8Array(
-await crypto.subtle.digest("SHA-256", encoder.encode(expectedSecret)),
-);
-const actualHash = new Uint8Array(
-await crypto.subtle.digest("SHA-256", encoder.encode(cronSecret || "")),
-);
-let result = 0;
-for (let i = 0; i < expectedHash.length; i++) {
-result |= expectedHash[i]! ^ actualHash[i]!;
-}
-return result === 0;
+  if (!cronSecret || !expectedSecret) return false;
+  const encoder = new TextEncoder();
+  const expectedHash = new Uint8Array(
+    await crypto.subtle.digest("SHA-256", encoder.encode(expectedSecret)),
+  );
+  const actualHash = new Uint8Array(
+    await crypto.subtle.digest("SHA-256", encoder.encode(cronSecret)),
+  );
+  let result = 0;
+  for (let i = 0; i < expectedHash.length; i++) {
+    result |= expectedHash[i]! ^ actualHash[i]!;
+  }
+  return result === 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -235,19 +236,24 @@ return null;
 }
 
 async function handleCronProtection(
-req: NextRequest,
-pathname: string,
-applyCSP: (response: NextResponse) => NextResponse
+  req: NextRequest,
+  pathname: string,
+  applyCSP: (response: NextResponse) => NextResponse
 ): Promise<NextResponse | null> {
-if (pathname.startsWith("/api/cron/")) {
-const cronSecret = req.headers.get("x-cron-secret");
-const expectedSecret = process.env.CRON_SECRET || "";
-const isValid = await verifyCronSecret(cronSecret, expectedSecret);
-if (!cronSecret || !isValid) {
-return applyCSP(NextResponse.json({ error: "Forbidden" }, { status: 403 }));
-}
-}
-return null;
+  if (pathname.startsWith("/api/cron/")) {
+    const expectedSecret = process.env.CRON_SECRET || "";
+    const xCronSecret = req.headers.get("x-cron-secret");
+    const authHeader = req.headers.get("authorization");
+    const bearerSecret = authHeader?.replace(/^bearer /i, "")?.trim() || null;
+
+    const isXCronValid = await verifyCronSecret(xCronSecret, expectedSecret);
+    const isBearerValid = await verifyCronSecret(bearerSecret, expectedSecret);
+
+    if (!isXCronValid && !isBearerValid) {
+      return applyCSP(NextResponse.json({ error: "Forbidden" }, { status: 403 }));
+    }
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------

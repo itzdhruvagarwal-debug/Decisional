@@ -440,21 +440,22 @@ const receiver = await prisma.user.findUnique({
 where: { id: receiverId },
 select: { status: true },
 });
-if (
-!receiver ||
-receiver.status === "BANNED" ||
-receiver.status === "SUSPENDED"
-) {
-throw AppError.notFound("Recipient not found or unavailable");
-}
+    if (
+      !receiver ||
+      receiver.status === "BANNED" ||
+      receiver.status === "SUSPENDED" ||
+      receiver.status === "DELETED"
+    ) {
+      throw AppError.notFound("Recipient not found or unavailable");
+    }
 
-const sender = await prisma.user.findUnique({
-where: { id: userId },
-select: { status: true },
-});
-if (!sender || sender.status === "BANNED" || sender.status === "SUSPENDED") {
-throw AppError.badRequest("Your account is restricted from sending messages");
-}
+    const sender = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { status: true },
+    });
+    if (!sender || sender.status === "BANNED" || sender.status === "SUSPENDED" || sender.status === "DELETED") {
+      throw AppError.badRequest("Your account is restricted from sending messages");
+    }
 }
 
 private static applyContactFilterToContent(

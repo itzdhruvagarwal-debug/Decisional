@@ -319,11 +319,13 @@ return { success: true };
 // ==================== HELPERS ====================
 
 function sanitizeFileName(name: string): string {
-return name
-.toLowerCase()
-.replace(/[^a-z0-9.-]/g, "-")
-.replace(/-+/g, "-")
-.slice(0, 100);
+  const sanitized = String(name ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9.-]/g, "-")
+    .replace(/^[.-]+/, "")
+    .replace(/-+/g, "-")
+    .slice(0, 100);
+  return sanitized || "file";
 }
 
 

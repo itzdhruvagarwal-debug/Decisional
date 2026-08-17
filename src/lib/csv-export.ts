@@ -126,9 +126,12 @@ return `${yr}-${String(yr + 1).slice(-2)}`;
 /**
 * Escapes a CSV field value (protects commas, quotes, formula injection).
 */
-export function csvEsc(v: string | number): string {
-const s = neutralizeCsvFormula(String(v));
-return s.includes(",") || s.includes('"') ? `"${s.replaceAll('"', '""')}"` : s;
+export function csvEsc(v: string | number | null | undefined): string {
+  if (v === null || v === undefined) return "";
+  const s = neutralizeCsvFormula(String(v));
+  return s.includes(",") || s.includes('"') || s.includes("\n") || s.includes("\r")
+    ? `"${s.replaceAll('"', '""')}"`
+    : s;
 }
 
 /** Returns a labelled CSV row line. */

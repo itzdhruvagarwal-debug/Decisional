@@ -98,9 +98,13 @@ return createHmac("sha256", otpSecret())
 }
 
 function safeEqualHex(a: string, b: string) {
-const left = Buffer.from(a, "hex");
-const right = Buffer.from(b, "hex");
-return left.length === right.length && timingSafeEqual(left, right);
+  if (!a || !b) return false;
+  const left = Buffer.from(a, "hex");
+  const right = Buffer.from(b, "hex");
+  if (left.length === 0 || right.length === 0 || left.length !== right.length) {
+    return false;
+  }
+  return timingSafeEqual(left, right);
 }
 
 function otpMessage(otp: string) {
@@ -365,8 +369,9 @@ await redis.del(key);
 return { success: false, error: "Maximum attempts exceeded" };
 }
 
-const submittedHash = hashOtp(normalized, purpose, otp);
-const isValid = safeEqualHex(stored.hash, submittedHash);
+  const cleanOtp = String(otp ?? "").trim();
+  const submittedHash = hashOtp(normalized, purpose, cleanOtp);
+  const isValid = safeEqualHex(stored.hash, submittedHash);
 if (!isValid) {
 const ttl = await redis.ttl(key);
 if (ttl > 0) {

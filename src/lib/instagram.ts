@@ -254,17 +254,20 @@ return allPosts;
 * Find a specific post by its permalink among recent posts.
 */
 export async function findPostByUrl(
-accessToken: string,
-postUrl: string,
+  accessToken: string,
+  postUrl: string,
 ): Promise<InstagramPost | null> {
-const posts = await getRecentPosts(accessToken, 150); // Check last 150
-const normalizedUrl = (postUrl.split("?")[0] ?? postUrl).replace(/\/$/, "");
+  const posts = await getRecentPosts(accessToken, 150); // Check last 150
+  const clean = (u: string) =>
+    (u.split("?")[0] ?? u)
+      .toLowerCase()
+      .replace(/^https?:\/\//, "")
+      .replace(/^www\./, "")
+      .replace(/\/$/, "");
 
-return (
-posts.find(
-(p) => (p.permalink.split("?")[0] ?? p.permalink).replace(/\/$/, "") === normalizedUrl,
-) || null
-);
+  const target = clean(postUrl);
+
+  return posts.find((p) => clean(p.permalink) === target) || null;
 }
 
 

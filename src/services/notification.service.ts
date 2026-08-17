@@ -100,6 +100,9 @@ static async createNotifications(
   }>,
   _tx?: Prisma.TransactionClient
 ) {
+  if (!data || data.length === 0) {
+    return { count: 0 };
+  }
   const client = _tx || prisma;
   try {
     return await client.notification.createMany({

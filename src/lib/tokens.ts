@@ -92,25 +92,43 @@ const newTokenString = generateSecureToken();
 const expiresAt = new Date();
 expiresAt.setDate(expiresAt.getDate() + 7);
 
-// Transaction ensures atomicity prevents a window where both old and new are valid
-const [, newToken] = await prisma.$transaction([
-prisma.refreshToken.update({
-where: { id: existingToken.id },
-data: {
-revoked: true,
-replacedByToken: newTokenString,
-},
-}),
-prisma.refreshToken.create({
-data: {
-token: newTokenString,
-userId: existingToken.userId,
-expiresAt,
-},
-}),
-]);
+  // Transaction ensures atomicity and eliminates concurrent refresh race conditions
+  const result = await prisma.$transaction(async (tx) => {
+    const updateResult = await tx.refreshToken.updateMany({
+      where: { id: existingToken.id, revoked: false },
+      data: {
+        revoked: true,
+        replacedByToken: newTokenString,
+      },
+    });
 
-return newToken;
+    if (updateResult.count === 0) {
+      return null;
+    }
+
+    const created = await tx.refreshToken.create({
+      data: {
+        token: newTokenString,
+        userId: existingToken.userId,
+        expiresAt,
+      },
+    });
+
+    return created;
+  });
+
+  if (!result) {
+    const currentActive = await prisma.refreshToken.findFirst({
+      where: { userId: existingToken.userId, revoked: false },
+      orderBy: { createdAt: "desc" },
+    });
+    if (currentActive && (Date.now() - currentActive.createdAt.getTime()) < 10000) {
+      return currentActive;
+    }
+    return null;
+  }
+
+  return result;
 }
 
 /**

@@ -28,11 +28,25 @@ className="flex items-center justify-center p-6 bg-primary text-primary min-h-sc
 <div className="fixed z-0 system-error-bg-glow" />
 
 <div className="glass col-span-2 text-center w-full relative rounded-xl z-1 system-error-card border-rose-subtle">
-<div
-className="flex items-center justify-center mb-8 bg-rose-subtle text-rose rounded-full text-3xl mx-auto w-80 system-error-icon border-rose-subtle"
->
-
-</div>
+      <div
+        className="flex items-center justify-center mb-8 bg-rose-subtle text-rose rounded-full text-3xl mx-auto w-80 system-error-icon border-rose-subtle"
+      >
+        <svg
+          width={36}
+          height={36}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      </div>
 
 <h1 className="gradient-text text-xl font-extrabold mb-4 bg-gradient-rose-orange">
 System Malfunction

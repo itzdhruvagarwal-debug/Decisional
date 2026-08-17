@@ -72,6 +72,20 @@ createdAt: { gte: weekStart }
 });
 
 if (recentDealsCount > 10 && user.trustScore < 750) {
+// Check if a velocity alert was already recorded for this user in the last 24 hours
+const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+const existingViolation = await prisma.userViolation.findFirst({
+where: {
+userId,
+type: "SPAM",
+createdAt: { gte: dayAgo },
+},
+});
+
+if (existingViolation) {
+return; // Already recorded and alerted today
+}
+
 // Velocity trigger - Audit needed
 logger.warn("Velocity trigger activated for user", { userId, recentDealsCount });
 

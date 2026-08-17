@@ -74,9 +74,8 @@ z
 .refine((value) => GSTIN_REGEX.test(value), "Invalid GSTIN format")
 .optional(),
 ),
-gstRegistrationType: z
-.enum(GST_REGISTRATION_TYPES)
-.optional(),
+  gstRegistrationType: z
+    .preprocess(emptyToUndefined, z.enum(GST_REGISTRATION_TYPES).optional()),
 gstTurnoverSlab: z
 .preprocess(emptyToUndefined, z.enum(GST_TURNOVER_SLABS).optional()),
 itrAcknowledgementNumber: z.preprocess(

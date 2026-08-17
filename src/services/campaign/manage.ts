@@ -97,14 +97,19 @@ updateData.minEngagementRate = data.minEngagementRate ? Number(data.minEngagemen
 }
 }
 export function buildBudgetAndTimelineUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
-if (data.totalBudget !== undefined) updateData.totalBudget = Number(data.totalBudget);
-if (data.perInfluencerBudget !== undefined) {
-updateData.perInfluencerBudget = data.perInfluencerBudget ? Number(data.perInfluencerBudget) : null;
-}
-if (data.maxInfluencers !== undefined) {
-updateData.maxInfluencers = data.maxInfluencers ? Number(data.maxInfluencers) : null;
-}
-if (data.deliverables !== undefined) updateData.deliverables = data.deliverables as Prisma.InputJsonValue;
+  if (data.totalBudget !== undefined) {
+    const val = Number(data.totalBudget);
+    if (!Number.isNaN(val) && val >= 0) updateData.totalBudget = val;
+  }
+  if (data.perInfluencerBudget !== undefined) {
+    const val = data.perInfluencerBudget ? Number(data.perInfluencerBudget) : null;
+    updateData.perInfluencerBudget = val !== null && !Number.isNaN(val) && val >= 0 ? val : null;
+  }
+  if (data.maxInfluencers !== undefined) {
+    const val = data.maxInfluencers ? Number(data.maxInfluencers) : null;
+    updateData.maxInfluencers = val !== null && !Number.isNaN(val) && val > 0 ? val : null;
+  }
+  if (data.deliverables !== undefined) updateData.deliverables = data.deliverables as Prisma.InputJsonValue;
 if (data.applicationDeadline !== undefined) {
 updateData.applicationDeadline = data.applicationDeadline ? new Date(data.applicationDeadline as string) : null;
 }

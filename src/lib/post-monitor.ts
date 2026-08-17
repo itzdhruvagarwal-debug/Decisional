@@ -56,32 +56,33 @@ const time = completedAt?.getTime();
 if (time === undefined) {
 return { shouldCheck: false, day: 0 };
 }
-const daysSinceCompletion = Math.floor(
-(Date.now() - time) / (86400 * 1000),
-);
+  const daysSinceCompletion = Math.max(
+    0,
+    Math.floor((Date.now() - time) / (86400 * 1000)),
+  );
 
-if (daysSinceCompletion > 30) {
-return { shouldCheck: false, day: daysSinceCompletion };
-}
+  if (daysSinceCompletion > 30) {
+    return { shouldCheck: false, day: daysSinceCompletion };
+  }
 
-if (daysSinceCompletion <= 7) {
-// Daily checks
-return { shouldCheck: true, day: daysSinceCompletion };
-}
+  if (daysSinceCompletion <= 7) {
+    // Daily checks
+    return { shouldCheck: true, day: daysSinceCompletion };
+  }
 
-if (daysSinceCompletion <= 14) {
-// Every 2 days
-return {
-shouldCheck: daysSinceCompletion % 2 === 0,
-day: daysSinceCompletion,
-};
-}
+  if (daysSinceCompletion <= 14) {
+    // Every 2 days
+    return {
+      shouldCheck: daysSinceCompletion % 2 === 0,
+      day: daysSinceCompletion,
+    };
+  }
 
-// Weekly (check on day 21 and 28)
-return {
-shouldCheck: daysSinceCompletion % 7 === 0,
-day: daysSinceCompletion,
-};
+  // Weekly (check on day 21 and 28)
+  return {
+    shouldCheck: daysSinceCompletion % 7 === 0,
+    day: daysSinceCompletion,
+  };
 }
 
 // ==================== CLAWBACK CALCULATION ====================
@@ -427,29 +428,25 @@ dealId: string,
 reason: string,
 monitoringDay: number,
 ) {
-const brandWallet = await tx.wallet.findUnique({
-where: { userId: brandUserId },
-});
-if (brandWallet) {
-await tx.wallet.update({
-where: { userId: brandUserId },
-data: { balance: { increment: deductAmount } },
-});
+  const brandWallet = await tx.wallet.upsert({
+    where: { userId: brandUserId },
+    create: { userId: brandUserId, balance: deductAmount, pendingBalance: 0 },
+    update: { balance: { increment: deductAmount } },
+  });
 
-const unrecoveredSuffix = debtPending > 0 ? ` (Unrecovered debt: ${debtPending} paise)` : "";
-const brandDescription = `Clawback refund Influencer post ${reason} on day ${monitoringDay}${unrecoveredSuffix}`;
+  const unrecoveredSuffix = debtPending > 0 ? ` (Unrecovered debt: ${debtPending} paise)` : "";
+  const brandDescription = `Clawback refund Influencer post ${reason} on day ${monitoringDay}${unrecoveredSuffix}`;
 
-await tx.transaction.create({
-data: {
-walletId: brandWallet.id,
-amount: deductAmount,
-type: "CREDIT",
-dealId,
-description: brandDescription,
-status: "COMPLETED",
-},
-});
-}
+  await tx.transaction.create({
+    data: {
+      walletId: brandWallet.id,
+      amount: deductAmount,
+      type: "CREDIT",
+      dealId,
+      description: brandDescription,
+      status: "COMPLETED",
+    },
+  });
 }
 
 async function performClawbackTransaction(config: PerformClawbackTransactionConfig) {

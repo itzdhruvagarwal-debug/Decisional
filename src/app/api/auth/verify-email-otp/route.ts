@@ -204,19 +204,27 @@ return NextResponse.json(
 );
 }
 
-// OTP verified clean up
-await redis.del(key);
-await redis.setex(
-`email-otp-verified:${email.toLowerCase().trim()}`,
-15 * 60,
-"1",
-);
+    // OTP verified clean up
+    await redis.del(key);
+    const normalizedEmail = email.toLowerCase().trim();
+    await redis.setex(
+      `email-otp-verified:${normalizedEmail}`,
+      15 * 60,
+      "1",
+    );
 
-return NextResponse.json({
-success: true,
-verified: true,
-message: "Email verified successfully!",
-});
+    if (type === "email_verification") {
+      await prisma.user.updateMany({
+        where: { email: normalizedEmail },
+        data: { emailVerified: true },
+      });
+    }
+
+    return NextResponse.json({
+      success: true,
+      verified: true,
+      message: "Email verified successfully!",
+    });
 } catch (error) {
 logger.error("Email OTP verification error", error);
 return NextResponse.json(

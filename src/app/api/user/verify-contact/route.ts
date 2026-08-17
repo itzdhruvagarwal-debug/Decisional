@@ -117,32 +117,44 @@ return NextResponse.json(
 );
 }
 
-const updateData = type === "email" ? { emailVerified: true } : { phoneVerified: true };
+    const isBothVerified =
+      (type === "email" ? true : user.emailVerified) &&
+      (type === "phone" ? true : user.phoneVerified);
 
-if (Object.keys(updateData).length > 0) {
-await prisma.user.update({
-where: { id: session.user.id },
-data: updateData,
-});
+    const updateData: import("@prisma/client").Prisma.UserUpdateInput =
+      type === "email" ? { emailVerified: true } : { phoneVerified: true };
 
-await createActivityLog({
-userId: session.user.id,
-action: "CONTACT_CHANGED",
-entityType: "User",
-entityId: session.user.id,
-metadata: {
-field: type, // 'email' or 'phone'
-newValue: type === "email" ? user.email : user.phone,
-changedAt: new Date().toISOString(),
-ipAddress: getSecureClientIp(req),
-},
-});
-}
+    if (isBothVerified) {
+      if (user.verificationLevel === "NONE") {
+        updateData.verificationLevel = "BASIC";
+      }
+      if (user.status === "PENDING_VERIFICATION") {
+        updateData.status = "ACTIVE";
+      }
+    }
 
-return NextResponse.json({
-success: true,
-message: `${type} verified successfully!`,
-});
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: updateData,
+    });
+
+    await createActivityLog({
+      userId: session.user.id,
+      action: "CONTACT_CHANGED",
+      entityType: "User",
+      entityId: session.user.id,
+      metadata: {
+        field: type, // 'email' or 'phone'
+        newValue: type === "email" ? user.email : user.phone,
+        changedAt: new Date().toISOString(),
+        ipAddress: getSecureClientIp(req),
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: `${type} verified successfully!`,
+    });
 } catch (error: unknown) {
 logger.error("Verify contact error", error);
 // Never expose internal error details

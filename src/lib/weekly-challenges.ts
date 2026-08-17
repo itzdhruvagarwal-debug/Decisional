@@ -268,10 +268,8 @@ influencerChallenges: ChallengeTemplate[];
 brandChallenges: ChallengeTemplate[];
 weekId: string;
 }> {
-const now = new Date();
-const weekNumber = getWeekNumber(now);
-const year = now.getUTCFullYear();
-const weekId = `${year}-W${weekNumber}`;
+  const now = new Date();
+  const { weekNumber, weekId } = getIsoWeekInfo(now);
 
 // Filter pools
 const influencerPool = CHALLENGE_POOL.filter(
@@ -374,9 +372,9 @@ eventType: ChallengeType,
 incrementBy: number = 1,
 tx?: Prisma.TransactionClient,
 ): Promise<{ completed: string[]; updated: string[] }> {
-const db = tx || prisma;
-const now = new Date();
-const weekId = `${now.getUTCFullYear()}-W${getWeekNumber(now)}`;
+  const db = tx || prisma;
+  const now = new Date();
+  const weekId = getWeekId(now);
 
 // Get active challenges for this week
 const activeChallenges = await db.weeklyChallenge.findMany({
@@ -606,8 +604,8 @@ challengeId: challenge.challengeId,
 * Get current week's challenges with user progress.
 */
 export async function getUserWeeklyChallenges(userId: string) {
-const now = new Date();
-const weekId = `${now.getUTCFullYear()}-W${getWeekNumber(now)}`;
+  const now = new Date();
+  const weekId = getWeekId(now);
 
 const [challenges, progressRecords] = await Promise.all([
 prisma.weeklyChallenge.findMany({
@@ -633,14 +631,25 @@ completedAt: progressMap.get(c.challengeId)?.completedAt || null,
 
 // ==================== UTILITY FUNCTIONS ====================
 
-function getWeekNumber(date: Date): number {
+export function getIsoWeekInfo(date: Date): { year: number; weekNumber: number; weekId: string } {
   const d = new Date(
     Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
   );
-const dayNum = d.getUTCDay() || 7;
-d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const year = d.getUTCFullYear();
+  const yearStart = new Date(Date.UTC(year, 0, 1));
+  const weekNumber = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+  const weekId = `${year}-W${weekNumber}`;
+  return { year, weekNumber, weekId };
+}
+
+function getWeekNumber(date: Date): number {
+  return getIsoWeekInfo(date).weekNumber;
+}
+
+export function getWeekId(date: Date = new Date()): string {
+  return getIsoWeekInfo(date).weekId;
 }
 
 function getWeekStart(date: Date): Date {

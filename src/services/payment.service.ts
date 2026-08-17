@@ -22,8 +22,8 @@ import { releaseIdempotencyKey } from "@/lib/idempotency";
 
 export class PaymentService {
   static async createWalletTopUpOrder(userId: string, amountInPaise: number) {
-    if (!Number.isInteger(amountInPaise) || amountInPaise <= 0) {
-      throw AppError.badRequest("Invalid top-up amount");
+    if (!Number.isInteger(amountInPaise) || amountInPaise < 100) {
+      throw AppError.badRequest("Minimum top-up amount is ₹1 (100 paise)");
     }
 
     // L9 FIX: Enforce a max single top-up of ₹10,00,000 (100,000,000 paise = 10 lakh).
@@ -660,18 +660,19 @@ where: { withdrawalId, type: "WITHDRAWAL", status: "PENDING" },
 data: { status },
 });
 
-if (createRefundTx) {
-await tx.transaction.create({
-data: {
-walletId: w.walletId,
-withdrawalId,
-type: "REFUND",
-amount: w.amount,
-status: "COMPLETED",
-description: reason,
-},
-});
-}
+    const shouldCreateRefundTx = createRefundTx || status === "REVERSED";
+    if (shouldCreateRefundTx) {
+      await tx.transaction.create({
+        data: {
+          walletId: w.walletId,
+          withdrawalId,
+          type: "REFUND",
+          amount: w.amount,
+          status: "COMPLETED",
+          description: reason,
+        },
+      });
+    }
 
   return true;
   }

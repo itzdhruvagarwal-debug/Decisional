@@ -5,7 +5,7 @@ import { assertSufficientBalance } from "@/lib/utils";
 import { checkMessageForContacts } from "@/lib/contact-filter";
 import { updateTrustAndLevel } from "@/lib/trust-engine";
 import { recalculateSocialProof } from "@/lib/social-proof-calculator";
-import prisma from "@/lib/db";
+import prisma, { ensurePlatformTreasury } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { AppError } from "@/lib/errors";
 import { NotificationService } from "@/services/notification.service";
@@ -285,6 +285,27 @@ costPerExtraRevision: contract.costPerExtraRevision,
 },
 },
 });
+
+const treasuryWallet = await ensurePlatformTreasury(tx);
+await tx.wallet.update({
+where: { id: treasuryWallet.id },
+data: { balance: { increment: limitCheck.cost } },
+});
+await tx.transaction.create({
+data: {
+walletId: treasuryWallet.id,
+dealId,
+type: "CREDIT",
+amount: limitCheck.cost,
+status: "COMPLETED",
+description: `Extra revision fee platform revenue for deal: ${dealId}`,
+metadata: {
+source: "extra_revision_charge_revenue",
+brandUserId: userId,
+revisionNumber: deal.revisionsUsed + 1,
+},
+},
+});
 }
 }
 
@@ -347,92 +368,117 @@ export async function reviewContent(
       updatedStatus = "REVISION_REQUESTED";
       await handleRevisionCharge(tx, deal, userId, dealId);
     } else if (!overallApproved) {
-      // Partial review: some items still PENDING — persist partial feedback to DB
-      // but keep deal status unchanged so the brand can complete the review later.
-      updatedStatus = deal.status as "CONTENT_APPROVED" | "REVISION_REQUESTED";
-    }
+      // Partial review: some items still PENDING persist partial feedback to DB
+      // but keep deal status as CONTENT_SUBMITTED so brand can finish reviewing.
+      await tx.contentSubmission.update({
+        where: { id: latestSubmission.id },
+        data: {
+          contentUrls: updatedUrls as Prisma.InputJsonValue,
+        },
+      });
 
-    const allFeedback = updatedUrls
-      .filter((item) => item.status === "REVISION_REQUESTED" && item.feedback)
-      .map((item) => `[${item.type}]: ${item.feedback}`)
-      .join(" | ");
+      return {
+        ...deal,
+        status: "CONTENT_SUBMITTED" as const,
+        contentSubmissions: [
+          {
+            ...latestSubmission,
+            contentUrls: updatedUrls,
+          },
+        ],
+      };
+    }
 
     await tx.contentSubmission.update({
       where: { id: latestSubmission.id },
       data: {
-        status: updatedStatus === "CONTENT_APPROVED" ? "APPROVED" : "REVISION_REQUESTED",
+        status: updatedStatus === "CONTENT_APPROVED" ? "APPROVED" : "REJECTED",
         contentUrls: updatedUrls as Prisma.InputJsonValue,
-        feedback: allFeedback || null,
-        reviewedAt: new Date(),
       },
     });
 
-    const dealUpdatePayload: Prisma.DealUpdateInput = {
-      status: updatedStatus,
-      rejectionReason: updatedStatus === "REVISION_REQUESTED" ? allFeedback : null,
-    };
-    if (updatedStatus === "CONTENT_APPROVED") {
-      dealUpdatePayload.approvedAt = new Date();
-      await trackReviewChallenges(tx, deal, userId, latestSubmission);
-    }
-    if (updatedStatus === "REVISION_REQUESTED") {
-      dealUpdatePayload.revisionsUsed = { increment: 1 };
-    }
-
-    await tx.deal.update({
+    const updatedDeal = await tx.deal.update({
       where: { id: dealId },
-      data: dealUpdatePayload,
+      data: {
+        status: updatedStatus,
+        ...(updatedStatus === "REVISION_REQUESTED"
+          ? { revisionsUsed: { increment: 1 } }
+          : {}),
+      },
     });
 
-    if (deal.influencer?.userId) {
-      await NotificationService.createNotification({
-        userId: deal.influencer.userId,
-        type: "deal_update",
-        title: updatedStatus === "CONTENT_APPROVED" ? "Content Approved" : "Revision Requested",
-        message: updatedStatus === "CONTENT_APPROVED"
-          ? `Your content submission for "${deal.campaign.title}" was approved.`
-          : `The brand has requested revision on your submission for "${deal.campaign.title}".`,
-        data: { link: `/dashboard/deals/${dealId}` },
+    if (updatedStatus === "CONTENT_APPROVED") {
+      await updateTrustAndLevel(userId, "CONTENT_APPROVED");
+      await updateTrustAndLevel(deal.influencer.userId, "CONTENT_APPROVED");
+      await trackReviewChallenges(tx, deal, userId, latestSubmission);
+    }
+
+    if (updatedStatus === "REVISION_REQUESTED") {
+      const { createActivityLog } = await import("@/lib/audit");
+      await createActivityLog({
+        userId,
+        action: "REVISION_REQUESTED",
+        entityType: "Deal",
+        entityId: dealId,
+        metadata: {
+          revisionNumber: deal.revisionsUsed + 1,
+          reviews,
+        },
       }, tx);
     }
 
-    return {
-      success: true,
-      statusUpdated: true,
-      dealStatus: updatedStatus,
-      ownerId: deal.brand?.userId,
-      influencerUserId: deal.influencer.userId,
-      requiresPostVerification: deal.requiresPostVerification,
-    };
+    await NotificationService.createNotification({
+      userId: deal.influencer.userId,
+      type: "deal_update",
+      title:
+        updatedStatus === "CONTENT_APPROVED"
+          ? "Content approved!"
+          : "Revision requested",
+      message:
+        updatedStatus === "CONTENT_APPROVED"
+          ? `Your content for "${deal.campaign.title}" was approved! Please proceed with posting.`
+          : `Changes requested on your content for "${deal.campaign.title}". Check feedback and re-submit.`,
+      data: { link: `/dashboard/deals/${dealId}` },
+    }, tx);
+
+    return updatedDeal;
   });
 
-  if (result.statusUpdated && result.dealStatus === "CONTENT_APPROVED") {
-    if (result.influencerUserId) {
-      await updateTrustAndLevel(result.influencerUserId, "CONTENT_APPROVED");
-      recalculateSocialProof(result.influencerUserId).catch((err) => {
-        logger.warn("[SocialProof] Real-time recalc failed after deal completion", {
-          userId: result.influencerUserId,
-          error: err,
-        });
-      });
-    }
+  await invalidateDealCache(dealId);
+  return result;
+}
 
-    await invalidateDealCache(dealId);
+export async function approveDeliverable(
+  userId: string,
+  dealId: string,
+  deliverableType: string,
+) {
+  const deal = await prisma.deal.findUnique({
+    where: { id: dealId },
+    include: {
+      contentSubmissions: { orderBy: { version: "desc" }, take: 1 },
+    },
+  });
+  if (!deal) throw AppError.notFound("Deal not found");
+  const latestSubmission = deal.contentSubmissions[0];
+  if (!latestSubmission) throw AppError.badRequest("No submission found");
 
-    if (result.requiresPostVerification === false) {
-      try {
-        await PaymentService.processDealCompletion(dealId);
-        await invalidateDealCache(dealId);
-      } catch (error) {
-        logger.error("Failed to process deal payment immediately for no-verification deal", {
-          dealId,
-          error,
-        });
-      }
-    }
-  } else {
-    await invalidateDealCache(dealId);
-  }
+  return reviewContent(userId, dealId, [
+    { type: deliverableType, status: "APPROVED" },
+  ]);
+}
 
-  return { success: true };
+export async function requestRevision(
+  userId: string,
+  dealId: string,
+  feedback: string,
+  deliverableType?: string,
+) {
+  return reviewContent(userId, dealId, [
+    {
+      type: deliverableType || "GENERIC",
+      status: "REVISION_REQUESTED",
+      feedback,
+    },
+  ]);
 }

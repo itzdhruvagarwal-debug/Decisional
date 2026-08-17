@@ -1,17 +1,31 @@
 /**
-* Helper to render standardized HTML message pages for actions like
-* blog subscription verification, unsubscription, and errors.
-*/
+ * Helper to render standardized HTML message pages for actions like
+ * blog subscription verification, unsubscription, and errors.
+ */
+
+function escapeHtml(str: string): string {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export function renderResultHtml(
-title: string,
-heading: string,
-message: string,
-isSuccess: boolean,
+  title: string,
+  heading: string,
+  message: string,
+  isSuccess: boolean,
 ): string {
-return `<!DOCTYPE html>
+  const safeTitle = escapeHtml(title);
+  const safeHeading = escapeHtml(heading);
+  const safeMessage = escapeHtml(message);
+
+  return `<!DOCTYPE html>
 <html>
 <head>
-<title>${title}</title>
+<title>${safeTitle}</title>
 <style>
 body { background: #0b0f19; color: #fff; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
 .card { background: #111827; border: 1px solid #1f2937; padding: 40px; border-radius: 12px; text-align: center; max-width: 400px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
@@ -21,8 +35,8 @@ a { color: #6366f1; text-decoration: none; font-weight: bold; }
 </head>
 <body>
 <div class="card">
-<h1>${heading}</h1>
-<p>${message}</p>
+<h1>${safeHeading}</h1>
+<p>${safeMessage}</p>
 <p><a href="/">Back to Home</a></p>
 </div>
 </body>

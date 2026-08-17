@@ -152,7 +152,6 @@ export async function verifyWalletBalance(userId: string): Promise<VerificationA
             where: {
               brandId: brandProfile.id,
               status: { in: ACTIVE_DEAL_STATUSES as any[] },
-              reservedFromWallet: false,
             },
             _sum: { totalAmount: true },
           }),

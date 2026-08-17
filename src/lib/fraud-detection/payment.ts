@@ -111,20 +111,21 @@ let accessToken: string | undefined;
 if (userId) {
 accessToken = (await getFreshYouTubeAccessToken(userId)) ?? undefined;
 }
-const ytVideo = await getYouTubeVideo(youtubeId, accessToken);
-if (ytVideo) {
-return {
-isPublic: ytVideo.isLive,
-isPaidPartnership: false,
-caption: ytVideo.description,
-mentions: [...(ytVideo.description.match(/@([\w.-]+)/g) || [])].map((m) => m.slice(1)),
-hashtags: [...(ytVideo.description.match(/#(\w+)/g) || [])].map((h) => h.slice(1)),
-postTimestamp: new Date(ytVideo.publishedAt),
-likeCount: ytVideo.likeCount,
-commentCount: ytVideo.commentCount,
-viewCount: ytVideo.viewCount,
-};
-}
+    const ytVideo = await getYouTubeVideo(youtubeId, accessToken);
+    if (ytVideo) {
+      const isPublic = ytVideo.privacyStatus ? ytVideo.privacyStatus === "public" : true;
+      return {
+        isPublic,
+        isPaidPartnership: false,
+        caption: ytVideo.description,
+        mentions: [...(ytVideo.description.match(/@([\w.-]+)/g) || [])].map((m) => m.slice(1)),
+        hashtags: [...(ytVideo.description.match(/#(\w+)/g) || [])].map((h) => h.slice(1)),
+        postTimestamp: new Date(ytVideo.publishedAt),
+        likeCount: ytVideo.likeCount,
+        commentCount: ytVideo.commentCount,
+        viewCount: ytVideo.viewCount,
+      };
+    }
 } catch (apiError) {
 logger.warn("YouTube official verification failed", {
 error: apiError instanceof Error ? apiError.message : String(apiError),
@@ -150,22 +151,24 @@ description: "Post is not publicly visible",
 score += 100;
 }
 
-// Rule 2: Brand not tagged
-const brandMentioned = params.requiredTags.some(
-(tag) =>
-verifiedPostData.mentions.some((m: string) =>
-m.toLowerCase().includes(tag.replace("@", "").toLowerCase()),
-) || verifiedPostData.caption.toLowerCase().includes(tag.toLowerCase()),
-);
+  // Rule 2: Brand not tagged
+  const missingBrandTags = params.requiredTags.filter((tag) => {
+    const cleanTag = tag.replace("@", "").toLowerCase();
+    const mentionedInList = verifiedPostData.mentions.some((m: string) =>
+      m.toLowerCase().includes(cleanTag),
+    );
+    const mentionedInCaption = verifiedPostData.caption.toLowerCase().includes(cleanTag);
+    return !mentionedInList && !mentionedInCaption;
+  });
 
-if (params.requiredTags.length > 0 && !brandMentioned) {
-flags.push({
-rule: "BRAND_NOT_TAGGED",
-severity: "CRITICAL",
-description: `Brand tags missing: ${params.requiredTags.join(", ")}`,
-});
-score += 80;
-}
+  if (missingBrandTags.length > 0) {
+    flags.push({
+      rule: "BRAND_NOT_TAGGED",
+      severity: "CRITICAL",
+      description: `Brand tags missing: ${missingBrandTags.join(", ")}`,
+    });
+    score += 80;
+  }
 
 // Rule 3: Required hashtags missing
 const missingHashtags = params.requiredHashtags.filter(

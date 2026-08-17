@@ -149,7 +149,7 @@ include: {
 transactions: { take: 10, orderBy: { createdAt: "desc" } },
 },
 },
-verificationDocs: true,
+verificationDocs: { take: 20 },
 violations: { take: 10, orderBy: { createdAt: "desc" } },
 activityLogs: { take: 20, orderBy: { createdAt: "desc" } },
 badges: { include: { badge: true } },

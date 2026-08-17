@@ -230,15 +230,16 @@ GROUP BY DATE_TRUNC('month', "createdAt")
 ORDER BY DATE_TRUNC('month', "createdAt") ASC
 `;
 
-const monthMap = new Map(monthlyData.map(m => [m.month, Number(m.amount)]));
-const result: Array<{ month: string; amount: number }> = [];
-for (let i = 0; i < 12; i++) {
-const d = new Date(startDate);
-d.setMonth(d.getMonth() + i);
-const monthStr = format(d, "MMM yyyy");
-result.push({ month: monthStr, amount: monthMap.get(monthStr) || 0 });
-}
-return result;
+  const monthMap = new Map(monthlyData.map((m) => [m.month, Number(m.amount)]));
+  const result: Array<{ month: string; amount: number }> = [];
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(startDate);
+    d.setDate(1);
+    d.setMonth(d.getMonth() + i);
+    const monthStr = format(d, "MMM yyyy");
+    result.push({ month: monthStr, amount: monthMap.get(monthStr) || 0 });
+  }
+  return result;
 }
 
 async function getMonthlyEarnings(influencerId: string, fy?: string) {

@@ -91,23 +91,23 @@ version: number;
 // ==================== GENERATE CONTRACT ====================
 
 function collectContractText(value: unknown, depth = 0): string[] {
-if (depth > 5 || value === null || value === undefined) return [];
+  if (depth > 5 || value === null || value === undefined) return [];
 
-if (typeof value === "string" || typeof value === "number") {
-return [String(value)];
-}
+  if (typeof value === "string" || typeof value === "number") {
+    return [String(value)];
+  }
 
-if (Array.isArray(value)) {
-return value.flatMap((item) => collectContractText(item, depth + 1));
-}
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => collectContractText(item, depth + 1));
+  }
 
-if (typeof value === "object") {
-return Object.values(value as Record<string, unknown>).flatMap((item) =>
-collectContractText(item, depth + 1),
-);
-}
+  if (typeof value === "object" && value !== null) {
+    return Object.entries(value as Record<string, unknown>)
+      .filter(([k]) => Object.prototype.hasOwnProperty.call(value, k))
+      .flatMap(([, item]) => collectContractText(item, depth + 1));
+  }
 
-return [];
+  return [];
 }
 
 function uniqueNonEmpty(values: string[]): string[] {
@@ -413,7 +413,7 @@ switch (deal.status) {
   const payoutAmount = Math.round(dealAmount * (payoutPercent / 100));
   // Platform keeps proportional amount of the actual platform fee
   const platformFeeKept = Math.round((deal.platformFee ?? Math.round(dealAmount * 0.1)) * (payoutPercent / 100));
-  const refundAmount = totalHeld - payoutAmount - platformFeeKept;
+  const refundAmount = Math.max(0, totalHeld - payoutAmount - platformFeeKept);
 
   return {
     refundAmount,

@@ -182,30 +182,32 @@ return { influencerRefResult, brandRefResult };
 }
 
 export async function validateDisputeStatus(
-checkDispute: { status: DisputeStatus; tier: number } | null,
-disputeId: string
+  checkDispute: { status: DisputeStatus; tier: number } | null,
+  disputeId: string
 ): Promise<{ success: boolean; message: string }> {
-if (!checkDispute) return { success: false, message: "Dispute not found" };
+  if (!checkDispute) return { success: false, message: "Dispute not found" };
 
-if (
-checkDispute.status === "RESOLVED" ||
-checkDispute.status === "TIER2_MEDIATION" ||
-checkDispute.status === "TIER3_ARBITRATION"
-) {
-const lock = await prisma.dispute.updateMany({
-where: { id: disputeId, status: "TIER3_ARBITRATION" },
-data: {
-status: "TIER3_ARBITRATION",
-updatedAt: new Date(),
-},
-});
+  if (checkDispute.status === "RESOLVED") {
+    return { success: false, message: "Dispute already resolved, closed, or being processed." };
+  }
 
-if (lock.count === 0) {
-return { success: false, message: "Dispute already resolved, closed, or being processed." };
-}
-}
+  if (
+    checkDispute.status === "TIER2_MEDIATION" ||
+    checkDispute.status === "TIER3_ARBITRATION"
+  ) {
+    const lock = await prisma.dispute.updateMany({
+      where: { id: disputeId, status: checkDispute.status },
+      data: {
+        updatedAt: new Date(),
+      },
+    });
 
-return { success: true, message: "" };
+    if (lock.count === 0) {
+      return { success: false, message: "Dispute already resolved, closed, or being processed." };
+    }
+  }
+
+  return { success: true, message: "" };
 }
 
 export function calculateResolutionAmounts(analysis: MediatorAnalysis, deal: FullDeal) {

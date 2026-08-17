@@ -1,96 +1,42 @@
-import { apiWrapper } from "@/lib/api-wrapper";
-import { NextRequest, NextResponse } from "next/server";
+import { apiWrapper, ApiResponse, ValidatedNextRequest } from "@/lib/api-wrapper";
 import { z } from "zod";
-import { auth } from "@/lib/auth";
 import { routeParamsSchema } from "@/lib/validations";
 import { DealService } from "@/services/deal.service";
-import { logger } from "@/lib/logger";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { AppError } from "@/lib/errors";
 
-const paramsSchema = routeParamsSchema;
-const rejectSchema = z.object({
-reason: z.string().trim().min(5).max(500).optional(),
-}).optional();
+const rejectSchema = z
+  .object({
+    reason: z.string().trim().min(5).max(500).optional(),
+  })
+  .optional();
 
-function validateRejectPayload(body: unknown) {
-const parsedBody = rejectSchema.safeParse(body);
-if (!parsedBody.success) {
-const firstIssue = parsedBody.error.issues[0];
-const fieldName = firstIssue?.path.join(".") || "";
-const issueMsg = firstIssue?.message || "Invalid value";
-const prefix = fieldName ? `${fieldName} - ` : "";
-return {
-success: false,
-message: `Invalid payload: ${prefix}${issueMsg}`,
-errors: parsedBody.error.format()
-};
-}
-return { success: true, data: parsedBody.data };
-}
+async function handleReject(req: ValidatedNextRequest) {
+  const userId = req.session?.user?.id;
+  if (!userId) {
+    return ApiResponse.unauthorized();
+  }
 
-function handleRejectError(error: unknown) {
-logger.error("POST /api/deals/[id]/reject error", { error });
+  const validParams = req.validParams as { id: string } | undefined;
+  const dealId = validParams?.id;
+  if (!dealId) {
+    return ApiResponse.error("Invalid Deal ID", 400);
+  }
 
-if (error instanceof AppError) {
-return NextResponse.json({ success: false, message: error.message }, { status: error.statusCode });
+  const validBody = req.validBody as { reason?: string } | undefined;
+  const reason = validBody?.reason;
+
+  await DealService.rejectPendingInvite(userId, dealId, reason);
+
+  return ApiResponse.success(null, "Invite rejected successfully");
 }
 
-const errMsg = error instanceof Error ? error.message : String(error);
-const errCode = (error as { code?: string })?.code;
-
-if (errMsg?.includes("Unauthorized")) {
-return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
-}
-
-if (errMsg?.includes("not found") || errCode === "P2025") {
-return NextResponse.json({ success: false, message: "Deal not found" }, { status: 404 });
-}
-
-if (errMsg?.includes("pending signature")) {
-return NextResponse.json({ success: false, message: errMsg }, { status: 400 });
-}
-
-return NextResponse.json({ success: false, message: "Failed to reject invite" }, { status: 500 });
-}
-
-async function _handler_POST(request: NextRequest, context: { params: Promise<Record<string, string | string[]>> }) {
-try {
-const session = await auth();
-if (!session?.user?.id) {
-return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-}
-
-const limit = await checkRateLimit(session.user.id, "DEAL_UPDATES");
-if (!limit.success) {
-return NextResponse.json({ success: false, message: "Too many deal update requests" }, { status: 429 });
-}
-
-const resolvedParams = await context.params;
-const parsedParams = paramsSchema.safeParse(resolvedParams);
-if (!parsedParams.success) return NextResponse.json({ success: false, message: "Invalid Deal ID" }, { status: 400 });
-
-const body = await request.json().catch(() => ({}));
-const validation = validateRejectPayload(body);
-if (!validation.success) {
-return NextResponse.json(
-{ success: false, message: validation.message, data: validation.errors },
-{ status: 400 }
-);
-}
-
-await DealService.rejectPendingInvite(
-session.user.id,
-parsedParams.data.id,
-validation.data?.reason,
-);
-
-return NextResponse.json({ success: true, message: "Invite rejected successfully" }, { status: 200 });
-} catch (error: unknown) {
-return handleRejectError(error);
-}
-}
-
-
-// Wrapped handlers via apiWrapper
-export const POST = apiWrapper(_handler_POST);
+export const POST = apiWrapper(handleReject, {
+  requireAuth: true,
+  userRateLimit: {
+    bucket: "DEAL_UPDATES",
+    errorMessage: "Too many deal update requests",
+  },
+  validate: {
+    params: routeParamsSchema,
+    body: rejectSchema,
+  },
+});

@@ -59,7 +59,7 @@ function applyInfluencerBonuses(
   factors: InfluencerDRSFactors,
   state: { score: number; breakdown: DRSResult["breakdown"] },
 ) {
-  const qualifiedDeals = Math.min(factors.completedDeals, Math.floor(factors.totalEarningsPaise / 50000));
+  const qualifiedDeals = Math.min(factors.completedDeals, Math.floor(factors.totalEarningsPaise / 500000));
   const dealBonus = qualifiedDeals * 15;
   if (dealBonus > 0) {
     state.score += dealBonus;

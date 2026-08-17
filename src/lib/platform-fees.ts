@@ -21,9 +21,9 @@ select: { xp: true },
 const userLevel = brandUser ? calculateLevel(brandUser.xp).level : 1;
 const levelBasedFee = getPlatformFeePercentage(userLevel);
 const referralFeeInfo = await getEffectivePlatformFee(brandUserId);
-const effectivePlatformFee = Math.min(
-levelBasedFee,
-referralFeeInfo.effectiveFee,
+const effectivePlatformFee = Math.max(
+  0,
+  Math.min(levelBasedFee, referralFeeInfo.effectiveFee),
 );
 
 return {

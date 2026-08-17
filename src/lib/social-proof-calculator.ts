@@ -117,11 +117,12 @@ return 0;
 }
 
 function scoreRating(averageRating: number, _totalDeals: number): number {
-if (averageRating >= 4.5) return 10;
-if (averageRating >= 4.0) return 7;
-if (averageRating >= 3.5) return 4;
-if (averageRating < 3.0 && averageRating > 0) return -5;
-return 0;
+  const rating = averageRating > 5 ? averageRating / 100 : averageRating;
+  if (rating >= 4.5) return 10;
+  if (rating >= 4.0) return 7;
+  if (rating >= 3.5) return 4;
+  if (rating < 3.0 && rating > 0) return -5;
+  return 0;
 }
 
 /**
@@ -486,37 +487,56 @@ return { processed, failed };
 // ==================== HELPERS ====================
 
 function calculateEngagementScore(
-followers: number,
-engagementRate: number,
+  followers: number,
+  engagementRate: number,
 ): number {
-type Bracket = { maxFollowers: number; rules: { minRate: number; maxRate: number; score: number }[] };
-const brackets: Bracket[] = [
-{ maxFollowers: 10_000, rules: [
-{ minRate: 4, maxRate: 10, score: 25 },
-{ minRate: 2, maxRate: 4, score: 15 },
-{ minRate: 10, maxRate: 20, score: 10 },
-{ minRate: 20, maxRate: Infinity, score: -10 },
-]},
-{ maxFollowers: 50_000, rules: [
-{ minRate: 2, maxRate: 6, score: 20 },
-{ minRate: 1, maxRate: 2, score: 10 },
-{ minRate: 10, maxRate: Infinity, score: -5 },
-]},
-{ maxFollowers: 500_000, rules: [
-{ minRate: 1, maxRate: 5, score: 15 },
-{ minRate: 0.5, maxRate: 1, score: 8 },
-{ minRate: 8, maxRate: Infinity, score: -5 },
-]},
-{ maxFollowers: Infinity, rules: [
-{ minRate: 0.5, maxRate: 3, score: 10 },
-{ minRate: 0.2, maxRate: 0.5, score: 5 },
-{ minRate: 5, maxRate: Infinity, score: -5 },
-]},
-];
-const defaults = [5, 5, 3, 2];
-const bracketIdx = brackets.findIndex(b => followers < b.maxFollowers);
-const bracket = brackets[bracketIdx >= 0 ? bracketIdx : brackets.length - 1]!;
-const defaultScore = defaults[bracketIdx >= 0 ? bracketIdx : defaults.length - 1] ?? 2;
-const rule = bracket.rules.find(r => engagementRate >= r.minRate && engagementRate <= r.maxRate);
-return rule ? rule.score : defaultScore;
+  type Bracket = { maxFollowers: number; rules: { minRate: number; maxRate: number; score: number }[] };
+  const brackets: Bracket[] = [
+    {
+      maxFollowers: 10_000,
+      rules: [
+        { minRate: 4, maxRate: 10, score: 25 },
+        { minRate: 2, maxRate: 4, score: 15 },
+        { minRate: 10, maxRate: 20, score: 10 },
+        { minRate: 1, maxRate: 2, score: 5 },
+        { minRate: 20, maxRate: Infinity, score: -10 },
+      ],
+    },
+    {
+      maxFollowers: 50_000,
+      rules: [
+        { minRate: 2, maxRate: 6, score: 20 },
+        { minRate: 6, maxRate: 12, score: 15 },
+        { minRate: 1, maxRate: 2, score: 10 },
+        { minRate: 0.5, maxRate: 1, score: 5 },
+        { minRate: 12, maxRate: Infinity, score: -5 },
+      ],
+    },
+    {
+      maxFollowers: 500_000,
+      rules: [
+        { minRate: 1.5, maxRate: 5, score: 15 },
+        { minRate: 5, maxRate: 10, score: 12 },
+        { minRate: 0.5, maxRate: 1.5, score: 8 },
+        { minRate: 0.2, maxRate: 0.5, score: 3 },
+        { minRate: 10, maxRate: Infinity, score: -5 },
+      ],
+    },
+    {
+      maxFollowers: Infinity,
+      rules: [
+        { minRate: 0.8, maxRate: 3, score: 10 },
+        { minRate: 3, maxRate: 6, score: 8 },
+        { minRate: 0.2, maxRate: 0.8, score: 5 },
+        { minRate: 0, maxRate: 0.2, score: 2 },
+        { minRate: 6, maxRate: Infinity, score: -5 },
+      ],
+    },
+  ];
+  const defaults = [5, 5, 3, 2];
+  const bracketIdx = brackets.findIndex((b) => followers < b.maxFollowers);
+  const bracket = brackets[bracketIdx >= 0 ? bracketIdx : brackets.length - 1]!;
+  const defaultScore = defaults[bracketIdx >= 0 ? bracketIdx : defaults.length - 1] ?? 2;
+  const rule = bracket.rules.find((r) => engagementRate >= r.minRate && engagementRate <= r.maxRate);
+  return rule ? rule.score : defaultScore;
 }

@@ -50,9 +50,10 @@ followerCount,
 dealAmount: deal.amount,
 });
 
-const uniquenessResult = deal.verificationHash
-? await checkContentUniqueness(deal.verificationHash, deal.id)
-: null;
+  const uniquenessResult =
+    deal.verificationHash && deal.verificationHash.trim().length > 0
+      ? await checkContentUniqueness(deal.verificationHash, deal.id)
+      : null;
 
 const privacyResult = await checkAccountPrivacyFlip(deal.influencer.userId, postUrl);
 

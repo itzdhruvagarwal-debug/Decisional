@@ -96,13 +96,15 @@ action,
 * Simple text similarity using Jaccard index
 */
 export function calculateSimilarity(text1: string, text2: string): number {
-const words1 = new Set(text1.toLowerCase().split(/\s+/));
-const words2 = new Set(text2.toLowerCase().split(/\s+/));
+  const words1 = new Set(text1.toLowerCase().split(/\s+/).map((w) => w.trim()).filter(Boolean));
+  const words2 = new Set(text2.toLowerCase().split(/\s+/).map((w) => w.trim()).filter(Boolean));
 
-const intersection = new Set([...words1].filter((x) => words2.has(x)));
-const union = new Set([...words1, ...words2]);
+  if (words1.size === 0 && words2.size === 0) return 0;
 
-return intersection.size / union.size;
+  const intersection = new Set([...words1].filter((x) => words2.has(x)));
+  const union = new Set([...words1, ...words2]);
+
+  return union.size > 0 ? intersection.size / union.size : 0;
 }
 
 // VPN/Proxy check is now handled by the standalone ipinfo.ts module

@@ -664,9 +664,9 @@ ${sanitizedContent}
 You're receiving this because you subscribed to the ${APP_NAME} Blog. <a href="${unsubscribeUrl}" style="color: #999; text-decoration: underline;">Unsubscribe here</a>.
 </p>
 `,
-`${sanitizedSubject}\n\n${sanitizedContent}\n\nUnsubscribe: ${unsubscribeUrl}`,
-),
-text: `${sanitizedSubject}\n\n${sanitizedContent}\n\nUnsubscribe: ${unsubscribeUrl}`,
+      `${sanitizedSubject.replace(/\s+/g, " ").trim()}`,
+    ),
+    text: `${sanitizedSubject}\n\n${sanitizedContent.replace(/<[^>]*>/g, "")}\n\nUnsubscribe: ${unsubscribeUrl}`,
 tags: [
 { name: "category", value: "blog" },
 { name: "type", value: "newsletter" },

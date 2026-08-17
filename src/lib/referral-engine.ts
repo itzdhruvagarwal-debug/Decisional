@@ -506,20 +506,21 @@ xpAwarded: tierUpgraded ? currentTier.xpReward : 0
 }
 
 function buildActiveReferralWhere(referrerId: string): Prisma.UserWhereInput {
-return {
-referredBy: referrerId,
-OR: [
-{ influencerProfile: { completedDeals: { gt: 0 } } },
-{
-brandProfile: {
-OR: [
-{ campaigns: { some: { status: "COMPLETED" } } },
-{ totalSpent: { gt: 0 } }
-]
-}
-},
-],
-};
+  return {
+    referredBy: referrerId,
+    OR: [
+      { influencerProfile: { completedDeals: { gt: 0 } } },
+      {
+        brandProfile: {
+          OR: [
+            { campaigns: { some: { status: "COMPLETED" } } },
+            { deals: { some: { status: "COMPLETED" } } },
+            { totalSpent: { gt: 0 } },
+          ],
+        },
+      },
+    ],
+  };
 }
 
 async function checkDuplicateReferral(

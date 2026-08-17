@@ -206,13 +206,14 @@ return `${local.slice(0, 2)}***@${domain}`;
 * This allows efficient indexed lookups without decrypting all records.
 */
 export function hashForDuplicateDetection(value: string): string {
-const hmacKey = process.env.HMAC_KEY;
-if (!hmacKey) {
-throw AppError.badRequest("HMAC_KEY env var is required for duplicate detection hashing.");
-}
+  const hmacKey = process.env.HMAC_KEY;
+  if (!hmacKey) {
+    throw AppError.badRequest("HMAC_KEY env var is required for duplicate detection hashing.");
+  }
 
-const key = Buffer.from(hmacKey, "hex");
-const hmac = createHmac("sha256", key);
-hmac.update(value);
-return hmac.digest("hex");
+  const normalized = String(value ?? "").trim().toLowerCase();
+  const key = Buffer.from(hmacKey, "hex");
+  const hmac = createHmac("sha256", key);
+  hmac.update(normalized);
+  return hmac.digest("hex");
 }

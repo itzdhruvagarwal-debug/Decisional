@@ -478,17 +478,19 @@ return result;
 );
 }
 
-private static async getMonthlyRevenueHistory(monthsCount: number) {
-const months = Array.from({ length: monthsCount }, (_, i) => {
-const d = subMonths(new Date(), i);
-return {
-date: d,
-month: format(d, "MMM yyyy"),
-revenue: 0,
-gmv: 0,
-deals: 0,
-};
-}).reverse();
+  private static async getMonthlyRevenueHistory(monthsCount: number) {
+    const baseDate = new Date();
+    baseDate.setDate(1);
+    const months = Array.from({ length: monthsCount }, (_, i) => {
+      const d = subMonths(baseDate, i);
+      return {
+        date: d,
+        month: format(d, "MMM yyyy"),
+        revenue: 0,
+        gmv: 0,
+        deals: 0,
+      };
+    }).reverse();
 
 const transactions = await prisma.transaction.findMany({
 where: {

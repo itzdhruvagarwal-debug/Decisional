@@ -18,40 +18,40 @@ contentJSX: () => React.JSX.Element;
 
 const BLOG_POSTS: BlogPost[] = [
 {
-id: "tds-compliance-194o",
-category: "Compliance",
-title: "TDS Compliance under Section 194-O for Creators",
-description: "An operational deep-dive into the 1% TDS deduction rule on e-commerce platform payouts for Indian influencers.",
-readTime: "6 min read",
-date: "July 28, 2026",
-contentJSX: () => (
-<div className="text-left space-y-6 text-secondary">
-<p className="text-base leading-relaxed">
-Under the Indian Income Tax Act, Section 194-O mandates that e-commerce operators deduct Tax Deducted at Source (TDS) at the rate of 1% on the gross amount of sales or services facilitated through their digital platforms.
-</p>
+    id: "tds-compliance-194o",
+    category: "Compliance",
+    title: "TDS Compliance under Section 194-O for Creators",
+    description: "An operational deep-dive into the 0.1% TDS deduction rule on e-commerce platform payouts for Indian influencers.",
+    readTime: "6 min read",
+    date: "July 28, 2026",
+    contentJSX: () => (
+      <div className="text-left space-y-6 text-secondary">
+        <p className="text-base leading-relaxed">
+          Under the Indian Income Tax Act, Section 194-O mandates that e-commerce operators deduct Tax Deducted at Source (TDS) at the rate of 0.1% on the gross amount of sales or services facilitated through their digital platforms.
+        </p>
 
-<h3 className="text-xl font-bold text-white mt-8">Key Highlights for Influencers</h3>
-<ol className="list-decimal pl-6 space-y-3">
-<li>
-<strong>Who is an E-commerce Operator?</strong>: Platforms (like Decisional) that facilitate transactions between brands and creators are classified as e-commerce operators.
-</li>
-<li>
-<strong>The 1% TDS Rate</strong>: The platform is legally required to deduct 1% TDS on the total payment due to the creator before releasing the payout.
-</li>
-<li>
-<strong>PAN Requirement</strong>: Ensure your PAN is correctly updated in your Decisional Wallet. If a PAN is not provided, the TDS deduction rate rises to a hefty 20% under Section 206AA.
-</li>
-<li>
-<strong>Threshold Limits</strong>: If you are an individual creator and your gross sales/services via the platform do not exceed 5,00,000 in a financial year, no TDS is deducted (provided you have furnished your PAN).
-</li>
-</ol>
+        <h3 className="text-xl font-bold text-white mt-8">Key Highlights for Influencers</h3>
+        <ol className="list-decimal pl-6 space-y-3">
+          <li>
+            <strong>Who is an E-commerce Operator?</strong>: Platforms (like Decisional) that facilitate transactions between brands and creators are classified as e-commerce operators.
+          </li>
+          <li>
+            <strong>The 0.1% TDS Rate</strong>: The platform is legally required to deduct 0.1% TDS on the total payment due to the creator before releasing the payout (once the financial year threshold is crossed).
+          </li>
+          <li>
+            <strong>PAN Requirement</strong>: Ensure your PAN is correctly updated in your Decisional Wallet. If a PAN is not provided, the TDS deduction rate rises to a hefty 20% under Section 206AA.
+          </li>
+          <li>
+            <strong>Threshold Limits</strong>: If you are an individual creator and your gross sales/services via the platform do not exceed ₹5,00,000 in a financial year, no TDS is deducted (provided you have furnished your PAN).
+          </li>
+        </ol>
 
-<h3 className="text-xl font-bold text-white mt-8">How to File and Claim Refund</h3>
-<p className="text-base leading-relaxed">
-All TDS deductions will be reported in your Form 26AS. You can claim credits or refunds for these deductions when filing your annual Income Tax Return (ITR) under Form ITR-3 or ITR-4.
-</p>
-</div>
-)
+        <h3 className="text-xl font-bold text-white mt-8">How to File and Claim Refund</h3>
+        <p className="text-base leading-relaxed">
+          All TDS deductions will be reported in your Form 26AS. You can claim credits or refunds for these deductions when filing your annual Income Tax Return (ITR) under Form ITR-3 or ITR-4.
+        </p>
+      </div>
+    )
 },
 {
 id: "gst-invoicing-creators",

@@ -464,10 +464,10 @@ parsed.searchParams.has("v")
 return parsed.searchParams.get("v");
 }
 
-// youtu.be/ID
-if (parsed.hostname === "youtu.be") {
-return parsed.pathname.slice(1);
-}
+  // youtu.be/ID
+  if (parsed.hostname === "youtu.be" || parsed.hostname === "www.youtu.be") {
+    return parsed.pathname.slice(1).split("/")[0]?.trim() || null;
+  }
 
 // youtube.com/shorts/ID
 if (parsed.pathname.startsWith("/shorts/")) {

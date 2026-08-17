@@ -251,18 +251,18 @@ logger.error("Error deleting user PII file from storage", err, { url, key });
 }
 }
 }
-} catch (error: unknown) {
-const errStatus = (error as { statusCode?: number })?.statusCode;
-if (errStatus && errStatus >= 400 && errStatus < 500) {
-// Client errors (4xx): safe to return a generic denial message without internal details
-return NextResponse.json(
-{ success: false, message: "Account deletion could not be completed. Please try again." },
-{ status: errStatus }
-);
-}
-// For 5xx or unknown errors, rethrow so apiWrapper logs and returns a generic 500
-throw error;
-}
+    } catch (error: unknown) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      const errStatus = (error as { statusCode?: number })?.statusCode;
+      if (errStatus && errStatus >= 400 && errStatus < 500) {
+        const message = (error as { message?: string })?.message || "Account deletion could not be completed. Please try again.";
+        return NextResponse.json({ success: false, message }, { status: errStatus });
+      }
+      // For 5xx or unknown errors, rethrow so apiWrapper logs and returns a generic 500
+      throw error;
+    }
 
 logger.info("Account deleted (anonymized)", { userId });
 

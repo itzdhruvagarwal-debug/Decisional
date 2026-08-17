@@ -537,35 +537,22 @@ readonly displayValue?: string;
 }
 
 function MetricBar({ label, value, max, color, displayValue }: MetricBarProps) {
-const barId = React.useId().replace(/:/g, "");
-const fillClass = `trust-meter-fill-${barId}`;
-const progressPercent = (value / max) * 100;
+  const progressPercent = Math.min(100, Math.max(0, (value / max) * 100));
 
-return (
-<div>
-<div
-className="flex justify-between mb-1"
->
-<span
-className="text-sm text-secondary"
->
-{label}
-</span>
-<span className="text-sm font-semibold">
-{displayValue || `${value}%`}
-</span>
-</div>
-<div className="trust-meter">
-<style>{`
-.${fillClass} {
-width: ${progressPercent}%;
-background: ${color};
-}
-`}</style>
-<div className={`trust-meter-fill ${fillClass}`} />
-</div>
-</div>
-);
+  return (
+    <div>
+      <div className="flex justify-between mb-1">
+        <span className="text-sm text-secondary">{label}</span>
+        <span className="text-sm font-semibold">{displayValue || `${value}%`}</span>
+      </div>
+      <div className="trust-meter">
+        <div
+          className="trust-meter-fill transition-all duration-300"
+          style={{ width: `${progressPercent}%`, backgroundColor: color }}
+        />
+      </div>
+    </div>
+  );
 }
 
 function formatAction(action: string) {
