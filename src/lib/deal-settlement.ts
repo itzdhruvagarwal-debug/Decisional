@@ -92,6 +92,16 @@ grossPayout: number,
   return Math.max(0, totalRequiredTds - previousFyTdsAlreadyDeducted);
 }
 
+function getAppliedTdsRatePercent(hasPan: boolean, is194J: boolean): string {
+  if (!hasPan) {
+    return is194J ? "20%" : "5%";
+  }
+  if (is194J) {
+    return "10%";
+  }
+  return "0.1%";
+}
+
 export async function creditInfluencerPayoutWithTax(
 tx: Prisma.TransactionClient,
 params: {
@@ -129,10 +139,7 @@ params.metadata as Record<string, unknown> | undefined,
     });
     const is194J = taxCompliance?.tdsSection?.startsWith("194J") ?? false;
     const appliedSection = is194J ? "194J" : "194-O";
-    
-    const appliedRatePercent = !taxCompliance?.panLast4
-      ? (is194J ? "20%" : "5%")
-      : (is194J ? "10%" : "0.1%");
+    const appliedRatePercent = getAppliedTdsRatePercent(Boolean(taxCompliance?.panLast4), is194J);
 
     await tx.transaction.create({
       data: {
