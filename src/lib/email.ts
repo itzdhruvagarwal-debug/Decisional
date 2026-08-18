@@ -666,7 +666,7 @@ You're receiving this because you subscribed to the ${APP_NAME} Blog. <a href="$
 `,
       `${sanitizedSubject.replace(/\s+/g, " ").trim()}`,
     ),
-    text: `${sanitizedSubject}\n\n${sanitizedContent.replace(/<[^>]*>/g, "")}\n\nUnsubscribe: ${unsubscribeUrl}`,
+    text: `${sanitizedSubject}\n\n${stripHtmlTags(sanitizedContent)}\n\nUnsubscribe: ${unsubscribeUrl}`,
 tags: [
 { name: "category", value: "blog" },
 { name: "type", value: "newsletter" },

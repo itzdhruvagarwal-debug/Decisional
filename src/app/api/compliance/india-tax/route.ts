@@ -293,16 +293,18 @@ function populatePanDetails(updateData: Record<string, unknown>, panNumber?: str
   }
 }
 
-function populateGstDetails(updateData: Record<string, unknown>, registeredForGst: boolean, gstin?: string | null) {
-  if (registeredForGst && gstin) {
+function populateRegisteredGstDetails(updateData: Record<string, unknown>, gstin?: string | null) {
+  if (gstin) {
     updateData.gstin = encrypt(gstin);
     updateData.gstinLast4 = gstin.slice(-4);
     updateData.gstStateCode = getGstinStateCode(gstin);
-  } else if (!registeredForGst) {
-    updateData.gstin = null;
-    updateData.gstinLast4 = null;
-    updateData.gstStateCode = null;
   }
+}
+
+function clearGstDetails(updateData: Record<string, unknown>) {
+  updateData.gstin = null;
+  updateData.gstinLast4 = null;
+  updateData.gstStateCode = null;
 }
 
 function populateItrDetails(
@@ -350,7 +352,11 @@ function buildComplianceUpdatePayload(
   };
 
   populatePanDetails(updateData, data.panNumber);
-  populateGstDetails(updateData, registeredForGst, data.gstin);
+  if (registeredForGst) {
+    populateRegisteredGstDetails(updateData, data.gstin);
+  } else {
+    clearGstDetails(updateData);
+  }
   populateItrDetails(updateData, data.itrAcknowledgementNumber, data.itrAssessmentYear);
 
   return updateData;

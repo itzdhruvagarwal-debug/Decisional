@@ -32,7 +32,7 @@ const nextConfig: NextConfig = {
   ...(isVercel ? {} : { output: "standalone" as const }),
   compress: true,
   experimental: {
-    optimizePackageImports: ["lucide-react", "framer-motion", "date-fns", "recharts"],
+    optimizePackageImports: ["framer-motion", "date-fns", "recharts"],
   },
   images: {
     remotePatterns: [

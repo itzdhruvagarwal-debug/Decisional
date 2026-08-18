@@ -103,7 +103,7 @@ function collectContractText(value: unknown, depth = 0): string[] {
 
   if (typeof value === "object" && value !== null) {
     return Object.entries(value as Record<string, unknown>)
-      .filter(([k]) => Object.prototype.hasOwnProperty.call(value, k))
+      .filter(([k]) => Object.hasOwn(value, k))
       .flatMap(([, item]) => collectContractText(item, depth + 1));
   }
 

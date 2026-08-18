@@ -73,48 +73,72 @@ if (data.guidelines !== undefined) {
 updateData.guidelines = safeStringOrNullCast(data.guidelines);
 }
 }
+function parseOptionalPositiveNumber(val: unknown): number | null {
+  if (val === undefined || val === null || val === "") return null;
+  const num = Number(val);
+  return !Number.isNaN(num) && num > 0 ? num : null;
+}
+
+function parseOptionalNonNegativeNumber(val: unknown): number | null {
+  if (val === undefined || val === null || val === "") return null;
+  const num = Number(val);
+  return !Number.isNaN(num) && num >= 0 ? num : null;
+}
+
+function parseOptionalDate(val: unknown): Date | null {
+  if (!val) return null;
+  const d = new Date(val as string);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 export function buildDemographicsUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
-if (data.targetCategories !== undefined) updateData.targetCategories = data.targetCategories as string[];
-if (data.targetCities !== undefined) updateData.targetCities = data.targetCities as string[];
-if (data.targetLanguages !== undefined) updateData.targetLanguages = data.targetLanguages as string[];
-if (data.targetGender !== undefined) {
-updateData.targetGender = safeStringOrNullCast(data.targetGender);
+  if (data.targetCategories !== undefined) updateData.targetCategories = data.targetCategories as string[];
+  if (data.targetCities !== undefined) updateData.targetCities = data.targetCities as string[];
+  if (data.targetLanguages !== undefined) updateData.targetLanguages = data.targetLanguages as string[];
+  if (data.targetGender !== undefined) {
+    updateData.targetGender = safeStringOrNullCast(data.targetGender);
+  }
+  if (data.targetAgeMin !== undefined) {
+    updateData.targetAgeMin = parseOptionalNonNegativeNumber(data.targetAgeMin);
+  }
+  if (data.targetAgeMax !== undefined) {
+    updateData.targetAgeMax = parseOptionalNonNegativeNumber(data.targetAgeMax);
+  }
 }
-if (data.targetAgeMin !== undefined) {
-updateData.targetAgeMin = data.targetAgeMin !== null && data.targetAgeMin !== undefined ? Number(data.targetAgeMin) : null;
-}
-if (data.targetAgeMax !== undefined) {
-updateData.targetAgeMax = data.targetAgeMax !== null && data.targetAgeMax !== undefined ? Number(data.targetAgeMax) : null;
-}
-}
+
 export function buildFollowersAndEngagementUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
-if (data.minFollowers !== undefined) updateData.minFollowers = Number(data.minFollowers);
-if (data.maxFollowers !== undefined) {
-updateData.maxFollowers = Number(data.maxFollowers) > 0 ? Number(data.maxFollowers) : null;
+  if (data.minFollowers !== undefined) updateData.minFollowers = Number(data.minFollowers);
+  if (data.maxFollowers !== undefined) {
+    updateData.maxFollowers = parseOptionalPositiveNumber(data.maxFollowers);
+  }
+  if (data.minEngagementRate !== undefined) {
+    updateData.minEngagementRate = parseOptionalNonNegativeNumber(data.minEngagementRate);
+  }
 }
-if (data.minEngagementRate !== undefined) {
-updateData.minEngagementRate = data.minEngagementRate ? Number(data.minEngagementRate) : null;
-}
-}
+
 export function buildBudgetAndTimelineUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
   if (data.totalBudget !== undefined) {
-    const val = Number(data.totalBudget);
-    if (!Number.isNaN(val) && val >= 0) updateData.totalBudget = val;
+    const val = parseOptionalNonNegativeNumber(data.totalBudget);
+    if (val !== null) updateData.totalBudget = val;
   }
   if (data.perInfluencerBudget !== undefined) {
-    const val = data.perInfluencerBudget ? Number(data.perInfluencerBudget) : null;
-    updateData.perInfluencerBudget = val !== null && !Number.isNaN(val) && val >= 0 ? val : null;
+    updateData.perInfluencerBudget = parseOptionalNonNegativeNumber(data.perInfluencerBudget);
   }
   if (data.maxInfluencers !== undefined) {
-    const val = data.maxInfluencers ? Number(data.maxInfluencers) : null;
-    updateData.maxInfluencers = val !== null && !Number.isNaN(val) && val > 0 ? val : null;
+    updateData.maxInfluencers = parseOptionalPositiveNumber(data.maxInfluencers);
   }
-  if (data.deliverables !== undefined) updateData.deliverables = data.deliverables as Prisma.InputJsonValue;
-if (data.applicationDeadline !== undefined) {
-updateData.applicationDeadline = data.applicationDeadline ? new Date(data.applicationDeadline as string) : null;
-}
-if (data.contentDeadline !== undefined) updateData.contentDeadline = new Date(data.contentDeadline as string);
-if (data.postingDeadline !== undefined) updateData.postingDeadline = new Date(data.postingDeadline as string);
+  if (data.deliverables !== undefined) {
+    updateData.deliverables = data.deliverables as Prisma.InputJsonValue;
+  }
+  if (data.applicationDeadline !== undefined) {
+    updateData.applicationDeadline = parseOptionalDate(data.applicationDeadline);
+  }
+  if (data.contentDeadline !== undefined) {
+    updateData.contentDeadline = new Date(data.contentDeadline as string);
+  }
+  if (data.postingDeadline !== undefined) {
+    updateData.postingDeadline = new Date(data.postingDeadline as string);
+  }
 }
 export function buildProductSeedingUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
 if (data.requiresProduct !== undefined) updateData.requiresProduct = Boolean(data.requiresProduct);

@@ -267,21 +267,7 @@ const data = await res.json();
 
     if (data.success && data.data) {
       const bankName = String(data.data.full_name || "");
-      const cleanTokens = (n: string) =>
-        n
-          .toLowerCase()
-          .replace(/^(mr|ms|mrs|dr|prof|ca|adv|shri|smt|m\/s)\.?\s+/i, "")
-          .split(/\s+/)
-          .filter((t) => t.length >= 2);
-
-      const bankTokens = cleanTokens(bankName);
-      const beneficiaryTokens = cleanTokens(params.beneficiaryName);
-
-      const nameMatch =
-        bankTokens.length > 0 &&
-        beneficiaryTokens.length > 0 &&
-        (beneficiaryTokens.some((bt) => bankTokens.includes(bt)) ||
-          bankTokens.some((bkt) => beneficiaryTokens.includes(bkt)));
+      const nameMatch = hasMatchingNameTokens(bankName, params.beneficiaryName);
 
       return {
         success: true,
@@ -384,27 +370,14 @@ const dlLast4 = dlAadhaar.slice(-4);
 const userLast4 = aadhaarNumber.slice(-4);
 
   if (!dlAadhaar || dlAadhaar.length < 4) {
-    const cleanTokens = (n: string) =>
-      n
-        .toLowerCase()
-        .replace(/^(mr|ms|mrs|dr|prof|ca|adv|shri|smt|m\/s)\.?\s+/i, "")
-        .split(/\s+/)
-        .filter((t) => t.length >= 2);
-
-    const dlTokens = cleanTokens(String(profile.name || ""));
     const dbRaw = String(
       dbUser?.influencerProfile?.displayName ||
       dbUser?.brandProfile?.companyName ||
       dbUser?.email?.split("@")[0] ||
       "",
     );
-    const dbTokens = cleanTokens(dbRaw);
 
-    const isMatch =
-      dlTokens.length > 0 &&
-      dbTokens.length > 0 &&
-      (dbTokens.some((dt) => dlTokens.includes(dt)) ||
-        dlTokens.some((dlt) => dbTokens.includes(dlt)));
+    const isMatch = hasMatchingNameTokens(String(profile.name || ""), dbRaw);
 
     if (!isMatch) {
       return {
@@ -568,6 +541,26 @@ error: "Verification service unavailable",
 }
 
 // ==================== HELPERS ====================
+
+function tokenizeAndCleanName(name: string): string[] {
+  return name
+    .toLowerCase()
+    .replace(/^(mr|ms|mrs|dr|prof|ca|adv|shri|smt|m\/s)\.?\s+/i, "")
+    .split(/\s+/)
+    .filter((t) => t.length >= 2);
+}
+
+function hasMatchingNameTokens(nameA: string, nameB: string): boolean {
+  const tokensA = tokenizeAndCleanName(nameA);
+  const tokensB = tokenizeAndCleanName(nameB);
+
+  return (
+    tokensA.length > 0 &&
+    tokensB.length > 0 &&
+    (tokensA.some((ta) => tokensB.includes(ta)) ||
+      tokensB.some((tb) => tokensA.includes(tb)))
+  );
+}
 
 function maskDocument(doc: string, visibleDigits: number): string {
 if (doc.length <= visibleDigits) return doc;

@@ -4,12 +4,10 @@ import { ContractTerms, checkRevisionLimit } from "@/lib/contract-engine";
 import { assertSufficientBalance } from "@/lib/utils";
 import { checkMessageForContacts } from "@/lib/contact-filter";
 import { updateTrustAndLevel } from "@/lib/trust-engine";
-import { recalculateSocialProof } from "@/lib/social-proof-calculator";
 import prisma, { ensurePlatformTreasury } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { AppError } from "@/lib/errors";
 import { NotificationService } from "@/services/notification.service";
-import { PaymentService } from "@/services/payment.service";
 import { logger } from "@/lib/logger";
 import { DealWithRelations, invalidateDealCache, lockAndFetchDealForAction } from "./helpers";
 

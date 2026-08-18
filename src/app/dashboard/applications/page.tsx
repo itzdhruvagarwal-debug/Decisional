@@ -36,16 +36,23 @@ totalPages?: number;
 }
 
 function getStatusVariant(status: string): "success" | "danger" | "warning" {
-switch (status.toUpperCase()) {
-case "SELECTED":
-case "ACCEPTED":
-return "success";
-case "REJECTED":
-return "danger";
-case "PENDING":
-default:
-return "warning";
+  switch (status.toUpperCase()) {
+    case "SELECTED":
+    case "ACCEPTED":
+      return "success";
+    case "REJECTED":
+      return "danger";
+    case "PENDING":
+    default:
+      return "warning";
+  }
 }
+
+function getApplicationStatusLabel(status: string): string {
+  if (status === "SELECTED" || status === "ACCEPTED") return "Approved";
+  if (status === "REJECTED") return "Rejected";
+  if (status === "PENDING") return "Pending";
+  return status;
 }
 
 /** Skeleton placeholder matching the 6-column applications table layout. */
@@ -221,13 +228,7 @@ applicationsList = (
                 </td>
                 <td className="p-4">
                   <Badge variant={getStatusVariant(app.status)} className="text-xs font-extrabold">
-                    {app.status === "SELECTED" || app.status === "ACCEPTED"
-                      ? "Approved"
-                      : app.status === "REJECTED"
-                      ? "Rejected"
-                      : app.status === "PENDING"
-                      ? "Pending"
-                      : app.status}
+                    {getApplicationStatusLabel(app.status)}
                   </Badge>
                 </td>
                 <td className="p-4 text-right">

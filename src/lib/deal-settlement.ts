@@ -87,7 +87,7 @@ grossPayout: number,
     0,
   );
   
-  const tdsRate = is194J ? 0.10 : 0.001; // 10% for 194J, 0.1% for 194-O
+  const tdsRate = is194J ? 0.10 : TDS_RATE; // 10% for 194J, 0.1% for 194-O
   const totalRequiredTds = Math.round(totalEarnings * tdsRate);
   return Math.max(0, totalRequiredTds - previousFyTdsAlreadyDeducted);
 }
@@ -130,12 +130,9 @@ params.metadata as Record<string, unknown> | undefined,
     const is194J = taxCompliance?.tdsSection?.startsWith("194J") ?? false;
     const appliedSection = is194J ? "194J" : "194-O";
     
-    let appliedRatePercent = "0.1%";
-    if (!taxCompliance?.panLast4) {
-      appliedRatePercent = is194J ? "20%" : "5%";
-    } else {
-      appliedRatePercent = is194J ? "10%" : "0.1%";
-    }
+    const appliedRatePercent = !taxCompliance?.panLast4
+      ? (is194J ? "20%" : "5%")
+      : (is194J ? "10%" : "0.1%");
 
     await tx.transaction.create({
       data: {

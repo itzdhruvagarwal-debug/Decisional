@@ -4,7 +4,6 @@ import { auth } from "@/lib/auth";
 import { requireActiveAdmin } from "@/lib/admin-auth";
 import prisma from "@/lib/db";
 import { toCsv, csvResponse, paiseToRupees, getIndianFYBounds, getCurrentFY } from "@/lib/csv-export";
-import { format } from "date-fns";
 import { RATE_LIMIT_CONFIGS } from "@/lib/rate-limit";
 import { getPlatformHeader, getPlatformFooter } from "@/lib/platform-config";
 
