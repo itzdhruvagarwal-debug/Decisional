@@ -36,7 +36,7 @@ return true;
 }
 }
 
-export async function revokeToken(
+async function revokeToken(
 jti: string,
 durationSeconds: number = 86400,
 ): Promise<void> {

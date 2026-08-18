@@ -47,7 +47,7 @@ path: ["upiId"],
 }
 });
 
-export type BankAccountValues = z.infer<typeof bankAccountSchema>;
+type BankAccountValues = z.infer<typeof bankAccountSchema>;
 
 interface BankAccount {
 id: string;

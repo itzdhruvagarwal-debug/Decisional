@@ -460,7 +460,7 @@ ipAddress?: string | undefined;
 userAgent?: string | undefined;
 }
 
-export interface SignedContract {
+interface SignedContract {
 contractTerms: ContractTerms;
 contractHash: string; // SHA-256 hash of stringified terms
 influencerSignature?: ContractSignature | undefined;
@@ -530,7 +530,7 @@ return crypto.createHash("sha256").update(canonical).digest("hex");
 * Sign a contract - creates an HMAC signature using the user's ID + contract hash.
 * This proves that this specific user agreed to these specific terms.
 */
-export function signContract(
+function signContract(
 terms: ContractTerms,
 userId: string,
 ipAddress?: string,

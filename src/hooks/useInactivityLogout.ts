@@ -16,7 +16,7 @@ import { signOut } from "next-auth/react";
 const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 const WARNING_BEFORE_MS = 5 * 60 * 1000; // Show warning 5 min before logout
 
-export interface InactivityState {
+interface InactivityState {
 /** True when the warning modal should be shown */
 showWarning: boolean;
 /** Seconds remaining until forced logout */

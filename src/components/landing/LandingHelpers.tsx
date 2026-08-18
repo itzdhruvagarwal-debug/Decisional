@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, ReactNode } from "react";
 
 /* ============ Scroll-triggered animation hook ============ */
-export function useInView(threshold = 0.15) {
+function useInView(threshold = 0.15) {
 const ref = useRef<HTMLDivElement>(null);
 const [isInView, setIsInView] = useState(false);
 

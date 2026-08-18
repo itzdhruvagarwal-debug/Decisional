@@ -8,6 +8,7 @@ import { AppError } from "@/lib/errors";
 */
 
 import { logger } from "./logger";
+import { cleanUrl } from "./utils";
 
 const GRAPH_API_BASE = "https://graph.instagram.com";
 const GRAPH_API_VERSION = "v18.0";
@@ -258,16 +259,9 @@ export async function findPostByUrl(
   postUrl: string,
 ): Promise<InstagramPost | null> {
   const posts = await getRecentPosts(accessToken, 150); // Check last 150
-  const clean = (u: string) =>
-    (u.split("?")[0] ?? u)
-      .toLowerCase()
-      .replace(/^https?:\/\//, "")
-      .replace(/^www\./, "")
-      .replace(/\/$/, "");
+  const target = cleanUrl(postUrl);
 
-  const target = clean(postUrl);
-
-  return posts.find((p) => clean(p.permalink) === target) || null;
+  return posts.find((p) => cleanUrl(p.permalink) === target) || null;
 }
 
 

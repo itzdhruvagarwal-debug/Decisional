@@ -5,7 +5,7 @@ import { Button, Input } from "@/components/ui";
 
 export type UserType = "INFLUENCER" | "BRAND";
 
-export const userTypeInfo = {
+const userTypeInfo = {
 INFLUENCER: {
 title: "Influencer",
 icon: "CR",

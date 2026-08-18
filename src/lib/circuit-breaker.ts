@@ -2,7 +2,7 @@ import { AppError } from "@/lib/errors";
 import { redis } from "./redis";
 import { logger } from "./logger";
 
-export interface CircuitBreakerOptions {
+interface CircuitBreakerOptions {
   failureThreshold?: number; // Number of failed attempts before opening the circuit
   resetTimeout?: number; // Seconds to keep the circuit OPEN before allowing retry
 }

@@ -13,7 +13,7 @@ export function oauthRedirect(req: NextRequest, path: string): NextResponse {
 return NextResponse.redirect(appUrl(path, req.nextUrl.origin));
 }
 
-export interface OAuthStateValidationResult {
+interface OAuthStateValidationResult {
 /** Non-null when validation succeeded. */
 storedState: { userId: string; expiresAt: Date } | null;
 /** Non-null when the callback should terminate with this redirect. */

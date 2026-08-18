@@ -20,7 +20,7 @@
 */
 
 import { logger } from "./logger";
-import { sleep } from "./utils";
+import { escapeHtml, sleep } from "./utils";
 
 import DOMPurify from "isomorphic-dompurify";
 import { randomUUID } from "node:crypto";
@@ -66,21 +66,6 @@ success: boolean;
 messageId?: string;
 error?: string;
 correlationId: string;
-}
-
-// ==================== HTML SANITIZATION ====================
-
-/**
-* Escape user-provided strings before injecting into HTML templates.
-* Prevents XSS in email clients that render HTML.
-*/
-function escapeHtml(str: string): string {
-return str
-.replaceAll("&", "&amp;")
-.replaceAll("<", "&lt;")
-.replaceAll(">", "&gt;")
-.replaceAll('"', "&quot;")
-.replaceAll("'", "&#39;");
 }
 
 // ==================== BRANDED HTML WRAPPER ====================

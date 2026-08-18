@@ -15,7 +15,7 @@ password: z.string().min(1, "Password is required to delete your account"),
 reason: z.string().max(500, "Reason cannot exceed 500 characters").optional(),
 });
 
-export type DeleteAccountValues = z.infer<typeof deleteAccountSchema>;
+type DeleteAccountValues = z.infer<typeof deleteAccountSchema>;
 
 interface DeleteAccountPanelProps {
 isSaving: boolean;

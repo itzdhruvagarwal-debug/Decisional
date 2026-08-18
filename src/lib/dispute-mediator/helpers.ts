@@ -1,8 +1,7 @@
 import { FullDeal, FullDispute, MediatorAnalysis, Finding, ContractSig } from "./types";
 import { verifyContractSignature, ContractTerms } from "../contract-engine";
 
-// verifySignatures, checkContractSignatureIntegrity, checkSubmissionDeadline, checkBrandApprovalTimeliness, checkPostingDeadline, determineTimelineVerdict
-export function verifySignatures(
+function verifySignatures(
 contractTerms: ContractTerms,
 influencerSig?: ContractSig,
 brandSig?: ContractSig
@@ -241,8 +240,7 @@ export function determineTimelineVerdict(
 }
 
 
-// checkBrandApprovalDelay, createErrorAnalysis
-export function checkBrandApprovalDelay(deal: FullDeal): {
+function checkBrandApprovalDelay(deal: FullDeal): {
 late: boolean;
 hoursToApprove: number;
 detail: string;

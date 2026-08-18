@@ -117,3 +117,39 @@ export function normalizeDeliverables(
     })
     .filter((item) => Boolean(item.type));
 }
+
+export function escapeHtml(str: string): string {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+export function cleanUrl(url: string): string {
+  return (url.split("?")[0] ?? url)
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/$/, "");
+}
+
+export function safeString(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value;
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+}
+
+export function getTrustTierLabel(score: number): string {
+  if (score <= 450) return "Flagged";
+  if (score <= 600) return "Limited";
+  if (score <= 750) return "Normal";
+  if (score <= 850) return "Trusted";
+  return "Elite";
+}
+

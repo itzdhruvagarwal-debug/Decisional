@@ -59,7 +59,7 @@ brandRefundActual: number;
 analysis: MediatorAnalysis;
 }
 
-export async function applyCompletedDealClawback(config: CompletedDealClawbackConfig) {
+async function applyCompletedDealClawback(config: CompletedDealClawbackConfig) {
 const {
 tx,
 deal,
@@ -175,7 +175,7 @@ balance: { decrement: treasuryClawback },
   }
 }
 
-export async function handleActiveDealBrandRefund(
+async function handleActiveDealBrandRefund(
 tx: Prisma.TransactionClient,
 brandUserId: string,
 totalAmount: number,
@@ -205,7 +205,7 @@ totalAmount: number;
 analysis: MediatorAnalysis;
 }
 
-export async function handleRazorpayGatewayRefund(
+async function handleRazorpayGatewayRefund(
 deal: FullDeal,
 brandRefund: number,
 analysis: MediatorAnalysis
@@ -240,7 +240,7 @@ refundErr instanceof Error ? refundErr : new Error(String(refundErr)),
 }
 }
 
-export async function handleBrandWalletRefund(
+async function handleBrandWalletRefund(
 tx: Prisma.TransactionClient,
 deal: FullDeal,
 brandUserId: string | null,
@@ -294,7 +294,7 @@ reservedFromWallet: deal.reservedFromWallet,
 });
 }
 
-export async function applyActiveDealEscrowSettlement(config: ActiveDealEscrowSettlementConfig) {
+async function applyActiveDealEscrowSettlement(config: ActiveDealEscrowSettlementConfig) {
 const {
 tx,
 deal,
@@ -435,7 +435,7 @@ analysis,
 }
 }
 
-export async function handleCompletedDealPostSettlement(
+async function handleCompletedDealPostSettlement(
 tx: Prisma.TransactionClient,
 params: {
 analysis: MediatorAnalysis;

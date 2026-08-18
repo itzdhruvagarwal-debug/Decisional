@@ -23,7 +23,7 @@ import { createActivityLog } from "./audit";
 
 // ==================== TYPES ====================
 
-export interface PostStatusResult {
+interface PostStatusResult {
 dealId: string;
 isAlive: boolean;
 status: "ACTIVE" | "DELETED" | "PRIVATE" | "CHANGED";
@@ -31,7 +31,7 @@ message?: string;
 monitoringDay?: number;
 }
 
-export interface ClawbackResult {
+interface ClawbackResult {
 dealId: string;
 triggered: boolean;
 clawbackPercentage: number;
@@ -110,7 +110,7 @@ return 0; // Past monitoring window
 
 // ==================== CORE VERIFICATION ====================
 
-export async function verifyPostStatus(
+async function verifyPostStatus(
 dealId: string,
 ): Promise<PostStatusResult> {
 const deal = await prisma.deal.findUnique({

@@ -90,7 +90,7 @@ if (hasDoc) return "↑ Re-upload";
 return "↑ Upload";
 }
 
-export function UploadBtn({
+function UploadBtn({
 doc,
 type,
 isUploading,

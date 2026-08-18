@@ -34,7 +34,7 @@ export type ViolationCategory =
 | "LATE_RESPONSE"
 | "OTHER";
 
-export interface PenaltyResult {
+interface PenaltyResult {
 userId: string;
 strikeNumber: number;
 action: PenaltyAction;
@@ -44,7 +44,7 @@ expiresAt?: Date | null | undefined;
 requiresManualReview: boolean;
 }
 
-export type PenaltyAction =
+type PenaltyAction =
 | "WARNING"
 | "COOLDOWN_72H"
 | "SUSPENSION_14D"

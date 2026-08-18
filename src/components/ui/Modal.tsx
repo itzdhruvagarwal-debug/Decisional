@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export interface ModalProps {
+interface ModalProps {
 readonly open: boolean;
 readonly onClose: () => void;
 readonly title?: string | undefined;

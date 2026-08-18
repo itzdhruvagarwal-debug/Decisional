@@ -15,7 +15,7 @@ security: boolean;
 };
 }
 
-export type NotificationCategory = "marketing" | "updates" | "security";
+type NotificationCategory = "marketing" | "updates" | "security";
 
 interface NotificationPreferencesPanelProps {
 preferences: NotificationPreferences;

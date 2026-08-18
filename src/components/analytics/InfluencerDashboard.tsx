@@ -91,14 +91,6 @@ const id = window.setTimeout(() => setChartsReady(true), 50);
 return () => window.clearTimeout(id);
 }, []);
 
-const getTierLabel = (score: number) => {
-if (score <= 450) return "Flagged";
-if (score <= 600) return "Limited";
-if (score <= 750) return "Normal";
-if (score <= 850) return "Trusted";
-return "Elite";
-};
-
 if (!data || data.error)
 return (
 <div className="dashboard-error-state">

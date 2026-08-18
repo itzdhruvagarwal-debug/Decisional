@@ -1,16 +1,4 @@
-/**
- * Helper to render standardized HTML message pages for actions like
- * blog subscription verification, unsubscription, and errors.
- */
-
-function escapeHtml(str: string): string {
-  return String(str ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+import { escapeHtml } from "@/lib/utils";
 
 export function renderResultHtml(
   title: string,

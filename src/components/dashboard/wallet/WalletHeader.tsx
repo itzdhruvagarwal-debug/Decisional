@@ -13,7 +13,7 @@ export interface WalletData {
   totalHeld?: number;
 }
 
-export interface WalletHeaderProps {
+interface WalletHeaderProps {
   readonly userType: string | null | undefined;
   readonly balance: number;
   readonly isDownloading: Record<string, boolean | undefined>;
@@ -99,7 +99,7 @@ export function WalletHeader({
   );
 }
 
-export interface WalletSummaryCardsProps {
+interface WalletSummaryCardsProps {
   readonly userType: string | null | undefined;
   readonly walletData: WalletData;
 }

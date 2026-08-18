@@ -8,7 +8,7 @@ action?: string;
 [key: string]: unknown;
 }
 
-export type StringablePrimitive = string | number | boolean | bigint | symbol;
+type StringablePrimitive = string | number | boolean | bigint | symbol;
 
 export function safeStringCommon(message: unknown, fallbackInspect?: (obj: unknown) => string): string {
 if (typeof message === "string") return message;

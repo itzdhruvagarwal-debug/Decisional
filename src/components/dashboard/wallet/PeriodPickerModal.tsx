@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Modal from "@/components/ui/Modal";
 import { Button, Input, Select } from "@/components/ui";
 
-export type PeriodType = "transactions" | "report";
+type PeriodType = "transactions" | "report";
 
 export interface PeriodValue {
 startDate: string; // YYYY-MM-DD

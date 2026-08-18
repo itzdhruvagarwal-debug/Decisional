@@ -13,7 +13,7 @@ toast: ToastItem;
 onClose: (id: string) => void;
 }
 
-export function getToastIcon(type: ToastType): React.ReactNode {
+function getToastIcon(type: ToastType): React.ReactNode {
   if (type === "success") {
     return (
       <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 flex-shrink-0" style={{ color: "#34d399" }}>

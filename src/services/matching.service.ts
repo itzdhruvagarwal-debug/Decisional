@@ -2,7 +2,7 @@ import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { calculateLevel } from "@/lib/drs-score";
 
-export interface MatchBreakdown {
+interface MatchBreakdown {
 categoryScore: number;
 engagementScore: number;
 authenticityScore: number;
@@ -12,7 +12,7 @@ estimatedViews: number;
 estimatedCpvPaise: number;
 }
 
-export interface MatchScoreResult {
+interface MatchScoreResult {
 matchScore: number;
 matchBreakdown: MatchBreakdown;
 }

@@ -3,7 +3,7 @@
 * Zero-dependency CSV generation for financial reports
 */
 
-export type CsvRow = Record<string, string | number | null | undefined>;
+type CsvRow = Record<string, string | number | null | undefined>;
 
 function neutralizeCsvFormula(value: string): string {
 const trimmed = value.trimStart();
