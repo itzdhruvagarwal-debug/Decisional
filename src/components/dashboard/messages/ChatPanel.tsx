@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Modal, Button, Input, Select, Textarea } from "@/components/ui";
 import { useMessages } from "./useMessages";
 import { Message } from "./MessagesHelpers";
@@ -278,6 +279,36 @@ export function MessageList({ state }: Readonly<ChatPanelProps>) {
               ✕ Decline
             </Button>
           </div>
+        ) : null}
+
+        {isAccepted && (offer.dealId || msg.metadata?.dealId) ? (
+          <Link
+            href={`/dashboard/deals/${String(offer.dealId || msg.metadata?.dealId)}`}
+            className="w-full block mt-1"
+          >
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full flex items-center justify-center gap-1.5 text-xs py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 font-bold cursor-pointer"
+            >
+              <svg
+                width={14}
+                height={14}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+              <span>View Active Deal & Deliverables</span>
+            </Button>
+          </Link>
         ) : null}
       </div>
     );

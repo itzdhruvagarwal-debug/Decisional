@@ -393,217 +393,224 @@ showToast("error", "File sharing failed. Please try again.");
 }
 };
 
-const handleSendOffer = async (offerDetails: {
-title: string;
-amount: number; // in paise
-description: string;
-deliverables: string;
-contentDeadline: string;
-postingDeadline: string;
-}) => {
-if (!selectedConversation) return;
+  const handleSendOffer = async (offerDetails: {
+    title: string;
+    amount: number; // in paise
+    description: string;
+    deliverables: string;
+    contentDeadline: string;
+    postingDeadline: string;
+  }) => {
+    if (!selectedConversation) return;
 
-const tempId = `temp-${Date.now()}`;
-const displayContent = `Custom Offer: ${offerDetails.title} (₹${(offerDetails.amount / 100).toLocaleString()})`;
+    const tempId = `temp-${Date.now()}`;
+    const displayContent = `Custom Offer: ${offerDetails.title} (₹${(offerDetails.amount / 100).toLocaleString()})`;
 
-setMessages((prev) => [
-...prev,
-{
-id: tempId,
-senderId: session?.user?.id || "me",
-content: displayContent,
-createdAt: new Date().toLocaleTimeString([], {
-hour: "2-digit",
-minute: "2-digit",
-}),
-isMe: true,
-messageType: "OFFER",
-metadata: { ...offerDetails, status: "PENDING" },
-},
-]);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: tempId,
+        senderId: session?.user?.id || "me",
+        content: displayContent,
+        createdAt: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        isMe: true,
+        messageType: "OFFER",
+        metadata: { ...offerDetails, status: "PENDING" },
+      },
+    ]);
 
-try {
-const response = await fetch("/api/messages", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-receiverId: selectedConversation,
-content: displayContent,
-messageType: "OFFER",
-metadata: { ...offerDetails, status: "PENDING" },
-}),
-});
+    try {
+      const response = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          receiverId: selectedConversation,
+          content: displayContent,
+          messageType: "OFFER",
+          metadata: { ...offerDetails, status: "PENDING" },
+        }),
+      });
 
-const payload = await response.json();
-if (!response.ok || !payload?.success) {
-throw new Error(payload?.error || payload?.message || "Failed to send offer");
-}
+      const payload = await response.json();
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.error || payload?.message || "Failed to send offer");
+      }
 
-fetchMessages(false);
-} catch (err) {
-logger.error("[messages] Failed to send offer message:", err);
-setMessages((prev) => prev.filter((m) => m.id !== tempId));
-showToast("error", "Offer creation failed. Please try again.");
-}
-};
+      fetchMessages(false);
+    } catch (err) {
+      logger.error("[messages] Failed to send offer message:", err);
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      showToast("error", "Offer creation failed. Please try again.");
+    }
+  };
 
-const handleUpdateOfferStatus = async (messageId: string, status: "ACCEPTED" | "DECLINED") => {
-try {
-const response = await fetch(`/api/messages/${messageId}`, {
-method: "PATCH",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ status }),
-});
+  const handleUpdateOfferStatus = async (messageId: string, status: "ACCEPTED" | "DECLINED") => {
+    try {
+      const response = await fetch(`/api/messages/${messageId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
 
-const payload = await response.json();
-if (!response.ok || !payload?.success) {
-throw new Error(payload?.error || payload?.message || "Failed to update offer");
-}
+      const payload = await response.json();
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.error || payload?.message || "Failed to update offer");
+      }
 
-showToast("success", `Offer ${status.toLowerCase()} successfully`);
-fetchMessages(false);
-} catch (err) {
-logger.error("[messages] Failed to update offer:", err);
-showToast("error", "Failed to update offer status. Please try again.");
-}
-};
+      if (status === "ACCEPTED") {
+        showToast("success", "Offer accepted! Escrow funds secured and Deal is active.");
+      } else {
+        showToast("info", "Offer declined.");
+      }
+      fetchMessages(false);
+    } catch (err) {
+      logger.error("[messages] Failed to update offer:", err);
+      const errorMsg = err instanceof Error ? err.message : "Failed to update offer status. Please try again.";
+      showToast("error", errorMsg);
+    }
+  };
 
-const handleBlockUser = async () => {
-if (!selectedConversation) return;
-const confirmBlock = window.confirm("Are you sure you want to block this user? You will not be able to send or receive messages from them.");
-if (!confirmBlock) return;
+  const handleBlockUser = async () => {
+    if (!selectedConversation) return;
+    const confirmBlock = window.confirm(
+      "Are you sure you want to block this user? You will not be able to send or receive messages from them."
+    );
+    if (!confirmBlock) return;
 
-try {
-const res = await fetch("/api/users/block", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-blockedUserId: selectedConversation,
-action: "block",
-}),
-});
+    try {
+      const res = await fetch("/api/users/block", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          blockedUserId: selectedConversation,
+          action: "block",
+        }),
+      });
 
-const data = await res.json();
-if (!res.ok) {
-throw new Error(data?.message || "Failed to block user");
-}
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.message || "Failed to block user");
+      }
 
-showToast("success", "User blocked successfully");
-setIsChatUserBlocked(true);
-setConversations((prev) => prev.filter((c) => c.userId !== selectedConversation));
-setSelectedConversation(null);
-} catch (err) {
-logger.error("[messages] Block error:", err);
-showToast("error", err instanceof Error ? err.message : "Failed to block user");
-}
-};
+      showToast("success", "User blocked successfully");
+      setIsChatUserBlocked(true);
+      setConversations((prev) => prev.filter((c) => c.userId !== selectedConversation));
+      setSelectedConversation(null);
+    } catch (err) {
+      logger.error("[messages] Block error:", err);
+      showToast("error", err instanceof Error ? err.message : "Failed to block user");
+    }
+  };
 
-const handleUnblockUser = async () => {
-if (!selectedConversation) return;
+  const handleUnblockUser = async () => {
+    if (!selectedConversation) return;
 
-try {
-const res = await fetch("/api/users/block", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-blockedUserId: selectedConversation,
-action: "unblock",
-}),
-});
+    try {
+      const res = await fetch("/api/users/block", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          blockedUserId: selectedConversation,
+          action: "unblock",
+        }),
+      });
 
-const data = await res.json();
-if (!res.ok) {
-throw new Error(data?.message || "Failed to unblock user");
-}
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.message || "Failed to unblock user");
+      }
 
-showToast("success", "User unblocked successfully");
-setIsChatUserBlocked(false);
-fetchMessages(true);
-} catch (err) {
-logger.error("[messages] Unblock error:", err);
-showToast("error", err instanceof Error ? err.message : "Failed to unblock user");
-}
-};
+      showToast("success", "User unblocked successfully");
+      setIsChatUserBlocked(false);
+      fetchMessages(true);
+    } catch (err) {
+      logger.error("[messages] Unblock error:", err);
+      showToast("error", err instanceof Error ? err.message : "Failed to unblock user");
+    }
+  };
 
-const handleReportUserSubmit = async (e: React.FormEvent) => {
-e.preventDefault();
-if (!selectedConversation) return;
+  const handleReportUserSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedConversation) return;
 
-const validation = reportUserSchema.safeParse({
-reason: reportReason,
-description: reportDescription,
-});
+    const validation = reportUserSchema.safeParse({
+      reason: reportReason,
+      description: reportDescription,
+    });
 
-if (!validation.success) {
-showToast("error", validation.error.issues[0]?.message || "Invalid report details");
-return;
-}
+    if (!validation.success) {
+      showToast("error", validation.error.issues[0]?.message || "Invalid report details");
+      return;
+    }
 
-setSubmittingReport(true);
-try {
-const res = await fetch("/api/users/report", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-reportedUserId: selectedConversation,
-reason: reportReason,
-description: reportDescription,
-}),
-});
+    setSubmittingReport(true);
+    try {
+      const res = await fetch("/api/users/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reportedUserId: selectedConversation,
+          reason: reportReason,
+          description: reportDescription,
+        }),
+      });
 
-const data = await res.json();
-if (!res.ok) {
-throw new Error(data?.message || "Failed to submit report");
-}
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.message || "Failed to submit report");
+      }
 
-showToast("success", "User reported successfully. Our team will review this report.");
-setIsReportModalOpen(false);
-setReportReason("");
-setReportDescription("");
-} catch (err) {
-logger.error("[messages] Report error:", err);
-showToast("error", err instanceof Error ? err.message : "Failed to report user");
-} finally {
-setSubmittingReport(false);
-}
-};
+      showToast("success", "User reported successfully. Our team will review this report.");
+      setIsReportModalOpen(false);
+      setReportReason("");
+      setReportDescription("");
+    } catch (err) {
+      logger.error("[messages] Report error:", err);
+      showToast("error", err instanceof Error ? err.message : "Failed to report user");
+    } finally {
+      setSubmittingReport(false);
+    }
+  };
 
-const selectedChat = conversations.find((c) => c.userId === selectedConversation);
+  const selectedChat = conversations.find((c) => c.userId === selectedConversation);
 
-return {
-session,
-status,
-conversations,
-selectedConversation,
-setSelectedConversation,
-messages,
-newMessage,
-setNewMessage,
-isPeerTyping,
-loadingConversations,
-loadingMessages,
-messagesEndRef,
-isChatUserBlocked,
-isReportModalOpen,
-setIsReportModalOpen,
-reportReason,
-setReportReason,
-reportDescription,
-setReportDescription,
-submittingReport,
-toasts,
-removeToast,
-handleInputChange,
-handleSend,
-handleSendFile,
-handleSendOffer,
-handleUpdateOfferStatus,
-handleBlockUser,
-handleUnblockUser,
-handleReportUserSubmit,
-selectedChat,
-showToast,
-publishTyping,
-hasActiveDeal,
-};
+  return {
+    session,
+    status,
+    conversations,
+    selectedConversation,
+    setSelectedConversation,
+    messages,
+    newMessage,
+    setNewMessage,
+    isPeerTyping,
+    loadingConversations,
+    loadingMessages,
+    messagesEndRef,
+    isChatUserBlocked,
+    isReportModalOpen,
+    setIsReportModalOpen,
+    reportReason,
+    setReportReason,
+    reportDescription,
+    setReportDescription,
+    submittingReport,
+    toasts,
+    removeToast,
+    handleInputChange,
+    handleSend,
+    handleSendFile,
+    handleSendOffer,
+    handleUpdateOfferStatus,
+    handleBlockUser,
+    handleUnblockUser,
+    handleReportUserSubmit,
+    selectedChat,
+    showToast,
+    publishTyping,
+    hasActiveDeal,
+  };
 }
