@@ -135,13 +135,22 @@ export function cleanUrl(url: string): string {
     .replace(/\/$/, "");
 }
 
+type StringablePrimitive = string | number | boolean | bigint | symbol;
+
 export function safeString(value: unknown): string {
   if (value === null || value === undefined) return "";
   if (typeof value === "string") return value;
+  if (typeof value !== "object") {
+    return String(value as StringablePrimitive);
+  }
+  if (value instanceof Error) {
+    return value.message;
+  }
   try {
-    return JSON.stringify(value);
+    const json = JSON.stringify(value);
+    return json ?? "";
   } catch {
-    return String(value);
+    return "";
   }
 }
 
