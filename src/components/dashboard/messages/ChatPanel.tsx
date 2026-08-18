@@ -531,6 +531,7 @@ function ChatInputArea({ state }: Readonly<ChatPanelProps>) {
           onChange={handleFileChange}
           className="hidden"
           id="chat-file-upload-input"
+          aria-label="Attach image or document"
         />
 
         {/* Attach File Button */}

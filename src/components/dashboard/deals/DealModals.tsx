@@ -345,6 +345,7 @@ className="whitespace-nowrap"
 <input
 type="file"
 ref={fileInputRef}
+aria-label="Upload deliverable content file"
 aria-hidden="true"
 tabIndex={-1}
 className="hidden"

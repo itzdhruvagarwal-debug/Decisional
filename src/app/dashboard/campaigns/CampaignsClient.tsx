@@ -68,7 +68,7 @@ function CampaignCardSkeleton() {
 return (
 <div className="campaign-card-grid grid gap-4 grid-auto-280" aria-hidden="true">
 {Array.from({ length: 6 }).map((_, i) => (
-<div key={i} className="card p-18px">
+<div key={`skeleton-campaign-card-${i}`} className="card p-18px">
 <div className="flex items-center gap-3 mb-3">
 <Skeleton width={40} height={40} borderRadius={6} />
 <div className="flex-1">

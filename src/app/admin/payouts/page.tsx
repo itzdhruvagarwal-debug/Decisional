@@ -160,9 +160,9 @@ return (
 <table className="w-full border-collapse">
 <tbody>
 {Array.from({ length: 6 }).map((_, i) => (
-<tr key={i} className="border-b-card">
+<tr key={`skeleton-payout-row-${i}`} className="border-b-card">
 {["w-[140px]", "w-[80px]", "w-[120px]", "w-[80px]", "w-[100px]", "w-[60px]"].map((widthClass, j) => (
-<td key={j} className="p-4"><div className={`skeleton rounded-sm h-4 ${widthClass}`} /></td>
+<td key={`skeleton-payout-cell-${i}-${j}`} className="p-4"><div className={`skeleton rounded-sm h-4 ${widthClass}`} /></td>
 ))}
 </tr>
 ))}

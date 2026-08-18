@@ -165,7 +165,8 @@ async function _handler_GET(request: NextRequest) {
     const filter = searchParams.get("filter") || "all-time"; // all-time | weekly
     const city = searchParams.get("city") || "";
     const category = searchParams.get("category") || "";
-    const limit = Math.min(Number.parseInt(searchParams.get("limit") || "20", 10), 50);
+    const parsedLimit = Number.parseInt(searchParams.get("limit") || "20", 10);
+    const limit = Math.max(1, Math.min(Number.isNaN(parsedLimit) ? 20 : parsedLimit, 50));
 
     if (filter === "weekly") {
       const data = await getWeeklyLeaderboard(city, category, limit);

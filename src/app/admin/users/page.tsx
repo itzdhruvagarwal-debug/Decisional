@@ -219,7 +219,7 @@ fetcher
 
 const users = data?.data?.users || [];
 const total = data?.data?.total || 0;
-const totalPages = Math.max(1, Math.ceil(total / limit));
+const totalPages = Math.max(1, Math.ceil(total / (limit || 1)));
 
 const handleBan = async (userId: string) => {
 if (!confirm("Are you sure you want to ban this user?")) return;

@@ -151,6 +151,7 @@ className="text-xs text-muted bg-secondary rounded-md border-card leading-relaxe
 <input
 type="file"
 ref={fileInputRef}
+aria-label="Upload verification document"
 onChange={handleFileChange}
 className="hidden"
 accept="image/*,application/pdf"

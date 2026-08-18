@@ -288,6 +288,7 @@ className="absolute flex items-center justify-center text-sm rounded-full text-w
 <input
 type="file"
 ref={profileImageInputRef}
+aria-label="Upload profile photo"
 className="hidden"
 accept="image/*"
 onChange={handleProfileImageUpload}

@@ -27,7 +27,7 @@ pagination: {
 page,
 limit,
 total: result.total,
-totalPages: Math.ceil(result.total / limit),
+totalPages: Math.ceil(result.total / (limit || 1)),
 },
 });
 });
