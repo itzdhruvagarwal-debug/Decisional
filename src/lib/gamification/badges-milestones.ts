@@ -70,7 +70,7 @@ influencerProfile?: { completedDeals: number } | null;
 brandProfile?: { totalCampaigns: number } | null;
 },
 badgeId: string,
-db: Prisma.TransactionClient | typeof prisma,
+_db: Prisma.TransactionClient | typeof prisma,
 ): Promise<boolean> {
 let count = 0;
 

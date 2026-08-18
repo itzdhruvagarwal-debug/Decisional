@@ -17,13 +17,6 @@ const KYC_PROVIDER = process.env.KYC_PROVIDER || "manual"; // 'digilocker' | 'su
 
 // ==================== TYPES ====================
 
-type KYCDocType =
-| "AADHAAR"
-| "PAN"
-| "GST"
-| "BANK_ACCOUNT"
-| "BUSINESS_REG";
-
 type KYCStatus = "PENDING" | "VERIFIED" | "REJECTED" | "EXPIRED";
 
 

@@ -123,10 +123,6 @@ message: "GSTIN embedded PAN does not match the PAN number",
 }
 });
 
-type IndiaTaxComplianceInput = z.infer<
-  typeof indiaTaxComplianceInputSchema
->;
-
 type IndiaTaxSummaryInput = {
   userType: "BRAND" | "INFLUENCER" | "ADMIN";
   panPresent: boolean;
