@@ -295,7 +295,7 @@ body { padding: 16px; }
 </div>
 
 <div class="no-print">
-<button class="print-btn" onclick="window.print()"> Print / Save as PDF</button>
+<button type="button" class="print-btn" onclick="window.print()"> Print / Save as PDF</button>
 </div>
 </body>
 </html>`;
