@@ -218,9 +218,9 @@ return difficulty;
 
 return (
 <div className="space-y-4">
-<div className="flex items-center justify-between mb-6">
+<div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
 <h2 className="text-2xl font-bold">Weekly Challenges</h2>
-<span className="text-sm text-[var(--color-text-secondary)]">
+<span className="text-sm text-secondary">
 Complete challenges to earn XP and rewards!
 </span>
 </div>
@@ -234,10 +234,10 @@ const progressPercentage = Math.min(
 return (
 <div
 key={challenge.challengeId}
-className={`card p-6 border border-[var(--color-border)] rounded-2xl ${
+className={`card p-6 border rounded-2xl ${
 challenge.completed
-? "bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800"
-: "bg-[var(--color-bg-secondary)]"
+? "bg-secondary border-card"
+: "bg-card border-card"
 }`}
 >
 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 gap-4">
@@ -247,22 +247,22 @@ challenge.completed
 <h3 className="text-lg font-semibold mb-1">
 {challenge.title}
 {challenge.completed && (
-<span className="ml-2 text-green-600 dark:text-green-400 text-sm">
+<span className="ml-2 text-emerald text-sm font-bold">
 ✓ Completed
 </span>
 )}
 </h3>
-<p className="text-[var(--color-text-secondary)] text-sm">
+<p className="text-secondary text-sm">
 {challenge.description}
 </p>
 </div>
 </div>
 <div className="text-left sm:text-right flex-shrink-0">
-<div className="text-2xl font-bold text-[var(--color-accent)]">
+<div className="text-2xl font-bold gradient-text">
 +{challenge.xpReward} XP
 </div>
 {challenge.bonusPerk && (
-<div className="text-xs text-[var(--color-text-secondary)] mt-1">
+<div className="text-xs text-secondary mt-1">
 {challenge.bonusPerk}
 </div>
 )}
@@ -278,14 +278,14 @@ challenge.difficulty
 
 <div className="mb-2">
 <div className="flex justify-between text-sm mb-1">
-<span className="text-[var(--color-text-secondary)]">
+<span className="text-secondary">
 Progress
 </span>
 <span className="font-medium">
 {challenge.progress} / {challenge.goal}
 </span>
 </div>
-<div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+<div className="w-full bg-tertiary rounded-full h-3 overflow-hidden">
 {(() => {
   const safeId = challenge.challengeId.toLowerCase().replace(/[^a-z0-9]/g, "-");
   const progressClass = `challenge-progress-${safeId}`;
@@ -299,8 +299,8 @@ Progress
       <div
         className={`h-3 rounded-full transition-all ${progressClass} ${
           challenge.completed
-            ? "bg-green-500"
-            : "bg-[var(--color-accent)]"
+            ? "bg-emerald"
+            : "bg-primary"
         }`}
       />
     </>
@@ -310,7 +310,7 @@ Progress
 </div>
 
 {challenge.completed && challenge.completedAt && (
-<div className="text-xs text-[var(--color-text-secondary)] mt-2">
+<div className="text-xs text-muted mt-2">
 Completed on {new Date(challenge.completedAt).toLocaleDateString()}
 </div>
 )}

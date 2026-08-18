@@ -17,8 +17,8 @@ return (
 <thead>
 <tr className="bg-secondary">
 {["Admin", "Action", "Entity", "Details", "IP", "Timestamp"].map((col) => (
-<th key={col} className="text-left border-b-card py-[14px] px-[18px]">
-<div className={`skeleton h-3 rounded-sm ${col === "Details" ? "w-[56px]" : "w-[40px]"}`} />
+<th key={col} className="text-left border-b-card p-4">
+<div className={`skeleton h-3 rounded-sm ${col === "Details" ? "w-14" : "w-10"}`} />
 </th>
 ))}
 </tr>

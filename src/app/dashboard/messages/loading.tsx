@@ -5,7 +5,7 @@
 export default function MessagesLoading() {
 return (
 <div className="flex-1 p-6" aria-hidden="true">
-<div className="flex flex-1 overflow-hidden card p-0 h-[calc(100vh-120px)]" aria-hidden="true">
+<div className="flex flex-1 overflow-hidden card p-0" style={{ height: "calc(100vh - 120px)" }} aria-hidden="true">
 {/* Conversations sidebar */}
 <div className="flex flex-col border-r border-r-card flex-shrink-0 w-80">
 <div className="p-4 border-b-card">

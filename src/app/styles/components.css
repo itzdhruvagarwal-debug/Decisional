@@ -1287,9 +1287,29 @@ dialog.pwa-install-overlay {
 .min-w-200 { min-width: 200px; }
 .min-w-220 { min-width: 220px; }
 .max-w-200 { max-width: 200px; }
+.max-w-280 { max-width: 280px; }
 .max-w-600 { max-width: 600px; }
+.max-w-640 { max-width: 640px; }
+.max-w-720 { max-width: 720px; }
 .max-w-800 { max-width: 800px; }
+.max-w-840 { max-width: 840px; }
+.max-w-880 { max-width: 880px; }
+.max-w-900 { max-width: 900px; }
+.max-w-920 { max-width: 920px; }
 .max-w-1000 { max-width: 1000px; }
+.max-w-1040 { max-width: 1040px; }
+.max-w-1200 { max-width: 1200px; }
+.max-w-1280 { max-width: 1280px; }
+
+.min-h-300 { min-height: 300px; }
+.min-h-400 { min-height: 400px; }
+.min-h-60vh { min-height: 60vh; }
+
+.h-200 { height: 200px; }
+.h-220 { height: 220px; }
+.h-280 { height: 280px; }
+.h-350 { height: 350px; }
+.h-400 { height: 400px; }
 
 @media (max-width: 640px) {
   .min-w-160,

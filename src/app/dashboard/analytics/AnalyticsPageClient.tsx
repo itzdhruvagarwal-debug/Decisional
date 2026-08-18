@@ -89,7 +89,7 @@ id="analytics-fy-select"
 label="Financial Year:"
 value={selectedFY}
 onChange={(e) => handleFYChange(e.target.value)}
-className="w-[200px]"
+className="min-w-200"
 >
 <option value="">Rolling 12 Months</option>
 {availableFYs.map((fy) => (

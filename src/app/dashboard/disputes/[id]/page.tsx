@@ -216,7 +216,7 @@ Tier {dispute.tier}
 )}
 </header>
 
-<main className="p-6 w-full mx-auto max-w-[1200px]">
+<main className="p-6 w-full mx-auto max-w-1200">
 {/* AI Mediator Analysis Card */}
 <DisputeAnalysisCard
 analysis={analysis}
@@ -253,7 +253,7 @@ handleDisputeAction={handleDisputeAction}
 
 {/* Resolution */}
 {dispute.resolution && (
-<div className="card mb-6 border border-[var(--color-success)]">
+<div className="card mb-6 border border-card">
 <h2 className="text-lg font-bold mb-4 text-emerald"> Resolution</h2>
 <p>{dispute.resolution}</p>
 {dispute.resolvedAt && (

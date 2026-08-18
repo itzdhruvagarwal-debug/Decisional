@@ -14,7 +14,7 @@ return (
 <div className="flex gap-3 mb-6">
 <div className="skeleton h-9 w-32 rounded-md" />
 <div className="skeleton h-9 w-32 rounded-md" />
-<div className="skeleton h-9 flex-1 rounded-md max-w-[280px]" />
+<div className="skeleton h-9 flex-1 rounded-md max-w-280" />
 </div>
 {/* Campaign cards */}
 <div className="grid gap-5 grid-auto-360">

@@ -4,8 +4,8 @@
 */
 export default function ApplicationsLoading() {
 return (
-<div className="flex-1 py-[40px] px-[20px]" aria-hidden="true">
-<div className="max-w-[1000px] mx-auto">
+<div className="flex-1 p-6" aria-hidden="true">
+<div className="max-w-1000 mx-auto">
 {/* Page header */}
 <div className="mb-8">
 <div className="skeleton h-8 w-48 rounded-md mb-2" />
@@ -13,13 +13,13 @@ return (
 </div>
 {/* Table */}
 <div className="card overflow-hidden p-0">
-<div className="overflow-x-auto">
-<table className="w-full border-collapse">
+<div className="overflow-x-auto w-full">
+<table className="w-full border-collapse min-w-600" style={{ minWidth: "600px" }}>
 <thead>
 <tr className="border-b-card bg-tertiary">
 {["CAMPAIGN", "PROPOSED RATE", "SUBMITTED ON", "STATUS", "ACTION"].map((col) => (
 <th key={col} className="p-4">
-<div className={`skeleton h-3 rounded-sm ${col === "CAMPAIGN" ? "w-[72px]" : "w-[56px]"}`} />
+<div className={`skeleton h-3 rounded-sm ${col === "CAMPAIGN" ? "w-20" : "w-14"}`} />
 </th>
 ))}
 </tr>

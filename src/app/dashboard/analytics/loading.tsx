@@ -22,11 +22,11 @@ return (
 <div className="grid gap-5 grid-auto-360">
 <div className="card p-6">
 <div className="skeleton h-5 w-36 rounded-md mb-5" />
-<div className="skeleton rounded-md h-[200px]" />
+<div className="skeleton rounded-md h-200" />
 </div>
 <div className="card p-6">
 <div className="skeleton h-5 w-32 rounded-md mb-5" />
-<div className="skeleton rounded-md h-[200px]" />
+<div className="skeleton rounded-md h-200" />
 </div>
 </div>
 </div>

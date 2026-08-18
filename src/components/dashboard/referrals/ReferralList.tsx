@@ -94,7 +94,7 @@ Est. Earnings
 {filteredReferrals.map((ref) => (
 <tr
 key={ref.id}
-className="border-b-card hover:bg-[var(--color-bg-tertiary)] text-sm referral-row"
+className="border-b-card text-sm referral-row"
 >
 <td className="p-4">
 <div

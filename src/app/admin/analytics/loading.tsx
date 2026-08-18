@@ -26,7 +26,7 @@ return (
 <div className="grid gap-6 grid-auto-360">
 <div className="card p-6">
 <div className="skeleton h-5 w-40 rounded-md mb-5" />
-<div className="skeleton rounded-md h-[220px]" />
+<div className="skeleton rounded-md h-220" />
 </div>
 <div className="card p-6">
 <div className="skeleton h-5 w-36 rounded-md mb-5" />
@@ -34,8 +34,8 @@ return (
 <div key={i} className="flex items-center gap-3 mb-4">
 <div className="skeleton rounded-full flex-shrink-0 w-9 h-9" />
 <div className="flex-1">
-<div className="skeleton h-3.5 rounded-sm mb-2 w-[65%]" />
-<div className="skeleton h-3 rounded-sm w-[45%]" />
+<div className="skeleton h-3.5 rounded-sm mb-2 w-3/4" />
+<div className="skeleton h-3 rounded-sm w-1/2" />
 </div>
 <div className="skeleton h-3.5 w-16 rounded-sm" />
 </div>

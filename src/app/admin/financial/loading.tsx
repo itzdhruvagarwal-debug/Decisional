@@ -14,7 +14,7 @@ return (
 {/* 4 overview metric cards */}
 <div className="grid gap-6 mb-8 grid-auto-240">
 {[1, 2, 3, 4].map((i) => (
-<div key={i} className="card p-6 border-l-4 border-l-[rgba(255,255,255,0.08)]">
+<div key={i} className="card p-6 border-l-4 border-card">
 <div className="skeleton h-3 w-40 rounded-sm mb-3" />
 <div className="skeleton h-8 w-32 rounded-md mb-2" />
 <div className="skeleton h-3 w-28 rounded-sm" />

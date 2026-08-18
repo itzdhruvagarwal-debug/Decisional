@@ -248,9 +248,12 @@ Read Guide
 <Button
 variant="ghost"
 onClick={() => setSelectedPostId(null)}
-className="mb-8 text-sm cursor-pointer"
+className="mb-8 text-sm cursor-pointer inline-flex items-center gap-2"
 >
- Back to Guides
+<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+<polyline points="15 18 9 12 15 6" />
+</svg>
+Back to Guides
 </Button>
 
 <div className="mb-8 pb-6 border-b border-card-border">
@@ -260,9 +263,9 @@ className="mb-8 text-sm cursor-pointer"
 <h1 className="text-3xl font-extrabold text-white mb-4 leading-tight">
 {selectedPost.title}
 </h1>
-<div className="flex gap-4 text-xs text-secondary">
+<div className="flex items-center gap-3 text-xs text-secondary">
 <span>{selectedPost.date}</span>
-<span></span>
+<span aria-hidden="true">•</span>
 <span>{selectedPost.readTime}</span>
 </div>
 </div>

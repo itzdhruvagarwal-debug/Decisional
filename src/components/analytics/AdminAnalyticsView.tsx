@@ -170,14 +170,14 @@ Financial Performance
 </div>
 <div className="flex flex-col">
 <span className="text-sm text-gray-400 font-medium">Total Revenue</span>
-<span className="text-2xl font-bold tracking-tight text-emerald-400 drop-shadow-[0_0_12px_rgba(16,185,129,0.4)]">
+<span className="text-2xl font-bold tracking-tight text-emerald">
 {fmt(data.financials.totalRevenue)}
 </span>
 </div>
 </div>
 </div>
 
-<div className="w-full mt-4 h-[350px]">
+<div className="w-full mt-4 h-350">
 {chartsReady && (
 <ResponsiveContainer width="100%" height={350} minWidth={0}>
 <BarChart data={data.financials.revenueHistory} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -217,7 +217,7 @@ formatter={(value: number | undefined) => [fmt(value ?? 0), ""]}
 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 <div className="relative z-10">
 <h3 className="text-lg font-bold mb-6 text-white tracking-tight">User Growth (30 Days)</h3>
-<div className="w-full h-[280px]">
+<div className="w-full h-280">
 {chartsReady && (
 <ResponsiveContainer width="100%" height={280} minWidth={0}>
 <LineChart data={data.growth} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -252,33 +252,28 @@ Health & Risk
 <HealthRow
 label="Payment Success"
 value={`${data.systemHealth.paymentSuccessRate}%`}
-color={data.systemHealth.paymentSuccessRate > 95 ? "text-emerald-400" : "text-amber-400"}
+color={data.systemHealth.paymentSuccessRate > 95 ? "text-emerald" : "text-amber"}
 />
 <HealthRow
 label="Recent Errors"
 value={data.systemHealth.recentErrors}
-color={data.systemHealth.recentErrors > 10 ? "text-rose-400" : "text-emerald-400"}
+color={data.systemHealth.recentErrors > 10 ? "text-rose" : "text-emerald"}
 />
 <HealthRow
 label="Fraud Alerts"
 value={data.systemHealth.fraudAlerts}
-color={data.systemHealth.fraudAlerts > 5 ? "text-rose-400" : "text-emerald-400"}
+color={data.systemHealth.fraudAlerts > 5 ? "text-rose" : "text-emerald"}
 />
 <HealthRow
 label="Open Disputes"
 value={data.activity.disputesOpen}
-color={data.activity.disputesOpen > 5 ? "text-rose-400" : "text-emerald-400"}
+color={data.activity.disputesOpen > 5 ? "text-rose" : "text-emerald"}
 />
 <div className="h-px w-full bg-white/10 my-2" />
 <HealthRow
 label="K-Factor"
 value={data.growthMetrics.kFactor.toFixed(2)}
-color={data.growthMetrics.kFactor >= 1 ? "text-emerald-400" : "text-amber-400"}
-/>
-<HealthRow
-label="Churn Rate"
-value={`${data.growthMetrics.churnRate}%`}
-color={data.growthMetrics.churnRate < 20 ? "text-emerald-400" : "text-amber-400"}
+color={data.growthMetrics.kFactor >= 1 ? "text-emerald" : "text-amber"}
 />
 </div>
 </div>
@@ -289,7 +284,7 @@ color={data.growthMetrics.churnRate < 20 ? "text-emerald-400" : "text-amber-400"
 }
 
 interface MetricCardProps {
-readonly icon: React.ReactNode;
+readonly icon: string;
 readonly label: string;
 readonly value: string | number;
 readonly gradient: string;
@@ -300,10 +295,10 @@ function MetricCard({ icon, label, value, gradient, textColor }: MetricCardProps
 return (
 <motion.div variants={itemVariants} className="relative group">
 <div className={`absolute inset-0 bg-gradient-to-br ${gradient} rounded-2xl blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-500`} />
-<div className="relative bg-[#12121f]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:-translate-y-1 transition-transform duration-300">
+<div className="relative bg-card card glass border border-card rounded-2xl p-6 hover:-translate-y-1 transition-transform duration-300">
 <div className="flex justify-between items-start">
 <div className="flex flex-col">
-<span className="text-sm font-medium text-gray-400 mb-1">{label}</span>
+<span className="text-sm font-medium text-secondary mb-1">{label}</span>
 <span className={`text-3xl font-bold tracking-tight ${textColor}`}>{value}</span>
 </div>
 <div className="text-3xl filter drop-shadow-md">{icon}</div>

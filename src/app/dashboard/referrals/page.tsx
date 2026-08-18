@@ -233,8 +233,8 @@ referralLink = `${origin}/register?ref=${stats.referralCode}`;
 
 if (loading || !session) {
 return (
-<div className="flex items-center justify-center min-h-[60vh]">
-<div className="loading"></div>
+<div className="flex items-center justify-center min-h-60vh">
+<div className="loading" />
 </div>
 );
 }
@@ -243,10 +243,10 @@ if (!stats?.tier) {
 return (
 <DashboardShell user={session.user}>
 <div className="text-center py-20">
-<div className="text-2xl font-bold mb-2 text-[var(--color-text-secondary)]">
+<div className="text-2xl font-bold mb-2 text-secondary">
 Unavailable
 </div>
-<p className="text-[var(--color-text-muted)]">
+<p className="text-muted">
 Unable to load referral data at this time.
 </p>
 </div>
