@@ -170,7 +170,7 @@ setIsSaving(false);
 
 const handleSetDefault = async (id: string) => {
 try {
-const res = await fetch(`/api/wallet/bank-accounts?id=${id}`, {
+const res = await fetch(`/api/wallet/bank-accounts?id=${encodeURIComponent(id)}`, {
 method: "PUT",
 });
 if (res.ok) {
@@ -194,7 +194,7 @@ if (!deleteConfirmId) return;
 const id = deleteConfirmId;
 setDeleteConfirmId(null);
 try {
-const res = await fetch(`/api/wallet/bank-accounts?id=${id}`, {
+const res = await fetch(`/api/wallet/bank-accounts?id=${encodeURIComponent(id)}`, {
 method: "DELETE",
 });
 if (res.ok) {

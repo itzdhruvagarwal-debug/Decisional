@@ -112,7 +112,7 @@ setApplicationActionId(null);
 return;
 }
 
-const response = await fetch(`/api/applications/${applicationId}/${action}`, requestInit);
+const response = await fetch(`/api/applications/${encodeURIComponent(applicationId)}/${encodeURIComponent(action)}`, requestInit);
 const payload = await response.json();
 if (!response.ok || !payload?.success) {
 throw new Error(payload?.message || `Failed to ${action} application`);
@@ -183,7 +183,7 @@ action === "ACTIVATE"
 if (!globalThis.confirm(confirmText)) return;
 
 try {
-const response = await fetch(`/api/campaigns/${campaignId}`, {
+const response = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}`, {
 method: "PATCH",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify({ action }),

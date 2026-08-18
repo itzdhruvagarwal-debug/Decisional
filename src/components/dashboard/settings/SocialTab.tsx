@@ -61,7 +61,7 @@ showToast("Failed to connect Instagram. Please try again.", "error");
 const disconnectPlatform = async (platform: "instagram" | "youtube") => {
 const platformLabel = platform === "instagram" ? "Instagram" : "YouTube";
 try {
-const res = await fetch(`/api/auth/${platform}/disconnect`, { method: "POST" });
+const res = await fetch(`/api/auth/${encodeURIComponent(platform)}/disconnect`, { method: "POST" });
 if (res.ok) {
 // Refresh settings to reflect disconnected status
 const refreshRes = await fetch("/api/settings");

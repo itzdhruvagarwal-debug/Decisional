@@ -291,7 +291,7 @@ className="admin-users-th border-b-card text-muted text-xs font-extrabold upperc
 </tr>
 </thead>
 <tbody>
-{users.map((user: AdminUserListElement) => (
+{(users ?? []).map((user: AdminUserListElement) => (
 <UserRow
 key={user.id}
 user={user}

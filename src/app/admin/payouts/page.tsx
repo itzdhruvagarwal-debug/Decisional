@@ -133,7 +133,7 @@ draft.action === "APPROVE"
 ? { action: draft.action }
 : { action: draft.action, failureReason: note };
 
-const res = await fetch(`/api/admin/payouts/${draft.withdrawal.id}`, {
+const res = await fetch(`/api/admin/payouts/${encodeURIComponent(draft.withdrawal.id)}`, {
 method: "PUT",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify(body),

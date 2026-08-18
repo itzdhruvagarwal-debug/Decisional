@@ -149,7 +149,7 @@ setIsSubmitting(false);
 const handleProductAction = async (payload: Record<string, unknown>) => {
 setIsSubmitting(true);
 try {
-const res = await fetch(`/api/deals/${id}/product`, {
+const res = await fetch(`/api/deals/${encodeURIComponent(id)}/product`, {
 method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify(payload),
@@ -198,7 +198,7 @@ if (!confirm(signSummary)) return;
 
 setIsSubmitting(true);
 try {
-const res = await fetch(`/api/deals/${id}/sign`, { method: "POST" });
+const res = await fetch(`/api/deals/${encodeURIComponent(id)}/sign`, { method: "POST" });
 const data = await res.json();
 if (!res.ok || !data?.success) {
 throw new Error(data?.message || data?.error || "Failed to sign contract");
@@ -255,7 +255,7 @@ const handleRejectInvite = async () => {
 if (confirm("Are you sure you want to reject this invite? Direct-invite campaign funds will be refunded to the brand.")) {
 setIsSubmitting(true);
 try {
-const res = await fetch(`/api/deals/${id}/reject`, {
+const res = await fetch(`/api/deals/${encodeURIComponent(id)}/reject`, {
 method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify({
@@ -279,7 +279,7 @@ const handleCancelDeal = async () => {
 if (!confirm("Are you sure you want to cancel this deal? This action cannot be undone. Depending on the payment state, cancellation policies apply.")) return;
 setIsSubmitting(true);
 try {
-const res = await fetch(`/api/deals/${id}/cancel`, {
+const res = await fetch(`/api/deals/${encodeURIComponent(id)}/cancel`, {
 method: "POST",
 });
 const data = await res.json();

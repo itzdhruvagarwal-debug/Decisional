@@ -151,7 +151,7 @@ export default function CreateCampaignClient() {
     if (!invitedInfluencerId) return;
     const fetchInfluencer = async () => {
       try {
-        const res = await fetch(`/api/influencers/${invitedInfluencerId}`);
+        const res = await fetch(`/api/influencers/${encodeURIComponent(invitedInfluencerId)}`);
         if (res.ok) {
           const data = await res.json();
           if (data.influencer) {

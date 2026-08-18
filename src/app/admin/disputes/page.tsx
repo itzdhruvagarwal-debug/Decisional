@@ -128,7 +128,7 @@ return <EmptyState title={title} description={description} compact />;
 }
 return (
 <div className="grid gap-4">
-{disputes.map((dispute) => (
+{(disputes ?? []).map((dispute) => (
 <DisputeItem key={dispute.id} dispute={dispute} showHistory={showHistory} />
 ))}
 </div>

@@ -710,7 +710,7 @@ Mark all as read
 {notifications.length === 0 ? (
 <EmptyState emoji="" title="You're all caught up" description="No new notifications." compact />
 ) : (
-notifications.map((notif) => (
+(notifications ?? []).map((notif) => (
 <Button
 key={notif.id}
 onClick={() => !notif.isRead && markAsRead(notif.id)}

@@ -41,7 +41,7 @@ compact
 }
 return (
 <div className="flex flex-col gap-2">
-{deals.map((d) => (
+{(deals ?? []).map((d) => (
 <div
 key={d.id}
 className="flex justify-between items-center bg-tertiary rounded-md border-card px-3-py-2-5"

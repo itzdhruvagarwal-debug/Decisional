@@ -99,7 +99,7 @@ if (!currentUserId) return;
 
 processedDealRef.current = dealIdParam;
 
-fetch(`/api/deals/${dealIdParam}`)
+fetch(`/api/deals/${encodeURIComponent(dealIdParam)}`)
 .then(async (res) => {
 if (!res.ok) throw new Error("Failed to fetch deal details");
 return res.json();
@@ -141,7 +141,7 @@ if (!selectedConversation || !session) return;
 
 if (showLoading) setLoadingMessages(true);
 try {
-const response = await fetch(`/api/messages?with=${selectedConversation}`, {
+const response = await fetch(`/api/messages?with=${encodeURIComponent(selectedConversation)}`, {
 cache: "no-store",
 });
 const data = await response.json();
@@ -150,7 +150,7 @@ throw new Error(data?.error || "Failed to load messages");
 }
 
 try {
-const blockRes = await fetch(`/api/users/block?checkUserId=${selectedConversation}`);
+const blockRes = await fetch(`/api/users/block?checkUserId=${encodeURIComponent(selectedConversation)}`);
 if (blockRes.ok) {
 const blockData = await blockRes.json();
 setIsChatUserBlocked(blockData.data?.isBlocked || false);
@@ -449,7 +449,7 @@ showToast("error", "File sharing failed. Please try again.");
 
   const handleUpdateOfferStatus = async (messageId: string, status: "ACCEPTED" | "DECLINED") => {
     try {
-      const response = await fetch(`/api/messages/${messageId}`, {
+      const response = await fetch(`/api/messages/${encodeURIComponent(messageId)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),

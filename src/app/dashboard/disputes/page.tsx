@@ -101,7 +101,7 @@ actionHref="/dashboard/deals"
 }
 return (
 <div className="flex flex-col gap-4">
-{disputes.map((dispute) => (
+{(disputes ?? []).map((dispute) => (
 <Link
 key={dispute.id}
 href={`/dashboard/disputes/${dispute.id}`}
