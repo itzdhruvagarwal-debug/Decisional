@@ -15,6 +15,7 @@ ResponsiveContainer,
 import { ToastContainer, useToasts } from "@/components/ui/toast";
 import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Button } from "@/components/ui";
+import { getTrustTierLabel } from "@/lib/utils-client";
 
 export interface InfluencerAnalyticsData {
 overview: {
@@ -138,7 +139,7 @@ className={trustScoreColorClass}
 >
 {overview.trustScore}
 </strong>
-<small>{getTierLabel(overview.trustScore)}</small>
+<small>{getTrustTierLabel(overview.trustScore)}</small>
 </div>
 </section>
 
@@ -166,7 +167,7 @@ accentColorClass="text-[var(--color-accent-cyan)]"
 icon="trust"
 label="Trust Score"
 value={`${overview.trustScore}/900`}
-subvalue={getTierLabel(overview.trustScore)}
+subvalue={getTrustTierLabel(overview.trustScore)}
 accentColorClass="text-[var(--color-primary-light)]"
 />
 <StatCard

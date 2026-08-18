@@ -175,25 +175,6 @@ balance: { decrement: treasuryClawback },
   }
 }
 
-async function handleActiveDealBrandRefund(
-tx: Prisma.TransactionClient,
-brandUserId: string,
-totalAmount: number,
-brandRefund: number
-) {
-const debitResult = await tx.wallet.updateMany({
-where: { userId: brandUserId, pendingBalance: { gte: totalAmount } },
-data: {
-pendingBalance: { decrement: totalAmount },
-...(brandRefund > 0 ? { balance: { increment: brandRefund } } : {}),
-},
-});
-
-if (debitResult.count === 0) {
-throw AppError.badRequest("Invalid deal state: missing wallet reserve for dispute settlement");
-}
-}
-
 interface ActiveDealEscrowSettlementConfig {
 tx: Prisma.TransactionClient;
 deal: FullDeal;

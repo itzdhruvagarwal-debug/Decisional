@@ -14,6 +14,7 @@ import Link from "next/link";
 import { ToastContainer, useToasts } from "@/components/ui/toast";
 import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Button } from "@/components/ui";
+import { getTrustTierLabel } from "@/lib/utils-client";
 
 export interface BrandAnalyticsData {
 overview: {
@@ -101,7 +102,7 @@ return (
 <div className="dashboard-welcome-score" aria-label={`Trust score ${overview.trustScore || 0}`}>
 <span>Trust</span>
 <strong>{overview.trustScore || "--"}</strong>
-<small>{overview.trustScore ? getTierLabel(overview.trustScore) : "Brand"}</small>
+<small>{overview.trustScore ? getTrustTierLabel(overview.trustScore) : "Brand"}</small>
 </div>
 </section>
 
@@ -135,7 +136,7 @@ tone="emerald"
 icon="trust"
 label="Trust Score"
 value={overview.trustScore ? `${overview.trustScore}/900` : "N/A"}
-subvalue={overview.trustScore ? getTierLabel(overview.trustScore) : "Brand"}
+subvalue={overview.trustScore ? getTrustTierLabel(overview.trustScore) : "Brand"}
 tone="violet"
 />
 </div>
