@@ -80,7 +80,7 @@
 
   /* === DASHBOARD MAIN === */
   .dashboard-content {
-    padding: 16px;
+    padding: 16px 16px calc(96px + env(safe-area-inset-bottom, 0px)) 16px !important;
   }
 
   .dashboard-sub-header {
@@ -296,7 +296,7 @@
 
   /* === DASHBOARD CONTENT === */
   .dashboard-content {
-    padding: 12px;
+    padding: 14px 12px calc(96px + env(safe-area-inset-bottom, 0px)) 12px !important;
   }
 
   /* === SECTIONS === */
@@ -429,7 +429,7 @@
 
   /* === CONTENT === */
   .dashboard-content {
-    padding: 10px !important;
+    padding: 12px 10px calc(96px + env(safe-area-inset-bottom, 0px)) 10px !important;
   }
 
   /* === HERO BUTTONS — stack on tiny screens === */
@@ -536,7 +536,7 @@
   }
 
   .dashboard-content {
-    padding: 8px !important;
+    padding: 10px 8px calc(96px + env(safe-area-inset-bottom, 0px)) 8px !important;
   }
 
   /* === TYPOGRAPHY (absolute floor) === */

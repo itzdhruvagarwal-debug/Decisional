@@ -165,8 +165,8 @@ actionHref="/dashboard/campaigns"
 } else {
 applicationsList = (
 <div className="card overflow-hidden p-0">
-<div className="overflow-x-auto">
-<table className="w-full text-left border-collapse" aria-label="My campaign applications">
+<div className="overflow-x-auto w-full">
+<table className="w-full text-left border-collapse min-w-600" style={{ minWidth: "600px" }} aria-label="My campaign applications">
 <thead>
 <tr className="border-b-card bg-tertiary">
 <th scope="col" className="p-4 text-xs font-bold text-secondary">CAMPAIGN</th>

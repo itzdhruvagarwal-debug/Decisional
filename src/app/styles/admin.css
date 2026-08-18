@@ -390,7 +390,12 @@
 
 .admin-table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   width: 100%;
+}
+
+.admin-table-wrap table {
+  min-width: 640px;
 }
 
 .admin-modal-backdrop {
@@ -1305,14 +1310,14 @@
     right: 12px;
     bottom: max(10px, env(safe-area-inset-bottom));
     z-index: 70;
-    min-height: 70px;
-    padding: 8px 10px;
-    border: 1px solid rgba(229, 222, 246, 0.9);
+    min-height: 68px;
+    padding: 6px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
-    background: rgba(255, 255, 255, 0.94);
-    backdrop-filter: blur(24px) saturate(1.35);
-    -webkit-backdrop-filter: blur(24px) saturate(1.35);
-    box-shadow: 0 24px 70px rgba(30, 22, 56, 0.18);
+    background: rgba(18, 18, 31, 0.92);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     align-items: center;
@@ -1321,16 +1326,16 @@
 
   .dashboard-mobile-tab {
     min-width: 0;
-    min-height: 54px;
-    border-radius: 18px;
+    min-height: 52px;
+    border-radius: 16px;
     display: inline-flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    color: #4b5563;
+    gap: 3px;
+    color: var(--color-text-secondary, #a1a1b5);
     font-size: 10px;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1;
     transition:
       color var(--transition-fast),
@@ -1339,29 +1344,29 @@
   }
 
   .dashboard-mobile-tab-icon {
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
 
   .dashboard-mobile-tab.is-active {
-    color: #4f46e5;
-    background-color: #e0e7ff;
+    color: var(--color-primary-light, #818cf8);
+    background-color: rgba(99, 102, 241, 0.16);
   }
 
   .dashboard-mobile-tab.is-primary {
-    transform: translateY(-16px);
+    transform: translateY(-14px);
     color: #ffffff;
     font-size: 0;
   }
 
   .dashboard-mobile-tab.is-primary .dashboard-mobile-tab-icon {
-    width: 58px;
-    height: 58px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
     background: var(--gradient-primary);
-    box-shadow: 0 16px 34px rgba(109, 40, 255, 0.34);
+    box-shadow: 0 12px 28px rgba(99, 102, 241, 0.45);
   }
 }

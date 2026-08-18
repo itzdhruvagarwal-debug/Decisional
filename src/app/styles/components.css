@@ -859,6 +859,7 @@ dialog.pwa-install-overlay {
   border-radius: 20px;
   width: 100%;
   max-width: 480px;
+  max-height: calc(100dvh - 40px);
   box-shadow: 0 40px 120px rgba(0, 0, 0, 0.7);
   overflow: hidden;
   z-index: 1001;
@@ -867,12 +868,13 @@ dialog.pwa-install-overlay {
 }
 
 .modal-header {
-  padding: 24px 28px 20px;
+  padding: 20px 24px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
+  flex-shrink: 0;
 }
 
 .modal-title {
@@ -898,14 +900,44 @@ dialog.pwa-install-overlay {
 }
 
 .modal-body {
-  padding: 24px 28px;
+  padding: 20px 24px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  max-height: calc(100dvh - 140px);
 }
 
 .modal-footer {
-  padding: 0 28px 28px;
+  padding: 0 24px 20px;
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .modal-container {
+    width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    border-radius: 16px;
+  }
+  
+  .modal-header {
+    padding: 16px 18px 12px;
+  }
+  
+  .modal-body {
+    padding: 16px 18px;
+    max-height: calc(100dvh - 120px);
+  }
+  
+  .modal-footer {
+    padding: 0 18px 16px;
+    flex-direction: column-reverse;
+  }
+
+  .modal-footer > * {
+    width: 100% !important;
+  }
 }
 
 /* ==================== UTILITY CLASSES ==================== */
@@ -1247,9 +1279,29 @@ dialog.pwa-install-overlay {
 .w-36 { width: 36px; }
 .h-36 { height: 36px; }
 .w-80 { width: 80px; }
-.min-w-0 { min-width: 0; }
+.min-w-0 { min-width: 0 !important; }
+.min-w-90 { min-width: 90px; }
+.min-w-100 { min-width: 100px; }
+.min-w-160 { min-width: 160px; }
+.min-w-180 { min-width: 180px; }
+.min-w-200 { min-width: 200px; }
 .min-w-220 { min-width: 220px; }
+.max-w-200 { max-width: 200px; }
+.max-w-600 { max-width: 600px; }
+.max-w-800 { max-width: 800px; }
 .max-w-1000 { max-width: 1000px; }
+
+@media (max-width: 640px) {
+  .min-w-160,
+  .min-w-180,
+  .min-w-200,
+  .min-w-220 {
+    min-width: 0 !important;
+  }
+  .max-w-200 {
+    max-width: 100% !important;
+  }
+}
 .leading-1-6 { line-height: 1.6; }
 .bg-indigo-12 { background: rgba(99, 102, 241, 0.12); }
 .bg-indigo-15 { background: rgba(99, 102, 241, 0.15); }

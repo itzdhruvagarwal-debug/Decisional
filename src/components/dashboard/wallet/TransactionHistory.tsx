@@ -339,8 +339,8 @@ compact
 );
 }
 return (
-<div className="overflow-x-auto">
-<table className="w-full border-collapse">
+<div className="overflow-x-auto w-full">
+<table className="w-full border-collapse min-w-560" style={{ minWidth: "560px" }}>
 <thead>
 <tr
 className="border-b-card text-left text-sm text-secondary"
@@ -448,7 +448,7 @@ onClose={() => setPickerTarget(null)}
 className="p-6 border-b-card"
 >
 <div
-className="flex justify-between items-center mb-4"
+className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4"
 >
 <h3 className="text-lg font-bold">
 Transaction History

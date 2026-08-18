@@ -13,7 +13,7 @@ import { useTokenRefreshGuard } from "@/hooks/useTokenRefreshGuard";
 import { formatCurrency } from "@/lib/utils-client";
 import PeriodPickerModal, { type PeriodValue } from "@/components/dashboard/wallet/PeriodPickerModal";
 import { ToastContainer, type ToastItem, type ToastType } from "@/components/ui/toast";
-import { Button, Input } from "@/components/ui";
+import { Button, Input, Modal } from "@/components/ui";
 import { withdrawSchema } from "@/lib/validations/auth";
 import { z } from "zod";
 
@@ -554,143 +554,121 @@ You can save methods through Razorpay checkout for faster top-ups.
 )}
 </div>
 
-{showWithdrawModal && (
-<div className="modal-overlay">
-<div className="card w-full wallet-withdraw-modal">
-<h2 className="text-xl font-extrabold mb-6">
-Request Withdrawal
-</h2>
-
-<div className="mb-6 p-4 bg-[var(--color-bg-tertiary)] rounded-lg">
-<span className="text-sm text-[var(--color-text-secondary)]">Available Balance</span>
-<div className="text-2xl font-bold gradient-text">{formatCurrency(walletData.balance)}</div>
-</div>
-
-<form onSubmit={handleWithdraw}>
-<div className="mb-4">
-<Input
-id="withdraw-amount-input"
-type="number"
-label="Amount (INR)"
-min="500"
-max={walletData.balance / 100}
-value={withdrawAmount}
-onChange={(e) => setWithdrawAmount(e.target.value)}
-required
-placeholder="Minimum 500"
-fullWidth
-/>
-</div>
-
-<div className="mb-6">
-<div className="label">Select Bank Account</div>
-{selectedAccount ? (
-<div className="p-3 border border-[var(--color-primary)] rounded-lg flex justify-between items-center bg-[var(--color-bg-secondary)]">
-<div>
-<div className="font-bold">
-{selectedAccount.bankName === "UPI" ? "UPI Account" : selectedAccount.bankName}
-</div>
-<div className="text-xs text-[var(--color-text-secondary)]">
-{selectedAccount.bankName === "UPI"
-? selectedAccount.upiId
-: `**** ${(selectedAccount.accountNumber || "----").slice(-4)}`}
-</div>
-</div>
-<Button
-type="button"
-aria-label="Change selected bank account"
-onClick={() => setSelectedAccount(null)}
-variant="ghost"
-className="text-xs text-rose"
+<Modal
+  open={showWithdrawModal}
+  onClose={() => setShowWithdrawModal(false)}
+  title="Request Withdrawal"
+  maxWidth="540px"
 >
-Change
-</Button>
-</div>
-) : (
-<div className="border border-[var(--color-border)] rounded-lg p-4">
-<div className="mb-4 text-sm text-[var(--color-text-secondary)]">
-Select a saved account to receive funds:
-</div>
-<BankAccountManager
-onSelectAccount={(acc) => setSelectedAccount(acc as SelectedBankAccount)}
-/>
-</div>
-)}
-</div>
+  <div className="mb-6 p-4 bg-tertiary rounded-lg">
+    <span className="text-sm text-secondary">Available Balance</span>
+    <div className="text-2xl font-bold gradient-text">{formatCurrency(walletData?.balance || 0)}</div>
+  </div>
 
-<div className="flex justify-end gap-2">
-<Button
-type="button"
-variant="ghost"
-onClick={() => setShowWithdrawModal(false)}
->
-Cancel
-</Button>
-<Button
-type="submit"
-variant="primary"
-disabled={!selectedAccount || !withdrawAmount || isWithdrawing}
->
-{isWithdrawing ? "Processing..." : "Withdraw Funds"}
-</Button>
-</div>
-</form>
-</div>
-</div>
-)}
+  <form onSubmit={handleWithdraw}>
+    <div className="mb-4">
+      <Input
+        id="withdraw-amount-input"
+        type="number"
+        label="Amount (INR)"
+        min="500"
+        max={(walletData?.balance || 0) / 100}
+        value={withdrawAmount}
+        onChange={(e) => setWithdrawAmount(e.target.value)}
+        required
+        placeholder="Minimum 500"
+        fullWidth
+      />
+    </div>
 
-{showAddFundsModal && (
-<div className="modal-overlay">
-<div className="card w-full wallet-add-funds-modal">
-<h2 className="text-xl font-extrabold mb-6">
-Add Funds
-</h2>
-<form onSubmit={handleAddFunds}>
-<div className="mb-6">
-<Input
-id="add-funds-amount-input"
-name="amount"
-type="number"
-label="Amount (INR)"
-min="100"
-required
-placeholder="Enter amount"
-fullWidth
-/>
-</div>
-<div className="flex justify-end gap-2">
-<Button
-type="button"
-variant="ghost"
-onClick={() => setShowAddFundsModal(false)}
->
-Cancel
-</Button>
-<Button type="submit" variant="primary">
-Proceed to Pay
-</Button>
-</div>
-</form>
-</div>
-</div>
-)}
+    <div className="mb-6">
+      <div className="label">Select Bank Account</div>
+      {selectedAccount ? (
+        <div className="p-3 border border-indigo-15 rounded-lg flex justify-between items-center bg-secondary">
+          <div>
+            <div className="font-bold">
+              {selectedAccount.bankName === "UPI" ? "UPI Account" : selectedAccount.bankName}
+            </div>
+            <div className="text-xs text-secondary">
+              {selectedAccount.bankName === "UPI"
+                ? selectedAccount.upiId
+                : `**** ${(selectedAccount.accountNumber || "----").slice(-4)}`}
+            </div>
+          </div>
+          <Button
+            type="button"
+            aria-label="Change selected bank account"
+            onClick={() => setSelectedAccount(null)}
+            variant="ghost"
+            className="text-xs text-rose"
+          >
+            Change
+          </Button>
+        </div>
+      ) : (
+        <div className="border border-border rounded-lg p-4 max-h-60 overflow-y-auto">
+          <div className="mb-4 text-sm text-secondary">
+            Select a saved account to receive funds:
+          </div>
+          <BankAccountManager
+            onSelectAccount={(acc) => setSelectedAccount(acc as SelectedBankAccount)}
+          />
+        </div>
+      )}
+    </div>
 
-<style jsx>{`
-.modal-overlay {
-position: fixed;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
-background: rgba(10, 10, 20, 0.75);
-backdrop-filter: blur(8px);
-display: flex;
-align-items: center;
-justify-content: center;
-z-index: 100;
-padding: 20px;
-}
-`}</style>
+    <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 mt-4">
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={() => setShowWithdrawModal(false)}
+      >
+        Cancel
+      </Button>
+      <Button
+        type="submit"
+        variant="primary"
+        disabled={!selectedAccount || !withdrawAmount || isWithdrawing}
+      >
+        {isWithdrawing ? "Processing..." : "Withdraw Funds"}
+      </Button>
+    </div>
+  </form>
+</Modal>
+
+<Modal
+  open={showAddFundsModal}
+  onClose={() => setShowAddFundsModal(false)}
+  title="Add Funds"
+  maxWidth="480px"
+>
+  <form onSubmit={handleAddFunds}>
+    <div className="mb-6">
+      <Input
+        id="add-funds-amount-input"
+        name="amount"
+        type="number"
+        label="Amount (INR)"
+        min="100"
+        required
+        placeholder="Enter amount"
+        fullWidth
+      />
+    </div>
+    <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 mt-4">
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={() => setShowAddFundsModal(false)}
+      >
+        Cancel
+      </Button>
+      <Button type="submit" variant="primary">
+        Proceed to Pay
+      </Button>
+    </div>
+  </form>
+</Modal>
 </DashboardShell>
 );
 }

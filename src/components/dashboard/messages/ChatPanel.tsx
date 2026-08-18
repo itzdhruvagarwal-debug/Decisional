@@ -29,9 +29,11 @@ return (
 variant="ghost"
 onClick={() => setSelectedConversation(null)}
 aria-label="Back to conversations list"
-className="chat-back-btn show-mobile text-lg"
+className="chat-back-btn show-mobile p-1 min-w-0"
 >
-
+<svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+<polyline points="15 18 9 12 15 6" />
+</svg>
 </Button>
 <div className="flex items-center justify-center font-bold rounded-full text-white w-40 h-40 bg-gradient-card">
 {selectedChat.avatar ? (
