@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-echo "==================================================="
+DIVIDER="==================================================="
+
+echo "${DIVIDER}"
 echo "    DECISIONAL - FULL AUTOMATED SETUP SCRIPT"
-echo "==================================================="
+echo "${DIVIDER}"
 echo ""
 
 # 1. Check Node.js
@@ -14,7 +16,7 @@ if ! command -v node &> /dev/null; then
     elif command -v apt-get &> /dev/null; then
         sudo apt-get update && sudo apt-get install -y nodejs npm
     else
-        echo "[ERROR] Please install Node.js 20+ from https://nodejs.org/"
+        echo "[ERROR] Please install Node.js 20+ from https://nodejs.org/" >&2
         exit 1
     fi
 fi
@@ -33,7 +35,7 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # 3. Create .env if not present
-if [ ! -f ".env" ]; then
+if [[ ! -f ".env" ]]; then
     echo "[*] Creating .env configuration..."
     cat << 'EOF' > .env
 NODE_ENV="development"
@@ -72,29 +74,30 @@ if command -v docker &> /dev/null; then
     sleep 6
 fi
 
-# 5. Install NPM dependencies
+# 5. Install NPM dependencies securely
 echo "[*] Installing NPM dependencies..."
-npm install
+npm install --ignore-scripts
+npx --no-install prisma generate
 
-# 6. Push Prisma schema
+# 6. Push Prisma schema using local binaries
 echo "[*] Syncing database schema with Prisma..."
-npx prisma db push
+npx --no-install prisma db push
 
 # 7. Seed accounts
 echo "[*] Seeding database with fully verified test accounts (Admin, Brand, Influencer)..."
 npm run seed
 
 echo ""
-echo "==================================================="
+echo "${DIVIDER}"
 echo "  SETUP 100% COMPLETE! READY-TO-USE TEST ACCOUNTS:"
-echo "==================================================="
+echo "${DIVIDER}"
 echo "  Password for all accounts: Test@1234"
 echo ""
 echo "  1. ADMIN:       admin@test.decisional.in"
 echo "  2. BRAND:       brand@test.decisional.in (Wallet: Rs 1,00,000)"
 echo "  3. INFLUENCER:  influencer@test.decisional.in"
 echo "  4. INFLUENCER 2: influencer2@test.decisional.in"
-echo "==================================================="
+echo "${DIVIDER}"
 echo ""
 echo "Launching development server on http://localhost:3000..."
 echo ""
