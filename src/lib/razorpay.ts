@@ -54,7 +54,7 @@ return _razorpay;
 }
 
 
-export interface PayoutParams {
+interface PayoutParams {
 accountNumber: string;
 ifscCode: string;
 beneficiaryName: string;
@@ -65,7 +65,7 @@ userId?: string;
 upiId?: string;
 }
 
-export interface RefundParams {
+interface RefundParams {
 paymentId: string;
 amount: number; // In paise
 speed?: "normal" | "optimum";

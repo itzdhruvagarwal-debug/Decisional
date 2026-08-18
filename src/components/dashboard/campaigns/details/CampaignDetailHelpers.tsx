@@ -3,7 +3,7 @@
 import { normalizeStringArray, normalizeDeliverables } from "@/lib/utils-client";
 export { normalizeDeliverables };
 
-export interface CampaignDetail {
+interface CampaignDetail {
 id: string;
 title: string;
 description: string;

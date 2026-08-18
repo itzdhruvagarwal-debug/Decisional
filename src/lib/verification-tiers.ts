@@ -31,7 +31,7 @@ TIER_2_MAX_MONTHLY: 10_000_000, // 1,00,000 (Brand only Influencer jumps straigh
 TIER_3_MAX_MONTHLY: Infinity, // Unlimited
 } as const;
 
-export type VerificationTier = 0 | 1 | 2 | 3;
+type VerificationTier = 0 | 1 | 2 | 3;
 
 interface TierCheckResult {
 allowed: boolean;

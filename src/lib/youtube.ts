@@ -39,7 +39,7 @@ return res.json();
 
 // ==================== TYPES ====================
 
-export interface YouTubeChannel {
+interface YouTubeChannel {
 id: string;
 title: string;
 description: string;
@@ -52,7 +52,7 @@ country?: string;
 publishedAt: string;
 }
 
-export interface YouTubeVideo {
+interface YouTubeVideo {
   id: string;
   title: string;
   description: string;

@@ -154,7 +154,7 @@ return { allowed: true };
 
 // ==================== FINANCIAL IMPACT ENGINES ====================
 
-export type WithdrawalSpeed = "INSTANT" | "24_HOURS" | "72_HOURS" | "MANUAL_REVIEW";
+type WithdrawalSpeed = "INSTANT" | "24_HOURS" | "72_HOURS" | "MANUAL_REVIEW";
 
 /**
 * Determine withdrawal processing speed based on trust score tier.

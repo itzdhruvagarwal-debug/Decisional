@@ -42,7 +42,7 @@ influencerRefResult: { referrerId?: string } | undefined;
 brandRefResult: { referrerId?: string } | undefined;
 }
 
-export async function executeResolutionTransaction(config: ResolutionTransactionConfig): Promise<ResolutionResults> {
+async function executeResolutionTransaction(config: ResolutionTransactionConfig): Promise<ResolutionResults> {
 const {
 tx,
 disputeId,
@@ -181,7 +181,7 @@ influencerUserId,
 return { influencerRefResult, brandRefResult };
 }
 
-export async function validateDisputeStatus(
+async function validateDisputeStatus(
   checkDispute: { status: DisputeStatus; tier: number } | null,
   disputeId: string
 ): Promise<{ success: boolean; message: string }> {
@@ -210,7 +210,7 @@ export async function validateDisputeStatus(
   return { success: true, message: "" };
 }
 
-export function calculateResolutionAmounts(analysis: MediatorAnalysis, deal: FullDeal) {
+function calculateResolutionAmounts(analysis: MediatorAnalysis, deal: FullDeal) {
 let influencerShare = 0;
 let brandRefund = 0;
 let totalAmount = 0;
@@ -265,14 +265,14 @@ treasuryClawback,
 };
 }
 
-export function resolveDisputeCategory(disputeType: string): ViolationCategory {
+function resolveDisputeCategory(disputeType: string): ViolationCategory {
 if (disputeType === "CONTENT_DELETED") return "POST_DELETION";
 if (disputeType === "TIMELINE") return "MISSED_DEADLINE";
 if (disputeType === "PAYMENT") return "PAYMENT_FRAUD";
 return "OTHER";
 }
 
-export async function applyBrandFavoredPenalty(
+async function applyBrandFavoredPenalty(
 influencerUserId: string,
 disputeType: string,
 explanation: string,
@@ -296,7 +296,7 @@ penaltyError instanceof Error ? penaltyError : new Error(String(penaltyError)),
 }
 }
 
-export async function handlePostResolutionWork(
+async function handlePostResolutionWork(
 dispute: FullDispute,
 analysis: MediatorAnalysis,
 deal: FullDeal,
@@ -323,7 +323,7 @@ await updateTrustAndLevel(brandUserId, "DISPUTE_RESOLVED");
 }
 }
 
-export async function invalidateDisputePlatformFeeCaches(
+async function invalidateDisputePlatformFeeCaches(
 influencerRefResult: { referrerId?: string } | undefined,
 brandRefResult: { referrerId?: string } | undefined,
 ) {
@@ -345,7 +345,7 @@ error: err instanceof Error ? err.message : String(err),
 }
 }
 
-export async function runResolutionTransactionWithRetries(params: {
+async function runResolutionTransactionWithRetries(params: {
 disputeId: string;
 dispute: FullDispute;
 deal: FullDeal;

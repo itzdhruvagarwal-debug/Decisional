@@ -92,7 +92,7 @@ return {};
 return raw as ContractTermsJson;
 }
 
-export interface EngagementMetricsData {
+interface EngagementMetricsData {
 views: number;
 likes: number;
 comments: number;
@@ -109,7 +109,7 @@ timestamp: string;
 metrics: EngagementMetricsData;
 }
 
-export interface ROIData {
+interface ROIData {
 estimatedCostPerView: number;
 earnedMediaValue: number;
 estimatedReach: number;

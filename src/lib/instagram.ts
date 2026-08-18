@@ -15,7 +15,7 @@ const GRAPH_API_VERSION = "v18.0";
 
 // ==================== TYPES ====================
 
-export interface InstagramProfile {
+interface InstagramProfile {
 id: string;
 username: string;
 name: string;
@@ -28,7 +28,7 @@ isVerified: boolean;
 website?: string;
 }
 
-export interface InstagramPost {
+interface InstagramPost {
 id: string;
 mediaType: "IMAGE" | "VIDEO" | "CAROUSEL_ALBUM";
 mediaUrl: string;
@@ -41,7 +41,7 @@ isLive: boolean;
 isPaidPartnership?: boolean;
 }
 
-export interface InstagramInsights {
+interface InstagramInsights {
 engagementRate: number;
 avgLikes: number;
 avgComments: number;

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-export const PAN_REGEX = /^[A-Z]{5}\d{4}[A-Z]$/;
-export const GSTIN_REGEX = /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[\dA-Z]$/;
+const PAN_REGEX = /^[A-Z]{5}\d{4}[A-Z]$/;
+const GSTIN_REGEX = /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[\dA-Z]$/;
 const ITR_ACK_REGEX = /^\d{10,20}$/;
 const ASSESSMENT_YEAR_REGEX = /^20\d{2}-\d{2}$/;
 
