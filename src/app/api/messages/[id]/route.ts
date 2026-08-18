@@ -12,6 +12,325 @@ const updateMessageSchema = z.object({
   status: z.enum(["ACCEPTED", "DECLINED"]),
 });
 
+type MessageWithProfiles = Prisma.MessageGetPayload<{
+  include: {
+    sender: {
+      include: {
+        brandProfile: true;
+        influencerProfile: true;
+      };
+    };
+    receiver: {
+      include: {
+        brandProfile: true;
+        influencerProfile: true;
+      };
+    };
+  };
+}>;
+
+interface OfferParticipants {
+  brandProfile: NonNullable<MessageWithProfiles["sender"]["brandProfile"]>;
+  influencerProfile: NonNullable<MessageWithProfiles["sender"]["influencerProfile"]>;
+  brandUserId: string;
+  influencerUserId: string;
+}
+
+interface OfferDeadlines {
+  contentDeadline: Date;
+  postingDeadline: Date;
+}
+
+function resolveDeadlines(currentMetadata: Prisma.JsonObject): OfferDeadlines {
+  const now = new Date();
+  const rawContentDeadline = currentMetadata.contentDeadline
+    ? new Date(String(currentMetadata.contentDeadline))
+    : null;
+  const rawPostingDeadline = currentMetadata.postingDeadline
+    ? new Date(String(currentMetadata.postingDeadline))
+    : null;
+
+  const isContentValid =
+    rawContentDeadline !== null &&
+    !Number.isNaN(rawContentDeadline.getTime()) &&
+    rawContentDeadline > now;
+
+  const contentDeadline = isContentValid
+    ? rawContentDeadline
+    : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+  const isPostingValid =
+    rawPostingDeadline !== null &&
+    !Number.isNaN(rawPostingDeadline.getTime()) &&
+    rawPostingDeadline > contentDeadline;
+
+  const postingDeadline = isPostingValid
+    ? rawPostingDeadline
+    : new Date(contentDeadline.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  return { contentDeadline, postingDeadline };
+}
+
+function extractDirectParticipants(message: MessageWithProfiles) {
+  const brandProfile = message.sender.brandProfile || message.receiver.brandProfile;
+  const influencerProfile =
+    message.sender.influencerProfile || message.receiver.influencerProfile;
+
+  let brandUserId: string | null = null;
+  if (message.sender.brandProfile) {
+    brandUserId = message.senderId;
+  } else if (message.receiver.brandProfile) {
+    brandUserId = message.receiverId;
+  }
+
+  let influencerUserId: string | null = null;
+  if (message.sender.influencerProfile) {
+    influencerUserId = message.senderId;
+  } else if (message.receiver.influencerProfile) {
+    influencerUserId = message.receiverId;
+  }
+
+  return { brandProfile, influencerProfile, brandUserId, influencerUserId };
+}
+
+async function resolveOfferParticipants(
+  message: MessageWithProfiles
+): Promise<OfferParticipants | null> {
+  const direct = extractDirectParticipants(message);
+  let { brandProfile, influencerProfile, brandUserId, influencerUserId } = direct;
+
+  if (!brandProfile || !influencerProfile || !brandUserId || !influencerUserId) {
+    let brandUser = null;
+    if (message.sender.userType === "BRAND") {
+      brandUser = message.sender;
+    } else if (message.receiver.userType === "BRAND") {
+      brandUser = message.receiver;
+    }
+
+    let influencerUser = null;
+    if (message.sender.userType === "INFLUENCER") {
+      influencerUser = message.sender;
+    } else if (message.receiver.userType === "INFLUENCER") {
+      influencerUser = message.receiver;
+    }
+
+    if (brandUser && influencerUser) {
+      brandUserId = brandUser.id;
+      influencerUserId = influencerUser.id;
+      brandProfile =
+        brandUser.brandProfile ||
+        (await prisma.brandProfile.findUnique({ where: { userId: brandUser.id } }));
+      influencerProfile =
+        influencerUser.influencerProfile ||
+        (await prisma.influencerProfile.findUnique({ where: { userId: influencerUser.id } }));
+    }
+  }
+
+  if (!brandProfile || !influencerProfile || !brandUserId || !influencerUserId) {
+    return null;
+  }
+
+  return { brandProfile, influencerProfile, brandUserId, influencerUserId };
+}
+
+async function handleDeclinedOffer(
+  message: MessageWithProfiles,
+  currentMetadata: Prisma.JsonObject,
+  sessionUserId: string
+) {
+  const updatedMetadata: Prisma.JsonObject = {
+    ...currentMetadata,
+    status: "DECLINED",
+    declinedAt: new Date().toISOString(),
+    declinedByUserId: sessionUserId,
+  };
+
+  const updatedMessage = await prisma.message.update({
+    where: { id: message.id },
+    data: { metadata: updatedMetadata },
+  });
+
+  await NotificationService.createNotification({
+    userId: message.senderId,
+    title: "Proposal Declined",
+    message: `Your custom offer "${String(currentMetadata.title || "Custom Deal")}" was declined.`,
+    type: "MESSAGE",
+  });
+
+  return NextResponse.json({
+    success: true,
+    message: updatedMessage,
+  });
+}
+
+interface EscrowTxParams {
+  brandUserId: string;
+  brandProfileId: string;
+  influencerProfileId: string;
+  offerAmount: number;
+  totalAmountToLock: number;
+  paymentAmounts: ReturnType<typeof calculateTotalAmount>;
+  offerTitle: string;
+  offerDescription: string;
+  offerDeliverables: string;
+  contentDeadline: Date;
+  postingDeadline: Date;
+  messageId: string;
+  currentMetadata: Prisma.JsonObject;
+  sessionUserId: string;
+}
+
+async function executeOfferEscrowTransaction(params: EscrowTxParams) {
+  return prisma.$transaction(async (tx) => {
+    const brandWallet = await tx.wallet.findUnique({
+      where: { userId: params.brandUserId },
+    });
+
+    if (!brandWallet || brandWallet.balance < params.totalAmountToLock) {
+      const availableInr = brandWallet ? (brandWallet.balance / 100).toLocaleString("en-IN") : "0";
+      const requiredInr = (params.totalAmountToLock / 100).toLocaleString("en-IN");
+      throw new Error(
+        `Insufficient brand wallet balance (Available: ₹${availableInr}, Required: ₹${requiredInr}). Please top up your wallet to accept this offer.`
+      );
+    }
+
+    await tx.wallet.update({
+      where: { id: brandWallet.id },
+      data: {
+        balance: { decrement: params.totalAmountToLock },
+        pendingBalance: { increment: params.totalAmountToLock },
+        totalSpent: { increment: params.totalAmountToLock },
+      },
+    });
+
+    const campaign = await tx.campaign.create({
+      data: {
+        brandId: params.brandProfileId,
+        title: params.offerTitle,
+        description: params.offerDescription,
+        requirements: params.offerDeliverables,
+        deliverables: [
+          {
+            type: "CUSTOM",
+            count: 1,
+            specs: params.offerDeliverables,
+          },
+        ],
+        totalBudget: params.offerAmount,
+        perInfluencerBudget: params.offerAmount,
+        fundedAmount: params.totalAmountToLock,
+        reservedAmount: params.totalAmountToLock,
+        reservedTotalAmount: params.totalAmountToLock,
+        contentDeadline: params.contentDeadline,
+        postingDeadline: params.postingDeadline,
+        status: "ACTIVE",
+        isDirectInvite: true,
+        selectedInfluencers: 1,
+        maxInfluencers: 1,
+      },
+    });
+
+    const deal = await tx.deal.create({
+      data: {
+        campaignId: campaign.id,
+        influencerId: params.influencerProfileId,
+        brandId: params.brandProfileId,
+        amount: params.offerAmount,
+        platformFee: params.paymentAmounts.platformFee,
+        gatewayFee: params.paymentAmounts.gatewayFee,
+        totalAmount: params.totalAmountToLock,
+        influencerPayout: params.paymentAmounts.influencerReceives,
+        reservedFromWallet: true,
+        status: "ACTIVE",
+        submissionDeadline: params.contentDeadline,
+        postingDeadline: params.postingDeadline,
+        startedAt: new Date(),
+        contractTerms: {
+          title: params.offerTitle,
+          scope: params.offerDescription,
+          deliverables: params.offerDeliverables,
+          dealAmount: params.offerAmount,
+          platformFee: params.paymentAmounts.platformFee,
+          gatewayFee: params.paymentAmounts.gatewayFee,
+          totalAmount: params.totalAmountToLock,
+          influencerPayout: params.paymentAmounts.influencerReceives,
+          source: "in_chat_offer",
+        } as unknown as Prisma.InputJsonValue,
+      },
+    });
+
+    await tx.deal.update({
+      where: { id: deal.id },
+      data: {
+        contractTerms: {
+          dealId: deal.id,
+          title: params.offerTitle,
+          scope: params.offerDescription,
+          deliverables: params.offerDeliverables,
+          dealAmount: params.offerAmount,
+          platformFee: params.paymentAmounts.platformFee,
+          gatewayFee: params.paymentAmounts.gatewayFee,
+          totalAmount: params.totalAmountToLock,
+          influencerPayout: params.paymentAmounts.influencerReceives,
+          source: "in_chat_offer",
+        } as unknown as Prisma.InputJsonValue,
+      },
+    });
+
+    await tx.transaction.create({
+      data: {
+        walletId: brandWallet.id,
+        dealId: deal.id,
+        type: "DEBIT",
+        amount: params.totalAmountToLock,
+        status: "COMPLETED",
+        description: `Escrow hold for in-chat deal: ${params.offerTitle}`,
+        metadata: {
+          source: "in_chat_offer_acceptance",
+          dealId: deal.id,
+          dealAmount: params.offerAmount,
+          platformFee: params.paymentAmounts.platformFee,
+          gatewayFee: params.paymentAmounts.gatewayFee,
+        },
+      },
+    });
+
+    const updatedMetadata: Prisma.JsonObject = {
+      ...params.currentMetadata,
+      status: "ACCEPTED",
+      dealId: deal.id,
+      acceptedAt: new Date().toISOString(),
+      acceptedByUserId: params.sessionUserId,
+    };
+
+    const updatedMessage = await tx.message.update({
+      where: { id: params.messageId },
+      data: {
+        dealId: deal.id,
+        metadata: updatedMetadata,
+      },
+    });
+
+    await tx.brandProfile.update({
+      where: { id: params.brandProfileId },
+      data: {
+        totalCampaigns: { increment: 1 },
+        activeCampaigns: { increment: 1 },
+        totalSpent: { increment: params.totalAmountToLock },
+      },
+    });
+
+    await tx.influencerProfile.update({
+      where: { id: params.influencerProfileId },
+      data: {
+        totalDeals: { increment: 1 },
+      },
+    });
+
+    return { deal, message: updatedMessage };
+  });
+}
+
 export const PATCH = apiWrapper(async (req, { params }) => {
   const session = await auth();
   if (!session?.user?.id) {
@@ -48,7 +367,6 @@ export const PATCH = apiWrapper(async (req, { params }) => {
     return NextResponse.json({ error: "Message not found" }, { status: 404 });
   }
 
-  // Ensure the receiver of the message is the one accepting/declining the offer
   if (message.receiverId !== session.user.id) {
     return NextResponse.json(
       { error: "Only the offer receiver can accept or decline it" },
@@ -68,34 +386,10 @@ export const PATCH = apiWrapper(async (req, { params }) => {
     );
   }
 
-  // Handle DECLINED
   if (status === "DECLINED") {
-    const updatedMetadata: Prisma.JsonObject = {
-      ...currentMetadata,
-      status: "DECLINED",
-      declinedAt: new Date().toISOString(),
-      declinedByUserId: session.user.id,
-    };
-
-    const updatedMessage = await prisma.message.update({
-      where: { id: messageId },
-      data: { metadata: updatedMetadata },
-    });
-
-    await NotificationService.createNotification({
-      userId: message.senderId,
-      title: "Proposal Declined",
-      message: `Your custom offer "${String(currentMetadata.title || "Custom Deal")}" was declined.`,
-      type: "MESSAGE",
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: updatedMessage,
-    });
+    return handleDeclinedOffer(message, currentMetadata, session.user.id);
   }
 
-  // Handle ACCEPTED -> Full Escrow & Deal Creation
   const offerAmount = Number(currentMetadata.amount || 0);
   if (offerAmount <= 0) {
     return NextResponse.json(
@@ -112,70 +406,10 @@ export const PATCH = apiWrapper(async (req, { params }) => {
     currentMetadata.deliverables || "Deliverables as agreed in conversation."
   );
 
-  // Parse deadlines safely
-  const now = new Date();
-  const rawContentDeadline = currentMetadata.contentDeadline
-    ? new Date(String(currentMetadata.contentDeadline))
-    : null;
-  const rawPostingDeadline = currentMetadata.postingDeadline
-    ? new Date(String(currentMetadata.postingDeadline))
-    : null;
+  const { contentDeadline, postingDeadline } = resolveDeadlines(currentMetadata);
+  const participants = await resolveOfferParticipants(message);
 
-  const contentDeadline =
-    rawContentDeadline && !isNaN(rawContentDeadline.getTime()) && rawContentDeadline > now
-      ? rawContentDeadline
-      : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // default 7 days
-
-  const postingDeadline =
-    rawPostingDeadline &&
-    !isNaN(rawPostingDeadline.getTime()) &&
-    rawPostingDeadline > contentDeadline
-      ? rawPostingDeadline
-      : new Date(contentDeadline.getTime() + 7 * 24 * 60 * 60 * 1000); // default content + 7 days
-
-  // Identify Brand and Influencer profiles
-  let brandProfile = message.sender.brandProfile || message.receiver.brandProfile;
-  let influencerProfile =
-    message.sender.influencerProfile || message.receiver.influencerProfile;
-  let brandUserId = message.sender.brandProfile
-    ? message.senderId
-    : message.receiver.brandProfile
-    ? message.receiverId
-    : null;
-  let influencerUserId = message.sender.influencerProfile
-    ? message.senderId
-    : message.receiver.influencerProfile
-    ? message.receiverId
-    : null;
-
-  // Fallback: If roles aren't clearly separated, look up profiles directly
-  if (!brandProfile || !influencerProfile || !brandUserId || !influencerUserId) {
-    const brandUser =
-      message.sender.userType === "BRAND"
-        ? message.sender
-        : message.receiver.userType === "BRAND"
-        ? message.receiver
-        : null;
-    const influencerUser =
-      message.sender.userType === "INFLUENCER"
-        ? message.sender
-        : message.receiver.userType === "INFLUENCER"
-        ? message.receiver
-        : null;
-
-    if (brandUser && influencerUser) {
-      brandUserId = brandUser.id;
-      influencerUserId = influencerUser.id;
-      brandProfile =
-        brandUser.brandProfile ||
-        (await prisma.brandProfile.findUnique({ where: { userId: brandUser.id } }));
-      influencerProfile =
-        influencerUser.influencerProfile ||
-        (await prisma.influencerProfile.findUnique({ where: { userId: influencerUser.id } }));
-    }
-  }
-
-  if (!brandProfile || !influencerProfile || !brandUserId || !influencerUserId) {
+  if (!participants) {
     return NextResponse.json(
       {
         error:
@@ -189,165 +423,23 @@ export const PATCH = apiWrapper(async (req, { params }) => {
   const totalAmountToLock = paymentAmounts.totalAmount;
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. Check Brand Wallet
-      const brandWallet = await tx.wallet.findUnique({
-        where: { userId: brandUserId! },
-      });
-
-      if (!brandWallet || brandWallet.balance < totalAmountToLock) {
-        const availableInr = brandWallet ? (brandWallet.balance / 100).toLocaleString("en-IN") : "0";
-        const requiredInr = (totalAmountToLock / 100).toLocaleString("en-IN");
-        throw new Error(
-          `Insufficient brand wallet balance (Available: ₹${availableInr}, Required: ₹${requiredInr}). Please top up your wallet to accept this offer.`
-        );
-      }
-
-      // 2. Lock Funds from Brand Wallet into Escrow
-      await tx.wallet.update({
-        where: { id: brandWallet.id },
-        data: {
-          balance: { decrement: totalAmountToLock },
-          pendingBalance: { increment: totalAmountToLock },
-          totalSpent: { increment: totalAmountToLock },
-        },
-      });
-
-      // 3. Create Direct Invite Campaign container
-      const campaign = await tx.campaign.create({
-        data: {
-          brandId: brandProfile!.id,
-          title: offerTitle,
-          description: offerDescription,
-          requirements: offerDeliverables,
-          deliverables: [
-            {
-              type: "CUSTOM",
-              count: 1,
-              specs: offerDeliverables,
-            },
-          ],
-          totalBudget: offerAmount,
-          perInfluencerBudget: offerAmount,
-          fundedAmount: totalAmountToLock,
-          reservedAmount: totalAmountToLock,
-          reservedTotalAmount: totalAmountToLock,
-          contentDeadline,
-          postingDeadline,
-          status: "ACTIVE",
-          isDirectInvite: true,
-          selectedInfluencers: 1,
-          maxInfluencers: 1,
-        },
-      });
-
-      // 4. Create Active Deal Record
-      const deal = await tx.deal.create({
-        data: {
-          campaignId: campaign.id,
-          influencerId: influencerProfile!.id,
-          brandId: brandProfile!.id,
-          amount: offerAmount,
-          platformFee: paymentAmounts.platformFee,
-          gatewayFee: paymentAmounts.gatewayFee,
-          totalAmount: totalAmountToLock,
-          influencerPayout: paymentAmounts.influencerReceives,
-          reservedFromWallet: true,
-          status: "ACTIVE",
-          submissionDeadline: contentDeadline,
-          postingDeadline,
-          startedAt: new Date(),
-          contractTerms: {
-            title: offerTitle,
-            scope: offerDescription,
-            deliverables: offerDeliverables,
-            dealAmount: offerAmount,
-            platformFee: paymentAmounts.platformFee,
-            gatewayFee: paymentAmounts.gatewayFee,
-            totalAmount: totalAmountToLock,
-            influencerPayout: paymentAmounts.influencerReceives,
-            source: "in_chat_offer",
-          } as unknown as Prisma.InputJsonValue,
-        },
-      });
-
-      // Update contract terms with dealId
-      await tx.deal.update({
-        where: { id: deal.id },
-        data: {
-          contractTerms: {
-            dealId: deal.id,
-            title: offerTitle,
-            scope: offerDescription,
-            deliverables: offerDeliverables,
-            dealAmount: offerAmount,
-            platformFee: paymentAmounts.platformFee,
-            gatewayFee: paymentAmounts.gatewayFee,
-            totalAmount: totalAmountToLock,
-            influencerPayout: paymentAmounts.influencerReceives,
-            source: "in_chat_offer",
-          } as unknown as Prisma.InputJsonValue,
-        },
-      });
-
-      // 5. Create Transaction Record
-      await tx.transaction.create({
-        data: {
-          walletId: brandWallet.id,
-          dealId: deal.id,
-          type: "DEBIT",
-          amount: totalAmountToLock,
-          status: "COMPLETED",
-          description: `Escrow hold for in-chat deal: ${offerTitle}`,
-          metadata: {
-            source: "in_chat_offer_acceptance",
-            dealId: deal.id,
-            dealAmount: offerAmount,
-            platformFee: paymentAmounts.platformFee,
-            gatewayFee: paymentAmounts.gatewayFee,
-          },
-        },
-      });
-
-      // 6. Update Message Record
-      const updatedMetadata: Prisma.JsonObject = {
-        ...currentMetadata,
-        status: "ACCEPTED",
-        dealId: deal.id,
-        acceptedAt: new Date().toISOString(),
-        acceptedByUserId: session.user.id,
-      };
-
-      const updatedMessage = await tx.message.update({
-        where: { id: messageId },
-        data: {
-          dealId: deal.id,
-          metadata: updatedMetadata,
-        },
-      });
-
-      // 7. Update Brand active stats
-      await tx.brandProfile.update({
-        where: { id: brandProfile!.id },
-        data: {
-          totalCampaigns: { increment: 1 },
-          activeCampaigns: { increment: 1 },
-          totalSpent: { increment: totalAmountToLock },
-        },
-      });
-
-      // 8. Update Influencer active stats
-      await tx.influencerProfile.update({
-        where: { id: influencerProfile!.id },
-        data: {
-          totalDeals: { increment: 1 },
-        },
-      });
-
-      return { deal, message: updatedMessage };
+    const result = await executeOfferEscrowTransaction({
+      brandUserId: participants.brandUserId,
+      brandProfileId: participants.brandProfile.id,
+      influencerProfileId: participants.influencerProfile.id,
+      offerAmount,
+      totalAmountToLock,
+      paymentAmounts,
+      offerTitle,
+      offerDescription,
+      offerDeliverables,
+      contentDeadline,
+      postingDeadline,
+      messageId,
+      currentMetadata,
+      sessionUserId: session.user.id,
     });
 
-    // Send Real-Time Notifications
     await NotificationService.createNotifications([
       {
         userId: message.senderId,

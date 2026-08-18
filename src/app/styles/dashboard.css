@@ -2141,10 +2141,11 @@
 }
 
 .chat-bubble[data-me="true"] {
-  color: #ffffff;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff !important;
+  background-color: #3730a3;
+  background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
   border-color: transparent;
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
 }
 
 .chat-bubble[data-blocked="true"] {
