@@ -46,69 +46,64 @@ const sessionExpires = session?.expires
 
 const now = Date.now();
 
+const forceSignOut = (reason: string) => {
+  hasSignedOut.current = true;
+  signOut({ redirect: false }).finally(() => {
+    if (typeof window !== "undefined") {
+      window.location.href = `/login?reason=${reason}`;
+    }
+  });
+};
+
 if (lastRefreshed !== undefined && lastRefreshed !== null) {
-// --- Primary path: use lastRefreshed timestamp ---
+  // --- Primary path: use lastRefreshed timestamp ---
 
-// Clock Skew Detection: If token appears to be from the future
-if (lastRefreshed > now + MAX_CLOCK_SKEW_MS) {
-logger.error(
-"[SECURITY][TokenGuard] Clock skew detected. Token issued in the future. Possible manipulation.",
-{ lastRefreshed, now, delta: lastRefreshed - now },
-);
-hasSignedOut.current = true;
-signOut({
-redirect: true,
-callbackUrl: "/login?reason=token_manipulation",
-});
-return;
-}
+  // Clock Skew Detection: If token appears to be from the future
+  if (lastRefreshed > now + MAX_CLOCK_SKEW_MS) {
+    logger.error(
+      "[SECURITY][TokenGuard] Clock skew detected. Token issued in the future. Possible manipulation.",
+      { lastRefreshed, now, delta: lastRefreshed - now },
+    );
+    forceSignOut("token_manipulation");
+    return;
+  }
 
-const age = now - lastRefreshed;
+  const age = now - lastRefreshed;
 
-if (age > MAX_SESSION_AGE_MS) {
-logger.warn(
-"[SECURITY][TokenGuard] Session too old (lastRefreshed). Forcing sign-out.",
-{ ageMinutes: Math.round(age / 60000) },
-);
-hasSignedOut.current = true;
-signOut({
-redirect: true,
-callbackUrl: "/login?reason=session_expired",
-});
-return;
-}
+  if (age > MAX_SESSION_AGE_MS) {
+    logger.warn(
+      "[SECURITY][TokenGuard] Session too old (lastRefreshed). Forcing sign-out.",
+      { ageMinutes: Math.round(age / 60000) },
+    );
+    forceSignOut("session_expired");
+    return;
+  }
 
-if (age > WARN_SESSION_AGE_MS) {
-logger.warn(
-"[SECURITY][TokenGuard] Session nearing expiry. Please re-authenticate soon.",
-{ ageMinutes: Math.round(age / 60000) },
-);
-}
+  if (age > WARN_SESSION_AGE_MS) {
+    logger.warn(
+      "[SECURITY][TokenGuard] Session nearing expiry. Please re-authenticate soon.",
+      { ageMinutes: Math.round(age / 60000) },
+    );
+  }
 } else if (sessionExpires !== null) {
-// --- Fallback path: estimate from session `expires` field ---
-// NextAuth default session maxAge is typically 7 days.
-// We warn/sign out if expires is within 6 hours to nudge re-auth.
-const timeUntilExpiry = sessionExpires - now;
-const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
+  // --- Fallback path: estimate from session `expires` field ---
+  // NextAuth default session maxAge is typically 7 days.
+  // We warn/sign out if expires is within 6 hours to nudge re-auth.
+  const timeUntilExpiry = sessionExpires - now;
+  const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
 
-if (timeUntilExpiry < 0) {
-// Already expired; the next CSRF-protected request will return 401.
-// but let's be proactive
-logger.warn("[SECURITY][TokenGuard] Session already expired by clock.");
-hasSignedOut.current = true;
-signOut({
-redirect: true,
-callbackUrl: "/login?reason=session_expired",
-});
-return;
-}
+  if (timeUntilExpiry < 0) {
+    logger.warn("[SECURITY][TokenGuard] Session already expired by clock.");
+    forceSignOut("session_expired");
+    return;
+  }
 
-if (timeUntilExpiry < SIX_HOURS_MS) {
-logger.warn(
-"[SECURITY][TokenGuard] Session expiring soon (via expires field).",
-{ hoursRemaining: (timeUntilExpiry / 3600000).toFixed(1) },
-);
-}
+  if (timeUntilExpiry < SIX_HOURS_MS) {
+    logger.warn(
+      "[SECURITY][TokenGuard] Session expiring soon (via expires field).",
+      { hoursRemaining: (timeUntilExpiry / 3600000).toFixed(1) },
+    );
+  }
 }
 }, [session]);
 

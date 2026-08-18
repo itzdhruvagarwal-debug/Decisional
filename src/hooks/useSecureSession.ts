@@ -105,10 +105,13 @@ broadcastRef.current.postMessage({ type: "logout", reason });
 localStorage.setItem(CROSS_TAB_LOGOUT_KEY, "true");
 }
 
-await signOut({
-redirect: true,
-callbackUrl: `/login?reason=${reason}`,
-});
+try {
+await signOut({ redirect: false });
+} finally {
+if (typeof window !== "undefined") {
+window.location.href = `/login?reason=${reason}`;
+}
+}
 }, []);
 
 // 2. Client-side session error detection (rotation failure, revocation, account block)

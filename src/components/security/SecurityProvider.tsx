@@ -122,14 +122,22 @@ callbackUrl: "/login?reason=manual_logout",
 useEffect(() => {
 const sessionError = session?.error;
 
+const forceSignOut = (reason: string) => {
+signOut({ redirect: false }).finally(() => {
+if (typeof window !== "undefined") {
+window.location.href = `/login?reason=${reason}`;
+}
+});
+};
+
 if (sessionError === "RefreshAccessTokenError") {
 // Token rotation failed, so force sign out.
-signOut({ redirect: true, callbackUrl: "/login?reason=token_expired" });
+forceSignOut("token_expired");
 }
 
 if (sessionError === "SessionRevoked") {
 // Session was revoked (new login on another device)
-signOut({ redirect: true, callbackUrl: "/login?reason=session_revoked" });
+forceSignOut("session_revoked");
 }
 }, [session]);
 
