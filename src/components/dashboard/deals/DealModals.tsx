@@ -87,7 +87,7 @@ maxWidth="500px"
 ["pinCode", "PIN code"],
 ] as const).map(([field, label]) => {
 const isFullWidth = ["line1", "line2", "fullName"].includes(field);
-const shippingAddress = deal.shippingAddress || {};
+const addressRecord = (typeof deal.shippingAddress === "object" && deal.shippingAddress !== null && !Array.isArray(deal.shippingAddress)) ? (deal.shippingAddress as Record<string, unknown>) : null;
 const isEditing = deal.status === "PENDING_SIGNATURE";
 
 return (
@@ -112,7 +112,7 @@ fullWidth
 <div>
 <div className="text-xs text-secondary">{label}</div>
 <div className="font-semibold text-sm">
-{typeof shippingAddress?.[field] === "string" && shippingAddress[field] ? shippingAddress[field] : "Not provided"}
+{typeof addressRecord?.[field] === "string" && addressRecord[field] ? String(addressRecord[field]) : "Not provided"}
 </div>
 </div>
 )}
