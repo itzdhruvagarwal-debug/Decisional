@@ -2,17 +2,17 @@ import { z } from "zod";
 
 export const PAN_REGEX = /^[A-Z]{5}\d{4}[A-Z]$/;
 export const GSTIN_REGEX = /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[\dA-Z]$/;
-export const ITR_ACK_REGEX = /^\d{10,20}$/;
-export const ASSESSMENT_YEAR_REGEX = /^20\d{2}-\d{2}$/;
+const ITR_ACK_REGEX = /^\d{10,20}$/;
+const ASSESSMENT_YEAR_REGEX = /^20\d{2}-\d{2}$/;
 
-export const GST_REGISTRATION_TYPES = [
+const GST_REGISTRATION_TYPES = [
 "UNREGISTERED",
 "REGISTERED",
 "COMPOSITION",
 "EXEMPT",
 ] as const;
 
-export const GST_TURNOVER_SLABS = [
+const GST_TURNOVER_SLABS = [
 "BELOW_20L",
 "BETWEEN_20L_AND_5CR",
 "FIVE_CR_PLUS",
@@ -123,18 +123,18 @@ message: "GSTIN embedded PAN does not match the PAN number",
 }
 });
 
-export type IndiaTaxComplianceInput = z.infer<
-typeof indiaTaxComplianceInputSchema
+type IndiaTaxComplianceInput = z.infer<
+  typeof indiaTaxComplianceInputSchema
 >;
 
-export type IndiaTaxSummaryInput = {
-userType: "BRAND" | "INFLUENCER" | "ADMIN";
-panPresent: boolean;
-gstinPresent: boolean;
-itrPresent: boolean;
-gstRegistrationType?: GstRegistrationType | null;
-gstTurnoverSlab?: GstTurnoverSlab | null;
-profileCompleteForInvoice?: boolean;
+type IndiaTaxSummaryInput = {
+  userType: "BRAND" | "INFLUENCER" | "ADMIN";
+  panPresent: boolean;
+  gstinPresent: boolean;
+  itrPresent: boolean;
+  gstRegistrationType?: GstRegistrationType | null;
+  gstTurnoverSlab?: GstTurnoverSlab | null;
+  profileCompleteForInvoice?: boolean;
 };
 
 export function getIndiaTaxSummary(input: IndiaTaxSummaryInput) {

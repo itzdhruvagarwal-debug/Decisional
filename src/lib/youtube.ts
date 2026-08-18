@@ -67,7 +67,7 @@ export interface YouTubeVideo {
   privacyStatus?: string;
 }
 
-export interface YouTubeInsights {
+interface YouTubeInsights {
 avgViews: number;
 avgLikes: number;
 avgComments: number;

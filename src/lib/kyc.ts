@@ -17,18 +17,18 @@ const KYC_PROVIDER = process.env.KYC_PROVIDER || "manual"; // 'digilocker' | 'su
 
 // ==================== TYPES ====================
 
-export type KYCDocType =
+type KYCDocType =
 | "AADHAAR"
 | "PAN"
 | "GST"
 | "BANK_ACCOUNT"
 | "BUSINESS_REG";
 
-export type KYCStatus = "PENDING" | "VERIFIED" | "REJECTED" | "EXPIRED";
+type KYCStatus = "PENDING" | "VERIFIED" | "REJECTED" | "EXPIRED";
 
 
 
-export interface BankVerifyResult {
+interface BankVerifyResult {
 success: boolean;
 nameMatch: boolean;
 accountExists: boolean;
@@ -305,7 +305,7 @@ error: "Service unavailable",
 // ==================== PROVIDER-SPECIFIC IMPLEMENTATIONS ====================
 
 // Update KYCVerifyResult to include clientId
-export interface KYCVerifyResult {
+interface KYCVerifyResult {
 success: boolean;
 status: KYCStatus;
 data?: {

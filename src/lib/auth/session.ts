@@ -109,7 +109,7 @@ token.accessTokenExpires = Date.now() + ACCESS_TOKEN_EXPIRY;
 return token;
 }
 
-export async function verifyUserAccountStatus(userId: string, token: Record<string, unknown>, now: number): Promise<{ valid: boolean; status?: string }> {
+async function verifyUserAccountStatus(userId: string, token: Record<string, unknown>, now: number): Promise<{ valid: boolean; status?: string }> {
 const dbUser = await prisma.user.findUnique({
 where: { id: userId },
 select: { status: true },
@@ -126,7 +126,7 @@ token.lastCheckedStatus = now;
 return { valid: true };
 }
 
-export async function isSessionRevokedByJti(jti: unknown): Promise<boolean> {
+async function isSessionRevokedByJti(jti: unknown): Promise<boolean> {
 if (typeof jti === "string") {
 const { isTokenRevoked } = await import("../blacklist");
 return await isTokenRevoked(jti);
@@ -134,12 +134,12 @@ return await isTokenRevoked(jti);
 return false;
 }
 
-export async function verifyActiveSessionToken(userId: string, currentRefreshToken: unknown): Promise<boolean> {
+async function verifyActiveSessionToken(userId: string, currentRefreshToken: unknown): Promise<boolean> {
 const activeToken = await redis.get(`active_session:${userId}`);
 return !activeToken || activeToken === currentRefreshToken;
 }
 
-export async function checkSessionSecurityAndStatus(token: Record<string, unknown>): Promise<{ valid: boolean; status?: string }> {
+async function checkSessionSecurityAndStatus(token: Record<string, unknown>): Promise<{ valid: boolean; status?: string }> {
 try {
 if (typeof token.id === "string") {
 const isSessionValid = await verifyActiveSessionToken(token.id, token.refreshToken);
@@ -170,7 +170,7 @@ return { valid: false };
 return { valid: true };
 }
 
-export async function rotateSessionToken(token: Record<string, unknown>): Promise<Record<string, unknown>> {
+async function rotateSessionToken(token: Record<string, unknown>): Promise<Record<string, unknown>> {
 try {
 if (!token.refreshToken) throw AppError.badRequest("No refresh token");
 

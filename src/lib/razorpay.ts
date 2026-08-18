@@ -558,7 +558,7 @@ export default getRazorpay;
 
 // ==================== FUND ACCOUNT VALIDATION (Penny-Drop) ====================
 
-export interface FundAccountValidationResult {
+interface FundAccountValidationResult {
   /** Razorpay fund_account_id for this bank account */
   fundAccountId: string;
   /** Razorpay validation id — can be used to poll status */

@@ -43,7 +43,7 @@ count: number;
 }
 
 /** Shape of each deliverable entry stored in campaign.deliverables JSON */
-export interface DeliverableConfig {
+interface DeliverableConfig {
 type: string;
 label?: string;
 count?: number;

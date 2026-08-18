@@ -72,7 +72,6 @@ brandProfile?: { totalCampaigns: number } | null;
 badgeId: string,
 db: Prisma.TransactionClient | typeof prisma,
 ): Promise<boolean> {
-const _db = db;
 let count = 0;
 
 if (user.userType !== "INFLUENCER") return false;

@@ -9,7 +9,7 @@ export const sendMessageSchema = z.object({
 content: z.string().min(1, "Message content cannot be empty").max(2000, "Message cannot exceed 2000 characters"),
 });
 
-export type MessageMetadata = Record<string, string | number | boolean | null | undefined>;
+type MessageMetadata = Record<string, string | number | boolean | null | undefined>;
 
 export interface Message {
 id: string;

@@ -10,7 +10,7 @@ gatewayFee: number;
 influencerPayout: number | null;
 };
 
-export type PayoutWithTaxResult = {
+type PayoutWithTaxResult = {
 grossPayout: number;
 tdsAmount: number;
 netPayout: number;
@@ -33,7 +33,7 @@ const month = istNow.getUTCMonth();
 return new Date(Date.UTC(month >= 3 ? year : year - 1, 3, 1, 0, 0, 0, 0) - IST_OFFSET_MS);
 }
 
-export async function calculateTdsForPayout(
+async function calculateTdsForPayout(
 tx: Prisma.TransactionClient,
 userId: string,
 dealId: string,

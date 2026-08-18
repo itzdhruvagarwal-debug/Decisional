@@ -16,7 +16,7 @@ import { decrypt } from "./encryption";
 
 // ==================== TYPES ====================
 
-export interface EngagementMetrics {
+interface EngagementMetrics {
 views: number;
 likes: number;
 comments: number;
@@ -44,7 +44,7 @@ trend: "GROWING" | "STABLE" | "DECLINING" | "INSUFFICIENT_DATA";
 hasEstimatedData: boolean;
 }
 
-export interface ROICalculation {
+interface ROICalculation {
 dealAmount: number; // in paise
 costPerView: number; // in paise
 costPerEngagement: number; // in paise

@@ -33,7 +33,7 @@ TIER_3_MAX_MONTHLY: Infinity, // Unlimited
 
 export type VerificationTier = 0 | 1 | 2 | 3;
 
-export interface TierCheckResult {
+interface TierCheckResult {
 allowed: boolean;
 tier: VerificationTier;
 monthlyUsed: number; // paise already used this month

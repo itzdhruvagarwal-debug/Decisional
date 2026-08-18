@@ -136,7 +136,7 @@ export function ChatHeader({ state }: Readonly<ChatPanelProps>) {
   );
 }
 
-export function MessageList({ state }: Readonly<ChatPanelProps>) {
+function MessageList({ state }: Readonly<ChatPanelProps>) {
   const { messages, isPeerTyping, loadingMessages, messagesEndRef } = state;
 
   const renderBlockedMessage = (msg: Message) => (
@@ -405,7 +405,7 @@ export function MessageList({ state }: Readonly<ChatPanelProps>) {
   );
 }
 
-export function ChatInputArea({ state }: Readonly<ChatPanelProps>) {
+function ChatInputArea({ state }: Readonly<ChatPanelProps>) {
   const {
     newMessage,
     isChatUserBlocked,

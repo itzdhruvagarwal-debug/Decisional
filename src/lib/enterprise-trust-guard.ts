@@ -8,7 +8,7 @@ import { logger } from "./logger";
 
 // ==================== DYNAMIC BEHAVIOR LOGIC ====================
 
-export interface ApplicationGateResult {
+interface ApplicationGateResult {
 allowed: boolean;
 reason?: string;
 maxAmountCap?: number;

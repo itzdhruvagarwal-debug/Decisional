@@ -19,15 +19,6 @@ countryCode: string;
 isProxy: boolean;
 }
 
-interface FreeIpApiResponse {
-ipAddress: string;
-latitude: number;
-longitude: number;
-cityName: string;
-countryCode: string;
-isProxy: boolean;
-}
-
 /**
 * Returns full IP details from freeipapi.com, falling back to null on failure.
 */
@@ -59,7 +50,7 @@ const url = `https://freeipapi.com/api/json/${encodeURIComponent(ip)}`;
 const controller = new AbortController();
 const timeout = setTimeout(() => controller.abort(), 3000); // 3s timeout
 
-let data: FreeIpApiResponse;
+let data: IpDetails;
 try {
 const res = await fetch(url, { signal: controller.signal });
 clearTimeout(timeout);
@@ -67,7 +58,7 @@ if (!res.ok) {
 logger.warn("[IPInfo] freeipapi.com returned non-OK status", { ip, status: res.status });
 return null;
 }
-data = (await res.json()) as FreeIpApiResponse;
+data = (await res.json()) as IpDetails;
 } catch (fetchError) {
 clearTimeout(timeout);
 logger.warn("[IPInfo] freeipapi.com request failed; failing open", {

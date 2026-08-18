@@ -16,7 +16,7 @@ import { createActivityLog } from "./audit";
 
 // ==================== TYPES ====================
 
-export type ChallengeType =
+type ChallengeType =
 | "DEALS"
 | "EARNINGS"
 | "REVIEWS"
@@ -24,9 +24,9 @@ export type ChallengeType =
 | "SPEED"
 | "QUALITY"
 | "COMMUNITY";
-export type ChallengeTarget = "INFLUENCER" | "BRAND" | "ALL";
+type ChallengeTarget = "INFLUENCER" | "BRAND" | "ALL";
 
-export interface ChallengeTemplate {
+interface ChallengeTemplate {
 id: string;
 title: string;
 description: string;

@@ -543,20 +543,10 @@ metadata: z
 // ==================== TYPE EXPORTS ====================
 
 export type RegisterInput = z.infer<typeof registerSchema>;
-export type LoginInput = z.infer<typeof loginSchema>;
-export type InfluencerProfileInput = z.infer<typeof influencerProfileSchema>;
-export type BrandProfileInput = z.infer<typeof brandProfileSchema>;
-export type CampaignInput = z.infer<typeof createCampaignSchema>;
 export interface ApplicationInput {
-campaignId: string;
-proposal: string;
-proposedRate: number;
-estimatedDelivery?: string | undefined;
-estimatedDeliveryDays?: number | undefined;
+  campaignId: string;
+  proposal: string;
+  proposedRate: number;
+  estimatedDelivery?: string | undefined;
+  estimatedDeliveryDays?: number | undefined;
 }
-export type ContentSubmissionInput = z.infer<typeof contentSubmissionSchema>;
-export type ProductFulfillmentInput = z.infer<typeof productFulfillmentSchema>;
-export type WithdrawalInput = z.infer<typeof withdrawalSchema>;
-export type DisputeInput = z.infer<typeof disputeSchema>;
-export type ReviewInput = z.infer<typeof reviewSchema>;
-export type MessageInput = z.infer<typeof messageSchema>;

@@ -20,7 +20,7 @@ import { checkChallengeProgress } from "./weekly-challenges";
 * Diamond (1000 referrals): 2% GMV revenue share (lifetime) + equity option
 */
 
-export interface ReferralTier {
+interface ReferralTier {
 name: string;
 min: number;
 commission: number; // For backward compatibility / generic use
@@ -32,7 +32,7 @@ color: string;
 icon: string;
 }
 
-export const REFERRAL_TIERS: Record<string, ReferralTier> = {
+const REFERRAL_TIERS: Record<string, ReferralTier> = {
 STARTER: {
 name: "STARTER",
 min: 0,

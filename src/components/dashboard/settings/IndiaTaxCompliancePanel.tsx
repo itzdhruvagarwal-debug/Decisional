@@ -103,10 +103,6 @@ const [error, setError] = useState("");
 const [success, setSuccess] = useState("");
 const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-// Regex validators
-const _PAN_REGEX = /^[A-Z]{5}\d{4}[A-Z]$/;
-const _GSTIN_REGEX = /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
-
 async function loadCompliance() {
 setLoading(true);
 setError("");
