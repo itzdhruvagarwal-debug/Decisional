@@ -644,10 +644,6 @@ function getIsoWeekInfo(date: Date): { year: number; weekNumber: number; weekId:
   return { year, weekNumber, weekId };
 }
 
-function getWeekNumber(date: Date): number {
-  return getIsoWeekInfo(date).weekNumber;
-}
-
 function getWeekId(date: Date = new Date()): string {
   return getIsoWeekInfo(date).weekId;
 }

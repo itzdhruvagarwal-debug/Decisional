@@ -351,11 +351,11 @@ TRUST: {inf.trustScore}%
 <div className="creator-stats grid gap-3 mb-6">
 <div className="text-center">
 <div className="text-muted font-bold mb-1 text-xs uppercase">Followers</div>
-<div className="font-extrabold text-sm text-primary">{formatNumber(inf.instagramFollowers)}</div>
-</div>
-<div className="text-center">
-<div className="text-muted font-bold mb-1 text-xs uppercase">Subs</div>
-<div className="font-extrabold text-sm text-primary">{inf.youtubeSubscribers === -1 ? 'Hidden' : formatNumber(inf.youtubeSubscribers)}</div>
+          <div className="font-extrabold text-sm text-primary">{formatNumber(inf.instagramFollowers || 0)}</div>
+        </div>
+        <div className="text-center">
+          <div className="text-muted font-bold mb-1 text-xs uppercase">Subs</div>
+          <div className="font-extrabold text-sm text-primary">{inf.youtubeSubscribers === -1 ? 'Hidden' : formatNumber(inf.youtubeSubscribers || 0)}</div>
 </div>
 <div className="text-center">
 <div className="text-muted font-bold mb-1 text-xs uppercase">Deals</div>

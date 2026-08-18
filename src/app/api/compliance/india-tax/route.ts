@@ -6,7 +6,7 @@ import { DocumentType, Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { createActivityLog } from "@/lib/audit";
-import { decrypt, encrypt, tryDecrypt } from "@/lib/encryption";
+import { encrypt, tryDecrypt } from "@/lib/encryption";
 import {
 type GstRegistrationType,
 type GstTurnoverSlab,

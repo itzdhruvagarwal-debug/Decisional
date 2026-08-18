@@ -144,8 +144,8 @@ return decrypted;
 /**
  * Safely attempt decryption, returning the raw value if not encrypted or if decryption fails.
  */
-export function tryDecrypt(value?: string | null): string | null {
-  if (!value) return null;
+export function tryDecrypt(value?: string | null): string {
+  if (!value) return "";
   try {
     return decrypt(value);
   } catch {

@@ -7,6 +7,7 @@ import { logger } from "@/lib/logger";
 import { routeParamsSchema, createCampaignSchema } from "@/lib/validations";
 import { CampaignService } from "@/services/campaign.service";
 import { requireActiveAdmin } from "@/lib/admin-auth";
+import prisma from "@/lib/db";
 import { isAdmin, isInfluencer } from "@/lib/rbac";
 import { AppError } from "@/lib/errors";
 import { TierError } from "@/services/campaign/types";

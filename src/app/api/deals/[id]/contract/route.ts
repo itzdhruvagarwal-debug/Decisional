@@ -35,7 +35,7 @@ import { format } from "date-fns";
 import { RATE_LIMIT_CONFIGS } from "@/lib/rate-limit";
 import { getPlatformHeader, getPlatformFooter } from "@/lib/platform-config";
 import { getDealParticipantRole } from "@/lib/utils";
-import { decrypt, tryDecrypt } from "@/lib/encryption";
+import { tryDecrypt } from "@/lib/encryption";
 import {
 verifyContractSignature,
 type ContractTerms,
