@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:all": "docker compose up -d && next dev",
     "build": "prisma generate && next build && node scripts/prepare-standalone.mjs",
     "postinstall": "prisma generate",
     "start": "node .next/standalone/server.js",

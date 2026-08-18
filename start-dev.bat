@@ -1,0 +1,6 @@
+@echo off
+echo [*] Starting Postgres & Redis containers in background...
+docker compose up -d
+echo [*] Starting Next.js Dev Server on http://localhost:3000...
+echo.
+call npm run dev
