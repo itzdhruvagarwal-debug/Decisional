@@ -644,7 +644,7 @@ export function getIsoWeekInfo(date: Date): { year: number; weekNumber: number; 
   return { year, weekNumber, weekId };
 }
 
-function getWeekNumber(date: Date): number {
+export function getWeekNumber(date: Date): number {
   return getIsoWeekInfo(date).weekNumber;
 }
 

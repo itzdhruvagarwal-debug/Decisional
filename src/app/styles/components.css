@@ -1271,12 +1271,9 @@ dialog.pwa-install-overlay {
 .border-glass-08 { border: 1px solid rgba(255, 255, 255, 0.08); }
 .border-dashed-primary { border: 2px dashed var(--color-primary); }
 .border-indigo-30 { border: 1px solid rgba(99, 102, 241, 0.3); }
-.max-w-140 { max-width: 140px; }
 .max-w-75pct { max-width: 75%; }
 .z-1000 { z-index: 1000; }
-.w-11 { width: 44px; }
 .w-13 { width: 52px; }
-.h-11 { height: 44px; }
 .h-13 { height: 52px; }
 .h-3-5-rem { height: 14px; }
 .h-8 { height: 32px; }
@@ -1657,12 +1654,6 @@ dialog.pwa-install-overlay {
   padding-right: 4px !important;
 }
 
-
-
-.max-w-400 {
-  max-width: 400px !important;
-}
-
 .max-w-380 {
   max-width: 380px !important;
 }
@@ -1739,10 +1730,6 @@ dialog.pwa-install-overlay {
   background: rgba(244, 63, 94, 0.04) !important;
   border: 1px solid rgba(244, 63, 94, 0.15) !important;
   margin: 16px !important;
-}
-
-.max-w-360 {
-  max-width: 360px !important;
 }
 
 .about-visual-panel {
@@ -1947,10 +1934,6 @@ dialog.pwa-install-overlay {
   color: var(--color-primary) !important;
   font-weight: 700 !important;
   text-decoration: none !important;
-}
-
-.max-w-160 {
-  max-width: 160px !important;
 }
 
 /* Custom dashboard referral code banner */

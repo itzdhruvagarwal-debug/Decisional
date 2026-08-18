@@ -118,7 +118,7 @@ export const PATCH = apiWrapper(async (req) => {
 
   const result = await DisputeService.handleAction(session.user.id, {
     disputeId,
-    action: mappedAction as any,
+    action: mappedAction as "accept" | "accept_resolution" | "reject" | "reject_resolution" | "withdraw" | "escalate",
     reason,
   });
 

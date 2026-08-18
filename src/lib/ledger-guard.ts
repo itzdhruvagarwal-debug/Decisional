@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, DealStatus } from "@prisma/client";
 
 import prisma from "./db";
 import { logger } from "./logger";
@@ -151,7 +151,7 @@ export async function verifyWalletBalance(userId: string): Promise<VerificationA
           tx.deal.aggregate({
             where: {
               brandId: brandProfile.id,
-              status: { in: ACTIVE_DEAL_STATUSES as any[] },
+              status: { in: ACTIVE_DEAL_STATUSES as DealStatus[] },
             },
             _sum: { totalAmount: true },
           }),

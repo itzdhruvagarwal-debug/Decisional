@@ -52,12 +52,12 @@ const totalNet = tdsTransactions.reduce((s, t) => s + ((t.metadata as Record<str
 
   // Map rows with dynamic section and rates
   const getTransactionTdsDetails = (t: typeof tdsTransactions[number]) => {
-    const meta = t.metadata as any;
+    const meta = t.metadata as Record<string, unknown> | null;
     const userTdsSection = t.deal?.influencer?.user?.taxCompliance?.tdsSection;
     const is194J = userTdsSection?.startsWith("194J") ?? false;
-    const appliedSection = meta?.tdsSection ?? (is194J ? "194J" : "194-O");
+    const appliedSection = (meta?.tdsSection as string | undefined) ?? (is194J ? "194J" : "194-O");
 
-    const gross = meta?.grossPayout ?? 0;
+    const gross = typeof meta?.grossPayout === "number" ? meta.grossPayout : 0;
     let rateStr = "0.1%";
     if (gross > 0) {
       const calculatedRate = (t.amount / gross) * 100;

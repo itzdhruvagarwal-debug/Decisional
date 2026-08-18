@@ -89,7 +89,7 @@ export function ChatHeader({ state }: Readonly<ChatPanelProps>) {
             {isPeerTyping ? (
               <span className="text-indigo-400 font-semibold italic flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping" />
-                Typing...
+                <span>Typing...</span>
               </span>
             ) : (
               <span>Verified Workspace Member</span>

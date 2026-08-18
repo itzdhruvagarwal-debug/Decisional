@@ -1,6 +1,6 @@
 import { AppError } from "@/lib/errors";
 import prisma from "@/lib/db";
-import { Prisma, DisputeType, DisputeStatus } from "@prisma/client";
+import { Prisma, DisputeType, DisputeStatus, DealStatus } from "@prisma/client";
 import { checkMessageForContacts } from "@/lib/contact-filter";
 import {
 analyzeDispute,
@@ -279,7 +279,7 @@ return { evidence, message: "Evidence added successfully" };
         }
 
         // Restore deal status to the status at creation of the dispute (defaulting to PAYMENT_HELD)
-        const targetStatus = (dispute.dealStatusAtCreation || "PAYMENT_HELD") as any;
+        const targetStatus = (dispute.dealStatusAtCreation || "PAYMENT_HELD") as DealStatus;
         await tx.deal.update({
           where: { id: dispute.dealId },
           data: { status: targetStatus },

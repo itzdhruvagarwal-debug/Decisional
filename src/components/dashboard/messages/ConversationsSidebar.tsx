@@ -50,8 +50,8 @@ export function ConversationsSidebar({ state }: Readonly<ConversationsSidebarPro
     return conversations.filter(
       (conv) =>
         conv.name.toLowerCase().includes(q) ||
-        (conv.userType && conv.userType.toLowerCase().includes(q)) ||
-        (conv.lastMessage && conv.lastMessage.toLowerCase().includes(q))
+        conv.userType?.toLowerCase().includes(q) ||
+        conv.lastMessage?.toLowerCase().includes(q)
     );
   }, [conversations, searchQuery]);
 
@@ -223,7 +223,8 @@ export function ConversationsSidebar({ state }: Readonly<ConversationsSidebarPro
                     >
                       {conv.isTyping ? (
                         <span className="text-indigo-400 font-semibold italic flex items-center gap-1">
-                          <span className="animate-pulse">●</span> Typing...
+                          <span className="animate-pulse">●</span>
+                          <span>Typing...</span>
                         </span>
                       ) : (
                         conv.lastMessage || "Start a conversation"

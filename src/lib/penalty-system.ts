@@ -11,7 +11,7 @@
 * STRICT RULE-BASED LOGIC ONLY NO ML.
 */
 
-import { Prisma } from "@prisma/client";
+import { Prisma, DealStatus } from "@prisma/client";
 import prisma from "./db";
 import { updateTrustAndLevel } from "./trust-engine";
 import { logger } from "./logger";
@@ -223,7 +223,7 @@ async function holdActivePayouts(userId: string) {
     const activeDeals = await prisma.deal.findMany({
       where: {
         influencer: { userId },
-        status: { in: ESCROW_HELD_STATUSES as any[] },
+        status: { in: ESCROW_HELD_STATUSES as DealStatus[] },
         reservedFromWallet: true,
       },
       select: { id: true, status: true },

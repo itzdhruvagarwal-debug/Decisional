@@ -35,7 +35,7 @@ interface StaleDeal {
   productFulfillmentStatus: string;
   updatedAt: Date;
   dispatchedAt: Date | null;
-  shippingAddress: any;
+  shippingAddress: unknown;
   campaign: { title: string };
   influencer: { userId: string; displayName: string | null };
   brand: { userId: string; companyName: string | null } | null;

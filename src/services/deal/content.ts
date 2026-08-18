@@ -320,10 +320,10 @@ async function trackReviewChallenges(
   tx: Prisma.TransactionClient,
   deal: Awaited<ReturnType<typeof lockAndFetchDealForAction>>,
   userId: string,
-  latestSubmission: any,
+  latestSubmission?: { submittedAt?: string | Date | null } | null,
 ) {
   // Track brand weekly challenge (approve_fast_3)
-  if (latestSubmission.submittedAt && Date.now() - new Date(latestSubmission.submittedAt).getTime() <= 12 * 60 * 60 * 1000) {
+  if (latestSubmission?.submittedAt && Date.now() - new Date(latestSubmission.submittedAt).getTime() <= 12 * 60 * 60 * 1000) {
     await checkChallengeProgress(userId, "SPEED", 1, tx).catch((err) => {
       logger.error("Failed to track brand challenge progress for approve_fast_3", { userId, error: err });
     });

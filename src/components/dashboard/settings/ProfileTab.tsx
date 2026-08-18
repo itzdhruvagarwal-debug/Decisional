@@ -138,7 +138,6 @@ const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) 
       if (previousImage !== undefined) {
         return { ...prev, profileImage: previousImage };
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { profileImage: _omit, ...rest } = prev;
       return rest as Profile;
     };
