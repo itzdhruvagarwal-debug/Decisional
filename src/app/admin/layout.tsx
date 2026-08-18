@@ -22,7 +22,7 @@ redirect(session?.user ? "/dashboard" : "/login?callbackUrl=/admin");
 return (
 <AdminFrame
 user={{
-name: session!.user.name ?? null,
+name: session?.user?.name ?? null,
 email: adminEmail,
 }}
 >

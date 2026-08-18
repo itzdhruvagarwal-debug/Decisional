@@ -156,7 +156,8 @@ context: { params: Promise<Record<string, string | string[]>> },
 ) {
 try {
 const session = await auth();
-const userId = session!.user!.id!;
+const userId = session?.user?.id;
+if (!userId) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
 const resolvedParams = await context.params;
 const { id, errorResponse } = parseCampaignId(resolvedParams);
@@ -174,8 +175,8 @@ return NextResponse.json(
 const action = parsedBody.data.action;
 const campaign =
 action === "ACTIVATE"
-? await CampaignService.activateDraftCampaign(userId, id!)
-: await CampaignService.cancelCampaign(userId, id!);
+? await CampaignService.activateDraftCampaign(userId, id)
+: await CampaignService.cancelCampaign(userId, id);
 
 return NextResponse.json(
 {
@@ -199,13 +200,14 @@ context: { params: Promise<Record<string, string | string[]>> },
 ) {
 try {
 const session = await auth();
-const userId = session!.user!.id!;
+const userId = session?.user?.id;
+if (!userId) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
 const resolvedParams = await context.params;
 const { id, errorResponse } = parseCampaignId(resolvedParams);
 if (errorResponse) return errorResponse;
 
-await CampaignService.cancelCampaign(userId, id!);
+await CampaignService.cancelCampaign(userId, id);
 
 return NextResponse.json(
 { success: true, message: "Campaign cancelled successfully" },
@@ -222,7 +224,8 @@ context: { params: Promise<Record<string, string | string[]>> },
 ) {
 try {
 const session = await auth();
-const userId = session!.user!.id!;
+const userId = session?.user?.id;
+if (!userId) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
 const resolvedParams = await context.params;
 const { id, errorResponse } = parseCampaignId(resolvedParams);

@@ -112,7 +112,7 @@ fullWidth
 <div>
 <div className="text-xs text-secondary">{label}</div>
 <div className="font-semibold text-sm">
-{(shippingAddress as unknown as Record<string, string>)[field] || "Not provided"}
+{typeof shippingAddress?.[field] === "string" && shippingAddress[field] ? shippingAddress[field] : "Not provided"}
 </div>
 </div>
 )}

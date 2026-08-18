@@ -8,8 +8,10 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 };
 
-interface CustomWindow extends Window {
-  deferredPrompt?: BeforeInstallPromptEvent | null;
+declare global {
+  interface Window {
+    deferredPrompt?: BeforeInstallPromptEvent | null;
+  }
 }
 
 type InstallPlatform = "auto" | "ios" | "android";
@@ -105,8 +107,8 @@ export default function PWAInstallButton({
     setIsInstalled(isStandaloneDisplay());
 
     // Check if the event was already captured globally
-    if (typeof window !== "undefined" && (window as unknown as CustomWindow).deferredPrompt) {
-      setPromptEvent((window as unknown as CustomWindow).deferredPrompt as BeforeInstallPromptEvent);
+    if (typeof window !== "undefined" && window.deferredPrompt) {
+      setPromptEvent(window.deferredPrompt);
     }
 
     const handleBeforeInstallPrompt = (event: Event) => {
@@ -126,7 +128,7 @@ export default function PWAInstallButton({
       setShowFallback(false);
       setIsInstalled(true);
       if (typeof window !== "undefined") {
-        (window as unknown as CustomWindow).deferredPrompt = null;
+        window.deferredPrompt = null;
       }
     };
 
@@ -151,7 +153,7 @@ export default function PWAInstallButton({
   const resolvedVariant = variant || (label ? "store" : "icon");
 
   const install = async () => {
-    const activePrompt = promptEvent || (typeof window !== "undefined" && (window as unknown as CustomWindow).deferredPrompt);
+    const activePrompt = promptEvent || (typeof window !== "undefined" ? window.deferredPrompt : null);
     if (activePrompt && resolvedPlatform !== "ios") {
       try {
         await activePrompt.prompt();
@@ -160,7 +162,7 @@ export default function PWAInstallButton({
           setIsInstalled(true);
           setPromptEvent(null);
           if (typeof window !== "undefined") {
-            (window as unknown as CustomWindow).deferredPrompt = null;
+            window.deferredPrompt = null;
           }
           return;
         }

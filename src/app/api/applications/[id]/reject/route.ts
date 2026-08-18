@@ -16,8 +16,8 @@ context: { params: Promise<Record<string, string | string[]>> },
 ) {
 try {
 const session = await auth();
-// Safe access as requireBrand is checked by apiWrapper
-const userId = session!.user!.id!;
+const userId = session?.user?.id;
+if (!userId) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
 const resolvedParams = await context.params;
 const parsedParams = paramsSchema.safeParse(resolvedParams);

@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Module from "node:module";
 const originalRequire = Module.prototype.require;
-Module.prototype.require = function (this: any, path: string, ...args: any[]) {
+Module.prototype.require = function (this: unknown, path: string, ...args: unknown[]) {
   if (path === "server-only") return {};
-  return originalRequire.apply(this, [path, ...args] as any);
+  return originalRequire.apply(this, [path, ...args] as [string, ...unknown[]]);
 };
 
 
