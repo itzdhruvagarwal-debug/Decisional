@@ -10,7 +10,7 @@ import { logger } from "./logger";
 const CACHE_PREFIX = "ipinfo:";
 const CACHE_TTL_SECONDS = 3600; // 1 hour
 
-export interface IpDetails {
+interface IpDetails {
 ipAddress: string;
 latitude: number;
 longitude: number;
