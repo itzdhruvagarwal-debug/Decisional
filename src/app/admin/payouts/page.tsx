@@ -8,7 +8,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Button, Textarea } from "@/components/ui";
 import { z } from "zod";
 
-export const payoutDecisionSchema = z.object({
+const payoutDecisionSchema = z.object({
 action: z.enum(["APPROVE", "REJECT"]),
 note: z.string().max(250),
 }).refine(data => data.action !== "REJECT" || data.note.trim().length >= 5, {

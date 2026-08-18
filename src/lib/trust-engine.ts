@@ -19,7 +19,7 @@ getDRSTierAndLimit,
 
 // ==================== TRUST GATE (Deal Limit Enforcement) ====================
 
-export interface TrustGateResult {
+interface TrustGateResult {
 allowed: boolean;
 maxDealAmount: number; // paise (-1 = unlimited)
 currentTier: string;

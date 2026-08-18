@@ -20,7 +20,7 @@ maskIdentifier,
 import { logger } from "@/lib/logger";
 import { isBrand, isInfluencer } from "@/lib/rbac";
 
-export interface IndiaTaxInput {
+interface IndiaTaxInput {
 gstRegistrationType?: GstRegistrationType | null | undefined;
 gstTurnoverSlab?: GstTurnoverSlab | null | undefined;
 panNumber?: string | null | undefined;
@@ -29,7 +29,7 @@ itrAcknowledgementNumber?: string | null | undefined;
 itrAssessmentYear?: string | null | undefined;
 }
 
-export type IndiaTaxUser = Prisma.UserGetPayload<{
+type IndiaTaxUser = Prisma.UserGetPayload<{
 select: {
 id: true;
 userType: true;
@@ -46,7 +46,7 @@ pinCode: true;
 };
 }>;
 
-export type IndiaTaxCompliance = Prisma.IndiaTaxComplianceGetPayload<Record<string, never>>;
+type IndiaTaxCompliance = Prisma.IndiaTaxComplianceGetPayload<Record<string, never>>;
 
 import { verifyPAN, verifyGST } from "@/lib/kyc";
 

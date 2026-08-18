@@ -294,17 +294,3 @@ secure: process.env.NODE_ENV === "production",
 },
 },
 });
-
-export interface AuthUser {
-id: string;
-email?: string | null;
-name?: string | null;
-userType?: string | null;
-status?: string | null;
-verificationLevel?: string | null;
-trustScore?: number | null;
-xp?: number | null;
-level?: number | null;
-refreshToken?: string | null;
-}
-

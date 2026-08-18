@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui";
 import { DealDetail, getFlatDeliverablesList, ContentUrlEntry } from "./DealDetailHelpers";
 
-export interface DealActionButtonsProps {
+interface DealActionButtonsProps {
 readonly dealStatus: string;
 readonly dealId: string;
 readonly isInfluencer: boolean;

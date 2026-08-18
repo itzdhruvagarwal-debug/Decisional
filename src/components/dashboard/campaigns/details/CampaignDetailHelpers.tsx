@@ -187,7 +187,7 @@ const youtubePayout = (ytSubscribers * (ytER / 100)) * 2.5 * youtubeCount;
 return Math.round(instagramPayout + youtubePayout);
 }
 
-export function promptNegotiatedRate(proposedRate: number): number | null {
+function promptNegotiatedRate(proposedRate: number): number | null {
 const proposedRateInRupees = proposedRate / 100;
   const rateInput = prompt(
     `Accept application at the proposed rate of ₹${proposedRateInRupees.toLocaleString()}?\n\nOr enter a custom negotiated payout rate in INR:`,

@@ -1,13 +1,7 @@
 "use client";
 
-import React from "react";
 import { Deal, Prisma } from "@prisma/client";
 export { formatCurrency } from "@/lib/utils-client";
-
-export const formatPercent = (value: number | undefined) =>
-typeof value === "number" && Number.isFinite(value)
-? `${value.toLocaleString("en-IN", { maximumFractionDigits: 2 })}%`
-: "As shown";
 
 export const formatContractDate = (value: unknown) => {
 if (!value || typeof value !== "string") return "Not set";
@@ -177,21 +171,6 @@ label: `${label}${suffix}`,
 }
 });
 return list;
-}
-
-export function PaymentRow({ label, value }: { readonly label: string; readonly value: string }) {
-return (
-<div className="flex justify-between py-2 border-b border-card last:border-0 text-sm">
-<span className="text-secondary">{label}</span>
-<span className="font-semibold">{value}</span>
-</div>
-);
-}
-
-export interface ContentUrlItem {
-type: string;
-url: string;
-status?: string;
 }
 
 export interface DealDetail extends Omit<Deal, "contractTerms" | "shippingAddress" | "contractSignature"> {

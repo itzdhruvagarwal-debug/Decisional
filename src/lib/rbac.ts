@@ -154,7 +154,7 @@ INFLUENCER: [
 ],
 };
 
-export type RbacUserType = UserType | string | null | undefined;
+type RbacUserType = UserType | string | null | undefined;
 
 export function hasPermission(
 userType: RbacUserType,

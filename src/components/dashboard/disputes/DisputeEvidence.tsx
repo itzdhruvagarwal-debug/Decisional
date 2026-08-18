@@ -4,7 +4,7 @@ import React from "react";
 import { Card, Button, Select, Input, Textarea } from "@/components/ui";
 import { DisputeDetail } from "./DisputeHelpers";
 
-export interface DisputeEvidenceProps {
+interface DisputeEvidenceProps {
 readonly dispute: DisputeDetail;
 readonly showEvidenceForm: boolean;
 readonly setShowEvidenceForm: (show: boolean) => void;

@@ -8,8 +8,8 @@ import { Badge, Input } from "@/components/ui";
 import type { AdminService } from "@/services/admin.service";
 import type { Prisma } from "@prisma/client";
 
-export type AdminViolationElement = Prisma.PromiseReturnType<typeof AdminService.listViolations>[number];
-export type ListViolationsResult = {
+type AdminViolationElement = Prisma.PromiseReturnType<typeof AdminService.listViolations>[number];
+type ListViolationsResult = {
 success: boolean;
 data: AdminViolationElement[];
 };

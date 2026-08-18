@@ -9,7 +9,7 @@ import { AppError } from "@/lib/errors";
 
 import { redis } from "@/lib/redis";
 
-export type ExpiredSignatureDeal = Prisma.DealGetPayload<{
+type ExpiredSignatureDeal = Prisma.DealGetPayload<{
   include: {
     brand: { select: { id: true; userId: true; companyName: true } };
     campaign: {

@@ -17,7 +17,7 @@ recordPlatformFeeRevenue,
 } from "@/lib/deal-settlement";
 import { refundPayment, capturePayment } from "@/lib/razorpay";
 
-export type DisputeWithDeal = Prisma.DisputeGetPayload<{
+type DisputeWithDeal = Prisma.DisputeGetPayload<{
 include: {
 deal: {
 include: {

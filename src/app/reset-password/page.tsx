@@ -24,8 +24,6 @@ message: "Passwords do not match",
 path: ["confirmPassword"],
 });
 
-export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
-
 function ResetPasswordForm() {
 const router = useRouter();
 const searchParams = useSearchParams();

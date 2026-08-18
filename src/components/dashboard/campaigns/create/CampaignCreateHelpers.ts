@@ -27,8 +27,6 @@ applicationDeadline: z.string().optional(),
 postingDeadline: z.string().min(1, "Posting deadline date is required"),
 });
 
-export type CreateCampaignValues = z.infer<typeof createCampaignSchema>;
-
 export interface CampaignFormData {
 title: string;
 description: string;

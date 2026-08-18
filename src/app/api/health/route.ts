@@ -59,7 +59,7 @@ const actualHash = createHash("sha256").update(authHeader).digest();
 return timingSafeEqual(actualHash, expectedHash);
 }
 
-export interface HealthCheckResponse {
+interface HealthCheckResponse {
 uptime: number;
 timestamp: number;
 status: string;

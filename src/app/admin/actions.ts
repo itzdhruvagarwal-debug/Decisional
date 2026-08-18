@@ -361,7 +361,7 @@ message: `Your application was rejected by security review. Reason: ${reason}`,
 revalidatePath("/admin");
 }
 
-export async function awardBadgeManually(targetUserId: string, badgeId: string) {
+async function awardBadgeManually(targetUserId: string, badgeId: string) {
 const _session = await requireAdmin();
 
 const user = await prisma.user.findUnique({

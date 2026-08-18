@@ -39,8 +39,6 @@ message: "Passwords do not match",
 path: ["confirmPassword"],
 });
 
-export type RegisterFormValues = z.infer<typeof registerSchema>;
-
 function RegisterContent() {
 const router = useRouter();
 const searchParams = useSearchParams();

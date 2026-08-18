@@ -12,8 +12,6 @@ password: z.string().min(1, "Password is required"),
 twoFactorCode: z.string().length(6, "2FA code must be 6 digits").optional().or(z.literal("")),
 });
 
-export type LoginFormValues = z.infer<typeof loginSchema>;
-
 import Logo from "../../components/Logo";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";

@@ -12,7 +12,7 @@ import { Button, Input, Select } from "@/components/ui";
 import { formatNumber } from "@/lib/utils-client";
 import { z } from "zod";
 
-export const discoverFiltersSchema = z.object({
+const discoverFiltersSchema = z.object({
 search: z.string().max(100).optional(),
 category: z.string().max(50).optional(),
 platform: z.string().max(20).optional(),

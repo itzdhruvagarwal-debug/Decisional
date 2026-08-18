@@ -10,8 +10,8 @@ import { Badge, Button, Input, Select } from "@/components/ui";
 import type { AdminService } from "@/services/admin.service";
 import type { Prisma } from "@prisma/client";
 
-export type AdminUserListElement = Prisma.PromiseReturnType<typeof AdminService.listUsers>["users"][number];
-export type ListUsersResult = {
+type AdminUserListElement = Prisma.PromiseReturnType<typeof AdminService.listUsers>["users"][number];
+type ListUsersResult = {
 success: boolean;
 data: {
 users: AdminUserListElement[];

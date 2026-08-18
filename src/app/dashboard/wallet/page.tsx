@@ -15,10 +15,6 @@ import PeriodPickerModal, { type PeriodValue } from "@/components/dashboard/wall
 import { ToastContainer, type ToastItem, type ToastType } from "@/components/ui/toast";
 import { Button, Input, Modal } from "@/components/ui";
 import { withdrawSchema } from "@/lib/validations/auth";
-import { z } from "zod";
-
-export type WithdrawFormValues = z.infer<typeof withdrawSchema>;
-
 import { WalletHeader, WalletSummaryCards, type WalletData } from "@/components/dashboard/wallet/WalletHeader";
 
 interface SelectedBankAccount {

@@ -91,36 +91,6 @@ return "var(--color-text-secondary)";
 }
 }
 
-export function getVerdictColor(verdict: string) {
-switch (verdict) {
-case "INFLUENCER_FAVORED":
-return "#22c55e";
-case "BRAND_FAVORED":
-return "#3b82f6";
-case "SPLIT":
-return "#f59e0b";
-case "DISMISSED":
-return "#6b7280";
-case "ESCALATE":
-return "#ef4444";
-default:
-return "var(--color-text-secondary)";
-}
-}
-
-export function getFindingColor(result: string) {
-switch (result) {
-case "PASS":
-return "#22c55e";
-case "FAIL":
-return "#ef4444";
-case "WARNING":
-return "#f59e0b";
-default:
-return "#6b7280";
-}
-}
-
 export function getFindingIcon(result: string) {
   switch (result) {
     case "PASS":

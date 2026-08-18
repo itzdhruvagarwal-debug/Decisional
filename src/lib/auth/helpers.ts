@@ -96,7 +96,7 @@ logger.warn("Failed login invalid password", { email, ip });
 throw AppError.badRequest("INVALID_PASSWORD");
 }
 
-export async function checkImpossibleTravelInternal(user: { id: string; isTwoFactorEnabled?: boolean }, ip: string, lastDevice: { lastIp?: string; lastLocation?: string | null; lastSeenAt: Date } | null, credentials: Record<string, unknown>) {
+async function checkImpossibleTravelInternal(user: { id: string; isTwoFactorEnabled?: boolean }, ip: string, lastDevice: { lastIp?: string; lastLocation?: string | null; lastSeenAt: Date } | null, credentials: Record<string, unknown>) {
 if (!lastDevice || lastDevice.lastIp === ip || !lastDevice.lastLocation) return;
 
 const currentGeo = await getIpDetails(ip);
@@ -189,7 +189,7 @@ logger.warn("Impossible travel detection failed non-fatal", { error: err, email 
 }
 }
 
-export async function checkRecoveryCodeFallback(user: { id: string; twoFactorRecoveryCodes?: string | null }, code: string): Promise<boolean> {
+async function checkRecoveryCodeFallback(user: { id: string; twoFactorRecoveryCodes?: string | null }, code: string): Promise<boolean> {
 if (!user.twoFactorRecoveryCodes) return false;
 try {
 const recoveryHashes = JSON.parse(user.twoFactorRecoveryCodes) as string[];

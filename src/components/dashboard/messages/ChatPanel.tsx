@@ -11,7 +11,7 @@ interface ChatPanelProps {
   readonly state: ReturnType<typeof useMessages>;
 }
 
-export function ChatHeader({ state }: Readonly<ChatPanelProps>) {
+function ChatHeader({ state }: Readonly<ChatPanelProps>) {
   const {
     setSelectedConversation,
     isPeerTyping,

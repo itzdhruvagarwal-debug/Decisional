@@ -97,106 +97,6 @@ message: "2FA Code must be exactly 6 digits",
 })
 .optional(),
 });
-// ==================== PROFILE SCHEMAS ====================
-
-export const influencerProfileSchema = z.object({
-displayName: z
-.string()
-.trim()
-.min(2, "Name must be at least 2 characters")
-.max(50, "Name cannot exceed 50 characters"),
-bio: z.string().trim().max(500, "Bio must be under 500 characters").optional(),
-city: z.string().trim().max(50).optional(),
-state: z.string().trim().max(50).optional(),
-gender: z.enum(["MALE", "FEMALE", "NON_BINARY", "PREFER_NOT_TO_SAY", "OTHER"]).optional(),
-age: z.coerce.number().int("Age must be a whole number").min(13, "Must be at least 13 years old").max(100).optional(),
-instagramHandle: z
-.string()
-.trim()
-.regex(/^[a-zA-Z0-9._]+$/, "Invalid Instagram handle format")
-.optional(),
-youtubeHandle: z.string().trim().optional(),
-categories: z.array(z.string().trim()).min(1, "Select at least one category").max(5, "Select at most 5 categories"),
-languages: z.array(z.string().trim()).min(1, "Select at least one language"),
-minRate: z.number().int().min(100, "Minimum rate must be at least 100").optional(),
-maxRate: z.number().int().optional(),
-minInstagramRate: z.number().int().min(100, "Minimum Instagram rate must be at least 100").optional(),
-maxInstagramRate: z.number().int().optional(),
-minYoutubeRate: z.number().int().min(100, "Minimum YouTube rate must be at least 100").optional(),
-maxYoutubeRate: z.number().int().optional(),
-instagramFollowers: z.number().int().min(0).optional(),
-youtubeSubscribers: z.number().int().min(-1).optional(),
-instagramEngagementRate: z.number().min(0).max(100, "Must be a valid percentage").optional(),
-youtubeEngagementRate: z.number().min(0).max(100, "Must be a valid percentage").optional(),
-}).refine(data => !data.maxRate || (data.minRate !== undefined && data.maxRate >= data.minRate), {
-message: "Maximum rate must be greater than or equal to minimum rate",
-path: ["maxRate"],
-}).refine(data => !data.maxInstagramRate || (data.minInstagramRate !== undefined && data.maxInstagramRate >= data.minInstagramRate), {
-message: "Maximum Instagram rate must be greater than or equal to minimum Instagram rate",
-path: ["maxInstagramRate"],
-}).refine(data => !data.maxYoutubeRate || (data.minYoutubeRate !== undefined && data.maxYoutubeRate >= data.minYoutubeRate), {
-message: "Maximum YouTube rate must be greater than or equal to minimum YouTube rate",
-path: ["maxYoutubeRate"],
-});
-
-export const brandProfileSchema = z.object({
-companyName: z
-.string()
-.trim()
-.min(2, "Company name must be at least 2 characters")
-.max(100, "Company name cannot exceed 100 characters"),
-logo: z
-.string()
-.trim()
-.refine((val) => {
-if (!val) return true;
-if (val.startsWith("/")) return true;
-try {
-const u = new URL(val);
-return u.protocol === "http:" || u.protocol === "https:";
-} catch {
-return false;
-}
-}, "Please provide a valid logo image URL or local path")
-.max(500)
-.optional(),
-website: z
-.string()
-.url("Please provide a valid website URL")
-.max(500)
-.refine(
-(val) => val.startsWith("http://") || val.startsWith("https://"),
-"Website URL must start with http:// or https://",
-)
-.optional(),
-description: z.string().trim().max(1000, "Description cannot exceed 1000 characters").optional(),
-industry: z.string().trim().max(50).optional(),
-gstNumber: z
-.string()
-.trim()
-.toUpperCase()
-.regex(
-/^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[\dA-Z]$/,
-"Must be a valid Indian GSTIN format",
-)
-.optional(),
-panNumber: z
-.string()
-.trim()
-.toUpperCase()
-.regex(/^[A-Z]{5}\d{4}[A-Z]$/, "Must be a valid Indian PAN format")
-.optional(),
-cinNumber: z
-.string()
-.trim()
-.toUpperCase()
-.regex(
-/^([LUu])(\d{5})([A-Za-z]{2})(\d{4})([A-Za-z]{3})(\d{6})$/,
-"Must be a valid Indian CIN format",
-)
-.optional(),
-});
-
 // ==================== CAMPAIGN SCHEMAS ====================
 
 export const createCampaignSchema = z
@@ -337,7 +237,7 @@ export const createApplicationSchema = z.object({
   estimatedDeliveryDays: z.number().int().positive().max(90).optional(),
 });
 
-export const contentSubmissionItemSchema = z.object({
+const contentSubmissionItemSchema = z.object({
 type: z.string().trim(),
 url: z
 .string()
@@ -382,7 +282,7 @@ contentUrls: z.array(contentSubmissionItemSchema).optional(),
 notes: z.string().trim().max(500, "Notes attached are exceeding limit").optional(),
 });
 
-export const deliverableReviewSchema = z.object({
+const deliverableReviewSchema = z.object({
 type: z.string().trim(),
 status: z.enum(["APPROVED", "REVISION_REQUESTED"]),
 feedback: z.string().trim().optional(),
@@ -422,7 +322,7 @@ z
 ),
 });
 
-export const shippingAddressSchema = z.object({
+const shippingAddressSchema = z.object({
 fullName: z.string().trim().min(2).max(100),
 phone: phoneSchema,
 line1: z.string().trim().min(5).max(200),

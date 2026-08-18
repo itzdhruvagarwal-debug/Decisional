@@ -240,7 +240,7 @@ return map[seg];
 return "Dashboard";
 }
 
-export interface DashboardUser {
+interface DashboardUser {
 id?: string | undefined;
 name?: string | null | undefined;
 email?: string | null | undefined;

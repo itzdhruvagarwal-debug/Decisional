@@ -13,13 +13,13 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { getDealParticipantRole } from "@/lib/utils";
 import { Prisma } from "@prisma/client";
 
-export interface SignResult {
+interface SignResult {
 signed: {
 isFullySigned: boolean;
 };
 }
 
-export type DealToSign = Prisma.DealGetPayload<{
+type DealToSign = Prisma.DealGetPayload<{
 include: {
 influencer: { select: { userId: true; displayName: true } };
 brand: { select: { userId: true; companyName: true } };

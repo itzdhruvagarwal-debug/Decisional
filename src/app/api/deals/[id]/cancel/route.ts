@@ -11,14 +11,14 @@ import { getDealTotalAmount } from "@/lib/utils";
 import { createActivityLog } from "@/lib/audit";
 import { AppError } from "@/lib/errors";
 
-export interface CancellationSummary {
+interface CancellationSummary {
 refundAmount: number;
 payoutAmount: number;
 platformFeeKept: number;
 reason: string;
 }
 
-export type DealWithProfile = Prisma.DealGetPayload<{
+type DealWithProfile = Prisma.DealGetPayload<{
 include: { influencer: true; brand: true };
 }>;
 

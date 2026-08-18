@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { apiWrapper, ApiResponse } from "@/lib/api-wrapper";
 import { Prisma } from "@prisma/client";
 
-export type DealContractData = Prisma.DealGetPayload<{
+type DealContractData = Prisma.DealGetPayload<{
 include: {
 influencer: {
 select: {

@@ -18,7 +18,7 @@ function channelHandle(channel: { customUrl: string; title: string; id: string }
 return channel.customUrl || channel.title || channel.id;
 }
 
-export interface YouTubeTokenData {
+interface YouTubeTokenData {
 accessToken: string;
 refreshToken?: string;
 expiresAt?: Date;

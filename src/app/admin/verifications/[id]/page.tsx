@@ -11,7 +11,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import { Button, Input } from "@/components/ui";
 import { z } from "zod";
 
-export const verificationRejectSchema = z.object({
+const verificationRejectSchema = z.object({
 reason: z.string().min(5, "Reason must be at least 5 characters").max(100),
 });
 

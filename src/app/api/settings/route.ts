@@ -171,7 +171,7 @@ return NextResponse.json(
 }
 }
 
-export interface UpdateProfileInput {
+interface UpdateProfileInput {
 displayName?: string | null | undefined;
 bio?: string | null | undefined;
 city?: string | null | undefined;
