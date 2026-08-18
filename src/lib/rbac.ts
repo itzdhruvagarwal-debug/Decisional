@@ -50,7 +50,7 @@ export type Permission =
 | "MANAGE_SETTINGS"
 | "VIEW_SETTINGS";
 
-export const ROLE_PERMISSIONS: Record<UserType, Permission[]> = {
+const ROLE_PERMISSIONS: Record<UserType, Permission[]> = {
 ADMIN: [
 // Dashboard & Navigation
 "VIEW_DASHBOARD",

@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { decrypt, maskAccountNumber } from "@/lib/encryption";
+import { decrypt, maskAccountNumber, tryDecrypt } from "@/lib/encryption";
 import { WithdrawalStatus } from "@prisma/client";
 import { paginationSchema } from "@/lib/validations";
 import { AppError } from "@/lib/errors";
@@ -13,15 +13,6 @@ status: z
 .enum(["PENDING", "PENDING_REVIEW", "PROCESSING", "COMPLETED", "FAILED", "ALL"])
 .default("PENDING"),
 });
-
-function tryDecrypt(value?: string | null) {
-if (!value) return null;
-try {
-return decrypt(value);
-} catch {
-return value;
-}
-}
 
 function maskUpi(value?: string | null) {
 const plain = tryDecrypt(value);

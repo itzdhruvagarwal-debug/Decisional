@@ -134,7 +134,7 @@ error: apiError instanceof Error ? apiError.message : String(apiError),
 return null;
 }
 
-export function performPostContentChecks(
+function performPostContentChecks(
 verifiedPostData: VerifiedPostData,
 params: PostVerificationParams,
 flags: FraudFlag[]

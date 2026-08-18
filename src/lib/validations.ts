@@ -199,19 +199,6 @@ cinNumber: z
 
 // ==================== CAMPAIGN SCHEMAS ====================
 
-export const deliverableSchema = z.object({
-type: z.enum([
-"INSTAGRAM_POST",
-"INSTAGRAM_REEL",
-"INSTAGRAM_STORY",
-"YOUTUBE_VIDEO",
-"YOUTUBE_SHORT",
-]),
-count: z.number().int().min(1, "Count must be at least 1").max(10, "Maximum 10 deliverables per line"),
-duration: z.string().trim().max(20).optional(), // "30s", "60s" allowed shapes
-specs: z.string().trim().max(500, "Specifications input is too long").optional(),
-});
-
 export const createCampaignSchema = z
 .object({
 title: z.string().min(3),

@@ -63,7 +63,7 @@ return false;
 }
 
 
-export async function checkDealCount(
+async function checkDealCount(
 user: {
 userType: string;
 influencerProfile?: { completedDeals: number } | null;
@@ -100,7 +100,7 @@ return false;
 }
 }
 
-export async function checkEarnings(
+async function checkEarnings(
 user: { id: string },
 badgeId: string,
 db: Prisma.TransactionClient | typeof prisma,
@@ -138,7 +138,7 @@ return false;
 }
 }
 
-export async function checkReviews(
+async function checkReviews(
 userId: string,
 countNeeded: number,
 minRating: number,
@@ -164,7 +164,7 @@ const count = await prismaRef.review.count({ where: whereClause });
 return count >= countNeeded;
 }
 
-export async function checkReferralCount(
+async function checkReferralCount(
 user: { id: string },
 badgeId: string,
 db: Prisma.TransactionClient | typeof prisma,

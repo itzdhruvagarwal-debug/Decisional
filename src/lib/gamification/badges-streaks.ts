@@ -1,29 +1,29 @@
 import { DbClient, GamificationUser } from "./types";
 
-export async function checkDealStreak(badgeId: string, userId: string, db: DbClient, startOfMonth: Date): Promise<boolean> {
-const count = await db.deal.count({
-where: { influencerId: userId, status: "COMPLETED", completedAt: { gte: startOfMonth } },
-});
-if (badgeId === "deal_streak_5") return count >= 5;
-if (badgeId === "deal_streak_10") return count >= 10;
-return false;
+async function checkDealStreak(badgeId: string, userId: string, db: DbClient, startOfMonth: Date): Promise<boolean> {
+  const count = await db.deal.count({
+    where: { influencerId: userId, status: "COMPLETED", completedAt: { gte: startOfMonth } },
+  });
+  if (badgeId === "deal_streak_5") return count >= 5;
+  if (badgeId === "deal_streak_10") return count >= 10;
+  return false;
 }
 
-export async function checkFinancialStreak(badgeId: string, userId: string, db: DbClient, startOfMonth: Date): Promise<boolean> {
-if (badgeId === "fast_earner") {
-const monthlyPayouts = await db.transaction.aggregate({
-where: {
-wallet: { userId },
-type: "CREDIT",
-dealId: { not: null },
-createdAt: { gte: startOfMonth },
-},
-_sum: { amount: true },
-});
-const earnedAmount = monthlyPayouts?._sum?.amount ?? 0;
-return earnedAmount >= 5000000;
-}
-return false;
+async function checkFinancialStreak(badgeId: string, userId: string, db: DbClient, startOfMonth: Date): Promise<boolean> {
+  if (badgeId === "fast_earner") {
+    const monthlyPayouts = await db.transaction.aggregate({
+      where: {
+        wallet: { userId },
+        type: "CREDIT",
+        dealId: { not: null },
+        createdAt: { gte: startOfMonth },
+      },
+      _sum: { amount: true },
+    });
+    const earnedAmount = monthlyPayouts?._sum?.amount ?? 0;
+    return earnedAmount >= 5000000;
+  }
+  return false;
 }
 
 async function checkSpeedDemon(userId: string, db: DbClient): Promise<boolean> {
@@ -72,7 +72,7 @@ async function checkWeekendWarrior(userId: string, db: DbClient): Promise<boolea
   });
 }
 
-export async function checkSpeedAndTimingStreak(badgeId: string, userId: string, db: DbClient): Promise<boolean> {
+async function checkSpeedAndTimingStreak(badgeId: string, userId: string, db: DbClient): Promise<boolean> {
   if (badgeId === "speed_demon") return checkSpeedDemon(userId, db);
   if (badgeId === "early_bird") return checkEarlyBird(userId, db);
   if (badgeId === "night_owl") return checkNightOwl(userId, db);
@@ -80,34 +80,34 @@ export async function checkSpeedAndTimingStreak(badgeId: string, userId: string,
   return false;
 }
 
-export async function checkPortfolioAndLoyaltyStreak(badgeId: string, userId: string, db: DbClient): Promise<boolean> {
-if (badgeId === "diverse_portfolio") {
-const portfolioDeals = await db.deal.findMany({
-where: { influencerId: userId, status: "COMPLETED" },
-include: { campaign: { select: { targetCategories: true } } },
-});
-const categoriesSet = new Set<string>();
-for (const deal of portfolioDeals) {
-if (deal.campaign?.targetCategories) {
-for (const cat of deal.campaign.targetCategories) {
-categoriesSet.add(cat);
-}
-}
-}
-return categoriesSet.size >= 5;
-}
-if (badgeId === "loyalist") {
-const loyaltyGroups = await db.deal.groupBy({
-by: ["brandId"],
-where: { influencerId: userId, status: "COMPLETED", brandId: { not: null } },
-_count: { id: true },
-});
-return loyaltyGroups.some((group: { _count: { id: number | null } }) => (group._count.id ?? 0) >= 5);
-}
-return false;
+async function checkPortfolioAndLoyaltyStreak(badgeId: string, userId: string, db: DbClient): Promise<boolean> {
+  if (badgeId === "diverse_portfolio") {
+    const portfolioDeals = await db.deal.findMany({
+      where: { influencerId: userId, status: "COMPLETED" },
+      include: { campaign: { select: { targetCategories: true } } },
+    });
+    const categoriesSet = new Set<string>();
+    for (const deal of portfolioDeals) {
+      if (deal.campaign?.targetCategories) {
+        for (const cat of deal.campaign.targetCategories) {
+          categoriesSet.add(cat);
+        }
+      }
+    }
+    return categoriesSet.size >= 5;
+  }
+  if (badgeId === "loyalist") {
+    const loyaltyGroups = await db.deal.groupBy({
+      by: ["brandId"],
+      where: { influencerId: userId, status: "COMPLETED", brandId: { not: null } },
+      _count: { id: true },
+    });
+    return loyaltyGroups.some((group: { _count: { id: number | null } }) => (group._count.id ?? 0) >= 5);
+  }
+  return false;
 }
 
-export async function checkRatingAndViralStreak(badgeId: string, userId: string, db: DbClient, influencerProfile: GamificationUser["influencerProfile"]): Promise<boolean> {
+async function checkRatingAndViralStreak(badgeId: string, userId: string, db: DbClient, influencerProfile: GamificationUser["influencerProfile"]): Promise<boolean> {
 if (badgeId === "perfect_rating") {
 const rating = influencerProfile?.averageRating || 0;
 const completedDeals = influencerProfile?.completedDeals || 0;
@@ -228,7 +228,7 @@ async function checkHolidaySpecial(userId: string, db: DbClient): Promise<boolea
   });
 }
 
-export async function checkLocationAndOtherStreak(badgeId: string, userId: string, db: DbClient, influencerProfile: GamificationUser["influencerProfile"]): Promise<boolean> {
+async function checkLocationAndOtherStreak(badgeId: string, userId: string, db: DbClient, influencerProfile: GamificationUser["influencerProfile"]): Promise<boolean> {
   if (badgeId === "category_king") return checkCategoryKing(userId, db, influencerProfile);
   if (badgeId === "city_champion") return checkCityChampion(userId, db, influencerProfile);
   if (badgeId === "comeback_kid") return checkComebackKid(userId, db);

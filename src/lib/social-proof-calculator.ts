@@ -259,7 +259,7 @@ profile.instagramEngagementRate = updates.instagramEngagementRate;
 /**
 * Recalculate and save social proof scores for a specific influencer.
 */
-export async function recalculateSocialProof(
+async function recalculateSocialProof(
 userId: string,
 ): Promise<SocialProofResult | null> {
 try {

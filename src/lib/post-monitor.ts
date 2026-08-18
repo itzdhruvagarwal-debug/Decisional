@@ -48,7 +48,7 @@ reason: string;
 * Day 15-30: Check weekly
 * Day 31+: Monitoring complete
 */
-export function shouldCheckToday(completedAt?: Date | null): {
+function shouldCheckToday(completedAt?: Date | null): {
 shouldCheck: boolean;
 day: number;
 } {
@@ -97,7 +97,7 @@ return { shouldCheck: false, day: 0 };
 * Day 15-21: 25% clawback
 * Day 22-30: 15% clawback (late removal, still penalized)
 */
-export function calculateClawbackPercentage(
+function calculateClawbackPercentage(
 daysSinceCompletion: number,
 ): number {
 if (daysSinceCompletion <= 3) return 100;
@@ -614,7 +614,7 @@ reason: "Clawback execution failed due to error",
 }
 }
 
-export function checkIsStoryDeal(contractTerms: unknown): boolean {
+function checkIsStoryDeal(contractTerms: unknown): boolean {
 if (!contractTerms || typeof contractTerms !== "object") return false;
 const terms = contractTerms as Record<string, unknown>;
 

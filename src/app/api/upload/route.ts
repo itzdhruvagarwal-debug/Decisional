@@ -15,15 +15,7 @@ image?: string | null;
 import { uploadFormFile, uploadBase64, type UploadFolder } from "@/lib/storage";
 import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
-
-function bytesToAscii(bytes: Uint8Array): string {
-return String.fromCodePoint(...bytes);
-}
-
-function matchesHeader(bytes: Uint8Array, pattern: number[]): boolean {
-if (bytes.length < pattern.length) return false;
-return pattern.every((val, i) => bytes[i] === val);
-}
+import { bytesToAscii, matchesHeader } from "@/lib/utils";
 
 function detectMimeFromMagicBytes(bytes: Uint8Array): string | null {
 if (bytes.length < 12) return null;

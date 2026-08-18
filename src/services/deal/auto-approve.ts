@@ -7,7 +7,7 @@ import { logger } from "@/lib/logger";
 import { sendDealNotificationEmail } from "@/lib/email";
 import { NotificationService } from "@/services/notification.service";
 
-export async function sendAutoApproveEmails(deal: ExpiredDealCandidate) {
+async function sendAutoApproveEmails(deal: ExpiredDealCandidate) {
 try {
 const [influencerUser, brandUser] = await Promise.all([
 prisma.user.findUnique({ where: { id: deal.influencer.userId }, select: { email: true } }),
@@ -35,10 +35,10 @@ deal.campaign.title,
 logger.warn("Auto-approval email notification failed - non-fatal", { error: mailErr, dealId: deal.id });
 }
 }
-export async function autoApproveDealTx(
-deal: ExpiredDealCandidate,
-now: Date,
-latestSubmission: { id: string; status: string }
+async function autoApproveDealTx(
+  deal: ExpiredDealCandidate,
+  now: Date,
+  latestSubmission: { id: string; status: string }
 ): Promise<boolean> {
 return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
 const submissionUpdate = await tx.contentSubmission.updateMany({
@@ -90,7 +90,7 @@ return true;
 
 
 
-export async function autoApproveSingleExpiredDeal(deal: ExpiredDealCandidate, now: Date): Promise<boolean> {
+async function autoApproveSingleExpiredDeal(deal: ExpiredDealCandidate, now: Date): Promise<boolean> {
 const latestSubmission = deal.contentSubmissions[0];
 if (latestSubmission?.status !== "PENDING") {
 return false;

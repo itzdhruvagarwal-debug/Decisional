@@ -9,13 +9,9 @@ import { logger } from "@/lib/logger";
 import { CampaignService, type ListCampaignsParams } from "@/services/campaign.service";
 import { requireActiveAdmin } from "@/lib/admin-auth";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { parsePagination } from "@/lib/utils";
+import { parsePagination, toPaise } from "@/lib/utils";
 import { AppError } from "@/lib/errors";
 import { TierError } from "@/services/campaign/types";
-
-function toPaise(amountInRupees: number): number {
-return Math.round(amountInRupees * 100);
-}
 
 async function _handler_GET(request: NextRequest) {
 try {

@@ -35,22 +35,13 @@ import { format } from "date-fns";
 import { RATE_LIMIT_CONFIGS } from "@/lib/rate-limit";
 import { getPlatformHeader, getPlatformFooter } from "@/lib/platform-config";
 import { getDealParticipantRole } from "@/lib/utils";
-import { decrypt } from "@/lib/encryption";
+import { decrypt, tryDecrypt } from "@/lib/encryption";
 import {
 verifyContractSignature,
 type ContractTerms,
 type ContractSignature as ContractSig,
 } from "@/lib/contract-engine";
 import { logger } from "@/lib/logger";
-
-function tryDecrypt(value?: string | null): string {
-if (!value) return "";
-try {
-return decrypt(value);
-} catch {
-return value;
-}
-}
 
 interface PlatformDetails {
 name?: string;

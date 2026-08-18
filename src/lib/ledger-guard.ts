@@ -87,7 +87,7 @@ pendingDrift?: number;
 * Recalculate and verify a specific user's wallet balance.
 * Returns null if everything is correct, or anomaly data if drift exists.
 */
-export async function verifyWalletBalance(userId: string): Promise<VerificationAnomaly | null> {
+async function verifyWalletBalance(userId: string): Promise<VerificationAnomaly | null> {
   return prisma.$transaction(async (tx) => {
     // 1. Lock the wallet row to prevent concurrent updates during verification
     await tx.$queryRaw`SELECT id FROM "Wallet" WHERE "userId" = ${userId} FOR UPDATE`;

@@ -98,8 +98,22 @@ const result = notificationPreferencesSchema.safeParse(parsed);
 if (result.success) {
 return result.data;
 }
-return {
-email: { marketing: true, updates: true, security: true },
-push: { marketing: true, updates: true, security: true },
-};
+  return {
+    email: { marketing: true, updates: true, security: true },
+    push: { marketing: true, updates: true, security: true },
+  };
 }
+
+export function bytesToAscii(bytes: Uint8Array): string {
+  return String.fromCodePoint(...bytes);
+}
+
+export function matchesHeader(bytes: Uint8Array, pattern: number[]): boolean {
+  if (bytes.length < pattern.length) return false;
+  return pattern.every((val, i) => bytes[i] === val);
+}
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+

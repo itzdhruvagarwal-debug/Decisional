@@ -22,6 +22,7 @@ verifyGST,
 verifyBankAccount,
 } from "@/lib/kyc";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { bytesToAscii } from "@/lib/utils";
 import { z } from "zod";
 
 const aadhaarSchema = z.object({
@@ -75,10 +76,6 @@ const ALLOWED_VERIFICATION_MIME_TYPES = [
 ] as const;
 
 const MAX_VERIFICATION_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
-function bytesToAscii(bytes: Uint8Array): string {
-return String.fromCodePoint(...bytes);
-}
 
 function detectVerificationMimeFromMagicBytes(bytes: Uint8Array): string | null {
 if (bytes.length < 12) return null;

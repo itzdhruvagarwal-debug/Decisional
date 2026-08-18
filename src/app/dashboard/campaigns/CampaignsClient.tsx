@@ -4,7 +4,7 @@ import Image from "next/image";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { formatCurrency, formatNumber, normalizeStringArray } from "@/lib/utils-client";
+import { formatCurrency, formatNumber, normalizeStringArray, normalizeDeliverables } from "@/lib/utils-client";
 import { Pagination } from "@/components/ui/pagination";
 import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Button, Input, Select, Skeleton } from "@/components/ui";
@@ -39,24 +39,6 @@ INSTAGRAM_STORY: "IG Story",
 YOUTUBE_VIDEO: "YT Video",
 YOUTUBE_SHORT: "YT Short",
 };
-
-function normalizeDeliverables(
-value: unknown,
-): Array<{ type: string; count: number }> {
-if (!Array.isArray(value)) {
-return [];
-}
-
-return value
-.map((item) => {
-const parsed = item as { type?: unknown; count?: unknown };
-return {
-type: typeof parsed?.type === "string" ? parsed.type.trim() : "",
-count: Math.max(1, Number(parsed?.count || 1)),
-};
-})
-.filter((item) => Boolean(item.type));
-}
 
 interface CampaignsPayload {
 data?: { campaigns?: RawCampaign[]; totalPages?: number };

@@ -153,7 +153,7 @@ return null;
 /**
 * Refresh a YouTube OAuth access token using the stored refresh token.
 */
-export async function refreshYouTubeToken(refreshToken: string): Promise<{
+async function refreshYouTubeToken(refreshToken: string): Promise<{
 accessToken: string;
 expiresAt: Date;
 } | null> {
@@ -511,7 +511,7 @@ return { isLive: video.isLive, video };
 /**
 * Fetch recent videos from a channel.
 */
-export async function getRecentVideos(
+async function getRecentVideos(
 channelId: string,
 maxResults: number = 10,
 ): Promise<YouTubeVideo[]> {

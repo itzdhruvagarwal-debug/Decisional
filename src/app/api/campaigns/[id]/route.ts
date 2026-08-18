@@ -7,10 +7,10 @@ import { logger } from "@/lib/logger";
 import { routeParamsSchema, createCampaignSchema } from "@/lib/validations";
 import { CampaignService } from "@/services/campaign.service";
 import { requireActiveAdmin } from "@/lib/admin-auth";
-import prisma from "@/lib/db";
 import { isAdmin, isInfluencer } from "@/lib/rbac";
 import { AppError } from "@/lib/errors";
 import { TierError } from "@/services/campaign/types";
+import { toPaise } from "@/lib/utils";
 
 const paramsSchema = routeParamsSchema;
 const actionSchema = z.object({ action: z.enum(["ACTIVATE", "CANCEL"]) });
@@ -244,7 +244,6 @@ data: parsedBody.error.format(),
 );
 }
 
-const toPaise = (amountInRupees: number) => Math.round(amountInRupees * 100);
 const payload = {
 ...parsedBody.data,
 totalBudget: toPaise(parsedBody.data.totalBudget),

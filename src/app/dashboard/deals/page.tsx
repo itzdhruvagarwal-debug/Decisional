@@ -8,7 +8,7 @@ import { fetcher } from "@/lib/fetcher";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
-import { formatCurrency } from "@/lib/utils-client";
+import { formatCurrency, normalizeDeliverables } from "@/lib/utils-client";
 import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Button } from "@/components/ui";
 
@@ -94,20 +94,6 @@ postingDeadline: string;
 campaign: { title: string };
 brand: { companyName: string; logo: string | null };
 deliverables: { type: string; count: number }[];
-}
-
-function normalizeDeliverables(value: unknown): Deal["deliverables"] {
-if (!Array.isArray(value)) return [];
-
-return value
-.map((item) => {
-const parsed = item as { type?: unknown; count?: unknown };
-return {
-type: typeof parsed?.type === "string" ? parsed.type.trim() : "",
-count: Math.max(1, Number(parsed?.count || 1)),
-};
-})
-.filter((item) => Boolean(item.type));
 }
 
 interface RawDeal {

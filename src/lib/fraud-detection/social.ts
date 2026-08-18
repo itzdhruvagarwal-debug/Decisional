@@ -216,7 +216,7 @@ action,
 // ==================== ENGAGEMENT ANOMALY DETECTION ====================
 
 
-export function checkLikeViewAnomaly(
+function checkLikeViewAnomaly(
 likes: number,
 views: number,
 flags: FraudFlag[]

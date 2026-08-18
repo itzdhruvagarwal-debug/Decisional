@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import EmptyState from "@/components/ui/EmptyState";
 import { Button, Input, Select } from "@/components/ui";
+import { formatNumber } from "@/lib/utils-client";
 import { z } from "zod";
 
 export const discoverFiltersSchema = z.object({
@@ -35,12 +36,6 @@ totalCompletedDeals: number;
 trustScore: number;
 userId: string;
 isFeatured?: boolean;
-}
-
-function formatNumber(val: number | null | undefined): string {
-if (!val) return "-";
-if (val > 1000) return (val / 1000).toFixed(1) + "k";
-return val.toString();
 }
 
 export default function DiscoverInfluencersPage() {

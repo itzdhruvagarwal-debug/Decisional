@@ -65,13 +65,13 @@ return null;
 
 return campaign;
 }
-export function buildBasicInfoUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
-if (data.title !== undefined) updateData.title = safeStringCast(data.title);
-if (data.description !== undefined) updateData.description = safeStringCast(data.description);
-if (data.requirements !== undefined) updateData.requirements = safeStringCast(data.requirements);
-if (data.guidelines !== undefined) {
-updateData.guidelines = safeStringOrNullCast(data.guidelines);
-}
+function buildBasicInfoUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
+  if (data.title !== undefined) updateData.title = safeStringCast(data.title);
+  if (data.description !== undefined) updateData.description = safeStringCast(data.description);
+  if (data.requirements !== undefined) updateData.requirements = safeStringCast(data.requirements);
+  if (data.guidelines !== undefined) {
+    updateData.guidelines = safeStringOrNullCast(data.guidelines);
+  }
 }
 function parseOptionalPositiveNumber(val: unknown): number | null {
   if (val === undefined || val === null || val === "") return null;
@@ -91,7 +91,7 @@ function parseOptionalDate(val: unknown): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-export function buildDemographicsUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
+function buildDemographicsUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
   if (data.targetCategories !== undefined) updateData.targetCategories = data.targetCategories as string[];
   if (data.targetCities !== undefined) updateData.targetCities = data.targetCities as string[];
   if (data.targetLanguages !== undefined) updateData.targetLanguages = data.targetLanguages as string[];
@@ -106,7 +106,7 @@ export function buildDemographicsUpdate(data: Record<string, unknown>, updateDat
   }
 }
 
-export function buildFollowersAndEngagementUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
+function buildFollowersAndEngagementUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
   if (data.minFollowers !== undefined) updateData.minFollowers = Number(data.minFollowers);
   if (data.maxFollowers !== undefined) {
     updateData.maxFollowers = parseOptionalPositiveNumber(data.maxFollowers);
@@ -116,7 +116,7 @@ export function buildFollowersAndEngagementUpdate(data: Record<string, unknown>,
   }
 }
 
-export function buildBudgetAndTimelineUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
+function buildBudgetAndTimelineUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
   if (data.totalBudget !== undefined) {
     const val = parseOptionalNonNegativeNumber(data.totalBudget);
     if (val !== null) updateData.totalBudget = val;
@@ -140,24 +140,24 @@ export function buildBudgetAndTimelineUpdate(data: Record<string, unknown>, upda
     updateData.postingDeadline = new Date(data.postingDeadline as string);
   }
 }
-export function buildProductSeedingUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
-if (data.requiresProduct !== undefined) updateData.requiresProduct = Boolean(data.requiresProduct);
-if (data.productName !== undefined) {
-updateData.productName = safeStringCast(data.productName);
+function buildProductSeedingUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
+  if (data.requiresProduct !== undefined) updateData.requiresProduct = Boolean(data.requiresProduct);
+  if (data.productName !== undefined) {
+    updateData.productName = safeStringCast(data.productName);
+  }
+  if (data.productValue !== undefined) updateData.productValue = Number(data.productValue);
+  if (data.productDescription !== undefined) {
+    updateData.productDescription = safeStringCast(data.productDescription);
+  }
 }
-if (data.productValue !== undefined) updateData.productValue = Number(data.productValue);
-if (data.productDescription !== undefined) {
-updateData.productDescription = safeStringCast(data.productDescription);
-}
-}
-export function buildCampaignUpdatePayload(data: Record<string, unknown>): Prisma.CampaignUpdateInput {
-const updateData: Prisma.CampaignUpdateInput = {};
-buildBasicInfoUpdate(data, updateData);
-buildDemographicsUpdate(data, updateData);
-buildFollowersAndEngagementUpdate(data, updateData);
-buildBudgetAndTimelineUpdate(data, updateData);
-buildProductSeedingUpdate(data, updateData);
-return updateData;
+function buildCampaignUpdatePayload(data: Record<string, unknown>): Prisma.CampaignUpdateInput {
+  const updateData: Prisma.CampaignUpdateInput = {};
+  buildBasicInfoUpdate(data, updateData);
+  buildDemographicsUpdate(data, updateData);
+  buildFollowersAndEngagementUpdate(data, updateData);
+  buildBudgetAndTimelineUpdate(data, updateData);
+  buildProductSeedingUpdate(data, updateData);
+  return updateData;
 }
 export async function updateDraftCampaign(
 campaignId: string,

@@ -22,16 +22,16 @@ export const GST_TURNOVER_SLABS = [
 export type GstRegistrationType = (typeof GST_REGISTRATION_TYPES)[number];
 export type GstTurnoverSlab = (typeof GST_TURNOVER_SLABS)[number];
 
-export function normalizePan(value: string) {
-return value.replace(/\s+/g, "").toUpperCase();
+function normalizePan(value: string) {
+  return value.replace(/\s+/g, "").toUpperCase();
 }
 
-export function normalizeGstin(value: string) {
-return value.replace(/\s+/g, "").toUpperCase();
+function normalizeGstin(value: string) {
+  return value.replace(/\s+/g, "").toUpperCase();
 }
 
-export function normalizeItrAcknowledgement(value: string) {
-return value.replace(/\s+/g, "");
+function normalizeItrAcknowledgement(value: string) {
+  return value.replace(/\s+/g, "");
 }
 
 export function maskIdentifier(last4?: string | null) {

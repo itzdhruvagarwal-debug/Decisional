@@ -79,18 +79,41 @@ throw AppError.badRequest("Account suspended, flagged, or deleted. Cannot perfor
 }
 
 export function normalizeStringArray(value: unknown): string[] {
-if (Array.isArray(value)) {
-return value
-.map((item) => String(item || "").trim())
-.filter(Boolean);
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => String(item || "").trim())
+      .filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
 }
 
-if (typeof value === "string") {
-return value
-.split(",")
-.map((item) => item.trim())
-.filter(Boolean);
+export function toPaise(amountInRupees: number): number {
+  return Math.round(amountInRupees * 100);
 }
 
-return [];
+export function normalizeDeliverables(
+  value: unknown,
+): Array<{ type: string; count: number; specs?: string }> {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => {
+      const parsed = item as { type?: unknown; count?: unknown; specs?: unknown };
+      return {
+        type: typeof parsed?.type === "string" ? parsed.type.trim() : "",
+        count: Math.max(1, Number(parsed?.count || 1)),
+        ...(typeof parsed?.specs === "string" ? { specs: parsed.specs } : {}),
+      };
+    })
+    .filter((item) => Boolean(item.type));
 }

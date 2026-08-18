@@ -20,6 +20,7 @@
 */
 
 import { logger } from "./logger";
+import { sleep } from "./utils";
 
 import DOMPurify from "isomorphic-dompurify";
 import { randomUUID } from "node:crypto";
@@ -348,10 +349,6 @@ success: false,
 error: "Email delivery failed after retries",
 correlationId,
 };
-}
-
-function sleep(ms: number): Promise<void> {
-return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // ==================== EMAIL TEMPLATES ====================

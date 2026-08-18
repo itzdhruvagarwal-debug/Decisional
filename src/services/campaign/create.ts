@@ -29,7 +29,7 @@ throw AppError.badRequest(
 }
 
 
-export async function checkBrandVerificationTiers(
+async function checkBrandVerificationTiers(
 userId: string,
 totalBudgetPaise: number,
 productValuePaise: number | null,
@@ -62,7 +62,7 @@ throw new TierError(fundingTierCheck.reason || "Verification required", tierErro
 
 return campaignFundingAmounts;
 }
-export async function handleDirectInviteInCampaign(params: DirectInviteParams) {
+async function handleDirectInviteInCampaign(params: DirectInviteParams) {
 const {
 tx,
 newCampaign,
@@ -245,7 +245,7 @@ if (applicationDeadline && applicationDeadline > contentDeadline) {
 throw AppError.badRequest("Application deadline must be before content deadline");
 }
 }
-export function parseDeliverables(deliverables: unknown) {
+function parseDeliverables(deliverables: unknown) {
 if (!Array.isArray(deliverables) || deliverables.length === 0) {
 throw AppError.badRequest("At least one deliverable is required");
 }
@@ -268,7 +268,7 @@ throw AppError.badRequest("Deliverables are invalid");
 }
 return normalized;
 }
-export function parseAndValidateCampaignDetails(data: Record<string, unknown>) {
+function parseAndValidateCampaignDetails(data: Record<string, unknown>) {
 const requiresProduct = Boolean(data.requiresProduct);
 const productValuePaise =
 data.productValue === null || data.productValue === undefined

@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import { BrandComplianceConfig, DbClient, GamificationUser } from "./types";
 import prisma from "../db";
 
-export async function checkBrandFastApprover(userId: string, db: DbClient): Promise<boolean> {
+async function checkBrandFastApprover(userId: string, db: DbClient): Promise<boolean> {
 const submissions = await db.contentSubmission.findMany({
 where: {
 deal: { brand: { userId } },
@@ -18,7 +18,7 @@ return diff <= 6 * 60 * 60 * 1000;
 return fastCount >= 10;
 }
 
-export async function checkBrandRoiMaster(userId: string, db: DbClient): Promise<boolean> {
+async function checkBrandRoiMaster(userId: string, db: DbClient): Promise<boolean> {
 const campaigns = await db.campaign.findMany({
 where: { brand: { userId } },
 select: { id: true },
@@ -65,7 +65,7 @@ return true;
 return false;
 }
 
-export async function checkBrandPartnershipPro(brandProfile: GamificationUser["brandProfile"], db: DbClient): Promise<boolean> {
+async function checkBrandPartnershipPro(brandProfile: GamificationUser["brandProfile"], db: DbClient): Promise<boolean> {
 const brandProfileId = brandProfile?.id;
 if (!brandProfileId) return false;
 const repeatDeals = await db.deal.groupBy({
@@ -128,7 +128,7 @@ return false;
 }
 
 
-export async function checkBrandCampaignBadge(
+async function checkBrandCampaignBadge(
 user: {
 id: string;
 userType: string;
@@ -173,7 +173,7 @@ return false;
 }
 }
 
-export async function checkTrustBadge(
+async function checkTrustBadge(
 user: { id: string; trustScore: number },
 badgeId: string,
 db: Prisma.TransactionClient | typeof prisma,

@@ -141,6 +141,18 @@ decrypted += decipher.final("utf8");
 return decrypted;
 }
 
+/**
+ * Safely attempt decryption, returning the raw value if not encrypted or if decryption fails.
+ */
+export function tryDecrypt(value?: string | null): string | null {
+  if (!value) return null;
+  try {
+    return decrypt(value);
+  } catch {
+    return value;
+  }
+}
+
 
 
 

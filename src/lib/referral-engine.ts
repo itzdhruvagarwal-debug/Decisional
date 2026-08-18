@@ -104,7 +104,7 @@ icon: "💎",
 /**
 * Determine referral tier from active referral count.
 */
-export function getTierFromCount(activeReferrals: number): ReferralTier {
+function getTierFromCount(activeReferrals: number): ReferralTier {
 if (activeReferrals >= REFERRAL_TIERS.DIAMOND!.min)
 return REFERRAL_TIERS.DIAMOND!;
 if (activeReferrals >= REFERRAL_TIERS.PLATINUM!.min)
@@ -120,7 +120,7 @@ return REFERRAL_TIERS.STARTER!;
 /**
 * Get next tier info for progression display.
 */
-export function getNextTier(currentTier: ReferralTier): ReferralTier | null {
+function getNextTier(currentTier: ReferralTier): ReferralTier | null {
 const tierOrder: ReferralTier[] = [
 REFERRAL_TIERS.STARTER!,
 REFERRAL_TIERS.BRONZE!,

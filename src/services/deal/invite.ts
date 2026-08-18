@@ -7,7 +7,7 @@ import { NotificationService } from "@/services/notification.service";
 import { getDealTotalAmount } from "@/lib/utils";
 import { DealWithRelations, invalidateDealCache, lockAndFetchDealForAction, releaseWalletHold } from "./helpers";
 
-export async function refundRejectPendingInvite(tx: Prisma.TransactionClient, deal: DealWithRelations) {
+async function refundRejectPendingInvite(tx: Prisma.TransactionClient, deal: DealWithRelations) {
 if (deal.brand?.userId && deal.reservedFromWallet) {
 const refundAmount = getDealTotalAmount(deal);
 const isCampaignPoolRefund = !deal.campaign.isDirectInvite;
@@ -51,7 +51,7 @@ source: "non_wallet_pool_refund",
 );
 }
 }
-export async function cancelCampaignForDirectInvite(tx: Prisma.TransactionClient, deal: DealWithRelations) {
+async function cancelCampaignForDirectInvite(tx: Prisma.TransactionClient, deal: DealWithRelations) {
 if (deal.campaign.isDirectInvite) {
 await tx.campaign.update({
 where: { id: deal.campaignId },

@@ -178,68 +178,68 @@ reviews = [{ type: "GENERIC", status: "APPROVED" }];
 
 return reviewContent(userId, dealId, reviews);
 }
-export function validateAndGetSubmissionUrls(deal: DealWithRelations) {
-if (deal.status !== "CONTENT_SUBMITTED") {
-throw AppError.badRequest("No content to review");
+function validateAndGetSubmissionUrls(deal: DealWithRelations) {
+  if (deal.status !== "CONTENT_SUBMITTED") {
+    throw AppError.badRequest("No content to review");
+  }
+
+  const latestSubmission = deal.contentSubmissions[0];
+  if (!latestSubmission) throw AppError.badRequest("No content submission found");
+
+  let currentUrls: Array<{ type: string; url: string; status: string; feedback: string }> = [];
+  if (latestSubmission.contentUrls) {
+    currentUrls = structuredClone(latestSubmission.contentUrls) as Array<{
+      type: string;
+      url: string;
+      status: string;
+      feedback: string;
+    }>;
+  } else {
+    currentUrls = [
+      {
+        type: "GENERIC",
+        url: latestSubmission.contentUrl,
+        status: "PENDING",
+        feedback: "",
+      },
+    ];
+  }
+  return { latestSubmission, currentUrls };
 }
 
-const latestSubmission = deal.contentSubmissions[0];
-if (!latestSubmission) throw AppError.badRequest("No content submission found");
-
-let currentUrls: Array<{ type: string; url: string; status: string; feedback: string }> = [];
-if (latestSubmission.contentUrls) {
-currentUrls = structuredClone(latestSubmission.contentUrls) as Array<{
-type: string;
-url: string;
-status: string;
-feedback: string;
-}>;
-} else {
-currentUrls = [
-{
-type: "GENERIC",
-url: latestSubmission.contentUrl,
-status: "PENDING",
-feedback: "",
-},
-];
-}
-return { latestSubmission, currentUrls };
-}
-export function processContentUrlsReview(
-currentUrls: Array<{ type: string; url: string; status: string; feedback: string }>,
-reviews: Array<{ type: string; status: "APPROVED" | "REVISION_REQUESTED"; feedback?: string | undefined }>
+function processContentUrlsReview(
+  currentUrls: Array<{ type: string; url: string; status: string; feedback: string }>,
+  reviews: Array<{ type: string; status: "APPROVED" | "REVISION_REQUESTED"; feedback?: string | undefined }>
 ) {
-let overallApproved = true;
-let hasRevision = false;
+  let overallApproved = true;
+  let hasRevision = false;
 
-const updatedUrls = currentUrls.map((item) => {
-const review = reviews.find((r) => r.type === item.type);
-if (review) {
-if (review.status === "REVISION_REQUESTED") {
-overallApproved = false;
-hasRevision = true;
-}
-return {
-...item,
-status: review.status,
-feedback: review.feedback || "",
-};
-}
-if (item.status !== "APPROVED") {
-overallApproved = false;
-if (item.status === "REVISION_REQUESTED") {
-hasRevision = true;
-}
-}
-return item;
-});
+  const updatedUrls = currentUrls.map((item) => {
+    const review = reviews.find((r) => r.type === item.type);
+    if (review) {
+      if (review.status === "REVISION_REQUESTED") {
+        overallApproved = false;
+        hasRevision = true;
+      }
+      return {
+        ...item,
+        status: review.status,
+        feedback: review.feedback || "",
+      };
+    }
+    if (item.status !== "APPROVED") {
+      overallApproved = false;
+      if (item.status === "REVISION_REQUESTED") {
+        hasRevision = true;
+      }
+    }
+    return item;
+  });
 
-return { updatedUrls, overallApproved, hasRevision };
+  return { updatedUrls, overallApproved, hasRevision };
 }
 
-
-export async function handleRevisionCharge(
+async function handleRevisionCharge(
 tx: Prisma.TransactionClient,
 deal: DealWithRelations,
 userId: string,
@@ -444,39 +444,4 @@ export async function reviewContent(
 
   await invalidateDealCache(dealId);
   return result;
-}
-
-export async function approveDeliverable(
-  userId: string,
-  dealId: string,
-  deliverableType: string,
-) {
-  const deal = await prisma.deal.findUnique({
-    where: { id: dealId },
-    include: {
-      contentSubmissions: { orderBy: { version: "desc" }, take: 1 },
-    },
-  });
-  if (!deal) throw AppError.notFound("Deal not found");
-  const latestSubmission = deal.contentSubmissions[0];
-  if (!latestSubmission) throw AppError.badRequest("No submission found");
-
-  return reviewContent(userId, dealId, [
-    { type: deliverableType, status: "APPROVED" },
-  ]);
-}
-
-export async function requestRevision(
-  userId: string,
-  dealId: string,
-  feedback: string,
-  deliverableType?: string,
-) {
-  return reviewContent(userId, dealId, [
-    {
-      type: deliverableType || "GENERIC",
-      status: "REVISION_REQUESTED",
-      feedback,
-    },
-  ]);
 }

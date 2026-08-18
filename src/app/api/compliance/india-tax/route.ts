@@ -6,7 +6,7 @@ import { DocumentType, Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { createActivityLog } from "@/lib/audit";
-import { decrypt, encrypt } from "@/lib/encryption";
+import { decrypt, encrypt, tryDecrypt } from "@/lib/encryption";
 import {
 type GstRegistrationType,
 type GstTurnoverSlab,
@@ -79,15 +79,6 @@ pinCode: string | null;
 }) {
 const profile = user.brandProfile;
 return Boolean(profile?.address && profile.state && profile.pinCode);
-}
-
-function tryDecrypt(value?: string | null) {
-if (!value) return undefined;
-try {
-return decrypt(value);
-} catch {
-return undefined;
-}
 }
 
 const GST_REGISTRATION_VALUES = new Set<string>([

@@ -15,7 +15,7 @@ import { validateApplicationRatesAndProposal } from "./list";
 import { ApplicationInput } from "@/lib/validations";
 import { CampaignValidateResult, resolveApplicationDealAmount } from "./types";
 
-export async function getAndValidateInfluencer(userId: string) {
+async function getAndValidateInfluencer(userId: string) {
 const user = await prisma.user.findUnique({
 where: { id: userId },
 include: {
@@ -88,7 +88,7 @@ function validateFollowerThresholds(
   }
 }
 
-export async function getAndValidateCampaign(
+async function getAndValidateCampaign(
   campaignId: string,
   maxRelevantFollowers: number,
   hasHiddenSubscribers: boolean
@@ -131,10 +131,10 @@ export async function getAndValidateCampaign(
 
   return campaign;
 }
-export async function checkVerificationAndGates(
-userId: string,
-data: ApplicationInput,
-campaign: CampaignValidateResult
+async function checkVerificationAndGates(
+  userId: string,
+  data: ApplicationInput,
+  campaign: CampaignValidateResult
 ) {
 const isProductOnly = campaign.requiresProduct && campaign.totalBudget === 0;
 const applicationValue = isProductOnly ? campaign.productValue || 0 : campaign.perInfluencerBudget || 0;

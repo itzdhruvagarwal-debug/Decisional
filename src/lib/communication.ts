@@ -21,6 +21,7 @@
 
 import { logger } from "./logger";
 import { randomUUID } from "node:crypto";
+import { sleep } from "./utils";
 
 // ==================== CONFIG ====================
 
@@ -29,10 +30,6 @@ const BASE_RETRY_DELAY_MS = 1000;
 const REQUEST_TIMEOUT_MS = 15_000;
 
 // ==================== HELPERS ====================
-
-function sleep(ms: number): Promise<void> {
-return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 async function performSmsPost(
 apiKey: string,

@@ -1,6 +1,7 @@
 "use client";
 
-import { normalizeStringArray } from "@/lib/utils-client";
+import { normalizeStringArray, normalizeDeliverables } from "@/lib/utils-client";
+export { normalizeDeliverables };
 
 export interface CampaignDetail {
 id: string;
@@ -65,23 +66,6 @@ roiScore: number;
 estimatedViews: number;
 estimatedCpvPaise: number;
 };
-}
-
-export function normalizeDeliverables(value: unknown): CampaignDetail["deliverables"] {
-if (!Array.isArray(value)) {
-return [];
-}
-return value
-.map((item) => {
-const parsed = item as { type?: unknown; count?: unknown; specs?: unknown };
-const specsStr = typeof parsed?.specs === "string" ? parsed.specs.trim() : "";
-return {
-type: typeof parsed?.type === "string" ? parsed.type.trim() : "",
-count: Math.max(1, Number(parsed?.count || 1)),
-...(specsStr ? { specs: specsStr } : {}),
-};
-})
-.filter((item) => Boolean(item.type));
 }
 
 export interface RawCampaign {

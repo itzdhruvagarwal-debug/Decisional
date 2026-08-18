@@ -5,7 +5,7 @@ import { AppError } from "@/lib/errors";
 import { isInfluencer, isBrand, isAdmin } from "@/lib/rbac";
 import { ListCampaignsParams, CAMPAIGN_INCLUDE } from "./types";
 
-export function resolveStatusFilter(
+function resolveStatusFilter(
 params: ListCampaignsParams,
 userId: string | undefined,
 userType: string | undefined,
@@ -39,48 +39,50 @@ statusFilter = "ACTIVE";
 
 return statusFilter;
 }
-export function buildTextAndCategoryFilters(params: ListCampaignsParams): Prisma.CampaignWhereInput[] {
-const conditions: Prisma.CampaignWhereInput[] = [];
+function buildTextAndCategoryFilters(params: ListCampaignsParams): Prisma.CampaignWhereInput[] {
+  const conditions: Prisma.CampaignWhereInput[] = [];
 
-if (params.category) {
-const category = params.category.trim();
-if (category) {
-conditions.push({ targetCategories: { has: category } });
-}
+  if (params.category) {
+    const category = params.category.trim();
+    if (category) {
+      conditions.push({ targetCategories: { has: category } });
+    }
+  }
+
+  if (params.city) {
+    const city = params.city.trim();
+    if (city) {
+      conditions.push({ targetCities: { has: city } });
+    }
+  }
+
+  if (params.search) {
+    const search = params.search.trim();
+    if (search) {
+      conditions.push({
+        OR: [
+          { title: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+        ],
+      });
+    }
+  }
+
+  return conditions;
 }
 
-if (params.city) {
-const city = params.city.trim();
-if (city) {
-conditions.push({ targetCities: { has: city } });
-}
-}
-
-if (params.search) {
-const search = params.search.trim();
-if (search) {
-conditions.push({
-OR: [
-{ title: { contains: search, mode: "insensitive" } },
-{ description: { contains: search, mode: "insensitive" } },
-],
-});
-}
+function buildBudgetFilter(params: ListCampaignsParams): Prisma.IntNullableFilter | null {
+  const budgetFilter: Prisma.IntNullableFilter = {};
+  if (params.minBudget) {
+    budgetFilter.gte = Number(params.minBudget);
+  }
+  if (params.maxBudget) {
+    budgetFilter.lte = Number(params.maxBudget);
+  }
+  return Object.keys(budgetFilter).length > 0 ? budgetFilter : null;
 }
 
-return conditions;
-}
-export function buildBudgetFilter(params: ListCampaignsParams): Prisma.IntNullableFilter | null {
-const budgetFilter: Prisma.IntNullableFilter = {};
-if (params.minBudget) {
-budgetFilter.gte = Number(params.minBudget);
-}
-if (params.maxBudget) {
-budgetFilter.lte = Number(params.maxBudget);
-}
-return Object.keys(budgetFilter).length > 0 ? budgetFilter : null;
-}
-export async function buildOwnershipFilter(
+async function buildOwnershipFilter(
   params: ListCampaignsParams,
   userId: string,
   userType: string | undefined,
@@ -102,7 +104,8 @@ export async function buildOwnershipFilter(
 
   return conditions;
 }
-export function getPlatformCompatibilityCondition(
+
+function getPlatformCompatibilityCondition(
   hasIg: boolean,
   hasYt: boolean,
 ): Prisma.CampaignWhereInput {
@@ -125,29 +128,31 @@ export function getPlatformCompatibilityCondition(
     OR: platformConditions,
   };
 }
-export function getBudgetCondition(
-minInstagramRate: number | null,
-minYoutubeRate: number | null,
-minRate: number | null,
+
+function getBudgetCondition(
+  minInstagramRate: number | null,
+  minYoutubeRate: number | null,
+  minRate: number | null,
 ): Prisma.CampaignWhereInput | null {
-const rates = [
-minInstagramRate,
-minYoutubeRate,
-minRate
-].filter((r): r is number => r !== null && r !== undefined && r > 0);
-const activeMinRate = rates.length > 0 ? Math.min(...rates) : 0;
-if (activeMinRate > 0) {
-return {
-OR: [
-{ perInfluencerBudget: null },
-{ perInfluencerBudget: 0 },
-{ perInfluencerBudget: { gte: activeMinRate } },
-],
-};
+  const rates = [
+    minInstagramRate,
+    minYoutubeRate,
+    minRate
+  ].filter((r): r is number => r !== null && r !== undefined && r > 0);
+  const activeMinRate = rates.length > 0 ? Math.min(...rates) : 0;
+  if (activeMinRate > 0) {
+    return {
+      OR: [
+        { perInfluencerBudget: null },
+        { perInfluencerBudget: 0 },
+        { perInfluencerBudget: { gte: activeMinRate } },
+      ],
+    };
+  }
+  return null;
 }
-return null;
-}
-export async function buildInfluencerEligibilityFilter(
+
+async function buildInfluencerEligibilityFilter(
   userId: string,
   params: ListCampaignsParams,
   _statusFilter: CampaignStatus | undefined,
@@ -305,35 +310,36 @@ params,
 throw AppError.badRequest("Failed to list campaigns");
 }
 }
-export function validateTotalBudget(
-requiresProduct: boolean,
-totalBudgetPaise: number,
-productValuePaise: number | null,
-minFollowers: number
+function validateTotalBudget(
+  requiresProduct: boolean,
+  totalBudgetPaise: number,
+  productValuePaise: number | null,
+  minFollowers: number
 ) {
-if (!Number.isInteger(totalBudgetPaise)) {
-throw AppError.badRequest("totalBudget must be an integer in paise");
+  if (!Number.isInteger(totalBudgetPaise)) {
+    throw AppError.badRequest("totalBudget must be an integer in paise");
+  }
+
+  if (requiresProduct) {
+    if (totalBudgetPaise < 0) {
+      throw AppError.badRequest("totalBudget cannot be negative");
+    }
+    if (totalBudgetPaise === 0) {
+      // MIN matches Zod schema (validations.ts) and frontend (CampaignCreateHelpers.ts): ₹500
+      const MIN_PRODUCT_VALUE_PAISE = 50000; // ₹500 in paise
+      if (!productValuePaise || productValuePaise < MIN_PRODUCT_VALUE_PAISE) {
+        throw AppError.badRequest("A product-only campaign must specify a product value of at least 500");
+      }
+      if (minFollowers > 10000) {
+        throw AppError.badRequest("A product-only campaign must target influencers with up to 10,000 followers");
+      }
+    }
+  } else if (totalBudgetPaise <= 0) {
+    throw AppError.badRequest("totalBudget must be a positive integer in paise");
+  }
 }
 
-if (requiresProduct) {
-if (totalBudgetPaise < 0) {
-throw AppError.badRequest("totalBudget cannot be negative");
-}
-if (totalBudgetPaise === 0) {
-// MIN matches Zod schema (validations.ts) and frontend (CampaignCreateHelpers.ts): ₹500
-const MIN_PRODUCT_VALUE_PAISE = 50000; // ₹500 in paise
-if (!productValuePaise || productValuePaise < MIN_PRODUCT_VALUE_PAISE) {
-throw AppError.badRequest("A product-only campaign must specify a product value of at least 500");
-}
-if (minFollowers > 10000) {
-throw AppError.badRequest("A product-only campaign must target influencers with up to 10,000 followers");
-}
-}
-} else if (totalBudgetPaise <= 0) {
-throw AppError.badRequest("totalBudget must be a positive integer in paise");
-}
-}
-export function validatePerInfluencerBudget(
+function validatePerInfluencerBudget(
 requiresProduct: boolean,
 totalBudgetPaise: number,
 perInfluencerBudgetPaise: number | null

@@ -199,7 +199,7 @@ return null;
 /**
 * Fetch recent media (posts) for verification.
 */
-export async function getRecentPosts(
+async function getRecentPosts(
 accessToken: string,
 limit: number = 10,
 ): Promise<InstagramPost[]> {

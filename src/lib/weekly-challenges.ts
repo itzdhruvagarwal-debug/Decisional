@@ -631,7 +631,7 @@ completedAt: progressMap.get(c.challengeId)?.completedAt || null,
 
 // ==================== UTILITY FUNCTIONS ====================
 
-export function getIsoWeekInfo(date: Date): { year: number; weekNumber: number; weekId: string } {
+function getIsoWeekInfo(date: Date): { year: number; weekNumber: number; weekId: string } {
   const d = new Date(
     Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
   );
@@ -644,11 +644,11 @@ export function getIsoWeekInfo(date: Date): { year: number; weekNumber: number; 
   return { year, weekNumber, weekId };
 }
 
-export function getWeekNumber(date: Date): number {
+function getWeekNumber(date: Date): number {
   return getIsoWeekInfo(date).weekNumber;
 }
 
-export function getWeekId(date: Date = new Date()): string {
+function getWeekId(date: Date = new Date()): string {
   return getIsoWeekInfo(date).weekId;
 }
 

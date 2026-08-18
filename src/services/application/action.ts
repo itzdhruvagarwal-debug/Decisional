@@ -14,7 +14,7 @@ import { validateApplicationCanBeAccepted } from "./create";
 import { createDealAndReserveFunds } from "@/services/deal/helpers";
 import { checkChallengeProgress } from "@/lib/weekly-challenges";
 
-export async function calculateDealFinancials(
+async function calculateDealFinancials(
 application: {
 proposedRate: number | null;
 campaign: {

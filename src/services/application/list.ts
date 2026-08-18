@@ -7,7 +7,7 @@ import { Prisma, ApplicationStatus } from "@prisma/client";
 import { AppError } from "@/lib/errors";
 import { isBrand, isInfluencer, isAdmin } from "@/lib/rbac";
 
-export async function checkCampaignOwnership(campaignId: string, userId: string, userType: string) {
+async function checkCampaignOwnership(campaignId: string, userId: string, userType: string) {
 if (isAdmin(userType) || isInfluencer(userType)) return;
 const campaign = await prisma.campaign.findUnique({
 where: { id: campaignId },
@@ -25,7 +25,7 @@ campaignId,
 throw AppError.badRequest("Not authorized to view these applications");
 }
 }
-export async function resolveListWhere(
+async function resolveListWhere(
 userId: string,
 userType: string,
 params: {
