@@ -5,7 +5,10 @@ import { auth } from "@/lib/auth";
 
 export const GET = apiWrapper(async (_req) => {
 const session = await auth();
-const userId = session!.user!.id;
+const userId = session?.user?.id;
+if (!userId) {
+  return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+}
 
 const result = await WalletService.getWallet(
 userId,
@@ -39,7 +42,7 @@ return NextResponse.json(
 {
 success: true,
 message: "Wallet fetched successfully",
-userType: session!.user!.userType,
+userType: session?.user?.userType,
 wallet: walletPayload,
 data: walletPayload,
 },

@@ -20,7 +20,7 @@ const { searchParams } = new URL(request.url);
 const parsed = querySchema.safeParse({
 page: searchParams.get("page") || undefined,
 limit: searchParams.get("limit") || undefined,
-search: searchParams.get("search") || searchParams.get("q") || undefined,
+search: searchParams.get("search")?.trim() || searchParams.get("q") || undefined,
 type: searchParams.get("type") || undefined,
 status: searchParams.get("status") || undefined,
 });
