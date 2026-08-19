@@ -54,6 +54,7 @@ async function getWeeklyLeaderboard(city: string, category: string, limit: numbe
           }
         : {}),
     },
+    take: limit,
     include: {
       user: {
         select: { id: true, xp: true, level: true, trustScore: true },
@@ -234,6 +235,7 @@ async function getTopBrands(limit: number, filter: string, city: string) {
         id: { in: brandIds },
         ...(city ? { city: { contains: city, mode: "insensitive" as const } } : {}),
       },
+      take: limit,
       include: {
         user: { select: { id: true, xp: true, level: true, trustScore: true } },
       },
