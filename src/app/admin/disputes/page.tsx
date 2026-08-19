@@ -98,6 +98,7 @@ brand: { select: { companyName: true } },
 },
 raisedBy: { select: { email: true } },
 },
+take: 100,
 orderBy: { createdAt: "desc" },
 });
 return { disputes: disputes as DisputeWithDetails[], error: false };

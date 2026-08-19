@@ -86,6 +86,7 @@ const { userId, errorResponse } = await requireInfluencerSession(req);
 
   const accounts = await prisma.bankAccount.findMany({
     where: { userId, deletedAt: null },
+    take: 20,
     orderBy: { createdAt: "desc" },
   });
 
