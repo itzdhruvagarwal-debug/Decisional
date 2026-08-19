@@ -126,10 +126,13 @@ const { storedState, errorRedirect } = await validateAndConsumeOAuthState(
 req, code, state, error,
 "youtube", ERROR_BASE, "youtube_connect_cancelled",
 );
-if (errorRedirect) return errorRedirect;
+if (errorRedirect || !storedState || !code) {
+return errorRedirect || oauthRedirect(req, `${ERROR_BASE}invalid_state`);
+}
+const userId = storedState.userId;
 
 const redirectUri = appUrl("/api/auth/youtube/callback", req.nextUrl.origin);
-const tokens = await exchangeYouTubeCode(code!, redirectUri);
+const tokens = await exchangeYouTubeCode(code, redirectUri);
 if (!tokens) {
 return oauthRedirect(req, `${ERROR_BASE}youtube_token_exchange_failed`);
 }
@@ -157,8 +160,8 @@ accessToken: encrypt(tokens.accessToken),
 ...(tokens.scope ? { scope: tokens.scope } : {}),
 };
 
-await linkYouTubeOAuthAccount(storedState!.userId, channel.id, handle, tokenData, existingLink);
-await syncYouTubeInfluencerProfile(storedState!.userId, channel, handle);
+await linkYouTubeOAuthAccount(userId, channel.id, handle, tokenData, existingLink);
+await syncYouTubeInfluencerProfile(userId, channel, handle);
 
 return oauthRedirect(req, "/dashboard/settings?tab=social&success=youtube_connected");
 } catch (err: unknown) {

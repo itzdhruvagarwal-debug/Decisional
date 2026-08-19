@@ -423,10 +423,13 @@ const isDraft = data.status === "DRAFT";
 const wallet = await tx.wallet.findUnique({ where: { userId } });
 
 if (!isDraft) {
+if (!wallet) {
+  throw AppError.badRequest("Brand wallet not found");
+}
 assertSufficientBalance(wallet, campaignFundingAmounts.totalAmount);
 
 const updateResult = await tx.wallet.updateMany({
-where: { id: wallet!.id, balance: { gte: campaignFundingAmounts.totalAmount } },
+where: { id: wallet.id, balance: { gte: campaignFundingAmounts.totalAmount } },
 data: {
 balance: { decrement: campaignFundingAmounts.totalAmount },
 pendingBalance: { increment: campaignFundingAmounts.totalAmount },

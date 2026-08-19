@@ -109,9 +109,9 @@ return NextResponse.json(
 }
 
 const { id, deal, errorResponse } = await resolveAuthorizedDeal(context, session.user.id);
-if (errorResponse) return errorResponse;
+if (errorResponse || !deal) return errorResponse || NextResponse.json({ error: "Deal not found" }, { status: 404 });
 
-if (!deal!.postUrl) {
+if (!deal.postUrl) {
 return NextResponse.json(
 { error: "No post URL found. Post must be verified first." },
 { status: 400 },

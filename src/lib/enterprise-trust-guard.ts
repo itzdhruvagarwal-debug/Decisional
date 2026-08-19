@@ -103,6 +103,7 @@ metadata: { recentDealsCount, trustScore: user.trustScore },
 
 // 2. Notify all administrators
 const admins = await prisma.user.findMany({
+    take: 20,
 where: { userType: "ADMIN" },
 select: { id: true },
 });

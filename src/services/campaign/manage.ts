@@ -274,11 +274,14 @@ throw new TierError(fundingTierCheck.reason || "Verification required", tierErro
 }
 const amountPaise = fundingAmounts.totalAmount;
 const wallet = await tx.wallet.findUnique({ where: { userId } });
+if (!wallet) {
+  throw AppError.badRequest("Brand wallet not found");
+}
 
 assertSufficientBalance(wallet, amountPaise);
 
 const updateResult = await tx.wallet.updateMany({
-where: { id: wallet!.id, balance: { gte: amountPaise } },
+where: { id: wallet.id, balance: { gte: amountPaise } },
 data: {
 balance: { decrement: amountPaise },
 pendingBalance: { increment: amountPaise },
@@ -291,7 +294,7 @@ throw AppError.badRequest("Insufficient wallet balance or concurrent transaction
 
 await tx.transaction.create({
 data: {
-walletId: wallet!.id,
+walletId: wallet.id,
 type: "DEBIT",
 amount: amountPaise,
 status: "COMPLETED",

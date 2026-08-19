@@ -48,6 +48,7 @@ take: limit,
 
 // Fetch all referral rewards for the user's wallet to compute unattributed earnings and exact referral matching
 const referralRewards = await prisma.transaction.findMany({
+    take: 200,
 where: {
 wallet: { userId: session.user.id },
 type: "CREDIT",

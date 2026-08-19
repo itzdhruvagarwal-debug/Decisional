@@ -136,6 +136,7 @@ score += 60;
 }
 
 const last24hWithdrawals = await prisma.withdrawal.findMany({
+      take: 50,
 where: {
 wallet: { userId },
 status: { notIn: ["FAILED", "REVERSED"] },

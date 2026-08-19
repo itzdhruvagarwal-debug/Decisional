@@ -693,9 +693,12 @@ select: { status: true },
 });
 
 validateSigningRequest(deal, userId, role, actor?.status);
+if (!deal || !deal.contractTerms) {
+  throw AppError.badRequest("Deal has no contract terms to sign");
+}
 
 // Safe cast as we enforce schema structure elsewhere
-const terms = deal!.contractTerms as unknown as ContractTerms;
+const terms = deal.contractTerms as unknown as ContractTerms;
 
 // Generate signature
 const signature = signContract(terms, userId, ipAddress, userAgent);
@@ -703,8 +706,8 @@ const contractHash = generateContractHash(terms);
 
 // Get existing signatures
 const existingSigs =
-(deal!.contractSignature
-? (deal!.contractSignature as unknown as SignedContract)
+(deal.contractSignature
+? (deal.contractSignature as unknown as SignedContract)
 : null) ||
 ({
 contractTerms: terms,

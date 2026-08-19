@@ -16,6 +16,7 @@ if (!bounds) return ApiResponse.error("Invalid FY format. Use YYYY-YY e.g. 2025-
 
 // Query all TDS transactions in FY
 const tdsTransactions = await prisma.transaction.findMany({
+    take: 1000,
 where: {
 type: "DEBIT",
 status: "COMPLETED",

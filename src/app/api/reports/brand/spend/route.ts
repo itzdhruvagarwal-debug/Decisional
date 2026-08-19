@@ -43,6 +43,7 @@ if (!profile) return ApiResponse.error("Profile not found", 404);
 
 // Deals in this FY
 const deals = await prisma.deal.findMany({
+    take: 500,
 where: {
 brandId: profile.id,
 status: "COMPLETED",

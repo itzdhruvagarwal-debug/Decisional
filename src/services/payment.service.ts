@@ -374,13 +374,16 @@ await redis.del(lockKey);
     if (updateResult.count === 0) throw AppError.badRequest("INSUFFICIENT_FUNDS_OR_FROZEN");
 
     const wallet = await tx.wallet.findUnique({ where: { userId } });
+    if (!wallet) {
+      throw AppError.badRequest("User wallet not found");
+    }
     const encryptedAcc = encrypt(data.bankAccountNumber);
     const bankAccountHash = hashForDuplicateDetection(data.bankAccountNumber);
     const upiIdHash = data.upiId ? hashForDuplicateDetection(data.upiId) : null;
 
     const w = await tx.withdrawal.create({
       data: {
-        walletId: wallet!.id,
+        walletId: wallet.id,
         amount: data.amount,
         bankAccountName: data.bankAccountName,
         bankAccountNumber: encryptedAcc,
@@ -396,7 +399,7 @@ await redis.del(lockKey);
 
     const t = await tx.transaction.create({
       data: {
-        walletId: wallet!.id,
+        walletId: wallet.id,
         withdrawalId: w.id,
         type: "WITHDRAWAL",
         amount: data.amount,

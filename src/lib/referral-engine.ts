@@ -32,7 +32,7 @@ color: string;
 icon: string;
 }
 
-const REFERRAL_TIERS: Record<string, ReferralTier> = {
+const REFERRAL_TIERS: Record<"STARTER" | "BRONZE" | "SILVER" | "GOLD" | "PLATINUM" | "DIAMOND", ReferralTier> = {
 STARTER: {
 name: "STARTER",
 min: 0,
@@ -68,11 +68,11 @@ icon: "🥈",
 },
 GOLD: {
 name: "GOLD",
-min: 100,
+min: 200,
 commission: 0,
 feeDiscount: 2,
 revenueShare: 0,
-xpReward: 3500,
+xpReward: 5000,
 label: "Gold",
 color: "#ffd700",
 icon: "🥇",
@@ -86,7 +86,7 @@ revenueShare: 0.01, // 1% of GMV
 xpReward: 0,
 label: "Platinum",
 color: "#e5e4e2",
-icon: "💎",
+icon: "🏆",
 },
 DIAMOND: {
 name: "DIAMOND",
@@ -105,16 +105,16 @@ icon: "💎",
 * Determine referral tier from active referral count.
 */
 function getTierFromCount(activeReferrals: number): ReferralTier {
-if (activeReferrals >= REFERRAL_TIERS.DIAMOND!.min)
-return REFERRAL_TIERS.DIAMOND!;
-if (activeReferrals >= REFERRAL_TIERS.PLATINUM!.min)
-return REFERRAL_TIERS.PLATINUM!;
-if (activeReferrals >= REFERRAL_TIERS.GOLD!.min) return REFERRAL_TIERS.GOLD!;
-if (activeReferrals >= REFERRAL_TIERS.SILVER!.min)
-return REFERRAL_TIERS.SILVER!;
-if (activeReferrals >= REFERRAL_TIERS.BRONZE!.min)
-return REFERRAL_TIERS.BRONZE!;
-return REFERRAL_TIERS.STARTER!;
+if (activeReferrals >= REFERRAL_TIERS.DIAMOND.min)
+return REFERRAL_TIERS.DIAMOND;
+if (activeReferrals >= REFERRAL_TIERS.PLATINUM.min)
+return REFERRAL_TIERS.PLATINUM;
+if (activeReferrals >= REFERRAL_TIERS.GOLD.min) return REFERRAL_TIERS.GOLD;
+if (activeReferrals >= REFERRAL_TIERS.SILVER.min)
+return REFERRAL_TIERS.SILVER;
+if (activeReferrals >= REFERRAL_TIERS.BRONZE.min)
+return REFERRAL_TIERS.BRONZE;
+return REFERRAL_TIERS.STARTER;
 }
 
 /**
@@ -122,12 +122,12 @@ return REFERRAL_TIERS.STARTER!;
 */
 function getNextTier(currentTier: ReferralTier): ReferralTier | null {
 const tierOrder: ReferralTier[] = [
-REFERRAL_TIERS.STARTER!,
-REFERRAL_TIERS.BRONZE!,
-REFERRAL_TIERS.SILVER!,
-REFERRAL_TIERS.GOLD!,
-REFERRAL_TIERS.PLATINUM!,
-REFERRAL_TIERS.DIAMOND!,
+REFERRAL_TIERS.STARTER,
+REFERRAL_TIERS.BRONZE,
+REFERRAL_TIERS.SILVER,
+REFERRAL_TIERS.GOLD,
+REFERRAL_TIERS.PLATINUM,
+REFERRAL_TIERS.DIAMOND,
 ];
 const idx = tierOrder.findIndex((t) => t.name === currentTier.name);
 return idx >= 0 && idx < tierOrder.length - 1 ? tierOrder[idx + 1] ?? null : null;

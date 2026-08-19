@@ -49,6 +49,7 @@ async function _handler(req: NextRequest) {
 
   // Query platform fee transactions within FY
   const transactions = await prisma.transaction.findMany({
+    take: 1000,
     where: {
       type: "PLATFORM_FEE",
       status: "COMPLETED",
@@ -64,6 +65,7 @@ async function _handler(req: NextRequest) {
 
   // Query completed deals within FY
   const deals = await prisma.deal.findMany({
+    take: 1000,
     where: {
       status: "COMPLETED",
       completedAt: { gte: bounds.start, lte: bounds.end },

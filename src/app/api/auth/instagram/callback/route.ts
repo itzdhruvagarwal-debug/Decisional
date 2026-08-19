@@ -21,10 +21,13 @@ const { storedState, errorRedirect } = await validateAndConsumeOAuthState(
 req, code, state, error,
 "instagram", ERROR_BASE, "instagram_connect_cancelled",
 );
-if (errorRedirect) return errorRedirect;
+if (errorRedirect || !storedState || !code) {
+return errorRedirect || oauthRedirect(req, `${ERROR_BASE}invalid_state`);
+}
+const userId = storedState.userId;
 
 const redirectUri = appUrl("/api/auth/instagram/callback", req.nextUrl.origin);
-const tokens = await exchangeInstagramCode(code!, redirectUri);
+const tokens = await exchangeInstagramCode(code, redirectUri);
 
 if (!tokens) {
 return oauthRedirect(req, `${ERROR_BASE}token_exchange_failed`);
@@ -48,7 +51,7 @@ providerAccountId: tokens.userId,
 select: { userId: true },
 });
 
-if (existingLink && existingLink.userId !== storedState!.userId) {
+if (existingLink && existingLink.userId !== userId) {
 // Ownership conflict
 // The Instagram account is currently linked to a *different* Decisional
 // user (previousOwner). Silently overwriting the access token would leave
@@ -64,7 +67,7 @@ logger.warn("Instagram account ownership conflict re-linking to new owner", {
 instagramUserId: tokens.userId,
 instagramHandle: profile.username,
 previousOwnerId,
-newOwnerId: storedState!.userId,
+newOwnerId: userId,
 });
 
 await prisma.$transaction([
@@ -89,7 +92,7 @@ data: { instagramHandle: null },
 // 3. Create a fresh link for the new owner
 prisma.oAuthAccount.create({
 data: {
-userId: storedState!.userId,
+userId,
 provider: "instagram",
 providerAccountId: tokens.userId,
 accessToken: encrypt(tokens.accessToken),
@@ -111,7 +114,7 @@ data: { accessToken: encrypt(tokens.accessToken) },
 // Fresh link no prior row
 await prisma.oAuthAccount.create({
 data: {
-userId: storedState!.userId,
+userId,
 provider: "instagram",
 providerAccountId: tokens.userId,
 accessToken: encrypt(tokens.accessToken),
@@ -122,15 +125,15 @@ accessToken: encrypt(tokens.accessToken),
 
 // If the connecting user is an influencer, sync their handle + follower count.
 const user = await prisma.user.findUnique({
-where: { id: storedState!.userId },
+where: { id: userId },
 select: { userType: true, email: true },
 });
 
 if (user && isInfluencer(user.userType)) {
 await prisma.influencerProfile.upsert({
-where: { userId: storedState!.userId },
+where: { userId },
 create: {
-userId: storedState!.userId,
+userId,
 displayName: user.email?.split("@")[0] || "",
 categories: "General",
 languages: "English",

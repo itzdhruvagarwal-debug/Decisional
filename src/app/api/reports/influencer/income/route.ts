@@ -46,6 +46,7 @@ select: { panNumber: true },
 
 // Deals in this FY
 const deals = await prisma.deal.findMany({
+    take: 500,
 where: {
 influencerId: profile.id,
 status: "COMPLETED",
