@@ -166,7 +166,7 @@ applications.map(async (app) => {
 );
 
 // Sort by match score descending to bubble up highest matching/ROI candidates first
-const sortedApplications = applicationsWithScores.sort((a, b) => b.matchScore - a.matchScore);
+const sortedApplications = [...applicationsWithScores].sort((a, b) => b.matchScore - a.matchScore);
 
 return { applications: sortedApplications, total, totalPages: Math.ceil(total / limit) };
 } catch (error) {

@@ -169,6 +169,7 @@ where.OR = [
 { displayName: { contains: params.searchTerm, mode: "insensitive" } },
 { bio: { contains: params.searchTerm, mode: "insensitive" } },
 { instagramHandle: { contains: params.searchTerm, mode: "insensitive" } },
+{ youtubeHandle: { contains: params.searchTerm, mode: "insensitive" } },
 ];
 }
 

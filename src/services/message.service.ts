@@ -400,14 +400,13 @@ unreadCount: unreadByPartner.get(contactId) ?? 0,
 presence: presenceByPartner.get(contactId),
 };
 });
-conversations.sort(
+const sortedConversations = [...conversations].sort(
 (a, b) =>
 (b.latestMessage?.createdAt.getTime() || 0) -
 (a.latestMessage?.createdAt.getTime() || 0),
 );
 
-
-return { conversations, total };
+return { conversations: sortedConversations, total };
 }
 
 static async setTyping(
