@@ -512,6 +512,7 @@ status: "COMPLETED",
 completedAt: { gte: subMonths(new Date(), monthsCount) },
 },
 select: { totalAmount: true, completedAt: true },
+take: 10000,
 });
 
 deals.forEach((deal) => {

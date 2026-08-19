@@ -148,6 +148,7 @@ async function sendReminderNotifications(deal: StaleDeal, staleDays: number) {
       createdAt: { gte: new Date(Date.now() - 22 * 60 * 60 * 1000) },
     },
     select: { data: true },
+    take: 20,
   });
 
   const alreadySent = recentNotifications.some((n) => {
@@ -335,8 +336,9 @@ async function scanStaleFulfillmentDeals(): Promise<{
 
   // M14 FIX: Pre-fetch admin details to avoid N+1 queries during deal processing loop
   const admins = await prisma.user.findMany({
-    where: { userType: "ADMIN" },
+    where: { userType: "ADMIN", status: "ACTIVE" },
     select: { id: true },
+    take: 20,
   });
   const allAdminIds = admins.map((a) => a.id);
   const firstAdminId = allAdminIds[0] || null;

@@ -19,10 +19,11 @@ import { logger } from "@/lib/logger";
 async function notifyAdminsOfAnomalies(anomalies: VerificationAnomaly[]) {
 if (anomalies.length === 0) return;
 
-const adminUsers = await prisma.user.findMany({
-where: { userType: "ADMIN" },
-select: { id: true },
-});
+  const adminUsers = await prisma.user.findMany({
+    where: { userType: "ADMIN", status: "ACTIVE" },
+    select: { id: true },
+    take: 20,
+  });
 
 if (adminUsers.length === 0) {
 logger.error("LEDGER_SCAN: Anomalies detected but NO admin users exist to notify", {

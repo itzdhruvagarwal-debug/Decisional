@@ -45,6 +45,8 @@ influencerId,
 status: { in: ["VERIFIED", "COMPLETED", "POSTED"] },
 },
 select: { id: true },
+take: 100,
+orderBy: { createdAt: "desc" },
 });
 
 const dealIds = deals.map((d) => d.id);
@@ -53,6 +55,7 @@ if (dealIds.length === 0) return { rate: 0, hasData: false };
 const snapshots = await prisma.engagementSnapshot.findMany({
 where: { dealId: { in: dealIds } },
 orderBy: { capturedAt: "desc" },
+take: 500,
 });
 
 if (snapshots.length === 0) return { rate: 0, hasData: false };
@@ -93,6 +96,8 @@ where: {
 influencerRevieweeId: influencerId,
 reviewerType: "BRAND",
 },
+take: 100,
+orderBy: { createdAt: "desc" },
 select: {
 rating: true,
 qualityRating: true,

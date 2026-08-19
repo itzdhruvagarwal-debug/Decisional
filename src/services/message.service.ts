@@ -303,6 +303,7 @@ OR: [
 { blockedUserId: userId },
 ],
 },
+take: 200,
 select: {
 blockingUserId: true,
 blockedUserId: true,
@@ -493,7 +494,9 @@ data: { messageId },
 });
 
 const adminUsers = await prisma.user.findMany({
-where: { userType: "ADMIN" },
+where: { userType: "ADMIN", status: "ACTIVE" },
+select: { id: true },
+take: 20,
 });
 if (adminUsers.length > 0) {
 await NotificationService.createNotifications(

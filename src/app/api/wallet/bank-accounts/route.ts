@@ -239,8 +239,8 @@ try {
 
   // L4 FIX: Soft-delete instead of hard delete to preserve audit trail.
   // Hard delete loses the record entirely; soft-delete keeps it for reconciliation and fraud investigation.
-  await prisma.bankAccount.update({
-    where: { id: verification.id },
+  await prisma.bankAccount.updateMany({
+    where: { id: verification.id, userId },
     data: { deletedAt: new Date() },
   });
   return NextResponse.json({ success: true });
@@ -267,7 +267,7 @@ if (verification.errorResponse) return verification.errorResponse;
 // Clear all defaults for this user, then set the chosen one
 await prisma.$transaction([
 prisma.bankAccount.updateMany({ where: { userId }, data: { isDefault: false } }),
-prisma.bankAccount.update({ where: { id: verification.id }, data: { isDefault: true } }),
+prisma.bankAccount.updateMany({ where: { id: verification.id, userId }, data: { isDefault: true } }),
 ]);
 
 logger.info("Bank account set as default", { userId, accountId: verification.id });

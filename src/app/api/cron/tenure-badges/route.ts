@@ -15,6 +15,8 @@ async function awardVeteranBadges(now: Date): Promise<number> {
       badges: { none: { badgeId: "platform_veteran" } },
     },
     select: { id: true },
+    take: 100,
+    orderBy: { createdAt: "asc" },
   });
 
   for (const user of veterans) {
@@ -32,6 +34,8 @@ async function awardBrandAmbassadorBadges(now: Date): Promise<number> {
       badges: { none: { badgeId: "brand_ambassador" } },
     },
     select: { id: true },
+    take: 100,
+    orderBy: { createdAt: "asc" },
   });
 
   for (const user of brandAmbassadors) {
@@ -49,6 +53,8 @@ async function awardOgMemberBadges(): Promise<number> {
       badges: { none: { badgeId: "og_member" } },
     },
     select: { id: true },
+    take: 100,
+    orderBy: { createdAt: "asc" },
   });
 
   for (const user of ogMembers) {
@@ -74,7 +80,7 @@ async function awardHotCreatorBadges(now: Date): Promise<string[]> {
     const firstDeal = topInfluencerDeals[0];
     if (firstDeal?._count?.id !== undefined) {
       const maxCount = firstDeal._count.id;
-      const tiedInfluencers = topInfluencerDeals.filter(item => item._count?.id === maxCount);
+      const tiedInfluencers = topInfluencerDeals.filter((item) => item._count?.id === maxCount);
 
       for (const item of tiedInfluencers) {
         if (item.influencerId) {
@@ -112,11 +118,11 @@ async function _handler_POST(_req: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    data: {
-      veteransAwarded,
-      brandAmbassadorsAwarded,
-      ogMembersAwarded,
-      hotCreatorsAwarded: hotCreatorUserIds.length,
+    badgesAwarded: {
+      platform_veteran: veteransAwarded,
+      brand_ambassador: brandAmbassadorsAwarded,
+      og_member: ogMembersAwarded,
+      hot_creator: hotCreatorUserIds.length,
     },
   });
 }

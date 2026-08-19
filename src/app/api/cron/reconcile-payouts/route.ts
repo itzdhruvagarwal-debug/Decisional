@@ -57,6 +57,8 @@ const verifiedDeals = await prisma.deal.findMany({
       reconcileFailures: { lt: 3 },
     },
     select: { id: true },
+    take: 100,
+    orderBy: { createdAt: "asc" },
 });
 
 logger.info("Found verified deals needing payout reconciliation", { count: verifiedDeals.length });

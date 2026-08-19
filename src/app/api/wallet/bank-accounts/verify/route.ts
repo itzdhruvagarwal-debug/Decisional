@@ -72,8 +72,8 @@ async function _handler_POST(req: NextRequest) {
   const isUpiAccount =
     bankAccount.ifscCode === "UPI00000000" || bankAccount.accountNumber === "UPI_PAYOUT";
   if (isUpiAccount) {
-    await prisma.bankAccount.update({
-      where: { id: bankAccountId },
+    await prisma.bankAccount.updateMany({
+      where: { id: bankAccountId, userId },
       data: { isVerified: true, verifiedAt: new Date() },
     });
     return NextResponse.json({
@@ -123,8 +123,8 @@ async function _handler_POST(req: NextRequest) {
   }
 
   // 6. Mark as verified in DB
-  await prisma.bankAccount.update({
-    where: { id: bankAccountId },
+  await prisma.bankAccount.updateMany({
+    where: { id: bankAccountId, userId },
     data: {
       isVerified: true,
       verifiedAt: new Date(),
