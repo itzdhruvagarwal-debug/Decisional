@@ -375,188 +375,231 @@ productName,
 productDescription,
 };
 }
-export async function createCampaign(userId: string, userType: UserType, data: Record<string, unknown>) {
-try {
-if (!isBrand(userType)) {
-throw AppError.badRequest("Only brands can create campaigns");
-}
+async function lockAndDeductWalletForCampaign(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  totalAmount: number
+) {
+  const wallet = await tx.wallet.findUnique({ where: { userId } });
+  if (!wallet) {
+    throw AppError.badRequest("Brand wallet not found");
+  }
+  assertSufficientBalance(wallet, totalAmount);
 
-const user = await prisma.user.findUnique({ where: { id: userId } });
-if (!user) {
-throw AppError.notFound("User not found");
-}
-assertAccountCanTransact(user.status);
-
-const parsed = parseAndValidateCampaignDetails(data);
-
-const campaignBrandFee = await resolveBrandPlatformFee(userId);
-const isProductOnly = parsed.requiresProduct && parsed.totalBudgetPaise === 0;
-const productHandlingFee = calculateProductHandlingFee(
-parsed.productValuePaise,
-parsed.requiresProduct,
-isProductOnly,
-campaignBrandFee.effectivePlatformFee,
-);
-
-const fundedDealSlots = estimateCampaignDealSlots(
-parsed.totalBudgetPaise,
-parsed.perInfluencerBudgetPaise,
-data.maxInfluencers ? Number(data.maxInfluencers) : null,
-);
-
-const campaignFundingAmounts = await checkBrandVerificationTiers(
-userId,
-parsed.totalBudgetPaise,
-parsed.productValuePaise,
-campaignBrandFee,
-fundedDealSlots,
-productHandlingFee
-);
-
-const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-const profile = await tx.brandProfile.findUnique({ where: { userId } });
-if (!profile) {
-throw AppError.notFound("Profile not found. Please complete your profile first.");
-}
-
-const isDraft = data.status === "DRAFT";
-const wallet = await tx.wallet.findUnique({ where: { userId } });
-
-if (!isDraft) {
-if (!wallet) {
-  throw AppError.badRequest("Brand wallet not found");
-}
-assertSufficientBalance(wallet, campaignFundingAmounts.totalAmount);
-
-const updateResult = await tx.wallet.updateMany({
-where: { id: wallet.id, balance: { gte: campaignFundingAmounts.totalAmount } },
-data: {
-balance: { decrement: campaignFundingAmounts.totalAmount },
-pendingBalance: { increment: campaignFundingAmounts.totalAmount },
-},
-});
-
-if (updateResult.count === 0) {
-throw AppError.badRequest("Insufficient wallet balance or concurrent transaction detected",);
-}
-}
-
-const newCampaign = await tx.campaign.create({
-data: {
-brandId: profile.id,
-title: parsed.title,
-description: parsed.description,
-requirements: parsed.requirements,
-guidelines: parsed.guidelines,
-totalBudget: parsed.totalBudgetPaise,
-perInfluencerBudget: parsed.perInfluencerBudgetPaise,
-fundedAmount: isDraft ? 0 : campaignFundingAmounts.totalAmount,
-maxInfluencers: data.maxInfluencers ? Number(data.maxInfluencers) : null,
-targetCategories: parsed.targetCategories,
-targetCities: parsed.targetCities,
-targetLanguages: parsed.targetLanguages,
-targetGender: typeof data.targetGender === "string" ? data.targetGender : null,
-targetAgeMin:
-data.targetAgeMin === null || data.targetAgeMin === undefined
-? null
-: Number(data.targetAgeMin),
-targetAgeMax:
-data.targetAgeMax === null || data.targetAgeMax === undefined
-? null
-: Number(data.targetAgeMax),
-minFollowers: parsed.minFollowers,
-maxFollowers: parsed.maxFollowers > 0 ? parsed.maxFollowers : null,
-minEngagementRate: parsed.minEngagementRate,
-deliverables: parsed.normalizedDeliverables,
-applicationDeadline: parsed.applicationDeadline,
-contentDeadline: parsed.contentDeadline,
-postingDeadline: parsed.postingDeadline,
-status: isDraft ? "DRAFT" : "ACTIVE",
-requiresProduct: parsed.requiresProduct,
-productName: parsed.productName,
-productValue: parsed.productValuePaise,
-productDescription: parsed.productDescription,
-isDirectInvite: Boolean(data.invitedInfluencerId),
-},
-});
-
-await handleDirectInviteInCampaign({
-tx,
-newCampaign,
-data,
-profile,
-totalBudgetPaise: parsed.totalBudgetPaise,
-perInfluencerBudgetPaise: parsed.perInfluencerBudgetPaise,
-normalizedDeliverables: parsed.normalizedDeliverables,
-requirements: parsed.requirements,
-contentDeadline: parsed.contentDeadline,
-postingDeadline: parsed.postingDeadline,
-requiresProduct: parsed.requiresProduct,
-productName: parsed.productName,
-productValuePaise: parsed.productValuePaise,
-productHandlingFee,
-});
-
-const profileUpdateData: Prisma.BrandProfileUpdateInput = {
-totalCampaigns: { increment: 1 },
-...(isDraft ? {} : { activeCampaigns: { increment: 1 } }),
-};
-
-await tx.brandProfile.update({
-where: { id: profile.id },
-data: profileUpdateData,
-});
-
-await checkAndAwardBadges(userId, "CAMPAIGN_CREATED", tx);
-
-if (!isDraft) {
-  await checkChallengeProgress(userId, "DEALS", 1, tx).catch((err) => {
-    logger.error("Failed to track brand challenge progress for launch_campaign", { userId, error: err });
+  const updateResult = await tx.wallet.updateMany({
+    where: { id: wallet.id, balance: { gte: totalAmount } },
+    data: {
+      balance: { decrement: totalAmount },
+      pendingBalance: { increment: totalAmount },
+    },
   });
+
+  if (updateResult.count === 0) {
+    throw AppError.badRequest("Insufficient wallet balance or concurrent transaction detected");
+  }
+  return wallet;
 }
 
-if (!isDraft && wallet) {
-await tx.transaction.create({
-data: {
-walletId: wallet.id,
-type: "DEBIT",
-amount: campaignFundingAmounts.totalAmount,
-status: "COMPLETED",
-description: `Funds held for campaign creation: ${parsed.title}`,
-metadata: {
-balanceImpact: true,
-campaignId: newCampaign.id,
-totalBudget: parsed.totalBudgetPaise,
-platformFee: campaignFundingAmounts.platformFee,
-gatewayFee: campaignFundingAmounts.gatewayFee,
-fundedDealSlots,
-},
-},
-});
+function buildCampaignCreationData(
+  profileId: string,
+  parsed: ReturnType<typeof parseAndValidateCampaignDetails>,
+  data: Record<string, unknown>,
+  isDraft: boolean,
+  fundingTotalAmount: number
+): Prisma.CampaignCreateInput {
+  return {
+    brand: { connect: { id: profileId } },
+    title: parsed.title,
+    description: parsed.description,
+    requirements: parsed.requirements,
+    guidelines: parsed.guidelines,
+    totalBudget: parsed.totalBudgetPaise,
+    perInfluencerBudget: parsed.perInfluencerBudgetPaise,
+    fundedAmount: isDraft ? 0 : fundingTotalAmount,
+    maxInfluencers: data.maxInfluencers ? Number(data.maxInfluencers) : null,
+    targetCategories: parsed.targetCategories,
+    targetCities: parsed.targetCities,
+    targetLanguages: parsed.targetLanguages,
+    targetGender: typeof data.targetGender === "string" ? data.targetGender : null,
+    targetAgeMin: data.targetAgeMin != null ? Number(data.targetAgeMin) : null,
+    targetAgeMax: data.targetAgeMax != null ? Number(data.targetAgeMax) : null,
+    minFollowers: parsed.minFollowers,
+    maxFollowers: parsed.maxFollowers > 0 ? parsed.maxFollowers : null,
+    minEngagementRate: parsed.minEngagementRate,
+    deliverables: parsed.normalizedDeliverables,
+    applicationDeadline: parsed.applicationDeadline,
+    contentDeadline: parsed.contentDeadline,
+    postingDeadline: parsed.postingDeadline,
+    status: isDraft ? "DRAFT" : "ACTIVE",
+    requiresProduct: parsed.requiresProduct,
+    productName: parsed.productName,
+    productValue: parsed.productValuePaise,
+    productDescription: parsed.productDescription,
+    isDirectInvite: Boolean(data.invitedInfluencerId),
+  };
 }
 
-await createActivityLog({
-userId,
-action: "CREATE_CAMPAIGN",
-entityType: "Campaign",
-entityId: newCampaign.id,
-}, tx);
+async function handlePostCampaignCreationTasks(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  wallet: { id: string } | null,
+  newCampaignId: string,
+  campaignTitle: string,
+  parsedTotalBudgetPaise: number,
+  campaignFundingAmounts: { totalAmount: number; platformFee: number; gatewayFee: number },
+  fundedDealSlots: number,
+  isDraft: boolean
+) {
+  await checkAndAwardBadges(userId, "CAMPAIGN_CREATED", tx);
 
-return newCampaign;
-}, {
-// Serializable isolation prevents TOCTOU races on the budget/deal checks
-// when two parallel invites are sent at campaign creation time.
-isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-});
+  if (!isDraft) {
+    await checkChallengeProgress(userId, "DEALS", 1, tx).catch((err) => {
+      logger.error("Failed to track brand challenge progress for launch_campaign", { userId, error: err });
+    });
 
-logger.info("Campaign created successfully", {
-userId,
-campaignId: result.id,
-});
-return result;
-} catch (error) {
-logger.error("Error creating campaign", error, { userId });
-throw error;
+    if (wallet) {
+      await tx.transaction.create({
+        data: {
+          walletId: wallet.id,
+          type: "DEBIT",
+          amount: campaignFundingAmounts.totalAmount,
+          status: "COMPLETED",
+          description: `Funds held for campaign creation: ${campaignTitle}`,
+          metadata: {
+            balanceImpact: true,
+            campaignId: newCampaignId,
+            totalBudget: parsedTotalBudgetPaise,
+            platformFee: campaignFundingAmounts.platformFee,
+            gatewayFee: campaignFundingAmounts.gatewayFee,
+            fundedDealSlots,
+          },
+        },
+      });
+    }
+  }
+
+  await createActivityLog({
+    userId,
+    action: "CREATE_CAMPAIGN",
+    entityType: "Campaign",
+    entityId: newCampaignId,
+  }, tx);
 }
+
+export async function createCampaign(userId: string, userType: UserType, data: Record<string, unknown>) {
+  try {
+    if (!isBrand(userType)) {
+      throw AppError.badRequest("Only brands can create campaigns");
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw AppError.notFound("User not found");
+    }
+    assertAccountCanTransact(user.status);
+
+    const parsed = parseAndValidateCampaignDetails(data);
+
+    const campaignBrandFee = await resolveBrandPlatformFee(userId);
+    const isProductOnly = parsed.requiresProduct && parsed.totalBudgetPaise === 0;
+    const productHandlingFee = calculateProductHandlingFee(
+      parsed.productValuePaise,
+      parsed.requiresProduct,
+      isProductOnly,
+      campaignBrandFee.effectivePlatformFee,
+    );
+
+    const fundedDealSlots = estimateCampaignDealSlots(
+      parsed.totalBudgetPaise,
+      parsed.perInfluencerBudgetPaise,
+      data.maxInfluencers ? Number(data.maxInfluencers) : null,
+    );
+
+    const campaignFundingAmounts = await checkBrandVerificationTiers(
+      userId,
+      parsed.totalBudgetPaise,
+      parsed.productValuePaise,
+      campaignBrandFee,
+      fundedDealSlots,
+      productHandlingFee
+    );
+
+    const isDraft = data.status === "DRAFT";
+
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      const profile = await tx.brandProfile.findUnique({ where: { userId } });
+      if (!profile) {
+        throw AppError.notFound("Profile not found. Please complete your profile first.");
+      }
+
+      const wallet = !isDraft
+        ? await lockAndDeductWalletForCampaign(tx, userId, campaignFundingAmounts.totalAmount)
+        : null;
+
+      const campaignCreateData = buildCampaignCreationData(
+        profile.id,
+        parsed,
+        data,
+        isDraft,
+        campaignFundingAmounts.totalAmount
+      );
+      const newCampaign = await tx.campaign.create({ data: campaignCreateData });
+
+      await handleDirectInviteInCampaign({
+        tx,
+        newCampaign,
+        data,
+        profile,
+        totalBudgetPaise: parsed.totalBudgetPaise,
+        perInfluencerBudgetPaise: parsed.perInfluencerBudgetPaise,
+        normalizedDeliverables: parsed.normalizedDeliverables,
+        requirements: parsed.requirements,
+        contentDeadline: parsed.contentDeadline,
+        postingDeadline: parsed.postingDeadline,
+        requiresProduct: parsed.requiresProduct,
+        productName: parsed.productName,
+        productValuePaise: parsed.productValuePaise,
+        productHandlingFee,
+      });
+
+      const profileUpdateData: Prisma.BrandProfileUpdateInput = {
+        totalCampaigns: { increment: 1 },
+        ...(isDraft ? {} : { activeCampaigns: { increment: 1 } }),
+      };
+
+      await tx.brandProfile.update({
+        where: { id: profile.id },
+        data: profileUpdateData,
+      });
+
+      await handlePostCampaignCreationTasks(
+        tx,
+        userId,
+        wallet,
+        newCampaign.id,
+        parsed.title,
+        parsed.totalBudgetPaise,
+        campaignFundingAmounts,
+        fundedDealSlots,
+        isDraft
+      );
+
+      return newCampaign;
+    }, {
+      // Serializable isolation prevents TOCTOU races on the budget/deal checks
+      // when two parallel invites are sent at campaign creation time.
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+    });
+
+    logger.info("Campaign created successfully", {
+      userId,
+      campaignId: result.id,
+    });
+    return result;
+  } catch (error) {
+    logger.error("Error creating campaign", error, { userId });
+    throw error;
+  }
 }
+
 

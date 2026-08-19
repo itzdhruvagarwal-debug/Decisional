@@ -693,7 +693,7 @@ select: { status: true },
 });
 
 validateSigningRequest(deal, userId, role, actor?.status);
-if (!deal || !deal.contractTerms) {
+if (!deal?.contractTerms) {
   throw AppError.badRequest("Deal has no contract terms to sign");
 }
 

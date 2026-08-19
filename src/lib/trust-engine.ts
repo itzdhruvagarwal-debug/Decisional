@@ -107,35 +107,35 @@ type TrustTrigger =
 | "POST_DELETED"
 | "ADMIN_ADJUSTMENT";
 
+function extractTrustReduction(metadata: unknown): number {
+  if (!metadata) return 0;
+  try {
+    const parsed = typeof metadata === "string" ? JSON.parse(metadata) : metadata;
+    if (parsed && typeof parsed === "object" && typeof (parsed as Record<string, unknown>).trustReduction === "number") {
+      return (parsed as Record<string, unknown>).trustReduction as number;
+    }
+  } catch {
+    // Ignore parse error
+  }
+  return 0;
+}
+
 async function applyProgressivePenalties(userId: string, baseScore: number): Promise<number> {
-try {
-const ninetyDaysAgo = new Date(Date.now() - 90 * 86400 * 1000);
-const recentViolations = await prisma.userViolation.findMany({
-where: { userId, createdAt: { gte: ninetyDaysAgo } },
-});
-let progressiveReduction = 0;
-for (const v of recentViolations) {
-let rawMetadata = null;
-if (v.metadata) {
-try {
-  rawMetadata = typeof v.metadata === "string" ? JSON.parse(v.metadata) : v.metadata;
-} catch {
-  rawMetadata = null;
-}
-}
-const metadata =
-rawMetadata && typeof rawMetadata === "object"
-? (rawMetadata as Record<string, unknown>)
-: null;
-if (metadata && typeof metadata.trustReduction === "number") {
-progressiveReduction += metadata.trustReduction;
-}
-}
-return baseScore - progressiveReduction;
-} catch (err) {
-logger.error("Failed to apply progressive penalty reduction during DRS calculation", err);
-return baseScore;
-}
+  try {
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 86400 * 1000);
+    const recentViolations = await prisma.userViolation.findMany({
+      where: { userId, createdAt: { gte: ninetyDaysAgo } },
+      select: { metadata: true },
+    });
+    const progressiveReduction = recentViolations.reduce(
+      (sum, v) => sum + extractTrustReduction(v.metadata),
+      0
+    );
+    return baseScore - progressiveReduction;
+  } catch (err) {
+    logger.error("Failed to apply progressive penalty reduction during DRS calculation", err);
+    return baseScore;
+  }
 }
 
 async function calculateNewTrustScore(

@@ -17,7 +17,9 @@ import { logger } from "@/lib/logger";
 */
 
 async function notifyAdminsOfAnomalies(anomalies: VerificationAnomaly[]) {
-if (anomalies.length === 0) return;
+  if (anomalies.length === 0) {
+    return;
+  }
 
   const adminUsers = await prisma.user.findMany({
     where: { userType: "ADMIN", status: "ACTIVE" },
