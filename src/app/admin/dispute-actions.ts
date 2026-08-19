@@ -11,6 +11,7 @@ import { finalizeDealGamification } from "@/lib/gamification-engine";
 import { logger } from "@/lib/logger";
 import { auth } from "@/lib/auth";
 import { requireActiveAdmin } from "@/lib/admin-auth";
+import { createActivityLog } from "@/lib/audit";
 import {
 creditInfluencerPayoutWithTax,
 recordPlatformFeeRevenue,
@@ -383,4 +384,17 @@ if (brand) {
 await updateTrustAndLevel(brand.userId, "DISPUTE_RESOLVED");
 }
 }
+
+await createActivityLog({
+  userId: session.user.id,
+  action: "DISPUTE_RESOLUTION",
+  entityType: "DEAL",
+  entityId: dispute.dealId,
+  metadata: {
+    disputeId,
+    decision,
+    reason,
+    adminEmail: session.user.email,
+  },
+}).catch(() => {});
 }

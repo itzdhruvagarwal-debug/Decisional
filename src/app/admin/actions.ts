@@ -3,12 +3,13 @@
 import { AppError } from "@/lib/errors";
 
 import prisma from "@/lib/db";
-import { NotificationService } from "@/services/notification.service";
 import { Prisma } from "@prisma/client";
+import { NotificationService } from "@/services/notification.service";
 import { revalidatePath } from "next/cache";
 import { checkAndAwardBadges, awardBadgeIfNotExists } from "@/lib/gamification-engine";
 import { BADGES } from "@/lib/badges";
 import { auth } from "@/lib/auth";
+import { createActivityLog } from "@/lib/audit";
 import { AdminService } from "@/services/admin.service";
 import { requireActiveAdmin } from "@/lib/admin-auth";
 
@@ -147,6 +148,14 @@ timeout: 15000,
 
 revalidatePath("/admin/verifications");
 revalidatePath(`/admin/verifications/${userId}`);
+
+await createActivityLog({
+  userId: _session.user.id,
+  action: "KYC_APPROVED",
+  entityType: "USER",
+  entityId: userId,
+  metadata: { adminEmail: _session.user.email },
+}).catch(() => {});
 }
 
 export async function rejectUser(userId: string, reason: string) {
@@ -185,6 +194,14 @@ message: `Your verification was rejected. Reason: ${reason}. Please re-upload do
 
 revalidatePath("/admin/verifications");
 revalidatePath(`/admin/verifications/${userId}`);
+
+await createActivityLog({
+  userId: _session.user.id,
+  action: "KYC_REJECTED",
+  entityType: "USER",
+  entityId: userId,
+  metadata: { adminEmail: _session.user.email, reason },
+}).catch(() => {});
 }
 
 export async function approveDocument(docId: string, userId: string) {
@@ -338,6 +355,14 @@ message: "Your flagged application was reviewed and approved. It is now pending 
 }
 
 revalidatePath("/admin");
+
+await createActivityLog({
+  userId: _session.user.id,
+  action: "FLAGGED_APPLICATION_APPROVED",
+  entityType: "APPLICATION",
+  entityId: applicationId,
+  metadata: { adminEmail: _session.user.email },
+}).catch(() => {});
 }
 
 export async function rejectFlaggedApplication(applicationId: string, reason: string) {
@@ -359,6 +384,14 @@ message: `Your application was rejected by security review. Reason: ${reason}`,
 }
 
 revalidatePath("/admin");
+
+await createActivityLog({
+  userId: _session.user.id,
+  action: "FLAGGED_APPLICATION_REJECTED",
+  entityType: "APPLICATION",
+  entityId: applicationId,
+  metadata: { adminEmail: _session.user.email, reason },
+}).catch(() => {});
 }
 
 async function awardBadgeManually(targetUserId: string, badgeId: string) {
@@ -385,6 +418,14 @@ message: `An admin has manually awarded you the "${badgeDef?.name || badgeId}" b
 
 revalidatePath("/admin/users");
 revalidatePath(`/admin/users/${targetUserId}`);
+
+await createActivityLog({
+  userId: _session.user.id,
+  action: "BADGE_AWARDED_MANUALLY",
+  entityType: "USER",
+  entityId: targetUserId,
+  metadata: { adminEmail: _session.user.email, badgeId },
+}).catch(() => {});
 }
 
 export async function awardBadgeAction(formData: FormData) {

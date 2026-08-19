@@ -187,7 +187,10 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           id={selectId}
           style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
           value={activeValue}
-          onChange={onChange}
+          onChange={(e) => {
+            setSelectedValue(e.target.value);
+            onChange?.(e);
+          }}
           {...props}
         >
           {options

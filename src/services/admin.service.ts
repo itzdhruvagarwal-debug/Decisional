@@ -15,7 +15,7 @@ requireActiveAdmin,
 invalidateAdminCache,
 type AdminSessionUser,
 } from "@/lib/admin-auth";
-import { createActivityLog, ActivityAction } from "@/lib/audit";
+import { createActivityLog, createAuditLog, ActivityAction } from "@/lib/audit";
 import { NotificationService } from "@/services/notification.service";
 
 export class AdminService {
@@ -344,7 +344,8 @@ break;
 }
 
 if (auditAction) {
-await createActivityLog({
+await Promise.all([
+createActivityLog({
 userId: admin.id,
 action: auditAction as ActivityAction,
 entityType: "USER",
@@ -358,7 +359,22 @@ suspensionDays: data.suspensionDays,
 previousStatus: user.status,
 previousTrustScore: user.trustScore,
 },
-}).catch(() => {});
+}).catch(() => {}),
+createAuditLog({
+actorId: admin.id,
+actionType: auditAction,
+entityType: "USER",
+entityId: userId,
+beforeJSON: { status: user.status, trustScore: user.trustScore },
+afterJSON: {
+action: data.action,
+reason: data.reason,
+trustScoreAdjustment: data.trustScoreAdjustment,
+verificationLevel: data.verificationLevel,
+suspensionDays: data.suspensionDays,
+},
+}).catch(() => {}),
+]);
 }
 
 return result;

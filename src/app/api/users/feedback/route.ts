@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createActivityLog } from "@/lib/audit";
 import { awardBadgeIfNotExists } from "@/lib/gamification-engine";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getSecureClientIp } from "@/lib/ip";
 
 const feedbackSchema = z.object({
 type: z.enum(["BUG", "FEEDBACK"]),
@@ -45,13 +46,15 @@ return ApiResponse.error(parsed.error.issues[0]?.message || "Invalid payload", 4
 }
 
 const { type, title, description, screenshotUrl } = parsed.data;
+const clientIp = getSecureClientIp(request);
 
-// Log the activity
+// Log the activity and create audit log record
 await createActivityLog({
 userId: session.user.id,
 action: type === "BUG" ? "BUG_REPORT_SUBMITTED" : "FEEDBACK_SUBMITTED",
 entityType: type === "BUG" ? "BUG" : "FEEDBACK",
 metadata: { title, description, screenshotUrl: screenshotUrl || undefined },
+ipAddress: clientIp,
 });
 
 // Award the badge
