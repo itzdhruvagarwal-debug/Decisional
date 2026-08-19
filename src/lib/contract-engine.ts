@@ -22,6 +22,23 @@ duration?: string;
 specs?: string;
 }
 
+export interface ContractSignature {
+userId: string;
+signedAt: string;
+signatureHash: string;
+ipAddress?: string;
+userAgent?: string;
+}
+
+export interface SignedContract {
+contractTerms: ContractTerms;
+contractHash: string;
+influencerSignature?: ContractSignature;
+brandSignature?: ContractSignature;
+isFullySigned: boolean;
+signedAt?: string;
+}
+
 export interface ContractTerms {
 dealId: string;
 dealAmount: number; // Creator fee in paise

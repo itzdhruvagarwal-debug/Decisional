@@ -39,6 +39,7 @@ import { tryDecrypt } from "@/lib/encryption";
 import {
 verifyContractSignature,
 type ContractTerms,
+type ContractSignature as ContractSig,
 } from "@/lib/contract-engine";
 import { logger } from "@/lib/logger";
 
