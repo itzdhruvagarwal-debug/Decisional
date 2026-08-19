@@ -105,6 +105,10 @@ code,
 }),
 });
 
+if (!res.ok) {
+logger.error("Instagram token exchange HTTP error", { status: res.status });
+return null;
+}
 const data = await res.json();
 
 if (data.access_token) {
@@ -214,6 +218,10 @@ let nextUrl: string | null = `${GRAPH_API_BASE}/${GRAPH_API_VERSION}/me/media?fi
 try {
 while (nextUrl && allPosts.length < limit) {
 const res: Response = await fetch(nextUrl);
+if (!res.ok) {
+logger.error("Instagram API HTTP error during getRecentPosts pagination", { status: res.status });
+break;
+}
 const data = await res.json() as {
 error?: { message: string };
 data?: Array<Record<string, unknown>>;

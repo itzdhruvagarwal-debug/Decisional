@@ -109,6 +109,10 @@ Authorization: `Bearer ${KYC_API_KEY}`,
 body: JSON.stringify({ id_number: panNumber.toUpperCase() }),
 });
 
+if (!res.ok) {
+logger.error("Surepass PAN verification HTTP error", { status: res.status });
+return { success: false, status: "PENDING", error: "Verification provider temporarily unavailable" };
+}
 const data = await res.json();
 
 if (data.success && data.data) {
@@ -180,6 +184,10 @@ body: JSON.stringify({ id_number: gstNumber.toUpperCase() }),
 },
 );
 
+if (!res.ok) {
+logger.error("Surepass GST verification HTTP error", { status: res.status });
+return { success: false, status: "PENDING", error: "Verification provider temporarily unavailable" };
+}
 const data = await res.json();
 
 if (data.success && data.data) {
@@ -256,6 +264,10 @@ ifsc_details: true,
 },
 );
 
+if (!res.ok) {
+logger.error("Surepass Bank validation HTTP error", { status: res.status });
+return { success: false, nameMatch: false, accountExists: false, error: "Bank verification service temporarily unavailable" };
+}
 const data = await res.json();
 
     if (data.success && data.data) {

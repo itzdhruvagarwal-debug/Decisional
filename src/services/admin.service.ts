@@ -344,7 +344,7 @@ break;
 }
 
 if (auditAction) {
-createActivityLog({
+await createActivityLog({
 userId: admin.id,
 action: auditAction as ActivityAction,
 entityType: "USER",

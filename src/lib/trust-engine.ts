@@ -117,7 +117,11 @@ let progressiveReduction = 0;
 for (const v of recentViolations) {
 let rawMetadata = null;
 if (v.metadata) {
-rawMetadata = typeof v.metadata === "string" ? JSON.parse(v.metadata) : v.metadata;
+try {
+  rawMetadata = typeof v.metadata === "string" ? JSON.parse(v.metadata) : v.metadata;
+} catch {
+  rawMetadata = null;
+}
 }
 const metadata =
 rawMetadata && typeof rawMetadata === "object"

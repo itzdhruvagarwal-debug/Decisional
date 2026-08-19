@@ -304,7 +304,7 @@ export async function scanAllWalletsForDrift(maxScanCount: number = 500): Promis
   }
 
   if (cursor) {
-    await redis.set(LEDGER_SCAN_CURSOR_KEY, cursor);
+    await redis.setex(LEDGER_SCAN_CURSOR_KEY, 86400, cursor);
   } else {
     await redis.del(LEDGER_SCAN_CURSOR_KEY);
   }

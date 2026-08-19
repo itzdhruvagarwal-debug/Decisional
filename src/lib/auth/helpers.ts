@@ -13,9 +13,9 @@ import { encrypt, decrypt } from "../encryption";
 
 
 export async function storeActiveSessionToken(userId: string, refreshToken: string) {
-try {
-await redis.set(`active_session:${userId}`, refreshToken);
-} catch (error) {
+  try {
+    await redis.setex(`active_session:${userId}`, 7 * 24 * 60 * 60, refreshToken);
+  } catch (error) {
 logger.error("Failed to persist active session token", error, { userId });
 if (process.env.NODE_ENV === "production") {
 throw error;
@@ -298,11 +298,11 @@ logger.warn("Device fingerprint tracking failed", { error: err, userId });
 }
 
 export async function handleGoogleOAuthSignIn(user: { email?: string | null; id?: string; userType?: string; status?: string; verificationLevel?: string; trustScore?: number; xp?: number; level?: number }, account: { provider?: string; providerAccountId: string; access_token?: string | null }): Promise<boolean | string> {
-const email = user.email;
-if (!email) {
-logger.warn("Google OAuth login rejected: no email provided");
-return false;
-}
+  const email = user.email?.trim().toLowerCase();
+  if (!email) {
+    logger.warn("Google OAuth login rejected: no email provided");
+    return false;
+  }
 
 const dbUser = await prisma.user.findUnique({ where: { email } });
 

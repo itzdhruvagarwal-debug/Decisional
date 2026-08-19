@@ -188,7 +188,8 @@ return csvResponse(csv, `decisional-transactions-${safeName}-${format(new Date()
 
 export const GET = apiWrapper(async (req: NextRequest) => {
 const session = await auth();
-const userId = session!.user!.id;
+const userId = session?.user?.id;
+if (!userId) return ApiResponse.unauthorized();
 
 const { searchParams } = req.nextUrl;
 const parsed = querySchema.parse({
