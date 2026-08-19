@@ -162,9 +162,9 @@ async function _handler_GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const filter = searchParams.get("filter") || "all-time"; // all-time | weekly
-    const city = searchParams.get("city") || "";
-    const category = searchParams.get("category") || "";
+    const filter = searchParams.get("filter")?.trim() || "all-time"; // all-time | weekly
+    const city = searchParams.get("city")?.trim() || "";
+    const category = searchParams.get("category")?.trim() || "";
     const parsedLimit = Number.parseInt(searchParams.get("limit") || "20", 10);
     const limit = Math.max(1, Math.min(Number.isNaN(parsedLimit) ? 20 : parsedLimit, 50));
 

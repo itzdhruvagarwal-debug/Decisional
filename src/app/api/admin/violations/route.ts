@@ -9,7 +9,7 @@ const session = await auth();
 await requireActiveAdmin(session?.user);
 
 const { searchParams } = new URL(request.url);
-const userId = searchParams.get("userId") || undefined;
+const userId = searchParams.get("userId")?.trim() || undefined;
 
 const violations = await AdminService.listViolations(userId);
 

@@ -20,13 +20,13 @@ const session = (request as AuthenticatedRequest).session;
 const { searchParams } = new URL(request.url);
 const { page, limit, skip: _skip } = parsePagination(searchParams);
 
-const status = searchParams.get("status")?.toUpperCase() || undefined;
-const category = searchParams.get("category") || undefined;
-const city = searchParams.get("city") || undefined;
-const sortBy = searchParams.get("sortBy") || undefined;
+const status = searchParams.get("status")?.trim().toUpperCase() || undefined;
+const category = searchParams.get("category")?.trim() || undefined;
+const city = searchParams.get("city")?.trim() || undefined;
+const sortBy = searchParams.get("sortBy")?.trim() || undefined;
 const sortOrder =
-searchParams.get("sortOrder") === "asc" ? "asc" : ("desc" as const);
-const search = searchParams.get("search") || undefined;
+searchParams.get("sortOrder")?.trim() === "asc" ? "asc" : ("desc" as const);
+const search = searchParams.get("search")?.trim() || undefined;
 const ownerOnly = searchParams.get("scope") === "mine";
 
 const minBudgetRupees = searchParams.get("minBudget");

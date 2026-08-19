@@ -9,11 +9,11 @@ const session = await auth();
 await requireActiveAdmin(session?.user);
 
 const { searchParams } = new URL(request.url);
-const actorId = searchParams.get("actorId") || undefined;
-const entityType = searchParams.get("entityType") || undefined;
-const entityId = searchParams.get("entityId") || undefined;
-  const rawStartDate = searchParams.get("startDate");
-  const rawEndDate = searchParams.get("endDate");
+const actorId = searchParams.get("actorId")?.trim() || undefined;
+const entityType = searchParams.get("entityType")?.trim() || undefined;
+const entityId = searchParams.get("entityId")?.trim() || undefined;
+  const rawStartDate = searchParams.get("startDate")?.trim();
+  const rawEndDate = searchParams.get("endDate")?.trim();
 
   const parsedStartDate = rawStartDate ? new Date(rawStartDate) : undefined;
   const parsedEndDate = rawEndDate ? new Date(rawEndDate) : undefined;

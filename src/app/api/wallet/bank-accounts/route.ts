@@ -206,7 +206,7 @@ req: NextRequest,
 userId: string,
 ): Promise<{ id: string; errorResponse: NextResponse | null }> {
 const { searchParams } = new URL(req.url);
-const id = searchParams.get("id");
+const id = searchParams.get("id")?.trim();
 
 if (!id) {
 return { id: "", errorResponse: NextResponse.json({ error: "ID is required" }, { status: 400 }) };

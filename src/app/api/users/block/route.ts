@@ -39,7 +39,7 @@ return ApiResponse.unauthorized();
 }
 
 const { searchParams } = new URL(request.url);
-const checkUserId = searchParams.get("checkUserId");
+const checkUserId = searchParams.get("checkUserId")?.trim();
 
 if (checkUserId) {
 const isBlocked = await BlockService.isBlocked(session.user.id, checkUserId);

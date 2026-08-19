@@ -14,7 +14,7 @@ try {
 const session = (request as AuthenticatedRequest).session;
 
 const { searchParams } = new URL(request.url);
-const campaignId = searchParams.get("campaignId");
+const campaignId = searchParams.get("campaignId")?.trim();
 const { page, limit, skip: _skip } = parsePagination(searchParams);
 
 const userType = session.user.userType || "INFLUENCER";

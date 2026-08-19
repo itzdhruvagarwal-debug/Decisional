@@ -52,13 +52,19 @@ return deal;
 }
 
 export function getErrorMessage(error: unknown): string {
-if (error instanceof Error) return error.message;
-if (typeof error === "string") return error;
-try {
-return JSON.stringify(error);
-} catch {
-return String(error);
-}
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  if (typeof error === "object" && error !== null) {
+    if ("message" in error && typeof (error as Record<string, unknown>).message === "string") {
+      return (error as Record<string, unknown>).message as string;
+    }
+  }
+  try {
+    const str = JSON.stringify(error);
+    return str === "{}" ? String(error) : str;
+  } catch {
+    return String(error);
+  }
 }
 
 export const notificationPreferencesSchema = z.object({

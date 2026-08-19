@@ -13,7 +13,7 @@ return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 
 const { searchParams } = new URL(req.url);
-const targetUserId = searchParams.get("userId") || undefined; // If looking at someone else's reviews
+const targetUserId = searchParams.get("userId")?.trim() || undefined; // If looking at someone else's reviews
 const { page, limit } = parsePagination(searchParams);
 
 const result = await ReviewService.listReviews(

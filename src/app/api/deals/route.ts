@@ -19,7 +19,7 @@ return ApiResponse.unauthorized();
 
 const { searchParams } = new URL(req.url);
 const { page, limit } = parsePagination(searchParams);
-const status = searchParams.get("status");
+const status = searchParams.get("status")?.trim();
 
 if (isAdmin(session.user.userType)) {
 await requireActiveAdmin(session.user);

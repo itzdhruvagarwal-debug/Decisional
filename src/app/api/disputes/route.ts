@@ -13,8 +13,8 @@ export const GET = apiWrapper(async (req) => {
   }
 
   const { searchParams } = new URL(req.url);
-  const dealId = searchParams.get("dealId");
-  const status = searchParams.get("status");
+  const dealId = searchParams.get("dealId")?.trim();
+  const status = searchParams.get("status")?.trim();
   const { page, limit } = parsePagination(searchParams);
 
   const result = await DisputeService.listDisputes(session.user.id, {

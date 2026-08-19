@@ -6,19 +6,19 @@ import { parsePagination } from "@/lib/utils";
 import { isAdmin, isBrand } from "@/lib/rbac";
 
 function parseQueryParams(searchParams: URLSearchParams) {
-const category = searchParams.get("category");
-const city = searchParams.get("city");
-const minFollowersStr = searchParams.get("minFollowers");
-const minFollowers = minFollowersStr ? Number.parseInt(minFollowersStr, 10) : undefined;
-const minEngagementRateStr = searchParams.get("minEngagementRate");
-const minEngagementRate = minEngagementRateStr ? Math.round(Number.parseFloat(minEngagementRateStr) * 100) : undefined;
-const minRateStr = searchParams.get("minRate");
-const minRate = minRateStr ? Math.round(Number.parseFloat(minRateStr) * 100) : undefined;
-const maxRateStr = searchParams.get("maxRate");
-const maxRate = maxRateStr ? Math.round(Number.parseFloat(maxRateStr) * 100) : undefined;
-const platform = searchParams.get("platform");
-const searchTerm = searchParams.get("search");
-const sortBy = searchParams.get("sortBy") || undefined;
+  const category = searchParams.get("category")?.trim() || undefined;
+  const city = searchParams.get("city")?.trim() || undefined;
+  const minFollowersStr = searchParams.get("minFollowers");
+  const minFollowers = minFollowersStr ? Number.parseInt(minFollowersStr, 10) : undefined;
+  const minEngagementRateStr = searchParams.get("minEngagementRate");
+  const minEngagementRate = minEngagementRateStr ? Math.round(Number.parseFloat(minEngagementRateStr) * 100) : undefined;
+  const minRateStr = searchParams.get("minRate");
+  const minRate = minRateStr ? Math.round(Number.parseFloat(minRateStr) * 100) : undefined;
+  const maxRateStr = searchParams.get("maxRate");
+  const maxRate = maxRateStr ? Math.round(Number.parseFloat(maxRateStr) * 100) : undefined;
+  const platform = searchParams.get("platform")?.trim() || undefined;
+  const searchTerm = searchParams.get("search")?.trim() || undefined;
+  const sortBy = searchParams.get("sortBy")?.trim() || undefined;
 
 return {
 category,

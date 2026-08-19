@@ -24,8 +24,8 @@ return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 
 const { searchParams } = new URL(req.url);
-const dealId = searchParams.get("dealId");
-const conversationWith = searchParams.get("with");
+const dealId = searchParams.get("dealId")?.trim();
+const conversationWith = searchParams.get("with")?.trim();
 const { page, limit } = parsePagination(searchParams, 50);
 
 // List Conversations
