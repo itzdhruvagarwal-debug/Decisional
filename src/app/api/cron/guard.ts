@@ -1,0 +1,30 @@
+import { headers } from "next/headers";
+import { createHash, timingSafeEqual } from "node:crypto";
+import { AppError } from "@/lib/errors";
+
+export async function validateCronSecret() {
+const reqHeaders = await headers();
+const authHeader = reqHeaders.get("authorization");
+const xCronHeader = reqHeaders.get("x-cron-secret");
+const configuredSecret = process.env.CRON_SECRET;
+
+if (!configuredSecret) {
+throw AppError.internal("CRON_SECRET is not configured");
+}
+
+  // 1. Verify standard Authorization: Bearer <secret> (case-insensitive per RFC-7235)
+  const authHeaderNormalized = authHeader ? authHeader.replace(/^bearer /i, `Bearer `) : "";
+  const expectedAuth = `Bearer ${configuredSecret}`;
+  const expectedAuthHash = createHash("sha256").update(expectedAuth).digest();
+  const actualAuthHash = createHash("sha256").update(authHeaderNormalized || "").digest();
+  const isAuthValid = authHeader && timingSafeEqual(actualAuthHash, expectedAuthHash);
+
+// 2. Verify fallback x-cron-secret: <secret>
+const expectedXCronHash = createHash("sha256").update(configuredSecret).digest();
+const actualXCronHash = createHash("sha256").update(xCronHeader || "").digest();
+const isXCronValid = xCronHeader && timingSafeEqual(actualXCronHash, expectedXCronHash);
+
+if (!isAuthValid && !isXCronValid) {
+throw AppError.unauthorized("Invalid Cron Secret");
+}
+}
