@@ -20,6 +20,7 @@ verifyAadhaarOTP,
 verifyPAN,
 verifyGST,
 verifyBankAccount,
+hasMatchingNameTokens,
 } from "@/lib/kyc";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { bytesToAscii } from "@/lib/utils";
@@ -216,6 +217,27 @@ return result;
 async function handleVerifyAadhaarOtp(userId: string, clientId: string, otp: string) {
 const result = await verifyAadhaarOTP(clientId, otp);
 if (result.success && result.status === "VERIFIED") {
+const user = await prisma.user.findUnique({
+where: { id: userId },
+select: {
+influencerProfile: { select: { displayName: true } },
+brandProfile: { select: { companyName: true } },
+email: true,
+},
+});
+const registeredName =
+user?.influencerProfile?.displayName ||
+user?.brandProfile?.companyName ||
+user?.email?.split("@")[0] ||
+"";
+const returnedName = result.data?.name || "";
+if (returnedName && registeredName && !hasMatchingNameTokens(returnedName, registeredName)) {
+return {
+success: false,
+status: "REJECTED" as const,
+error: "The name on the verified Aadhaar does not match your registered profile name.",
+};
+}
 await prisma.user.update({
 where: { id: userId },
 data: { verificationLevel: "IDENTITY" },
@@ -227,6 +249,27 @@ return result;
 async function handleVerifyPan(userId: string, panNumber: string) {
 const result = await verifyPAN(panNumber);
 if (result.success && result.status === "VERIFIED") {
+const user = await prisma.user.findUnique({
+where: { id: userId },
+select: {
+influencerProfile: { select: { displayName: true } },
+brandProfile: { select: { companyName: true } },
+email: true,
+},
+});
+const registeredName =
+user?.influencerProfile?.displayName ||
+user?.brandProfile?.companyName ||
+user?.email?.split("@")[0] ||
+"";
+const returnedName = result.data?.name || "";
+if (returnedName && registeredName && !hasMatchingNameTokens(returnedName, registeredName)) {
+return {
+success: false,
+status: "REJECTED" as const,
+error: "The name on the verified PAN card does not match your registered profile name.",
+};
+}
 await prisma.user.update({
 where: { id: userId },
 data: { verificationLevel: "IDENTITY" },
@@ -238,6 +281,27 @@ return result;
 async function handleVerifyGst(userId: string, gstNumber: string) {
 const result = await verifyGST(gstNumber);
 if (result.success && result.status === "VERIFIED") {
+const user = await prisma.user.findUnique({
+where: { id: userId },
+select: {
+influencerProfile: { select: { displayName: true } },
+brandProfile: { select: { companyName: true } },
+email: true,
+},
+});
+const registeredName =
+user?.brandProfile?.companyName ||
+user?.influencerProfile?.displayName ||
+user?.email?.split("@")[0] ||
+"";
+const returnedName = result.data?.name || "";
+if (returnedName && registeredName && !hasMatchingNameTokens(returnedName, registeredName)) {
+return {
+success: false,
+status: "REJECTED" as const,
+error: "The business name on the verified GST does not match your registered company name.",
+};
+}
 await prisma.user.update({
 where: { id: userId },
 data: { verificationLevel: "IDENTITY" },

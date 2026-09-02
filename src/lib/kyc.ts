@@ -555,7 +555,7 @@ function tokenizeAndCleanName(name: string): string[] {
     .filter((t) => t.length >= 2);
 }
 
-function hasMatchingNameTokens(nameA: string, nameB: string): boolean {
+export function hasMatchingNameTokens(nameA: string, nameB: string): boolean {
   const tokensA = tokenizeAndCleanName(nameA);
   const tokensB = tokenizeAndCleanName(nameB);
 

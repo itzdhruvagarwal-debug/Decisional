@@ -92,7 +92,6 @@ include: {
 blockedUser: {
 select: {
 id: true,
-email: true,
 userType: true,
 influencerProfile: { select: { displayName: true, avatar: true } },
 brandProfile: { select: { companyName: true, logo: true } },

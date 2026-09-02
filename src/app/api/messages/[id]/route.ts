@@ -7,6 +7,7 @@ import { Prisma } from "@prisma/client";
 import { calculateTotalAmount } from "@/lib/razorpay";
 import { NotificationService } from "@/services/notification.service";
 import { createActivityLog } from "@/lib/audit";
+import { assertAccountCanTransact } from "@/lib/utils";
 
 const updateMessageSchema = z.object({
   status: z.enum(["ACCEPTED", "DECLINED"]),
@@ -181,154 +182,181 @@ interface EscrowTxParams {
 }
 
 async function executeOfferEscrowTransaction(params: EscrowTxParams) {
-  return prisma.$transaction(async (tx) => {
-    const brandWallet = await tx.wallet.findUnique({
-      where: { userId: params.brandUserId },
-    });
+  return prisma.$transaction(
+    async (tx) => {
+      // 1. Row-level write lock on the Message to prevent concurrent double-acceptance
+      await tx.$queryRaw`SELECT id FROM "Message" WHERE id = ${params.messageId} FOR UPDATE`;
 
-    if (!brandWallet || brandWallet.balance < params.totalAmountToLock) {
-      const availableInr = brandWallet ? (brandWallet.balance / 100).toLocaleString("en-IN") : "0";
-      const requiredInr = (params.totalAmountToLock / 100).toLocaleString("en-IN");
-      throw new Error(
-        `Insufficient brand wallet balance (Available: ₹${availableInr}, Required: ₹${requiredInr}). Please top up your wallet to accept this offer.`
-      );
-    }
+      const freshMessage = await tx.message.findUnique({
+        where: { id: params.messageId },
+        select: { metadata: true, messageType: true, dealId: true },
+      });
 
-    await tx.wallet.update({
-      where: { id: brandWallet.id },
-      data: {
-        balance: { decrement: params.totalAmountToLock },
-        pendingBalance: { increment: params.totalAmountToLock },
-        totalSpent: { increment: params.totalAmountToLock },
-      },
-    });
+      if (!freshMessage || freshMessage.messageType !== "OFFER") {
+        throw new Error("Offer message not found or invalid type");
+      }
 
-    const campaign = await tx.campaign.create({
-      data: {
-        brandId: params.brandProfileId,
-        title: params.offerTitle,
-        description: params.offerDescription,
-        requirements: params.offerDeliverables,
-        deliverables: [
-          {
-            type: "CUSTOM",
-            count: 1,
-            specs: params.offerDeliverables,
-          },
-        ],
-        totalBudget: params.offerAmount,
-        perInfluencerBudget: params.offerAmount,
-        fundedAmount: params.totalAmountToLock,
-        reservedAmount: params.totalAmountToLock,
-        reservedTotalAmount: params.totalAmountToLock,
-        contentDeadline: params.contentDeadline,
-        postingDeadline: params.postingDeadline,
-        status: "ACTIVE",
-        isDirectInvite: true,
-        selectedInfluencers: 1,
-        maxInfluencers: 1,
-      },
-    });
+      const freshMeta = (freshMessage.metadata as Prisma.JsonObject) || {};
+      if (freshMeta.status === "ACCEPTED" || freshMeta.status === "DECLINED" || freshMessage.dealId) {
+        throw new Error(
+          `Offer has already been ${String(freshMeta.status || "processed").toLowerCase()}`
+        );
+      }
 
-    const deal = await tx.deal.create({
-      data: {
-        campaignId: campaign.id,
-        influencerId: params.influencerProfileId,
-        brandId: params.brandProfileId,
-        amount: params.offerAmount,
-        platformFee: params.paymentAmounts.platformFee,
-        gatewayFee: params.paymentAmounts.gatewayFee,
-        totalAmount: params.totalAmountToLock,
-        influencerPayout: params.paymentAmounts.influencerReceives,
-        reservedFromWallet: true,
-        status: "ACTIVE",
-        submissionDeadline: params.contentDeadline,
-        postingDeadline: params.postingDeadline,
-        startedAt: new Date(),
-        contractTerms: {
-          title: params.offerTitle,
-          scope: params.offerDescription,
-          deliverables: params.offerDeliverables,
-          dealAmount: params.offerAmount,
-          platformFee: params.paymentAmounts.platformFee,
-          gatewayFee: params.paymentAmounts.gatewayFee,
-          totalAmount: params.totalAmountToLock,
-          influencerPayout: params.paymentAmounts.influencerReceives,
-          source: "in_chat_offer",
-        } as unknown as Prisma.InputJsonValue,
-      },
-    });
+      // 2. Row-level write lock on the Brand Wallet
+      await tx.$queryRaw`SELECT id FROM "Wallet" WHERE "userId" = ${params.brandUserId} FOR UPDATE`;
 
-    await tx.deal.update({
-      where: { id: deal.id },
-      data: {
-        contractTerms: {
-          dealId: deal.id,
-          title: params.offerTitle,
-          scope: params.offerDescription,
-          deliverables: params.offerDeliverables,
-          dealAmount: params.offerAmount,
-          platformFee: params.paymentAmounts.platformFee,
-          gatewayFee: params.paymentAmounts.gatewayFee,
-          totalAmount: params.totalAmountToLock,
-          influencerPayout: params.paymentAmounts.influencerReceives,
-          source: "in_chat_offer",
-        } as unknown as Prisma.InputJsonValue,
-      },
-    });
+      const brandWallet = await tx.wallet.findUnique({
+        where: { userId: params.brandUserId },
+      });
 
-    await tx.transaction.create({
-      data: {
-        walletId: brandWallet.id,
-        dealId: deal.id,
-        type: "DEBIT",
-        amount: params.totalAmountToLock,
-        status: "COMPLETED",
-        description: `Escrow hold for in-chat deal: ${params.offerTitle}`,
-        metadata: {
-          source: "in_chat_offer_acceptance",
-          dealId: deal.id,
-          dealAmount: params.offerAmount,
-          platformFee: params.paymentAmounts.platformFee,
-          gatewayFee: params.paymentAmounts.gatewayFee,
+      if (!brandWallet || brandWallet.balance < params.totalAmountToLock) {
+        const availableInr = brandWallet ? (brandWallet.balance / 100).toLocaleString("en-IN") : "0";
+        const requiredInr = (params.totalAmountToLock / 100).toLocaleString("en-IN");
+        throw new Error(
+          `Insufficient brand wallet balance (Available: ₹${availableInr}, Required: ₹${requiredInr}). Please top up your wallet to accept this offer.`
+        );
+      }
+
+      await tx.wallet.update({
+        where: { id: brandWallet.id },
+        data: {
+          balance: { decrement: params.totalAmountToLock },
+          pendingBalance: { increment: params.totalAmountToLock },
+          totalSpent: { increment: params.totalAmountToLock },
         },
-      },
-    });
+      });
 
-    const updatedMetadata: Prisma.JsonObject = {
-      ...params.currentMetadata,
-      status: "ACCEPTED",
-      dealId: deal.id,
-      acceptedAt: new Date().toISOString(),
-      acceptedByUserId: params.sessionUserId,
-    };
+      const campaign = await tx.campaign.create({
+        data: {
+          brandId: params.brandProfileId,
+          title: params.offerTitle,
+          description: params.offerDescription,
+          requirements: params.offerDeliverables,
+          deliverables: [
+            {
+              type: "CUSTOM",
+              count: 1,
+              specs: params.offerDeliverables,
+            },
+          ],
+          totalBudget: params.offerAmount,
+          perInfluencerBudget: params.offerAmount,
+          fundedAmount: params.totalAmountToLock,
+          reservedAmount: params.totalAmountToLock,
+          reservedTotalAmount: params.totalAmountToLock,
+          contentDeadline: params.contentDeadline,
+          postingDeadline: params.postingDeadline,
+          status: "ACTIVE",
+          isDirectInvite: true,
+          selectedInfluencers: 1,
+          maxInfluencers: 1,
+        },
+      });
 
-    const updatedMessage = await tx.message.update({
-      where: { id: params.messageId },
-      data: {
+      const deal = await tx.deal.create({
+        data: {
+          campaignId: campaign.id,
+          influencerId: params.influencerProfileId,
+          brandId: params.brandProfileId,
+          amount: params.offerAmount,
+          platformFee: params.paymentAmounts.platformFee,
+          gatewayFee: params.paymentAmounts.gatewayFee,
+          totalAmount: params.totalAmountToLock,
+          influencerPayout: params.paymentAmounts.influencerReceives,
+          reservedFromWallet: true,
+          status: "ACTIVE",
+          submissionDeadline: params.contentDeadline,
+          postingDeadline: params.postingDeadline,
+          startedAt: new Date(),
+          contractTerms: {
+            title: params.offerTitle,
+            scope: params.offerDescription,
+            deliverables: params.offerDeliverables,
+            dealAmount: params.offerAmount,
+            platformFee: params.paymentAmounts.platformFee,
+            gatewayFee: params.paymentAmounts.gatewayFee,
+            totalAmount: params.totalAmountToLock,
+            influencerPayout: params.paymentAmounts.influencerReceives,
+            source: "in_chat_offer",
+          } as unknown as Prisma.InputJsonValue,
+        },
+      });
+
+      await tx.deal.update({
+        where: { id: deal.id },
+        data: {
+          contractTerms: {
+            dealId: deal.id,
+            title: params.offerTitle,
+            scope: params.offerDescription,
+            deliverables: params.offerDeliverables,
+            dealAmount: params.offerAmount,
+            platformFee: params.paymentAmounts.platformFee,
+            gatewayFee: params.paymentAmounts.gatewayFee,
+            totalAmount: params.totalAmountToLock,
+            influencerPayout: params.paymentAmounts.influencerReceives,
+            source: "in_chat_offer",
+          } as unknown as Prisma.InputJsonValue,
+        },
+      });
+
+      await tx.transaction.create({
+        data: {
+          walletId: brandWallet.id,
+          dealId: deal.id,
+          type: "DEBIT",
+          amount: params.totalAmountToLock,
+          status: "COMPLETED",
+          description: `Escrow hold for in-chat deal: ${params.offerTitle}`,
+          metadata: {
+            source: "in_chat_offer_acceptance",
+            dealId: deal.id,
+            dealAmount: params.offerAmount,
+            platformFee: params.paymentAmounts.platformFee,
+            gatewayFee: params.paymentAmounts.gatewayFee,
+          },
+        },
+      });
+
+      const updatedMetadata: Prisma.JsonObject = {
+        ...params.currentMetadata,
+        status: "ACCEPTED",
         dealId: deal.id,
-        metadata: updatedMetadata,
-      },
-    });
+        acceptedAt: new Date().toISOString(),
+        acceptedByUserId: params.sessionUserId,
+      };
 
-    await tx.brandProfile.update({
-      where: { id: params.brandProfileId },
-      data: {
-        totalCampaigns: { increment: 1 },
-        activeCampaigns: { increment: 1 },
-        totalSpent: { increment: params.totalAmountToLock },
-      },
-    });
+      const updatedMessage = await tx.message.update({
+        where: { id: params.messageId },
+        data: {
+          dealId: deal.id,
+          metadata: updatedMetadata,
+        },
+      });
 
-    await tx.influencerProfile.update({
-      where: { id: params.influencerProfileId },
-      data: {
-        totalDeals: { increment: 1 },
-      },
-    });
+      await tx.brandProfile.update({
+        where: { id: params.brandProfileId },
+        data: {
+          totalCampaigns: { increment: 1 },
+          activeCampaigns: { increment: 1 },
+          totalSpent: { increment: params.totalAmountToLock },
+        },
+      });
 
-    return { deal, message: updatedMessage };
-  });
+      await tx.influencerProfile.update({
+        where: { id: params.influencerProfileId },
+        data: {
+          totalDeals: { increment: 1 },
+        },
+      });
+
+      return { deal, message: updatedMessage };
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+    }
+  );
 }
 
 export const PATCH = apiWrapper(async (req, { params }) => {
@@ -373,6 +401,9 @@ export const PATCH = apiWrapper(async (req, { params }) => {
       { status: 403 }
     );
   }
+
+  assertAccountCanTransact(message.sender.status);
+  assertAccountCanTransact(message.receiver.status);
 
   if (message.messageType !== "OFFER") {
     return NextResponse.json({ error: "Only offers can be updated" }, { status: 400 });

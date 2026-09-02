@@ -12,6 +12,7 @@ import { checkVerificationTierForAmount, tierErrorResponse } from "@/lib/verific
 import { checkEnterpriseApplicationGate } from "@/lib/enterprise-trust-guard";
 import { logger } from "@/lib/logger";
 import { validateApplicationRatesAndProposal } from "./list";
+import { BlockService } from "@/services/block.service";
 import { ApplicationInput } from "@/lib/validations";
 import { CampaignValidateResult, resolveApplicationDealAmount } from "./types";
 
@@ -91,7 +92,8 @@ function validateFollowerThresholds(
 async function getAndValidateCampaign(
   campaignId: string,
   maxRelevantFollowers: number,
-  hasHiddenSubscribers: boolean
+  hasHiddenSubscribers: boolean,
+  userId: string,
 ) {
   const campaign = await prisma.campaign.findUnique({
     where: { id: campaignId },
@@ -107,6 +109,7 @@ async function getAndValidateCampaign(
       requiresProduct: true,
       totalBudget: true,
       productValue: true,
+      brand: { select: { userId: true } },
     },
   });
 
@@ -114,6 +117,14 @@ async function getAndValidateCampaign(
   if (campaign.status !== "ACTIVE") {
     throw AppError.badRequest("Campaign is not accepting applications");
   }
+
+  if (campaign.brand?.userId) {
+    const isBlocked = await BlockService.isBlocked(userId, campaign.brand.userId);
+    if (isBlocked) {
+      throw AppError.forbidden("You cannot apply to this campaign");
+    }
+  }
+
   if (
     campaign.maxInfluencers !== null &&
     campaign.maxInfluencers !== undefined &&
@@ -199,7 +210,8 @@ await getAndValidateInfluencer(userId);
 const campaign = await getAndValidateCampaign(
 data.campaignId,
 maxRelevantFollowers,
-hasHiddenSubscribers
+hasHiddenSubscribers,
+userId
 );
 
 const { fraudCheck } = await checkVerificationAndGates(userId, data, campaign);

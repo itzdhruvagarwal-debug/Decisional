@@ -17,6 +17,7 @@ import { validateCampaignInputAndBudgets } from "./list";
 import { TierError, DirectInviteParams, estimateCampaignDealSlots, safeStringCast, safeStringOrNullCast } from "./types";
 import { createDealAndReserveFunds } from "@/services/deal/helpers";
 import { checkMessageForContacts } from "@/lib/contact-filter";
+import { BlockService } from "@/services/block.service";
 
 export function assertNoContactDetails(text: string | null | undefined, fieldName: string) {
 if (!text) return;
@@ -98,6 +99,11 @@ if (invitedInfluencer.followerAuthenticityScore < 40) {
 throw AppError.badRequest(
 `This influencer cannot be invited because their follower authenticity score (${invitedInfluencer.followerAuthenticityScore}/100) is below the minimum required threshold of 40.`
 );
+}
+
+const isBlocked = await BlockService.isBlocked(profile.userId, invitedInfluencer.userId);
+if (isBlocked) {
+  throw AppError.badRequest("Cannot invite a blocked influencer");
 }
 
 assertAccountCanTransact(invitedInfluencer.user.status);

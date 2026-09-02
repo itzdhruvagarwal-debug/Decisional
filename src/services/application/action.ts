@@ -13,6 +13,7 @@ import { resolveApplicationDealAmount } from "./types";
 import { validateApplicationCanBeAccepted } from "./create";
 import { createDealAndReserveFunds } from "@/services/deal/helpers";
 import { checkChallengeProgress } from "@/lib/weekly-challenges";
+import { BlockService } from "@/services/block.service";
 
 async function calculateDealFinancials(
 application: {
@@ -143,6 +144,11 @@ if (application.influencer.followerAuthenticityScore < 40) {
 throw AppError.badRequest(
 `This application cannot be accepted because the influencer's follower authenticity score (${application.influencer.followerAuthenticityScore}/100) is below the minimum required threshold of 40.`
 );
+}
+
+const isBlocked = await BlockService.isBlocked(userId, application.influencer.userId);
+if (isBlocked) {
+  throw AppError.badRequest("Cannot accept application from a blocked user");
 }
 
 validateApplicationCanBeAccepted(application, brandProfile.id);

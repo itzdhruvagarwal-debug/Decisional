@@ -4,11 +4,9 @@ import { InfluencerProfile } from "@prisma/client";
 import { NextRequest } from "next/server";
 import prisma from "@/lib/db";
 import {
-calculateYouTubeEngagement,
-getYouTubeChannel,
-getYouTubeChannelByToken,
-getFreshYouTubeAccessToken,
-resolveYouTubeUrl,
+  calculateYouTubeEngagement,
+  getYouTubeChannelByToken,
+  getFreshYouTubeAccessToken,
 } from "@/lib/youtube";
 import { calculateEngagement, getInstagramProfile } from "@/lib/instagram";
 import { logger } from "@/lib/logger";
@@ -29,31 +27,21 @@ handle: z
 });
 
 async function verifyYouTubeChannel(userId: string, handle: string, userProfile: InfluencerProfile) {
-let channelIdentifier = handle;
-if (handle.includes("youtube.com") || handle.includes("youtu.be")) {
-const resolved = await resolveYouTubeUrl(handle);
-if (resolved) {
-channelIdentifier = resolved.customUrl || resolved.id;
-}
-}
+  const freshAccessToken = await getFreshYouTubeAccessToken(userId);
+  if (!freshAccessToken) {
+    throw AppError.badRequest("Connect YouTube through OAuth before verifying profile metrics.");
+  }
 
-const freshAccessToken = await getFreshYouTubeAccessToken(userId);
+  const channel = await getYouTubeChannelByToken(freshAccessToken);
+  if (!channel) {
+    throw AppError.badRequest("Unable to verify YouTube channel via connected Google account.");
+  }
 
-const channel = freshAccessToken
-? await getYouTubeChannelByToken(freshAccessToken)
-: await getYouTubeChannel(channelIdentifier);
-
-if (!channel) {
-throw AppError.badRequest("Unable to verify YouTube channel. Please ensure the handle is correct and try again.");
-}
-
-if (freshAccessToken) {
-const normalizedCustomUrl = channel.customUrl?.replace(/^@/, "").toLowerCase();
-const normalizedHandle = handle.replace(/^@/, "").toLowerCase();
-if (normalizedCustomUrl !== normalizedHandle) {
-throw AppError.badRequest("Connected YouTube channel handle does not match the requested handle.");
-}
-}
+  const normalizedCustomUrl = channel.customUrl?.replace(/^@/, "").toLowerCase();
+  const normalizedHandle = handle.replace(/^@/, "").toLowerCase();
+  if (normalizedCustomUrl && normalizedCustomUrl !== normalizedHandle) {
+    throw AppError.badRequest("Connected YouTube channel handle does not match the requested handle.");
+  }
 
 const followers = channel.subscriberCount === -1 ? null : channel.subscriberCount;
 let engagementRate = 0;

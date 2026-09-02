@@ -25,8 +25,18 @@ const updateProfileSchema = z.object({
   ),
   categories: z.array(z.string()).optional().nullish(),
   languages: z.array(z.string()).optional().nullish(),
-  instagramHandle: z.string().optional().nullish(),
-  youtubeHandle: z.string().optional().nullish(),
+  instagramHandle: z
+    .string()
+    .max(100, "Instagram handle is too long")
+    .regex(/^[a-zA-Z0-9._@-]+$/, "Instagram handle contains invalid characters")
+    .optional()
+    .nullish(),
+  youtubeHandle: z
+    .string()
+    .max(100, "YouTube handle is too long")
+    .regex(/^[a-zA-Z0-9._@-]+$/, "YouTube handle contains invalid characters")
+    .optional()
+    .nullish(),
   minRate: z.preprocess((val) => (val === "" || val === null || val === undefined ? 0 : Number(val)), z.number().min(0).optional().nullish().catch(0)),
   maxRate: z.preprocess((val) => (val === "" || val === null || val === undefined ? 0 : Number(val)), z.number().min(0).optional().nullish().catch(0)),
   minInstagramRate: z.preprocess((val) => (val === "" || val === null || val === undefined ? 0 : Number(val)), z.number().min(0).optional().nullish().catch(0)),
@@ -214,30 +224,56 @@ return true;
 }
 
 async function updateInfluencerProfile(userId: string, email: string, data: UpdateProfileInput) {
-const updateData: Prisma.InfluencerProfileUpdateInput = {};
+  const existingProfile = await prisma.influencerProfile.findUnique({
+    where: { userId },
+    select: { instagramHandle: true, youtubeHandle: true },
+  });
 
-const fields: (keyof Prisma.InfluencerProfileUpdateInput)[] = [
-"displayName", "bio", "city", "state", "address", "pinCode", "gender", "age",
-"instagramHandle", "youtubeHandle", "minRate", "maxRate",
-"minInstagramRate", "maxInstagramRate", "minYoutubeRate", "maxYoutubeRate"
-];
+  const updateData: Prisma.InfluencerProfileUpdateInput = {};
 
-fields.forEach((field) => {
-const val = data[field];
-if (val !== undefined && val !== null) {
-(updateData as Record<string, unknown>)[field] = val;
-}
-});
+  const fields: (keyof Prisma.InfluencerProfileUpdateInput)[] = [
+    "displayName", "bio", "city", "state", "address", "pinCode", "gender", "age",
+    "instagramHandle", "youtubeHandle", "minRate", "maxRate",
+    "minInstagramRate", "maxInstagramRate", "minYoutubeRate", "maxYoutubeRate"
+  ];
 
-if (data.categories != null) {
-updateData.categories = data.categories.join(",");
-}
-if (data.languages != null) {
-updateData.languages = data.languages.join(",");
-}
-if (data.profileImage !== undefined && data.profileImage !== "") {
-updateData.avatar = data.profileImage;
-}
+  fields.forEach((field) => {
+    const val = data[field];
+    if (val !== undefined && val !== null) {
+      (updateData as Record<string, unknown>)[field] = val;
+    }
+  });
+
+  // If social handles changed, invalidate verified metrics until re-verified via OAuth flow
+  if (
+    data.instagramHandle !== undefined &&
+    data.instagramHandle !== null &&
+    existingProfile &&
+    data.instagramHandle !== existingProfile.instagramHandle
+  ) {
+    updateData.instagramFollowers = 0;
+    updateData.instagramEngagementRate = 0;
+  }
+
+  if (
+    data.youtubeHandle !== undefined &&
+    data.youtubeHandle !== null &&
+    existingProfile &&
+    data.youtubeHandle !== existingProfile.youtubeHandle
+  ) {
+    updateData.youtubeSubscribers = 0;
+    updateData.youtubeEngagementRate = 0;
+  }
+
+  if (data.categories != null) {
+    updateData.categories = data.categories.join(",");
+  }
+  if (data.languages != null) {
+    updateData.languages = data.languages.join(",");
+  }
+  if (data.profileImage !== undefined && data.profileImage !== "") {
+    updateData.avatar = data.profileImage;
+  }
 
 await prisma.influencerProfile.upsert({
 where: { userId },

@@ -418,7 +418,7 @@ dealId: dbIdSchema.optional(),
 receiverId: dbIdSchema,
 content: z.string().trim().max(2000, "Message truncated. Avoid lengthy chats over 2000chars limit.").optional().default(""),
 messageType: z
-.enum(["TEXT", "FILE", "OFFER", "CONTRACT_ACCEPTANCE", "SYSTEM"])
+.enum(["TEXT", "FILE", "OFFER"])
 .optional(),
 fileUrl: z
 .string()
