@@ -1,27 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, ReactNode } from "react";
-
-/* ============ Scroll-triggered animation hook ============ */
-function useInView(threshold = 0.15) {
-const ref = useRef<HTMLDivElement>(null);
-const [isInView, setIsInView] = useState(false);
-
-useEffect(() => {
-const el = ref.current;
-if (!el) return;
-const observer = new IntersectionObserver(
-([entry]) => {
-if (entry?.isIntersecting) setIsInView(true);
-},
-{ threshold },
-);
-observer.observe(el);
-return () => observer.disconnect();
-}, [threshold]);
-
-return { ref, isInView };
-}
+import { ReactNode } from "react";
+import { useInView } from "@/hooks/useInView";
 
 export function RevealOnScroll({
 children,

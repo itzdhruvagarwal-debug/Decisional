@@ -7,11 +7,13 @@ import { ToastContainer } from "@/components/ui/toast";
 import { useTokenRefreshGuard } from "@/hooks/useTokenRefreshGuard";
 import { useDealDetail, computeDealDisplay } from "@/components/dashboard/deals/useDealDetail";
 import { parseContractTerms } from "@/components/dashboard/deals/DealDetailHelpers";
-import { DealProgress } from "@/components/dashboard/deals/DealProgress";
-import { DealContractCard } from "@/components/dashboard/deals/DealContractCard";
-import { EngagementCard } from "@/components/dashboard/deals/EngagementCard";
-import { ContentSubmissionsCard } from "@/components/dashboard/deals/ContentSubmissionsCard";
-import { DealActionButtons } from "@/components/dashboard/deals/DealActionButtons";
+import {
+  DealProgress,
+  DealContractCard,
+  EngagementCard,
+  ContentSubmissionsCard,
+  DealActionButtons,
+} from "@/components/dashboard/deals/DealCards";
 import { DealModals } from "@/components/dashboard/deals/DealModals";
 import { Button, Textarea } from "@/components/ui";
 

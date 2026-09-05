@@ -2,29 +2,31 @@
 export { Button } from "./Button";
 export type { ButtonProps } from "./Button";
 
-export { Input } from "./Input";
-export type { InputProps } from "./Input";
+export {
+  Input,
+  type InputProps,
+  Textarea,
+  type TextareaProps,
+} from "./inputs";
 
-export { Badge } from "./Badge";
-export type { BadgeProps, BadgeVariant } from "./Badge";
-
-export { Avatar } from "./Avatar";
-export type { AvatarProps, AvatarSize } from "./Avatar";
-
-export { Card } from "./Card";
-export type { CardProps } from "./Card";
-
-export { Skeleton } from "./Skeleton";
-export type { SkeletonProps } from "./Skeleton";
-
-export { Textarea } from "./Textarea";
-export type { TextareaProps } from "./Textarea";
+export {
+  Avatar,
+  type AvatarProps,
+  type AvatarSize,
+  Badge,
+  type BadgeProps,
+  type BadgeVariant,
+  Card,
+  type CardProps,
+  Skeleton,
+  type SkeletonProps,
+  Spinner,
+  type SpinnerProps,
+  type SpinnerSize,
+} from "./primitives";
 
 export { Select } from "./Select";
 export type { SelectProps } from "./Select";
-
-export { Spinner } from "./Spinner";
-export type { SpinnerProps, SpinnerSize } from "./Spinner";
 
 export { default as EmptyState } from "./EmptyState";
 export type { EmptyStateProps } from "./EmptyState";

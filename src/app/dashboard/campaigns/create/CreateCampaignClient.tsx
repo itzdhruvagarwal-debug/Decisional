@@ -10,8 +10,10 @@ import {
   CampaignFormData,
   validateCampaignForm,
 } from "@/components/dashboard/campaigns/create/CampaignCreateHelpers";
-import { ProductSeedingCard } from "@/components/dashboard/campaigns/create/ProductSeedingCard";
-import { DeliverablesList } from "@/components/dashboard/campaigns/create/DeliverablesList";
+import {
+  ProductSeedingCard,
+  DeliverablesList,
+} from "@/components/dashboard/campaigns/create/CampaignCreateCards";
 import { ALL_CATEGORIES } from "@/lib/categories";
 
 interface DraftCampaignData {

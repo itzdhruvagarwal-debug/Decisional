@@ -1,16 +1,6 @@
 import React from "react";
 import Link from "next/link";
 
-type AriaExpandedType = boolean | "true" | "false";
-type AriaHasPopupType = boolean | "true" | "false" | "menu" | "listbox" | "tree" | "grid" | "dialog";
-type AriaPressedType = boolean | "true" | "false" | "mixed";
-type AriaSelectedType = boolean | "true" | "false";
-type AriaCurrentType = "true" | "false" | "page" | "step" | "location" | "date" | "time" | boolean;
-type AriaBusyType = boolean | "true" | "false";
-type AriaAtomicType = boolean | "true" | "false";
-type AriaHiddenType = boolean | "true" | "false";
-type DataActiveType = boolean | "true" | "false";
-
 export interface ButtonProps {
   readonly children?: React.ReactNode;
   readonly className?: string | undefined;
@@ -26,15 +16,12 @@ export interface ButtonProps {
   readonly type?: "button" | "submit" | "reset";
   readonly autoFocus?: boolean;
   readonly onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  readonly onMouseEnter?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined;
+  readonly onMouseLeave?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined;
   readonly form?: string;
   readonly name?: string;
   readonly value?: string;
   readonly id?: string;
-  readonly "aria-label"?: string;
-  readonly "aria-expanded"?: AriaExpandedType;
-  readonly "aria-haspopup"?: AriaHasPopupType;
-  readonly "aria-controls"?: string;
-  readonly "aria-pressed"?: AriaPressedType;
   readonly tabIndex?: number;
   // Link-specific (only used when href is provided)
   readonly href?: string;
@@ -43,23 +30,14 @@ export interface ButtonProps {
   readonly rel?: string;
   readonly title?: string;
   readonly role?: string;
-  readonly "aria-selected"?: AriaSelectedType;
-  readonly "aria-current"?: AriaCurrentType;
-  readonly onMouseEnter?: React.MouseEventHandler<HTMLButtonElement>;
-  readonly onMouseLeave?: React.MouseEventHandler<HTMLButtonElement>;
-  readonly onMouseDown?: React.MouseEventHandler<HTMLButtonElement>;
-  readonly onMouseUp?: React.MouseEventHandler<HTMLButtonElement>;
-  readonly onFocus?: React.FocusEventHandler<HTMLButtonElement>;
-  readonly onBlur?: React.FocusEventHandler<HTMLButtonElement>;
-  readonly onKeyDown?: React.KeyboardEventHandler<HTMLButtonElement>;
-  readonly onKeyUp?: React.KeyboardEventHandler<HTMLButtonElement>;
-  readonly "aria-busy"?: AriaBusyType;
-  readonly "aria-live"?: "off" | "assertive" | "polite";
-  readonly "aria-atomic"?: AriaAtomicType;
-  readonly "aria-describedby"?: string;
-  readonly "aria-labelledby"?: string;
-  readonly "aria-hidden"?: AriaHiddenType;
-  readonly "data-active"?: DataActiveType;
+  // ARIA — only props actually used in the project
+  readonly "aria-label"?: string;
+  readonly "aria-expanded"?: boolean | "true" | "false";
+  readonly "aria-haspopup"?: boolean | "true" | "false" | "menu" | "listbox" | "tree" | "grid" | "dialog";
+  readonly "aria-controls"?: string;
+  readonly "aria-hidden"?: boolean | "true" | "false";
+  readonly "aria-current"?: "true" | "false" | "page" | "step" | "location" | "date" | "time" | boolean;
+  readonly "data-active"?: boolean | "true" | "false";
 }
 
 const VARIANT_CLASSES: Record<NonNullable<ButtonProps["variant"]>, string> = {
@@ -98,12 +76,6 @@ export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, Bu
       onClick,
       onMouseEnter,
       onMouseLeave,
-      onMouseDown,
-      onMouseUp,
-      onFocus,
-      onBlur,
-      onKeyDown,
-      onKeyUp,
       form,
       name,
       value,
@@ -111,7 +83,7 @@ export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, Bu
       tabIndex,
       ...ariaProps
     },
-    ref
+    ref,
   ) => {
     const classes = [
       "btn",
@@ -123,68 +95,60 @@ export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, Bu
       .filter(Boolean)
       .join(" ");
 
-const content = (
-<>
-{loading && <span className={`loading ${children ? "loading-with-label" : ""}`} />}
-{!loading && leftIcon && (
-<span className="btn-icon-left inline-flex items-center">
-{leftIcon}
-</span>
-)}
-{children}
-{!loading && rightIcon && (
-<span className="btn-icon-right inline-flex items-center">
-{rightIcon}
-</span>
-)}
-</>
-);
+    const content = (
+      <>
+        {loading && <span className={`loading ${children ? "loading-with-label" : ""}`} />}
+        {!loading && leftIcon && (
+          <span className="btn-icon-left inline-flex items-center">{leftIcon}</span>
+        )}
+        {children}
+        {!loading && rightIcon && (
+          <span className="btn-icon-right inline-flex items-center">{rightIcon}</span>
+        )}
+      </>
+    );
 
-if (href) {
-return (
-<Link
-href={href}
-className={classes}
-{...(prefetch !== undefined ? { prefetch } : {})}
-{...(target !== undefined ? { target } : {})}
-{...(rel !== undefined ? { rel } : {})}
-{...(id !== undefined ? { id } : {})}
-{...(tabIndex !== undefined ? { tabIndex } : {})}
-ref={ref as React.Ref<HTMLAnchorElement>}
-{...ariaProps}
->
-{content}
-</Link>
-);
-}
+    if (href) {
+      return (
+        <Link
+          href={href}
+          className={classes}
+          {...(prefetch !== undefined ? { prefetch } : {})}
+          {...(target !== undefined ? { target } : {})}
+          {...(rel !== undefined ? { rel } : {})}
+          {...(id !== undefined ? { id } : {})}
+          {...(tabIndex !== undefined ? { tabIndex } : {})}
+          {...(onMouseEnter !== undefined ? { onMouseEnter: onMouseEnter as React.MouseEventHandler<HTMLAnchorElement> } : {})}
+          {...(onMouseLeave !== undefined ? { onMouseLeave: onMouseLeave as React.MouseEventHandler<HTMLAnchorElement> } : {})}
+          ref={ref as React.Ref<HTMLAnchorElement>}
+          {...ariaProps}
+        >
+          {content}
+        </Link>
+      );
+    }
 
-return (
-<button
-type={type}
-autoFocus={autoFocus}
-className={classes}
-disabled={disabled || loading}
-onClick={onClick}
-onMouseEnter={onMouseEnter}
-onMouseLeave={onMouseLeave}
-onMouseDown={onMouseDown}
-onMouseUp={onMouseUp}
-onFocus={onFocus}
-onBlur={onBlur}
-onKeyDown={onKeyDown}
-onKeyUp={onKeyUp}
-form={form}
-name={name}
-value={value}
-id={id}
-tabIndex={tabIndex}
-ref={ref as React.Ref<HTMLButtonElement>}
-{...ariaProps}
->
-{content}
-</button>
-);
-}
+    return (
+      <button
+        type={type}
+        autoFocus={autoFocus}
+        className={classes}
+        disabled={disabled || loading}
+        onClick={onClick}
+        {...(onMouseEnter !== undefined ? { onMouseEnter: onMouseEnter as React.MouseEventHandler<HTMLButtonElement> } : {})}
+        {...(onMouseLeave !== undefined ? { onMouseLeave: onMouseLeave as React.MouseEventHandler<HTMLButtonElement> } : {})}
+        form={form}
+        name={name}
+        value={value}
+        id={id}
+        tabIndex={tabIndex}
+        ref={ref as React.Ref<HTMLButtonElement>}
+        {...ariaProps}
+      >
+        {content}
+      </button>
+    );
+  },
 );
 
 Button.displayName = "Button";
