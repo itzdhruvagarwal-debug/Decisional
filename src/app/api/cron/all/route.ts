@@ -26,11 +26,9 @@ async function _handler_POST(req: NextRequest) {
   await validateCronSecret();
 
   const startTime = Date.now();
-  const origin =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    process.env.APP_BASE_URL ||
-    req.nextUrl.origin ||
-    "https://vyaparmedia.vercel.app";
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "vyaparmedia.vercel.app";
+  const proto = req.headers.get("x-forwarded-proto") || "https";
+  const origin = `${proto}://${host}`;
 
   const authHeader = req.headers.get("authorization") || "";
   const xCronHeader = req.headers.get("x-cron-secret") || "";
