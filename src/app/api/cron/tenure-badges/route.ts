@@ -128,3 +128,4 @@ async function _handler_POST(_req: NextRequest) {
 }
 
 export const POST = apiWrapper(_handler_POST);
+export const GET = POST;

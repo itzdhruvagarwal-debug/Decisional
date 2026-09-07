@@ -121,6 +121,7 @@ async function _handler_POST(_req: NextRequest) {
 }
 
 export const POST = apiWrapper(_handler_POST);
+export const GET = POST;
 
 async function handleWalletRefund(tx: Prisma.TransactionClient, deal: ExpiredSignatureDeal, brandUserId: string) {
   const refundAmount = getDealTotalAmount(deal);

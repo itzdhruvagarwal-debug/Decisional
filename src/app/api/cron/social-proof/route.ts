@@ -33,3 +33,4 @@ durationMs,
 }
 
 export const POST = apiWrapper(_handler_POST);
+export const GET = POST;

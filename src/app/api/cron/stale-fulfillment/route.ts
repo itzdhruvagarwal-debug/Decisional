@@ -421,3 +421,4 @@ await redis.del(LOCK_KEY);
 }
 
 export const POST = apiWrapper(_handler_POST);
+export const GET = POST;

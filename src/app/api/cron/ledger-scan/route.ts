@@ -93,3 +93,4 @@ scannedAt: new Date().toISOString(),
 }
 
 export const POST = apiWrapper(_handler_POST);
+export const GET = POST;

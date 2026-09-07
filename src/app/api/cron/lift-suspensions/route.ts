@@ -15,3 +15,4 @@ return NextResponse.json({ success: true, message: `Suspensions lifted: ${result
 }
 
 export const POST = apiWrapper(_handler_POST);
+export const GET = POST;

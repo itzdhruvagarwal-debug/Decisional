@@ -13,3 +13,4 @@ return NextResponse.json({ success: true, message: "Engagement synced", data: re
 }
 
 export const POST = apiWrapper(_handler_POST);
+export const GET = POST;
