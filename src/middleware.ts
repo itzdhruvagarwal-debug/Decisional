@@ -45,30 +45,30 @@ const storageImageStr = storageImageSources.length > 0 ? " " + storageImageSourc
 const isDev = process.env.NODE_ENV === "development";
 
 const BASE_CSP = isDev
-? [
-"default-src 'self'",
-"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.google.com https://*.googleapis.com https://checkout.razorpay.com https://*.razorpay.com",
-"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-`img-src 'self' data: blob: https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://images.unsplash.com${storageImageStr}`,
-"font-src 'self' https://fonts.gstatic.com",
-`connect-src 'self' https://*.googleapis.com https://*.razorpay.com https://api.razorpay.com https://graph.instagram.com https://api.instagram.com https://graph.facebook.com https://api.msg91.com https://surepass.io https://*.surepass.io https://*.ingest.sentry.io https://*.sentry.io${storageConnectStr}`,
-"frame-src 'self' https://checkout.razorpay.com https://*.razorpay.com",
-"worker-src 'self' blob:",
-"object-src 'none'",
-"base-uri 'self'",
-].join("; ")
-: [
-"default-src 'self'",
-`script-src 'self' 'nonce-{NONCE}' https://*.google.com https://*.googleapis.com https://checkout.razorpay.com https://*.razorpay.com`,
-"style-src 'self' 'unsafe-inline' 'nonce-{NONCE}' https://fonts.googleapis.com",
-`img-src 'self' data: blob: https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://images.unsplash.com${storageImageStr}`,
-"font-src 'self' https://fonts.gstatic.com",
-`connect-src 'self' https://*.googleapis.com https://*.razorpay.com https://api.razorpay.com https://graph.instagram.com https://api.instagram.com https://graph.facebook.com https://api.msg91.com https://surepass.io https://*.surepass.io https://*.ingest.sentry.io https://*.sentry.io${storageConnectStr}`,
-"frame-src 'self' https://checkout.razorpay.com https://*.razorpay.com",
-"worker-src 'self' blob:",
-"object-src 'none'",
-"base-uri 'self'",
-].join("; ");
+  ? [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.google.com https://*.googleapis.com https://checkout.razorpay.com https://*.razorpay.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      `img-src 'self' data: blob: https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://images.unsplash.com${storageImageStr}`,
+      "font-src 'self' https://fonts.gstatic.com",
+      `connect-src 'self' https://*.googleapis.com https://*.razorpay.com https://api.razorpay.com https://graph.instagram.com https://api.instagram.com https://graph.facebook.com https://api.msg91.com https://surepass.io https://*.surepass.io https://*.ingest.sentry.io https://*.sentry.io${storageConnectStr}`,
+      "frame-src 'self' https://checkout.razorpay.com https://*.razorpay.com",
+      "worker-src 'self' blob:",
+      "object-src 'none'",
+      "base-uri 'self'",
+    ].join("; ")
+  : [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://*.google.com https://*.googleapis.com https://checkout.razorpay.com https://*.razorpay.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      `img-src 'self' data: blob: https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://images.unsplash.com${storageImageStr}`,
+      "font-src 'self' https://fonts.gstatic.com",
+      `connect-src 'self' https://*.googleapis.com https://*.razorpay.com https://api.razorpay.com https://graph.instagram.com https://api.instagram.com https://graph.facebook.com https://api.msg91.com https://surepass.io https://*.surepass.io https://*.ingest.sentry.io https://*.sentry.io${storageConnectStr}`,
+      "frame-src 'self' https://checkout.razorpay.com https://*.razorpay.com",
+      "worker-src 'self' blob:",
+      "object-src 'none'",
+      "base-uri 'self'",
+    ].join("; ");
 
 // ---------------------------------------------------------------------------
 // Private guard helpers (not exported)
