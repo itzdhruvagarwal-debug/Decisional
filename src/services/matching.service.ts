@@ -412,10 +412,25 @@ export class MatchingService {
    * Relative ROI-Scoring Algorithm benchmarked against top enterprise influencer platforms.
    * Compares the influencer's estimated CPV against the category's market baseline.
    * Produces a relative score (10-100) with smooth linear interpolation.
+   * Supports passing an explicit baseline in paise (number), a single category (string),
+   * an array of categories (string[]), or defaults to platform baseline.
    */
-  public static calculateRoiScore(cpvPaise: number, baselineCpvPaise: number): number {
+  public static calculateRoiScore(
+    cpvPaise: number,
+    categoryOrBaseline?: number | string | string[]
+  ): number {
     if (cpvPaise <= 0) return 100;
-    const baseline = Math.max(1, baselineCpvPaise);
+
+    let baseline = DEFAULT_BASELINE_CPV_PAISE;
+
+    if (typeof categoryOrBaseline === "number") {
+      baseline = Math.max(1, categoryOrBaseline);
+    } else if (typeof categoryOrBaseline === "string") {
+      baseline = MatchingService.getCategoryBaselineCpvSync([categoryOrBaseline]);
+    } else if (Array.isArray(categoryOrBaseline) && categoryOrBaseline.length > 0) {
+      baseline = MatchingService.getCategoryBaselineCpvSync(categoryOrBaseline);
+    }
+
     const efficiencyRatio = cpvPaise / baseline;
 
     // 1. Highly Efficient (CPV <= 40% of category baseline): Score 95 - 100
@@ -445,6 +460,89 @@ export class MatchingService {
     }
     // 6. Substantially Overpriced (CPV > 350% of category baseline): Score 10 - 30
     return Math.max(10, Math.round(30 - (efficiencyRatio - 3.5) * 5));
+  }
+
+  /**
+   * Asynchronous version of calculateRoiScore that fully resolves dynamic 30-day platform
+   * data and DB-configured benchmarks for the category.
+   */
+  public static async calculateRoiScoreAsync(
+    cpvPaise: number,
+    categoryOrBaseline?: number | string | string[]
+  ): Promise<number> {
+    if (cpvPaise <= 0) return 100;
+
+    let baseline = DEFAULT_BASELINE_CPV_PAISE;
+
+    if (typeof categoryOrBaseline === "number") {
+      baseline = Math.max(1, categoryOrBaseline);
+    } else if (typeof categoryOrBaseline === "string") {
+      baseline = await MatchingService.getCategoryBaselineCpv([categoryOrBaseline]);
+    } else if (Array.isArray(categoryOrBaseline) && categoryOrBaseline.length > 0) {
+      baseline = await MatchingService.getCategoryBaselineCpv(categoryOrBaseline);
+    }
+
+    return MatchingService.calculateRoiScore(cpvPaise, baseline);
+  }
+
+  /**
+   * Resets an admin-configured category benchmark from TrustRuleConfig table
+   * and invalidates Redis cache so dynamic/seeded baselines resume.
+   */
+  public static async resetCategoryBaselineCpv(category: string, adminId?: string): Promise<void> {
+    const normalized = category.trim().toLowerCase();
+    const ruleKey = `CPV_BENCHMARK_${normalized.toUpperCase().replace(/[\s-]+/g, "_")}`;
+
+    await prisma.trustRuleConfig.deleteMany({
+      where: { ruleKey },
+    });
+
+    try {
+      await redis.del(`category_cpv:resolved:${normalized}`);
+    } catch (err) {
+      logger.debug("Failed to invalidate Redis category CPV cache", { category, error: err });
+    }
+
+    logger.info("Reset category baseline CPV in database", {
+      category: normalized,
+      adminId,
+    });
+  }
+
+  /**
+   * Fetches all known category benchmarks with their resolution tier,
+   * current effective baseline in paise and rupees, and whether admin configured in DB.
+   */
+  public static async getAllCategoryBenchmarks(): Promise<
+    Array<{
+      category: string;
+      rawKey: string;
+      baselinePaise: number;
+      baselineRupees: string;
+      source: CategoryBenchmarkSource;
+      isDbConfigured: boolean;
+      dealCount?: number;
+    }>
+  > {
+    const categories = Object.keys(CATEGORY_BASELINE_CPV_PAISE);
+    const results = await Promise.all(
+      categories.map(async (cat) => {
+        const details = await MatchingService.resolveSingleCategoryBaseline(cat);
+        const dbConfigured = await MatchingService.getDbConfiguredCategoryBaselineCpv(cat);
+        const dynamicData = await MatchingService.getDynamicCategoryBaselineCpv(cat, 1);
+        return {
+          category: cat.charAt(0).toUpperCase() + cat.slice(1),
+          rawKey: cat,
+          baselinePaise: details.baselinePaise,
+          baselineRupees: (details.baselinePaise / 100).toFixed(2),
+          source: details.source,
+          isDbConfigured: dbConfigured !== null,
+          dealCount: dynamicData?.dealCount ?? 0,
+        };
+      })
+    );
+
+    return results.sort((a, b) => b.baselinePaise - a.baselinePaise);
   }
 
   private static calculateCategoryScore(targetCategories: string[], categories: string): number {
@@ -986,5 +1084,8 @@ export const getCategoryBaselineCpv = MatchingService.getCategoryBaselineCpv;
 export const getCategoryBaselineDetails = MatchingService.getCategoryBaselineDetails;
 export const getCategoryBaselineCpvSync = MatchingService.getCategoryBaselineCpvSync;
 export const calculateRoiScore = MatchingService.calculateRoiScore;
+export const calculateRoiScoreAsync = MatchingService.calculateRoiScoreAsync;
 export const updateCategoryBaselineCpv = MatchingService.updateCategoryBaselineCpv;
+export const resetCategoryBaselineCpv = MatchingService.resetCategoryBaselineCpv;
+export const getAllCategoryBenchmarks = MatchingService.getAllCategoryBenchmarks;
 

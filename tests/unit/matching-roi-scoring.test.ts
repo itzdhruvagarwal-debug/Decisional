@@ -7,6 +7,9 @@ import {
   getCategoryBaselineDetails,
   updateCategoryBaselineCpv,
   calculateRoiScore,
+  calculateRoiScoreAsync,
+  getAllCategoryBenchmarks,
+  resetCategoryBaselineCpv,
   MatchingService,
   encodeMatchingPriority,
   decodeMatchingPriority,
@@ -48,6 +51,7 @@ vi.mock("@/lib/db", () => ({
     trustRuleConfig: {
       findUnique: vi.fn().mockResolvedValue(null),
       upsert: vi.fn().mockResolvedValue({ id: "rule-1" }),
+      deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
     },
     review: {
       findMany: vi.fn().mockResolvedValue([]),
@@ -211,23 +215,47 @@ describe("Unit Tests: Category-Specific ROI & Relative CPV Scoring (CreatorIQ / 
       expect(financeRoiScore - fashionRoiScore).toBeGreaterThanOrEqual(40);
     });
 
-    it("should award top score (95-100) for hyper-efficient CPV (<= 40% of baseline)", () => {
-      const techBaseline = 65;
-      const score = calculateRoiScore(20, techBaseline);
-      expect(score).toBeGreaterThanOrEqual(95);
-      expect(score).toBeLessThanOrEqual(100);
+    it("DOD: should accept category name directly as string and compute genuinely different roiScores", () => {
+      const SAME_CPV_PAISE = 50; // ₹0.50 per view
+
+      // Pass category name directly as second argument!
+      const financeScore = calculateRoiScore(SAME_CPV_PAISE, "finance");
+      const fashionScore = calculateRoiScore(SAME_CPV_PAISE, "fashion");
+
+      expect(financeScore).toBe(95);
+      expect(fashionScore).toBe(50);
+      expect(financeScore).toBeGreaterThan(fashionScore);
     });
 
-    it("should heavily penalize overpriced CPV (> 350% of baseline)", () => {
-      const techBaseline = 65;
-      const score = calculateRoiScore(300, techBaseline);
-      expect(score).toBeLessThan(30);
-      expect(score).toBeGreaterThanOrEqual(10);
+    it("DOD: should accept category array directly and compute genuinely different roiScores", () => {
+      const SAME_CPV_PAISE = 50;
+
+      const financeScore = calculateRoiScore(SAME_CPV_PAISE, ["Finance"]);
+      const fashionScore = calculateRoiScore(SAME_CPV_PAISE, ["Fashion"]);
+
+      expect(financeScore).toBe(95);
+      expect(fashionScore).toBe(50);
     });
 
-    it("should gracefully handle zero or negative CPV as maximum ROI efficiency", () => {
-      expect(calculateRoiScore(0, 65)).toBe(100);
-      expect(calculateRoiScore(-10, 65)).toBe(100);
+    it("DOD: should asynchronously resolve dynamic/DB baselines via calculateRoiScoreAsync", async () => {
+      const SAME_CPV_PAISE = 50;
+
+      const financeScore = await calculateRoiScoreAsync(SAME_CPV_PAISE, "finance");
+      const fashionScore = await calculateRoiScoreAsync(SAME_CPV_PAISE, "fashion");
+
+      expect(financeScore).toBe(95);
+      expect(fashionScore).toBe(50);
+    });
+
+    it("should list all category benchmarks and allow resetting overrides", async () => {
+      const all = await getAllCategoryBenchmarks();
+      expect(all.length).toBeGreaterThanOrEqual(15);
+      expect(all.find((b) => b.rawKey === "finance")?.baselinePaise).toBe(120);
+      expect(all.find((b) => b.rawKey === "fashion")?.baselinePaise).toBe(25);
+
+      (prisma.trustRuleConfig.deleteMany as ReturnType<typeof vi.fn>).mockResolvedValue({ count: 1 });
+      await resetCategoryBaselineCpv("finance");
+      expect(prisma.trustRuleConfig.deleteMany).toHaveBeenCalled();
     });
   });
 

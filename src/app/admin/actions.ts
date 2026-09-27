@@ -19,6 +19,7 @@ import {
   checkAdminApplicationReviewEligibility,
   checkAdminVerificationReviewEligibility,
 } from "@/lib/action-eligibility";
+import { MatchingService } from "@/services/matching.service";
 
 async function requireAdmin() {
 const session = await auth();
@@ -533,3 +534,60 @@ export async function resolveFraudAppealAction(
   revalidatePath(`/admin/users/${targetUserId}`);
   return result;
 }
+
+export async function updateCategoryBenchmarkAction(
+  category: string,
+  baselinePaise: number
+) {
+  const session = await requireAdmin();
+  if (!category || typeof category !== "string") {
+    throw AppError.badRequest("Valid category is required");
+  }
+  if (!baselinePaise || baselinePaise < 1 || baselinePaise > 5000) {
+    throw AppError.badRequest("Baseline CPV must be between 1 paise and 5000 paise (₹50)");
+  }
+
+  await MatchingService.updateCategoryBaselineCpv(category, baselinePaise, session.user.id);
+
+  await createActivityLog({
+    userId: session.user.id,
+    action: "CATEGORY_BENCHMARK_UPDATED",
+    entityType: "SYSTEM_CONFIG",
+    entityId: category,
+    metadata: {
+      category,
+      baselinePaise,
+      baselineRupees: (baselinePaise / 100).toFixed(2),
+      adminEmail: session.user.email,
+    },
+  }).catch(() => {});
+
+  revalidatePath("/admin/benchmarks");
+  revalidatePath("/admin");
+  return { success: true, category, baselinePaise };
+}
+
+export async function resetCategoryBenchmarkAction(category: string) {
+  const session = await requireAdmin();
+  if (!category || typeof category !== "string") {
+    throw AppError.badRequest("Valid category is required");
+  }
+
+  await MatchingService.resetCategoryBaselineCpv(category, session.user.id);
+
+  await createActivityLog({
+    userId: session.user.id,
+    action: "CATEGORY_BENCHMARK_RESET",
+    entityType: "SYSTEM_CONFIG",
+    entityId: category,
+    metadata: {
+      category,
+      adminEmail: session.user.email,
+    },
+  }).catch(() => {});
+
+  revalidatePath("/admin/benchmarks");
+  revalidatePath("/admin");
+  return { success: true, category };
+}
+

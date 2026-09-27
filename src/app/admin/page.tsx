@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   ArrowRight,
   LayoutDashboard,
+  Target,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -104,6 +105,12 @@ export default async function AdminOverviewPage() {
       desc: "Off-platform circumvention detection and penalty history.",
       href: "/admin/violations",
       icon: AlertTriangle,
+    },
+    {
+      title: "Category CPV Benchmarks",
+      desc: "Tune dynamic & database baselines for relative ROI matching across creator niches.",
+      href: "/admin/benchmarks",
+      icon: Target,
     },
   ];
 
