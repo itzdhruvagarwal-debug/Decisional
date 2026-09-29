@@ -23,6 +23,7 @@ export interface CreateShiprocketOrderParams {
   breadth?: number | undefined;
   height?: number | undefined;
   weight?: number | undefined; // kg
+  pickupPincode?: string | undefined; // brand pickup pincode for rate estimation
 }
 
 export interface TrackingCheckpoint {
@@ -49,6 +50,8 @@ export interface CompleteShipmentResult {
   manifestUrl?: string | undefined;
   initialStatus: string;
   trackingHistory: TrackingCheckpoint[];
+  /** Courier charge billed to brand wallet (paise). */
+  courierChargePaise: number;
 }
 
 // In-memory token cache
@@ -264,7 +267,47 @@ async function generateManifest(token: string, shipmentId: string): Promise<stri
 }
 
 /**
+ * Fetches the recommended courier rate for a shipment from Shiprocket.
+ * Returns estimated courier charge in paise (rounded to nearest rupee * 100).
+ * Falls back to 0 on error (charge will be skipped gracefully).
+ */
+export async function getShippingRate(
+  token: string,
+  params: {
+    pickupPincode: string;
+    deliveryPincode: string;
+    weight: number; // kg
+    cod: boolean;
+  },
+): Promise<number> {
+  try {
+    const url = new URL(`${SHIPROCKET_API_BASE}/courier/serviceability/`);
+    url.searchParams.set("pickup_postcode", params.pickupPincode);
+    url.searchParams.set("delivery_postcode", params.deliveryPincode);
+    url.searchParams.set("weight", String(Math.max(0.1, params.weight)));
+    url.searchParams.set("cod", params.cod ? "1" : "0");
+
+    const response = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!response.ok) return 0;
+
+    const data = await response.json();
+    // Shiprocket returns recommended_courier_data array sorted by rank
+    const recommended = data.data?.available_courier_companies?.[0];
+    if (!recommended) return 0;
+
+    const chargeRupees = Number(recommended.rate || recommended.freight_charge || 0);
+    return Math.round(chargeRupees * 100); // convert to paise
+  } catch {
+    return 0; // Non-fatal — shipment still created, charge skipped
+  }
+}
+
+/**
  * Unified method to create order, assign courier AWB, and generate label.
+ * Also fetches actual courier rate and returns as courierChargePaise for wallet billing.
  * If credentials are not configured, runs high-fidelity mock simulation.
  */
 export async function createCompleteShipment(
@@ -275,6 +318,7 @@ export async function createCompleteShipment(
     const mockOrderNum = Math.floor(100000 + Math.random() * 900000);
     const mockAwb = `SRDEL${Math.floor(1000000000 + Math.random() * 9000000000)}`;
     const nowIso = new Date().toISOString();
+    const mockChargeRupees = 80 + Math.floor(Math.random() * 70); // ~₹80–₹150 simulated
 
     return {
       orderId: `MOCK-ORD-${params.dealId.slice(-6).toUpperCase()}-${mockOrderNum}`,
@@ -284,6 +328,7 @@ export async function createCompleteShipment(
       labelUrl: `https://apiv2.shiprocket.in/sample-label/${mockAwb}.pdf`,
       manifestUrl: `https://apiv2.shiprocket.in/sample-manifest/${mockAwb}.pdf`,
       initialStatus: "PICKUP_SCHEDULED",
+      courierChargePaise: mockChargeRupees * 100,
       trackingHistory: [
         {
           date: nowIso,
@@ -296,6 +341,15 @@ export async function createCompleteShipment(
   }
 
   const token = await getShiprocketToken();
+
+  // Fetch courier rate before creating shipment (non-blocking on failure)
+  const courierChargePaise = await getShippingRate(token, {
+    pickupPincode: params.pickupPincode || process.env.SHIPROCKET_PICKUP_PINCODE || "110001",
+    deliveryPincode: params.shippingAddress.pinCode,
+    weight: Math.max(0.1, params.weight || 0.5),
+    cod: false,
+  });
+
   const order = await createAdhocOrder(token, params);
   const awb = await assignAwb(token, order.shipmentId);
   const labelUrl = await generateLabel(token, order.shipmentId);
@@ -316,6 +370,7 @@ export async function createCompleteShipment(
     labelUrl: labelUrl || undefined,
     manifestUrl: manifestUrl || undefined,
     initialStatus: "PICKUP_SCHEDULED",
+    courierChargePaise,
     trackingHistory: [initialCheckpoint],
   };
 }

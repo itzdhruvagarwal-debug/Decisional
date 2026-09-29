@@ -111,6 +111,7 @@ export async function createShiprocketShipment(
   dealId: string,
   options?: {
     pickupLocation?: string | undefined;
+    pickupPincode?: string | undefined;
     length?: number | undefined;
     breadth?: number | undefined;
     height?: number | undefined;
@@ -156,7 +157,7 @@ export async function createShiprocketShipment(
     country: rawAddress.country ? String(rawAddress.country) : "India",
   };
 
-  // Step 2: Call Shiprocket API to create order, assign courier AWB, and fetch label
+  // Step 2: Call Shiprocket API to create order, assign courier AWB, fetch label + rate
   const { createCompleteShipment } = await import("@/lib/shiprocket");
   const shipment = await createCompleteShipment({
     dealId: deal.id,
@@ -166,18 +167,71 @@ export async function createShiprocketShipment(
     shippingAddress,
     creatorEmail: deal.influencer.user?.email || undefined,
     pickupLocation: options?.pickupLocation,
+    pickupPincode: options?.pickupPincode,
     length: options?.length,
     breadth: options?.breadth,
     height: options?.height,
     weight: options?.weight,
   });
 
-  // Step 3: Atomic database transaction to commit the generated shipment
+  const courierChargePaise = shipment.courierChargePaise || 0;
+
+  // Step 3: Atomic transaction — validate balance, debit brand wallet, record shipment
   const updatedDeal = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const lockedDeal = await lockAndFetchDealForAction(tx, dealId);
     if (lockedDeal.productFulfillmentStatus !== "READY_TO_DISPATCH") {
       throw AppError.badRequest("Deal status changed concurrently");
     }
+
+    // --- Integrated Billing: Debit brand wallet for courier charge ---
+    if (courierChargePaise > 0 && deal.brand?.userId) {
+      const brandWallet = await tx.wallet.findUnique({
+        where: { userId: deal.brand.userId },
+        select: { id: true, balance: true, isFrozen: true },
+      });
+
+      if (!brandWallet || brandWallet.isFrozen) {
+        throw AppError.badRequest("Brand wallet is unavailable or frozen. Cannot process shipping charge.");
+      }
+      if (brandWallet.balance < courierChargePaise) {
+        const shortfallRupees = ((courierChargePaise - brandWallet.balance) / 100).toFixed(2);
+        throw AppError.badRequest(
+          `Insufficient wallet balance for shipping charge. Please deposit ₹${shortfallRupees} more.`,
+        );
+      }
+
+      // Debit brand wallet
+      await tx.wallet.update({
+        where: { userId: deal.brand.userId },
+        data: { balance: { decrement: courierChargePaise } },
+      });
+
+      // Record SHIPPING_CHARGE transaction on brand wallet
+      await tx.transaction.create({
+        data: {
+          walletId: brandWallet.id,
+          dealId: deal.id,
+          type: "SHIPPING_CHARGE",
+          amount: courierChargePaise,
+          status: "COMPLETED",
+          description: `Shiprocket courier charge for deal: ${deal.id} (AWB: ${shipment.awbCode})`,
+          metadata: {
+            awbCode: shipment.awbCode,
+            courierName: shipment.courierName,
+            orderId: shipment.orderId,
+            chargeRupees: (courierChargePaise / 100).toFixed(2),
+          },
+        },
+      });
+
+      // Credit platform treasury (double-entry bookkeeping)
+      await tx.wallet.upsert({
+        where: { userId: "PLATFORM_TREASURY" },
+        create: { userId: "PLATFORM_TREASURY", balance: courierChargePaise, pendingBalance: 0 },
+        update: { balance: { increment: courierChargePaise } },
+      });
+    }
+    // ----------------------------------------------------------------
 
     const updated = await tx.deal.update({
       where: { id: dealId },
@@ -194,8 +248,13 @@ export async function createShiprocketShipment(
         shippingManifestUrl: shipment.manifestUrl || null,
         shippingStatus: shipment.initialStatus,
         shippingTrackingHistory: shipment.trackingHistory as unknown as Prisma.InputJsonValue,
+        shippingChargeAmount: courierChargePaise > 0 ? courierChargePaise : null,
       },
     });
+
+    const chargeDisplay = courierChargePaise > 0
+      ? ` Courier charge ₹${(courierChargePaise / 100).toFixed(2)} debited from your wallet.`
+      : "";
 
     await NotificationService.createNotification({
       userId: deal.influencer.userId,
@@ -205,11 +264,21 @@ export async function createShiprocketShipment(
       data: { link: `/dashboard/deals/${dealId}` },
     }, tx);
 
+    if (deal.brand?.userId && courierChargePaise > 0) {
+      await NotificationService.createNotification({
+        userId: deal.brand.userId,
+        type: "deal_update",
+        title: "Shipping charge billed",
+        message: `₹${(courierChargePaise / 100).toFixed(2)} courier charge for "${deal.campaign.title}" deducted from your wallet.${chargeDisplay}`,
+        data: { link: `/dashboard/deals/${dealId}` },
+      }, tx);
+    }
+
     return updated;
   });
 
   await invalidateDealCache(dealId);
-  return { deal: updatedDeal, shipment };
+  return { deal: updatedDeal, shipment, courierChargePaise };
 }
 
 

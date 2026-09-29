@@ -634,6 +634,7 @@ model Deal {
   shippingStatus           String?
   shippingCourierName      String?
   shippingTrackingHistory  Json?
+  shippingChargeAmount     Int?    // Courier charge billed to brand wallet (paise). Null = not yet billed.
 
   // Timeline
   submissionDeadline DateTime
@@ -779,6 +780,7 @@ enum TransactionType {
   CLAWBACK
   PLATFORM_FEE
   CHARGEBACK
+  SHIPPING_CHARGE
 }
 
 enum TransactionStatus {

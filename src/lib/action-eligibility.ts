@@ -933,11 +933,16 @@ export function checkDealCancellationEligibility(
 
 export function checkProductFulfillmentEligibility(
   deal: {
+    id?: string | undefined;
     status: string;
     requiresProduct?: boolean | null | undefined;
     productFulfillmentStatus?: string | null | undefined;
     shippingAddress?: unknown;
     hasActiveDispute?: boolean | null | undefined;
+    /** Estimated courier charge in paise (from Shiprocket rate lookup). Used for wallet pre-flight. */
+    estimatedShippingCharge?: number | undefined;
+    /** Brand's current wallet balance in paise. Used for shipping balance pre-flight. */
+    brandWalletBalance?: number | undefined;
   } | null | undefined,
   userRole: "INFLUENCER" | "BRAND" | "ADMIN",
   action: "submit_address" | "confirm_dispatch" | "confirm_received" | "create_shipment",
@@ -952,6 +957,7 @@ export function checkProductFulfillmentEligibility(
     | "PAYMENT_NOT_SECURED"
     | "ADDRESS_MISSING"
     | "NOT_DISPATCHED"
+    | "INSUFFICIENT_SHIPPING_BALANCE"
     | undefined;
   ctaText?: string | undefined;
   ctaHref?: string | undefined;
@@ -1015,6 +1021,25 @@ export function checkProductFulfillmentEligibility(
         allowed: false,
         reason: "Creator shipping address is required before the product can be dispatched.",
         reasonCode: "ADDRESS_MISSING",
+        ctaText: "View Deal",
+        ctaHref: `/dashboard/deals/${deal.id}`,
+      };
+    }
+    // Wallet balance pre-flight for create_shipment (estimated courier charge)
+    if (
+      action === "create_shipment" &&
+      typeof deal.estimatedShippingCharge === "number" &&
+      deal.estimatedShippingCharge > 0 &&
+      typeof deal.brandWalletBalance === "number" &&
+      deal.brandWalletBalance < deal.estimatedShippingCharge
+    ) {
+      const shortfallRupees = ((deal.estimatedShippingCharge - deal.brandWalletBalance) / 100).toFixed(2);
+      return {
+        allowed: false,
+        reason: `Wallet balance insufficient for courier charge — deposit ₹${shortfallRupees} more to proceed.`,
+        reasonCode: "INSUFFICIENT_SHIPPING_BALANCE",
+        ctaText: `Deposit ₹${shortfallRupees}`,
+        ctaHref: "/dashboard/wallet",
       };
     }
   }
