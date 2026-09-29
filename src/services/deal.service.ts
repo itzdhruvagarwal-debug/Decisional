@@ -1,7 +1,14 @@
 import { listDeals } from "./deal/list";
 import { rejectPendingInvite } from "./deal/invite";
 import { submitContent, approveContent, reviewContent } from "./deal/content";
-import { submitShippingAddress, confirmProductDispatch, confirmProductReceived } from "./deal/product";
+import {
+  submitShippingAddress,
+  confirmProductDispatch,
+  confirmProductReceived,
+  createShiprocketShipment,
+  trackDealShipping,
+  handleShiprocketWebhook,
+} from "./deal/product";
 import { autoApproveExpiredContent } from "./deal/auto-approve";
 import { verifyPost } from "./deal/verify";
 
@@ -14,6 +21,9 @@ static readonly rejectPendingInvite = rejectPendingInvite;
 static readonly submitShippingAddress = submitShippingAddress;
 static readonly confirmProductDispatch = confirmProductDispatch;
 static readonly confirmProductReceived = confirmProductReceived;
+static readonly createShiprocketShipment = createShiprocketShipment;
+static readonly trackDealShipping = trackDealShipping;
+static readonly handleShiprocketWebhook = handleShiprocketWebhook;
 static readonly approveContent = approveContent;
 static readonly reviewContent = reviewContent;
 static readonly autoApproveExpiredContent = autoApproveExpiredContent;

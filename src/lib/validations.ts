@@ -346,6 +346,14 @@ trackingNumber: z.string().trim().min(1).max(120),
 carrier: z.string().trim().max(80).optional(),
 }),
 z.object({
+action: z.literal("create_shiprocket_shipment"),
+pickupLocation: z.string().trim().max(100).optional(),
+length: z.number().min(1).max(200).optional(),
+breadth: z.number().min(1).max(200).optional(),
+height: z.number().min(1).max(200).optional(),
+weight: z.number().min(0.01).max(50).optional(),
+}),
+z.object({
 action: z.literal("confirm_received"),
 }),
 ]);

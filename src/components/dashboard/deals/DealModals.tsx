@@ -1,10 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Modal, Button, Input, Textarea, type ToastType } from "@/components/ui";
 import { DealDetail, getFlatDeliverablesList, ContentUrlEntry } from "./DealDetailHelpers";
 import { checkRevisionRequestEligibility } from "@/lib/action-eligibility";
+import { ShipmentTrackingModal } from "./ShipmentTrackingModal";
+import { Truck, Package, Sparkles } from "lucide-react";
 
 interface DealModalsProps {
   readonly showAddressModal: boolean;
@@ -15,6 +17,8 @@ interface DealModalsProps {
   readonly setShowVerifyModal: (open: boolean) => void;
   readonly showDispatchModal?: boolean;
   readonly setShowDispatchModal?: (open: boolean) => void;
+  readonly showTrackingModal?: boolean;
+  readonly setShowTrackingModal?: (open: boolean) => void;
   readonly deal: DealDetail | null;
   readonly shippingForm: { fullName: string; phone: string; line1: string; line2: string; city: string; state: string; pinCode: string; country: string };
   readonly setShippingForm: React.Dispatch<React.SetStateAction<{ fullName: string; phone: string; line1: string; line2: string; city: string; state: string; pinCode: string; country: string }>>;
@@ -29,6 +33,10 @@ interface DealModalsProps {
   readonly handleReviewContent: () => Promise<void>;
   readonly itemizedReviews: Record<string, { status: "APPROVED" | "REVISION_REQUESTED"; feedback: string }>;
   readonly setItemizedReviews: React.Dispatch<React.SetStateAction<Record<string, { status: "APPROVED" | "REVISION_REQUESTED"; feedback: string }>>>;
+  readonly isBrand?: boolean;
+  readonly isInfluencer?: boolean;
+  readonly onConfirmReceived?: () => void;
+  readonly onStatusUpdated?: () => void;
 }
 
 export function DealModals({
@@ -40,6 +48,8 @@ export function DealModals({
   setShowVerifyModal,
   showDispatchModal = false,
   setShowDispatchModal,
+  showTrackingModal = false,
+  setShowTrackingModal,
   deal,
   shippingForm,
   setShippingForm,
@@ -54,7 +64,19 @@ export function DealModals({
   handleReviewContent,
   itemizedReviews,
   setItemizedReviews,
+  isBrand = false,
+  isInfluencer = false,
+  onConfirmReceived,
+  onStatusUpdated,
 }: DealModalsProps) {
+  const [dispatchMode, setDispatchMode] = useState<"shiprocket" | "manual">("shiprocket");
+  const [shiprocketForm, setShiprocketForm] = useState({
+    pickupLocation: "Primary",
+    length: 10,
+    breadth: 10,
+    height: 10,
+    weight: 0.5,
+  });
   const revisionEligibility = React.useMemo(() => {
     return checkRevisionRequestEligibility(deal);
   }, [deal]);
@@ -372,35 +394,128 @@ className="flex-1"
   <Modal
     open={showDispatchModal}
     onClose={() => setShowDispatchModal(false)}
-    title="Confirm Product Dispatch"
-    maxWidth="500px"
+    title="Product Dispatch & Shipping"
+    maxWidth="540px"
   >
-    <div className="mb-4 space-y-3">
-      <p className="text-xs text-secondary">
-        Enter the courier tracking details after shipping the required product to the creator.
-      </p>
-      <Input
-        label="Tracking / AWB Number *"
-        id="dispatch-tracking-input"
-        type="text"
-        placeholder="e.g. 1234567890"
-        value={dispatchForm.trackingNumber}
-        onChange={(e) => setDispatchForm({ ...dispatchForm, trackingNumber: e.target.value })}
-        fullWidth
-      />
-      <Input
-        label="Courier / Carrier Partner"
-        id="dispatch-carrier-input"
-        type="text"
-        placeholder="e.g. BlueDart, Delhivery, DTDC, India Post"
-        value={dispatchForm.carrier}
-        onChange={(e) => setDispatchForm({ ...dispatchForm, carrier: e.target.value })}
-        fullWidth
-      />
-      {!dispatchForm.trackingNumber.trim() && (
-        <p className="text-xs text-amber-500 font-medium">
-          ⚠️ Courier AWB / Tracking number is required to confirm dispatch.
-        </p>
+    <div className="mb-4 space-y-4">
+      {/* Dispatch Method Tabs */}
+      <div className="grid grid-cols-2 p-1 bg-muted rounded-xl border border-border">
+        <button
+          type="button"
+          onClick={() => setDispatchMode("shiprocket")}
+          className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            dispatchMode === "shiprocket"
+              ? "bg-primary text-primary-foreground shadow-xs"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Shiprocket (1-Click)</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setDispatchMode("manual")}
+          className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            dispatchMode === "manual"
+              ? "bg-card text-foreground shadow-xs border border-border"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Truck className="w-3.5 h-3.5" />
+          <span>Manual Courier</span>
+        </button>
+      </div>
+
+      {dispatchMode === "shiprocket" ? (
+        <div className="space-y-3.5">
+          <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-xs text-foreground space-y-1">
+            <div className="font-bold flex items-center gap-1.5 text-primary">
+              <Package className="w-4 h-4" />
+              <span>Automated Shiprocket Logistics</span>
+            </div>
+            <p className="text-muted-foreground text-[11px] leading-relaxed">
+              System creates the shipment, assigns the optimal courier partner (Delhivery, BlueDart, DTDC), generates AWB tracking code, and provides a downloadable shipping label PDF.
+            </p>
+          </div>
+
+          <Input
+            label="Pickup Warehouse / Location Name"
+            id="shiprocket-pickup-location"
+            type="text"
+            placeholder="e.g. Primary or Main Warehouse"
+            value={shiprocketForm.pickupLocation}
+            onChange={(e) => setShiprocketForm({ ...shiprocketForm, pickupLocation: e.target.value })}
+            fullWidth
+          />
+
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Approx Weight (kg)"
+              id="shiprocket-weight"
+              type="number"
+              step="0.1"
+              min="0.1"
+              value={String(shiprocketForm.weight)}
+              onChange={(e) => setShiprocketForm({ ...shiprocketForm, weight: parseFloat(e.target.value) || 0.5 })}
+              fullWidth
+            />
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-foreground block">Box Dimensions (L x B x H cm)</label>
+              <div className="grid grid-cols-3 gap-1">
+                <input
+                  type="number"
+                  placeholder="L"
+                  value={shiprocketForm.length}
+                  onChange={(e) => setShiprocketForm({ ...shiprocketForm, length: parseInt(e.target.value, 10) || 10 })}
+                  className="w-full text-xs p-2 rounded-lg border border-border bg-background text-foreground text-center"
+                />
+                <input
+                  type="number"
+                  placeholder="B"
+                  value={shiprocketForm.breadth}
+                  onChange={(e) => setShiprocketForm({ ...shiprocketForm, breadth: parseInt(e.target.value, 10) || 10 })}
+                  className="w-full text-xs p-2 rounded-lg border border-border bg-background text-foreground text-center"
+                />
+                <input
+                  type="number"
+                  placeholder="H"
+                  value={shiprocketForm.height}
+                  onChange={(e) => setShiprocketForm({ ...shiprocketForm, height: parseInt(e.target.value, 10) || 10 })}
+                  className="w-full text-xs p-2 rounded-lg border border-border bg-background text-foreground text-center"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <p className="text-xs text-muted-foreground">
+            Enter the courier tracking details after manually dispatching the product to the creator.
+          </p>
+          <Input
+            label="Tracking / AWB Number *"
+            id="dispatch-tracking-input"
+            type="text"
+            placeholder="e.g. 1234567890"
+            value={dispatchForm.trackingNumber}
+            onChange={(e) => setDispatchForm({ ...dispatchForm, trackingNumber: e.target.value })}
+            fullWidth
+          />
+          <Input
+            label="Courier / Carrier Partner"
+            id="dispatch-carrier-input"
+            type="text"
+            placeholder="e.g. BlueDart, Delhivery, DTDC, India Post"
+            value={dispatchForm.carrier}
+            onChange={(e) => setDispatchForm({ ...dispatchForm, carrier: e.target.value })}
+            fullWidth
+          />
+          {!dispatchForm.trackingNumber.trim() && (
+            <p className="text-xs text-amber-500 font-medium">
+              ⚠️ Courier AWB / Tracking number is required to confirm dispatch.
+            </p>
+          )}
+        </div>
       )}
     </div>
     <div className="flex gap-3">
@@ -414,23 +529,53 @@ className="flex-1"
       <Button
         variant="primary"
         onClick={() => {
-          if (!dispatchForm.trackingNumber.trim()) {
-            showToast("error", "Please enter a valid tracking number");
-            return;
+          if (dispatchMode === "shiprocket") {
+            handleProductAction({
+              action: "create_shiprocket_shipment",
+              pickupLocation: shiprocketForm.pickupLocation.trim() || undefined,
+              length: shiprocketForm.length,
+              breadth: shiprocketForm.breadth,
+              height: shiprocketForm.height,
+              weight: shiprocketForm.weight,
+            });
+          } else {
+            if (!dispatchForm.trackingNumber.trim()) {
+              showToast("error", "Please enter a valid tracking number");
+              return;
+            }
+            handleProductAction({
+              action: "confirm_dispatch",
+              trackingNumber: dispatchForm.trackingNumber.trim(),
+              carrier: dispatchForm.carrier.trim() || undefined,
+            });
           }
-          handleProductAction({
-            action: "confirm_dispatch",
-            trackingNumber: dispatchForm.trackingNumber.trim(),
-            carrier: dispatchForm.carrier.trim() || undefined,
-          });
         }}
-        disabled={isSubmitting || !dispatchForm.trackingNumber.trim()}
-        className="flex-1"
+        disabled={isSubmitting || (dispatchMode === "manual" && !dispatchForm.trackingNumber.trim())}
+        className="flex-1 min-h-[44px]"
       >
-        {isSubmitting ? <span className="loading" /> : "Confirm Dispatch"}
+        {isSubmitting ? (
+          <span className="loading" />
+        ) : dispatchMode === "shiprocket" ? (
+          "Generate AWB & Ship via Shiprocket"
+        ) : (
+          "Confirm Manual Dispatch"
+        )}
       </Button>
     </div>
   </Modal>
+)}
+
+{/* ── Tracking Modal ────────────────────────────────────── */}
+{setShowTrackingModal && (
+  <ShipmentTrackingModal
+    open={showTrackingModal}
+    onClose={() => setShowTrackingModal(false)}
+    deal={deal}
+    isBrand={isBrand}
+    isInfluencer={isInfluencer}
+    onConfirmReceived={onConfirmReceived}
+    onStatusUpdated={onStatusUpdated}
+  />
 )}
 </>
 );

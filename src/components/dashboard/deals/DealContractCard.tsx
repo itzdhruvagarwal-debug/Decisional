@@ -37,6 +37,7 @@ interface DealContractCardProps {
   readonly isInfluencer?: boolean;
   readonly onOpenAddressModal?: () => void;
   readonly onOpenDispatchModal?: () => void;
+  readonly onOpenTrackingModal?: () => void;
   readonly onConfirmReceived?: () => void;
   readonly isSubmitting?: boolean;
 }
@@ -49,6 +50,7 @@ export function DealContractCard({
   isInfluencer = false,
   onOpenAddressModal,
   onOpenDispatchModal,
+  onOpenTrackingModal,
   onConfirmReceived,
   isSubmitting = false,
 }: Readonly<DealContractCardProps>) {
@@ -421,6 +423,30 @@ export function DealContractCard({
                             </span>
                           )}
                         </div>
+                      )}
+
+                      {/* Live Tracking & Shiprocket Label Actions */}
+                      {Boolean(tracking || ["DISPATCHED", "RECEIVED"].includes(status)) && onOpenTrackingModal && (
+                        <button
+                          type="button"
+                          onClick={onOpenTrackingModal}
+                          className="text-xs bg-muted hover:bg-muted/80 text-foreground px-3.5 py-2 min-h-[44px] rounded-xl font-bold transition-all cursor-pointer inline-flex items-center justify-center gap-1.5 border border-border shadow-xs"
+                        >
+                          <Truck className="w-3.5 h-3.5 text-primary" />
+                          <span>Track Shipment</span>
+                        </button>
+                      )}
+
+                      {Boolean(isBrand && deal.shippingLabelUrl) && (
+                        <a
+                          href={deal.shippingLabelUrl || "#"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs bg-primary/10 hover:bg-primary/20 text-primary px-3 py-2 min-h-[44px] rounded-xl font-bold transition-all cursor-pointer inline-flex items-center justify-center gap-1.5 border border-primary/20 shadow-xs"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>Shipping Label</span>
+                        </a>
                       )}
                     </div>
                   </div>

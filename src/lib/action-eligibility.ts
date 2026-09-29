@@ -940,7 +940,7 @@ export function checkProductFulfillmentEligibility(
     hasActiveDispute?: boolean | null | undefined;
   } | null | undefined,
   userRole: "INFLUENCER" | "BRAND" | "ADMIN",
-  action: "submit_address" | "confirm_dispatch" | "confirm_received",
+  action: "submit_address" | "confirm_dispatch" | "confirm_received" | "create_shipment",
 ): {
   allowed: boolean;
   reason?: string | undefined;
@@ -995,11 +995,11 @@ export function checkProductFulfillmentEligibility(
     }
   }
 
-  if (action === "confirm_dispatch") {
+  if (action === "confirm_dispatch" || action === "create_shipment") {
     if (userRole !== "BRAND" && userRole !== "ADMIN") {
       return {
         allowed: false,
-        reason: "Only the brand client can confirm product dispatch.",
+        reason: "Only the brand client can confirm product dispatch or create shipments.",
         reasonCode: "UNAUTHORIZED",
       };
     }

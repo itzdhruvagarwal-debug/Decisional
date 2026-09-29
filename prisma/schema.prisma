@@ -625,6 +625,16 @@ model Deal {
   dispatchedAt             DateTime?
   productReceivedAt        DateTime?
 
+  // Shiprocket Shipping Integration
+  shippingOrderId          String?
+  shippingShipmentId       String?
+  shippingAwbCode          String?
+  shippingLabelUrl         String?
+  shippingManifestUrl      String?
+  shippingStatus           String?
+  shippingCourierName      String?
+  shippingTrackingHistory  Json?
+
   // Timeline
   submissionDeadline DateTime
   reviewPeriodHours  Int      @default(48)

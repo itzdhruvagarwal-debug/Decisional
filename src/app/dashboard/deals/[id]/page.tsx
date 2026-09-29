@@ -241,6 +241,7 @@ export default function DealDetailPage() {
   const isClient = session?.user?.userType === "BRAND";
   const isInfluencer = session?.user?.userType === "INFLUENCER";
   const [showContractPrint, setShowContractPrint] = React.useState(false);
+  const [showTrackingModal, setShowTrackingModal] = React.useState(false);
 
   const disputeEligibility = React.useMemo(() => {
     if (!deal) return { allowed: false };
@@ -418,6 +419,7 @@ export default function DealDetailPage() {
               isInfluencer={isInfluencer}
               onOpenAddressModal={() => setShowAddressModal(true)}
               onOpenDispatchModal={() => setShowDispatchModal(true)}
+              onOpenTrackingModal={() => setShowTrackingModal(true)}
               onConfirmReceived={() => handleProductAction({ action: "confirm_received" })}
               isSubmitting={isSubmitting}
             />
@@ -607,6 +609,12 @@ export default function DealDetailPage() {
         setShowVerifyModal={setShowVerifyModal}
         showDispatchModal={showDispatchModal}
         setShowDispatchModal={setShowDispatchModal}
+        showTrackingModal={showTrackingModal}
+        setShowTrackingModal={setShowTrackingModal}
+        isBrand={isClient}
+        isInfluencer={isInfluencer}
+        onConfirmReceived={() => handleProductAction({ action: "confirm_received" })}
+        onStatusUpdated={() => fetchDeal()}
         deal={deal}
         shippingForm={shippingForm}
         setShippingForm={setShippingForm}

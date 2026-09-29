@@ -1,0 +1,415 @@
+import { AppError } from "@/lib/errors";
+
+export interface ShiprocketAddress {
+  fullName: string;
+  phone: string;
+  line1: string;
+  line2?: string | null;
+  city: string;
+  state: string;
+  pinCode: string;
+  country?: string;
+}
+
+export interface CreateShiprocketOrderParams {
+  dealId: string;
+  campaignTitle: string;
+  productName: string;
+  productValuePaise: number;
+  shippingAddress: ShiprocketAddress;
+  creatorEmail?: string | undefined;
+  pickupLocation?: string | undefined;
+  length?: number | undefined;
+  breadth?: number | undefined;
+  height?: number | undefined;
+  weight?: number | undefined; // kg
+}
+
+export interface TrackingCheckpoint {
+  date: string;
+  status: string;
+  activity: string;
+  location: string;
+}
+
+export interface TrackingResult {
+  awbCode: string;
+  currentStatus: string;
+  courierName?: string | undefined;
+  deliveredDate?: string | null | undefined;
+  scans: TrackingCheckpoint[];
+}
+
+export interface CompleteShipmentResult {
+  orderId: string;
+  shipmentId: string;
+  awbCode: string;
+  courierName: string;
+  labelUrl?: string | undefined;
+  manifestUrl?: string | undefined;
+  initialStatus: string;
+  trackingHistory: TrackingCheckpoint[];
+}
+
+// In-memory token cache
+let cachedToken: string | null = null;
+let tokenExpiresAt = 0;
+
+const SHIPROCKET_API_BASE = "https://apiv2.shiprocket.in/v1/external";
+
+/**
+ * Checks whether Shiprocket live API credentials are configured.
+ */
+export function isShiprocketConfigured(): boolean {
+  return Boolean(process.env.SHIPROCKET_EMAIL && process.env.SHIPROCKET_PASSWORD);
+}
+
+/**
+ * Authenticates with Shiprocket API and returns a valid Bearer token.
+ * Tokens are valid for 10 days; we cache for 7 days.
+ */
+export async function getShiprocketToken(): Promise<string> {
+  const email = process.env.SHIPROCKET_EMAIL;
+  const password = process.env.SHIPROCKET_PASSWORD;
+
+  if (!email || !password) {
+    throw AppError.badRequest("Shiprocket credentials are not configured in environment variables");
+  }
+
+  const now = Date.now();
+  if (cachedToken && now < tokenExpiresAt) {
+    return cachedToken;
+  }
+
+  try {
+    const response = await fetch(`${SHIPROCKET_API_BASE}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Shiprocket auth failed (${response.status}): ${errText}`);
+    }
+
+    const data = await response.json();
+    if (!data.token) {
+      throw new Error("Shiprocket auth response did not include a token");
+    }
+
+    cachedToken = data.token;
+    // Cache for 7 days (604800 seconds)
+    tokenExpiresAt = now + 7 * 24 * 60 * 60 * 1000;
+    return cachedToken as string;
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Shiprocket authentication error";
+    throw AppError.internal(message);
+  }
+}
+
+/**
+ * Creates an adhoc order in Shiprocket.
+ */
+async function createAdhocOrder(
+  token: string,
+  params: CreateShiprocketOrderParams,
+): Promise<{ orderId: string; shipmentId: string; status: string }> {
+  const productPriceRupees = Math.max(1, Math.round((params.productValuePaise || 10000) / 100));
+  const orderRef = `RO-${params.dealId.slice(-8).toUpperCase()}-${Date.now().toString().slice(-4)}`;
+
+  const body = {
+    order_id: orderRef,
+    order_date: new Date().toISOString().slice(0, 19).replace("T", " "),
+    pickup_location: params.pickupLocation || process.env.SHIPROCKET_PICKUP_LOCATION || "Primary",
+    billing_customer_name: params.shippingAddress.fullName,
+    billing_last_name: "",
+    billing_address: params.shippingAddress.line1,
+    billing_address_2: params.shippingAddress.line2 || "",
+    billing_city: params.shippingAddress.city,
+    billing_pincode: params.shippingAddress.pinCode,
+    billing_state: params.shippingAddress.state,
+    billing_country: params.shippingAddress.country || "India",
+    billing_email: params.creatorEmail || "creator@reachout.platform",
+    billing_phone: params.shippingAddress.phone,
+    shipping_is_billing: true,
+    order_items: [
+      {
+        name: params.productName || "Campaign Product Sample",
+        sku: `SKU-${params.dealId.slice(-6).toUpperCase()}`,
+        units: 1,
+        selling_price: productPriceRupees,
+        discount: 0,
+        tax: 0,
+      },
+    ],
+    payment_method: "Prepaid",
+    sub_total: productPriceRupees,
+    length: Math.max(1, params.length || 10),
+    breadth: Math.max(1, params.breadth || 10),
+    height: Math.max(1, params.height || 10),
+    weight: Math.max(0.1, params.weight || 0.5),
+  };
+
+  const response = await fetch(`${SHIPROCKET_API_BASE}/orders/create/adhoc`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw AppError.badRequest(`Shiprocket order creation failed: ${errorText}`);
+  }
+
+  const data = await response.json();
+  const orderId = String(data.order_id || data.id || orderRef);
+  const shipmentId = String(data.shipment_id || orderId);
+
+  return {
+    orderId,
+    shipmentId,
+    status: data.status || "NEW",
+  };
+}
+
+/**
+ * Assigns courier & generates AWB in Shiprocket.
+ */
+async function assignAwb(
+  token: string,
+  shipmentId: string,
+): Promise<{ awbCode: string; courierName: string; courierId?: number }> {
+  const response = await fetch(`${SHIPROCKET_API_BASE}/courier/assign/awb`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      shipment_id: shipmentId,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw AppError.badRequest(`Shiprocket AWB assignment failed: ${errorText}`);
+  }
+
+  const data = await response.json();
+  const responseData = data.response?.data || data;
+  const awbCode = responseData.awb_code || responseData.awb;
+  const courierName = responseData.courier_name || "Shiprocket Partner Courier";
+
+  if (!awbCode) {
+    throw AppError.badRequest(responseData.message || "Failed to generate AWB code from courier partner");
+  }
+
+  return {
+    awbCode: String(awbCode),
+    courierName: String(courierName),
+    courierId: responseData.courier_id,
+  };
+}
+
+/**
+ * Generates shipping label PDF URL in Shiprocket.
+ */
+async function generateLabel(token: string, shipmentId: string): Promise<string | null> {
+  try {
+    const response = await fetch(`${SHIPROCKET_API_BASE}/courier/generate/label`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        shipment_id: [shipmentId],
+      }),
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.label_url || data.label_created || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Generates manifest PDF URL in Shiprocket.
+ */
+async function generateManifest(token: string, shipmentId: string): Promise<string | null> {
+  try {
+    const response = await fetch(`${SHIPROCKET_API_BASE}/manifests/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        shipment_id: [shipmentId],
+      }),
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.manifest_url || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Unified method to create order, assign courier AWB, and generate label.
+ * If credentials are not configured, runs high-fidelity mock simulation.
+ */
+export async function createCompleteShipment(
+  params: CreateShiprocketOrderParams,
+): Promise<CompleteShipmentResult> {
+  // Mock mode for local dev / testing
+  if (!isShiprocketConfigured()) {
+    const mockOrderNum = Math.floor(100000 + Math.random() * 900000);
+    const mockAwb = `SRDEL${Math.floor(1000000000 + Math.random() * 9000000000)}`;
+    const nowIso = new Date().toISOString();
+
+    return {
+      orderId: `MOCK-ORD-${params.dealId.slice(-6).toUpperCase()}-${mockOrderNum}`,
+      shipmentId: `MOCK-SHIP-${mockOrderNum}`,
+      awbCode: mockAwb,
+      courierName: "Delhivery Surface (Simulated)",
+      labelUrl: `https://apiv2.shiprocket.in/sample-label/${mockAwb}.pdf`,
+      manifestUrl: `https://apiv2.shiprocket.in/sample-manifest/${mockAwb}.pdf`,
+      initialStatus: "PICKUP_SCHEDULED",
+      trackingHistory: [
+        {
+          date: nowIso,
+          status: "PICKUP_SCHEDULED",
+          activity: "Shipment manifested and pickup scheduled with courier partner",
+          location: params.shippingAddress.city || "Origin Hub",
+        },
+      ],
+    };
+  }
+
+  const token = await getShiprocketToken();
+  const order = await createAdhocOrder(token, params);
+  const awb = await assignAwb(token, order.shipmentId);
+  const labelUrl = await generateLabel(token, order.shipmentId);
+  const manifestUrl = await generateManifest(token, order.shipmentId);
+
+  const initialCheckpoint: TrackingCheckpoint = {
+    date: new Date().toISOString(),
+    status: "PICKUP_SCHEDULED",
+    activity: `AWB generated with ${awb.courierName}. Pickup request generated.`,
+    location: params.shippingAddress.city || "Origin Warehouse",
+  };
+
+  return {
+    orderId: order.orderId,
+    shipmentId: order.shipmentId,
+    awbCode: awb.awbCode,
+    courierName: awb.courierName,
+    labelUrl: labelUrl || undefined,
+    manifestUrl: manifestUrl || undefined,
+    initialStatus: "PICKUP_SCHEDULED",
+    trackingHistory: [initialCheckpoint],
+  };
+}
+
+/**
+ * Tracks shipment by AWB code via Shiprocket Tracking API.
+ * If credentials are not configured or AWB is simulated, provides dynamic simulation.
+ */
+export async function trackShipment(
+  awbCode: string,
+  currentStoredStatus?: string,
+): Promise<TrackingResult> {
+  const cleanAwb = awbCode.trim();
+
+  // Handle mock / simulated tracking
+  if (!isShiprocketConfigured() || cleanAwb.startsWith("SRDEL") || cleanAwb.startsWith("MOCK")) {
+    const isDelivered = currentStoredStatus === "DELIVERED";
+    const now = new Date();
+    const mockDateStr = now.toISOString();
+
+    const scans: TrackingCheckpoint[] = [
+      {
+        date: new Date(now.getTime() - 86400000 * 2).toISOString(),
+        status: "PICKUP_SCHEDULED",
+        activity: "Shipment manifested and pickup scheduled",
+        location: "Origin Warehouse",
+      },
+      {
+        date: new Date(now.getTime() - 86400000).toISOString(),
+        status: "IN_TRANSIT",
+        activity: "Package in transit to destination hub",
+        location: "Central Sorting Facility",
+      },
+      {
+        date: mockDateStr,
+        status: isDelivered ? "DELIVERED" : "OUT_FOR_DELIVERY",
+        activity: isDelivered
+          ? "Package delivered to creator and signed"
+          : "Out for delivery with delivery executive",
+        location: "Destination Hub",
+      },
+    ];
+
+    return {
+      awbCode: cleanAwb,
+      currentStatus: isDelivered ? "DELIVERED" : "OUT_FOR_DELIVERY",
+      courierName: "Delhivery Surface (Simulated)",
+      deliveredDate: isDelivered ? mockDateStr : null,
+      scans,
+    };
+  }
+
+  const token = await getShiprocketToken();
+  const response = await fetch(`${SHIPROCKET_API_BASE}/courier/track/awb/${encodeURIComponent(cleanAwb)}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw AppError.badRequest(`Shiprocket tracking request failed with status ${response.status}`);
+  }
+
+  const data = await response.json();
+  const trackingData = data.tracking_data || data;
+  const currentStatus = String(trackingData.track_status || trackingData.shipment_track?.[0]?.current_status || "IN_TRANSIT").toUpperCase();
+  const courierName = trackingData.shipment_track?.[0]?.courier_name || trackingData.courier_name || "Courier Partner";
+
+  const rawScans = trackingData.shipment_track_activities || trackingData.scans || [];
+  const scans: TrackingCheckpoint[] = Array.isArray(rawScans)
+    ? rawScans.map((s: Record<string, unknown>) => ({
+        date: String(s.date || s.time || new Date().toISOString()),
+        status: String(s.status || s.activity || "IN_TRANSIT"),
+        activity: String(s.activity || s["sr-status-label"] || s.status || ""),
+        location: String(s.location || s.city || ""),
+      }))
+    : [];
+
+  const deliveredDate = currentStatus.includes("DELIVERED") ? new Date().toISOString() : null;
+
+  return {
+    awbCode: cleanAwb,
+    currentStatus,
+    courierName,
+    deliveredDate,
+    scans,
+  };
+}
+
+/**
+ * Validates Shiprocket tracking webhook secret if configured.
+ */
+export function verifyWebhookSecret(authHeader: string | null): boolean {
+  const secret = process.env.SHIPROCKET_WEBHOOK_SECRET;
+  if (!secret) return true; // If no secret configured, accept
+  return authHeader === secret || authHeader === `Bearer ${secret}`;
+}

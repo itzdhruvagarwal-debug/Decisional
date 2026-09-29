@@ -41,9 +41,21 @@ const userId = session.user.id;
 const payload = parsedBody.data;
 
 let deal;
+let shipment;
 switch (payload.action) {
 case "submit_address":
 deal = await DealService.submitShippingAddress(userId, dealId, payload.address);
+break;
+case "create_shiprocket_shipment":
+const result = await DealService.createShiprocketShipment(userId, dealId, {
+pickupLocation: payload.pickupLocation,
+length: payload.length,
+breadth: payload.breadth,
+height: payload.height,
+weight: payload.weight,
+});
+deal = result.deal;
+shipment = result.shipment;
 break;
 case "confirm_dispatch":
 deal = await DealService.confirmProductDispatch(userId, dealId, {
@@ -55,8 +67,33 @@ default:
 deal = await DealService.confirmProductReceived(userId, dealId);
 }
 
-return NextResponse.json({ success: true, deal });
+return NextResponse.json({ success: true, deal, ...(shipment ? { shipment } : {}) });
+}
+
+async function _handler_GET(
+request: NextRequest,
+{ params }: { params: Promise<Record<string, string | string[]>> },
+) {
+const parsedParams = paramsSchema.safeParse(await params);
+if (!parsedParams.success) {
+return NextResponse.json({ error: "Invalid deal ID" }, { status: 400 });
+}
+
+const session = await auth();
+if (!session?.user?.id) {
+return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+}
+
+const dealId = parsedParams.data.id;
+const trackingData = await DealService.trackDealShipping(session.user.id, dealId);
+
+return NextResponse.json({
+success: true,
+deal: trackingData.deal,
+tracking: trackingData.tracking,
+});
 }
 
 // Wrapped handlers via apiWrapper
 export const POST = apiWrapper(_handler_POST);
+export const GET = apiWrapper(_handler_GET);
