@@ -23,7 +23,8 @@ productName: string;
 productValue: number;
 productDescription: string;
 deliverables: Array<{ type: string; count: number; rate: number }>;
-matchingPriority?: "BALANCED" | "REACH_FOCUSED" | "TRUST_FOCUSED" | "ROI_FOCUSED";
+matchingPriority?: "BALANCED" | "REACH_FOCUSED" | "TRUST_FOCUSED" | "ROI_FOCUSED" | "CUSTOM" | undefined;
+customWeights?: { category: number; engagement: number; authenticity: number; quality: number; roi: number } | undefined;
 }
 
 type ValidationResult = { success: boolean; fieldErrors?: Record<string, string>; error?: string };
@@ -90,6 +91,7 @@ targetCategories: formData.targetCategories,
 applicationDeadline: formData.applicationDeadline || undefined,
 postingDeadline: formData.postingDeadline,
 matchingPriority: formData.matchingPriority || "BALANCED",
+customWeights: formData.customWeights,
 });
 
 if (!result.success) {

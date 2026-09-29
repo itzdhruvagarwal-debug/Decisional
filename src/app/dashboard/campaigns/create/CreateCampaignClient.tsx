@@ -16,6 +16,7 @@ import {
 import { ProductSeedingCard } from "@/components/dashboard/campaigns/create/ProductSeedingCard";
 import { DeliverablesList } from "@/components/dashboard/campaigns/create/DeliverablesList";
 import { CampaignSummarySidebar } from "@/components/dashboard/campaigns/create/CampaignSummarySidebar";
+import { MatchingPrioritySliders } from "@/components/dashboard/campaigns/create/MatchingPrioritySliders";
 import { ALL_CATEGORIES } from "@/lib/categories";
 import type { DraftCampaignData, DraftCampaignResponse } from "@/lib/schemas/campaign.schema";
 import Link from "next/link";
@@ -885,106 +886,17 @@ export default function CreateCampaignClient() {
                   </div>
 
                   {/* AI Matching Priority & Algorithm Weighting */}
-                  <div className="p-5 rounded-2xl border border-border bg-muted/40 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Sliders className="w-3.5 h-3.5 text-primary" />
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                          AI Matching Priority & Discovery Weights
-                        </h4>
-                      </div>
-                      <span className="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
-                        Brand Customizable
-                      </span>
-                    </div>
-
-                    <p className="text-xs text-muted-foreground">
-                      Choose how the matchmaking algorithm ranks creator applicants and discovery results for this campaign.
-                    </p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                      {(Object.keys(MATCHING_PRIORITY_META) as MatchingPriorityPreset[]).map((presetKey) => {
-                        const meta = MATCHING_PRIORITY_META[presetKey];
-                        const isSelected = (formData.matchingPriority || "BALANCED") === presetKey;
-
-                        const renderIcon = () => {
-                          switch (presetKey) {
-                            case "BALANCED":
-                              return <Scale className="w-4 h-4" />;
-                            case "REACH_FOCUSED":
-                              return <Zap className="w-4 h-4" />;
-                            case "TRUST_FOCUSED":
-                              return <ShieldCheck className="w-4 h-4" />;
-                            case "ROI_FOCUSED":
-                              return <TrendingUp className="w-4 h-4" />;
-                          }
-                        };
-
-                        return (
-                          <button
-                            key={presetKey}
-                            type="button"
-                            onClick={() => setFormData({ ...formData, matchingPriority: presetKey })}
-                            className={`flex flex-col text-left p-4 rounded-xl border transition-all duration-150 relative ${
-                              isSelected
-                                ? "bg-card border-primary shadow-xs ring-2 ring-primary/20"
-                                : "bg-card/60 hover:bg-card border-border hover:border-border/80"
-                            }`}
-                          >
-                            <div className="flex items-start justify-between gap-2 mb-1.5 w-full">
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                                    isSelected
-                                      ? "bg-primary text-primary-foreground"
-                                      : "bg-muted text-muted-foreground"
-                                  }`}
-                                >
-                                  {renderIcon()}
-                                </div>
-                                <div>
-                                  <span className="text-xs font-bold text-foreground block leading-tight">
-                                    {meta.label}
-                                  </span>
-                                  <span className="text-[11px] text-muted-foreground block leading-tight">
-                                    {meta.tagline}
-                                  </span>
-                                </div>
-                              </div>
-                              <span
-                                className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 border ${
-                                  isSelected
-                                    ? "bg-primary/10 text-primary border-primary/30"
-                                    : "bg-muted text-muted-foreground border-border"
-                                }`}
-                              >
-                                {meta.badge}
-                              </span>
-                            </div>
-
-                            <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
-                              {meta.description}
-                            </p>
-
-                            <div className="flex flex-wrap gap-1 mt-3 pt-2 border-t border-border/50">
-                              {meta.highlights.map((h, i) => (
-                                <span
-                                  key={i}
-                                  className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                                    isSelected
-                                      ? "bg-primary/10 text-primary font-semibold"
-                                      : "bg-muted text-muted-foreground"
-                                  }`}
-                                >
-                                  {h}
-                                </span>
-                              ))}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  <MatchingPrioritySliders
+                    priority={formData.matchingPriority || "BALANCED"}
+                    customWeights={formData.customWeights}
+                    onChange={(priority, weights) => {
+                      setFormData({
+                        ...formData,
+                        matchingPriority: priority,
+                        customWeights: weights,
+                      });
+                    }}
+                  />
 
                   {/* Physical Product Seeding Card */}
                   <ProductSeedingCard formData={formData} setFormData={setFormData} />

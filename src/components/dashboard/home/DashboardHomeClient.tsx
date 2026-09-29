@@ -19,6 +19,7 @@ import { FinancialOverviewBar } from "./FinancialOverviewBar";
 import { ActiveDealsFeed, filterActiveDeals } from "./ActiveDealsFeed";
 import { QuickDiscoveryRow } from "./QuickDiscoveryRow";
 import { DashboardStoriesBar } from "./DashboardStoriesBar";
+import { AuthenticityAppealBanner } from "@/components/dashboard/AuthenticityAppealBanner";
 import AnalyticsPageClient from "@/app/dashboard/analytics/AnalyticsPageClient";
 import type { InfluencerAnalyticsData } from "@/components/analytics/InfluencerDashboard";
 import type { BrandAnalyticsData } from "@/components/analytics/BrandDashboard";
@@ -182,6 +183,9 @@ export default function DashboardHomeClient({
       {/* 3. MAIN VIEW CONTENT */}
       {activeView === "feed" ? (
         <main className="space-y-6 sm:space-y-8">
+          {/* Creator Authenticity Audit Alert & Appeal Banner */}
+          {isInfluencer && <AuthenticityAppealBanner />}
+
           {/* Collabr Priority Action Required Banner */}
           <ActionRequiredBanner
             deals={dealsSource}

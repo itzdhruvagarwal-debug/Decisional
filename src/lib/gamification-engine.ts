@@ -11,6 +11,8 @@ import { TRIGGER_TO_BADGES } from "./gamification/types";
 import { checkMilestoneEarningsReferrals, checkVerificationReviews } from "./gamification/badges-milestones";
 import { checkStreakActivity } from "./gamification/badges-streaks";
 import { checkBrandCompliance } from "./gamification/badges-brands";
+import { redis } from "./redis";
+import { logger } from "./logger";
 
 export async function finalizeDealGamification(
   userId: string,
@@ -274,6 +276,72 @@ async function awardBadges(
   }
 }
 
+export const DAILY_XP_CONFIG = {
+  FULL_REWARD_THRESHOLD: 200, // 0 to 200 XP: 100% full weight
+  MAX_DAILY_CAP: 400,         // 201 to 400 XP: 50% diminishing returns; 401+ XP: 0% hard cap
+  DIMINISHING_FACTOR: 0.5,    // 50% rate
+  EXEMPT_REASONS: ["BADGE_EARNED", "REFERRAL_TIER_UP", "WEEKLY_CHALLENGE"] as const,
+};
+
+export function calculateDiminishingXp(
+  currentDailyXp: number,
+  rawAmount: number,
+  fullThreshold = DAILY_XP_CONFIG.FULL_REWARD_THRESHOLD,
+  maxCap = DAILY_XP_CONFIG.MAX_DAILY_CAP,
+  factor = DAILY_XP_CONFIG.DIMINISHING_FACTOR,
+): { awardedXp: number; capped: boolean; rateMultiplier: number } {
+  if (rawAmount <= 0 || currentDailyXp >= maxCap) {
+    return { awardedXp: 0, capped: true, rateMultiplier: 0 };
+  }
+
+  let remainingRaw = rawAmount;
+  let awarded = 0;
+  let effectiveDaily = currentDailyXp;
+
+  // 1. Full-weight phase (up to fullThreshold)
+  if (effectiveDaily < fullThreshold) {
+    const availableFull = fullThreshold - effectiveDaily;
+    const fullPortion = Math.min(remainingRaw, availableFull);
+    awarded += fullPortion;
+    effectiveDaily += fullPortion;
+    remainingRaw -= fullPortion;
+  }
+
+  // 2. Diminishing-returns phase (between fullThreshold and maxCap)
+  if (remainingRaw > 0 && effectiveDaily < maxCap) {
+    const availableDiminishingRoom = maxCap - effectiveDaily;
+    const potentialDiminished = Math.floor(remainingRaw * factor);
+    const diminishedPortion = Math.min(potentialDiminished, availableDiminishingRoom);
+    awarded += diminishedPortion;
+    effectiveDaily += diminishedPortion;
+  }
+
+  const capped = (currentDailyXp + rawAmount) > (currentDailyXp + awarded) && (effectiveDaily >= maxCap || rawAmount > awarded);
+  const rateMultiplier = rawAmount > 0 ? awarded / rawAmount : 0;
+
+  return { awardedXp: awarded, capped, rateMultiplier };
+}
+
+export function getStartOfDayIST(now: Date = new Date()): Date {
+  const istOffsetMs = 5.5 * 60 * 60 * 1000;
+  const istDate = new Date(now.getTime() + istOffsetMs);
+  return new Date(
+    Date.UTC(
+      istDate.getUTCFullYear(),
+      istDate.getUTCMonth(),
+      istDate.getUTCDate(),
+      0, 0, 0, 0
+    ) - istOffsetMs
+  );
+}
+
+export function getDailyXpRedisKey(userId: string, now: Date = new Date()): string {
+  const istOffsetMs = 5.5 * 60 * 60 * 1000;
+  const istDate = new Date(now.getTime() + istOffsetMs);
+  const dateStr = istDate.toISOString().slice(0, 10);
+  return `gamification:daily_xp:${userId}:${dateStr}`;
+}
+
 export async function addUserXp(
   userId: string,
   amount: number,
@@ -282,11 +350,98 @@ export async function addUserXp(
 ) {
   if (!Number.isInteger(amount) || amount <= 0) return null;
 
+  const isExempt = (DAILY_XP_CONFIG.EXEMPT_REASONS as readonly string[]).includes(reason);
+
+  let effectiveAmount = amount;
+  let calculation = { awardedXp: amount, capped: false, rateMultiplier: 1.0 };
+  let currentDailyXp = 0;
+  let redisKey = "";
+
+  if (!isExempt) {
+    redisKey = getDailyXpRedisKey(userId);
+    let redisAvailable = false;
+
+    try {
+      const val = await redis.get(redisKey);
+      if (val !== null) {
+        currentDailyXp = parseInt(val, 10) || 0;
+        redisAvailable = true;
+      }
+    } catch (err) {
+      logger.warn("[Gamification] Redis get failed for daily XP, falling back to DB", { userId, error: err });
+    }
+
+    if (!redisAvailable) {
+      const startOfDayIST = getStartOfDayIST();
+      const logs = await db.activityLog.findMany({
+        where: {
+          userId,
+          action: "XP_AWARDED",
+          createdAt: { gte: startOfDayIST },
+        },
+        select: { metadata: true },
+      });
+
+      currentDailyXp = logs.reduce((sum, log) => {
+        const meta = log.metadata as Record<string, unknown> | null;
+        if (!meta || meta.isExemptFromDailyCap) return sum;
+        return sum + (Number(meta.xpAwarded) || 0);
+      }, 0);
+
+      try {
+        await redis.set(redisKey, currentDailyXp.toString(), "EX", 172800);
+      } catch {
+        // Ignore cache set error
+      }
+    }
+
+    calculation = calculateDiminishingXp(currentDailyXp, amount);
+    effectiveAmount = calculation.awardedXp;
+  }
+
+  // If effectiveAmount is 0 (daily cap fully reached)
+  if (effectiveAmount <= 0) {
+    const currentUser = await db.user.findUnique({
+      where: { id: userId },
+      select: { xp: true, level: true },
+    });
+
+    await createActivityLog({
+      userId,
+      action: "XP_AWARDED",
+      metadata: {
+        reason,
+        rawXp: amount,
+        xpAwarded: 0,
+        dailyXpBefore: currentDailyXp,
+        dailyXpAfter: currentDailyXp,
+        rateMultiplier: 0,
+        isDailyCapped: true,
+        dailyCapReached: true,
+        isExemptFromDailyCap: false,
+        totalXp: currentUser?.xp ?? 0,
+        oldLevel: currentUser?.level ?? 1,
+        newLevel: currentUser?.level ?? 1,
+      },
+    }, db);
+
+    return { xp: currentUser?.xp ?? 0, level: currentUser?.level ?? 1, effectiveXp: 0 };
+  }
+
   const updatedUser = await db.user.update({
     where: { id: userId },
-    data: { xp: { increment: amount } },
+    data: { xp: { increment: effectiveAmount } },
     select: { xp: true, level: true },
   });
+
+  if (!isExempt && redisKey) {
+    try {
+      await redis.incrby(redisKey, effectiveAmount);
+      await redis.expire(redisKey, 172800);
+    } catch {
+      // Ignore cache increment error
+    }
+  }
 
   const nextLevel = calculateLevel(updatedUser.xp).level;
   if (nextLevel !== updatedUser.level) {
@@ -302,12 +457,19 @@ export async function addUserXp(
     action: "XP_AWARDED",
     metadata: {
       reason,
-      xpAwarded: amount,
+      rawXp: amount,
+      xpAwarded: effectiveAmount,
+      dailyXpBefore: currentDailyXp,
+      dailyXpAfter: currentDailyXp + effectiveAmount,
+      rateMultiplier: calculation.rateMultiplier,
+      isDailyCapped: calculation.capped,
+      isExemptFromDailyCap: isExempt,
       totalXp: updatedUser.xp,
       oldLevel: updatedUser.level,
       newLevel: nextLevel,
     },
   }, db);
 
-  return { xp: updatedUser.xp, level: nextLevel };
+  return { xp: updatedUser.xp, level: nextLevel, effectiveXp: effectiveAmount };
 }
+

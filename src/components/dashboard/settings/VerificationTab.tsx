@@ -14,6 +14,7 @@ import {
 } from "./verification/VerificationCards";
 import { ShieldCheck, HelpCircle } from "lucide-react";
 import Link from "next/link";
+import { AuthenticityAppealBanner } from "@/components/dashboard/AuthenticityAppealBanner";
 
 export interface VerificationData {
   verificationLevel?: string;
@@ -104,6 +105,9 @@ export default function VerificationTab({
         aria-hidden="true"
         onChange={handleFileChange}
       />
+
+      {/* Authenticity & Fraud Appeal Alert (if under review) */}
+      {roleType === "INFLUENCER" && <AuthenticityAppealBanner />}
 
       {/* 1. Tier Status Overview */}
       <TierStatusCardComponent

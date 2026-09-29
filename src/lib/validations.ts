@@ -140,7 +140,14 @@ productDescription: z.string().max(5000).optional(),
 
 invitedInfluencerId: dbIdSchema.optional(),
 status: z.enum(["DRAFT", "ACTIVE"]).optional(),
-matchingPriority: z.enum(["BALANCED", "REACH_FOCUSED", "TRUST_FOCUSED", "ROI_FOCUSED"]).optional().default("BALANCED"),
+matchingPriority: z.enum(["BALANCED", "REACH_FOCUSED", "TRUST_FOCUSED", "ROI_FOCUSED", "CUSTOM"]).optional().default("BALANCED"),
+customWeights: z.object({
+  category: z.number().min(0).max(1),
+  engagement: z.number().min(0).max(1),
+  authenticity: z.number().min(0).max(1),
+  quality: z.number().min(0).max(1),
+  roi: z.number().min(0).max(1),
+}).optional(),
 })
 .superRefine((value, ctx) => {
   validateBudgetSettings(value, ctx);

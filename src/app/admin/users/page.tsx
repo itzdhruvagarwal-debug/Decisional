@@ -23,6 +23,7 @@ import {
   ShieldAlert,
   CheckCircle2,
   AlertTriangle,
+  Clock,
 } from "lucide-react";
 
 type AdminUserListElement = Prisma.PromiseReturnType<typeof AdminService.listUsers>["users"][number];
@@ -226,6 +227,33 @@ function AuthenticityAuditModal({
             </div>
           )}
         </div>
+
+        {/* Creator Submitted Appeal (if present) */}
+        {user.activityLogs?.[0] && (
+          <div className="p-3.5 rounded-xl bg-primary/5 border border-primary/20 space-y-1.5 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-foreground flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-primary" /> Creator Appeal Submitted
+              </span>
+              <span className="text-[10px] text-muted-foreground font-mono">
+                {new Date(user.activityLogs[0].createdAt).toLocaleDateString()}
+              </span>
+            </div>
+            <p className="text-foreground leading-relaxed italic bg-card/60 p-2 rounded-lg border border-border">
+              "{(user.activityLogs[0].metadata as any)?.reason || "No written statement provided"}"
+            </p>
+            {(user.activityLogs[0].metadata as any)?.evidenceUrl && (
+              <a
+                href={(user.activityLogs[0].metadata as any).evidenceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11px] font-semibold text-primary underline inline-flex items-center gap-1 hover:text-primary/80"
+              >
+                <span>View Creator Proof / Evidence Link</span> ↗
+              </a>
+            )}
+          </div>
+        )}
 
         {/* Dispute & Appeal Resolution Workflow */}
         <div className="space-y-3 pt-2 border-t border-border">

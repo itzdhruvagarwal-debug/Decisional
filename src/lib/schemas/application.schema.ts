@@ -25,6 +25,9 @@ export const applicationItemSchema = z.object({
       .nullable()
       .optional(),
   }),
+  matchScore: z.number().optional(),
+  matchBreakdown: z.record(z.string(), z.any()).nullable().optional(),
+  dealStatus: z.string().nullable().optional(),
 });
 
 export type ApplicationItem = z.infer<typeof applicationItemSchema>;

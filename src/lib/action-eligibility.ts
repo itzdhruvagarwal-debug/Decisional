@@ -1395,4 +1395,61 @@ export function checkAdminVerificationReviewEligibility(
   return { allowed: true };
 }
 
+// ---------------------------------------------------------------------------
+// 23. INFLUENCER FRAUD & AUTHENTICITY APPEAL
+// ---------------------------------------------------------------------------
+
+export interface FraudAppealEligibilityInput {
+  userType?: string | null | undefined;
+  userStatus?: string | null | undefined;
+  followerAuthenticityScore?: number | null | undefined;
+  hasPendingAppeal?: boolean | null | undefined;
+  appealReasonLength?: number | null | undefined;
+}
+
+export function checkFraudAppealEligibility(input: FraudAppealEligibilityInput): {
+  allowed: boolean;
+  reason?: string | undefined;
+  reasonCode?: "NOT_INFLUENCER" | "ACCOUNT_HEALTHY" | "PENDING_APPEAL" | "REASON_TOO_SHORT" | undefined;
+  ctaText?: string | undefined;
+  ctaHref?: string | undefined;
+} {
+  if (input.userType && input.userType !== "INFLUENCER") {
+    return {
+      allowed: false,
+      reason: "Authenticity appeals are only available for creator/influencer accounts.",
+      reasonCode: "NOT_INFLUENCER",
+    };
+  }
+
+  const isFlagged = input.userStatus === "FLAGGED";
+  const isLowScore = (input.followerAuthenticityScore ?? 100) < 60;
+  if (!isFlagged && !isLowScore) {
+    return {
+      allowed: false,
+      reason: "Account authenticity is healthy. No manual appeal is necessary.",
+      reasonCode: "ACCOUNT_HEALTHY",
+    };
+  }
+
+  if (input.hasPendingAppeal) {
+    return {
+      allowed: false,
+      reason: "An authenticity appeal is already submitted and pending admin review.",
+      reasonCode: "PENDING_APPEAL",
+    };
+  }
+
+  if (typeof input.appealReasonLength === "number" && input.appealReasonLength < 15) {
+    const remaining = 15 - input.appealReasonLength;
+    return {
+      allowed: false,
+      reason: `Please provide at least 15 characters explaining your audience metrics or evidence (${remaining} more needed).`,
+      reasonCode: "REASON_TOO_SHORT",
+    };
+  }
+
+  return { allowed: true };
+}
+
 

@@ -2,7 +2,8 @@ export type MatchingPriorityPreset =
   | "BALANCED"
   | "REACH_FOCUSED"
   | "TRUST_FOCUSED"
-  | "ROI_FOCUSED";
+  | "ROI_FOCUSED"
+  | "CUSTOM";
 
 export interface MatchingWeights {
   category: number;
@@ -40,6 +41,13 @@ export const MATCHING_PRIORITY_PRESETS: Record<MatchingPriorityPreset, MatchingW
     authenticity: 0.10,
     quality: 0.10,
     roi: 0.40,
+  },
+  CUSTOM: {
+    category: 0.20,
+    engagement: 0.20,
+    authenticity: 0.20,
+    quality: 0.20,
+    roi: 0.20,
   },
 };
 
@@ -90,34 +98,69 @@ export const MATCHING_PRIORITY_META: Record<MatchingPriorityPreset, MatchingPrio
     accentClass: "border-amber-500/40 bg-amber-500/5 text-amber-500",
     highlights: ["ROI (CPV) 40%", "Category 20%", "Engagement 20%", "Quality 10%", "Authenticity 10%"],
   },
+  CUSTOM: {
+    id: "CUSTOM",
+    label: "Custom Weights (Sliders)",
+    tagline: "Fine-tune individual pillar weightings",
+    description: "Configure custom percentage weights across Category Relevance, Engagement Rate, Authenticity, Platform Quality, and Commercial CPV.",
+    badge: "Fine-Tuned",
+    accentClass: "border-purple-500/40 bg-purple-500/5 text-purple-500",
+    highlights: ["Custom sliders", "Tailored percentages"],
+  },
 };
 
 export function encodeMatchingPriority(
   guidelines: string | null | undefined,
-  priority: MatchingPriorityPreset = "BALANCED"
+  priority: MatchingPriorityPreset = "BALANCED",
+  customWeights?: MatchingWeights | null
 ): string | null {
-  if (priority === "BALANCED" && !guidelines) return null;
   const clean = stripMatchingPriority(guidelines);
-  if (priority === "BALANCED") return clean;
-  const prefix = `[MATCHING_PRIORITY:${priority}]`;
-  return clean ? `${prefix}\n${clean}` : prefix;
+  let tags = "";
+  if (priority !== "BALANCED" || customWeights) {
+    tags += `[MATCHING_PRIORITY:${priority}]`;
+  }
+  if (customWeights) {
+    tags += `[MATCHING_WEIGHTS:${JSON.stringify(customWeights)}]`;
+  }
+  if (!tags) return clean || null;
+  return clean ? `${tags}\n${clean}` : tags;
 }
 
 export function decodeMatchingPriority(
   guidelines: string | null | undefined
-): { priority: MatchingPriorityPreset; cleanGuidelines: string | null } {
+): {
+  priority: MatchingPriorityPreset;
+  customWeights?: MatchingWeights | undefined;
+  cleanGuidelines: string | null;
+} {
   if (!guidelines) {
     return { priority: "BALANCED", cleanGuidelines: null };
   }
-  const match = guidelines.match(/\[MATCHING_PRIORITY:(BALANCED|REACH_FOCUSED|TRUST_FOCUSED|ROI_FOCUSED)\]/);
-  if (!match) {
-    return { priority: "BALANCED", cleanGuidelines: guidelines };
+
+  let priority: MatchingPriorityPreset = "BALANCED";
+  const priorityMatch = guidelines.match(
+    /\[MATCHING_PRIORITY:(BALANCED|REACH_FOCUSED|TRUST_FOCUSED|ROI_FOCUSED|CUSTOM)\]/
+  );
+  if (priorityMatch && priorityMatch[1]) {
+    priority = priorityMatch[1] as MatchingPriorityPreset;
   }
-  const priority = (match[1] as MatchingPriorityPreset) || "BALANCED";
+
+  let customWeights: MatchingWeights | undefined = undefined;
+  const weightsMatch = guidelines.match(/\[MATCHING_WEIGHTS:(\{.*?\})\]/);
+  if (weightsMatch && weightsMatch[1]) {
+    try {
+      customWeights = JSON.parse(weightsMatch[1]) as MatchingWeights;
+    } catch {
+      /* ignore invalid JSON */
+    }
+  }
+
   const cleanGuidelines = guidelines
-    .replace(/\[MATCHING_PRIORITY:(BALANCED|REACH_FOCUSED|TRUST_FOCUSED|ROI_FOCUSED)\]\n?/, "")
+    .replace(/\[MATCHING_PRIORITY:(BALANCED|REACH_FOCUSED|TRUST_FOCUSED|ROI_FOCUSED|CUSTOM)\]\n?/, "")
+    .replace(/\[MATCHING_WEIGHTS:\{.*?\}\]\n?/, "")
     .trim();
-  return { priority, cleanGuidelines: cleanGuidelines || null };
+
+  return { priority, customWeights, cleanGuidelines: cleanGuidelines || null };
 }
 
 export function stripMatchingPriority(guidelines: string | null | undefined): string | null {

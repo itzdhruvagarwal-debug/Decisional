@@ -18,7 +18,7 @@ import {
   updateTrustRuleWeight,
   DEFAULT_TRUST_RULE_WEIGHTS,
 } from "@/lib/trust-rules";
-import { calculateInfluencerDRS, calculateBrandDRS } from "@/lib/drs-score";
+import { calculateInfluencerDRS, calculateBrandDRS, calculateReviewDiversityRatio } from "@/lib/drs-score";
 import { checkPaymentFraud } from "@/lib/fraud-detection/payment";
 import prisma from "@/lib/db";
 import { redis } from "@/lib/redis";
@@ -191,13 +191,15 @@ describe("Unit Tests: KYC Verification & Fraud-Detection Hardening", () => {
       const baseInfluencerData = {
         completedDeals: 1,
         totalEarningsPaise: 100000,
-        fiveStarReviews: 0,
-        onTimeDeliveries: 1,
-        lateDeliveries: 0,
-        poorReviews: 0,
-        contentRejections: 0,
         disputesLost: 0,
-        disputesWon: 0,
+        dealBuckets:              { recent: 1, mid: 0, old: 0 },
+        reviewBuckets:            { recent: 0, mid: 0, old: 0 },
+        onTimeBuckets:            { recent: 1, mid: 0, old: 0 },
+        disputeWonBuckets:        { recent: 0, mid: 0, old: 0 },
+        lateDeliveryBuckets:      { recent: 0, mid: 0, old: 0 },
+        poorReviewBuckets:        { recent: 0, mid: 0, old: 0 },
+        contentRejectionBuckets:  { recent: 0, mid: 0, old: 0 },
+        disputeLostBuckets:       { recent: 0, mid: 0, old: 0 },
         identityVerified: true,
         accountAgeDays: 30,
         engagementRate: 2.0,
@@ -263,6 +265,95 @@ describe("Unit Tests: KYC Verification & Fraud-Detection Hardening", () => {
       expect(result.success).toBe(true);
       expect(result.weight).toBe(100);
       expect(redisDelSpy).toHaveBeenCalledWith("trust_rules:weights_map");
+    });
+
+    it("should calculate review diversity ratio accurately and protect against low sample sizes", () => {
+      expect(calculateReviewDiversityRatio(0, 0)).toBe(1.0);
+      expect(calculateReviewDiversityRatio(1, 1)).toBe(1.0);
+      expect(calculateReviewDiversityRatio(1, 2)).toBe(1.0); // <= 2 reviews grace period
+      expect(calculateReviewDiversityRatio(10, 10)).toBe(1.0); // 10 unique reviewers
+      expect(calculateReviewDiversityRatio(1, 10)).toBe(0.1); // 1 reviewer repeated 10 times
+      expect(calculateReviewDiversityRatio(3, 10)).toBe(0.3); // 3 reviewers across 10 reviews
+      expect(calculateReviewDiversityRatio(5, 10)).toBe(0.5);
+    });
+
+    it("should scale down influencer 5-star review bonus when reviews come from a single colluding reviewer", () => {
+      const baseFactors = {
+        completedDeals: 0,
+        totalEarningsPaise: 0,
+        disputesLost: 0,
+        dealBuckets: { recent: 0, mid: 0, old: 0 },
+        reviewBuckets: { recent: 10, mid: 0, old: 0 }, // 10 five-star reviews
+        onTimeBuckets: { recent: 0, mid: 0, old: 0 },
+        disputeWonBuckets: { recent: 0, mid: 0, old: 0 },
+        lateDeliveryBuckets: { recent: 0, mid: 0, old: 0 },
+        poorReviewBuckets: { recent: 0, mid: 0, old: 0 },
+        contentRejectionBuckets: { recent: 0, mid: 0, old: 0 },
+        disputeLostBuckets: { recent: 0, mid: 0, old: 0 },
+        identityVerified: false,
+        accountAgeDays: 0,
+        engagementRate: 0,
+        fakeFollowersDetected: false,
+        termsViolations: 0,
+        paymentFraudAttempts: 0,
+        avgReferralDRS: 0,
+        successfulReferrals: 0,
+        profileCompleteness: 0,
+      };
+
+      // 10 distinct brands reviewed the influencer
+      const diverseResult = calculateInfluencerDRS({
+        ...baseFactors,
+        uniqueReviewersCount: 10,
+      });
+
+      // Only 1 colluding brand gave all 10 reviews (Sybil ring)
+      const colludedResult = calculateInfluencerDRS({
+        ...baseFactors,
+        uniqueReviewersCount: 1,
+      });
+
+      expect(diverseResult.score).toBeGreaterThan(colludedResult.score);
+      const diverseReviewBreakdown = diverseResult.breakdown.find((b) => b.factor === "5-Star Quality");
+      const colludedReviewBreakdown = colludedResult.breakdown.find((b) => b.factor === "5-Star Quality");
+
+      expect(diverseReviewBreakdown?.impact).toBe(120); // capped at 120 with full diversity
+      expect(colludedReviewBreakdown?.impact).toBe(12);  // 120 * 0.1 diversity penalty = 12
+      expect(colludedReviewBreakdown?.reason).toContain("diversity penalty");
+    });
+
+    it("should scale down brand fair review bonus when reviews come from a single colluding creator", () => {
+      const baseBrand = {
+        completedCampaigns: 0,
+        fastApprovals: 0,
+        lateApprovals: 0,
+        fairReviews: 5,
+        disputesLost: 0,
+        companyVerified: false,
+        paymentReliability: 0,
+        termsViolations: 0,
+        longTermPartnerships: 0,
+        unfairRejections: 0,
+        influencerComplaints: 0,
+      };
+
+      const diverseBrand = calculateBrandDRS({
+        ...baseBrand,
+        uniqueInfluencersCount: 5,
+      });
+
+      const colludedBrand = calculateBrandDRS({
+        ...baseBrand,
+        uniqueInfluencersCount: 1,
+      });
+
+      expect(diverseBrand.score).toBeGreaterThan(colludedBrand.score);
+      const diverseFairBreakdown = diverseBrand.breakdown.find((b) => b.factor === "Fair Reviews");
+      const colludedFairBreakdown = colludedBrand.breakdown.find((b) => b.factor === "Fair Reviews");
+
+      expect(diverseFairBreakdown?.impact).toBe(5 * 30); // 150 pts
+      expect(colludedFairBreakdown?.impact).toBe(Math.round(150 * 0.2)); // 30 pts (diversity ratio = 1/5 = 0.2)
+      expect(colludedFairBreakdown?.reason).toContain("diversity penalty");
     });
   });
 

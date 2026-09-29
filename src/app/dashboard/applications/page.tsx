@@ -32,6 +32,7 @@ import DashboardShell from "@/components/dashboard/DashboardShell";
 import { formatCurrency, formatDate } from "@/lib/utils-client";
 import EmptyState from "@/components/ui/EmptyState";
 import { Button, Skeleton } from "@/components/ui";
+import { MatchScoreBadge } from "@/components/dashboard/campaigns/MatchScoreBadge";
 
 type FilterTab = "ALL" | "REVIEW" | "OFFERS" | "ARCHIVED";
 type ViewMode = "cards" | "table";
@@ -512,6 +513,12 @@ export default function ApplicationsPage() {
                       </div>
 
                       <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+                        {app.matchScore !== undefined && (
+                          <MatchScoreBadge
+                            score={app.matchScore}
+                            breakdown={app.matchBreakdown}
+                          />
+                        )}
                         <span
                           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shrink-0 ${meta.badgeClass}`}
                         >
@@ -753,12 +760,20 @@ export default function ApplicationsPage() {
                           {formatDate(app.createdAt)}
                         </td>
                         <td className="p-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${meta.badgeClass}`}
-                          >
-                            <StatusIcon className="w-3.5 h-3.5" />
-                            {meta.label}
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {app.matchScore !== undefined && (
+                              <MatchScoreBadge
+                                score={app.matchScore}
+                                breakdown={app.matchBreakdown}
+                              />
+                            )}
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${meta.badgeClass}`}
+                            >
+                              <StatusIcon className="w-3.5 h-3.5" />
+                              {meta.label}
+                            </span>
+                          </div>
                           {app.rejectionReason && (
                             <span
                               className="text-2xs text-disputed block mt-1 max-w-xs truncate"

@@ -328,6 +328,24 @@ describe("Unit Tests: Category-Specific ROI & Relative CPV Scoring (CreatorIQ / 
       expect(nullDecoded.cleanGuidelines).toBeNull();
     });
 
+    it("should encode and decode custom fine-tuned weights cleanly", () => {
+      const custom = {
+        category: 0.1,
+        engagement: 0.1,
+        authenticity: 0.1,
+        quality: 0.1,
+        roi: 0.6,
+      };
+      const encoded = encodeMatchingPriority("Clean guidelines here", "CUSTOM", custom);
+      expect(encoded).toContain("[MATCHING_PRIORITY:CUSTOM]");
+      expect(encoded).toContain("[MATCHING_WEIGHTS:");
+
+      const decoded = decodeMatchingPriority(encoded);
+      expect(decoded.priority).toBe("CUSTOM");
+      expect(decoded.customWeights?.roi).toBe(0.6);
+      expect(decoded.cleanGuidelines).toBe("Clean guidelines here");
+    });
+
     it("DOD: Different matching priorities must re-rank creators genuinely according to campaign goals", async () => {
       // Common campaign targeting Fashion
       const baseCampaign = {
@@ -402,6 +420,56 @@ describe("Unit Tests: Category-Specific ROI & Relative CPV Scoring (CreatorIQ / 
       // Trust-Focused: Trust > Viral
       expect(reachViral.matchScore - reachTrust.matchScore).toBeGreaterThan(0);
       expect(trustTrust.matchScore - trustViral.matchScore).toBeGreaterThan(0);
+    });
+
+    it("DOD: should rank creators using fine-tuned slider weights and expose complete matchBreakdown", async () => {
+      const baseCampaign = {
+        id: "camp-slider-test",
+        title: "Fintech App Campaign",
+        targetCategories: ["Finance"],
+        perInfluencerBudget: 1000000,
+      };
+
+      const highRoiCreator = {
+        id: "creator-high-roi",
+        categories: "Finance",
+        instagramFollowers: 100000,
+        instagramEngagementRate: 200, // 2%
+        youtubeSubscribers: null,
+        youtubeEngagementRate: null,
+        followerAuthenticityScore: 60,
+        averageRating: 350,
+        xp: 100,
+      };
+
+      // Custom weights emphasizing ROI (60%) via sliders
+      const customSliderWeights = {
+        category: 0.1,
+        engagement: 0.1,
+        authenticity: 0.1,
+        quality: 0.1,
+        roi: 0.6,
+      };
+
+      const result = await MatchingService.calculateMatchScore(
+        {
+          ...baseCampaign,
+          guidelines: encodeMatchingPriority(null, "CUSTOM", customSliderWeights),
+        },
+        highRoiCreator,
+        100000 // Proposed rate: ₹1,000 (very low CPV -> hyper ROI)
+      );
+
+      // Verify breakdown transparency ("Why this score")
+      expect(result.matchBreakdown).toBeDefined();
+      expect(result.matchBreakdown.matchingPriority).toBe("CUSTOM");
+      expect(result.matchBreakdown.categoryScore).toBeGreaterThan(0);
+      expect(result.matchBreakdown.engagementScore).toBeGreaterThan(0);
+      expect(result.matchBreakdown.authenticityScore).toBeGreaterThan(0);
+      expect(result.matchBreakdown.qualityScore).toBeGreaterThan(0);
+      expect(result.matchBreakdown.roiScore).toBeGreaterThan(0);
+      expect(result.matchBreakdown.weights?.roi).toBe(0.6);
+      expect(result.matchScore).toBeGreaterThanOrEqual(80);
     });
   });
 });

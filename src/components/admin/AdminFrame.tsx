@@ -16,6 +16,7 @@ import {
   Banknote,
   ScrollText,
   AlertTriangle,
+  ShieldAlert,
   Mail,
   LogOut,
   Menu,
@@ -32,16 +33,17 @@ type AdminFrameProps = {
 };
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Overview",      href: "/admin" },
-  { icon: Wallet,          label: "Financials",    href: "/admin/financial" },
-  { icon: ShieldCheck,     label: "Verifications", href: "/admin/verifications" },
-  { icon: FileText,        label: "Applications",  href: "/admin/applications" },
-  { icon: Scale,           label: "Disputes",      href: "/admin/disputes" },
-  { icon: Users,           label: "Users",         href: "/admin/users" },
-  { icon: Banknote,        label: "Payouts",       href: "/admin/payouts" },
-  { icon: ScrollText,      label: "Audit Logs",    href: "/admin/audit-logs" },
-  { icon: AlertTriangle,   label: "Violations",    href: "/admin/violations" },
-  { icon: Mail,            label: "Newsletter",    href: "/admin/newsletter" },
+  { icon: LayoutDashboard, label: "Overview",         href: "/admin" },
+  { icon: Wallet,          label: "Financials",       href: "/admin/financial" },
+  { icon: ShieldCheck,     label: "Verifications",    href: "/admin/verifications" },
+  { icon: FileText,        label: "Applications",     href: "/admin/applications" },
+  { icon: Scale,           label: "Disputes",         href: "/admin/disputes" },
+  { icon: Users,           label: "Users",            href: "/admin/users" },
+  { icon: Banknote,        label: "Payouts",          href: "/admin/payouts" },
+  { icon: ScrollText,      label: "Audit Logs",       href: "/admin/audit-logs" },
+  { icon: AlertTriangle,   label: "Violations",       href: "/admin/violations" },
+  { icon: ShieldAlert,     label: "Review Collusion", href: "/admin/suspicious-reviews" },
+  { icon: Mail,            label: "Newsletter",       href: "/admin/newsletter" },
 ] as const;
 
 function getInitials(name?: string | null, email?: string | null) {

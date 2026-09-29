@@ -69,6 +69,9 @@ export enum ActivityAction {
   PERMANENT_BAN = "PERMANENT_BAN",
   XP_AWARDED = "XP_AWARDED",
   CHALLENGE_COMPLETED = "CHALLENGE_COMPLETED",
+  // Authenticity & Fraud Events
+  FRAUD_APPEAL_SUBMITTED = "FRAUD_APPEAL_SUBMITTED",
+  FRAUD_APPEAL_RESOLVED = "FRAUD_APPEAL_RESOLVED",
 }
 
 export interface ActivityLogParams {

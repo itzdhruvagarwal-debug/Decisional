@@ -832,15 +832,17 @@ export class MatchingService {
       const roiScore = this.calculateRoiScore(cpvPaise, categoryBaselineCpv);
 
       // Determine matching priority weights (Preset or fine-tuned custom weights)
+      const decodedGuidelines = campaign.guidelines ? decodeMatchingPriority(campaign.guidelines) : undefined;
       const priority: MatchingPriorityPreset =
         options?.matchingPriority ??
         campaign.matchingPriority ??
-        (campaign.guidelines ? decodeMatchingPriority(campaign.guidelines).priority : undefined) ??
+        decodedGuidelines?.priority ??
         "BALANCED";
 
       const rawWeights: MatchingWeights =
         options?.customWeights ??
         campaign.customWeights ??
+        decodedGuidelines?.customWeights ??
         MATCHING_PRIORITY_PRESETS[priority] ??
         MATCHING_PRIORITY_PRESETS.BALANCED;
 

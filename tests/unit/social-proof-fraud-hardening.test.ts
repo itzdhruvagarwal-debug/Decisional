@@ -8,6 +8,7 @@ import {
 } from "@/lib/social-proof-core";
 import { ReviewService } from "@/services/review.service";
 import { AdminService } from "@/services/admin.service";
+import { checkFraudAppealEligibility } from "@/lib/action-eligibility";
 import prisma from "@/lib/db";
 import { NotificationService } from "@/services/notification.service";
 
@@ -53,6 +54,8 @@ vi.mock("@/lib/db", () => {
     },
     activityLog: {
       create: vi.fn().mockResolvedValue({ id: "act-1" }),
+      findFirst: vi.fn().mockResolvedValue(null),
+      findMany: vi.fn().mockResolvedValue([]),
     },
     auditLog: {
       create: vi.fn().mockResolvedValue({ id: "audit-1" }),
@@ -465,5 +468,112 @@ describe("Follower Authenticity & Fraud Detection Hardening", () => {
         data: { status: "FLAGGED" },
       });
     });
+
+    it("evaluates checkFraudAppealEligibility: blocks healthy accounts, non-influencers, or short reasons", () => {
+      // Non-influencer
+      const brandCheck = checkFraudAppealEligibility({
+        userType: "BRAND",
+        userStatus: "FLAGGED",
+      });
+      expect(brandCheck.allowed).toBe(false);
+      expect(brandCheck.reasonCode).toBe("NOT_INFLUENCER");
+
+      // Healthy creator account
+      const healthyCheck = checkFraudAppealEligibility({
+        userType: "INFLUENCER",
+        userStatus: "ACTIVE",
+        followerAuthenticityScore: 85,
+      });
+      expect(healthyCheck.allowed).toBe(false);
+      expect(healthyCheck.reasonCode).toBe("ACCOUNT_HEALTHY");
+
+      // Pending appeal
+      const pendingCheck = checkFraudAppealEligibility({
+        userType: "INFLUENCER",
+        userStatus: "FLAGGED",
+        hasPendingAppeal: true,
+      });
+      expect(pendingCheck.allowed).toBe(false);
+      expect(pendingCheck.reasonCode).toBe("PENDING_APPEAL");
+
+      // Reason too short
+      const shortReasonCheck = checkFraudAppealEligibility({
+        userType: "INFLUENCER",
+        userStatus: "FLAGGED",
+        appealReasonLength: 8,
+      });
+      expect(shortReasonCheck.allowed).toBe(false);
+      expect(shortReasonCheck.reasonCode).toBe("REASON_TOO_SHORT");
+
+      // Valid appeal eligibility
+      const validCheck = checkFraudAppealEligibility({
+        userType: "INFLUENCER",
+        userStatus: "FLAGGED",
+        followerAuthenticityScore: 35,
+        appealReasonLength: 30,
+      });
+      expect(validCheck.allowed).toBe(true);
+    });
+
+    it("allows flagged influencer to submit an appeal with audit log and notification", async () => {
+      vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({
+        id: "creator-appeal-1",
+        userType: "INFLUENCER",
+        status: "FLAGGED",
+        influencerProfile: {
+          id: "inf-prof-app-1",
+          followerAuthenticityScore: 38,
+        },
+      } as any);
+
+      vi.mocked(prisma.activityLog.findFirst).mockResolvedValueOnce(null);
+
+      const result = await AdminService.submitInfluencerFraudAppeal("creator-appeal-1", {
+        reason: "My Instagram reel went viral because it was boosted via Meta Ads campaign.",
+        evidenceUrl: "https://drive.google.com/ad-proof.png",
+      });
+
+      expect(result.success).toBe(true);
+      expect(prisma.activityLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            userId: "creator-appeal-1",
+            action: "FRAUD_APPEAL_SUBMITTED",
+          }),
+        })
+      );
+      expect(NotificationService.createNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: "creator-appeal-1",
+          title: "Authenticity Appeal Submitted",
+        })
+      );
+    });
+
+    it("rejects duplicate pending appeals within 7 days", async () => {
+      vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({
+        id: "creator-appeal-2",
+        userType: "INFLUENCER",
+        status: "FLAGGED",
+        influencerProfile: {
+          id: "inf-prof-app-2",
+          followerAuthenticityScore: 30,
+        },
+      } as any);
+
+      vi.mocked(prisma.activityLog.findFirst).mockResolvedValueOnce({
+        id: "recent-act-1",
+        userId: "creator-appeal-2",
+        action: "FRAUD_APPEAL_SUBMITTED",
+        createdAt: new Date(),
+      } as any);
+
+      await expect(
+        AdminService.submitInfluencerFraudAppeal("creator-appeal-2", {
+          reason: "Another appeal attempt before the previous one was reviewed.",
+        })
+      ).rejects.toThrow("already pending manual review");
+    });
   });
 });
+

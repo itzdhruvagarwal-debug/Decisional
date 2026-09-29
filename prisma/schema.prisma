@@ -117,6 +117,9 @@ model User {
   trustScore         Int                 @default(600)
   deviceFingerprints DeviceFingerprint[]
   loginAttempts      LoginAttempt[]
+  scoreSnapshots     DrsScoreSnapshot[]
+  reviewFlagsAsInfluencer ReviewFlagRecord[] @relation("InfluencerFlags")
+  reviewFlagsAsBrand      ReviewFlagRecord[] @relation("BrandFlags")
 
   // Password Reset
   resetToken       String?
@@ -1450,4 +1453,85 @@ model DeadLetterJob {
   @@index([status, category, createdAt])
   @@index([topic, createdAt])
   @@index([deduplicationId])
+}
+
+// ==================== COLLUSION / WASH-TRADING REVIEW FLAGS ====================
+//
+// Written by the trust-engine's detectCollusionPatterns() whenever a
+// same-pair (influencer ↔ brand) crosses the ≥3-mutual-5-star-deal threshold.
+// Admin-readable via GET /api/admin/reports/suspicious-reviews.
+// No automatic punitive action — admins review and decide.
+//
+// DRS impact: flagged reviewers are NOT removed from uniqueReviewersCount —
+// the existing diversity-ratio (uniqueCounterparties / totalReviews) already
+// downweights repeat-partner reviews automatically.
+
+model ReviewFlagRecord {
+  id              String   @id @default(cuid())
+
+  // The flagged pair
+  influencerUserId String
+  brandUserId      String
+
+  // Evidence snapshot (captured at flag-time; not updated on re-check)
+  totalDealsInPair        Int   // Total completed/verified deals between this pair
+  suspiciousDealCount     Int   // Deals with mutual 5-star AND amount ≤ 2× threshold
+  avgDealAmountPaise      Int   // Average deal amount in paise across suspicious deals
+  qualifyingThresholdPaise Int  // DRS_QUALIFIED_DEAL_VALUE_PAISE at flag-time
+
+  // Classification
+  flagReason      String   // Human-readable e.g. "3 mutual 5-star deals, avg ₹600 (≤2× min)"
+  riskScore       Int      // 0-100 computed risk score for sorting in admin dashboard
+
+  // Admin resolution
+  status          ReviewFlagStatus @default(PENDING)
+  resolvedBy      String?  // Admin userId who resolved
+  resolvedAt      DateTime?
+  resolutionNote  String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  influencerUser  User     @relation("InfluencerFlags",  fields: [influencerUserId], references: [id], onDelete: Cascade)
+  brandUser       User     @relation("BrandFlags",       fields: [brandUserId],      references: [id], onDelete: Cascade)
+
+  // One active flag per pair — upserted on each DRS recalc cycle
+  @@unique([influencerUserId, brandUserId])
+  @@index([status, createdAt])
+  @@index([influencerUserId])
+  @@index([brandUserId])
+}
+
+enum ReviewFlagStatus {
+  PENDING      // Awaiting admin review
+  CONFIRMED    // Admin confirmed as collusion
+  DISMISSED    // Admin dismissed as false positive
+}
+
+// ==================== DRS SCORE VELOCITY HISTORY ====================
+//
+// Stores every velocity-capped score write for audit and gradual-movement
+// enforcement.  The trust engine reads the most-recent snapshot to clamp
+// the new calculated score to ±DRS_MAX_WEEKLY_CHANGE.
+
+model DrsScoreSnapshot {
+  id              String   @id @default(cuid())
+  userId          String
+
+  // Scores at the time of this recalculation cycle
+  previousScore   Int      // Score BEFORE this cycle (from last snapshot)
+  calculatedScore Int      // Raw score the DRS formula produced
+  velocityCap     Int      // maxChange used (default 50)
+  finalScore      Int      // Velocity-capped score saved to user.trustScore
+
+  // Reason / context
+  trigger         String   // e.g. "DEAL_COMPLETED", "ADMIN_ADJUSTMENT"
+  tier            String   // DRS tier at finalScore
+
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId])
 }

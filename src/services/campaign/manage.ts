@@ -12,7 +12,7 @@ import { resolveBrandPlatformFee } from "@/lib/platform-fees";
 import { assertNoContactDetails } from "./create";
 import { invalidateCampaignSearchCache } from "@/lib/search";
 import { checkCampaignCancelEligibility, checkCampaignActivationEligibility } from "@/lib/action-eligibility";
-import { encodeMatchingPriority, decodeMatchingPriority, type MatchingPriorityPreset } from "@/services/matching.service";
+import { encodeMatchingPriority, decodeMatchingPriority, type MatchingPriorityPreset, type MatchingWeights } from "@/services/matching.service";
 
 export async function getCampaignById(
 campaignId: string,
@@ -83,7 +83,7 @@ function buildBasicInfoUpdate(
     const priority = (typeof data.matchingPriority === "string"
       ? data.matchingPriority
       : (existingGuidelines ? decodeMatchingPriority(existingGuidelines).priority : "BALANCED")) as MatchingPriorityPreset;
-    updateData.guidelines = encodeMatchingPriority(rawGuidelines, priority);
+    updateData.guidelines = encodeMatchingPriority(rawGuidelines, priority, data.customWeights as MatchingWeights | undefined);
   }
 }
 function parseOptionalPositiveNumber(val: unknown): number | null {

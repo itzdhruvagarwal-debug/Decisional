@@ -12,6 +12,7 @@ import { logger } from "./logger";
 import { getYouTubeChannel, calculateYouTubeEngagement } from "./youtube";
 import { getInstagramProfile, calculateEngagement } from "./instagram";
 import { decrypt } from "./encryption";
+import { NotificationService } from "@/services/notification.service";
 import {
   calculateFollowerAuthenticity,
   calculateContentQuality,
@@ -145,7 +146,7 @@ export async function recalculateSocialProof(
         averageRating: true,
         accountAge: true,
         user: {
-          select: { createdAt: true },
+          select: { createdAt: true, status: true },
         },
       },
     });
@@ -268,6 +269,21 @@ export async function recalculateSocialProof(
         contentQualityScore,
       },
     });
+
+    // If flagged by hardened fraud checks and user is ACTIVE, update to FLAGGED for review
+    if (authResult.isFlagged && profile.user.status === "ACTIVE") {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { status: "FLAGGED" },
+      });
+      await NotificationService.createNotification({
+        userId,
+        type: "system",
+        title: "Account Under Authenticity Review",
+        message:
+          "Your profile has triggered an automated authenticity review due to anomalous engagement signals. You can review signals and submit an appeal in your dashboard.",
+      });
+    }
 
     const result: SocialProofResult = {
       followerAuthenticityScore,
