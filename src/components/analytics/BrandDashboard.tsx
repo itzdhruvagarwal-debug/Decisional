@@ -351,7 +351,7 @@ export default function BrandDashboard({ data, currentFY }: BrandDashboardProps)
 
         <div className="w-full h-72 sm:h-80 select-none">
           {spendHistory.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
               <AreaChart data={spendHistory} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="spendGradient" x1="0" y1="0" x2="0" y2="1">

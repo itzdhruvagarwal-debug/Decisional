@@ -42,7 +42,11 @@ const data = await response.json();
 // Upstash REST returns { result: "value" } or { result: null }
 return data && data.result !== null;
   } catch (err) {
-    logger.error("Edge blacklist lookup failed (failing open to prevent outage):", err);
+    if (process.env.NODE_ENV === "production") {
+      logger.error("Edge blacklist lookup failed (failing open to prevent outage):", err);
+    } else {
+      logger.warn("Edge blacklist lookup skipped in development (failing open)");
+    }
     return false;
   }
 }
