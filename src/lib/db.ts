@@ -271,12 +271,20 @@ const isProd = process.env.NODE_ENV === "production";
 // Connection Pool Configuration
 // Enterprise scaling requires a pooler (PgBouncer or Prisma Accelerate)
 const poolUrl = process.env.PRISMA_ACCELERATE_URL || process.env.PGBOUNCER_URL;
-const datasourceUrl = poolUrl || process.env.DATABASE_URL;
+let datasourceUrl = poolUrl || process.env.DATABASE_URL;
+
+// In long-running Node.js processes (local dev, test runner, Docker containers),
+// connection_limit=1 causes query serialization in Node memory (2s+ slow query queueing).
+// Adapt connection_limit to 10 for true parallel multiplexing against Supavisor/PostgreSQL.
+const isServerless = process.env.VERCEL === "1" || Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME);
+if (!isServerless && datasourceUrl && datasourceUrl.includes("connection_limit=1")) {
+  datasourceUrl = datasourceUrl.replace(/([?&])connection_limit=1(&|$)/, "$1connection_limit=10$2");
+}
 
 const baseClient = new PrismaClient({
-log: !isProd ? ["error", "warn"] : ["error"],
-errorFormat: "minimal",
-...(poolUrl && datasourceUrl ? { datasourceUrl } : {}),
+  log: !isProd ? ["error", "warn"] : ["error"],
+  errorFormat: "minimal",
+  ...(datasourceUrl ? { datasourceUrl } : {}),
 });
 
 const usesManagedPrismaTransport = Boolean(process.env.PRISMA_ACCELERATE_URL);

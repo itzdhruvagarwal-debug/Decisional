@@ -25,6 +25,8 @@ export function useNotificationCenter(userId?: string | null) {
   const [activeToast, setActiveToast] = useState<NotificationToast | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef<boolean>(true);
+  const inFlightRef = useRef<boolean>(false);
+  const lastFetchTimeRef = useRef<number>(0);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -36,18 +38,25 @@ export function useNotificationCenter(userId?: string | null) {
     };
   }, []);
 
-  const fetchNotifications = useCallback(async () => {
+  const fetchNotifications = useCallback(async (force = false) => {
     if (!userId) return;
+    const now = Date.now();
+    // Throttle automatic refreshes to at least 15 seconds to avoid hammering the DB
+    if (!force && (inFlightRef.current || now - lastFetchTimeRef.current < 15000)) {
+      return;
+    }
     try {
+      inFlightRef.current = true;
       setIsLoading(true);
       const data = await apiClient.settings.getNotifications({ limit: 30 });
       if (!isMountedRef.current) return;
       setNotifications(data.notifications || []);
       setUnreadCount(data.unreadCount ?? 0);
-
+      lastFetchTimeRef.current = Date.now();
     } catch (err) {
       logger.warn("[useNotificationCenter] Failed to fetch notifications", { error: err });
     } finally {
+      inFlightRef.current = false;
       if (isMountedRef.current) {
         setIsLoading(false);
       }
@@ -223,6 +232,6 @@ export function useNotificationCenter(userId?: string | null) {
     dismissToast,
     markAsRead,
     markAllAsRead,
-    refresh: fetchNotifications,
+    refresh: () => fetchNotifications(true),
   };
 }

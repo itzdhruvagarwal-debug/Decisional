@@ -51,7 +51,7 @@ statsWhere.brandId = profile.id;
 
 logger.info("Listing deals", { userId, userType, filters: where, page });
 
-const [deals, total, activeCount, completedCount, earningsAggregation] = await Promise.all([
+const [deals, total, activeCount, completedAggregation] = await Promise.all([
 prisma.deal.findMany({
 where,
 include: {
@@ -80,16 +80,13 @@ in: ACTIVE_DEAL_STATUSES as DealStatus[],
 },
 },
 }),
-prisma.deal.count({
-where: {
-...statsWhere,
-status: "COMPLETED",
-},
-}),
 prisma.deal.aggregate({
 where: {
 ...statsWhere,
 status: "COMPLETED",
+},
+_count: {
+_all: true,
 },
 _sum: {
 influencerPayout: true,
@@ -99,8 +96,8 @@ influencerPayout: true,
 
 const stats = {
 active: activeCount,
-completed: completedCount,
-totalEarnings: earningsAggregation._sum.influencerPayout || 0,
+completed: completedAggregation._count._all || 0,
+totalEarnings: completedAggregation._sum.influencerPayout || 0,
 };
 
 return { deals, total, totalPages: Math.ceil(total / limit), stats };
