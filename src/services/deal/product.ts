@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { AppError } from "@/lib/errors";
 import { NotificationService } from "@/services/notification.service";
 import { invalidateDealCache, lockAndFetchDealForAction, validateShippingAddress } from "./helpers";
+import { shiprocketWebhookPayloadSchema } from "@/lib/validations";
 
 export async function submitShippingAddress(
 userId: string,
@@ -157,6 +158,18 @@ export async function createShiprocketShipment(
     country: rawAddress.country ? String(rawAddress.country) : "India",
   };
 
+  // Pre-fetch brand wallet to check freeze status and balance before touching external APIs
+  const brandWallet = deal.brand?.userId
+    ? await prisma.wallet.findUnique({
+        where: { userId: deal.brand.userId },
+        select: { id: true, balance: true, isFrozen: true },
+      })
+    : null;
+
+  if (brandWallet?.isFrozen) {
+    throw AppError.badRequest("Brand wallet is unavailable or frozen. Cannot process shipping charge.");
+  }
+
   // Step 2: Call Shiprocket API to create order, assign courier AWB, fetch label + rate
   const { createCompleteShipment } = await import("@/lib/shiprocket");
   const shipment = await createCompleteShipment({
@@ -172,6 +185,7 @@ export async function createShiprocketShipment(
     breadth: options?.breadth,
     height: options?.height,
     weight: options?.weight,
+    walletBalancePaise: brandWallet?.balance,
   });
 
   const courierChargePaise = shipment.courierChargePaise || 0;
@@ -357,14 +371,18 @@ export async function trackDealShipping(userId: string, dealId: string) {
 }
 
 
-export async function handleShiprocketWebhook(payload: Record<string, unknown>) {
-  const awb = String(payload.awb || payload.awb_code || payload.tracking_number || "").trim();
-  const orderId = String(payload.order_id || "").trim();
-  const status = String(payload.current_status || payload.status || "").trim().toUpperCase();
-
-  if (!awb && !orderId) {
-    throw AppError.badRequest("Webhook payload missing awb and order_id");
+export async function handleShiprocketWebhook(rawPayload: unknown) {
+  const parseResult = shiprocketWebhookPayloadSchema.safeParse(rawPayload);
+  if (!parseResult.success) {
+    const errorDetails = parseResult.error.issues.map((i) => i.message).join("; ");
+    throw AppError.badRequest(`Invalid Shiprocket webhook payload: ${errorDetails}`);
   }
+
+  const payload = parseResult.data;
+  const awb = (payload.awb || payload.awb_code || payload.tracking_number || "").trim();
+  const orderId = (payload.order_id || "").trim();
+  const rawStatus = (payload.current_status || payload.status || "").trim().toUpperCase();
+  const status = rawStatus.slice(0, 50);
 
   // Find matching deal
   const deal = await prisma.deal.findFirst({
@@ -386,12 +404,36 @@ export async function handleShiprocketWebhook(payload: Record<string, unknown>) 
   }
 
   const isDelivered = status.includes("DELIVER");
-  const rawScans = Array.isArray(payload.scans) ? payload.scans : [];
+  
+  // Safely validate and sanitize scan history checkpoints
+  const incomingScans = Array.isArray(payload.scans)
+    ? payload.scans
+    : Array.isArray(payload.shipment_track_activities)
+      ? payload.shipment_track_activities
+      : [];
+
+  const sanitizedScans = incomingScans.slice(0, 50).map((s) => {
+    if (typeof s === "string") {
+      return {
+        date: new Date().toISOString(),
+        status: status || "IN_TRANSIT",
+        activity: s.slice(0, 255),
+        location: "In Transit",
+      };
+    }
+    const item = s as Record<string, unknown>;
+    return {
+      date: String(item.date || item.time || new Date().toISOString()).slice(0, 100),
+      status: String(item.status || item.activity || "IN_TRANSIT").slice(0, 100),
+      activity: String(item.activity || item["sr-status-label"] || item.status || "").slice(0, 255),
+      location: String(item.location || item.city || "").slice(0, 255),
+    };
+  });
 
   await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const updateData: Prisma.DealUpdateInput = {
       shippingStatus: status || deal.shippingStatus,
-      ...(rawScans.length > 0 ? { shippingTrackingHistory: rawScans as unknown as Prisma.InputJsonValue } : {}),
+      ...(sanitizedScans.length > 0 ? { shippingTrackingHistory: sanitizedScans as unknown as Prisma.InputJsonValue } : {}),
     };
 
     if (isDelivered && deal.productFulfillmentStatus !== "RECEIVED") {

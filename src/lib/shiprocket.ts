@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { AppError } from "@/lib/errors";
 
 export interface ShiprocketAddress {
@@ -24,6 +25,7 @@ export interface CreateShiprocketOrderParams {
   height?: number | undefined;
   weight?: number | undefined; // kg
   pickupPincode?: string | undefined; // brand pickup pincode for rate estimation
+  walletBalancePaise?: number | undefined; // brand's wallet balance for pre-flight validation
 }
 
 export interface TrackingCheckpoint {
@@ -54,9 +56,10 @@ export interface CompleteShipmentResult {
   courierChargePaise: number;
 }
 
-// In-memory token cache
+// In-memory token cache with concurrency deduplication
 let cachedToken: string | null = null;
 let tokenExpiresAt = 0;
+let tokenFetchPromise: Promise<string> | null = null;
 
 const SHIPROCKET_API_BASE = "https://apiv2.shiprocket.in/v1/external";
 
@@ -70,6 +73,7 @@ export function isShiprocketConfigured(): boolean {
 /**
  * Authenticates with Shiprocket API and returns a valid Bearer token.
  * Tokens are valid for 10 days; we cache for 7 days.
+ * Deduplicates in-flight requests to prevent concurrent cold-start race conditions.
  */
 export async function getShiprocketToken(): Promise<string> {
   const email = process.env.SHIPROCKET_EMAIL;
@@ -84,31 +88,42 @@ export async function getShiprocketToken(): Promise<string> {
     return cachedToken;
   }
 
-  try {
-    const response = await fetch(`${SHIPROCKET_API_BASE}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Shiprocket auth failed (${response.status}): ${errText}`);
-    }
-
-    const data = await response.json();
-    if (!data.token) {
-      throw new Error("Shiprocket auth response did not include a token");
-    }
-
-    cachedToken = data.token;
-    // Cache for 7 days (604800 seconds)
-    tokenExpiresAt = now + 7 * 24 * 60 * 60 * 1000;
-    return cachedToken as string;
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Shiprocket authentication error";
-    throw AppError.internal(message);
+  // Deduplicate concurrent login requests during cold start / expiry
+  if (tokenFetchPromise) {
+    return tokenFetchPromise;
   }
+
+  tokenFetchPromise = (async () => {
+    try {
+      const response = await fetch(`${SHIPROCKET_API_BASE}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Shiprocket auth failed (${response.status}): ${errText}`);
+      }
+
+      const data = await response.json();
+      if (!data.token) {
+        throw new Error("Shiprocket auth response did not include a token");
+      }
+
+      cachedToken = data.token;
+      // Cache for 7 days (604800 seconds)
+      tokenExpiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+      return cachedToken as string;
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Shiprocket authentication error";
+      throw AppError.internal(message);
+    } finally {
+      tokenFetchPromise = null;
+    }
+  })();
+
+  return tokenFetchPromise;
 }
 
 /**
@@ -308,13 +323,25 @@ export async function getShippingRate(
 /**
  * Unified method to create order, assign courier AWB, and generate label.
  * Also fetches actual courier rate and returns as courierChargePaise for wallet billing.
- * If credentials are not configured, runs high-fidelity mock simulation.
+ * If credentials are not configured:
+ *  - In PRODUCTION: Throws AppError to prevent silent mock shipping and false billing.
+ *  - In DEV/TEST: Runs high-fidelity mock simulation with explicit warning logs.
  */
 export async function createCompleteShipment(
   params: CreateShiprocketOrderParams,
 ): Promise<CompleteShipmentResult> {
   // Mock mode for local dev / testing
   if (!isShiprocketConfigured()) {
+    if (process.env.NODE_ENV === "production") {
+      throw AppError.internal(
+        "Shiprocket shipping credentials (SHIPROCKET_EMAIL, SHIPROCKET_PASSWORD) are not configured in production environment. Cannot dispatch real shipments.",
+      );
+    }
+
+    console.warn(
+      `[Shiprocket Warning] SHIPROCKET_EMAIL / SHIPROCKET_PASSWORD are not configured. Generating simulated mock shipment for deal: ${params.dealId} (dev/test only). No physical shipment will be dispatched.`,
+    );
+
     const mockOrderNum = Math.floor(100000 + Math.random() * 900000);
     const mockAwb = `SRDEL${Math.floor(1000000000 + Math.random() * 9000000000)}`;
     const nowIso = new Date().toISOString();
@@ -333,7 +360,7 @@ export async function createCompleteShipment(
         {
           date: nowIso,
           status: "PICKUP_SCHEDULED",
-          activity: "Shipment manifested and pickup scheduled with courier partner",
+          activity: "Shipment manifested and pickup scheduled with courier partner (Simulated)",
           location: params.shippingAddress.city || "Origin Hub",
         },
       ],
@@ -349,6 +376,18 @@ export async function createCompleteShipment(
     weight: Math.max(0.1, params.weight || 0.5),
     cod: false,
   });
+
+  // Pre-flight check: ensure brand has enough wallet balance BEFORE booking in Shiprocket
+  if (
+    courierChargePaise > 0 &&
+    typeof params.walletBalancePaise === "number" &&
+    params.walletBalancePaise < courierChargePaise
+  ) {
+    const shortfallRupees = ((courierChargePaise - params.walletBalancePaise) / 100).toFixed(2);
+    throw AppError.badRequest(
+      `Insufficient wallet balance for shipping charge (₹${(courierChargePaise / 100).toFixed(2)}). Please deposit ₹${shortfallRupees} more before creating shipment.`,
+    );
+  }
 
   const order = await createAdhocOrder(token, params);
   const awb = await assignAwb(token, order.shipmentId);
@@ -377,7 +416,8 @@ export async function createCompleteShipment(
 
 /**
  * Tracks shipment by AWB code via Shiprocket Tracking API.
- * If credentials are not configured or AWB is simulated, provides dynamic simulation.
+ * If credentials are not configured or AWB is explicitly a mock ("MOCK*"), provides dynamic simulation.
+ * Does NOT hijack real "SRDEL" AWBs when Shiprocket is configured.
  */
 export async function trackShipment(
   awbCode: string,
@@ -385,8 +425,13 @@ export async function trackShipment(
 ): Promise<TrackingResult> {
   const cleanAwb = awbCode.trim();
 
-  // Handle mock / simulated tracking
-  if (!isShiprocketConfigured() || cleanAwb.startsWith("SRDEL") || cleanAwb.startsWith("MOCK")) {
+  // Handle mock / simulated tracking:
+  // - If Shiprocket credentials are NOT configured (dev/test environment), use simulation.
+  // - Or if the AWB is explicitly marked as simulated (starts with "MOCK").
+  // Note: We do NOT hijack AWBs starting with "SRDEL" when Shiprocket is configured,
+  // because real Delhivery shipments via Shiprocket can carry an SRDEL prefix.
+  const isExplicitMockAwb = cleanAwb.startsWith("MOCK");
+  if (!isShiprocketConfigured() || isExplicitMockAwb) {
     const isDelivered = currentStoredStatus === "DELIVERED";
     const now = new Date();
     const mockDateStr = now.toISOString();
@@ -461,10 +506,42 @@ export async function trackShipment(
 }
 
 /**
- * Validates Shiprocket tracking webhook secret if configured.
+ * Validates Shiprocket tracking webhook secret.
+ * In production: If SHIPROCKET_WEBHOOK_SECRET is missing, all requests are strictly rejected (fail-closed).
+ * In non-production: If missing, logs a warning and permits requests for development convenience.
+ * Timing-safe comparison is used when validating headers.
  */
 export function verifyWebhookSecret(authHeader: string | null): boolean {
   const secret = process.env.SHIPROCKET_WEBHOOK_SECRET;
-  if (!secret) return true; // If no secret configured, accept
-  return authHeader === secret || authHeader === `Bearer ${secret}`;
+
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      console.error(
+        "[Shiprocket Webhook] REJECTED: SHIPROCKET_WEBHOOK_SECRET is not configured in production environment.",
+      );
+      return false;
+    }
+    console.warn(
+      "[Shiprocket Webhook] Warning: SHIPROCKET_WEBHOOK_SECRET is not configured. Allowing in non-production mode.",
+    );
+    return true;
+  }
+
+  if (!authHeader) {
+    return false;
+  }
+
+  const cleanHeader = authHeader.trim();
+  const candidate = cleanHeader.startsWith("Bearer ")
+    ? cleanHeader.slice(7).trim()
+    : cleanHeader;
+
+  const secretBuffer = Buffer.from(secret, "utf-8");
+  const candidateBuffer = Buffer.from(candidate, "utf-8");
+
+  if (secretBuffer.length !== candidateBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(secretBuffer, candidateBuffer);
 }

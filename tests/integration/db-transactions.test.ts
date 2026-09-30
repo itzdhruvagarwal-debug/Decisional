@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import prisma from "@/lib/db";
 import { transitionDealState } from "@/lib/deal-state-machine";
 import { AppError } from "@/lib/errors";
+import { DealService } from "@/services/deal.service";
 
 describe("Integration Tests: Real Database Transactions & Constraints (PostgreSQL)", () => {
   const timestamp = Date.now();
@@ -12,6 +13,7 @@ describe("Integration Tests: Real Database Transactions & Constraints (PostgreSQ
   let testWalletId = "";
   let testCampaignId = "";
   let testDealId = "";
+  let testProductDealId = "";
 
   beforeAll(async () => {
     // 1. Create a real brand user & profile in PostgreSQL
@@ -91,15 +93,17 @@ describe("Integration Tests: Real Database Transactions & Constraints (PostgreSQ
 
   afterAll(async () => {
     // Clean up test data in foreign-key safe order
-    if (testDealId) {
-      await prisma.deal.deleteMany({ where: { id: testDealId } });
+    // Note: Transactions in COMPLETED state are protected by PostgreSQL append-only ledger triggers
+    try {
+      if (testDealId) {
+        await prisma.deal.deleteMany({ where: { id: testDealId } });
+      }
+      await prisma.processedWebhookEvent.deleteMany({
+        where: { eventId: { startsWith: `test_evt_${timestamp}` } },
+      });
+    } catch {
+      // Ledger integrity rules protect completed transactions from mutation
     }
-    if (testCampaignId) {
-      await prisma.campaign.deleteMany({ where: { id: testCampaignId } });
-    }
-    await prisma.processedWebhookEvent.deleteMany({
-      where: { eventId: { startsWith: `test_evt_${timestamp}` } },
-    });
   });
 
   it("should execute an atomic conditional balance deduction in real PostgreSQL transaction", async () => {
@@ -264,5 +268,110 @@ describe("Integration Tests: Real Database Transactions & Constraints (PostgreSQ
         actor: { userId: brandUserId, role: "ADMIN" },
       }),
     ).rejects.toThrow("TERMINAL_STATE_LOCKED");
+  });
+
+  it("should execute real end-to-end Shiprocket fulfillment pipeline in PostgreSQL", async () => {
+    // 1. Create a real physical product deal in PostgreSQL
+    const sampleAddress = {
+      fullName: "Integration Creator",
+      phone: "9876543210",
+      line1: "402 Tech Hub, Bandra West",
+      city: "Mumbai",
+      state: "Maharashtra",
+      pinCode: "400050",
+      country: "India",
+    };
+
+    const productDeal = await prisma.deal.create({
+      data: {
+        campaign: { connect: { id: testCampaignId } },
+        brand: { connect: { id: brandProfileId } },
+        influencer: { connect: { id: influencerProfileId } },
+        amount: 60000,
+        status: "ACTIVE",
+        requiresProduct: true,
+        productName: "Organic Facial Cream 100g",
+        productValue: 20000,
+        productFulfillmentStatus: "READY_TO_DISPATCH",
+        shippingAddress: sampleAddress,
+        contractTerms: { scope: "Product review video", fee: 60000 },
+        submissionDeadline: new Date(Date.now() + 5 * 86400000),
+        postingDeadline: new Date(Date.now() + 10 * 86400000),
+        reviewPeriodHours: 48,
+      },
+    });
+    testProductDealId = productDeal.id;
+
+    const brandWalletBefore = await prisma.wallet.findUnique({
+      where: { id: testWalletId },
+    });
+    const balanceBefore = brandWalletBefore?.balance || 0;
+
+    // 2. Execute real DealService.createShiprocketShipment in PostgreSQL
+    const shipmentResult = await DealService.createShiprocketShipment(
+      brandUserId,
+      productDeal.id,
+      { pickupLocation: "Primary Warehouse", weight: 0.5 },
+    );
+
+    expect(shipmentResult.deal.productFulfillmentStatus).toBe("DISPATCHED");
+    expect(shipmentResult.shipment.awbCode).toBeDefined();
+    expect(shipmentResult.courierChargePaise).toBeGreaterThan(0);
+
+    // 3. Verify PostgreSQL brand wallet was debited and transaction logged
+    const brandWalletAfter = await prisma.wallet.findUnique({
+      where: { id: testWalletId },
+    });
+    expect(brandWalletAfter?.balance).toBe(balanceBefore - shipmentResult.courierChargePaise);
+
+    const shippingTx = await prisma.transaction.findFirst({
+      where: {
+        dealId: productDeal.id,
+        type: "SHIPPING_CHARGE",
+      },
+    });
+    expect(shippingTx).not.toBeNull();
+    expect(shippingTx?.amount).toBe(shipmentResult.courierChargePaise);
+
+    // 4. Verify PostgreSQL deal row was updated with shipping info
+    const dbDispatchedDeal = await prisma.deal.findUnique({
+      where: { id: productDeal.id },
+    });
+    expect(dbDispatchedDeal?.productFulfillmentStatus).toBe("DISPATCHED");
+    expect(dbDispatchedDeal?.shippingAwbCode).toBe(shipmentResult.shipment.awbCode);
+    expect(dbDispatchedDeal?.shippingStatus).toBe("PICKUP_SCHEDULED");
+
+    // 5. Execute real DealService.handleShiprocketWebhook in PostgreSQL
+    const webhookResult = await DealService.handleShiprocketWebhook({
+      awb: shipmentResult.shipment.awbCode,
+      current_status: "DELIVERED",
+      scans: [
+        {
+          date: new Date().toISOString(),
+          status: "DELIVERED",
+          activity: "Package handed over to creator and signed",
+          location: "Mumbai",
+        },
+      ],
+    });
+
+    expect(webhookResult.matched).toBe(true);
+    expect(webhookResult.dealId).toBe(productDeal.id);
+
+    // 6. Verify deal row in PostgreSQL is now marked RECEIVED
+    const dbDeliveredDeal = await prisma.deal.findUnique({
+      where: { id: productDeal.id },
+    });
+    expect(dbDeliveredDeal?.productFulfillmentStatus).toBe("RECEIVED");
+    expect(dbDeliveredDeal?.shippingStatus).toBe("DELIVERED");
+    expect(dbDeliveredDeal?.productReceivedAt).not.toBeNull();
+
+    // 7. Verify notifications created in PostgreSQL for brand and creator
+    const notifications = await prisma.notification.findMany({
+      where: {
+        userId: { in: [brandUserId, influencerUserId] },
+      },
+    });
+    expect(notifications.length).toBeGreaterThanOrEqual(2);
   });
 });

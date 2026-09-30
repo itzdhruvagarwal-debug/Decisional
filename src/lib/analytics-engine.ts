@@ -48,110 +48,113 @@ logger.error("Influencer profile not found for analytics", { userId });
 throw AppError.notFound("Influencer profile not found");
 }
 
-// 1. Overview Stats
-const totalEarnings = profile.totalEarnings;
-const completedDeals = profile.completedDeals;
+  // 1. Overview stats from profile
+  const totalEarnings = profile.totalEarnings;
+  const completedDeals = profile.completedDeals;
 
-const activeDeals = await prisma.deal.count({
-where: {
-influencerId: profile.id,
-status: {
-in: [
-"ACTIVE",
-"CONTENT_SUBMITTED",
-"REVISION_REQUESTED",
-"CONTENT_APPROVED",
-"POSTED",
-"VERIFICATION_PENDING",
-],
-},
-},
-});
-
-// 2. Earnings History (Last 12 Months or FY)
-const earningsHistory = await getMonthlyEarnings(profile.id, fy);
-
-// 3. Performance Metrics
-const deliveryRate = await calculateDeliveryRate(profile.id);
-
-// 4. Recent Activity
-const recentActivity = await prisma.activityLog.findMany({
-where: { userId },
-orderBy: { createdAt: "desc" },
-take: 10,
-select: { action: true, createdAt: true, metadata: true },
-});
-
-// 5. Gamification & Referrals
-const referralStats = await getReferralStats(userId, { includeUsers: false });
-const userBadges = await prisma.userBadge.findMany({
-where: { userId },
-include: { badge: true },
-orderBy: { earnedAt: "desc" },
-take: 5,
-});
-
-const recentBadges = userBadges.map((ub) => ({
-...ub.badge,
-earnedAt: ub.earnedAt,
-}));
-
-// 6. Top Performing Content (deals with highest ratings)
-const topDeals = await prisma.deal.findMany({
-where: {
-influencerId: profile.id,
-status: "COMPLETED",
-},
-orderBy: { amount: "desc" },
-take: 5,
-select: {
-id: true,
-amount: true,
-completedAt: true,
-postUrl: true,
-campaign: { select: { title: true } },
-},
-});
-
-// 7. Category Breakdown
-// Fix #13: Select only targetCategories and take 1000 max to prevent memory bloat (OOM)
-const allDeals = await prisma.deal.findMany({
-  where: { influencerId: profile.id, status: "COMPLETED" },
-  select: {
-    id: true,
-    campaign: {
-      select: {
-        targetCategories: true,
+  // 2. Parallelize all independent database queries via Promise.all
+  const [
+    activeDeals,
+    earningsHistory,
+    deliveryRate,
+    recentActivity,
+    referralStats,
+    userBadges,
+    topDeals,
+    allDeals,
+    closedDealsGroupBy,
+  ] = await Promise.all([
+    // Active deals count
+    prisma.deal.count({
+      where: {
+        influencerId: profile.id,
+        status: {
+          in: [
+            "ACTIVE",
+            "CONTENT_SUBMITTED",
+            "REVISION_REQUESTED",
+            "CONTENT_APPROVED",
+            "POSTED",
+            "VERIFICATION_PENDING",
+          ],
+        },
       },
-    },
-  },
-  take: 1000,
-});
-const categoryMap = new Map<string, number>();
-allDeals.forEach((d) => {
-const cat = getPrimaryCategory(d.campaign?.targetCategories);
-categoryMap.set(cat, (categoryMap.get(cat) || 0) + 1);
-});
-const categoryBreakdown = Array.from(categoryMap.entries())
-.map(([category, count]) => ({
-category,
-count,
-percentage: Math.round((count / allDeals.length) * 100),
-}))
-.sort((a, b) => b.count - a.count);
+    }),
+    // Earnings history
+    getMonthlyEarnings(profile.id, fy),
+    // Performance delivery rate
+    calculateDeliveryRate(profile.id),
+    // Recent activity log
+    prisma.activityLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: { action: true, createdAt: true, metadata: true },
+    }),
+    // Gamification & referrals
+    getReferralStats(userId, { includeUsers: false }),
+    // Badges
+    prisma.userBadge.findMany({
+      where: { userId },
+      include: { badge: true },
+      orderBy: { earnedAt: "desc" },
+      take: 5,
+    }),
+    // Top performing content
+    prisma.deal.findMany({
+      where: { influencerId: profile.id, status: "COMPLETED" },
+      orderBy: { amount: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        amount: true,
+        completedAt: true,
+        postUrl: true,
+        campaign: { select: { title: true } },
+      },
+    }),
+    // Category breakdown deals
+    prisma.deal.findMany({
+      where: { influencerId: profile.id, status: "COMPLETED" },
+      select: {
+        id: true,
+        campaign: { select: { targetCategories: true } },
+      },
+      take: 1000,
+    }),
+    // Success rate status counts in a single group query
+    prisma.deal.groupBy({
+      by: ["status"],
+      where: {
+        influencerId: profile.id,
+        status: { in: ["COMPLETED", "CANCELLED"] },
+      },
+      _count: { id: true },
+    }),
+  ]);
 
-// 8. Success Rate
-const totalClosed = await prisma.deal.count({
-where: {
-influencerId: profile.id,
-status: { in: ["COMPLETED", "CANCELLED"] },
-},
-});
-const totalCompleted = await prisma.deal.count({
-where: { influencerId: profile.id, status: "COMPLETED" },
-});
-const successRate =
-totalClosed > 0 ? Math.round((totalCompleted / totalClosed) * 100) : 100;
+  const recentBadges = userBadges.map((ub) => ({
+    ...ub.badge,
+    earnedAt: ub.earnedAt,
+  }));
+
+  const categoryMap = new Map<string, number>();
+  allDeals.forEach((d) => {
+    const cat = getPrimaryCategory(d.campaign?.targetCategories);
+    categoryMap.set(cat, (categoryMap.get(cat) || 0) + 1);
+  });
+  const categoryBreakdown = Array.from(categoryMap.entries())
+    .map(([category, count]) => ({
+      category,
+      count,
+      percentage: Math.round((count / (allDeals.length || 1)) * 100),
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  const completedCount = closedDealsGroupBy.find((g) => g.status === "COMPLETED")?._count.id || 0;
+  const cancelledCount = closedDealsGroupBy.find((g) => g.status === "CANCELLED")?._count.id || 0;
+  const totalClosed = completedCount + cancelledCount;
+  const successRate = totalClosed > 0 ? Math.round((completedCount / totalClosed) * 100) : 100;
 
 logger.debug("InfluencerAnalytics data fetched successfully", { userId });
 return {
@@ -285,71 +288,79 @@ const totalSpent = profile.totalSpent;
 const activeCampaigns = profile.activeCampaigns;
 const totalCampaigns = profile.totalCampaigns;
 
-const activeDeals = await prisma.deal.count({
-where: {
-brandId: profile.id,
-status: { notIn: ["COMPLETED", "CANCELLED", "DISPUTED"] },
-},
-});
+// 1. Parallelize all independent database queries via Promise.all
+const [
+  activeDeals,
+  spendHistory,
+  campaigns,
+  aggregateResult,
+  categoryPerf,
+  influencerDeals,
+  referralStats,
+] = await Promise.all([
+  // Active deals
+  prisma.deal.count({
+    where: {
+      brandId: profile.id,
+      status: { notIn: ["COMPLETED", "CANCELLED", "DISPUTED"] },
+    },
+  }),
+  // Spend History (Last 12 Months or FY)
+  getMonthlySpend(userId, fy),
+  // Campaign Performance
+  prisma.campaign.findMany({
+    where: { brandId: profile.id },
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      totalBudget: true,
+      targetCategories: true,
+      _count: { select: { deals: true } },
+      deals: {
+        where: { status: "COMPLETED" },
+        select: { amount: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 10,
+  }),
+  // ROI Calculation aggregate
+  prisma.deal.aggregate({
+    where: { brandId: profile.id, status: "COMPLETED" },
+    _sum: { totalAmount: true },
+    _count: { id: true },
+  }),
+  // Content Type Performance
+  prisma.deal.groupBy({
+    by: ["status"],
+    where: { brandId: profile.id },
+    _count: true,
+    _sum: { amount: true },
+  }),
+  // Micro vs Macro comparison
+  prisma.deal.findMany({
+    where: { brandId: profile.id, status: "COMPLETED" },
+    select: {
+      amount: true,
+      influencer: {
+        select: {
+          instagramFollowers: true,
+          averageRating: true,
+        },
+      },
+    },
+    take: 1000,
+  }),
+  // Referrals
+  getReferralStats(userId, { includeUsers: false }),
+]);
 
-// 2. Spend History (Last 12 Months or FY)
-const spendHistory = await getMonthlySpend(userId, fy);
-
-// 3. Campaign Performance
-const campaigns = await prisma.campaign.findMany({
-where: { brandId: profile.id },
-select: {
-id: true,
-title: true,
-status: true,
-totalBudget: true,
-targetCategories: true,
-_count: { select: { deals: true } },
-deals: {
-where: { status: "COMPLETED" },
-select: { amount: true },
-},
-},
-orderBy: { createdAt: "desc" },
-take: 10,
-});
-
-// 4. ROI Calculation
-// Fix #13: Use database-level aggregate to calculate total deal spend and average deal cost
-const aggregateResult = await prisma.deal.aggregate({
-  where: { brandId: profile.id, status: "COMPLETED" },
-  _sum: { totalAmount: true },
-  _count: { id: true },
-});
 const totalDealSpend = aggregateResult._sum.totalAmount ?? 0;
 const avgDealCost =
   aggregateResult._count.id > 0
     ? Math.round(totalDealSpend / aggregateResult._count.id)
     : 0;
-
-// 5. Content Type Performance
-const categoryPerf = await prisma.deal.groupBy({
-by: ["status"],
-where: { brandId: profile.id },
-_count: true,
-_sum: { amount: true },
-});
-
-// 6. Micro vs Macro comparison
-// Fix #13: Limit results and select only required fields to prevent memory bloat (OOM)
-const influencerDeals = await prisma.deal.findMany({
-  where: { brandId: profile.id, status: "COMPLETED" },
-  select: {
-    amount: true,
-    influencer: {
-      select: {
-        instagramFollowers: true,
-        averageRating: true,
-      },
-    },
-  },
-  take: 1000,
-});
 
 const micro = influencerDeals.filter(
 (d) => (d.influencer?.instagramFollowers || 0) < 50000,
@@ -398,9 +409,6 @@ macro.reduce(
 : "0",
 },
 };
-
-// 7. Referrals
-const referralStats = await getReferralStats(userId, { includeUsers: false });
 
 return {
 overview: {

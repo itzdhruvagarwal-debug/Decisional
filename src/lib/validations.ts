@@ -482,3 +482,44 @@ export interface ApplicationInput {
   estimatedDelivery?: string | undefined;
   estimatedDeliveryDays?: number | undefined;
 }
+
+export const shiprocketWebhookScanSchema = z
+  .object({
+    date: z.string().max(100).optional(),
+    time: z.string().max(100).optional(),
+    status: z.string().max(100).optional(),
+    activity: z.string().max(255).optional(),
+    location: z.string().max(255).optional(),
+    city: z.string().max(255).optional(),
+    "sr-status-label": z.string().max(255).optional(),
+  })
+  .passthrough();
+
+export const shiprocketWebhookPayloadSchema = z
+  .object({
+    awb: z.union([z.string(), z.number()]).transform((v) => String(v).trim()).optional(),
+    awb_code: z.union([z.string(), z.number()]).transform((v) => String(v).trim()).optional(),
+    tracking_number: z.union([z.string(), z.number()]).transform((v) => String(v).trim()).optional(),
+    order_id: z.union([z.string(), z.number()]).transform((v) => String(v).trim()).optional(),
+    current_status: z.string().max(100).optional(),
+    status: z.string().max(100).optional(),
+    courier_name: z.string().max(100).optional(),
+    scans: z.array(z.union([z.string(), z.record(z.string(), z.unknown())])).optional(),
+    shipment_track_activities: z.array(z.record(z.string(), z.unknown())).optional(),
+  })
+  .passthrough()
+  .refine(
+    (data) =>
+      Boolean(
+        (data.awb && data.awb.length > 0) ||
+          (data.awb_code && data.awb_code.length > 0) ||
+          (data.tracking_number && data.tracking_number.length > 0) ||
+          (data.order_id && data.order_id.length > 0),
+      ),
+    {
+      message: "Webhook payload must contain at least one of awb, awb_code, tracking_number, or order_id",
+    },
+  );
+
+export type ShiprocketWebhookPayload = z.infer<typeof shiprocketWebhookPayloadSchema>;
+
