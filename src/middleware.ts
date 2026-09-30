@@ -485,5 +485,5 @@ return response;
 });
 
 export const config = {
-  matcher: ["/((?!api/payments/webhook|api/webhooks/razorpay/process|api/jobs|api/metrics|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api/auth|api/payments/webhook|api/webhooks/razorpay/process|api/jobs|api/metrics|_next/static|_next/image|favicon.ico).*)"],
 };
