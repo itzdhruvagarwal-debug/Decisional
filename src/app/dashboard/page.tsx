@@ -12,6 +12,7 @@ import { isAdmin as rbacIsAdmin, isBrand, isInfluencer } from "@/lib/rbac";
 import { Button } from "@/components/ui";
 import DashboardHomeClient from "@/components/dashboard/home/DashboardHomeClient";
 import prisma from "@/lib/db";
+import { cache } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -113,14 +114,19 @@ export default async function DashboardPage({
   // Guard: Newly registered users must complete onboarding before entering the dashboard
   let isCompleted = true;
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        userType: true,
-        influencerProfile: { select: { city: true, categories: true } },
-        brandProfile: { select: { companyName: true, city: true } },
-      },
-    });
+    const user = await cache(
+      `user:onboarding:${userId}`,
+      () =>
+        prisma.user.findUnique({
+          where: { id: userId },
+          select: {
+            userType: true,
+            influencerProfile: { select: { city: true, categories: true } },
+            brandProfile: { select: { companyName: true, city: true } },
+          },
+        }),
+      300,
+    );
 
     const isInfluencerUser = user?.userType === "INFLUENCER";
     isCompleted = isInfluencerUser

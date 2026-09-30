@@ -14,6 +14,7 @@ import { logger } from "./logger";
 import { subMonths, format } from "date-fns";
 import { getIndianFYBounds } from "./csv-export";
 import { WalletService } from "@/services/wallet.service";
+import { cache } from "./cache";
 
 function getPrimaryCategory(value: unknown): string {
 if (Array.isArray(value)) {
@@ -28,7 +29,9 @@ return "Other";
 }
 
 export async function getInfluencerAnalytics(userId: string, fy?: string) {
-const profile = await prisma.influencerProfile.findUnique({
+  const cacheKey = `analytics:influencer:${userId}:${fy || "default"}`;
+  return cache(cacheKey, async () => {
+    const profile = await prisma.influencerProfile.findUnique({
 where: { userId },
 include: {
 user: {
@@ -184,11 +187,12 @@ postUrl: d.postUrl,
 })),
 categoryBreakdown,
 recentActivity,
-gamification: {
-recentBadges,
-referralStats,
-},
-};
+      gamification: {
+        recentBadges,
+        referralStats,
+      },
+    };
+  }, 60);
 }
 
 /** Resolves analytics date range: FY bounds if fy is valid, else rolling 12 months. */
@@ -268,7 +272,9 @@ return Math.round((completed / totalDeals) * 100);
 }
 
 export async function getBrandAnalytics(userId: string, fy?: string) {
-const profile = await prisma.brandProfile.findUnique({
+  const cacheKey = `analytics:brand:${userId}:${fy || "default"}`;
+  return cache(cacheKey, async () => {
+    const profile = await prisma.brandProfile.findUnique({
 where: { userId },
 include: {
 user: {
@@ -437,9 +443,10 @@ status: p.status,
 count: p._count,
 totalAmount: p._sum.amount || 0,
 })),
-microVsMacro,
-referralStats,
-};
+      microVsMacro,
+      referralStats,
+    };
+  }, 60);
 }
 
 async function getMonthlySpend(userId: string, fy?: string) {
