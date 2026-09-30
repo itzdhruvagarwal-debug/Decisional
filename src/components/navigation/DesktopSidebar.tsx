@@ -26,6 +26,9 @@ import {
   Trophy,
   Award,
   Share2,
+  BarChart3,
+  HelpCircle,
+  FileText,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -203,12 +206,38 @@ export default function DesktopSidebar({
             <span className="flex-1 tracking-tight">Badges & Level</span>
           </Link>
 
+          {!isBrand && (
+            <Link
+              href="/dashboard/applications"
+              className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            >
+              <FileText className="w-4 h-4 stroke-[1.75]" />
+              <span className="flex-1 tracking-tight">My Applications</span>
+            </Link>
+          )}
+
+          <Link
+            href="/dashboard/analytics"
+            className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+          >
+            <BarChart3 className="w-4 h-4 stroke-[1.75]" />
+            <span className="flex-1 tracking-tight">Analytics & Reports</span>
+          </Link>
+
           <Link
             href="/dashboard/referrals"
             className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
           >
             <Share2 className="w-4 h-4 stroke-[1.75]" />
             <span className="flex-1 tracking-tight">Refer & Earn</span>
+          </Link>
+
+          <Link
+            href="/dashboard/support"
+            className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+          >
+            <HelpCircle className="w-4 h-4 stroke-[1.75]" />
+            <span className="flex-1 tracking-tight">Support & Help</span>
           </Link>
         </div>
       </nav>

@@ -24,6 +24,7 @@ import {
   LayoutGrid,
   List,
   Sparkles,
+  FileText,
 } from "lucide-react";
 
 export function buildCampaignQueryParams(
@@ -250,13 +251,21 @@ export default function CampaignsClient({
             </div>
           )}
 
-          {canCreateCampaign && (
+          {canCreateCampaign ? (
             <Button
               href="/dashboard/campaigns/create"
               variant="primary"
               className="font-bold text-xs gap-1.5 shadow-sm"
             >
               <PlusCircle className="w-4 h-4" /> Create New Brief
+            </Button>
+          ) : (
+            <Button
+              href="/dashboard/applications"
+              variant="secondary"
+              className="font-bold text-xs gap-1.5 shadow-sm"
+            >
+              <FileText className="w-4 h-4" /> My Applications
             </Button>
           )}
         </div>

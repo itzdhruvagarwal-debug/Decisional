@@ -8,6 +8,7 @@ import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui";
 import {
   LayoutDashboard,
+  BarChart3,
   Wallet,
   ShieldCheck,
   FileText,
@@ -15,6 +16,7 @@ import {
   Users,
   Banknote,
   ScrollText,
+  Target,
   AlertTriangle,
   ShieldAlert,
   Mail,
@@ -34,6 +36,7 @@ type AdminFrameProps = {
 
 const navItems = [
   { icon: LayoutDashboard, label: "Overview",         href: "/admin" },
+  { icon: BarChart3,       label: "Analytics",        href: "/admin/analytics" },
   { icon: Wallet,          label: "Financials",       href: "/admin/financial" },
   { icon: ShieldCheck,     label: "Verifications",    href: "/admin/verifications" },
   { icon: FileText,        label: "Applications",     href: "/admin/applications" },
@@ -41,6 +44,7 @@ const navItems = [
   { icon: Users,           label: "Users",            href: "/admin/users" },
   { icon: Banknote,        label: "Payouts",          href: "/admin/payouts" },
   { icon: ScrollText,      label: "Audit Logs",       href: "/admin/audit-logs" },
+  { icon: Target,          label: "CPV Benchmarks",   href: "/admin/benchmarks" },
   { icon: AlertTriangle,   label: "Violations",       href: "/admin/violations" },
   { icon: ShieldAlert,     label: "Review Collusion", href: "/admin/suspicious-reviews" },
   { icon: Mail,            label: "Newsletter",       href: "/admin/newsletter" },

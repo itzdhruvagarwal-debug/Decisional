@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Badge, Button, Input } from "@/components/ui";
 import { updateCategoryBenchmarkAction, resetCategoryBenchmarkAction } from "@/app/admin/actions";
-import { calculateRoiScore } from "@/services/matching.service";
+import { calculateRoiScore } from "@/lib/roi-calculator";
 
 export interface CategoryBenchmarkItem {
   category: string;

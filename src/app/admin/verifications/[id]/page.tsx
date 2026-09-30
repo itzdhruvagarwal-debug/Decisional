@@ -324,7 +324,13 @@ export default async function VerificationDetailPage({
                 {doc.status === "PENDING" && (
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-3 border-t border-border">
                     <form action={approveDocument.bind(null, doc.id, user.id)} className="sm:w-auto">
-                      <Button variant="success" size="sm" className="w-full gap-1 font-bold">
+                      <Button
+                        type="submit"
+                        variant="success"
+                        size="sm"
+                        disabled={!adminEligibility.allowed}
+                        className="w-full gap-1 font-bold"
+                      >
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         Approve Document
                       </Button>

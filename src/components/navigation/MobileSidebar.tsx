@@ -27,6 +27,8 @@ import {
   Award,
   Share2,
   HelpCircle,
+  BarChart3,
+  FileText,
   X,
   Sparkles,
 } from "lucide-react";
@@ -236,6 +238,34 @@ export default function MobileSidebar({
                 >
                   <Award className="w-4 h-4 stroke-[1.75]" />
                   <span className="flex-1 truncate">Badges & Level</span>
+                </Link>
+
+                {!isBrand && (
+                  <Link
+                    href="/dashboard/applications"
+                    onClick={onClose}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+                      isActive("/dashboard/applications")
+                        ? "bg-primary/10 text-primary font-bold border border-primary/20"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                    }`}
+                  >
+                    <FileText className="w-4 h-4 stroke-[1.75]" />
+                    <span className="flex-1 truncate">My Applications</span>
+                  </Link>
+                )}
+
+                <Link
+                  href="/dashboard/analytics"
+                  onClick={onClose}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    isActive("/dashboard/analytics")
+                      ? "bg-primary/10 text-primary font-bold border border-primary/20"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  }`}
+                >
+                  <BarChart3 className="w-4 h-4 stroke-[1.75]" />
+                  <span className="flex-1 truncate">Analytics & Reports</span>
                 </Link>
 
                 <Link
