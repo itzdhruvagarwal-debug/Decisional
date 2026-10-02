@@ -62,6 +62,17 @@ async function _handler_POST(
       include: {
         brand: true,
         paymentHold: true,
+        influencer: {
+          include: {
+            user: {
+              include: {
+                bankAccounts: {
+                  where: { isVerified: true, deletedAt: null },
+                },
+              },
+            },
+          },
+        },
       },
     });
 
@@ -70,8 +81,15 @@ async function _handler_POST(
       return NextResponse.json({ success: false, message: "Deal not found" }, { status: 404 });
     }
 
+    const creatorHasVerifiedBank = Boolean(
+      deal.influencer?.user?.bankAccounts && deal.influencer.user.bankAccounts.length > 0
+    );
+
     const eligibility = checkDealEscrowFundingEligibility(
-      deal,
+      {
+        ...deal,
+        creatorHasVerifiedBank,
+      },
       session.user.id,
       session.user.status,
     );

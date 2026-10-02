@@ -8,6 +8,8 @@ getOrCreateLinkedAccount,
 releaseTransferHold,
 reverseTransfer,
 refundPayment,
+checkLinkedAccountActivation,
+fetchPaymentTransfers,
 } from "@/lib/razorpay";
 import { encrypt, hashForDuplicateDetection } from "@/lib/encryption";
 import { logger } from "@/lib/logger";
@@ -231,16 +233,60 @@ throw AppError.badRequest("NO_RESERVED_CAMPAIGN_FUNDS");
         /* non-fatal */
       }
 
-      if (transferId) {
+      // Fallback: If not in Redis, look up transfers attached to the captured payment
+      if (!transferId && deal.paymentHold.razorpayPaymentId) {
         try {
-          await releaseTransferHold(transferId);
-        } catch (err) {
-          logger.error("Failed to release transfer hold on Razorpay Route", {
-            dealId: deal.id,
-            transferId,
-            error: err,
+          const transfers = await fetchPaymentTransfers(deal.paymentHold.razorpayPaymentId);
+          const firstTransfer = transfers[0];
+          if (firstTransfer && firstTransfer.id) {
+            transferId = firstTransfer.id;
+            await redis.set(`rzp:route:transfer:${deal.id}`, transferId, "EX", 86400 * 30).catch(() => {});
+          }
+        } catch (fetchErr) {
+          logger.warn("Could not query payment transfers as fallback", {
+            paymentId: deal.paymentHold.razorpayPaymentId,
+            error: fetchErr,
           });
         }
+      }
+
+      if (!transferId) {
+        // Record failure so that hold is tracked as FAILED for manual/cron intervention
+        await prisma.paymentHold.update({
+          where: { id: deal.paymentHold.id },
+          data: { status: "FAILED" },
+        }).catch(() => {});
+
+        logger.critical("ESCROW_RELEASE_FAILED: Missing transfer ID for Route deal escrow release", {
+          dealId: deal.id,
+          paymentHoldId: deal.paymentHold.id,
+        });
+
+        throw AppError.internal(
+          "Cannot complete deal: Razorpay Route transfer ID could not be identified to release funds to creator. Marked as FAILED for admin review."
+        );
+      }
+
+      try {
+        await releaseTransferHold(transferId);
+      } catch (err) {
+        // Persist FAILED status on paymentHold outside the rolling back transaction
+        await prisma.paymentHold.update({
+          where: { id: deal.paymentHold.id },
+          data: { status: "FAILED" },
+        }).catch(() => {});
+
+        logger.critical("ESCROW_RELEASE_FAILED: Failed to release transfer hold on Razorpay Route", {
+          dealId: deal.id,
+          transferId,
+          error: err instanceof Error ? err.message : String(err),
+        });
+
+        // DO NOT silently swallow! Rethrow so database transaction rolls back,
+        // preventing deal from being falsely marked as COMPLETED.
+        throw AppError.internal(
+          `Escrow payout release failed on payment gateway: ${err instanceof Error ? err.message : "Gateway error"}. Deal completion stopped to protect creator funds.`
+        );
       }
 
       await tx.paymentHold.update({
@@ -914,14 +960,29 @@ data: { status },
     const creatorUser = deal.influencer.user;
     const defaultBank = creatorUser.bankAccounts[0];
 
+    if (!defaultBank) {
+      throw AppError.badRequest(
+        "Creator has not added a verified bank account for payouts. Please ask the creator to add and verify their bank account before funding escrow."
+      );
+    }
+
     // Onboard creator to Razorpay Route (linked account id acc_...)
     const creatorAccountId = await getOrCreateLinkedAccount(creatorUser.id, {
       email: creatorUser.email,
       name: deal.influencer.displayName || "Vyapar Creator",
       phone: creatorUser.phone || undefined,
-      accountNumber: defaultBank?.accountNumber,
-      ifscCode: defaultBank?.ifscCode,
+      accountNumber: defaultBank.accountNumber,
+      ifscCode: defaultBank.ifscCode,
     });
+
+    // Verify creator's linked account activation on Razorpay Route
+    const activation = await checkLinkedAccountActivation(creatorAccountId);
+    if (!activation.isActivated) {
+      throw AppError.badRequest(
+        activation.reason ||
+          `Creator's gateway payout account is pending KYC activation (status: ${activation.status}). Funds cannot be routed until KYC is approved.`
+      );
+    }
 
     const influencerPayout = deal.influencerPayout ?? deal.amount;
     const receipt = `deal_route_${deal.id}_${Date.now()}`;
@@ -1035,5 +1096,35 @@ data: { status },
         data: { status: "FAILED" },
       });
     }
+  }
+
+  /**
+   * Safely retry failed Route escrow release for deals stuck in FAILED hold status.
+   */
+  static async retryFailedRouteEscrowRelease(dealId: string) {
+    const deal = await prisma.deal.findUnique({
+      where: { id: dealId },
+      include: { paymentHold: true },
+    });
+
+    if (!deal || !deal.paymentHold) {
+      throw AppError.notFound("Deal or PaymentHold not found");
+    }
+
+    if (deal.paymentHold.status !== "FAILED") {
+      throw AppError.badRequest(`PaymentHold is in status '${deal.paymentHold.status}', not FAILED.`);
+    }
+
+    if (!["VERIFIED", "CONTENT_APPROVED"].includes(deal.status)) {
+      throw AppError.badRequest(`Deal is in status '${deal.status}', which cannot be completed.`);
+    }
+
+    // Reset hold status to HELD so processDealCompletion can attempt release again
+    await prisma.paymentHold.update({
+      where: { id: deal.paymentHold.id },
+      data: { status: "HELD" },
+    });
+
+    return await PaymentService.processDealCompletion(dealId);
   }
 }

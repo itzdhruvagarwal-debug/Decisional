@@ -333,6 +333,181 @@ export async function getOrCreateLinkedAccount(
   return linked.accountId;
 }
 
+export interface LinkedAccountDetails {
+  id: string;
+  status: string;
+  email?: string;
+  activated: boolean;
+  live?: boolean;
+  notes?: Record<string, string>;
+}
+
+/**
+ * Fetch a linked account from Razorpay Route API (GET /v2/accounts/:id)
+ */
+export async function fetchLinkedAccount(accountId: string): Promise<LinkedAccountDetails> {
+  const { keyId, keySecret } = getRazorpayCredentials();
+  const authHeader = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+
+  if (
+    accountId.startsWith("acc_route_") ||
+    accountId.startsWith("acc_sandbox_") ||
+    process.env.NODE_ENV !== "production" ||
+    keyId.startsWith("rzp_test_")
+  ) {
+    return {
+      id: accountId,
+      status: "activated",
+      activated: true,
+      live: false,
+    };
+  }
+
+  return await withCircuitBreaker("razorpay:fetchLinkedAccount", async () => {
+    const res = await fetchWithTimeout(
+      `https://api.razorpay.com/v2/accounts/${encodeURIComponent(accountId)}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Basic ${authHeader}` },
+      },
+      10000
+    );
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      const desc = (err as { error?: { description?: string } })?.error?.description || res.statusText;
+      throw new AppError(`Failed to fetch linked account: ${desc}`, res.status, ApiErrorCode.GATEWAY_ERROR);
+    }
+
+    const data = await res.json();
+    const status = data.status || "created";
+    const activated = status === "activated";
+
+    return {
+      id: data.id || accountId,
+      status,
+      email: data.email,
+      activated,
+      live: data.live ?? false,
+      notes: data.notes,
+    };
+  });
+}
+
+/**
+ * Check whether a creator's linked account is active and KYC-approved for payouts.
+ * Caches in Redis for 5 minutes.
+ */
+export async function checkLinkedAccountActivation(
+  accountId: string
+): Promise<{ isActivated: boolean; status: string; reason?: string | undefined }> {
+  if (
+    accountId.startsWith("acc_route_") ||
+    accountId.startsWith("acc_sandbox_") ||
+    process.env.NODE_ENV !== "production"
+  ) {
+    return { isActivated: true, status: "activated" };
+  }
+
+  const cacheKey = `rzp:route:account_activation:${accountId}`;
+  try {
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      const parsed = JSON.parse(cached) as { isActivated: boolean; status: string; reason?: string };
+      return parsed;
+    }
+  } catch {
+    /* non-fatal */
+  }
+
+  try {
+    const account = await fetchLinkedAccount(accountId);
+    const result = {
+      isActivated: account.activated || account.status === "activated",
+      status: account.status,
+      reason:
+        account.status === "activated"
+          ? undefined
+          : `Creator linked payout account status is '${account.status}'. Payouts require KYC activation with the payment gateway.`,
+    };
+
+    try {
+      await redis.set(cacheKey, JSON.stringify(result), "EX", 300);
+    } catch {
+      /* non-fatal */
+    }
+
+    return result;
+  } catch (err) {
+    logger.warn("Could not verify linked account activation from gateway", { accountId, error: err });
+    return {
+      isActivated: true,
+      status: "unknown",
+      reason: "Could not reach gateway verification",
+    };
+  }
+}
+
+/**
+ * Fetch all transfers associated with a payment.
+ * Used for reconciliation or when a transfer ID was not cached during order creation.
+ */
+export async function fetchPaymentTransfers(paymentId: string): Promise<Array<{
+  id: string;
+  entity: string;
+  account: string;
+  amount: number;
+  currency: string;
+  on_hold: boolean;
+  status: string;
+  notes?: Record<string, string>;
+}>> {
+  const { keyId, keySecret } = getRazorpayCredentials();
+  const authHeader = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+
+  if (paymentId.startsWith("pay_sandbox_") || paymentId.startsWith("sim_")) {
+    return [
+      {
+        id: `trf_sandbox_${paymentId}`,
+        entity: "transfer",
+        account: "acc_route_sandbox",
+        amount: 10000,
+        currency: "INR",
+        on_hold: true,
+        status: "created",
+      },
+    ];
+  }
+
+  return await withCircuitBreaker("razorpay:fetchPaymentTransfers", async () => {
+    const res = await fetchWithTimeout(
+      `https://api.razorpay.com/v1/payments/${encodeURIComponent(paymentId)}/transfers`,
+      {
+        method: "GET",
+        headers: { Authorization: `Basic ${authHeader}` },
+      },
+      10000
+    );
+
+    if (!res.ok) {
+      logger.warn("Failed to fetch payment transfers from Razorpay", { paymentId, status: res.status });
+      return [];
+    }
+
+    const data = await res.json().catch(() => ({}));
+    return (data.items as Array<{
+      id: string;
+      entity: string;
+      account: string;
+      amount: number;
+      currency: string;
+      on_hold: boolean;
+      status: string;
+      notes?: Record<string, string>;
+    }>) || [];
+  });
+}
+
 /**
  * Release an Escrow Hold on a Razorpay Route transfer.
  * Called when a deal deliverable is approved / verified.
@@ -368,9 +543,25 @@ export async function releaseTransferHold(
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.error) {
-      const errorDesc = data.error?.description || "Failed to release transfer hold";
+      const errorDesc = (data.error?.description as string) || res.statusText || "Failed to release transfer hold";
+
+      // Idempotency: if already released, settled, or not on hold, return success
+      const errLower = typeof errorDesc === "string" ? errorDesc.toLowerCase() : "";
+      if (
+        errLower.includes("already") ||
+        errLower.includes("not on hold") ||
+        errLower.includes("processed") ||
+        errLower.includes("settled")
+      ) {
+        logger.info("Transfer hold was already released on Razorpay Route (idempotent)", {
+          transferId,
+          error: errorDesc,
+        });
+        return { success: true, transferId, status: "processed" };
+      }
+
       logger.error("Failed to release Razorpay Route transfer hold", { transferId, error: errorDesc });
-      throw new AppError(errorDesc, res.status, ApiErrorCode.GATEWAY_ERROR);
+      throw new AppError(errorDesc, res.status || 502, ApiErrorCode.GATEWAY_ERROR);
     }
 
     logger.info("Razorpay Route transfer hold released successfully", {

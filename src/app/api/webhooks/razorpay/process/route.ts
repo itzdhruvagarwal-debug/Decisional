@@ -8,6 +8,7 @@ import { sendWithdrawalEmail } from "@/lib/email";
 import { WebhookJobPayload } from "@/lib/qstash";
 import { recordWebhookAnomaly, recordPaymentFailure } from "@/lib/observability";
 import { transitionDealState } from "@/lib/deal-state-machine";
+import { redis } from "@/lib/redis";
 
 export const dynamic = "force-dynamic";
 
@@ -327,22 +328,124 @@ export async function processWebhookEventInternal(
     return { success: true, message: "Payout event processed" };
   }
 
-  // transfer.*: Route split transfer updates
+  // transfer.*: Route split transfer reconciliation updates
   if (event.startsWith("transfer.")) {
     const transferEntity = (payload?.payload as Record<string, unknown>)?.transfer as
-      | { entity?: { id?: string; account?: string; amount?: number; on_hold?: boolean; status?: string } }
+      | {
+          entity?: {
+            id?: string;
+            source?: string;
+            recipient?: string;
+            amount?: number;
+            on_hold?: boolean;
+            status?: string;
+            notes?: Record<string, string>;
+            error_code?: string;
+            error_description?: string;
+          };
+        }
       | undefined;
     const transfer = transferEntity?.entity;
     logger.info("Razorpay Route transfer event received", {
       event,
       transferId: transfer?.id,
-      account: transfer?.account,
+      source: transfer?.source,
+      account: transfer?.recipient,
       amount: transfer?.amount,
       onHold: transfer?.on_hold,
       status: transfer?.status,
     });
+
+    const dealId = transfer?.notes?.deal_id;
+    const paymentId = transfer?.source;
+
+    // Resolve PaymentHold by dealId, razorpayPaymentId, or Redis transfer mapping
+    let paymentHold = null;
+    if (dealId) {
+      paymentHold = await prisma.paymentHold.findUnique({
+        where: { dealId },
+        include: { deal: true },
+      });
+    }
+    if (!paymentHold && paymentId) {
+      paymentHold = await prisma.paymentHold.findFirst({
+        where: { razorpayPaymentId: paymentId },
+        include: { deal: true },
+      });
+    }
+
+    if (transfer?.id && paymentHold) {
+      await redis.set(`rzp:route:transfer:${paymentHold.dealId}`, transfer.id, "EX", 86400 * 30).catch(() => {});
+    }
+
+    if (event === "transfer.processed") {
+      if (paymentHold) {
+        // When transfer hold is confirmed released (or status is processed/settled), reconcile DB to RELEASED
+        if (transfer?.on_hold === false || transfer?.status === "processed" || transfer?.status === "settled") {
+          if (paymentHold.status !== "RELEASED") {
+            await prisma.paymentHold.update({
+              where: { id: paymentHold.id },
+              data: {
+                status: "RELEASED",
+                releasedAt: new Date(),
+              },
+            });
+
+            logger.info("Reconciled PaymentHold to RELEASED via transfer.processed webhook", {
+              dealId: paymentHold.dealId,
+              transferId: transfer?.id,
+            });
+
+            // If deal deliverable was approved/verified but was waiting on webhook release confirmation, complete it
+            if (paymentHold.deal && ["VERIFIED", "CONTENT_APPROVED"].includes(paymentHold.deal.status)) {
+              await transitionDealState({
+                dealId: paymentHold.deal.id,
+                fromState: paymentHold.deal.status,
+                toState: "COMPLETED",
+                actor: { userId: "SYSTEM_WEBHOOK", role: "SYSTEM" },
+                reason: "Deal successfully completed after Razorpay Route transfer settlement confirmation",
+                metadata: {
+                  transferId: transfer?.id,
+                  amount: transfer?.amount,
+                },
+              }).catch((transErr) => {
+                logger.warn("Could not transition deal to COMPLETED in transfer.processed webhook", {
+                  dealId: paymentHold?.dealId,
+                  error: transErr,
+                });
+              });
+            }
+          }
+        }
+      }
+    } else if (event === "transfer.failed") {
+      recordPaymentFailure(
+        "RAZORPAY_ROUTE_TRANSFER_FAILED",
+        new Error(transfer?.error_description || "Razorpay Route transfer failed"),
+        {
+          dealId: paymentHold?.dealId,
+          transferId: transfer?.id,
+          ...(typeof transfer?.amount === "number" ? { amount: transfer.amount } : {}),
+          ...(transfer?.error_description ? { reason: transfer.error_description } : {}),
+        },
+      );
+      if (paymentHold) {
+        await prisma.paymentHold.update({
+          where: { id: paymentHold.id },
+          data: { status: "FAILED" },
+        });
+
+        logger.critical("PaymentHold marked FAILED via transfer.failed webhook", {
+          dealId: paymentHold.dealId,
+          transferId: transfer?.id,
+          reason: transfer?.error_description,
+          errorCode: transfer?.error_code,
+        });
+      }
+    }
+
     await markWebhookProcessed(job.eventId, job.eventType, job.payload as Prisma.InputJsonValue);
-    return { success: true, message: `Transfer event ${event} processed` };
+    return { success: true, message: `Transfer event ${event} reconciled successfully` };
   }
 
   // Acknowledge unhandled event types

@@ -90,6 +90,36 @@ describe("Razorpay Route Escrow & RBI-Compliant Split Settlement", () => {
       expect(result.allowed).toBe(false);
       expect(result.reasonCode).toBe("ACCOUNT_SUSPENDED");
     });
+
+    it("should block escrow funding if creator has not linked a verified bank account", () => {
+      const deal = {
+        status: "PAYMENT_PENDING",
+        totalAmount: 100000,
+        reservedFromWallet: false,
+        brand: { userId: "user_brand_1" },
+        creatorHasVerifiedBank: false,
+      };
+
+      const result = checkDealEscrowFundingEligibility(deal, "user_brand_1", "ACTIVE");
+      expect(result.allowed).toBe(false);
+      expect(result.reasonCode).toBe("CREATOR_BANK_MISSING");
+      expect(result.reason).toContain("verified bank account");
+    });
+
+    it("should block escrow funding if creator route account is not active", () => {
+      const deal = {
+        status: "PAYMENT_PENDING",
+        totalAmount: 100000,
+        reservedFromWallet: false,
+        brand: { userId: "user_brand_1" },
+        creatorRouteAccountActive: false,
+      };
+
+      const result = checkDealEscrowFundingEligibility(deal, "user_brand_1", "ACTIVE");
+      expect(result.allowed).toBe(false);
+      expect(result.reasonCode).toBe("CREATOR_KYC_PENDING");
+      expect(result.reason).toContain("KYC");
+    });
   });
 
   describe("2. Linked Account Creation & Resolution", () => {

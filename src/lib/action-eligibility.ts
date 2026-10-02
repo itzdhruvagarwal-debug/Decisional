@@ -83,13 +83,17 @@ export interface DealEscrowFundingEligibilityInput {
   brand?: { userId?: string | undefined } | null | undefined;
   brandUserId?: string | null | undefined;
   paymentHold?: { status?: string | undefined } | null | undefined;
+  creatorHasVerifiedBank?: boolean | undefined;
+  creatorRouteAccountActive?: boolean | undefined;
 }
 
 export type DealEscrowFundingReasonCode =
   | "UNAUTHORIZED"
   | "INVALID_STATUS"
   | "ALREADY_FUNDED"
-  | "ACCOUNT_SUSPENDED";
+  | "ACCOUNT_SUSPENDED"
+  | "CREATOR_BANK_MISSING"
+  | "CREATOR_KYC_PENDING";
 
 export function checkDealEscrowFundingEligibility(
   deal: DealEscrowFundingEligibilityInput | null | undefined,
@@ -136,6 +140,25 @@ export function checkDealEscrowFundingEligibility(
       allowed: false,
       reason: `Deal is in ${deal.status} status and cannot be funded.`,
       reasonCode: "INVALID_STATUS",
+    };
+  }
+
+  if (deal.creatorHasVerifiedBank === false) {
+    return {
+      allowed: false,
+      reason: "Creator has not yet linked a verified bank account for payouts.",
+      reasonCode: "CREATOR_BANK_MISSING",
+      ctaText: "Remind Creator",
+      ctaHref: "/dashboard/messages",
+    };
+  }
+
+  if (deal.creatorRouteAccountActive === false) {
+    return {
+      allowed: false,
+      reason: "Creator's payout account is awaiting payment gateway KYC activation.",
+      reasonCode: "CREATOR_KYC_PENDING",
+      ctaText: "Awaiting Creator KYC",
     };
   }
 
