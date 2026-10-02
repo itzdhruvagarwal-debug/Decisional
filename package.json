@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && npx prisma migrate deploy && next build && node scripts/prepare-standalone.mjs",
+    "build": "prisma generate && next build && node scripts/prepare-standalone.mjs",
+    "migrate": "prisma migrate deploy",
     "postinstall": "prisma generate",
     "start": "node .next/standalone/server.js",
     "lint": "eslint",
