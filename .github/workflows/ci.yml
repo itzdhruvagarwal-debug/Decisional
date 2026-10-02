@@ -58,6 +58,9 @@ jobs:
   prisma-validate:
     name: Prisma Schema Validation
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://test_user:test_password@localhost:5432/vyapar_test_db?schema=public"
+      DIRECT_URL: "postgresql://test_user:test_password@localhost:5432/vyapar_test_db?schema=public"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -132,8 +135,8 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
-      - name: Apply DB migrations
-        run: npx prisma migrate deploy
+      - name: Apply DB schema
+        run: npx prisma db push --skip-generate
 
       - name: Run Vitest Suite (Unit + Integration)
         run: npm run test

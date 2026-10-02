@@ -30,6 +30,7 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Deploy Preview to Vercel
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -64,11 +65,16 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
         run: |
-          echo "🚀 Applying pending database migrations via Prisma migrate deploy..."
-          npx prisma migrate deploy
-          echo "✅ Production database migrations applied successfully!"
+          if [ -n "$DATABASE_URL" ]; then
+            echo "🚀 Applying pending database migrations via Prisma migrate deploy..."
+            npx prisma migrate deploy
+            echo "✅ Production database migrations applied successfully!"
+          else
+            echo "⚠️ DATABASE_URL repository secret not configured; skipping automated migration."
+          fi
 
       - name: Deploy Production to Vercel
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
