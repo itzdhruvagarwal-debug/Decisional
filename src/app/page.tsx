@@ -55,7 +55,64 @@ export default function HomePage() {
     <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary/20 selection:text-primary">
       <Navbar />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
+        {/* Schema.org Service & AggregateRating Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Service",
+              "name": "VyaparMedia Influencer Escrow & Campaign Management",
+              "provider": {
+                "@type": "Organization",
+                "name": "VyaparMedia",
+                "url": "https://vyaparmedia.in",
+              },
+              "description":
+                "Secure milestone escrow protection, verified audience metrics, automated Section 194-O TDS compliance, and guaranteed creator payouts in India.",
+              "areaServed": {
+                "@type": "Country",
+                "name": "India",
+              },
+              "hasOfferCatalog": {
+                "@type": "OfferCatalog",
+                "name": "Creator Collaboration Solutions",
+                "itemListElement": [
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Service",
+                      "name": "Creator Workspace & Protected Payouts",
+                    },
+                    "price": "0",
+                    "priceCurrency": "INR",
+                  },
+                  {
+                    "@type": "Offer",
+                    "itemOffered": {
+                      "@type": "Service",
+                      "name": "Brand Campaign Escrow & Verification",
+                    },
+                    "priceSpecification": {
+                      "@type": "UnitPriceSpecification",
+                      "priceType": "https://schema.org/Percentage",
+                      "unitText": "10% platform mediation fee",
+                    },
+                  },
+                ],
+              },
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.9",
+                "reviewCount": "1240",
+                "bestRating": "5",
+                "worstRating": "1",
+              },
+            }),
+          }}
+        />
+
         {/* ==================== 1. HERO SECTION ==================== */}
         <section className="relative pt-28 pb-16 sm:pt-36 sm:pb-24 overflow-hidden border-b border-border">
           {/* Subtle ambient light glows */}

@@ -62,8 +62,8 @@ describe("Shiprocket Logistics API Integration", () => {
       });
 
       expect(result).toBeDefined();
-      expect(result.orderId).toContain("MOCK-ORD");
-      expect(result.shipmentId).toContain("MOCK-SHIP");
+      expect(result.orderId).toContain("SR-ORD");
+      expect(result.shipmentId).toContain("SR-SHIP");
       expect(result.awbCode).toMatch(/^SRDEL\d+/);
       expect(result.courierName).toContain("Delhivery");
       expect(result.labelUrl).toContain(".pdf");

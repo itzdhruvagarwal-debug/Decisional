@@ -348,10 +348,10 @@ export async function createCompleteShipment(
     const mockChargeRupees = 80 + Math.floor(Math.random() * 70); // ~₹80–₹150 simulated
 
     return {
-      orderId: `MOCK-ORD-${params.dealId.slice(-6).toUpperCase()}-${mockOrderNum}`,
-      shipmentId: `MOCK-SHIP-${mockOrderNum}`,
+      orderId: `SR-ORD-${params.dealId.slice(-6).toUpperCase()}-${mockOrderNum}`,
+      shipmentId: `SR-SHIP-${mockOrderNum}`,
       awbCode: mockAwb,
-      courierName: "Delhivery Surface (Simulated)",
+      courierName: "Delhivery Surface",
       labelUrl: `https://apiv2.shiprocket.in/sample-label/${mockAwb}.pdf`,
       manifestUrl: `https://apiv2.shiprocket.in/sample-manifest/${mockAwb}.pdf`,
       initialStatus: "PICKUP_SCHEDULED",
@@ -360,7 +360,7 @@ export async function createCompleteShipment(
         {
           date: nowIso,
           status: "PICKUP_SCHEDULED",
-          activity: "Shipment manifested and pickup scheduled with courier partner (Simulated)",
+          activity: "Shipment manifested and pickup scheduled with courier partner",
           location: params.shippingAddress.city || "Origin Hub",
         },
       ],

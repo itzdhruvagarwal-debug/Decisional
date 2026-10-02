@@ -7,6 +7,7 @@ import { PaymentService } from "@/services/payment.service";
 import { sendWithdrawalEmail } from "@/lib/email";
 import { WebhookJobPayload } from "@/lib/qstash";
 import { recordWebhookAnomaly, recordPaymentFailure } from "@/lib/observability";
+import { transitionDealState } from "@/lib/deal-state-machine";
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +68,50 @@ export async function processWebhookEventInternal(
     if (!orderId || !paymentId || !Number.isInteger(capturedAmount) || capturedAmount <= 0) {
       logger.warn("Malformed payment.captured values", { orderId, paymentId, capturedAmount });
       return { success: false, message: "Invalid payment fields" };
+    }
+
+    // Check if this payment is for a deal escrow hold (Razorpay Route)
+    const paymentHold = await prisma.paymentHold.findUnique({
+      where: { razorpayOrderId: orderId },
+      include: { deal: true },
+    });
+
+    if (paymentHold) {
+      if (paymentHold.status === "RELEASED") {
+        logger.info("PaymentHold already released, ignoring duplicate capture event", { orderId, paymentId });
+        await markWebhookProcessed(job.eventId, job.eventType, job.payload as Prisma.InputJsonValue);
+        return { success: true, message: "Already released" };
+      }
+
+      await prisma.paymentHold.update({
+        where: { id: paymentHold.id },
+        data: {
+          status: "HELD",
+          capturedAt: new Date(),
+          razorpayPaymentId: paymentId,
+        },
+      });
+
+      if (
+        paymentHold.deal &&
+        ["PAYMENT_PENDING", "PENDING_SIGNATURE"].includes(paymentHold.deal.status)
+      ) {
+        await transitionDealState({
+          dealId: paymentHold.deal.id,
+          fromState: paymentHold.deal.status,
+          toState: "PAYMENT_HELD",
+          actor: { userId: "SYSTEM_WEBHOOK", role: "SYSTEM" },
+          reason: "Brand deal payment captured and escrow hold locked via Razorpay Route",
+          metadata: {
+            paymentId,
+            orderId,
+            amount: capturedAmount,
+          },
+        });
+      }
+
+      await markWebhookProcessed(job.eventId, job.eventType, job.payload as Prisma.InputJsonValue);
+      return { success: true, message: "Deal escrow hold secured via Razorpay Route" };
     }
 
     const transaction = await prisma.transaction.findFirst({
@@ -280,6 +325,24 @@ export async function processWebhookEventInternal(
 
     await markWebhookProcessed(job.eventId, job.eventType, job.payload as Prisma.InputJsonValue);
     return { success: true, message: "Payout event processed" };
+  }
+
+  // transfer.*: Route split transfer updates
+  if (event.startsWith("transfer.")) {
+    const transferEntity = (payload?.payload as Record<string, unknown>)?.transfer as
+      | { entity?: { id?: string; account?: string; amount?: number; on_hold?: boolean; status?: string } }
+      | undefined;
+    const transfer = transferEntity?.entity;
+    logger.info("Razorpay Route transfer event received", {
+      event,
+      transferId: transfer?.id,
+      account: transfer?.account,
+      amount: transfer?.amount,
+      onHold: transfer?.on_hold,
+      status: transfer?.status,
+    });
+    await markWebhookProcessed(job.eventId, job.eventType, job.payload as Prisma.InputJsonValue);
+    return { success: true, message: `Transfer event ${event} processed` };
   }
 
   // Acknowledge unhandled event types

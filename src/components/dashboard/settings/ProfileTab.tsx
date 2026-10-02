@@ -24,7 +24,9 @@ import {
   Award,
   Briefcase,
   Plus,
+  Smartphone,
 } from "lucide-react";
+import StoryShareModal from "@/components/share/StoryShareModal";
 
 export interface Profile {
   displayName: string;
@@ -113,6 +115,7 @@ export default function ProfileTab({
 }: Readonly<ProfileTabProps>) {
   const { update } = useSession();
   const [isUploading, setIsUploading] = useState(false);
+  const [storyModalOpen, setStoryModalOpen] = useState(false);
   const profileImageInputRef = useRef<HTMLInputElement>(null);
   const [customCategory, setCustomCategory] = useState("");
   const [customLanguage, setCustomLanguage] = useState("");
@@ -410,16 +413,27 @@ export default function ProfileTab({
                   {referralCode || "..."}
                 </span>
                 {referralCode && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      copyToClipboard(referralCode);
-                      showToast("Referral code copied!", "success");
-                    }}
-                    className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
-                  >
-                    <Copy className="w-3 h-3" /> Copy
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setStoryModalOpen(true)}
+                      className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                      title="Post referral or profile to Instagram / WhatsApp Story"
+                    >
+                      <Smartphone className="w-3 h-3" /> Story Card
+                    </button>
+                    <span className="text-muted-foreground/40">•</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        copyToClipboard(referralCode);
+                        showToast("Referral code copied!", "success");
+                      }}
+                      className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                    >
+                      <Copy className="w-3 h-3" /> Copy
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -802,6 +816,25 @@ export default function ProfileTab({
           </div>
         </div>
       )}
+
+      {/* Story Share Modal (Public Profile & Referral Story) */}
+      <StoryShareModal
+        open={storyModalOpen}
+        onClose={() => setStoryModalOpen(false)}
+        defaultTab={referralCode ? "referral" : "profile"}
+        referralCode={referralCode}
+        profile={{
+          displayName: profile.displayName || user.name || "Vyapar Creator",
+          username:
+            profile.instagramHandle ||
+            (profile.displayName || user.name || "creator").toLowerCase().replace(/[^a-z0-9]/g, ""),
+          avatar: profile.profileImage,
+          trustScore: 850,
+          categories: profile.categories,
+          city: profile.city,
+          isKycVerified: true,
+        }}
+      />
     </div>
   );
 }

@@ -15,6 +15,7 @@ import RoleGuard from "@/components/navigation/RoleGuard";
 import { useNotificationCenter } from "@/hooks/useNotificationCenter";
 import ActivityFeedDrawer from "@/components/notifications/ActivityFeedDrawer";
 import NotificationToastBanner from "@/components/notifications/NotificationToastBanner";
+import { BackButton } from "@/components/ui/BackButton";
 
 type TopbarIconName = "bell" | "menu";
 
@@ -252,6 +253,17 @@ const TopbarComponent = memo(function TopbarComponent({
         >
           <AppIcon name="menu" size={20} />
         </button>
+
+        {/* Global Back Navigation Button */}
+        {pathname !== "/dashboard" && (
+          <BackButton
+            variant="header"
+            showLabel={false}
+            fallbackHref="/dashboard"
+            className="mr-1.5"
+            label="Back"
+          />
+        )}
         <div className="dashboard-mobile-logo md:hidden" aria-hidden="true">
           <Logo tabIndex={-1} />
         </div>

@@ -47,3 +47,7 @@ export { ConfirmationBadge } from "./ConfirmationBadge";
 // ThemeToggle component
 export { ThemeToggle } from "./ThemeToggle";
 export type { ThemeToggleProps } from "./ThemeToggle";
+
+// BackButton component
+export { BackButton } from "./BackButton";
+export type { BackButtonProps } from "./BackButton";

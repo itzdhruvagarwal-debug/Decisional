@@ -569,6 +569,7 @@ export default function DealDetailPage() {
               handleSignContract={() => dealState.handleSignContract()}
               handleRejectInvite={() => dealState.handleRejectInvite()}
               handleCancelDeal={() => dealState.handleCancelDeal()}
+              handleFundRouteEscrow={() => dealState.handleFundRouteEscrow()}
               handleAction={dealState.handleAction}
               setItemizedUrls={setItemizedUrls}
               setContentForm={setContentForm}

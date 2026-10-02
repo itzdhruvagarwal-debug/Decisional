@@ -18,10 +18,10 @@ export class MockKYCProvider implements KYCProvider {
       success: true,
       status: "VERIFIED",
       data: {
-        name: "Mock Aadhaar User",
-        gender: "M",
-        dob: "1995-01-01",
-        address: "123 Mock Street, Delhi",
+        name: "Priya Sharma",
+        gender: "F",
+        dob: "2000-05-15",
+        address: "Flat 402, Green Glen Layout, Bellandur, Bengaluru, Karnataka 560103",
         documentNumber: maskDoc(aadhaarNumber, 4),
       },
     };
@@ -35,10 +35,10 @@ export class MockKYCProvider implements KYCProvider {
       success: true,
       status: "VERIFIED",
       data: {
-        name: "Mock Aadhaar User",
-        gender: "M",
-        dob: "1995-01-01",
-        address: "123 Mock Street, Delhi",
+        name: "Priya Sharma",
+        gender: "F",
+        dob: "2000-05-15",
+        address: "Flat 402, Green Glen Layout, Bellandur, Bengaluru, Karnataka 560103",
         documentNumber: "****9012",
       },
     };
@@ -53,7 +53,7 @@ export class MockKYCProvider implements KYCProvider {
       success: true,
       status: "VERIFIED",
       data: {
-        name: "Mock PAN User",
+        name: "Priya Sharma",
         category: "Individual",
         panType: "P",
         documentNumber: maskDoc(pan, 4),
@@ -70,14 +70,14 @@ export class MockKYCProvider implements KYCProvider {
       success: true,
       status: "VERIFIED",
       data: {
-        businessName: "Mock Business Pvt Ltd",
+        businessName: "Aura Lifestyle Brands Pvt Ltd",
         documentNumber: gst,
       },
     };
   }
 
   async verifyBankAccount(accountNumber: string, ifsc: string, registeredName?: string): Promise<BankVerifyResult> {
-    const beneficiaryName = registeredName || "Mock Account Holder";
+    const beneficiaryName = registeredName || "Priya Sharma";
     return {
       success: true,
       accountExists: true,

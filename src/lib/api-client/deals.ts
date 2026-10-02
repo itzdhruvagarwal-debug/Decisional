@@ -93,3 +93,15 @@ export function updateProduct(
 export function getEngagement(id: string, options?: HttpOptions) {
   return get(`/api/deals/${encodeURIComponent(id)}/engagement`, options);
 }
+
+/** POST /api/deals/:id/fund — initialize Razorpay Route escrow payment */
+export function fund(id: string, options?: HttpOptions): Promise<{
+  success: boolean;
+  orderId: string;
+  amount: number;
+  currency: string;
+  key: string;
+  creatorAccountId?: string;
+}> {
+  return post(`/api/deals/${encodeURIComponent(id)}/fund`, {}, options);
+}

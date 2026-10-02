@@ -243,6 +243,52 @@ export default function BlogPage() {
       <Navbar />
 
       <main className="flex-1 pt-24 pb-16">
+        {/* Schema.org Blog / BlogPosting Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(
+              selectedPost
+                ? {
+                    "@context": "https://schema.org",
+                    "@type": "BlogPosting",
+                    "headline": selectedPost.title,
+                    "description": selectedPost.description,
+                    "datePublished": "2026-06-15T00:00:00Z",
+                    "dateModified": "2026-07-28T00:00:00Z",
+                    "author": {
+                      "@type": "Organization",
+                      "name": "VyaparMedia Legal & Compliance Editorial",
+                      "url": "https://vyaparmedia.in",
+                    },
+                    "publisher": {
+                      "@type": "Organization",
+                      "name": "VyaparMedia",
+                      "logo": {
+                        "@type": "ImageObject",
+                        "url": "https://vyaparmedia.in/icon-512.png",
+                      },
+                    },
+                    "mainEntityOfPage": `https://vyaparmedia.in/blog?post=${selectedPost.id}`,
+                  }
+                : {
+                    "@context": "https://schema.org",
+                    "@type": "Blog",
+                    "name": "VyaparMedia Creator Economy & Compliance Blog",
+                    "url": "https://vyaparmedia.in/blog",
+                    "description":
+                      "Legal, tax, and strategy guides for Indian influencers and brand partnerships.",
+                    "blogPost": BLOG_POSTS.map((post) => ({
+                      "@type": "BlogPosting",
+                      "headline": post.title,
+                      "description": post.description,
+                      "url": `https://vyaparmedia.in/blog?post=${post.id}`,
+                    })),
+                  }
+            ),
+          }}
+        />
+
         {!selectedPost ? (
           <>
             {/* ── Hero ────────────────────────────────────────── */}

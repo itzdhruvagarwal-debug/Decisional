@@ -67,13 +67,6 @@ export function savePushSubscription(
   return post("/api/notifications/push-subscription", data, options);
 }
 
-/** POST /api/notifications — send test notification */
-export function sendTestNotification(
-  data: Record<string, unknown>,
-  options?: HttpOptions,
-) {
-  return post("/api/notifications", data, options);
-}
 
 /** GET /api/compliance/india-tax */
 export function getComplianceInfo(options?: HttpOptions) {

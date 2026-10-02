@@ -244,6 +244,64 @@ export function useDealDetail(
     }
   };
 
+  const handleFundRouteEscrow = async () => {
+    if (!deal) return;
+    setIsSubmitting(true);
+    try {
+      const fundData = await apiClient.deals.fund(deal.id);
+
+      if (fundData && fundData.orderId && typeof window !== "undefined") {
+        const loadRazorpay = () => {
+          return new Promise<boolean>((resolve) => {
+            if ((window as unknown as { Razorpay?: unknown }).Razorpay) return resolve(true);
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+          });
+        };
+
+        const loaded = await loadRazorpay();
+        if (!loaded) {
+          showToast("error", "Unable to load Razorpay payment gateway.");
+          return;
+        }
+
+        const options = {
+          key: (fundData as { key?: string }).key,
+          amount: (fundData as { amount?: number }).amount,
+          currency: (fundData as { currency?: string }).currency || "INR",
+          name: "VyaparMedia Escrow",
+          description: `Secured Escrow for Deal: ${deal.id}`,
+          order_id: (fundData as { orderId?: string }).orderId,
+          handler: function () {
+            showToast("success", "Escrow deposit received! Locking funds in regulated escrow...");
+            setTimeout(() => fetchDeal(), 1500);
+          },
+          prefill: {
+            email: session?.user?.email || "",
+            name: session?.user?.name || "",
+          },
+          theme: {
+            color: "#6366f1",
+          },
+        };
+
+        const RazorpayClass = (window as unknown as { Razorpay: new (opts: unknown) => { open: () => void } }).Razorpay;
+        const rzp = new RazorpayClass(options);
+        rzp.open();
+      } else {
+        showToast("success", "Deal escrow order initiated.");
+        fetchDeal();
+      }
+    } catch (err) {
+      showToast("error", extractMessage(err));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return {
     deal,
     fetchDeal,
@@ -294,6 +352,7 @@ export function useDealDetail(
     handleReviewContent,
     handleRejectInvite,
     handleCancelDeal,
+    handleFundRouteEscrow,
     setIsSubmitting,
     engagement,
     engagementDisclaimer,

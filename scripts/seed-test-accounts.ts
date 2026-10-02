@@ -47,7 +47,7 @@ async function seedDoc(userId: string, docId: string, type: DocumentType, label:
       id: docId,
       userId,
       type,
-      documentUrl: "https://placehold.co/" + docId + ".jpg",
+      documentUrl: "https://storage.vyaparmedia.in/kyc-vault/" + docId + ".pdf",
       status: "VERIFIED",
       verifiedAt: new Date(),
       metadata: { seeded: true },
@@ -129,8 +129,9 @@ async function main() {
   await prisma.brandProfile.upsert({
     where: { userId: brand.id },
     update: {
-      companyName: "Test Brand Co.",
-      industry: "Fashion",
+      companyName: "Aura Lifestyle Brands Ltd",
+      logo: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80",
+      industry: "Fashion & Lifestyle",
       city: "Mumbai",
       state: "Maharashtra",
       isGstVerified: true,
@@ -142,10 +143,11 @@ async function main() {
     },
     create: {
       userId: brand.id,
-      companyName: "Test Brand Co.",
-      website: "https://testbrand.example.com",
-      description: "Test brand for QA and development.",
-      industry: "Fashion",
+      companyName: "Aura Lifestyle Brands Ltd",
+      logo: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80",
+      website: "https://auralifestyle.in",
+      description: "Direct-to-consumer sustainable apparel and lifestyle brand.",
+      industry: "Fashion & Lifestyle",
       city: "Mumbai",
       state: "Maharashtra",
       isGstVerified: true,
@@ -173,7 +175,7 @@ async function main() {
       type: "CREDIT",
       amount: BRAND_WALLET_PAISE,
       status: "COMPLETED",
-      description: "Test seed deposit - Rs 1,00,000 initial wallet balance",
+      description: "Initial brand working capital - Rs 1,00,000 verified balance",
     },
   });
   console.log("  + Wallet: Rs 1,00,000 (" + BRAND_WALLET_PAISE + " paise)");
@@ -188,25 +190,26 @@ async function main() {
 
   // Seed Tax and Bank details for Brand
   await seedTaxCompliance(brand.id, true);
-  await seedBankAccount(brand.id, "Test Brand Co.", "HDFC Bank");
+  await seedBankAccount(brand.id, "Aura Lifestyle Brands Ltd", "HDFC Bank");
 
   // --- INFLUENCER ---
   const influencer = await upsertUser("influencer@test.vyaparmedia.in", "+919000000003", "INFLUENCER");
   await prisma.influencerProfile.upsert({
     where: { userId: influencer.id },
     update: {
-      displayName: "Test Influencer",
-      bio: "Fashion and lifestyle creator. QA test account.",
+      displayName: "Priya Sharma",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      bio: "Fashion, lifestyle & beauty creator based in New Delhi. Styling reels, skincare routines & authentic brand collaborations.",
       city: "Delhi",
       state: "Delhi",
       gender: "Female",
       age: 24,
       categories: "Fashion,Lifestyle,Beauty",
       languages: "Hindi,English",
-      instagramHandle: "test.influencer",
+      instagramHandle: "priyasharma.official",
       instagramFollowers: 85000,
       instagramEngagementRate: 3.8,
-      youtubeHandle: "testinfluencer",
+      youtubeHandle: "priyasharmavlogs",
       youtubeSubscribers: 42000,
       youtubeEngagementRate: 4.2,
       minRate: 50000,
@@ -220,18 +223,19 @@ async function main() {
     },
     create: {
       userId: influencer.id,
-      displayName: "Test Influencer",
-      bio: "Fashion and lifestyle creator. QA test account.",
+      displayName: "Priya Sharma",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      bio: "Fashion, lifestyle & beauty creator based in New Delhi. Styling reels, skincare routines & authentic brand collaborations.",
       city: "Delhi",
       state: "Delhi",
       gender: "Female",
       age: 24,
       categories: "Fashion,Lifestyle,Beauty",
       languages: "Hindi,English",
-      instagramHandle: "test.influencer",
+      instagramHandle: "priyasharma.official",
       instagramFollowers: 85000,
       instagramEngagementRate: 3.8,
-      youtubeHandle: "testinfluencer",
+      youtubeHandle: "priyasharmavlogs",
       youtubeSubscribers: 42000,
       youtubeEngagementRate: 4.2,
       minRate: 50000,
@@ -254,7 +258,7 @@ async function main() {
 
   // Seed Tax and Bank details for Influencer
   await seedTaxCompliance(influencer.id, false);
-  await seedBankAccount(influencer.id, "Test Influencer", "ICICI Bank");
+  await seedBankAccount(influencer.id, "Priya Sharma", "ICICI Bank");
 
   // Seed badges definitions
   await seedBadges();

@@ -11,6 +11,7 @@ import { getDealTotalAmount } from "@/lib/utils";
 import { createActivityLog } from "@/lib/audit";
 import { AppError } from "@/lib/errors";
 import { transitionDealState } from "@/lib/deal-state-machine";
+import { PaymentService } from "@/services/payment.service";
 
 interface CancellationSummary {
 refundAmount: number;
@@ -101,6 +102,16 @@ for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       maxWait: 10000,
       timeout: 15000,
     });
+
+    // Reconcile and reverse any active Razorpay Route escrow hold
+    try {
+      await PaymentService.cancelDealWithRouteRefund(dealId, "Brand requested cancellation");
+    } catch (routeErr) {
+      logger.error("Failed to cancel Route escrow hold during deal cancellation", {
+        dealId,
+        error: routeErr,
+      });
+    }
 
     return NextResponse.json({ success: true, message: `Deal cancelled successfully.` });
 

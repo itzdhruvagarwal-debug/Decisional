@@ -10,7 +10,6 @@ import {
   Briefcase,
   AlertCircle,
   ShieldCheck,
-  Zap,
   CheckCircle2,
   Send,
 } from "lucide-react";
@@ -94,7 +93,6 @@ export default function NotificationPreferencesPanel({
   );
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
-  const [testSending, setTestSending] = useState(false);
   const [pushPermission, setPushPermission] = useState<NotificationPermission>("default");
 
   // Check browser push permission on mount
@@ -157,28 +155,48 @@ export default function NotificationPreferencesPanel({
       setPushPermission(perm);
 
       if (perm === "granted" && "serviceWorker" in navigator) {
-        await navigator.serviceWorker.ready;
-        // In full production, subscribe using VAPID key
-        // Send subscription to server
-        await apiClient.settings.savePushSubscription({
-          endpoint: `https://push.browser.vyapar/${Date.now()}`,
-          keys: { p256dh: "mock_p256dh_key", auth: "mock_auth_key" },
-          userAgent: navigator.userAgent,
-        });
+        const registration = await navigator.serviceWorker.ready;
+        try {
+          const res = await fetch("/api/notifications/push-subscription");
+          if (res.ok) {
+            const data = await res.json();
+            const vapidPublicKey = data?.vapidPublicKey;
+
+            if (vapidPublicKey && registration.pushManager) {
+              const padding = "=".repeat((4 - (vapidPublicKey.length % 4)) % 4);
+              const base64 = (vapidPublicKey + padding).replace(/-/g, "+").replace(/_/g, "/");
+              const rawData = window.atob(base64);
+              const outputArray = new Uint8Array(rawData.length);
+              for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+              }
+
+              const sub = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: outputArray,
+              });
+
+              const p256dhKey = sub.getKey("p256dh");
+              const authKey = sub.getKey("auth");
+
+              if (p256dhKey && authKey) {
+                const p256dh = btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(p256dhKey))));
+                const auth = btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(authKey))));
+
+                await apiClient.settings.savePushSubscription({
+                  endpoint: sub.endpoint,
+                  keys: { p256dh, auth },
+                  userAgent: navigator.userAgent,
+                });
+              }
+            }
+          }
+        } catch (subErr) {
+          console.warn("Web Push registration error:", subErr);
+        }
       }
     } catch (err) {
       console.warn("Push permission request error:", err);
-    }
-  };
-
-  const handleSendTestNotification = async () => {
-    setTestSending(true);
-    try {
-      await apiClient.settings.sendTestNotification({ action: "test" });
-    } catch (err) {
-      console.warn("Test notification error:", err);
-    } finally {
-      setTimeout(() => setTestSending(false), 500);
     }
   };
 
@@ -194,20 +212,6 @@ export default function NotificationPreferencesPanel({
           <p className="text-xs text-muted-foreground mt-1">
             Choose how you receive alerts for each business category. Critical financial and deal events are delivered even when the app is closed.
           </p>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleSendTestNotification}
-            disabled={testSending}
-            className="text-xs font-semibold gap-1.5"
-            title="Trigger an instant test notification"
-          >
-            <Zap className={`w-3.5 h-3.5 text-amber-500 ${testSending ? "animate-spin" : ""}`} />
-            <span>Send Test Alert</span>
-          </Button>
         </div>
       </div>
 

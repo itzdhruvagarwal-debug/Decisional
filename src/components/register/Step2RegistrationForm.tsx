@@ -54,7 +54,7 @@ return (
 id="name"
 label={userType === "BRAND" ? "Brand / Company Name *" : "Full Name *"}
 type="text"
-placeholder={userType === "BRAND" ? "Acme Pvt Ltd" : "Your full name"}
+placeholder={userType === "BRAND" ? "e.g. Aura Lifestyle Pvt Ltd" : "e.g. Priya Sharma"}
 value={formData.name}
 onChange={(e) =>
 setFormData({ ...formData, name: e.target.value })

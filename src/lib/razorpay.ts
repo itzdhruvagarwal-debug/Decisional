@@ -125,36 +125,358 @@ platformFeePercent,
 };
 }
 
+export interface RouteTransferItem {
+  account: string; // Razorpay Linked Account ID (e.g. "acc_XXXXX")
+  amount: number; // in paise
+  currency?: string; // default "INR"
+  on_hold?: boolean; // true holds payout in escrow; false settles directly
+  on_hold_until?: number; // optional unix timestamp
+  notes?: Record<string, string>;
+  linked_account_notes?: string[];
+}
+
+export interface CreateLinkedAccountParams {
+  userId: string;
+  email: string;
+  phone?: string | undefined;
+  legalBusinessName: string;
+  contactName?: string | undefined;
+  accountNumber?: string | undefined;
+  ifscCode?: string | undefined;
+  beneficiaryName?: string | undefined;
+  accountType?: ("savings" | "current") | undefined;
+}
+
+export interface LinkedAccountResult {
+  accountId: string;
+  status: string;
+  email: string;
+}
+
 /**
-* Create a standard order (for adding funds)
+* Create a standard order or Route split order (for direct escrow funding)
 */
 export async function createOrder(params: {
-amount: number;
-currency?: string;
-receipt: string;
-notes?: Record<string, string>;
+  amount: number;
+  currency?: string;
+  receipt: string;
+  notes?: Record<string, string>;
+  transfers?: RouteTransferItem[];
 }) {
-// notes: Razorpay SDK accepts IMap<string | number>, our params use Record<string, string>
-// We spread into a compatible object explicitly to avoid the need for `as any`
-const orderPayload = {
-amount: params.amount,
-currency: params.currency ?? "INR",
-receipt: params.receipt,
-...(params.notes
-? { notes: params.notes as Record<string, string | number> }
-: {}),
-};
-const order = await withCircuitBreaker<{ id: string; amount: string | number; currency: string; receipt?: string; status: string }>("razorpay:createOrder", async () => {
-return getRazorpay().orders.create(orderPayload);
-});
+  // notes: Razorpay SDK accepts IMap<string | number>, our params use Record<string, string>
+  const orderPayload: Record<string, unknown> = {
+    amount: params.amount,
+    currency: params.currency ?? "INR",
+    receipt: params.receipt,
+    ...(params.notes
+      ? { notes: params.notes as Record<string, string | number> }
+      : {}),
+    ...(params.transfers && params.transfers.length > 0
+      ? {
+          transfers: params.transfers.map((t) => ({
+            account: t.account,
+            amount: t.amount,
+            currency: t.currency ?? "INR",
+            on_hold: t.on_hold !== undefined ? t.on_hold : true,
+            ...(t.on_hold_until ? { on_hold_until: t.on_hold_until } : {}),
+            ...(t.notes ? { notes: t.notes } : {}),
+            ...(t.linked_account_notes ? { linked_account_notes: t.linked_account_notes } : {}),
+          })),
+        }
+      : {}),
+  };
 
-return {
-orderId: order.id,
-amount: typeof order.amount === "string" ? Number.parseInt(order.amount, 10) : order.amount,
-currency: order.currency,
-receipt: order.receipt,
-status: order.status,
-};
+  const order = await withCircuitBreaker<{
+    id: string;
+    amount: string | number;
+    currency: string;
+    receipt?: string;
+    status: string;
+    transfers?: Array<{ id: string; account: string; amount: number; on_hold: boolean }>;
+  }>("razorpay:createOrder", async () => {
+    return (getRazorpay().orders as unknown as { create: (payload: unknown) => Promise<any> }).create(orderPayload);
+  });
+
+  return {
+    orderId: order.id,
+    amount: typeof order.amount === "string" ? Number.parseInt(order.amount, 10) : order.amount,
+    currency: order.currency,
+    receipt: order.receipt,
+    status: order.status,
+    transfers: order.transfers,
+  };
+}
+
+/**
+ * Create a Razorpay Route Linked Account for a creator/vendor.
+ * Complies with RBI Payment Aggregator regulations by onboarding creators as sub-merchants.
+ */
+export async function createLinkedAccount(
+  params: CreateLinkedAccountParams
+): Promise<LinkedAccountResult> {
+  const { keyId, keySecret } = getRazorpayCredentials();
+  const authHeader = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+
+  const body: Record<string, unknown> = {
+    email: params.email,
+    phone: params.phone || "9999999999",
+    legal_business_name: params.legalBusinessName || "Creator Partner",
+    customer_facing_business_name: params.legalBusinessName || "Creator Partner",
+    business_type: "individual",
+    contact_name: params.contactName || params.legalBusinessName || "Creator Partner",
+    profile: {
+      category: "services",
+      subcategory: "marketing_advertising_services",
+      description: "Influencer marketing and content creation services",
+    },
+    notes: {
+      user_id: params.userId,
+      platform: "VyaparMedia",
+    },
+  };
+
+  if (params.accountNumber && params.ifscCode) {
+    body.settlement_accounts = [
+      {
+        beneficiary_name: params.beneficiaryName || params.legalBusinessName,
+        account_number: params.accountNumber,
+        ifsc_code: params.ifscCode,
+        account_type: params.accountType || "savings",
+      },
+    ];
+  }
+
+  const result = await withCircuitBreaker<LinkedAccountResult>(
+    "razorpay:createLinkedAccount",
+    async () => {
+      const res = await fetchWithTimeout(
+        "https://api.razorpay.com/v2/accounts",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Basic ${authHeader}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        },
+        10000
+      );
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.error) {
+        const errDesc = data.error?.description || res.statusText || "Failed to create linked account";
+        logger.warn("Razorpay v2/accounts returned error; using fallback or sandbox", {
+          error: errDesc,
+          userId: params.userId,
+        });
+
+        // If in development or using test keys, generate a deterministic sandbox account id
+        if (process.env.NODE_ENV !== "production" || keyId.startsWith("rzp_test_")) {
+          const deterministicId = `acc_route_${crypto.createHash("sha256").update(params.userId).digest("hex").slice(0, 14)}`;
+          return {
+            accountId: deterministicId,
+            status: "active",
+            email: params.email,
+          };
+        }
+        throw new AppError(errDesc, res.status, ApiErrorCode.GATEWAY_ERROR);
+      }
+
+      return {
+        accountId: data.id,
+        status: data.status || "created",
+        email: data.email || params.email,
+      };
+    }
+  );
+
+  // Cache in Redis for fast repeated deal funding
+  try {
+    await redis.set(`rzp:route:account:${params.userId}`, result.accountId, "EX", 86400 * 30);
+  } catch {
+    /* non-fatal */
+  }
+
+  return result;
+}
+
+/**
+ * Resolve an existing linked account from Redis/DB or create one on Razorpay Route.
+ */
+export async function getOrCreateLinkedAccount(
+  userId: string,
+  userFallback?: {
+    email: string;
+    name: string;
+    phone?: string | undefined;
+    accountNumber?: string | undefined;
+    ifscCode?: string | undefined;
+  } | undefined
+): Promise<string> {
+  const cacheKey = `rzp:route:account:${userId}`;
+  try {
+    const cached = await redis.get(cacheKey);
+    if (cached) return cached;
+  } catch {
+    /* non-fatal */
+  }
+
+  const linked = await createLinkedAccount({
+    userId,
+    email: userFallback?.email || `creator_${userId}@vyaparmedia.in`,
+    phone: userFallback?.phone,
+    legalBusinessName: userFallback?.name || "Vyapar Creator",
+    accountNumber: userFallback?.accountNumber,
+    ifscCode: userFallback?.ifscCode,
+  });
+
+  return linked.accountId;
+}
+
+/**
+ * Release an Escrow Hold on a Razorpay Route transfer.
+ * Called when a deal deliverable is approved / verified.
+ * Releases the funds held in Razorpay's RBI-regulated Escrow so they settle directly to the creator.
+ */
+export async function releaseTransferHold(
+  transferId: string
+): Promise<{ success: boolean; transferId: string; status?: string }> {
+  const { keyId, keySecret } = getRazorpayCredentials();
+  const authHeader = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+
+  return await withCircuitBreaker("razorpay:releaseTransferHold", async () => {
+    if (transferId.startsWith("trf_sandbox_") || transferId.startsWith("sim_")) {
+      logger.info("Sandbox transfer hold release simulated", { transferId });
+      return { success: true, transferId, status: "settled" };
+    }
+
+    const res = await fetchWithTimeout(
+      `https://api.razorpay.com/v1/transfers/${encodeURIComponent(transferId)}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Basic ${authHeader}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          on_hold: false,
+          on_hold_until: null,
+        }),
+      },
+      10000
+    );
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error) {
+      const errorDesc = data.error?.description || "Failed to release transfer hold";
+      logger.error("Failed to release Razorpay Route transfer hold", { transferId, error: errorDesc });
+      throw new AppError(errorDesc, res.status, ApiErrorCode.GATEWAY_ERROR);
+    }
+
+    logger.info("Razorpay Route transfer hold released successfully", {
+      transferId,
+      status: data.status,
+    });
+
+    return {
+      success: true,
+      transferId: data.id || transferId,
+      status: data.status,
+    };
+  });
+}
+
+/**
+ * Reverse a Route transfer back to platform nodal account.
+ * Used when a deal is cancelled, disputed, or refunded to the brand.
+ */
+export async function reverseTransfer(params: {
+  transferId: string;
+  amount?: number;
+  notes?: Record<string, string>;
+}): Promise<{ success: boolean; reversalId?: string; transferId: string; amount?: number }> {
+  const { keyId, keySecret } = getRazorpayCredentials();
+  const authHeader = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+
+  return await withCircuitBreaker("razorpay:reverseTransfer", async () => {
+    if (params.transferId.startsWith("trf_sandbox_") || params.transferId.startsWith("sim_")) {
+      logger.info("Sandbox transfer reversal simulated", { transferId: params.transferId });
+      return {
+        success: true,
+        reversalId: `rev_sandbox_${Date.now()}`,
+        transferId: params.transferId,
+        amount: params.amount,
+      };
+    }
+
+    const res = await fetchWithTimeout(
+      `https://api.razorpay.com/v1/transfers/${encodeURIComponent(params.transferId)}/reversals`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${authHeader}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...(params.amount ? { amount: params.amount } : {}),
+          ...(params.notes ? { notes: params.notes } : {}),
+        }),
+      },
+      10000
+    );
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error) {
+      const errorDesc = data.error?.description || "Failed to reverse transfer";
+      logger.error("Failed to reverse Razorpay Route transfer", {
+        transferId: params.transferId,
+        error: errorDesc,
+      });
+      throw new AppError(errorDesc, res.status, ApiErrorCode.GATEWAY_ERROR);
+    }
+
+    logger.info("Razorpay Route transfer reversed successfully", {
+      transferId: params.transferId,
+      reversalId: data.id,
+    });
+
+    return {
+      success: true,
+      reversalId: data.id,
+      transferId: params.transferId,
+      amount: data.amount,
+    };
+  });
+}
+
+/**
+ * Fetch transfer status from Razorpay Route.
+ */
+export async function fetchTransfer(transferId: string): Promise<{
+  id: string;
+  entity: string;
+  account: string;
+  amount: number;
+  currency: string;
+  on_hold: boolean;
+  settlement_status?: string;
+}> {
+  const { keyId, keySecret } = getRazorpayCredentials();
+  const authHeader = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+
+  const res = await fetchWithTimeout(
+    `https://api.razorpay.com/v1/transfers/${encodeURIComponent(transferId)}`,
+    {
+      method: "GET",
+      headers: { Authorization: `Basic ${authHeader}` },
+    },
+    10000
+  );
+
+  if (!res.ok) {
+    throw AppError.badRequest(`Failed to fetch transfer: ${res.statusText}`);
+  }
+  return await res.json();
 }
 
 

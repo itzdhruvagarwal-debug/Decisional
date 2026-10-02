@@ -19,7 +19,9 @@ import {
   Share2,
   Zap,
   TrendingUp,
+  Smartphone,
 } from "lucide-react";
+import StoryShareModal from "@/components/share/StoryShareModal";
 
 interface ReferralStats {
   totalReferrals: number;
@@ -44,9 +46,10 @@ interface ShareModalProps {
   readonly onClose: () => void;
   readonly referralCode: string;
   readonly referralLink: string;
+  readonly onOpenStory?: () => void;
 }
 
-function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalProps) {
+function ShareModal({ open, onClose, referralCode, referralLink, onOpenStory }: ShareModalProps) {
   const [linkCopied, setLinkCopied] = useState(false);
 
   const shareText = `Join me on VyaparMedia — India's most trusted influencer-brand deal platform! Use my referral code ${referralCode} and get started. `;
@@ -78,10 +81,31 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
       style: "bg-verified-muted border-verified-border text-verified hover:bg-verified/20",
     },
     {
+      id: "facebook",
+      label: "Facebook",
+      emoji: "f",
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}&quote=${encodeURIComponent(shareText)}`,
+      style: "bg-escrow-muted border-escrow-border text-escrow hover:bg-escrow/20",
+    },
+    {
+      id: "telegram",
+      label: "Telegram",
+      emoji: "✈️",
+      href: `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(shareText)}`,
+      style: "bg-primary/10 border-primary/25 text-primary hover:bg-primary/20",
+    },
+    {
       id: "twitter",
       label: "X (Twitter)",
       emoji: "✕",
       href: `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(referralLink)}`,
+      style: "bg-muted border-border text-foreground hover:bg-muted/80",
+    },
+    {
+      id: "threads",
+      label: "Threads",
+      emoji: "🧵",
+      href: `https://www.threads.net/intent/post?text=${encodeURIComponent(shareText + " " + referralLink)}`,
       style: "bg-muted border-border text-foreground hover:bg-muted/80",
     },
     {
@@ -91,14 +115,47 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
       href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(referralLink)}`,
       style: "bg-escrow-muted border-escrow-border text-escrow hover:bg-escrow/20",
     },
+    {
+      id: "reddit",
+      label: "Reddit",
+      emoji: "🤖",
+      href: `https://reddit.com/submit?url=${encodeURIComponent(referralLink)}&title=${encodeURIComponent(shareText)}`,
+      style: "bg-muted border-border text-foreground hover:bg-muted/80",
+    },
   ] as const;
 
   return (
-    <Modal open={open} onClose={onClose} title="Invite Your Network" maxWidth="480px">
+    <Modal open={open} onClose={onClose} title="Invite Your Network" maxWidth="520px">
       <div className="space-y-5">
         <p className="text-xs text-muted-foreground -mt-2">
           Share your referral link with brands &amp; creators to earn commission.
         </p>
+
+        {/* Instagram & WhatsApp Story Banner */}
+        {onOpenStory && (
+          <div className="p-3.5 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-between gap-3">
+            <div className="space-y-0.5">
+              <div className="text-xs font-bold text-primary flex items-center gap-1.5">
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>Instagram &amp; WhatsApp Story</span>
+              </div>
+              <div className="text-[11px] text-muted-foreground">
+                9:16 vertical card with invite QR &amp; link sticker
+              </div>
+            </div>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                onClose();
+                onOpenStory();
+              }}
+              className="shrink-0 text-xs font-bold"
+            >
+              Open Story Card
+            </Button>
+          </div>
+        )}
 
         {/* Referral link box */}
         <div className="flex items-center gap-3 p-3.5 rounded-xl bg-muted/40 border border-border">
@@ -130,16 +187,16 @@ function ShareModal({ open, onClose, referralCode, referralLink }: ShareModalPro
         </div>
 
         {/* Share channels */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
           {channels.map((ch) => (
             <a
               key={ch.id}
               href={ch.href}
               target="_blank"
               rel="noopener noreferrer"
-              className={`flex flex-col items-center gap-2 p-3 rounded-xl border text-center text-xs font-semibold transition-all hover:-translate-y-0.5 ${ch.style}`}
+              className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border text-center text-xs font-semibold transition-all hover:-translate-y-0.5 ${ch.style}`}
             >
-              <span className="text-xl leading-none">{ch.emoji}</span>
+              <span className="text-lg leading-none">{ch.emoji}</span>
               <span className="whitespace-nowrap">{ch.label}</span>
             </a>
           ))}
@@ -178,6 +235,7 @@ export default function ReferralsPage() {
   const [codeCopied, setCodeCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [storyModalOpen, setStoryModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "history">("overview");
 
   const { data: stats, isLoading: loading } = useSWR<ReferralStats>(
@@ -397,6 +455,15 @@ export default function ReferralsPage() {
                   <Button
                     variant="secondary"
                     size="sm"
+                    onClick={() => setStoryModalOpen(true)}
+                    className="gap-1.5 font-bold text-xs bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20"
+                  >
+                    <Smartphone className="w-3.5 h-3.5" />
+                    Post to Story / Status
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => setShareOpen(true)}
                     id="share-referral-btn"
                     aria-label="Share referral link"
@@ -567,6 +634,19 @@ export default function ReferralsPage() {
         onClose={() => setShareOpen(false)}
         referralCode={stats.referralCode}
         referralLink={referralLink}
+        onOpenStory={() => setStoryModalOpen(true)}
+      />
+
+      {/* Story Share Modal (9:16 Story Card) */}
+      <StoryShareModal
+        open={storyModalOpen}
+        onClose={() => setStoryModalOpen(false)}
+        defaultTab="referral"
+        referralCode={stats.referralCode}
+        profile={{
+          displayName: session.user.name || "Vyapar Creator",
+          username: session.user.name?.toLowerCase().replace(/[^a-z0-9]/g, "") || "creator",
+        }}
       />
     </DashboardShell>
   );

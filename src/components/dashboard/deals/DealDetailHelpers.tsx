@@ -64,6 +64,7 @@ export interface ContractTermsJson {
   influencerPayout?: number;
   platformFee?: number;
   gatewayFee?: number;
+  platformFeePercent?: number;
   influencerObligations?: string[];
   brandObligations?: string[];
   contentUsage?: {

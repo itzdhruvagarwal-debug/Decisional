@@ -175,10 +175,10 @@ export default function CategoryBenchmarksClient({ initialBenchmarks }: Props) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-          {/* Input: Test CPV */}
+          {/* Input: Benchmark CPV */}
           <div className="space-y-2">
             <label htmlFor="sim-cpv" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Test Influencer CPV (INR)
+              Creator Benchmark CPV (INR)
             </label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">

@@ -75,10 +75,20 @@ export function DealContractCard({
 
   // Financial calculations
   const dealAmountPaise = deal.amount || terms?.dealAmount || 0;
-  const platformFeePaise = terms?.platformFee || Math.round(dealAmountPaise * 0.05);
-  const gstFeePaise = Math.round(platformFeePaise * 0.18);
+  const platformFeePercent =
+    terms?.platformFeePercent ??
+    (dealAmountPaise > 0 && terms?.platformFee
+      ? Math.round((terms.platformFee / dealAmountPaise) * 100)
+      : 10);
+  const platformFeePaise =
+    terms?.platformFee ?? Math.round((dealAmountPaise * platformFeePercent) / 100);
+  const gatewayFeePaise =
+    terms?.gatewayFee ??
+    (deal.totalAmount
+      ? Math.max(0, deal.totalAmount - dealAmountPaise - platformFeePaise)
+      : Math.round((dealAmountPaise + platformFeePaise) * 0.02));
   const totalAmountPaise =
-    deal.totalAmount || terms?.totalAmount || dealAmountPaise + platformFeePaise + gstFeePaise;
+    deal.totalAmount || terms?.totalAmount || dealAmountPaise + platformFeePaise + gatewayFeePaise;
   const creatorPayoutPaise = terms?.influencerPayout || dealAmountPaise;
 
   // Deliverables list
@@ -480,7 +490,7 @@ export function DealContractCard({
                     {formatCurrency(totalAmountPaise)}
                   </p>
                   <span className="text-[10px] text-muted-foreground block">
-                    Includes 5% fee + 18% GST
+                    Includes {platformFeePercent}% fee + gateway charges
                   </span>
                 </div>
 
@@ -512,17 +522,19 @@ export function DealContractCard({
                     </span>
                   </div>
                   <div className="py-2.5 flex justify-between items-center">
-                    <span className="text-muted-foreground">VyaparMedia Service Fee (5%)</span>
+                    <span className="text-muted-foreground">VyaparMedia Service Fee ({platformFeePercent}%)</span>
                     <span className="font-bold text-foreground tabular-nums">
                       {formatCurrency(platformFeePaise)}
                     </span>
                   </div>
-                  <div className="py-2.5 flex justify-between items-center">
-                    <span className="text-muted-foreground">GST on Service Fee (18%)</span>
-                    <span className="font-bold text-foreground tabular-nums">
-                      {formatCurrency(gstFeePaise)}
-                    </span>
-                  </div>
+                  {gatewayFeePaise > 0 && (
+                    <div className="py-2.5 flex justify-between items-center">
+                      <span className="text-muted-foreground">Payment Gateway Fee (2%)</span>
+                      <span className="font-bold text-foreground tabular-nums">
+                        {formatCurrency(gatewayFeePaise)}
+                      </span>
+                    </div>
+                  )}
                   <div className="py-3 flex justify-between items-center font-black text-sm border-t border-border pt-3">
                     <span className="text-foreground">Total Client Escrow Deposit</span>
                     <span className="text-escrow tabular-nums">

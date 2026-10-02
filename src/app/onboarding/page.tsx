@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { formatUserError } from "@/lib/user-messages";
 import Logo from "@/components/Logo";
+import { BackButton } from "@/components/ui/BackButton";
 
 const NICHE_ITEMS = [
   { name: "Tech & Gadgets", icon: "💻" },
@@ -230,7 +231,10 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-background text-foreground flex flex-col justify-between p-4 sm:p-6 lg:p-8">
       {/* Header Bar */}
       <header className="max-w-3xl w-full mx-auto flex items-center justify-between py-4">
-        <Logo />
+        <div className="flex items-center gap-3">
+          <BackButton fallbackHref="/dashboard" label="Back" variant="pill" />
+          <Logo />
+        </div>
         {step < 4 && (
           <Link
             href="/dashboard"
@@ -364,7 +368,7 @@ export default function OnboardingPage() {
                       type="text"
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
-                      placeholder="e.g. Acme Botanicals India Pvt Ltd"
+                      placeholder="e.g. Aura Lifestyle India Pvt Ltd"
                       className="w-full px-4 py-2.5 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-xs sm:text-sm"
                     />
                   </div>

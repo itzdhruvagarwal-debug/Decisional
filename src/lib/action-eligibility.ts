@@ -73,6 +73,76 @@ export function checkContentSubmissionEligibility(
 }
 
 // ---------------------------------------------------------------------------
+// 1B. DEAL ESCROW FUNDING (RAZORPAY ROUTE SPLIT SETTLEMENT)
+// ---------------------------------------------------------------------------
+
+export interface DealEscrowFundingEligibilityInput {
+  status: string;
+  totalAmount?: number | null | undefined;
+  reservedFromWallet?: boolean | null | undefined;
+  brand?: { userId?: string | undefined } | null | undefined;
+  brandUserId?: string | null | undefined;
+  paymentHold?: { status?: string | undefined } | null | undefined;
+}
+
+export type DealEscrowFundingReasonCode =
+  | "UNAUTHORIZED"
+  | "INVALID_STATUS"
+  | "ALREADY_FUNDED"
+  | "ACCOUNT_SUSPENDED";
+
+export function checkDealEscrowFundingEligibility(
+  deal: DealEscrowFundingEligibilityInput | null | undefined,
+  actingUserId?: string | undefined,
+  userStatus?: string | undefined,
+): {
+  allowed: boolean;
+  reason?: string | undefined;
+  reasonCode?: DealEscrowFundingReasonCode | undefined;
+  ctaText?: string | undefined;
+  ctaHref?: string | undefined;
+} {
+  if (!deal) {
+    return { allowed: false, reason: "Deal details not found.", reasonCode: "UNAUTHORIZED" };
+  }
+
+  if (userStatus && ["SUSPENDED", "BANNED", "FLAGGED", "DELETED"].includes(userStatus)) {
+    return {
+      allowed: false,
+      reason: "Your account is currently restricted from initiating escrow payments.",
+      reasonCode: "ACCOUNT_SUSPENDED",
+    };
+  }
+
+  const brandId = deal.brand?.userId || deal.brandUserId;
+  if (actingUserId && brandId && brandId !== actingUserId) {
+    return {
+      allowed: false,
+      reason: "Only the brand owner can fund this deal escrow.",
+      reasonCode: "UNAUTHORIZED",
+    };
+  }
+
+  if (deal.reservedFromWallet || deal.paymentHold?.status === "HELD") {
+    return {
+      allowed: false,
+      reason: "Escrow funds have already been secured for this deal.",
+      reasonCode: "ALREADY_FUNDED",
+    };
+  }
+
+  if (!["PAYMENT_PENDING", "PENDING_SIGNATURE"].includes(deal.status)) {
+    return {
+      allowed: false,
+      reason: `Deal is in ${deal.status} status and cannot be funded.`,
+      reasonCode: "INVALID_STATUS",
+    };
+  }
+
+  return { allowed: true, ctaText: "Deposit Escrow via Razorpay Route" };
+}
+
+// ---------------------------------------------------------------------------
 // 2. CONTRACT SIGNING
 // ---------------------------------------------------------------------------
 

@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { InfluencerProfileClient } from "@/components/profile";
 import { MessageService } from "@/services/message.service";
 import { ShieldCheck, ArrowRight } from "lucide-react";
+import { BackButton } from "@/components/ui/BackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -45,11 +46,14 @@ export async function generateMetadata({
       "Escrow Creator Collaboration",
       "India Creator Rate Card",
     ].filter(Boolean),
+    alternates: {
+      canonical: `/creator/${encodeURIComponent(username)}`,
+    },
     openGraph: {
       title,
       description,
       type: "profile",
-      url: `https://vyaparmedia.com/creator/${encodeURIComponent(username)}`,
+      url: `https://vyaparmedia.in/creator/${encodeURIComponent(username)}`,
       images: profile.avatar ? [{ url: profile.avatar, alt: profile.displayName }] : [],
     },
     twitter: {
@@ -90,6 +94,40 @@ export default async function PublicCreatorProfilePage({
 
       {/* Main Public Profile Content */}
       <main className="flex-1 pt-20 pb-16">
+        {/* Schema.org ProfilePage & Person Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ProfilePage",
+              "mainEntity": {
+                "@type": "Person",
+                "name": profile.displayName,
+                "alternateName": profile.instagramHandle ? `@${profile.instagramHandle}` : undefined,
+                "description": profile.bio || undefined,
+                "image": profile.avatar || undefined,
+                "jobTitle": "Content Creator & Influencer",
+                "address": {
+                  "@type": "PostalAddress",
+                  "addressLocality": profile.city || "New Delhi",
+                  "addressCountry": "IN",
+                },
+                "sameAs": [
+                  profile.instagramHandle ? `https://instagram.com/${profile.instagramHandle}` : null,
+                  profile.youtubeHandle ? `https://youtube.com/@${profile.youtubeHandle}` : null,
+                ].filter(Boolean),
+                "knowsAbout": profile.categories,
+              },
+            }),
+          }}
+        />
+
+        {/* Breadcrumb Navigation & Back Action */}
+        <div className="max-w-4xl mx-auto px-4 mb-3 flex items-center justify-between">
+          <BackButton fallbackHref="/dashboard/influencers" label="Back to Discovery" />
+        </div>
+
         {/* Trust & Escrow Guarantee Banner */}
         <div className="max-w-4xl mx-auto px-4 mb-4">
           <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-card border border-border text-xs text-muted-foreground shadow-xs">

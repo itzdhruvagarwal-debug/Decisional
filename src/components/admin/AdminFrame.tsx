@@ -6,6 +6,7 @@ import { ReactNode, useState } from "react";
 import Logo from "@/components/Logo";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui";
+import { BackButton } from "@/components/ui/BackButton";
 import {
   LayoutDashboard,
   BarChart3,
@@ -168,19 +169,34 @@ export default function AdminFrame({ children, user }: Readonly<AdminFrameProps>
 
       {/* ── Main content area ── */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        {/* Top bar (mobile) */}
-        <header className="sticky top-0 z-20 flex items-center gap-4 px-4 py-3 bg-card/95 backdrop-blur-sm border-b border-border lg:hidden">
-          <button
-            type="button"
-            className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open admin navigation"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <div>
-            <div className="text-sm font-extrabold text-foreground">Admin Console</div>
-            <div className="text-xs text-muted-foreground">Live operations workspace</div>
+        {/* Top bar */}
+        <header className="sticky top-0 z-20 flex items-center justify-between gap-4 px-4 py-3 bg-card/95 backdrop-blur-sm border-b border-border">
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              className="p-2 min-h-[38px] min-w-[38px] flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open admin navigation"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            {pathname !== "/admin" && (
+              <BackButton variant="header" showLabel={false} fallbackHref="/admin" label="Back to Admin" />
+            )}
+            <div>
+              <div className="text-sm font-extrabold text-foreground">
+                {pathname === "/admin" ? "Admin Console" : navItems.find((n) => n.href === pathname)?.label || "Admin Console"}
+              </div>
+              <div className="text-[11px] text-muted-foreground hidden sm:block">Live operations workspace</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="text-xs font-semibold text-primary hover:underline px-2.5 py-1.5 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors"
+            >
+              <span>User Dashboard &rarr;</span>
+            </Link>
           </div>
         </header>
 

@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Logo from "./Logo";
 import { Button } from "@/components/ui";
+import { BackButton } from "@/components/ui/BackButton";
 
 const primaryLinks = [
 { label: "Features", href: "/#features" },
@@ -19,6 +21,7 @@ const mobileLinks = [
 ];
 
 export function Navbar() {
+const pathname = usePathname();
 const [isScrolled, setIsScrolled] = useState(false);
 const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -43,7 +46,17 @@ return (
 <div
 className="container flex items-center justify-between"
 >
-<Logo />
+<div className="flex items-center gap-2">
+  {pathname !== "/" && (
+    <BackButton
+      variant="pill"
+      label="Back"
+      fallbackHref="/"
+      className="shrink-0 mr-1"
+    />
+  )}
+  <Logo />
+</div>
 
 <div className="nav-links">
 {primaryLinks.map((link) => (

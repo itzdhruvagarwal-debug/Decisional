@@ -34,9 +34,11 @@ import {
   Video,
   ArrowRight,
   Wallet,
+  Smartphone,
 } from "lucide-react";
 import { useWallet } from "@/hooks/api/useWallet";
 import { checkDirectMessageEligibility } from "@/lib/action-eligibility";
+import StoryShareModal from "@/components/share/StoryShareModal";
 
 interface InfluencerProfileClientProps {
   profile: InfluencerProfileData;
@@ -120,6 +122,7 @@ export default function InfluencerProfileClient({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
   const [canMessageState, setCanMessageState] = useState<boolean>(Boolean(canMessage));
+  const [showStoryModal, setShowStoryModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (canMessage !== undefined) {
@@ -338,6 +341,14 @@ export default function InfluencerProfileClient({
                   </Link>
                   <button
                     type="button"
+                    onClick={() => setShowStoryModal(true)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all shadow-xs"
+                  >
+                    <Smartphone className="w-3.5 h-3.5" />
+                    <span>Add to Story</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={handleShare}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-bold transition-all shadow-xs"
                   >
@@ -401,8 +412,9 @@ export default function InfluencerProfileClient({
 
                   <button
                     type="button"
-                    onClick={handleShare}
-                    aria-label="Share creator profile"
+                    onClick={() => setShowStoryModal(true)}
+                    aria-label="Share creator profile to Story"
+                    title="Share to Instagram & WhatsApp Story"
                     className="p-2.5 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all shadow-xs"
                   >
                     <Share2 className="w-4 h-4" />
@@ -1088,6 +1100,23 @@ export default function InfluencerProfileClient({
           </div>
         </Modal>
       )}
+
+      {/* Story Share Modal (Instagram & WhatsApp Story) */}
+      <StoryShareModal
+        open={showStoryModal}
+        onClose={() => setShowStoryModal(false)}
+        defaultTab="profile"
+        profile={{
+          displayName: profile.displayName,
+          username: profile.instagramHandle || profile.displayName.toLowerCase().replace(/[^a-z0-9]/g, ""),
+          avatar: profile.avatar,
+          trustScore: profile.trustScore,
+          categories: profile.categories,
+          city: profile.city,
+          completedDealsCount: profile.completedDealsCount,
+          isKycVerified: profile.isKycVerified,
+        }}
+      />
     </div>
   );
 }

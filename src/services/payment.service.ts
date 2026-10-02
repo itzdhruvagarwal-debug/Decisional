@@ -4,6 +4,10 @@ import prisma, { ensurePlatformTreasury } from "@/lib/db";
 import {
 createOrder,
 createPayout,
+getOrCreateLinkedAccount,
+releaseTransferHold,
+reverseTransfer,
+refundPayment,
 } from "@/lib/razorpay";
 import { encrypt, hashForDuplicateDetection } from "@/lib/encryption";
 import { logger } from "@/lib/logger";
@@ -155,7 +159,7 @@ export class PaymentService {
 try {
 const deal = await prisma.deal.findUnique({
 where: { id: dealId },
-include: { influencer: true, brand: true },
+include: { influencer: true, brand: true, paymentHold: true },
 });
 
     if (
@@ -202,8 +206,13 @@ where: { userId: brandUserId },
 select: { id: true, pendingBalance: true },
 });
 
+const hasActiveRouteHold = Boolean(
+  deal.paymentHold && ["HELD", "CAPTURED"].includes(deal.paymentHold.status)
+);
+
 if (
 !deal.reservedFromWallet &&
+!hasActiveRouteHold &&
 (!brandWallet || brandWallet.pendingBalance < getDealTotalAmount(deal))
 ) {
 throw AppError.badRequest("NO_RESERVED_CAMPAIGN_FUNDS");
@@ -211,6 +220,36 @@ throw AppError.badRequest("NO_RESERVED_CAMPAIGN_FUNDS");
 
     if (!["VERIFIED", "CONTENT_APPROVED"].includes(deal.status)) {
       return;
+    }
+
+    // If deal was funded via Razorpay Route, release the escrow hold on Razorpay
+    if (hasActiveRouteHold && deal.paymentHold) {
+      let transferId = "";
+      try {
+        transferId = (await redis.get(`rzp:route:transfer:${deal.id}`)) || "";
+      } catch {
+        /* non-fatal */
+      }
+
+      if (transferId) {
+        try {
+          await releaseTransferHold(transferId);
+        } catch (err) {
+          logger.error("Failed to release transfer hold on Razorpay Route", {
+            dealId: deal.id,
+            transferId,
+            error: err,
+          });
+        }
+      }
+
+      await tx.paymentHold.update({
+        where: { id: deal.paymentHold.id },
+        data: {
+          status: "RELEASED",
+          releasedAt: new Date(),
+        },
+      });
     }
 
     await transitionDealState({
@@ -222,11 +261,12 @@ throw AppError.badRequest("NO_RESERVED_CAMPAIGN_FUNDS");
       metadata: {
         amount: deal.amount,
         influencerPayout: deal.influencerPayout ?? deal.amount,
+        routeEscrowReleased: hasActiveRouteHold,
       },
       tx,
     });
 
-if (brandWallet && !deal.reservedFromWallet) {
+if (brandWallet && !deal.reservedFromWallet && !hasActiveRouteHold) {
 // Atomic conditional decrement: only succeeds if pendingBalance still covers the amount.
 // Prevents double-spend when two deals complete concurrently for the same brand wallet.
 const pendingRelease = getDealTotalAmount(deal);
@@ -241,7 +281,7 @@ if (escrowUpdate.count === 0) {
 throw AppError.badRequest("INSUFFICIENT_PENDING_BALANCE");
 }
 } else if (brandWallet) {
-// reservedFromWallet deals — just update totalSpent, no pendingBalance change needed
+// reservedFromWallet deals or Route-held deals — just update totalSpent, no pendingBalance change needed
 await tx.wallet.update({
 where: { id: brandWallet.id },
 data: { totalSpent: { increment: getDealTotalAmount(deal) } },
@@ -828,5 +868,172 @@ data: { status },
     });
 
     return true;
+  }
+
+  /**
+   * Initialize a Razorpay Route Escrow Order for direct deal funding.
+   * RBI-compliant architecture: Brand payment is held in Razorpay regulated escrow
+   * with transfers[].on_hold = true to the creator's Linked Account.
+   */
+  static async createDealRouteEscrowOrder(params: {
+    dealId: string;
+    brandUserId: string;
+    idempotencyKey?: string;
+  }) {
+    const deal = await prisma.deal.findUnique({
+      where: { id: params.dealId },
+      include: {
+        brand: true,
+        influencer: {
+          include: {
+            user: {
+              include: {
+                bankAccounts: {
+                  where: { isVerified: true, deletedAt: null },
+                  orderBy: { isDefault: "desc" },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!deal) {
+      throw AppError.notFound("Deal not found");
+    }
+
+    if (deal.brand?.userId !== params.brandUserId) {
+      throw AppError.forbidden("Only the brand owner can fund this deal");
+    }
+
+    if (["COMPLETED", "CANCELLED", "ACTIVE", "PAYMENT_HELD"].includes(deal.status)) {
+      throw AppError.badRequest(`Deal is in ${deal.status} status and cannot be funded`);
+    }
+
+    const creatorUser = deal.influencer.user;
+    const defaultBank = creatorUser.bankAccounts[0];
+
+    // Onboard creator to Razorpay Route (linked account id acc_...)
+    const creatorAccountId = await getOrCreateLinkedAccount(creatorUser.id, {
+      email: creatorUser.email,
+      name: deal.influencer.displayName || "Vyapar Creator",
+      phone: creatorUser.phone || undefined,
+      accountNumber: defaultBank?.accountNumber,
+      ifscCode: defaultBank?.ifscCode,
+    });
+
+    const influencerPayout = deal.influencerPayout ?? deal.amount;
+    const receipt = `deal_route_${deal.id}_${Date.now()}`;
+
+    // Create split settlement order with on_hold: true
+    const order = await createOrder({
+      amount: deal.totalAmount,
+      currency: "INR",
+      receipt,
+      notes: {
+        type: "route_deal_escrow",
+        deal_id: deal.id,
+        brand_user_id: params.brandUserId,
+        influencer_user_id: creatorUser.id,
+        ...(params.idempotencyKey ? { idempotency_key: params.idempotencyKey } : {}),
+      },
+      transfers: [
+        {
+          account: creatorAccountId,
+          amount: influencerPayout,
+          currency: "INR",
+          on_hold: true, // Holds funds securely in Razorpay Escrow until deliverable approval
+          notes: {
+            deal_id: deal.id,
+            type: "creator_deal_payout",
+          },
+        },
+      ],
+    });
+
+    // Record or update PaymentHold
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    await prisma.paymentHold.upsert({
+      where: { dealId: deal.id },
+      create: {
+        dealId: deal.id,
+        razorpayOrderId: order.orderId,
+        amount: deal.totalAmount,
+        status: "PENDING",
+        expiresAt,
+      },
+      update: {
+        razorpayOrderId: order.orderId,
+        amount: deal.totalAmount,
+        status: "PENDING",
+        expiresAt,
+      },
+    });
+
+    // If order returned transfers, cache the transfer ID in Redis
+    const firstTransfer = order.transfers?.[0];
+    if (firstTransfer?.id) {
+      try {
+        await redis.set(`rzp:route:transfer:${deal.id}`, firstTransfer.id, "EX", 86400 * 30);
+      } catch {
+        /* non-fatal */
+      }
+    }
+
+    return {
+      orderId: order.orderId,
+      amount: order.amount,
+      currency: order.currency,
+      key: process.env.RAZORPAY_KEY_ID,
+      creatorAccountId,
+    };
+  }
+
+  /**
+   * Cancel a deal funded via Razorpay Route: reverses the transfer hold and refunds the brand.
+   */
+  static async cancelDealWithRouteRefund(dealId: string, reason: string) {
+    const paymentHold = await prisma.paymentHold.findUnique({
+      where: { dealId },
+    });
+
+    if (paymentHold && paymentHold.status === "HELD") {
+      let transferId = "";
+      try {
+        transferId = (await redis.get(`rzp:route:transfer:${dealId}`)) || "";
+      } catch {
+        /* non-fatal */
+      }
+
+      if (transferId) {
+        try {
+          await reverseTransfer({
+            transferId,
+            amount: paymentHold.amount,
+            notes: { dealId, reason },
+          });
+        } catch (err) {
+          logger.error("Failed to reverse Route transfer", { dealId, transferId, error: err });
+        }
+      }
+
+      if (paymentHold.razorpayPaymentId) {
+        try {
+          await refundPayment({
+            paymentId: paymentHold.razorpayPaymentId,
+            amount: paymentHold.amount,
+            notes: { dealId, reason },
+          });
+        } catch (err) {
+          logger.error("Failed to refund brand payment", { dealId, error: err });
+        }
+      }
+
+      await prisma.paymentHold.update({
+        where: { id: paymentHold.id },
+        data: { status: "FAILED" },
+      });
+    }
   }
 }

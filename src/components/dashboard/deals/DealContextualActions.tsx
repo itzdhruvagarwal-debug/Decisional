@@ -11,12 +11,14 @@ import {
   XCircle,
   MessageSquare,
   ExternalLink,
+  Lock,
 } from "lucide-react";
 import { DealDetail, getFlatDeliverablesList, ContentUrlEntry } from "./DealDetailHelpers";
 import {
   checkDealEscrowReleaseEligibility,
   checkDealCancellationEligibility,
   checkContentSubmissionEligibility,
+  checkDealEscrowFundingEligibility,
 } from "@/lib/action-eligibility";
 
 
@@ -31,6 +33,7 @@ export interface DealContextualActionsProps {
   handleSignContract: () => void;
   handleRejectInvite: () => void;
   handleCancelDeal: () => void;
+  handleFundRouteEscrow?: () => void;
   handleAction: (action: string, payload?: Record<string, unknown>) => Promise<boolean>;
   setItemizedUrls: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   setContentForm: React.Dispatch<React.SetStateAction<{ contentUrl: string; notes: string }>>;
@@ -51,6 +54,7 @@ export function DealContextualActions({
   handleSignContract,
   handleRejectInvite,
   handleCancelDeal,
+  handleFundRouteEscrow,
   handleAction,
   setItemizedUrls,
   setContentForm,
@@ -76,6 +80,10 @@ export function DealContextualActions({
     isBrand
   );
   const submissionEligibility = checkContentSubmissionEligibility(deal);
+  const fundEligibility = checkDealEscrowFundingEligibility(
+    deal,
+    isBrand ? deal.brand?.userId : undefined
+  );
 
   return (
     <div className="bg-card border border-border rounded-2xl p-5 mb-6 shadow-sm">
@@ -93,6 +101,14 @@ export function DealContextualActions({
                   : counterpartySigned
                   ? `${isBrand ? "Creator" : "Brand"} has signed! Please sign the contract to lock escrow.`
                   : "Both parties must digitally sign the contract to proceed."}
+              </p>
+            )}
+
+            {dealStatus === "PAYMENT_PENDING" && (
+              <p className="text-sm font-semibold text-foreground">
+                {isBrand
+                  ? "Contract signed! Please deposit escrow funds into Razorpay Route regulated escrow to activate work."
+                  : "Contract signed! Waiting for brand to deposit escrow funds into regulated escrow."}
               </p>
             )}
 
@@ -197,6 +213,26 @@ export function DealContextualActions({
                 Sign Contract
               </Button>
             )
+          )}
+
+          {dealStatus === "PAYMENT_PENDING" && isBrand && (
+            <div className="flex flex-col items-start gap-1">
+              <Button
+                variant="primary"
+                onClick={handleFundRouteEscrow || (() => {})}
+                disabled={isSubmitting || !fundEligibility.allowed}
+                className="gap-1.5 bg-escrow text-primary-foreground hover:opacity-90 disabled:opacity-50"
+              >
+                <Lock className="w-4 h-4" />
+                Deposit Escrow (Razorpay Route)
+              </Button>
+              {!fundEligibility.allowed && (
+                <div className="flex items-center gap-1.5 text-xs text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-md mt-1">
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>{fundEligibility.reason}</span>
+                </div>
+              )}
+            </div>
           )}
 
           {dealStatus === "PENDING_SIGNATURE" && isInfluencer && !userHasSigned && (
