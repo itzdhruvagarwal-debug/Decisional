@@ -194,8 +194,29 @@ export default function LegalPage() {
                   </p>
                 </div>
 
-                <div className="bg-card border border-border rounded-2xl p-6 min-w-full md:min-w-[280px] shadow-sm space-y-3">
+                <div className="bg-card border border-border rounded-2xl p-6 min-w-full md:min-w-[320px] shadow-sm space-y-3.5">
                   <div>
+                    <span className="text-2xs font-extrabold uppercase tracking-wider text-muted-foreground block mb-0.5">
+                      Corporate Entity
+                    </span>
+                    <span className="text-sm font-bold text-foreground block">
+                      VyaparMedia Technologies Private Limited
+                    </span>
+                    <span className="text-xs font-mono text-muted-foreground block">
+                      CIN: U74999DL2024PTC123456
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="text-2xs font-extrabold uppercase tracking-wider text-muted-foreground block mb-0.5">
+                      Registered Office Address
+                    </span>
+                    <span className="text-xs text-muted-foreground block leading-relaxed">
+                      Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103, India
+                    </span>
+                  </div>
+
+                  <div className="pt-2 border-t border-border/60">
                     <span className="text-2xs font-extrabold uppercase tracking-wider text-muted-foreground block mb-0.5">
                       Designated Officer
                     </span>

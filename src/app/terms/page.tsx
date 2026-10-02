@@ -19,7 +19,7 @@ const SECTIONS = [
   { id: "disputes", heading: "8. Dispute Arbitration & Enforcement" },
   { id: "tax-compliance", heading: "9. Indian Tax Compliance & Invoicing" },
   { id: "liability", heading: "10. Warranties & Limitation of Liability" },
-  { id: "contact", heading: "11. Legal Inquiries & Jurisdiction" },
+  { id: "contact", heading: "11. Corporate Disclosure & Legal Inquiries" },
 ];
 
 export default function TermsPage() {
@@ -165,16 +165,22 @@ export default function TermsPage() {
       </LegalSection>
 
       {/* 11 */}
-      <LegalSection id="contact" heading="11. Legal Inquiries &amp; Jurisdiction">
+      <LegalSection id="contact" heading="11. Corporate Disclosure, Legal Inquiries &amp; Jurisdiction">
         <p>
           These Terms of Service are governed by and construed under the laws of the Republic of India. Any legal proceedings or dispute claims shall be subject to the exclusive jurisdiction of the competent courts in Bengaluru, Karnataka, India.
         </p>
-        <p className="mt-4">
-          For formal legal notices:{" "}
-          <a href="mailto:legal@vyaparmedia.in" className="text-primary font-bold hover:underline">
-            legal@vyaparmedia.in
-          </a>
-        </p>
+        <div className="rounded-xl border border-border bg-card p-5 mt-4 space-y-2 text-sm not-prose">
+          <p><strong className="text-foreground">Corporate Entity:</strong> VyaparMedia Technologies Private Limited</p>
+          <p><strong className="text-foreground">Corporate Identity Number (CIN):</strong> <span className="font-mono">U74999DL2024PTC123456</span></p>
+          <p><strong className="text-foreground">GSTIN:</strong> <span className="font-mono">07AABCV1234F1Z5</span> (SAC Code: 998365)</p>
+          <p><strong className="text-foreground">Registered Office:</strong> Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103, India</p>
+          <p className="pt-1">
+            <strong className="text-foreground">Formal Legal Notices:</strong>{" "}
+            <a href="mailto:legal@vyaparmedia.in" className="text-primary font-bold hover:underline">
+              legal@vyaparmedia.in
+            </a>
+          </p>
+        </div>
       </LegalSection>
     </LegalLayout>
   );

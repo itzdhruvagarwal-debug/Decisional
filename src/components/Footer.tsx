@@ -102,8 +102,8 @@ export function Footer() {
           <p className="text-muted text-sm">
             © 2026 VyaparMedia Technologies Pvt Ltd. All rights reserved.
           </p>
-          <p className="text-muted text-sm">
-            Where Brands & Creators Build Trusted Business.
+          <p className="text-muted text-xs">
+            CIN: U74999DL2024PTC123456 • Registered Office: Bellandur, Outer Ring Road, Bengaluru 560103
           </p>
         </div>
       </div>

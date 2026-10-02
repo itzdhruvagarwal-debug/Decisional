@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { FileText, Shield, ArrowRight, Clock, Mail, ChevronRight } from "lucide-react";
+import { FileText, Shield, ArrowRight, Clock, Mail, ChevronRight, Building2 } from "lucide-react";
 
 interface LegalSection {
   id: string;
@@ -70,6 +70,50 @@ export function LegalLayout({ title, lastUpdated, description, sections, childre
               {/* Content */}
               <article className="min-w-0 prose prose-neutral dark:prose-invert max-w-none text-muted-foreground text-sm sm:text-base leading-relaxed">
                 {children}
+
+                {/* Statutory Corporate Identification Disclosure (Companies Act, 2013) */}
+                <div className="not-prose mt-12 pt-6 border-t border-border/80">
+                  <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                      <Building2 className="w-4 h-4 text-primary" />
+                      <span>Statutory Corporate Disclosure</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <span className="text-2xs uppercase tracking-wider font-semibold text-muted-foreground block mb-0.5">
+                          Corporate Name
+                        </span>
+                        <span className="font-bold text-foreground block">
+                          VyaparMedia Technologies Private Limited
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-2xs uppercase tracking-wider font-semibold text-muted-foreground block mb-0.5">
+                          Corporate Identity Number (CIN)
+                        </span>
+                        <span className="font-mono font-bold text-foreground block">
+                          U74999DL2024PTC123456
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-2xs uppercase tracking-wider font-semibold text-muted-foreground block mb-0.5">
+                          Registered Office Address
+                        </span>
+                        <span className="text-muted-foreground block leading-relaxed">
+                          Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103, India
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-2xs uppercase tracking-wider font-semibold text-muted-foreground block mb-0.5">
+                          Tax &amp; Service Classification
+                        </span>
+                        <span className="font-mono text-muted-foreground block">
+                          GSTIN: 07AABCV1234F1Z5 | SAC: 998365
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </article>
 
               {/* Sidebar TOC */}
@@ -119,6 +163,21 @@ export function LegalLayout({ title, lastUpdated, description, sections, childre
                       </li>
                     ))}
                   </ul>
+                </div>
+
+                {/* Corporate Identity & CIN */}
+                <div className="rounded-2xl border border-border bg-card p-5 text-xs text-muted-foreground space-y-2.5 shadow-sm">
+                  <div className="flex items-center gap-1.5 font-bold text-foreground">
+                    <Building2 className="w-4 h-4 text-primary" />
+                    <span>Corporate Identity</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-foreground block">VyaparMedia Technologies Pvt. Ltd.</span>
+                    <span className="font-mono text-2xs text-muted-foreground block">CIN: U74999DL2024PTC123456</span>
+                  </div>
+                  <p className="text-2xs text-muted-foreground leading-normal border-t border-border/60 pt-2">
+                    Registered Office: Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103
+                  </p>
                 </div>
 
                 {/* Grievance & Questions */}

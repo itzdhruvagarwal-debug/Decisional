@@ -1,9 +1,9 @@
 # VyaparMedia Design Tokens & Accessibility Specification
 
-> **Last Updated**: September 24, 2026 (Cross-Cutting Consistency Pass)  
-> **Status**: 100% Token-Compliant across all 52 pages (0 Hardcoded Hex / Inline Overrides)
+> **Last Updated**: October 2026 (Enterprise Benchmark & Full Route Verification Pass)  
+> **Status**: 100% Token-Compliant across all 55 pages (0 Hardcoded Hex / Inline Overrides across 579 source files)
 
-This document defines the visual design system, token contracts, typography, dark mode palettes, and accessibility standards for VyaparMedia — an influencer marketing & escrow marketplace.
+This document defines the visual design system, token contracts, typography, dark mode palettes, print specifications, and accessibility standards for VyaparMedia — an influencer marketing & escrow marketplace.
 
 ---
 
@@ -282,5 +282,22 @@ All primitive components consume `@base-ui/react` (v1.8.0) and export via `@/com
 ### 7.4 Branded 404 Glow Container
 - **Container**: `border border-pending/30 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl p-8 sm:p-12`.
 - **Status Indicator**: Luminous badge with `AlertTriangle` and amber glow accentuating platform recovery.
+
+### 7.5 Enterprise Campaign ROI Report & A4 Print Styles
+- **CSS Print Media Query (`@media print`)**:
+  - Hides non-printable chrome: `DesktopSidebar`, `MobileBottomBar`, toast notifications, breadcrumb action buttons, and live chat widgets (`.no-print` or `print:hidden`).
+  - Container forces pure white background and near-black text for sharp PDF rendering and physical printer ink preservation:
+    ```css
+    @media print {
+      body { background: white !important; color: black !important; }
+      .print-card { box-shadow: none !important; border: 1px solid #E5E7EB !important; page-break-inside: avoid; }
+    }
+    ```
+  - Standardizes on A4 page geometry with `size: A4 portrait; margin: 1.5cm;` eliminating layout cutoff.
+- **4-Tier Category Performance Badges**:
+  - `EXCEPTIONAL` tier: `bg-verified/10 text-verified border-verified/30` paired with `TrendingUp` icon.
+  - `HIGH` tier: `bg-escrow/10 text-escrow border-escrow/30` paired with `Award` icon.
+  - `AVERAGE` tier: `bg-pending/10 text-pending border-pending/30` paired with `BarChart2` icon.
+  - `BELOW_AVERAGE` tier: `bg-disputed/10 text-disputed border-disputed/30` paired with `AlertCircle` icon.
 
 

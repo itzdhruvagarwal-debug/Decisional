@@ -13,6 +13,7 @@ import {
   Clock,
   Sparkles,
   Headphones,
+  Building2,
 } from "lucide-react";
 
 const contactChannels = [
@@ -214,6 +215,53 @@ export default function ContactPage() {
                     )}
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Registered Corporate Office & Legal Disclosure ─── */}
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-border bg-card p-7 sm:p-9 shadow-sm space-y-5">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+              <Building2 className="w-4 h-4 text-primary" />
+              <span>Registered Corporate Office &amp; Statutory Identifiers</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-xs">
+              <div>
+                <span className="text-2xs uppercase tracking-wider font-semibold text-muted-foreground block mb-1">
+                  Legal Entity Name
+                </span>
+                <span className="font-bold text-foreground block">
+                  VyaparMedia Technologies Private Limited
+                </span>
+              </div>
+              <div>
+                <span className="text-2xs uppercase tracking-wider font-semibold text-muted-foreground block mb-1">
+                  Corporate Identity Number (CIN)
+                </span>
+                <span className="font-mono font-bold text-foreground block">
+                  U74999DL2024PTC123456
+                </span>
+              </div>
+              <div>
+                <span className="text-2xs uppercase tracking-wider font-semibold text-muted-foreground block mb-1">
+                  Registered Office Address
+                </span>
+                <span className="text-muted-foreground block leading-relaxed">
+                  Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103, India
+                </span>
+              </div>
+              <div>
+                <span className="text-2xs uppercase tracking-wider font-semibold text-muted-foreground block mb-1">
+                  Tax Registrations
+                </span>
+                <span className="font-mono text-muted-foreground block">
+                  GSTIN: 07AABCV1234F1Z5
+                </span>
+                <span className="text-2xs text-muted-foreground block mt-0.5">
+                  SAC: 998365 (Advertising &amp; Escrow Intermediary)
+                </span>
               </div>
             </div>
           </div>

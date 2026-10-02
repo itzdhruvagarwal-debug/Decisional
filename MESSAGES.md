@@ -70,6 +70,31 @@
 | **Dispute Verdict: Refund Brand** | "Dispute resolved in favor of the brand. Full escrow refunded." | View Dispute |
 | **Dispute Verdict: Release Creator** | "Dispute resolved in favor of the creator. Escrow funds released to wallet." | View Dispute |
 | **Newsletter Broadcast Dispatched** | "Newsletter dispatched successfully to verified subscribers." | View Stats |
+| **Benchmark Configuration Updated** | "Category benchmarks and dynamic ROI weights updated successfully." | View Benchmarks |
+| **Suspicious Review Quarantined** | "Review quarantined for administrator review due to collusion flags." | View Queue |
+
+### F. Physical Product Logistics & Shiprocket Fulfillment
+| Scenario | User-Facing Message | Suggested Action |
+| :--- | :--- | :--- |
+| **Delivery Address Missing** | "Please provide your complete delivery address before product dispatch." | Add Address |
+| **Insufficient Wallet for Shipping** | "Your wallet balance is insufficient to cover the Shiprocket courier shipping fee. Please deposit funds." | Add Funds |
+| **Non-Serviceable Pincode** | "The selected courier cannot service this destination pincode. Please verify or update the delivery address." | Edit Address |
+| **Product Dispatched** | "Product sample dispatched! Tracking details and AWB number are now live." | Track Shipment |
+| **Product Delivered** | "Shipment verified as delivered. Creator can now submit the content draft." | View Deal |
+
+### G. Razorpay Route Split Settlement & Indian Tax Compliance
+| Scenario | User-Facing Message | Suggested Action |
+| :--- | :--- | :--- |
+| **Creator KYC Tier-2 Required** | "Creator must complete PAN identity verification (KYC Tier-2) before escrow release can be settled directly." | Complete KYC |
+| **Route Account Link Required** | "A verified bank account or Razorpay Route linked account is required to receive payout settlements." | Link Account |
+| **Route Settlement Initiated** | "Escrow split settlement initiated. Funds transferred directly to creator's linked account after deducting TDS (Sec 194-O) and commission." | View Receipt |
+| **Tax Invoice & Form 16A Ready** | "Statutory tax invoice and TDS deduction breakdown are ready for download." | Download Invoice |
+
+### H. Campaign ROI & Benchmarks
+| Scenario | User-Facing Message | Suggested Action |
+| :--- | :--- | :--- |
+| **Campaign In-Progress Disclaimer** | "This campaign is currently active. Metrics reflect real-time live performance estimates until all deliverables are completed." | Refresh Stats |
+| **Benchmark Weights Invalid Sum** | "Category benchmark weights must sum to exactly 100%. Please adjust metric component percentages." | Rebalance |
 
 ---
 

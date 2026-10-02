@@ -320,7 +320,10 @@ The platform provides live printable, PDF-exportable statements (`StatementPrint
   - Sandbox Test Mode: 100% Free (`rzp_test_...`).
   - Inbound Gateway: 2% + GST per successful transaction.
   - RazorpayX Bank Payouts: ₹2 to ₹9 per transfer.
-- **Webhook Endpoint**: `https://yourdomain.com/api/webhooks/razorpay`
+  - Razorpay Route Split Transfer: ₹0 to creator linked account.
+- **Webhook Endpoints**:
+  - Payment Captures: `https://yourdomain.com/api/webhooks/razorpay`
+  - Route Split Transfer Reconciliation: `https://yourdomain.com/api/webhooks/razorpay/process`
 
 ---
 

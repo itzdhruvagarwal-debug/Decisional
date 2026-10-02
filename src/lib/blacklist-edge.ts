@@ -34,19 +34,25 @@ Authorization: `Bearer ${restToken}`,
 signal: AbortSignal.timeout(1000),
 });
 
-if (!response.ok) {
-return false;
-}
-
-const data = await response.json();
-// Upstash REST returns { result: "value" } or { result: null }
-return data && data.result !== null;
-  } catch (err) {
+  if (!response.ok) {
     if (process.env.NODE_ENV === "production") {
-      logger.error("Edge blacklist lookup failed (failing open to prevent outage):", err);
-    } else {
-      logger.warn("Edge blacklist lookup skipped in development (failing open)");
+      logger.error(`Edge blacklist lookup HTTP error (${response.status}): failing closed in production for security`);
+      return true;
     }
     return false;
+  }
+
+  const data = await response.json();
+  // Upstash REST returns { result: "value" } or { result: null }
+  return data && data.result !== null;
+  } catch (err) {
+    if (process.env.NODE_ENV === "production") {
+      logger.error("Edge blacklist lookup failed (failing closed in production for security):", err);
+      // Fail closed in production for security, fail open in development/testing
+      return true;
+    } else {
+      logger.warn("Edge blacklist lookup skipped in development (failing open)");
+      return false;
+    }
   }
 }

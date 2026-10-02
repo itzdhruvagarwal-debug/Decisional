@@ -14,7 +14,7 @@ const SECTIONS = [
   { id: "zero-tracking", heading: "3. Zero Cross-Site Tracking Guarantee" },
   { id: "pwa-storage", heading: "4. PWA Caching & Local Storage" },
   { id: "user-control", heading: "5. Browser Settings & User Control" },
-  { id: "contact", heading: "6. Questions & Grievance Contact" },
+  { id: "contact", heading: "6. Corporate Disclosure & Grievance Contact" },
 ];
 
 const COOKIE_TYPES = [
@@ -129,18 +129,24 @@ export default function CookiePage() {
       </LegalSection>
 
       {/* 6 */}
-      <LegalSection id="contact" heading="6. Questions &amp; Grievance Contact">
+      <LegalSection id="contact" heading="6. Corporate Disclosure &amp; Technical Privacy Contact">
         <p>
           If you have questions regarding our use of cookies or web storage technologies, contact our technical privacy team:
         </p>
-        <p className="mt-3">
-          <a
-            href="mailto:privacy@vyaparmedia.in"
-            className="text-primary font-bold hover:underline inline-flex items-center gap-1.5"
-          >
-            privacy@vyaparmedia.in
-          </a>
-        </p>
+        <div className="rounded-xl border border-border bg-card p-5 mt-4 space-y-2 text-sm not-prose">
+          <p><strong className="text-foreground">Corporate Entity:</strong> VyaparMedia Technologies Private Limited</p>
+          <p><strong className="text-foreground">Corporate Identity Number (CIN):</strong> <span className="font-mono">U74999DL2024PTC123456</span></p>
+          <p><strong className="text-foreground">Registered Office:</strong> Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103, India</p>
+          <p className="pt-1">
+            <strong className="text-foreground">Direct Inquiries:</strong>{" "}
+            <a
+              href="mailto:privacy@vyaparmedia.in"
+              className="text-primary font-bold hover:underline inline-flex items-center gap-1.5"
+            >
+              privacy@vyaparmedia.in
+            </a>
+          </p>
+        </div>
       </LegalSection>
     </LegalLayout>
   );

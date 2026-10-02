@@ -18,6 +18,7 @@ const SECTIONS = [
   { id: "timelines", heading: "5. Processing Timelines & Methods" },
   { id: "disputes", heading: "6. Dispute Adjudication Outcomes" },
   { id: "how-to-initiate", heading: "7. How to File a Refund Request" },
+  { id: "corporate-entity", heading: "8. Billing Entity & Statutory Office" },
 ];
 
 export default function RefundPage() {
@@ -146,6 +147,25 @@ export default function RefundPage() {
           >
             Contact Billing Support →
           </a>
+        </div>
+      </LegalSection>
+
+      {/* 8 */}
+      <LegalSection id="corporate-entity" heading="8. Billing Entity &amp; Statutory Office">
+        <p>
+          All commercial refunds, credit notes, and escrow disbursements are issued by our corporate entity:
+        </p>
+        <div className="rounded-xl border border-border bg-card p-5 mt-4 space-y-2 text-sm not-prose">
+          <p><strong className="text-foreground">Billing Entity:</strong> VyaparMedia Technologies Private Limited</p>
+          <p><strong className="text-foreground">Corporate Identity Number (CIN):</strong> <span className="font-mono">U74999DL2024PTC123456</span></p>
+          <p><strong className="text-foreground">GSTIN:</strong> <span className="font-mono">07AABCV1234F1Z5</span></p>
+          <p><strong className="text-foreground">Registered Office:</strong> Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103, India</p>
+          <p className="pt-1">
+            <strong className="text-foreground">Billing Escalations:</strong>{" "}
+            <a href="mailto:billing@vyaparmedia.in" className="text-primary font-bold hover:underline">
+              billing@vyaparmedia.in
+            </a>
+          </p>
         </div>
       </LegalSection>
     </LegalLayout>

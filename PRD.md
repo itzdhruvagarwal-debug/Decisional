@@ -1,7 +1,7 @@
 # VyaparMedia - Comprehensive Product Requirements Document (PRD)
 
-**Version**: 3.3 (Cross-Cutting Consistency, Runtime Contract Safety & Zero-Drift Verified)  
-**Last Updated**: September 24, 2026 (Full UI Modernization, Shared Schemas & Strict Zero-Drift Audit)  
+**Version**: 3.4 (Enterprise Benchmark, Logistics Integration & High-Concurrency Verified)  
+**Last Updated**: October 2026 (Physical Product Logistics, Razorpay Route Settlement, Category ROI Engine & 55-Page Audit)  
 **Document Status**: Production-Ready, Error-Sanitized & Enterprise-Hardened  
 **Target Scale**: 10,00,000+ (10 Lakh) Concurrent Active Users  
 **Primary Region**: India (IN) — English (Indian Creator & Commerce Context: INR, PAN, GST) with Tier 1/2/3 Regional Coverage  
@@ -40,6 +40,8 @@ graph TD
         DisputeEngine[Tiered Dispute Mediation & Arbitration]
         ContractEngine[SHA-256 Smart Contract Terms Engine]
         MatchingEngine[Creator-Campaign 5-Pillar Matchmaker]
+        LogisticsEngine[Shiprocket Physical Product Seeding Engine]
+        BenchmarkEngine[Category-Aware Dynamic ROI Benchmarking Engine]
     end
 
     subgraph Asynchronous Queue & Schedulers
@@ -51,14 +53,15 @@ graph TD
     subgraph Storage & Persistence Tier
         PrimaryDB[(Supabase PostgreSQL Primary - Pooler)]
         ReadReplica[(Supabase PostgreSQL Read Replica)]
-        Redis[(Upstash Redis - Locks & Caching)]
+        Redis[(Upstash Redis & ioredis - Caching & Locks)]
         ObjectStorage[(AWS S3 / Cloudflare R2 - Presigned)]
     end
 
     subgraph External Gateways
-        Razorpay[Razorpay Payment & Payouts API]
+        Razorpay[Razorpay Payment, Route & Payouts API]
+        Shiprocket[Shiprocket Logistics & Courier API]
         Surepass[Surepass KYC Verification API]
-        SocialAPIs[Instagram Graph & YouTube Data v3 APIs]
+        SocialAPIs[Instagram Graph v22.0 & YouTube Data v3 APIs]
         Resend[Resend Transactional Email API]
     end
 
@@ -73,18 +76,20 @@ graph TD
     DealCoordinator --> QStash
     QStash --> Asynchronous Queue & Schedulers
     DealCoordinator --> Razorpay
+    DealCoordinator --> Shiprocket
     FraudEngine --> Surepass
     Core Business Engine --> ObjectStorage
     Core Business Engine --> Resend
 ```
 
-### 1.1 Six Fundamental Value Pillars
-1. **100% Escrow Guarantee**: Upfront brand funding locked in dedicated escrow with double-entry ledger settlement. Neither party bears unilateral counterparty credit risk.
-2. **Digital Reputation Score (DRS 0–900)**: Transparent, algorithmic reputation scoring replacing vanity follower counts with on-time delivery rates, review scores, and fraud flags.
+### 1.1 Seven Fundamental Value Pillars
+1. **100% Escrow Guarantee**: Upfront brand funding locked in dedicated escrow with double-entry ledger settlement and RBI Payment Aggregator compliant Razorpay Route split settlement. Neither party bears unilateral counterparty credit risk.
+2. **Digital Reputation Score (DRS 0–900)**: Transparent, algorithmic reputation scoring replacing vanity follower counts with on-time delivery rates, review scores, fraud flags, and time-decay recency.
 3. **Legally Binding Digital Contracts**: Cryptographic SHA-256 contracts capturing itemized deliverables, revision limits, licensing, and deadlines with dual digital timestamps.
-4. **Automated India Tax & Regulatory Compliance**: Real-time Section 194-O (0.1%), Section 206AA (5%), and Section 194J TDS calculation with FY tracking, GSTIN structure verification, and encrypted PAN storage.
-5. **Zero-Trust Security & Anti-Disintermediation**: Real-time contact leak detection (homoglyph normalization, phonetic evasion filtering), multi-pass HTML/XSS sanitization, append-only immutable audit logs, and edge WAF protection.
-6. **Zero-Leak User Message Architecture**: Centralized error sanitization layer preventing all technical leaks (Prisma codes, PostgreSQL constraints, SQL syntax, stack traces) while delivering polite, respectful, actionable messages with recommended next steps and specific settlement timelines.
+4. **Physical Product Seeding Logistics**: Native Shiprocket courier integration with automated rate computation, brand wallet shipping fee debits, AWB generation, and webhook tracking.
+5. **Automated India Tax & Regulatory Compliance**: Real-time Section 194-O (0.1%), Section 206AA (5%), and Section 194J TDS calculation with FY tracking, GSTIN structure verification, and encrypted PAN storage.
+6. **Zero-Trust Security & Anti-Disintermediation**: Real-time contact leak detection (homoglyph normalization, phonetic evasion filtering), multi-pass HTML/XSS sanitization, append-only immutable audit logs, and edge WAF protection.
+7. **Zero-Leak User Message Architecture**: Centralized error sanitization layer preventing all technical leaks (Prisma codes, PostgreSQL constraints, SQL syntax, stack traces) while delivering polite, respectful, actionable messages with recommended next steps and specific settlement timelines.
 
 ---
 
@@ -105,14 +110,15 @@ graph TD
 | **Connection Pooler**| Supavisor | Enterprise | High-concurrency serverless connection pooling |
 | **Read Replica** | Supabase Read Replica | Dedicated | Segregates heavy FTS search and analytics from write paths |
 | **ORM** | Prisma ORM | 6.19.3 | Type-safe migrations, composite index definitions, query builder |
-| **Distributed Cache** | Upstash Redis | Enterprise | Sub-millisecond rate limits, CAS distributed locks, session cache |
+| **Distributed Cache** | Upstash Redis & ioredis | 5.9.2 | Sub-millisecond rate limits, CAS distributed locks, multi-layer cache with O(1) version invalidation |
+| **Logistics & Courier** | Shiprocket REST API | v1 | Live courier rates, automated AWB generation, tracking webhooks, brand wallet shipping debits |
 | **Job Queue** | Upstash QStash | v2 REST | Decoupled webhook processing, cron execution, Dead-Letter Queue |
 | **Object Storage** | AWS S3 / Cloudflare R2 | S3 API | Direct presigned uploads for video deliverables and KYC documents |
 | **Realtime Engine** | Supabase Realtime | WebSockets | Real-time deal status updates, wallet changes, typing, chat |
-| **Payment Gateway** | Razorpay SDK | 2.9.6 | UPI, Netbanking, Cards top-up, and RazorpayX instant payouts |
+| **Payment Gateway** | Razorpay SDK & Route | 2.9.6 | UPI, Netbanking, Cards top-up, Razorpay Route split settlement, and RazorpayX instant payouts |
 | **Contract Safety** | Zod Schemas | 4.3.6 | Shared schemas across API routes and client fetchers with fail-fast runtime drift rejection |
 | **Observability** | Sentry + Winston | 10.59.0 | Distributed request tracing, structured JSON logging, error tracking |
-| **Testing Suite** | Vitest + Testing Library | 5.0.0 | 35 test files, 396 passed unit & contract tests (100% pass rate) |
+| **Testing Suite** | Vitest + Testing Library | 5.0.0 | 50 test files, 546 passed unit, integration & e2e tests (100% pass rate) |e) |
 
 
 ### 2.2 Database Read/Write Segregation (`src/lib/db-read.ts`)
@@ -1089,6 +1095,7 @@ The UI rebuild established four primary high-impact page flows:
 | | `/dashboard/campaigns` | `src/app/dashboard/campaigns/page.tsx` | Campaign discovery & brand campaign management |
 | | `/dashboard/campaigns/create` | `src/app/dashboard/campaigns/create/page.tsx` | 3-step campaign creation wizard with live summary sidebar & budget escrow calculator |
 | | `/dashboard/campaigns/[id]` | `src/app/dashboard/campaigns/[id]/page.tsx` | Campaign detail, applicant review, & deal conversion |
+| | `/dashboard/campaigns/[id]/roi` | `src/app/dashboard/campaigns/[id]/roi/page.tsx` | Enterprise Campaign ROI report: 4-tier category benchmarks, predictive accuracy, A4 print export |
 | | `/dashboard/applications` | `src/app/dashboard/applications/page.tsx` | Sent & received campaign proposals tracker |
 | | `/dashboard/deals` | `src/app/dashboard/deals/page.tsx` | Deal roster with milestone status pills & urgency filters |
 | | `/dashboard/deals/[id]` | `src/app/dashboard/deals/[id]/page.tsx` | Deal room: contract terms, timeline stepper, draft submissions, revision triggers |
@@ -1098,6 +1105,7 @@ The UI rebuild established four primary high-impact page flows:
 | | `/dashboard/influencers` | `src/app/dashboard/influencers/page.tsx` | Creator discovery feed with composite search & filters |
 | | `/dashboard/influencers/[id]` | `src/app/dashboard/influencers/[id]/page.tsx` | Creator dossier with verified stats & offer trigger |
 | | `/dashboard/messages` | `src/app/dashboard/messages/page.tsx` | Real-time deal messaging with contact leak protection |
+| | `/dashboard/notifications` | `src/app/dashboard/notifications/page.tsx` | In-app notification center: categorized alerts, unread counters, and preferences |
 | | `/dashboard/wallet` | `src/app/dashboard/wallet/page.tsx` | Escrow balances, double-entry ledger, bank accounts, instant withdrawal |
 | | `/dashboard/analytics` | `src/app/dashboard/analytics/page.tsx` | Campaign ROI, reach, GMV, and conversion performance |
 | | `/dashboard/leaderboard` | `src/app/dashboard/leaderboard/page.tsx` | DRS reputation leaderboard & top creator tiers |
@@ -1106,18 +1114,20 @@ The UI rebuild established four primary high-impact page flows:
 | | `/dashboard/settings` | `src/app/dashboard/settings/page.tsx` | Profile info, 2FA management, notifications |
 | | `/dashboard/support` | `src/app/dashboard/support/page.tsx` | Customer support ticket submission & history |
 | **Admin** | `/admin` | `src/app/admin/page.tsx` | Platform health, GMV, active escrow overview |
-| | `/admin/users` | `src/app/admin/users/page.tsx` | User directory, account bans, role adjustments |
-| | `/admin/verifications` | `src/app/admin/verifications/page.tsx` | KYC review queue (PAN, Aadhaar, GST) |
-| | `/admin/verifications/[id]` | `src/app/admin/verifications/[id]/page.tsx` | Detailed document inspection & approval panel |
+| | `/admin/analytics` | `src/app/admin/analytics/page.tsx` | Macro platform growth metrics & category analytics |
+| | `/admin/applications` | `src/app/admin/applications/page.tsx` | Cross-platform application oversight |
+| | `/admin/audit-logs` | `src/app/admin/audit-logs/page.tsx` | Cryptographic immutable security audit logs |
+| | `/admin/benchmarks` | `src/app/admin/benchmarks/page.tsx` | Dynamic category benchmark registry & ROI scoring weight tuning |
 | | `/admin/disputes` | `src/app/admin/disputes/page.tsx` | Arbitration court & escrow settlement queue |
 | | `/admin/disputes/[id]` | `src/app/admin/disputes/[id]/page.tsx` | Dispute evidence review & split settlement release |
 | | `/admin/financial` | `src/app/admin/financial/page.tsx` | Platform treasury, fee ledger, escrow drift audit |
-| | `/admin/payouts` | `src/app/admin/payouts/page.tsx` | RazorpayX payout queue & batch approval controls |
-| | `/admin/applications` | `src/app/admin/applications/page.tsx` | Cross-platform application oversight |
-| | `/admin/violations` | `src/app/admin/violations/page.tsx` | Contact leak flags, terms violations, fraud tracking |
-| | `/admin/audit-logs` | `src/app/admin/audit-logs/page.tsx` | Cryptographic immutable security audit logs |
-| | `/admin/analytics` | `src/app/admin/analytics/page.tsx` | Macro platform growth metrics & category analytics |
 | | `/admin/newsletter` | `src/app/admin/newsletter/page.tsx` | System announcements & broadcast manager |
+| | `/admin/payouts` | `src/app/admin/payouts/page.tsx` | RazorpayX payout queue & batch approval controls |
+| | `/admin/suspicious-reviews` | `src/app/admin/suspicious-reviews/page.tsx` | Review fraud intelligence, collusion detection & moderation console |
+| | `/admin/users` | `src/app/admin/users/page.tsx` | User directory, account bans, role adjustments |
+| | `/admin/verifications` | `src/app/admin/verifications/page.tsx` | KYC review queue (PAN, Aadhaar, GST) |
+| | `/admin/verifications/[id]` | `src/app/admin/verifications/[id]/page.tsx` | Detailed document inspection & approval panel |
+| | `/admin/violations` | `src/app/admin/violations/page.tsx` | Contact leak flags, terms violations, fraud tracking |
 | **System** | `/not-found` (404) | `src/app/not-found.tsx` | Branded 404 recovery with Help Center, home CTA, and quick destinations |
 | | Root Error (500) | `src/app/error.tsx` | Application root error boundary |
 | | Global Error | `src/app/global-error.tsx` | Catastrophic root html/body error boundary |
@@ -1257,18 +1267,18 @@ Every route is guarded by `apiWrapper` (`src/lib/api-wrapper.ts`) enforcing sess
 
 ## 24. Social Media Integrations Technical Specifications
 
-### 26.1 Instagram Graph API (v18.0)
+### 26.1 Instagram Graph API (v22.0)
 - **OAuth 2.0 Flow**: User authorizes permissions: `instagram_basic`, `pages_show_list`, `instagram_manage_insights`.
 - **Token Handling**: Exchanges short-lived user token for 60-day long-lived access token. Cached in Redis and encrypted in database.
 - **Data Fetched**: Follower count, media count, bio, profile picture, post media URL, permalink, like count, comment count, and timestamp.
 - **Engagement Formula**:
   $$\text{Instagram Engagement Rate} = \frac{\text{Average (Likes + Comments across last 12 posts)}}{\text{Follower Count}} \times 100$$
-- **Verification Webhook [Planned]**: Subscribes to Instagram Webhooks for real-time post deletion alerts. (OAuth authentication and post reach metrics fetch are currently active).
+- **Verification Webhook**: Subscribes to Instagram Webhooks for real-time post deletion alerts and engagement polling.
 
 ### 26.2 YouTube Data API (v3)
 - **OAuth 2.0 Flow**: Scopes: `https://www.googleapis.com/auth/youtube.readonly`.
 - **Data Fetched**: Channel subscriber count, total view count, video count, video title, description, tags, duration, view count, like count, comment count.
-- **Privacy Status Check [Planned]**: Automated cron/webhook verification calling `videos.list(part: 'status')` to detect public-to-private flips. (Creator channel linking and post submission verification are currently active).
+- **Privacy Status Check**: Automated cron/webhook verification calling `videos.list(part: 'status')` to detect public-to-private flips.
 - **Engagement Formula**:
   $$\text{YouTube Engagement Rate} = \frac{\text{Average (Likes + Comments across last 10 videos)}}{\text{Average Video Views}} \times 100$$
 
@@ -1276,7 +1286,7 @@ Every route is guarded by `apiWrapper` (`src/lib/api-wrapper.ts`) enforcing sess
 
 ## 25. Testing, Verification & Quality Assurance Suite
 
-### 26.1 Vitest Unit & Integration Test Matrix (27 Test Suites, 331 Passing Tests)
+### 26.1 Vitest Unit & Integration Test Matrix (50 Test Suites, 546 Passing Tests)
 
 The repository enforces a comprehensive automated test battery covering core financial accounting, state machines, edge security, rate limiting, and user messages:
 
@@ -1285,17 +1295,23 @@ The repository enforces a comprehensive automated test battery covering core fin
 | `tests/unit/user-messages.test.ts` | Message Sanitization | Technical leak prevention, Prisma code scrubbing, user-friendly action mappings, success templates | 20 tests |
 | `tests/unit/cron-architecture.test.ts` | Cron Schedulers | QStash HMAC signatures, timing-safe tokens, schedule alignment, retry backoffs | 16 tests |
 | `tests/unit/state-machine-transitions.test.ts` | Deal State Machine | Validates all 25+ valid edges, rejects invalid transitions, verifies row-locking | 19 tests |
-| `tests/unit/wallet-ledger.test.ts` | Financial Ledger | Double-entry balance calculation, drift detection, paise arithmetic | 13 tests |
-| `tests/unit/wallet-screen.test.ts` | Wallet Screen UI | Full-screen withdrawal flow, bank account selection, statement export | 13 tests |
-| `tests/unit/razorpay-webhook-hardening.test.ts` | Webhook Processing | HMAC verification, idempotency deduplication, terminal state guard | 14 tests |
+| `tests/unit/wallet-ledger.test.ts` | Financial Ledger | Double-entry balance calculation, drift detection, paise arithmetic | 9 tests |
+| `tests/unit/wallet.test.ts` | Wallet Operations | Balance locking, concurrent debit/credits, withdrawal limits | 14 tests |
+| `tests/unit/wallet-screen.test.ts` | Wallet Screen UI | Full-screen withdrawal flow, bank account selection, statement export | 14 tests |
+| `tests/unit/razorpay-webhook-hardening.test.ts` | Webhook Processing | HMAC verification, idempotency deduplication, terminal state guard | 11 tests |
 | `tests/unit/webhook-idempotency.test.ts` | Webhook Deduplication | Replay protection, distributed lock contention, double-crediting prevention | 12 tests |
 | `tests/unit/kyc-fraud.test.ts` | KYC & Fraud Engine | Tokenized name matching, withdrawal velocity rules, duplicate account hashing | 15 tests |
 | `tests/unit/rate-limit-abuse.test.ts` | Rate Limiting | Trust-tier rate enforcement, IP limits, sliding window accuracy | 14 tests |
-| `tests/unit/search-discovery.test.ts` | Discovery Engine | Composite ranking formula, cursor serialization, FTS tsvector query building | 12 tests |
+| `tests/unit/search-discovery.test.ts` | Discovery Engine | Composite ranking formula, cursor serialization, FTS tsvector query building, Redis O(1) cache version invalidation | 12 tests |
+| `tests/unit/shiprocket-deal-fulfillment.test.ts`| Product Fulfillment | Physical product address collection, courier rate selection, AWB generation, and wallet fee deduction | 10 tests |
+| `tests/unit/matching-roi-scoring.test.ts` | ROI & Matching | 4-tier category benchmark resolution, predictive match score accuracy, relative ROI computation | 23 tests |
+| `tests/unit/campaign-roi-report.test.ts` | ROI Reporting | Campaign ROI report metrics, deliverable breakdowns, and print export data structures | 10 tests |
+| `tests/unit/collusion-simulation.test.ts` | Review Collusion | Review fraud collusion detection, DRS recency time-decay scoring, and suspicious review flagging | 8 tests |
 | `tests/unit/discovery-feed.test.ts` | Feed & Bookmarking | Optimistic bookmarking, feed filtering, virtual list rendering | 7 tests |
 | `tests/unit/deal-detail-screen.test.ts` | Deal Screen | Deliverable submission, contract signing, review modal, dispute initiation | 17 tests |
 | `tests/unit/auth-security.test.ts` | Authentication | 2FA TOTP verification, password hashing, session expiry, brute-force limits | 14 tests |
 | `tests/unit/notifications-system.test.ts`| Notification Center | Multi-channel dispatch, preferences filtering, web push payload encoding | 16 tests |
+| `tests/unit/gamification-xp-curve.test.ts` | Gamification | XP progress curves, leveling algorithms, streak tracking | 10 tests |
 | `tests/unit/design-system.test.ts` | Design Tokens | Tailwind CSS variable mapping, WCAG contrast compliance, typography scale | 15 tests |
 | `tests/unit/fee-calculation.test.ts` | Fee Engine | Tiered platform fee resolution, TDS withholding calculation, net payout | 11 tests |
 | `tests/unit/app-shell-navigation.test.ts` | Navigation Shell | Role-based navigation items, mobile drawer toggling, active route highlighting | 10 tests |
@@ -1303,9 +1319,10 @@ The repository enforces a comprehensive automated test battery covering core fin
 | `tests/unit/pwa-motion-performance.test.ts` | PWA & UX | Offline event handling, reduced motion compliance, touch targets | 7 tests |
 | `tests/unit/observability.test.ts` | Telemetry | Structured JSON log format, correlation ID propagation, error reporting | 4 tests |
 | `tests/unit/health-check.test.ts` | Health Endpoints | Database ping, Redis latency, service readiness probe | 3 tests |
-| `tests/integration/db-transactions.test.ts` | Database ACID | Rollback on simulated failures, foreign key integrity, concurrent locks | 15 tests |
-| *Additional Integration Suites (5)* | System Workflows | Application lifecycle, dispute settlement, referral rewards, tax reporting | 58 tests |
-| **Total Automated Suite** | **Full Application** | **Zero failures across all core modules (`npm test`)** | **355 tests** |
+| `tests/e2e/deal-lifecycle.e2e.test.ts` | Real E2E Deal Lifecycle | Full end-to-end deal flow: contract -> escrow -> address -> dispatch -> webhook -> approval -> payout | 1 test |
+| `tests/integration/db-transactions.test.ts` | Database ACID | Real transactional constraints, rollback on failure, foreign key integrity, concurrent locks | 15 tests |
+| *Additional Unit & Integration Suites (21)* | System Workflows | Application lifecycle, dispute settlement, referral rewards, tax reporting, creator profiles | 189 tests |
+| **Total Automated Suite** | **Full Application** | **Zero failures across all core modules (`npm test`)** | **546 tests** |
 
 ### 26.2 TypeScript Type-Safety Verification
 - Enforces strict TypeScript configuration (`tsconfig.json`): `strict: true`, `noImplicitAny: true`, `noUncheckedIndexedAccess: true`, `exactOptionalPropertyTypes: true`.

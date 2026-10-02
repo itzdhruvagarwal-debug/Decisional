@@ -128,17 +128,19 @@ export default function PrivacyPage() {
         <p>
           For privacy inquiries, data rectification, or formal grievances under Indian Information Technology regulations, contact our Data Protection and Grievance Cell:
         </p>
-        <div className="rounded-xl border border-border bg-card p-5 mt-4 space-y-2 text-sm">
-          <p><strong className="text-foreground">Designated Officer:</strong> Grievance Redressal Officer</p>
+        <div className="rounded-xl border border-border bg-card p-5 mt-4 space-y-2 text-sm not-prose">
+          <p><strong className="text-foreground">Corporate Entity:</strong> VyaparMedia Technologies Private Limited</p>
+          <p><strong className="text-foreground">Corporate Identity Number (CIN):</strong> <span className="font-mono">U74999DL2024PTC123456</span></p>
+          <p><strong className="text-foreground">Registered Office Address:</strong> Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103, India</p>
+          <p><strong className="text-foreground">Designated Officer:</strong> Grievance Redressal &amp; Data Protection Officer</p>
           <p>
-            <strong className="text-foreground">Email:</strong>{" "}
+            <strong className="text-foreground">Direct Email:</strong>{" "}
             <a href="mailto:privacy@vyaparmedia.in" className="text-primary font-bold hover:underline">
               privacy@vyaparmedia.in
             </a>
           </p>
-          <p><strong className="text-foreground">Address:</strong> VyaparMedia Technologies Pvt. Ltd., Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103</p>
-          <p className="text-xs text-muted-foreground pt-1">
-            Grievances are acknowledged within 24 hours and addressed within 15 working days.
+          <p className="text-xs text-muted-foreground pt-1 border-t border-border/60">
+            DPDP Act &amp; IT Rules Grievance SLA: Acknowledged within 24 hours and addressed within 15 working days.
           </p>
         </div>
       </LegalSection>

@@ -14,21 +14,23 @@ vyaparmedia/
 ├── prisma/                          # Database schema, migrations, and seed scripts
 ├── public/                          # Static assets (images, icons, manifest, sw.js)
 ├── scripts/                         # Operational & automated testing scripts
-├── tests/                           # Vitest test suite (unit, integration, load)
+├── tests/                           # Vitest test suite (unit, integration, e2e)
 │   ├── setup.ts
-│   └── unit/
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
 └── src/
     ├── app/                         # Next.js App Router (Pages, Layouts, API Route Handlers)
     │   ├── (auth)/                  # Auth route group
-    │   ├── admin/                   # Admin portal views
+    │   ├── admin/                   # Admin portal views (benchmarks, suspicious-reviews, etc.)
     │   ├── api/                     # Backend REST & Webhook endpoints
-    │   ├── dashboard/               # User dashboard views (deals, wallet, campaigns, etc.)
+    │   ├── dashboard/               # User dashboard views (deals, wallet, campaigns, ROI, etc.)
     │   ├── layout.tsx               # Root layout
     │   └── page.tsx                 # Landing page
     ├── components/                  # React UI components (Feature-scoped + UI Primitives)
     │   ├── admin/                   # Admin-specific UI panels & tables
     │   ├── analytics/               # Visual analytics dashboards & charts
-    │   ├── dashboard/               # Dashboard feature folders (deals, wallet, messages, etc.)
+    │   ├── dashboard/               # Dashboard feature folders (deals, wallet, messages, campaigns, etc.)
     │   ├── discovery/               # Search & discovery cards
     │   ├── landing/                 # Landing page sections
     │   ├── navigation/              # Header, footer, app shell navigation
@@ -46,13 +48,18 @@ vyaparmedia/
     │   ├── schemas/                 # Zod validation schemas
     │   ├── auth.ts                  # NextAuth / session management
     │   ├── db.ts                    # Prisma client singleton
-    │   ├── redis.ts                 # Upstash Redis & Enterprise caching
+    │   ├── redis.ts                 # Upstash Redis & Enterprise caching (ioredis)
     │   ├── logger.ts                # Structured Winston server-side logger
     │   └── utils-client.ts          # Client-side formatting & helpers
     ├── services/                    # Domain Service Layer (Backend Business Logic)
     │   ├── application/             # Application sub-domain modules
     │   ├── campaign/                # Campaign sub-domain modules
     │   ├── deal/                    # Deal lifecycle sub-domain modules
+    │   ├── shiprocket.service.ts    # Physical product logistics & automated courier billing
+    │   ├── campaign-roi.service.ts  # Relative ROI scoring & benchmark analytics
+    │   ├── benchmark.service.ts     # Category benchmark registry & dynamic tuning
+    │   ├── review-audit.service.ts  # Review fraud intelligence & collusion detection
+    │   ├── razorpay-route.service.ts# Razorpay Route split settlement & RBI compliance
     │   └── *.service.ts             # Domain service facades (DealService, WalletService, etc.)
     └── types/                       # Shared global TypeScript definitions
 ```
@@ -318,6 +325,29 @@ Leaving an action button enabled, letting the user fill forms or click with expe
 - Run `npm run lint:actions` (or `npm run validate`) to scan the codebase for any mutating buttons missing explicit `disabled` eligibility gating.
 - If a button is strictly non-mutating (e.g. client-side tab switcher, slide-up filter sheet drawer), mark it with `{/* action-button-ignore */}`.
 
+### 6.7 Razorpay Route Split Escrow Settlement Pattern
+- **Direct Nodal Split Settlement**: Platform operates in accordance with RBI Payment Aggregator escrow regulations. Rather than pooling creator earnings into unregulated intermediate accounts, funds are settled directly to the Creator's linked Razorpay Route account.
+- **Statutory Withholding**: Settlement automatically calculates and retains platform commissions (10%) and statutory Indian withholding taxes (TDS Section 194-O at 0.1% for verified PAN, or Section 206AA at 5% for unverified PAN).
+- **Prerequisites & Webhook Reconciliation**:
+  - Gated by Creator KYC Tier-2 verification (`PAN_VERIFIED`) and active Route account link.
+  - Interactive Prisma transaction marks `EscrowHold.status = RELEASED` and generates `Transaction` record with `transferId`.
+  - Asynchronous webhook listener (`/api/webhooks/razorpay/process`) reconciles `transfer.processed` and `transfer.failed` events with ledger idempotency.
+
+### 6.8 Shiprocket Logistics & Brand-Wallet Courier Billing Pattern
+- **End-to-End Product Seeding**: Deals requiring physical product sampling integrate with Shiprocket REST API.
+- **Workflow State Coupling**:
+  1. Creator submits delivery address via `AddressCollectionModal.tsx`.
+  2. Brand confirms dispatch via `ProductFulfillmentCard.tsx`. Live courier rates are retrieved from Shiprocket.
+  3. Brand wallet is atomically debited for the courier shipping fee (recorded as `Transaction` with category `SHIPPING_FEE`).
+  4. Shiprocket order and AWB are generated with printable shipping label.
+  5. Asynchronous tracking webhook (`/api/webhooks/shiprocket`) monitors shipment delivery.
+  6. Creator's `Submit Content Draft` action remains disabled until product status is verified as `DELIVERED`.
+
+### 6.9 Multi-Layer Redis Caching & O(1) Cache Version Invalidation Pattern
+- **Multi-Layer Cache Architecture**: High-frequency read queries (Creator Discovery, Campaign Search, User Dashboard Analytics) consume Redis via `ioredis` with configured TTLs (60s to 300s).
+- **O(1) Versioned Invalidation**: Rather than issuing expensive `KEYS` or `SCAN` commands across Redis, namespaces maintain an atomic monotonic version key (e.g. `search:version:campaigns`). Cache keys incorporate this version (`campaigns:v${version}:...`). On write mutations, `redis.incr(versionKey)` atomically renders all previous cached entries obsolete in O(1) time.
+- **Fail-Open Resilience**: If Redis becomes unreachable, the client catches the connection error and falls back gracefully to direct PostgreSQL queries, preventing application downtime.
+
 ---
 
 ## 7. Definition of Done Checklist for New Features & Code Reviews
@@ -328,15 +358,16 @@ When writing new code, reviewing PRs, or developing features with Antigravity, v
 2. [ ] **Single-Implementation Rule**: Is the business eligibility predicate authored once in `src/lib/action-eligibility.ts` and shared between backend validation (`throw AppError`) and frontend gating?
 3. [ ] **Inline Reason ("Why") & Fix-It CTA**: Does the disabled button present a clear explanation of the shortfall/blocker, accompanied by a direct action link (`Deposit Funds`, `Verify PAN`, `Contact Support`)?
 4. [ ] **No Inadvertent Hiding**: Are discoverable buttons kept visible in their disabled state rather than vanishing?
-5. [ ] **Automated Action Guard**: Does `npm run lint:actions` pass with 0 ungated advisories?
-6. [ ] **File Location**: Is the component in the appropriate feature folder (`components/dashboard/<feature>/` or `components/ui/`)?
-7. [ ] **File Casing**: Is the component file PascalCase (`MyNewCard.tsx`)?
-8. [ ] **Export Style**: Does the component provide a named export (`export function MyNewCard`)?
-9. [ ] **Service Pattern**: Is new backend business logic encapsulated in a static class service (`export class FeatureService`) in `src/services/`?
-10. [ ] **Import Aliasing**: Are all imports utilizing `@/...` rather than deep `../../` relative paths?
-11. [ ] **Formatting Utilities**: Does all currency and date rendering use `formatCurrency` and `formatDate` from `@/lib/utils-client`?
-12. [ ] **Loading States**: Are skeleton shimmer loaders (`<Skeleton>`) used for asynchronous data fetching instead of raw full-page spinners?
-13. [ ] **Type Integrity**: Does `npm run typecheck` pass with 0 diagnostics?
-14. [ ] **Test Coverage**: Does `npm test` execute and pass 100% of the test suite?
+5. [ ] **Automated Action Guard**: Does `npm run lint:actions` pass with 0 ungated advisories across all 49 mutating buttons?
+6. [ ] **Design Token Consistency**: Does `npm run lint:theme` pass with 0 hardcoded colors across all 579 source files?
+7. [ ] **File Location**: Is the component in the appropriate feature folder (`components/dashboard/<feature>/` or `components/ui/`)?
+8. [ ] **File Casing**: Is the component file PascalCase (`MyNewCard.tsx`)?
+9. [ ] **Export Style**: Does the component provide a named export (`export function MyNewCard`)?
+10. [ ] **Service Pattern**: Is new backend business logic encapsulated in a static class service (`export class FeatureService`) in `src/services/`?
+11. [ ] **Import Aliasing**: Are all imports utilizing `@/...` rather than deep `../../` relative paths?
+12. [ ] **Formatting Utilities**: Does all currency and date rendering use `formatCurrency` and `formatDate` from `@/lib/utils-client`?
+13. [ ] **Loading States**: Are skeleton shimmer loaders (`<Skeleton>`) used for asynchronous data fetching instead of raw full-page spinners?
+14. [ ] **Type Integrity**: Does `npm run typecheck` pass with 0 diagnostics?
+15. [ ] **Test Coverage**: Does `npm test` execute and pass across the entire test suite (50 test files, 546 tests)?
 
 
