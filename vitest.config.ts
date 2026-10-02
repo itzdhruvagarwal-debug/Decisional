@@ -7,9 +7,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./tests/setup.ts"],
     include: ["tests/**/*.test.ts"],
-    testTimeout: 30000,
-    hookTimeout: 30000,
-    fileParallelism: false,
+    testTimeout: 20000,
+    hookTimeout: 20000,
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
