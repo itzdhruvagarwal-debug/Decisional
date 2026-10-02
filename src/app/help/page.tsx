@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description:
       "Frequently asked questions on milestone escrow, influencer payments, TDS deductions, and dispute mediation.",
     type: "website",
-    url: "https://vyaparmedia.in/help",
+    url: "/help",
   },
 };
 

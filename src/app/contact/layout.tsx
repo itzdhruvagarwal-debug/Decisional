@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: "Contact & Support | VyaparMedia",
     description:
       "24/7 dedicated support for creator deals, brand escrow management, and platform verification.",
-    url: "https://vyaparmedia.in/contact",
+    url: "/contact",
     type: "website",
   },
 };

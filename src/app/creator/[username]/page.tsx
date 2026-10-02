@@ -53,7 +53,7 @@ export async function generateMetadata({
       title,
       description,
       type: "profile",
-      url: `https://vyaparmedia.in/creator/${encodeURIComponent(username)}`,
+      url: `/creator/${encodeURIComponent(username)}`,
       images: profile.avatar ? [{ url: profile.avatar, alt: profile.displayName }] : [],
     },
     twitter: {

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: "Transparent Creator & Brand Pricing | VyaparMedia",
     description:
       "No hidden fees. Free forever for creators. Automated milestone escrow, verified analytics, and legally binding smart contracts for brands.",
-    url: "https://vyaparmedia.in/pricing",
+    url: "/pricing",
     type: "website",
   },
 };

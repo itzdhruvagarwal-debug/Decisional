@@ -30,7 +30,7 @@ address: configValue("PLATFORM_ADDRESS", "Registered office address"),
 gstin: configValue("PLATFORM_GSTIN", "Company GSTIN"),
 email: process.env.PLATFORM_EMAIL || "support@VyaparMedia.in",
 phone: process.env.PLATFORM_PHONE || "+91-XXXXXXXXXX",
-website: process.env.PLATFORM_WEBSITE || "https://VyaparMedia.in",
+website: process.env.PLATFORM_WEBSITE || process.env.NEXT_PUBLIC_APP_URL || "https://vyaparmedia-nine.vercel.app",
 cin: configValue("PLATFORM_CIN", "Company Identification Number"),
 pan: configValue("PLATFORM_PAN", "Company PAN"),
 } as const;

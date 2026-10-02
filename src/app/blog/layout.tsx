@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: "Creator Economy & Indian Tax Compliance Blog | VyaparMedia",
     description:
       "Deep dives into TDS Section 194-O, influencer contracts, brand escrow security, and creator growth.",
-    url: "https://vyaparmedia.in/blog",
+    url: "/blog",
     type: "website",
   },
 };

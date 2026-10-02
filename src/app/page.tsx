@@ -67,7 +67,7 @@ export default function HomePage() {
               "provider": {
                 "@type": "Organization",
                 "name": "VyaparMedia",
-                "url": "https://vyaparmedia.in",
+                "url": "https://vyaparmedia-nine.vercel.app",
               },
               "description":
                 "Secure milestone escrow protection, verified audience metrics, automated Section 194-O TDS compliance, and guaranteed creator payouts in India.",

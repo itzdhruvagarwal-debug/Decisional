@@ -22,7 +22,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://vyaparmedia.in";
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://vyaparmedia-nine.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -141,12 +141,12 @@ return (
               "@graph": [
                 {
                   "@type": "Organization",
-                  "@id": "https://vyaparmedia.in/#organization",
+                  "@id": `${siteUrl}/#organization`,
                   "name": "VyaparMedia",
-                  "url": "https://vyaparmedia.in",
+                  "url": siteUrl,
                   "logo": {
                     "@type": "ImageObject",
-                    "url": "https://vyaparmedia.in/icon-512.png",
+                    "url": `${siteUrl}/icon-512.png`,
                     "width": 512,
                     "height": 512,
                   },
@@ -166,17 +166,17 @@ return (
                 },
                 {
                   "@type": "WebSite",
-                  "@id": "https://vyaparmedia.in/#website",
-                  "url": "https://vyaparmedia.in",
+                  "@id": `${siteUrl}/#website`,
+                  "url": siteUrl,
                   "name": "VyaparMedia",
                   "publisher": {
-                    "@id": "https://vyaparmedia.in/#organization",
+                    "@id": `${siteUrl}/#organization`,
                   },
                   "inLanguage": "en-IN",
                 },
                 {
                   "@type": "SoftwareApplication",
-                  "@id": "https://vyaparmedia.in/#software",
+                  "@id": `${siteUrl}/#software`,
                   "name": "VyaparMedia Creator Escrow Marketplace",
                   "applicationCategory": "BusinessApplication",
                   "operatingSystem": "Web, iOS, Android (PWA)",

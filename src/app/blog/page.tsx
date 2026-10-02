@@ -259,30 +259,30 @@ export default function BlogPage() {
                     "author": {
                       "@type": "Organization",
                       "name": "VyaparMedia Legal & Compliance Editorial",
-                      "url": "https://vyaparmedia.in",
+                      "url": "https://vyaparmedia-nine.vercel.app",
                     },
                     "publisher": {
                       "@type": "Organization",
                       "name": "VyaparMedia",
                       "logo": {
                         "@type": "ImageObject",
-                        "url": "https://vyaparmedia.in/icon-512.png",
+                        "url": "https://vyaparmedia-nine.vercel.app/icon-512.png",
                       },
                     },
-                    "mainEntityOfPage": `https://vyaparmedia.in/blog?post=${selectedPost.id}`,
+                    "mainEntityOfPage": `https://vyaparmedia-nine.vercel.app/blog?post=${selectedPost.id}`,
                   }
                 : {
                     "@context": "https://schema.org",
                     "@type": "Blog",
                     "name": "VyaparMedia Creator Economy & Compliance Blog",
-                    "url": "https://vyaparmedia.in/blog",
+                    "url": "https://vyaparmedia-nine.vercel.app/blog",
                     "description":
                       "Legal, tax, and strategy guides for Indian influencers and brand partnerships.",
                     "blogPost": BLOG_POSTS.map((post) => ({
                       "@type": "BlogPosting",
                       "headline": post.title,
                       "description": post.description,
-                      "url": `https://vyaparmedia.in/blog?post=${post.id}`,
+                      "url": `https://vyaparmedia-nine.vercel.app/blog?post=${post.id}`,
                     })),
                   }
             ),

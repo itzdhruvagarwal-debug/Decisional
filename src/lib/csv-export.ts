@@ -159,7 +159,7 @@ export function csvPlatformHeader(reportType: string): string {
   out += csvRow("GSTIN", "07AABCV1234F1Z5");
   out += csvRow("Registered Address", "Level 4, Tech Boulevard, Sector 126, Noida, UP 201303");
   out += csvRow("Report Title", reportType);
-  out += csvRow("Website", "https://vyaparmedia.in");
+  out += csvRow("Website", process.env.NEXT_PUBLIC_APP_URL || "https://vyaparmedia-nine.vercel.app");
   out += csvRow("Tax & Compliance Support", "compliance@vyaparmedia.in");
   out += csvRow("SAC Code", "998365 (Advertising, Marketing & Influencer Services)");
   out += csvSep();

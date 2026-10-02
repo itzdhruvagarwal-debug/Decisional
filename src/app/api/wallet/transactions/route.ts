@@ -84,7 +84,7 @@ csv += row("VYAPARMEDIA TECHNOLOGIES PRIVATE LIMITED", "");
 csv += row("CIN: U74999DL2024PTC123456", "GSTIN: 07AABCV1234F1Z5");
 csv += row("Registered Address", "Level 4, Tech Boulevard, Sector 126, Noida, UP 201303");
 csv += row("OFFICIAL WALLET FINANCIAL STATEMENT & ESCROW LEDGER", "");
-csv += row("Website", "https://vyaparmedia.in");
+csv += row("Website", process.env.NEXT_PUBLIC_APP_URL || "https://vyaparmedia-nine.vercel.app");
 csv += row("Billing & Support", "billing@vyaparmedia.in");
 csv += sep();
 
