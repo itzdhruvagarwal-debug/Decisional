@@ -152,7 +152,7 @@ describe("Creator Profile Screen & Media Kit Specifications", () => {
     });
   });
 
-  describe("Kofluence-Style Transparent Rate Card", () => {
+  describe("Transparent Rate Card", () => {
     it("should expose structured deliverables with turnaround and revision limits", () => {
       const reel = mockProfile.rateCard.find((r) => r.id === "rate-reel");
       const story = mockProfile.rateCard.find((r) => r.id === "rate-story");

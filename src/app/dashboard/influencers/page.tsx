@@ -242,7 +242,7 @@ export default function DiscoverInfluencersPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* View Tab Segment: All Creators vs Saved Shortlist (Kofluence Benchmark) */}
+            {/* View Tab Segment: All Creators vs Saved Shortlist */}
             <div className="inline-flex items-center p-1 rounded-xl bg-muted border border-border text-xs font-semibold">
               <button
                 type="button"
@@ -348,7 +348,7 @@ export default function DiscoverInfluencersPage() {
               )}
             </div>
 
-            {/* Quick Sort Selector (Kofluence Benchmark — Recency Default) */}
+            {/* Quick Sort Selector (Recency Default) */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none text-xs">
               <span className="text-muted-foreground font-semibold flex items-center gap-1 shrink-0 px-1">
                 <ArrowUpDown className="w-3.5 h-3.5" />
@@ -448,7 +448,7 @@ export default function DiscoverInfluencersPage() {
           </div>
         )}
 
-        {/* ── 5. CREATOR SHOWCASE GRID (INSTAGRAM + KOFLUENCE CARDS) ──────── */}
+        {/* ── 5. CREATOR SHOWCASE GRID ──────── */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <DiscoveryCardSkeleton />

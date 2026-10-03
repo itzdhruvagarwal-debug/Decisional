@@ -486,13 +486,13 @@ export default function DisputeDetailPage({ params }: Readonly<DisputeDetailPage
                   </div>
                 )}
 
-                {/* Propose Mutual Settlement Card (Upwork Benchmark) */}
+                {/* Propose Mutual Settlement Card */}
                 {dispute.status !== "RESOLVED" && dispute.status !== "CLOSED" && (
                   <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-3">
                     <div className="flex items-center gap-2">
                       <Handshake className="w-4 h-4 text-primary" />
                       <h3 className="text-sm font-bold text-foreground">
-                        Propose Mutual Settlement (Upwork Benchmark)
+                        Propose Mutual Settlement
                       </h3>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">

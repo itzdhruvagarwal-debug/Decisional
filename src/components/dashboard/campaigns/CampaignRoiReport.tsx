@@ -180,7 +180,7 @@ export function CampaignRoiReport({ data, campaignId, onRefresh }: CampaignRoiRe
         <div>
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className="text-2xs font-mono font-bold tracking-widest text-primary uppercase">
-              CREATORIQ &amp; KOFLUENCE ENTERPRISE STANDARD
+              VYAPARMEDIA ENTERPRISE STANDARD
             </span>
             <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border">
               <ShieldCheck className="w-3 h-3" />

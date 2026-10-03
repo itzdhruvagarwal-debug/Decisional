@@ -423,7 +423,7 @@ export default function InfluencerProfileClient({
               )}
             </div>
 
-            {/* Kofluence Benchmark: Turnaround ETA & Guarantees */}
+            {/* Turnaround ETA & Guarantees */}
             <div className="flex items-center gap-3 pt-1 text-[11px] text-muted-foreground flex-wrap justify-center sm:justify-start">
               <span className="inline-flex items-center gap-1 font-bold text-verified">
                 <Clock className="w-3 h-3" />
@@ -664,7 +664,7 @@ export default function InfluencerProfileClient({
           </section>
         )}
 
-        {/* TAB 2: KOFLUENCE-STYLE TRANSPARENT RATE CARD */}
+        {/* TAB 2: TRANSPARENT RATE CARD */}
         {activeTab === "rate-card" && (
           <section aria-label="Transparent Rate Card" className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">

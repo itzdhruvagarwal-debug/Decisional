@@ -205,7 +205,7 @@ export default function InfluencerDashboard({
     <div className="space-y-6 sm:space-y-8">
       <ToastContainer toasts={toasts} onClose={removeToast} />
 
-      {/* 1. TOP KPI STAT TILES (INSTAGRAM PRO & KOFLUENCE STYLE) */}
+      {/* 1. TOP KPI STAT TILES */}
       <section aria-label="Key Performance Indicators" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Metric 1: Total Earnings */}
         <div className="p-5 rounded-2xl bg-card border border-border shadow-xs hover:border-border/80 transition-all flex flex-col justify-between">
@@ -384,7 +384,7 @@ export default function InfluencerDashboard({
         </div>
       </section>
 
-      {/* 2b. CHANNEL BREAKDOWN TABS (Kofluence benchmark) */}
+      {/* 2b. CHANNEL BREAKDOWN TABS */}
       {categoryBreakdown.length > 0 && (
         <section aria-label="Channel Performance Breakdown" className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-xs">
           <div className="flex items-center justify-between mb-4">

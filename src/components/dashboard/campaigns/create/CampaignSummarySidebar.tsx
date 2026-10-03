@@ -123,7 +123,7 @@ function SidebarContent({ formData, walletBalancePaise = 0 }: CampaignSummarySid
         )}
       </div>
 
-      {/* Kofluence Benchmark: Creator Reach & Tier Estimator */}
+      {/* Creator Reach & Tier Estimator */}
       {(() => {
         const getCreatorTier = (minFollowers: number) => {
           if (minFollowers < 10000) return { tier: "Nano Creators", range: "< 10K", reach: 20000 };

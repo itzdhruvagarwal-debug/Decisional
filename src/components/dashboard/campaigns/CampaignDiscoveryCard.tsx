@@ -87,7 +87,7 @@ export function CampaignDiscoveryCard({
           </div>
 
           <div className="min-w-0 flex-1">
-            {/* Verified brand badge (Kofluence benchmark — prominent) */}
+            {/* Verified brand badge */}
             <div className="flex items-center gap-1.5 mb-0.5">
               <span className="text-xs font-semibold text-foreground/90 truncate max-w-[120px]">
                 {campaign.brand.companyName}
@@ -181,7 +181,7 @@ export function CampaignDiscoveryCard({
           : "border-border bg-card hover:border-primary/50"
       }`}
     >
-      {/* Recommended glow accent (Kofluence top-pick indicator) */}
+      {/* Recommended glow accent */}
       {isRecommended && !isApplied && (
         <div className="absolute top-0 right-0 flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary text-[10px] font-bold border-b border-l border-primary/20 rounded-bl-xl rounded-tr-2xl">
           <Sparkles className="w-3 h-3" /> Top Match
@@ -217,7 +217,7 @@ export function CampaignDiscoveryCard({
                   </span>
                 )}
               </div>
-              {/* Verified Brand badge — prominent (Kofluence benchmark) */}
+              {/* Verified Brand badge */}
               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-verified bg-verified-muted px-1.5 py-0.5 rounded-md border border-verified-border mt-0.5">
                 <ShieldCheck className="w-2.5 h-2.5" /> Verified Brand
               </span>
@@ -272,7 +272,7 @@ export function CampaignDiscoveryCard({
           ))}
         </div>
 
-        {/* Urgency badges (Kofluence / Collabr scarcity pattern) */}
+        {/* Urgency badges */}
         {(isSlotsUrgent || isDeadlineUrgent) && (
           <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
             {isSlotsUrgent && (
@@ -288,7 +288,7 @@ export function CampaignDiscoveryCard({
           </div>
         )}
 
-        {/* Telemetry Metrics & Slot Progress (Kofluence style) */}
+        {/* Telemetry Metrics & Slot Progress */}
         <div className="rounded-xl border border-border/70 bg-muted/30 p-3 space-y-2">
           <div className="grid grid-cols-3 gap-2 text-center">
             <div>

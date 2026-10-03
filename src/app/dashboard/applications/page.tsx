@@ -254,7 +254,7 @@ export default function ApplicationsPage() {
                 Creator Pitches
               </span>
               <span className="text-xs text-muted-foreground">
-                Kofluence / Upwork Workflow
+                VyaparMedia Verified Workflow
               </span>
             </div>
             <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
@@ -459,7 +459,7 @@ export default function ApplicationsPage() {
             </Button>
           </div>
         ) : viewMode === "cards" ? (
-          /* Card Grid View (Kofluence Style) */
+          /* Card Grid View */
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {filteredApplications.map((app) => {
               const meta = getStatusMeta(app.status);
@@ -534,7 +534,7 @@ export default function ApplicationsPage() {
                       </div>
                     </div>
 
-                    {/* Upwork/Kofluence Pipeline Stepper */}
+                    {/* Application Pipeline Stepper */}
                     <div className="bg-muted/40 border border-border/80 rounded-xl p-3 mb-4">
                       <div className="flex items-center justify-between text-2xs font-semibold text-muted-foreground mb-2">
                         <span>PIPELINE PROGRESS</span>
@@ -677,7 +677,7 @@ export default function ApplicationsPage() {
             })}
           </div>
         ) : (
-          /* Table / Pipeline List View (Upwork Style) */
+          /* Table / Pipeline List View */
           <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse" aria-label="Applications table">

@@ -26,7 +26,7 @@
 
 ## 2. Status Legend
 
-* 🟢 **Rebuilt & reference-matched**: Completely redesigned UI layer following industry gold-standard references (Collabr, Upwork, Brex, Instagram, Telegram) with strict design tokens, accessible components, and verified backend data contracts.
+* 🟢 **Rebuilt & reference-matched**: Completely redesigned UI layer following industry gold-standard references (Collabr, Brex, Instagram, Telegram) with strict design tokens, accessible components, and verified backend data contracts.
 * ⚪ **Unchanged (low priority, not touched)**: Fully functional static pages (Currently 0).
 * 🟡 **Still needs work**: Functional pages that still use legacy styling. (Currently 0).
 
@@ -83,20 +83,20 @@
 | Route | Source File | Purpose | Status | Theme-Verified | Notes / Reference Pattern |
 | :--- | :--- | :--- | :--- | :---: | :--- |
 | `/dashboard` | `src/app/dashboard/page.tsx` | Command center, escrow stories bar, metrics, recent activities | **Rebuilt & reference-matched** | Yes | Collabr / Instagram inspired command center |
-| `/dashboard/deals` | `src/app/dashboard/deals/page.tsx` | Escrow deal roster with status filtering, search, and metrics | **Rebuilt & reference-matched** | Yes | Upwork roster style, milestone badges, quick actions |
-| `/dashboard/deals/[id]` | `src/app/dashboard/deals/[id]/page.tsx` | Deal room: milestone timeline, submissions vault, escrow ledger, dispute gateway | **Rebuilt & reference-matched** | Yes | Upwork / Collabr inspired Workroom standard |
-| `/dashboard/deals/[id]/dispute` | `src/app/dashboard/deals/[id]/dispute/page.tsx` | Specific deal dispute initiation form | **Rebuilt & reference-matched** | Yes | Upwork guided 2-step dispute wizard, contract preview, category tiles |
-| `/dashboard/campaigns` | `src/app/dashboard/campaigns/page.tsx` | Campaign discovery directory, brand trust badges, escrow pre-funding ribbon | **Rebuilt & reference-matched** | Yes | Kofluence campaign discovery & application benchmark |
+| `/dashboard/deals` | `src/app/dashboard/deals/page.tsx` | Escrow deal roster with status filtering, search, and metrics | **Rebuilt & reference-matched** | Yes | Deal roster style, milestone badges, quick actions |
+| `/dashboard/deals/[id]` | `src/app/dashboard/deals/[id]/page.tsx` | Deal room: milestone timeline, submissions vault, escrow ledger, dispute gateway | **Rebuilt & reference-matched** | Yes | Collabr inspired Workroom standard |
+| `/dashboard/deals/[id]/dispute` | `src/app/dashboard/deals/[id]/dispute/page.tsx` | Specific deal dispute initiation form | **Rebuilt & reference-matched** | Yes | Guided 2-step dispute wizard, contract preview, category tiles |
+| `/dashboard/campaigns` | `src/app/dashboard/campaigns/page.tsx` | Campaign discovery directory, brand trust badges, escrow pre-funding ribbon | **Rebuilt & reference-matched** | Yes | Campaign discovery & application benchmark |
 | `/dashboard/campaigns/create` | `src/app/dashboard/campaigns/create/page.tsx` | 3-step campaign creation wizard | **Rebuilt & reference-matched** | Yes | Step progress, deliverables builder, live preview sidebar |
-| `/dashboard/campaigns/[id]` | `src/app/dashboard/campaigns/[id]/page.tsx` | Campaign overview, deliverables, and applicant roster | **Rebuilt & reference-matched** | Yes | Upwork / Kofluence 2-column workspace, sticky escrow budget, slot progress meter, applicant review pipeline |
+| `/dashboard/campaigns/[id]` | `src/app/dashboard/campaigns/[id]/page.tsx` | Campaign overview, deliverables, and applicant roster | **Rebuilt & reference-matched** | Yes | 2-column workspace, sticky escrow budget, slot progress meter, applicant review pipeline |
 | `/dashboard/campaigns/[id]/roi` | `src/app/dashboard/campaigns/[id]/roi/page.tsx` | Comprehensive Campaign ROI Report & Analytics | **Rebuilt & reference-matched** | Yes | Enterprise campaign ROI report, 4-tier benchmark comparison, predictive accuracy tracking, and A4 print export |
 | `/dashboard/influencers` | `src/app/dashboard/influencers/page.tsx` | Creator discovery directory, DRS™ anti-fraud trust strip, Instagram category carousel | **Rebuilt & reference-matched** | Yes | Instagram + Collabr hybrid creator discovery standard |
 | `/dashboard/influencers/[id]` | `src/app/dashboard/influencers/[id]/page.tsx` | Detailed creator dossier, analytics, portfolio, and offer trigger | **Rebuilt & reference-matched** | Yes | Full metrics, platform engagement stats, direct deal CTA |
 | `/dashboard/wallet` | `src/app/dashboard/wallet/page.tsx` | Dual-tone balance cards (Available vs Escrow), instant IMPS payout, transaction receipt modal | **Rebuilt & reference-matched** | Yes | CRED / PhonePe / Jupiter inspired FinTech ledger |
 | `/dashboard/messages` | `src/app/dashboard/messages/page.tsx` | Secure communication thread between brands and creators | **Rebuilt & reference-matched** | Yes | Telegram / WhatsApp split layout, anti-leak alert |
-| `/dashboard/disputes` | `src/app/dashboard/disputes/page.tsx` | User dispute list and status tracker | **Rebuilt & reference-matched** | Yes | Upwork Resolution Center pattern, 4-step dispute timeline, metrics row, filter tabs |
-| `/dashboard/disputes/[id]` | `src/app/dashboard/disputes/[id]/page.tsx` | Dispute evidence room and mediator chat | **Rebuilt & reference-matched** | Yes | Upwork/Fiverr Arbitration Room pattern, 2-column layout, AI mediator analysis, evidence vault |
-| `/dashboard/applications` | `src/app/dashboard/applications/page.tsx` | Creator's campaign application tracking | **Rebuilt & reference-matched** | Yes | Kofluence / Upwork proposal pipeline, 4-step progress stepper, KPI summary strip, dual view toggle |
+| `/dashboard/disputes` | `src/app/dashboard/disputes/page.tsx` | User dispute list and status tracker | **Rebuilt & reference-matched** | Yes | Resolution Center pattern, 4-step dispute timeline, metrics row, filter tabs |
+| `/dashboard/disputes/[id]` | `src/app/dashboard/disputes/[id]/page.tsx` | Dispute evidence room and mediator chat | **Rebuilt & reference-matched** | Yes | Arbitration Room pattern, 2-column layout, AI mediator analysis, evidence vault |
+| `/dashboard/applications` | `src/app/dashboard/applications/page.tsx` | Creator's campaign application tracking | **Rebuilt & reference-matched** | Yes | Proposal pipeline, 4-step progress stepper, KPI summary strip, dual view toggle |
 | `/dashboard/badges` | `src/app/dashboard/badges/page.tsx` | Creator trust badges and level achievements | **Rebuilt & reference-matched** | Yes | CRED-style locked/unlocked states, rarity accent tokens, animated progress bars, KPI strip |
 | `/dashboard/leaderboard` | `src/app/dashboard/leaderboard/page.tsx` | Top performing creators and brands ranking | **Rebuilt & reference-matched** | Yes | Duolingo / Strava top-3 podium, weekly hot champion banner, city/category filters |
 | `/dashboard/notifications` | `src/app/dashboard/notifications/page.tsx` | In-app notification center | **Rebuilt & reference-matched** | Yes | Date-grouped sections (Today/This Week/Older), type badges, unread dot indicator, filter tabs |

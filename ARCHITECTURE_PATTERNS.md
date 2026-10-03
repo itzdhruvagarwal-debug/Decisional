@@ -149,7 +149,7 @@ The application adapts seamlessly between desktop and mobile viewport constraint
 - **Dual-Coding**: Every status indicator or trust badge must pair a semantic color token (`verified`, `escrow`, `pending`, `disputed`) with a visible text label and Lucide icon. Never communicate status through color alone.
 - **Tabular Numbers (`.tabular-nums`)**: All monetary figures, wallet counters, and percentage metrics must apply `.tabular-nums` (`font-variant-numeric: tabular-nums`) to prevent horizontal layout shift during counter animations.
 
-### 2.6 Multi-Step Form Wizard Pattern (Kofluence / Upwork "Post a Job")
+### 2.6 Multi-Step Form Wizard Pattern
 Complex multi-phase interactions (`src/app/onboarding/page.tsx`, `CreateCampaignClient.tsx`) must follow the progressive disclosure wizard pattern:
 1. **Client State Machine**: An active step pointer (`currentStep: 1 | 2 | 3 | 4`) with explicit validation guards preventing forward advancement on incomplete data.
 2. **Visual Stepper & Progress Bar**: Top-anchored visual stepper rendering completed checkmarks (`Check`, `bg-verified`), active ring indicator (`border-primary`), and upcoming muted steps.

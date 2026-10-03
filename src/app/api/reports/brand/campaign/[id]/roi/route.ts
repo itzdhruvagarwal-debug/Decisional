@@ -206,7 +206,7 @@ async function _handler(req: NextRequest, context: { params: Promise<Record<stri
 
     let csv = "";
 
-    // Corporate & Platform Header (CreatorIQ / Kofluence Benchmark)
+    // Corporate & Platform Header
     csv += row("VYAPARMEDIA TECHNOLOGIES PRIVATE LIMITED", "");
     csv += row("CIN: U74999DL2024PTC123456", "GSTIN: 07AABCV1234F1Z5");
     csv += row("Level 4, Tech Boulevard, Sector 126, Noida, UP 201303", "");

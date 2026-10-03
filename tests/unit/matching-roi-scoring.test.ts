@@ -62,7 +62,7 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
-describe("Unit Tests: Category-Specific ROI & Relative CPV Scoring (CreatorIQ / Aspire Benchmarks)", () => {
+describe("Unit Tests: Category-Specific ROI & Relative CPV Scoring", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

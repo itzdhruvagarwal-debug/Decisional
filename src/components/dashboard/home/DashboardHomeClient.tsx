@@ -71,7 +71,7 @@ export default function DashboardHomeClient({
 
   return (
     <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto pb-12">
-      {/* 1. TOP GREETING & VIEW SWITCHER (INSTAGRAM + KOFLUENCE STYLE) */}
+      {/* 1. TOP GREETING & VIEW SWITCHER */}
       <header className="flex flex-col gap-4 border-b border-border pb-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           {/* Creator/Brand identity */}
@@ -100,9 +100,9 @@ export default function DashboardHomeClient({
             </div>
           </div>
 
-          {/* Right Action Bar: Kofluence Hero Stats & View Switcher */}
+          {/* Right Action Bar: Hero Stats & View Switcher */}
           <div className="flex flex-wrap items-center gap-3 self-start lg:self-center">
-            {/* Pinned quick KPI chips (Kofluence pattern) */}
+            {/* Pinned quick KPI chips */}
             <div className="flex items-center gap-2">
               {isInfluencer && (
                 <Link

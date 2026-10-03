@@ -234,7 +234,7 @@ All primitive components consume `@base-ui/react` (v1.8.0) and export via `@/com
 - **`ActiveDealsFeed.tsx`**: Real-time collaboration feed displaying counterparty brand/creator, deliverable badges, milestone timeline status, and instant action triggers.
 
 ### 6.8 Campaign Creation Wizard (`src/components/dashboard/campaigns/create/`)
-- **`CreateCampaignClient.tsx`**: 3-step progressive disclosure wizard following Upwork "Post a Job" pattern.
+- **`CreateCampaignClient.tsx`**: 3-step progressive disclosure wizard for campaign creation.
 - **`CampaignSummarySidebar.tsx`**: Sticky desktop preview sidebar with real-time creator payout pool, 5% platform fee, 18% GST calculation, and bold `tabular-nums` escrow lock total.
 - **`DeliverablesList.tsx`**: Deliverable selector featuring platform accent badges (Instagram pink, YouTube red), quantity counters, and recommended price helper tags.
 - **`ProductSeedingCard.tsx`**: Logistics management card for physical product gifting with retail value tracking.

@@ -271,7 +271,7 @@ export default function CampaignsClient({
         </div>
       </header>
 
-      {/* ── 2. TRUST HIGHLIGHT RIBBON (KOFLUENCE BENCHMARK) ────────── */}
+      {/* ── 2. TRUST HIGHLIGHT RIBBON ────────── */}
       {!canCreateCampaign && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-2xl bg-card border border-border shadow-xs text-xs">
           <div className="flex items-center gap-2.5 p-2 rounded-xl bg-muted/40">
@@ -351,7 +351,7 @@ export default function CampaignsClient({
 
       {!loading && !error && campaigns.length > 0 && (
         <>
-          {/* Recommended for You section (Kofluence pattern) — page 1 default view */}
+          {/* Recommended for You section — page 1 default view */}
           {recommendedCampaigns.length > 0 && (
             <section aria-label="Recommended campaigns">
               <div className="flex items-center gap-2 mb-3">

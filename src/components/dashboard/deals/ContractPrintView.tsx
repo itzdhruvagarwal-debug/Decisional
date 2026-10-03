@@ -108,7 +108,7 @@ export function ContractPrintView({ deal, onClose }: ContractPrintViewProps) {
         </button>
       </div>
 
-      {/* Official Legal Document Container (Upwork & Deel Standard) */}
+      {/* Official Legal Document Container */}
       <div className="printable-document w-full max-w-4xl bg-card text-foreground rounded-2xl shadow-2xl p-8 sm:p-12 border border-border print:border-none print:shadow-none print:p-0 print:rounded-none">
         
         {/* Document Header & Platform Letterhead */}

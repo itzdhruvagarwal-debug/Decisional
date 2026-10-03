@@ -112,7 +112,7 @@ export default function DealsPage() {
     return counts;
   }, [deals]);
 
-  // Client-side search and multi-criteria sorting (Upwork pattern)
+  // Client-side search and multi-criteria sorting
   const sortedAndFilteredDeals = useMemo(() => {
     let result = deals;
 

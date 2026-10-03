@@ -462,7 +462,7 @@ export default function CreateCampaignClient() {
         </div>
       )}
 
-      {/* ==================== 1. UPWORK-STYLE 3-STEP PROGRESS STEPPER ==================== */}
+      {/* ==================== 1. 3-STEP PROGRESS STEPPER ==================== */}
       <nav aria-label="Campaign Creation Progress" className="p-3 sm:p-4 rounded-2xl bg-card border border-border shadow-xs">
         <div className="grid grid-cols-3 gap-2">
           {stepsList.map((step) => {

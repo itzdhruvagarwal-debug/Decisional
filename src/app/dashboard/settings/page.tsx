@@ -207,7 +207,7 @@ export default function SettingsPage() {
   const activeTabDef = visibleTabs.find((t) => t.id === activeTab);
   const isSelfManaged = activeTabDef?.selfManaged ?? false;
 
-  // Account health metrics calculation (Kofluence Benchmark)
+  // Account health metrics calculation
   const isKycVerified = Boolean(
     (session?.user?.verificationLevel && session.user.verificationLevel !== "NONE") ||
     (verificationData?.verificationLevel && verificationData.verificationLevel !== "NONE") ||
@@ -276,7 +276,7 @@ export default function SettingsPage() {
       <ToastContainer toasts={toasts} onClose={handleRemoveToast} />
 
       <div className="max-w-7xl mx-auto space-y-5 pb-16 animate-fade-in">
-        {/* ── 1. KOFLUENCE BENCHMARK: ACCOUNT HEALTH SUMMARY BANNER ─────────── */}
+        {/* ── 1. ACCOUNT HEALTH SUMMARY BANNER ─────────── */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 p-4 rounded-2xl bg-card border border-border shadow-xs text-xs">
           {/* KYC Status Tile */}
           <div className="p-3 rounded-xl bg-muted/40 flex items-center justify-between">

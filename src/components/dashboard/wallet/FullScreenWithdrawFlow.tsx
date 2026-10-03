@@ -547,7 +547,7 @@ export function FullScreenWithdrawFlow({
             </div>
           )}
 
-          {/* STEP 3: EXPLICIT CONFIRMATION WITH KOFLUENCE-STYLE TDS BREAKDOWN */}
+          {/* STEP 3: EXPLICIT CONFIRMATION WITH TDS BREAKDOWN */}
           {step === "confirm" && selectedAccount && (
             <div className="space-y-5 max-w-md mx-auto py-2">
               <div className="text-center">

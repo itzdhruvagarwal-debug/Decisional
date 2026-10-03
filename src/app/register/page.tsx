@@ -59,7 +59,7 @@ function RegisterContent() {
 
   return (
     <AuthLayout wideCard={step === 1}>
-      {/* Kofluence Benchmark: Micro-progress indicator & time estimate */}
+      {/* Micro-progress indicator & time estimate */}
       <div className="mb-6 space-y-2">
         <div className="flex items-center justify-between text-xs">
           <span className="font-bold text-foreground">

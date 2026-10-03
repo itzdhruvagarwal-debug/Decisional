@@ -6,7 +6,7 @@ import {
   CampaignFormData,
 } from "@/components/dashboard/campaigns/create/CampaignCreateHelpers";
 
-describe("Campaign Creation Wizard (Upwork / Kofluence Pattern)", () => {
+describe("Campaign Creation Wizard", () => {
   const validFormData: CampaignFormData = {
     title: "Summer Fest Glow Collection Launch",
     description: "Promoting our cruelty-free vegan sunscreen range across Instagram reels.",

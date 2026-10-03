@@ -165,7 +165,7 @@ function DealRoomSkeleton({ user }: { user?: unknown }) {
   );
 }
 
-// ─── Upwork / Collabr Workroom Page Component ─────────────────────────────────
+// ─── Workroom Page Component ─────────────────────────────────
 
 export default function DealDetailPage() {
   const { id } = useParams() as { id: string };
@@ -304,7 +304,7 @@ export default function DealDetailPage() {
 
       <div className="max-w-6xl mx-auto space-y-6 pb-20 animate-fade-in">
 
-        {/* ── 1. WORKROOM HERO HEADER (UPWORK / COLLABR BENCHMARK) ─────────── */}
+        {/* ── 1. WORKROOM HERO HEADER ─────────── */}
         <div className="space-y-3 border-b border-border pb-5">
           {/* Breadcrumb Navigation */}
           <Link
@@ -358,7 +358,7 @@ export default function DealDetailPage() {
                 </div>
               </div>
 
-              {/* Contract Summary PDF CTA (Upwork Benchmark) */}
+              {/* Contract Summary PDF CTA */}
               <button
                 type="button"
                 onClick={() => setShowContractPrint(true)}
@@ -384,7 +384,7 @@ export default function DealDetailPage() {
           </div>
         </div>
 
-        {/* ── 2. ESCROW TRUST BANNER (COLLABR SAFEGUARD REASSURANCE) ────────── */}
+        {/* ── 2. ESCROW TRUST BANNER ────────── */}
         <div className="p-3.5 px-4 rounded-2xl bg-escrow-muted/40 border border-escrow-border/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-escrow">
           <div className="flex items-center gap-2.5">
             <ShieldCheck className="w-4 h-4 shrink-0 text-escrow" />
@@ -397,7 +397,7 @@ export default function DealDetailPage() {
           </span>
         </div>
 
-        {/* ── 3. MILESTONE PROGRESS STEPPER (UPWORK WORKROOM PATTERN) ───────── */}
+        {/* ── 3. MILESTONE PROGRESS STEPPER ───────── */}
         <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 shadow-sm">
           <h2 className="text-sm font-heading font-bold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
             <Layers className="w-4 h-4 text-primary" />
@@ -644,7 +644,7 @@ export default function DealDetailPage() {
         />
       )}
 
-      {/* Official Upwork / Deel Printable Contract Agreement Modal */}
+      {/* Official Printable Contract Agreement Modal */}
       {showContractPrint && deal && (
         <ContractPrintView
           deal={deal}
@@ -652,7 +652,7 @@ export default function DealDetailPage() {
         />
       )}
 
-      {/* ── Persistent Raise Dispute & Mediation Footer Bar (Collabr / Upwork Benchmark) ── */}
+      {/* ── Persistent Raise Dispute & Mediation Footer Bar ── */}
       {deal && (
         <aside
           aria-label="Dispute Support"

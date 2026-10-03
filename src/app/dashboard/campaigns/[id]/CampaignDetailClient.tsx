@@ -432,7 +432,7 @@ export default function CampaignDetailClient({
         </div>
       )}
 
-      {/* 2-Column Upwork/Kofluence Workspace Layout */}
+      {/* 2-Column Workspace Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Scope, Guidelines, Audience & Applications Roster (8 cols) */}
         <div className="lg:col-span-8 space-y-6">
@@ -529,7 +529,7 @@ export default function CampaignDetailClient({
             </section>
           )}
 
-          {/* Kofluence Benchmark: Campaign Performance & Escrow Health Snapshot */}
+          {/* Campaign Performance & Escrow Health Snapshot */}
           {isOwner && (
             <section className="bg-card border border-border p-5 rounded-2xl shadow-xs space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-border">
@@ -577,7 +577,7 @@ export default function CampaignDetailClient({
                   className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
                 >
                   <BarChart3 className="w-3.5 h-3.5" />
-                  <span>View Full CreatorIQ ROI Report →</span>
+                  <span>View Full Campaign ROI Report →</span>
                 </Link>
               </div>
             </section>

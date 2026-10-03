@@ -77,7 +77,7 @@ export function DealsFilterToolbar({
           )}
         </div>
 
-        {/* Upwork-style Sort By selector */}
+        {/* Sort By selector */}
         {setSortBy && (
           <div className="sm:w-56 shrink-0">
             <Select
@@ -108,7 +108,7 @@ export function DealsFilterToolbar({
         </div>
       </div>
 
-      {/* 2. Horizontally Scrollable Stage Tabs (Upwork "My Jobs" Style) */}
+      {/* 2. Horizontally Scrollable Stage Tabs */}
       <nav
         aria-label="Deal status filters"
         className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none -mx-1 px-1 touch-pan-x"

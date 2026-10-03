@@ -96,7 +96,7 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
   const router = useRouter();
   const { data: session } = useSession();
 
-  // 3-Step Guided Wizard State (Fiverr Benchmark: 1. Issue Type -> 2. Statement & Evidence -> 3. Review & Submit)
+  // 3-Step Guided Wizard State (1. Issue Type -> 2. Statement & Evidence -> 3. Review & Submit)
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
 
   // Fetch Deal context
@@ -255,14 +255,14 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
             Back to Deal Room
           </Link>
 
-          {/* Fiverr Benchmark: Resolution Estimate Chip */}
+          {/* Resolution Estimate Chip */}
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-escrow-muted text-escrow border border-escrow-border shadow-xs self-start sm:self-auto max-w-full">
             <Zap className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate">Resolution ETA: 24–48 Hours (Tier-1 Conciliation)</span>
           </div>
         </div>
 
-        {/* ── 3-STEP WIZARD PROGRESS STEPPER BAR (FIVERR BENCHMARK) ────────── */}
+        {/* ── 3-STEP WIZARD PROGRESS STEPPER BAR ────────── */}
         <div className="bg-card border border-border rounded-2xl p-3 sm:p-4 shadow-xs">
           <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
             {/* Step 1 Pill */}
@@ -574,7 +574,7 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
                 </div>
               </div>
 
-              {/* Supporting Evidence URL Input (Fiverr Benchmark) */}
+              {/* Supporting Evidence URL Input */}
               <div className="space-y-1.5">
                 <label htmlFor="evidence-url" className="block text-xs font-bold text-foreground">
                   Supporting Evidence Link (Optional)

@@ -151,7 +151,7 @@ export default async function PublicCreatorProfilePage({
           </div>
         </div>
 
-        {/* Profile Component (Instagram Grid + Kofluence Media Kit) */}
+        {/* Profile Component (Media Kit & Showcase) */}
         <InfluencerProfileClient
           profile={profile}
           viewerRole={viewerRole}

@@ -296,7 +296,7 @@ export function DealPipelineCard({
           </div>
         </div>
 
-        {/* Milestone Progress Bar (Collabr / Upwork pattern) */}
+        {/* Milestone Progress Bar */}
         <div className="mt-3 pt-3 border-t border-border/40 space-y-1.5">
           <div className="flex items-center justify-between text-[11px]">
             <span className="font-semibold text-muted-foreground flex items-center gap-1.5">

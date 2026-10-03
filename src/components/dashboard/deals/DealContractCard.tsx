@@ -119,7 +119,7 @@ export function DealContractCard({
   return (
     <>
       <Card className="p-0 rounded-3xl border border-border bg-card shadow-sm overflow-hidden transition-colors">
-        {/* ── 1. UPWORK / FIVERR CONTRACT HEADER ── */}
+        {/* ── 1. CONTRACT HEADER ── */}
         <div className="p-5 sm:p-6 border-b border-border bg-muted/20 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
@@ -192,7 +192,7 @@ export function DealContractCard({
             </div>
           </div>
 
-          {/* ── 2. UPWORK WORKROOM TAB BAR ── */}
+          {/* ── 2. WORKROOM TAB BAR ── */}
           <div className="flex items-center gap-1.5 border-b border-border/80 -mb-5 sm:-mb-6 pt-2 overflow-x-auto no-scrollbar">
             <button
               type="button"
@@ -306,7 +306,7 @@ export function DealContractCard({
                 </div>
               </div>
 
-              {/* Mandatory Tags & Disclosures (Fiverr / Upwork Requirements) */}
+              {/* Mandatory Tags & Disclosures (Industry Requirements) */}
               <div className="p-4 rounded-2xl border border-border bg-muted/20 space-y-3">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
@@ -468,7 +468,7 @@ export function DealContractCard({
           {/* TAB 2: FINANCIALS & ESCROW */}
           {activeTab === "financials" && (
             <div className="space-y-6 animate-fade-in">
-              {/* Financial Breakdown Cards (Upwork Ledger Style) */}
+              {/* Financial Breakdown Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="p-4 rounded-2xl bg-card border border-border shadow-xs space-y-1">
                   <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block">
@@ -548,7 +548,7 @@ export function DealContractCard({
               <div className="p-4 rounded-2xl bg-escrow-muted/40 border border-escrow-border text-xs text-escrow space-y-1.5">
                 <div className="flex items-center gap-2 font-bold">
                   <Lock className="w-4 h-4 text-escrow shrink-0" />
-                  <span>Upwork-Grade Escrow Protection Guarantee</span>
+                  <span>Enterprise-Grade Escrow Protection Guarantee</span>
                 </div>
                 <p className="text-[11px] leading-relaxed text-foreground/90">
                   Client funds are held securely in an RBI-compliant escrow account. Funds are released to the creator only upon mutual milestone approval or upon expiry of the 48-hour client review window under platform auto-acceptance terms.
@@ -617,7 +617,7 @@ export function DealContractCard({
                 </div>
               </div>
 
-              {/* Content Usage Rights / Licensing (Fiverr Gig Licensing Style) */}
+              {/* Content Usage Rights / Licensing */}
               <div className="p-5 rounded-2xl border border-border bg-card space-y-3">
                 <h5 className="font-bold text-xs text-foreground uppercase tracking-wider flex items-center gap-2">
                   <Scale className="w-4 h-4 text-primary" />
@@ -779,7 +779,7 @@ export function DealContractCard({
         </div>
       </Card>
 
-      {/* ── 4. OFFICIAL LEGAL AGREEMENT MODAL (UPWORK / FIVERR FULL VIEW) ── */}
+      {/* ── 4. OFFICIAL LEGAL AGREEMENT MODAL ── */}
       {showFullAgreementModal && (
         <Modal
           open={showFullAgreementModal}
@@ -813,7 +813,7 @@ export function DealContractCard({
               </div>
             </div>
 
-            {/* Legal Agreement Text (Upwork Style Legal Contract) */}
+            {/* Legal Agreement Text */}
             <div className="p-5 sm:p-6 rounded-2xl border border-border bg-card text-xs space-y-4 leading-relaxed font-sans">
               <div className="text-center pb-3 border-b border-border space-y-1">
                 <h4 className="font-heading font-black text-base text-foreground uppercase tracking-tight">
