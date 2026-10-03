@@ -12,6 +12,7 @@
  *   npx tsx scripts/setup-qstash-crons.ts [--dry-run] [--app-url=https://your-domain.com]
  */
 
+import "dotenv/config";
 import { Client } from "@upstash/qstash";
 
 export interface CronJobDefinition {
