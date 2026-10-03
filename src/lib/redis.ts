@@ -32,13 +32,13 @@ redisUrl,
 });
 }
 
-const globalForRedis = global as unknown as { redis: Redis };
+const globalForRedis = globalThis as unknown as { redis?: Redis };
 const redisOptions: RedisOptions = {
   lazyConnect: isBuildTime,
-  connectTimeout: 5000,
-  enableOfflineQueue: false,
+  connectTimeout: 10000,
+  enableOfflineQueue: true,
   maxRetriesPerRequest: 3,
-  commandTimeout: 3000,
+  commandTimeout: 5000,
   enableReadyCheck: !shouldDisableReadyCheck,
 retryStrategy(times) {
 if (isBuildTime) return null;
@@ -69,6 +69,6 @@ logger.info("Enterprise Redis connected successfully");
 });
 }
 
-if (process.env.NODE_ENV !== "production") globalForRedis.redis = redis;
+globalForRedis.redis = redis;
 
 export default redis;
