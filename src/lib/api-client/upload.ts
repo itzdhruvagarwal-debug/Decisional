@@ -27,7 +27,7 @@ export async function file(
 ): Promise<UploadResponse> {
   const formData = new FormData();
   formData.append("file", fileObj);
-  if (folder) formData.append("folder", folder);
+  formData.append("folder", folder || "content");
 
   // Do NOT set Content-Type — browser sets it with multipart boundary
   return http<UploadResponse>("/api/upload", {

@@ -166,6 +166,7 @@ export default function ProfileTab({
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("folder", "avatars");
       formData.append("type", "avatar");
 
       const response = await fetch("/api/upload", {
@@ -179,8 +180,9 @@ export default function ProfileTab({
         fileUrl?: string;
         message?: string;
         error?: string;
+        data?: { url?: string; fileUrl?: string };
       };
-      const uploadedUrl = data.url || data.fileUrl;
+      const uploadedUrl = data.url || data.fileUrl || data.data?.url || data.data?.fileUrl;
 
       if (data.success && uploadedUrl) {
         setProfile((prev) =>
