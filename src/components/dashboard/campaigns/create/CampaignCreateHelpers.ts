@@ -140,3 +140,29 @@ export const deliverableTypes = [
 { value: "YOUTUBE_VIDEO", label: "YouTube Video" },
 { value: "YOUTUBE_SHORT", label: "YouTube Short" },
 ];
+
+export interface CampaignEscrowBreakdown {
+  creatorPayoutPoolPaise: number;
+  platformFeePaise: number;
+  gstFeePaise: number;
+  totalEscrowRequiredPaise: number;
+  platformFeePercent: number;
+  gstPercent: number;
+}
+
+export function calculateCampaignEscrowPaise(totalBudgetRupees: number): CampaignEscrowBreakdown {
+  const creatorPayoutPoolPaise = Math.round((Number(totalBudgetRupees) || 0) * 100);
+  const platformFeePaise = Math.round(creatorPayoutPoolPaise * 0.10);
+  const gstFeePaise = Math.round(platformFeePaise * 0.18);
+  const totalEscrowRequiredPaise = creatorPayoutPoolPaise + platformFeePaise + gstFeePaise;
+
+  return {
+    creatorPayoutPoolPaise,
+    platformFeePaise,
+    gstFeePaise,
+    totalEscrowRequiredPaise,
+    platformFeePercent: 10,
+    gstPercent: 18,
+  };
+}
+

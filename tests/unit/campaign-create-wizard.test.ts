@@ -4,6 +4,7 @@ import {
   getRecommendedRate,
   deliverableTypes,
   CampaignFormData,
+  calculateCampaignEscrowPaise,
 } from "@/components/dashboard/campaigns/create/CampaignCreateHelpers";
 
 describe("Campaign Creation Wizard", () => {
@@ -99,22 +100,19 @@ describe("Campaign Creation Wizard", () => {
   });
 
   describe("Escrow & GST Financial Calculations", () => {
-    it("should compute accurate escrow lock requirement with 5% fee and 18% GST", () => {
-      const creatorPool = 15000;
-      const platformFee = creatorPool * 0.05; // 750
-      const gstFee = platformFee * 0.18; // 135
-      const totalEscrowLock = creatorPool + platformFee + gstFee; // 15885
+    it("should compute accurate escrow lock requirement with 10% fee and 18% GST", () => {
+      const breakdown = calculateCampaignEscrowPaise(15000);
 
-      expect(platformFee).toBe(750);
-      expect(gstFee).toBe(135);
-      expect(totalEscrowLock).toBe(15885);
+      expect(breakdown.creatorPayoutPoolPaise).toBe(1500000); // ₹15,000 in paise
+      expect(breakdown.platformFeePaise).toBe(150000); // 10% fee = ₹1,500
+      expect(breakdown.gstFeePaise).toBe(27000); // 18% GST on platform fee = ₹270
+      expect(breakdown.totalEscrowRequiredPaise).toBe(1677000); // ₹16,770 in paise
+      expect(breakdown.platformFeePercent).toBe(10);
+      expect(breakdown.gstPercent).toBe(18);
     });
 
     it("should accurately detect insufficient wallet balance and calculate exact shortfall", () => {
-      const creatorPayoutPoolPaise = 15000 * 100; // 1,500,000 paise (₹15,000)
-      const platformFeePaise = Math.round(creatorPayoutPoolPaise * 0.05); // 75,000 paise (₹750)
-      const gstFeePaise = Math.round(platformFeePaise * 0.18); // 13,500 paise (₹135)
-      const totalEscrowRequiredPaise = creatorPayoutPoolPaise + platformFeePaise + gstFeePaise; // 1,588,500 paise (₹15,885)
+      const { totalEscrowRequiredPaise } = calculateCampaignEscrowPaise(15000);
 
       // Case 1: Insufficient funds (wallet has ₹10,000)
       const walletBalancePaise = 10000 * 100; // 1,000,000 paise
@@ -124,7 +122,7 @@ describe("Campaign Creation Wizard", () => {
         : 0;
 
       expect(isBalanceInsufficient).toBe(true);
-      expect(shortfallPaise).toBe(588500); // ₹5,885
+      expect(shortfallPaise).toBe(677000); // ₹6,770
 
       // Case 2: Sufficient funds (wallet has ₹20,000)
       const sufficientBalancePaise = 20000 * 100;

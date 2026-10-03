@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CampaignFormData } from "./CampaignCreateHelpers";
+import { CampaignFormData, calculateCampaignEscrowPaise } from "./CampaignCreateHelpers";
 import { formatCurrency, formatDate } from "@/lib/utils-client";
 import {
   ShieldCheck,
@@ -22,10 +22,14 @@ interface CampaignSummarySidebarProps {
 }
 
 function SidebarContent({ formData, walletBalancePaise = 0 }: CampaignSummarySidebarProps) {
-  const creatorPayoutPoolPaise = Math.round(formData.totalBudget * 100);
-  const platformFeePaise = Math.round(creatorPayoutPoolPaise * 0.05);
-  const gstFeePaise = Math.round(platformFeePaise * 0.18);
-  const totalEscrowRequiredPaise = creatorPayoutPoolPaise + platformFeePaise + gstFeePaise;
+  const {
+    creatorPayoutPoolPaise,
+    platformFeePaise,
+    gstFeePaise,
+    totalEscrowRequiredPaise,
+    platformFeePercent,
+    gstPercent,
+  } = calculateCampaignEscrowPaise(formData.totalBudget);
 
   const totalDeliverablesCount = formData.deliverables.reduce(
     (acc, d) => acc + (d.count || 0),
@@ -170,14 +174,14 @@ function SidebarContent({ formData, walletBalancePaise = 0 }: CampaignSummarySid
         </div>
 
         <div className="flex items-center justify-between text-muted-foreground">
-          <span>Platform Escrow Fee (5%)</span>
+          <span>Platform Escrow Fee ({platformFeePercent}%)</span>
           <span className="font-medium text-foreground tabular-nums">
             {formatCurrency(platformFeePaise)}
           </span>
         </div>
 
         <div className="flex items-center justify-between text-muted-foreground">
-          <span>GST on Platform Fee (18%)</span>
+          <span>GST on Platform Fee ({gstPercent}%)</span>
           <span className="font-medium text-foreground tabular-nums">
             {formatCurrency(gstFeePaise)}
           </span>
@@ -276,7 +280,7 @@ export function CampaignSummarySidebar({
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  const totalEscrow = Math.round(formData.totalBudget * 100 * 1.05 * 1.18);
+  const { totalEscrowRequiredPaise } = calculateCampaignEscrowPaise(formData.totalBudget);
 
   return (
     <>
@@ -299,7 +303,7 @@ export function CampaignSummarySidebar({
         <span>Escrow Summary</span>
         {formData.totalBudget > 0 && (
           <span className="ml-1 bg-background/20 rounded-lg px-2 py-0.5 tabular-nums">
-            {formatCurrency(totalEscrow)}
+            {formatCurrency(totalEscrowRequiredPaise)}
           </span>
         )}
       </button>

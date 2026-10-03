@@ -12,6 +12,7 @@ import { formatCurrency } from "@/lib/utils-client";
 import {
   CampaignFormData,
   validateCampaignForm,
+  calculateCampaignEscrowPaise,
 } from "@/components/dashboard/campaigns/create/CampaignCreateHelpers";
 import { ProductSeedingCard } from "@/components/dashboard/campaigns/create/ProductSeedingCard";
 import { DeliverablesList } from "@/components/dashboard/campaigns/create/DeliverablesList";
@@ -189,10 +190,12 @@ export default function CreateCampaignClient() {
   const { walletData, isLoading: isWalletLoading } = useWallet();
   const walletBalancePaise = walletData?.balance ?? 0;
 
-  const creatorPayoutPoolPaise = Math.round((Number(formData.totalBudget) || 0) * 100);
-  const platformFeePaise = Math.round(creatorPayoutPoolPaise * 0.05);
-  const gstFeePaise = Math.round(platformFeePaise * 0.18);
-  const totalEscrowRequiredPaise = creatorPayoutPoolPaise + platformFeePaise + gstFeePaise;
+  const {
+    creatorPayoutPoolPaise,
+    platformFeePaise: _platformFeePaise,
+    gstFeePaise: _gstFeePaise,
+    totalEscrowRequiredPaise,
+  } = calculateCampaignEscrowPaise(formData.totalBudget);
 
   const isWalletFrozen = Boolean(walletData?.isFrozen);
   const isBalanceInsufficient = Boolean(
