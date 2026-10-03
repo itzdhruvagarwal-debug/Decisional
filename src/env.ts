@@ -1,8 +1,8 @@
 import { z } from "zod";
-import {
-  DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
-  DEFAULT_GATEWAY_FEE_PERCENT,
-} from "@/constants/deals";
+
+// Standard platform fee defaults (aligned with @/constants/deals.ts)
+const DEFAULT_BRAND_PLATFORM_FEE_PERCENT = 10;
+const DEFAULT_GATEWAY_FEE_PERCENT = 2;
 
 const shouldSkipValidation =
   typeof process !== "undefined" &&
