@@ -1,4 +1,5 @@
 import { apiWrapper, ApiResponse } from "@/lib/api-wrapper";
+import { AppError } from "@/lib/errors";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { isBrand, isInfluencer, isAdmin } from "@/lib/rbac";
@@ -495,7 +496,11 @@ async function handleFormDataUpload(req: NextRequest, session: UploadSession) {
     });
   } catch (error) {
     logger.error("Form data upload error", error);
-    return ApiResponse.error("Internal Server Error", 500);
+    if (error instanceof AppError) {
+      return ApiResponse.error(error.message, error.statusCode);
+    }
+    const message = error instanceof Error ? error.message : "File upload failed. Please try again.";
+    return ApiResponse.error(message, 500);
   }
 }
 

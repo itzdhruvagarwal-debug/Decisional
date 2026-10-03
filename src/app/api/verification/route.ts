@@ -1,4 +1,5 @@
 import { apiWrapper } from "@/lib/api-wrapper";
+import { AppError } from "@/lib/errors";
 /**
 * Verification API Route
 */
@@ -635,13 +636,17 @@ return NextResponse.json(
       document,
       message: "Document uploaded successfully. Verification pending.",
     });
-} catch (error) {
-logger.error("Verification upload error", error);
-return NextResponse.json(
-{ error: "Failed to process upload" },
-{ status: 500 },
-);
-}
+  } catch (error) {
+    logger.error("Verification upload error", error);
+    if (error instanceof AppError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    }
+    const message = error instanceof Error ? error.message : "Failed to process document upload. Please try again.";
+    return NextResponse.json(
+      { error: message },
+      { status: 500 },
+    );
+  }
 }
 
 
