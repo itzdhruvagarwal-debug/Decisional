@@ -193,9 +193,19 @@ export default function CreateCampaignClient() {
   const {
     creatorPayoutPoolPaise,
     platformFeePaise: _platformFeePaise,
-    gstFeePaise: _gstFeePaise,
+    gatewayFeePaise: _gatewayFeePaise,
     totalEscrowRequiredPaise,
-  } = calculateCampaignEscrowPaise(formData.totalBudget);
+  } = calculateCampaignEscrowPaise(
+    formData.totalBudget,
+    undefined,
+    undefined,
+    {
+      requiresProduct: formData.requiresProduct,
+      productValueRupees: formData.productValue,
+      maxInfluencers: formData.maxInfluencers,
+      perInfluencerBudgetRupees: formData.perInfluencerBudget,
+    },
+  );
 
   const isWalletFrozen = Boolean(walletData?.isFrozen);
   const isBalanceInsufficient = Boolean(
@@ -375,7 +385,15 @@ export default function CreateCampaignClient() {
       router.push("/dashboard/campaigns");
       router.refresh();
     } catch (err: unknown) {
+      const explicitMessage =
+        err instanceof Error &&
+        err.message &&
+        !err.message.toLowerCase().includes("internal server error") &&
+        !err.message.toLowerCase().includes("something went wrong")
+          ? err.message
+          : null;
       setError(
+        explicitMessage ||
         formatUserError(
           err,
           "Failed to save campaign. Please check the details and try again."

@@ -120,25 +120,27 @@ rate: typeof d.rate === "number" ? toPaise(d.rate) : undefined,
 }
 
 function handleCampaignPostError(error: unknown) {
-logger.error("POST /api/campaigns error", error);
+  logger.error("POST /api/campaigns error", error);
 
-if (error instanceof AppError) {
-if (error instanceof TierError) {
-return ApiResponse.forbidden(error.message || "Verification required");
-}
-return ApiResponse.error(error.message, error.statusCode);
-}
+  if (error instanceof TierError) {
+    return ApiResponse.error(error.message || "Identity verification required to launch campaigns", 400, {
+      code: "VERIFICATION_REQUIRED",
+      details: error.tierError,
+    });
+  }
 
-const errMsg = error instanceof Error ? error.message : String(error);
-if (errMsg?.includes("Insufficient wallet balance")) {
-return ApiResponse.error(errMsg);
-}
+  if (error instanceof AppError) {
+    return ApiResponse.error(error.message, error.statusCode, {
+      code: error.errorCode,
+    });
+  }
 
-if (errMsg?.includes("required") || errMsg?.includes("Invalid")) {
-return ApiResponse.error(errMsg);
-}
+  const errMsg = error instanceof Error ? error.message : String(error);
+  if (errMsg?.includes("Insufficient wallet balance")) {
+    return ApiResponse.error(errMsg, 402, { code: "INSUFFICIENT_FUNDS" });
+  }
 
-return ApiResponse.error("Internal server error", 500);
+  return ApiResponse.error(errMsg || "Failed to create campaign. Please review details and try again.", 400);
 }
 
 async function _handler_POST(request: NextRequest) {

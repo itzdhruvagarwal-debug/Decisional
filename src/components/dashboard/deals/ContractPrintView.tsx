@@ -4,6 +4,13 @@ import React, { useMemo } from "react";
 import { ShieldCheck, CheckCircle2, Lock, Building2, User, FileText, Printer, X } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils-client";
 import { Button } from "@/components/ui";
+import {
+  DEFAULT_BRAND_REVIEW_PERIOD_HOURS,
+  DEFAULT_INCLUDED_REVISIONS,
+  DEFAULT_CANCELLATION_FEE_AFTER_APPROVAL_PERCENT,
+  DEFAULT_CANCELLATION_FEE_AFTER_SUBMISSION_PERCENT,
+  DEFAULT_CANCELLATION_FEE_AFTER_POSTING_PERCENT,
+} from "@/constants";
 
 export interface ContractPrintViewProps {
   deal: {
@@ -223,11 +230,11 @@ export function ContractPrintView({ deal, onClose }: ContractPrintViewProps) {
             </div>
             <div className="p-2.5 bg-muted/40 border border-border rounded-lg">
               <span className="text-muted-foreground block text-2xs uppercase font-semibold">Brand Review Window</span>
-              <span className="font-bold text-foreground">{(terms.reviewPeriodHours as number) || 72} Hours from submission</span>
+              <span className="font-bold text-foreground">{(terms.reviewPeriodHours as number) || DEFAULT_BRAND_REVIEW_PERIOD_HOURS} Hours from submission</span>
             </div>
             <div className="p-2.5 bg-muted/40 border border-border rounded-lg">
               <span className="text-muted-foreground block text-2xs uppercase font-semibold">Included Revisions</span>
-              <span className="font-bold text-foreground">{(terms.includedRevisions as number) ?? 2} Complimentary rounds</span>
+              <span className="font-bold text-foreground">{(terms.includedRevisions as number) ?? DEFAULT_INCLUDED_REVISIONS} Complimentary rounds</span>
             </div>
           </div>
         </section>
@@ -277,18 +284,18 @@ export function ContractPrintView({ deal, onClose }: ContractPrintViewProps) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs text-center">
             <div className="p-3 border border-border rounded-xl bg-muted/40">
               <span className="text-2xs text-muted-foreground font-semibold block uppercase">Before Draft Submission</span>
-              <span className="text-lg font-black text-foreground">{cancellationPolicy.beforeApproval || 30}% Payout</span>
-              <span className="text-2xs text-muted-foreground block mt-1">Creator retains 30% slot reservation kill fee</span>
+              <span className="text-lg font-black text-foreground">{cancellationPolicy.beforeApproval || DEFAULT_CANCELLATION_FEE_AFTER_APPROVAL_PERCENT}% Payout</span>
+              <span className="text-2xs text-muted-foreground block mt-1">Creator retains {DEFAULT_CANCELLATION_FEE_AFTER_APPROVAL_PERCENT}% slot reservation kill fee</span>
             </div>
             <div className="p-3 border border-border rounded-xl bg-muted/40">
               <span className="text-2xs text-muted-foreground font-semibold block uppercase">After Draft Submission</span>
-              <span className="text-lg font-black text-foreground">{cancellationPolicy.afterSubmission || 70}% Payout</span>
-              <span className="text-2xs text-muted-foreground block mt-1">70% compensation for production work</span>
+              <span className="text-lg font-black text-foreground">{cancellationPolicy.afterSubmission || DEFAULT_CANCELLATION_FEE_AFTER_SUBMISSION_PERCENT}% Payout</span>
+              <span className="text-2xs text-muted-foreground block mt-1">{DEFAULT_CANCELLATION_FEE_AFTER_SUBMISSION_PERCENT}% compensation for production work</span>
             </div>
             <div className="p-3 border border-border rounded-xl bg-muted/40">
               <span className="text-2xs text-muted-foreground font-semibold block uppercase">After Content Approval</span>
-              <span className="text-lg font-black text-foreground">{cancellationPolicy.afterPosting || 100}% Payout</span>
-              <span className="text-2xs text-muted-foreground block mt-1">Full 100% payout released to creator</span>
+              <span className="text-lg font-black text-foreground">{cancellationPolicy.afterPosting || DEFAULT_CANCELLATION_FEE_AFTER_POSTING_PERCENT}% Payout</span>
+              <span className="text-2xs text-muted-foreground block mt-1">Full {DEFAULT_CANCELLATION_FEE_AFTER_POSTING_PERCENT}% payout released to creator</span>
             </div>
           </div>
         </section>

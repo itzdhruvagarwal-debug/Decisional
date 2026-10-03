@@ -30,6 +30,14 @@ import {
   formatCurrency,
 } from "./DealDetailHelpers";
 import { checkProductFulfillmentEligibility } from "@/lib/action-eligibility";
+import {
+  DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
+  DEFAULT_GATEWAY_FEE_PERCENT,
+  DEFAULT_BRAND_REVIEW_PERIOD_HOURS,
+  DEFAULT_CANCELLATION_FEE_AFTER_APPROVAL_PERCENT,
+  DEFAULT_CANCELLATION_FEE_AFTER_SUBMISSION_PERCENT,
+  DEFAULT_CANCELLATION_FEE_AFTER_POSTING_PERCENT,
+} from "@/constants/deals";
 
 interface DealContractCardProps {
   readonly deal: DealDetail;
@@ -79,17 +87,21 @@ export function DealContractCard({
     terms?.platformFeePercent ??
     (dealAmountPaise > 0 && terms?.platformFee
       ? Math.round((terms.platformFee / dealAmountPaise) * 100)
-      : 10);
+      : DEFAULT_BRAND_PLATFORM_FEE_PERCENT);
   const platformFeePaise =
     terms?.platformFee ?? Math.round((dealAmountPaise * platformFeePercent) / 100);
   const gatewayFeePaise =
     terms?.gatewayFee ??
     (deal.totalAmount
       ? Math.max(0, deal.totalAmount - dealAmountPaise - platformFeePaise)
-      : Math.round((dealAmountPaise + platformFeePaise) * 0.02));
+      : Math.round(((dealAmountPaise + platformFeePaise) * DEFAULT_GATEWAY_FEE_PERCENT) / 100));
   const totalAmountPaise =
     deal.totalAmount || terms?.totalAmount || dealAmountPaise + platformFeePaise + gatewayFeePaise;
   const creatorPayoutPaise = terms?.influencerPayout || dealAmountPaise;
+  const reviewPeriodHours = Number(terms?.reviewPeriodHours ?? DEFAULT_BRAND_REVIEW_PERIOD_HOURS);
+  const cancelFeeApproval = terms?.cancellationFee?.afterApproval ?? DEFAULT_CANCELLATION_FEE_AFTER_APPROVAL_PERCENT;
+  const cancelFeeSubmission = terms?.cancellationFee?.afterSubmission ?? DEFAULT_CANCELLATION_FEE_AFTER_SUBMISSION_PERCENT;
+  const cancelFeePosting = terms?.cancellationFee?.afterPosting ?? DEFAULT_CANCELLATION_FEE_AFTER_POSTING_PERCENT;
 
   // Deliverables list
   const deliverablesList =
@@ -114,7 +126,7 @@ export function DealContractCard({
     }
   };
 
-  const contractRefId = `UPW-${deal.id.slice(-6).toUpperCase()}`;
+  const contractRefId = `VM-${deal.id.slice(-6).toUpperCase()}`;
 
   return (
     <>
@@ -490,7 +502,7 @@ export function DealContractCard({
                     {formatCurrency(totalAmountPaise)}
                   </p>
                   <span className="text-[10px] text-muted-foreground block">
-                    Includes {platformFeePercent}% fee + gateway charges
+                    Includes {platformFeePercent}% fee + {DEFAULT_GATEWAY_FEE_PERCENT}% gateway charges
                   </span>
                 </div>
 
@@ -529,7 +541,7 @@ export function DealContractCard({
                   </div>
                   {gatewayFeePaise > 0 && (
                     <div className="py-2.5 flex justify-between items-center">
-                      <span className="text-muted-foreground">Payment Gateway Fee (2%)</span>
+                      <span className="text-muted-foreground">Payment Gateway Fee ({DEFAULT_GATEWAY_FEE_PERCENT}%)</span>
                       <span className="font-bold text-foreground tabular-nums">
                         {formatCurrency(gatewayFeePaise)}
                       </span>
@@ -551,7 +563,7 @@ export function DealContractCard({
                   <span>Enterprise-Grade Escrow Protection Guarantee</span>
                 </div>
                 <p className="text-[11px] leading-relaxed text-foreground/90">
-                  Client funds are held securely in an RBI-compliant escrow account. Funds are released to the creator only upon mutual milestone approval or upon expiry of the 48-hour client review window under platform auto-acceptance terms.
+                  Client funds are held securely in an RBI-compliant escrow account. Funds are released to the creator only upon mutual milestone approval or upon expiry of the {reviewPeriodHours}-hour client review window under platform auto-acceptance terms.
                 </p>
               </div>
             </div>
@@ -655,17 +667,17 @@ export function DealContractCard({
                   </div>
                   <div className="p-3 rounded-xl bg-card border border-border space-y-1">
                     <span className="text-[10px] text-muted-foreground block">Draft Submitted</span>
-                    <p className="font-black text-foreground">30% Payout</p>
-                    <span className="text-[9px] text-muted-foreground">70% Refund</span>
+                    <p className="font-black text-foreground">{cancelFeeApproval}% Payout</p>
+                    <span className="text-[9px] text-muted-foreground">{100 - cancelFeeApproval}% Refund</span>
                   </div>
                   <div className="p-3 rounded-xl bg-card border border-border space-y-1">
                     <span className="text-[10px] text-muted-foreground block">Content Approved</span>
-                    <p className="font-black text-foreground">70% Payout</p>
-                    <span className="text-[9px] text-muted-foreground">30% Refund</span>
+                    <p className="font-black text-foreground">{cancelFeeSubmission}% Payout</p>
+                    <span className="text-[9px] text-muted-foreground">{100 - cancelFeeSubmission}% Refund</span>
                   </div>
                   <div className="p-3 rounded-xl bg-card border border-border space-y-1">
                     <span className="text-[10px] text-muted-foreground block">Live on Socials</span>
-                    <p className="font-black text-foreground">100% Payout</p>
+                    <p className="font-black text-foreground">{cancelFeePosting}% Payout</p>
                     <span className="text-[9px] text-muted-foreground">Non-refundable</span>
                   </div>
                 </div>
@@ -857,7 +869,7 @@ export function DealContractCard({
                   3. ESCROW DEPOSIT &amp; DISBURSAL
                 </h5>
                 <p className="text-muted-foreground leading-relaxed">
-                  Total contract value of <strong>{formatCurrency(totalAmountPaise)}</strong> has been locked in an escrow account. Upon Creator submitting final deliverables and Client approving (or after 48 hours without dispute), Creator receives <strong>{formatCurrency(creatorPayoutPaise)}</strong>.
+                  Total contract value of <strong>{formatCurrency(totalAmountPaise)}</strong> has been locked in an escrow account. Upon Creator submitting final deliverables and Client approving (or after {reviewPeriodHours} hours without dispute), Creator receives <strong>{formatCurrency(creatorPayoutPaise)}</strong>.
                 </p>
               </div>
 
@@ -866,7 +878,7 @@ export function DealContractCard({
                   4. REVISIONS &amp; AUTO-APPROVAL SLA
                 </h5>
                 <p className="text-muted-foreground leading-relaxed">
-                  Agreement includes <strong>{getIncludedRevisions(terms, deal)} complimentary revisions</strong>. Client agrees to provide feedback within 48 hours of submission. If Client remains inactive for 48 hours after submission, the Platform automatically accepts the submission on Client&apos;s behalf.
+                  Agreement includes <strong>{getIncludedRevisions(terms, deal)} complimentary revisions</strong>. Client agrees to provide feedback within {reviewPeriodHours} hours of submission. If Client remains inactive for {reviewPeriodHours} hours after submission, the Platform automatically accepts the submission on Client&apos;s behalf.
                 </p>
               </div>
 

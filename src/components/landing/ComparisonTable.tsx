@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { DEFAULT_BRAND_PLATFORM_FEE_PERCENT } from "@/constants";
 
 const COMPARISON_ROWS = [
   {
@@ -13,7 +14,7 @@ const COMPARISON_ROWS = [
   {
     feature: "Pricing Transparency",
     traditional: "30% - 50% hidden markup & agency cuts",
-    vyapar: "Flat 10% platform fee, 0% creator deductions",
+    vyapar: `Flat ${DEFAULT_BRAND_PLATFORM_FEE_PERCENT}% platform fee, 0% creator deductions`,
     highlight: false,
   },
   {
@@ -43,7 +44,7 @@ const COMPARISON_ROWS = [
   {
     feature: "Tax & Compliance",
     traditional: "Messy manual TDS tracking & missing GST invoices",
-    vyapar: "Automated GST B2B invoices & Sec 194J TDS compliance",
+    vyapar: "Automated GST B2B invoices & Sec 194-O / 194J TDS compliance",
     highlight: false,
   },
 ];

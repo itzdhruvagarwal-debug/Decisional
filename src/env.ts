@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
+  DEFAULT_GATEWAY_FEE_PERCENT,
+} from "@/constants/deals";
 
 const shouldSkipValidation =
   typeof process !== "undefined" &&
@@ -132,8 +136,8 @@ const envSchema = z.object({
   PLATFORM_WEBSITE: z.string().default("https://vyaparmedia-nine.vercel.app"),
 
   // Feature flags and limits
-  PLATFORM_FEE_PERCENTAGE: z.coerce.number().default(10),
-  GATEWAY_FEE_PERCENTAGE: z.coerce.number().default(2),
+  PLATFORM_FEE_PERCENTAGE: z.coerce.number().default(DEFAULT_BRAND_PLATFORM_FEE_PERCENT),
+  GATEWAY_FEE_PERCENTAGE: z.coerce.number().default(DEFAULT_GATEWAY_FEE_PERCENT),
   MIN_WITHDRAWAL_AMOUNT: z.coerce.number().default(50000),
   MAX_WITHDRAWAL_AMOUNT: z.coerce.number().default(50000000),
   E2E_MAGIC_OTP: z.string().optional(),

@@ -13,6 +13,7 @@ import {
   Scale,
   Building2,
 } from "lucide-react";
+import { TDS_194O_RATE_PERCENT_STRING } from "@/constants/tax";
 
 const legalPages = [
   {
@@ -67,7 +68,7 @@ const statutoryFrameworks = [
   {
     title: "Income Tax Section 194-O",
     subtitle: "E-Commerce TDS Withholding",
-    desc: "Automated 0.1% TDS withholding on gross creator disbursements with automated Form 16A quarterly generation.",
+    desc: `Automated ${TDS_194O_RATE_PERCENT_STRING} TDS withholding on gross creator disbursements with automated Form 16A quarterly generation.`,
   },
   {
     title: "ASCI Disclosure Standards",

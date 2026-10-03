@@ -7,6 +7,7 @@ import {
   DEFAULT_CANCELLATION_FEE_AFTER_POSTING_PERCENT,
   DEFAULT_BRAND_LATE_APPROVAL_FEE_PERCENT,
   DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
+  DEFAULT_GATEWAY_FEE_PERCENT,
   DEFAULT_BRAND_REVIEW_PERIOD_HOURS,
   DEFAULT_INCLUDED_REVISIONS,
   DEFAULT_COST_PER_EXTRA_REVISION_PAISE,
@@ -297,8 +298,9 @@ const financialRows = [
 { "Section": "FINANCIAL TERMS", "Field": "", "Value": "" },
 { "Section": "", "Field": "Creator Consideration (INR)", "Value": paiseToRupees(terms.dealAmount || 0) },
 { "Section": "", "Field": "Platform Escrow Fee (INR)", "Value": paiseToRupees(terms.platformFee || 0) },
-{ "Section": "", "Field": "Gateway Processing Fee (INR)", "Value": paiseToRupees(terms.gatewayFee || 0) },
 { "Section": "", "Field": "Platform Fee %", "Value": `${terms.platformFeePercent ?? DEFAULT_BRAND_PLATFORM_FEE_PERCENT}%` },
+{ "Section": "", "Field": "Gateway Processing Fee (INR)", "Value": paiseToRupees(terms.gatewayFee || 0) },
+{ "Section": "", "Field": "Gateway Processing Fee %", "Value": `${DEFAULT_GATEWAY_FEE_PERCENT}%` },
 { "Section": "", "Field": "Total Payable Into Escrow (INR)", "Value": paiseToRupees(terms.totalAmount || 0) },
 { "Section": "", "Field": "Influencer Net Payout (INR)", "Value": paiseToRupees(terms.influencerPayout || 0) },
 { "Section": "", "Field": "", "Value": "" }

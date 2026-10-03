@@ -7,6 +7,7 @@ import { Button, Input } from "@/components/ui";
 import { z } from "zod";
 import { apiClient } from "@/lib/api-client";
 import { formatUserError } from "@/lib/user-messages";
+import { GST_STANDARD_RATE, GST_STANDARD_RATE_PERCENT_STRING } from "@/constants";
 import {
   BookOpen,
   Clock,
@@ -139,8 +140,8 @@ const BLOG_POSTS: BlogPost[] = [
 
         <h3 className="text-xl font-bold text-foreground pt-2">3. Applicable Tax Rates</h3>
         <p>
-          Influencer creative services are taxed at a standard <strong className="text-foreground">18% GST</strong>.
-          For intrastate deals, split as 9% CGST + 9% SGST. For interstate deals across state borders, apply 18% IGST.
+          Influencer creative services are taxed at a standard <strong className="text-foreground">{GST_STANDARD_RATE_PERCENT_STRING} GST</strong>.
+          For intrastate deals, split as {Math.round((GST_STANDARD_RATE * 100) / 2)}% CGST + {Math.round((GST_STANDARD_RATE * 100) / 2)}% SGST. For interstate deals across state borders, apply {GST_STANDARD_RATE_PERCENT_STRING} IGST.
         </p>
       </div>
     ),

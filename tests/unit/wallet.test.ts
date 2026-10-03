@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { PaymentService } from "@/services/payment.service";
 import { AppError } from "@/lib/errors";
+import { TDS_194O_RATE } from "@/constants";
 
 describe("Unit Tests: Wallet Debit, Credit & Double-Entry Ledger", () => {
   beforeEach(() => {
@@ -258,7 +259,7 @@ describe("Unit Tests: Wallet Debit, Credit & Double-Entry Ledger", () => {
 
     it("should conserve double-entry balance sheet on deal completion with TDS withholding", () => {
       const grossDealAmount = 100_000; // ₹1,000
-      const tdsRate = 0.001; // 0.1% Section 194-O
+      const tdsRate = TDS_194O_RATE; // Section 194-O
       const tdsWithheld = Math.round(grossDealAmount * tdsRate); // 100 paise = ₹1
       const netPayout = grossDealAmount - tdsWithheld; // 99,900 paise = ₹999
 

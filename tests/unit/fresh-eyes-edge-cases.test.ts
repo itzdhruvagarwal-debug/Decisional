@@ -3,6 +3,7 @@ import { AppError } from "@/lib/errors";
 import { DEAL_TRANSITION_MATRIX, type DealActorRole } from "@/lib/deal-state-machine";
 import type { DealStatus } from "@prisma/client";
 import { bankAccountInputSchema } from "@/lib/schemas";
+import { DEFAULT_BRAND_PLATFORM_FEE_PERCENT, TDS_194O_RATE } from "@/constants";
 
 function canTransitionDeal(from: DealStatus, to: DealStatus, role: DealActorRole): boolean {
   const rules = DEAL_TRANSITION_MATRIX[from] || [];
@@ -126,16 +127,15 @@ describe("Fresh-Eyes Pass: Novel Edge-Case User Flow Invariants", () => {
 
     it("should compute net payout deducting platform and TDS fees without negative results", () => {
       const grossPaise = 500000; // ₹5,000
-      const tdsRatePercent = 1; // 1% Section 194J/194C
-      const platformFeePercent = 5; // 5%
+      const platformFeePercent = DEFAULT_BRAND_PLATFORM_FEE_PERCENT; // 10%
 
       const platformFee = Math.round(grossPaise * (platformFeePercent / 100));
-      const tdsDeduction = Math.round(grossPaise * (tdsRatePercent / 100));
+      const tdsDeduction = Math.round(grossPaise * TDS_194O_RATE);
       const netCreatorPayout = grossPaise - platformFee - tdsDeduction;
 
-      expect(platformFee).toBe(25000); // ₹250
-      expect(tdsDeduction).toBe(5000); // ₹50
-      expect(netCreatorPayout).toBe(470000); // ₹4,700
+      expect(platformFee).toBe(50000); // ₹500
+      expect(tdsDeduction).toBe(500); // ₹5 (0.1% Section 194-O)
+      expect(netCreatorPayout).toBe(449500); // ₹4,495
       expect(netCreatorPayout + platformFee + tdsDeduction).toBe(grossPaise);
     });
   });

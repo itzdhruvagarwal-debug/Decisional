@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { DEFAULT_BRAND_PLATFORM_FEE_PERCENT } from "@/constants";
 
 interface FAQItem {
   question: string;
@@ -36,15 +37,15 @@ const FAQS: FAQItem[] = [
   },
   {
     category: "Brands",
-    question: "How does the 10% platform fee work for brands?",
+    question: `How does the ${DEFAULT_BRAND_PLATFORM_FEE_PERCENT}% platform fee work for brands?`,
     answer:
-      "VyaparMedia charges a flat, transparent 10% escrow processing and mediation fee on the funded campaign budget. This covers digital smart contracts, KYC verification, live post crawling, dispute arbitration, and GST compliance. There are no monthly retainer fees or setup costs.",
+      `VyaparMedia charges a flat, transparent ${DEFAULT_BRAND_PLATFORM_FEE_PERCENT}% escrow processing and mediation fee on the funded campaign budget. This covers digital smart contracts, KYC verification, live post crawling, dispute arbitration, and GST compliance. There are no monthly retainer fees or setup costs.`,
   },
   {
     category: "Taxes & Legals",
-    question: "How are GST and TDS (Section 194J) handled?",
+    question: "How are GST and TDS (Section 194-O / 194J) handled?",
     answer:
-      "VyaparMedia provides automated B2B GST tax invoices for all campaign transactions. For brands required to deduct TDS under Section 194J (Fees for Professional / Technical Services), our system generates automated quarterly TDS credit schedules and tax reports.",
+      "VyaparMedia provides automated B2B GST tax invoices for all campaign transactions. For compliance under Section 194-O and Section 194J, our system generates automated quarterly TDS credit schedules and tax reports.",
   },
 ];
 

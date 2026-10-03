@@ -25,11 +25,22 @@ function SidebarContent({ formData, walletBalancePaise = 0 }: CampaignSummarySid
   const {
     creatorPayoutPoolPaise,
     platformFeePaise,
-    gstFeePaise,
+    gatewayFeePaise,
     totalEscrowRequiredPaise,
     platformFeePercent,
-    gstPercent,
-  } = calculateCampaignEscrowPaise(formData.totalBudget);
+    gatewayFeePercent,
+    productHandlingFeePaise = 0,
+  } = calculateCampaignEscrowPaise(
+    formData.totalBudget,
+    undefined,
+    undefined,
+    {
+      requiresProduct: formData.requiresProduct,
+      productValueRupees: formData.productValue,
+      maxInfluencers: formData.maxInfluencers,
+      perInfluencerBudgetRupees: formData.perInfluencerBudget,
+    },
+  );
 
   const totalDeliverablesCount = formData.deliverables.reduce(
     (acc, d) => acc + (d.count || 0),
@@ -180,10 +191,19 @@ function SidebarContent({ formData, walletBalancePaise = 0 }: CampaignSummarySid
           </span>
         </div>
 
+        {productHandlingFeePaise > 0 && (
+          <div className="flex items-center justify-between text-muted-foreground">
+            <span>Product Handling Escrow</span>
+            <span className="font-medium text-foreground tabular-nums">
+              {formatCurrency(productHandlingFeePaise)}
+            </span>
+          </div>
+        )}
+
         <div className="flex items-center justify-between text-muted-foreground">
-          <span>GST on Platform Fee ({gstPercent}%)</span>
+          <span>Payment Gateway Fee ({gatewayFeePercent}%)</span>
           <span className="font-medium text-foreground tabular-nums">
-            {formatCurrency(gstFeePaise)}
+            {formatCurrency(gatewayFeePaise)}
           </span>
         </div>
 
@@ -280,7 +300,17 @@ export function CampaignSummarySidebar({
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  const { totalEscrowRequiredPaise } = calculateCampaignEscrowPaise(formData.totalBudget);
+  const { totalEscrowRequiredPaise } = calculateCampaignEscrowPaise(
+    formData.totalBudget,
+    undefined,
+    undefined,
+    {
+      requiresProduct: formData.requiresProduct,
+      productValueRupees: formData.productValue,
+      maxInfluencers: formData.maxInfluencers,
+      perInfluencerBudgetRupees: formData.perInfluencerBudget,
+    },
+  );
 
   return (
     <>

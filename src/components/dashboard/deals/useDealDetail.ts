@@ -21,6 +21,10 @@ import {
 } from "./DealDetailHelpers";
 import type { ToastItem, ToastType } from "@/components/ui";
 import { checkContentSubmissionEligibility } from "@/lib/action-eligibility";
+import {
+  TDS_194J_RATE_PERCENT_STRING,
+  TDS_194O_RATE_PERCENT_STRING,
+} from "@/constants";
 
 function extractMessage(err: unknown): string {
   return formatUserError(err, "Failed to process deal action. Please try again.");
@@ -156,7 +160,7 @@ export function useDealDetail(
     const signSummary = [
       "You are signing this VyaparMedia deal contract.",
       `Creator payout: ${formatCurrency(payout)}`,
-      payout > 0 ? `Estimated TDS deduction (~10% if 194J / ~0.1% if 194-O): deducted at settlement` : "",
+      payout > 0 ? `Estimated TDS deduction (~${TDS_194J_RATE_PERCENT_STRING} if 194J / ~${TDS_194O_RATE_PERCENT_STRING} if 194-O): deducted at settlement` : "",
       `Brand payable: ${formatCurrency(payable)}`,
       `Submission deadline: ${formatContractDate(terms?.submissionDeadline)}`,
       `Posting deadline: ${formatContractDate(terms?.postingDeadline || deal?.postingDeadline)}`,

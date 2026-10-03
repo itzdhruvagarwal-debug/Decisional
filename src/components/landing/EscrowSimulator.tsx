@@ -4,17 +4,29 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { formatCurrency } from "@/lib/utils-client";
+import {
+  DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
+  DEFAULT_GATEWAY_FEE_PERCENT,
+  DEFAULT_INCLUDED_REVISIONS,
+} from "@/constants";
+
+const MILESTONE_STAGE_PERCENTAGES = {
+  STAGE_1: 30,
+  STAGE_2: 40,
+  STAGE_3: 30,
+} as const;
 
 const PRESET_BUDGETS = [25000, 50000, 100000, 250000];
 
 export function EscrowSimulator() {
   const [budget, setBudget] = useState<number>(50000);
 
-  const m1 = Math.round(budget * 0.3);
-  const m2 = Math.round(budget * 0.4);
-  const m3 = Math.round(budget * 0.3);
-  const platformFee = Math.round(budget * 0.1);
-  const totalBrandDeposit = budget + platformFee;
+  const m1 = Math.round((budget * MILESTONE_STAGE_PERCENTAGES.STAGE_1) / 100);
+  const m2 = Math.round((budget * MILESTONE_STAGE_PERCENTAGES.STAGE_2) / 100);
+  const m3 = Math.round((budget * MILESTONE_STAGE_PERCENTAGES.STAGE_3) / 100);
+  const platformFee = Math.round((budget * DEFAULT_BRAND_PLATFORM_FEE_PERCENT) / 100);
+  const gatewayFee = Math.round(((budget + platformFee) * DEFAULT_GATEWAY_FEE_PERCENT) / 100);
+  const totalBrandDeposit = budget + platformFee + gatewayFee;
 
   const formatRupees = (val: number) => formatCurrency(val * 100);
 
@@ -101,8 +113,12 @@ export function EscrowSimulator() {
               <span className="font-semibold text-foreground">{formatRupees(budget)}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
-              <span>Transparent Platform Fee (10%):</span>
+              <span>Platform Escrow Fee ({DEFAULT_BRAND_PLATFORM_FEE_PERCENT}%):</span>
               <span className="font-semibold text-foreground">{formatRupees(platformFee)}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>Payment Gateway Fee ({DEFAULT_GATEWAY_FEE_PERCENT}%):</span>
+              <span className="font-semibold text-foreground">{formatRupees(gatewayFee)}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span>Creator Deductions:</span>
@@ -142,7 +158,7 @@ export function EscrowSimulator() {
                 </span>
                 <div>
                   <h4 className="text-sm sm:text-base font-bold text-foreground">
-                    Stage 1: Script & Storyboard Approval (30%)
+                    Stage 1: Script & Storyboard Approval ({MILESTONE_STAGE_PERCENTAGES.STAGE_1}%)
                   </h4>
                   <p className="text-xs text-muted-foreground">
                     Creator shares script & visual concept in deal room.
@@ -174,7 +190,7 @@ export function EscrowSimulator() {
                 </span>
                 <div>
                   <h4 className="text-sm sm:text-base font-bold text-foreground">
-                    Stage 2: Draft Video Preview (40%)
+                    Stage 2: Draft Video Preview ({MILESTONE_STAGE_PERCENTAGES.STAGE_2}%)
                   </h4>
                   <p className="text-xs text-muted-foreground">
                     Watermarked rough cut submitted for tweaks and branding check.
@@ -193,7 +209,7 @@ export function EscrowSimulator() {
                 </svg>
                 Funds safely secured
               </span>
-              <span className="font-medium text-verified">Up to 2 revision rounds</span>
+              <span className="font-medium text-verified">Up to {DEFAULT_INCLUDED_REVISIONS} revision rounds</span>
             </div>
           </div>
 
@@ -206,7 +222,7 @@ export function EscrowSimulator() {
                 </span>
                 <div>
                   <h4 className="text-sm sm:text-base font-bold text-foreground">
-                    Stage 3: Live Post & Verification (30%)
+                    Stage 3: Live Post & Verification ({MILESTONE_STAGE_PERCENTAGES.STAGE_3}%)
                   </h4>
                   <p className="text-xs text-muted-foreground">
                     Automated crawler verifies Instagram Reel/YouTube link & tags.

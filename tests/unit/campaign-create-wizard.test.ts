@@ -6,6 +6,11 @@ import {
   CampaignFormData,
   calculateCampaignEscrowPaise,
 } from "@/components/dashboard/campaigns/create/CampaignCreateHelpers";
+import {
+  DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
+  DEFAULT_GATEWAY_FEE_PERCENT,
+  DEFAULT_PRODUCT_HANDLING_FEE_PERCENT,
+} from "@/constants/deals";
 
 describe("Campaign Creation Wizard", () => {
   const validFormData: CampaignFormData = {
@@ -99,16 +104,52 @@ describe("Campaign Creation Wizard", () => {
     });
   });
 
-  describe("Escrow & GST Financial Calculations", () => {
-    it("should compute accurate escrow lock requirement with 10% fee and 18% GST", () => {
+  describe("Escrow & Gateway Fee Financial Calculations", () => {
+    it("should compute accurate escrow lock requirement with platform fee and gateway fee", () => {
       const breakdown = calculateCampaignEscrowPaise(15000);
 
-      expect(breakdown.creatorPayoutPoolPaise).toBe(1500000); // ₹15,000 in paise
-      expect(breakdown.platformFeePaise).toBe(150000); // 10% fee = ₹1,500
-      expect(breakdown.gstFeePaise).toBe(27000); // 18% GST on platform fee = ₹270
-      expect(breakdown.totalEscrowRequiredPaise).toBe(1677000); // ₹16,770 in paise
-      expect(breakdown.platformFeePercent).toBe(10);
-      expect(breakdown.gstPercent).toBe(18);
+      const expectedCreatorPool = 1500000;
+      const expectedPlatformFee = Math.round((expectedCreatorPool * DEFAULT_BRAND_PLATFORM_FEE_PERCENT) / 100);
+      const expectedGatewayFee = Math.round(((expectedCreatorPool + expectedPlatformFee) * DEFAULT_GATEWAY_FEE_PERCENT) / 100);
+      const expectedTotal = expectedCreatorPool + expectedPlatformFee + expectedGatewayFee;
+
+      expect(breakdown.creatorPayoutPoolPaise).toBe(expectedCreatorPool); // ₹15,000 in paise
+      expect(breakdown.platformFeePaise).toBe(expectedPlatformFee); // 10% fee = ₹1,500
+      expect(breakdown.gatewayFeePaise).toBe(expectedGatewayFee); // 2% gateway fee = ₹330
+      expect(breakdown.totalEscrowRequiredPaise).toBe(expectedTotal); // ₹16,830 in paise
+      expect(breakdown.platformFeePercent).toBe(DEFAULT_BRAND_PLATFORM_FEE_PERCENT);
+      expect(breakdown.gatewayFeePercent).toBe(DEFAULT_GATEWAY_FEE_PERCENT);
+    });
+
+    it("should compute accurate escrow for product-seeded and product-only campaigns", () => {
+      // Product-seeded campaign (Budget ₹10,000, Product ₹1,000, 2 slots)
+      const seeded = calculateCampaignEscrowPaise(10000, undefined, undefined, {
+        requiresProduct: true,
+        productValueRupees: 1000,
+        maxInfluencers: 2,
+      });
+
+      const expectedProductFee = Math.round((1000 * 100 * DEFAULT_PRODUCT_HANDLING_FEE_PERCENT) / 100) * 2;
+      const expectedPlatformFee = Math.round((10000 * 100 * DEFAULT_BRAND_PLATFORM_FEE_PERCENT) / 100) + expectedProductFee;
+      const expectedGatewayFee = Math.round(((10000 * 100 + expectedPlatformFee) * DEFAULT_GATEWAY_FEE_PERCENT) / 100);
+      const expectedTotal = 10000 * 100 + expectedPlatformFee + expectedGatewayFee;
+
+      expect(seeded.productHandlingFeePaise).toBe(expectedProductFee);
+      expect(seeded.platformFeePaise).toBe(expectedPlatformFee);
+      expect(seeded.gatewayFeePaise).toBe(expectedGatewayFee);
+      expect(seeded.totalEscrowRequiredPaise).toBe(expectedTotal);
+
+      // Product-only campaign (Budget ₹0, Product ₹1,000, 1 slot)
+      const productOnly = calculateCampaignEscrowPaise(0, undefined, undefined, {
+        requiresProduct: true,
+        productValueRupees: 1000,
+        maxInfluencers: 1,
+      });
+      const expectedProductOnlyFee = Math.round((1000 * 100 * DEFAULT_BRAND_PLATFORM_FEE_PERCENT) / 100);
+      const expectedProductOnlyGateway = Math.round((expectedProductOnlyFee * DEFAULT_GATEWAY_FEE_PERCENT) / 100);
+      expect(productOnly.platformFeePaise).toBe(expectedProductOnlyFee);
+      expect(productOnly.gatewayFeePaise).toBe(expectedProductOnlyGateway);
+      expect(productOnly.totalEscrowRequiredPaise).toBe(expectedProductOnlyFee + expectedProductOnlyGateway);
     });
 
     it("should accurately detect insufficient wallet balance and calculate exact shortfall", () => {
@@ -122,7 +163,7 @@ describe("Campaign Creation Wizard", () => {
         : 0;
 
       expect(isBalanceInsufficient).toBe(true);
-      expect(shortfallPaise).toBe(677000); // ₹6,770
+      expect(shortfallPaise).toBe(totalEscrowRequiredPaise - walletBalancePaise);
 
       // Case 2: Sufficient funds (wallet has ₹20,000)
       const sufficientBalancePaise = 20000 * 100;

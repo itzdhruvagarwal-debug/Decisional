@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { LegalLayout, LegalSection } from "@/components/legal/LegalLayout";
 import { AlertTriangle } from "lucide-react";
+import {
+  DEFAULT_BRAND_REVIEW_PERIOD_HOURS,
+  TDS_194O_RATE_PERCENT_STRING,
+  GST_STANDARD_RATE_PERCENT_STRING,
+} from "@/constants";
 
 export const metadata: Metadata = {
   title: "Terms of Service — VyaparMedia",
@@ -86,7 +91,7 @@ export default function TermsPage() {
         <ul className="list-disc pl-6 space-y-2">
           <li>Campaign briefs must contain explicit creative requirements, deliverable formats (e.g. 60s Reel, 3-frame Story), brand tags, and mandatory talking points.</li>
           <li>Creators must deliver original, non-infringing creative assets by the contractual milestone deadlines.</li>
-          <li>Brands are allotted a standard review window (typically 72 hours) upon submission. If no revision or dispute is initiated within this window, the platform may trigger automated approval.</li>
+          <li>Brands are allotted a standard review window (typically {DEFAULT_BRAND_REVIEW_PERIOD_HOURS} hours) upon submission. If no revision or dispute is initiated within this window, the platform may trigger automated approval.</li>
           <li>Promotional posts must remain live on the creator&apos;s authenticated profile for the contractual retention period (standard 30–60 days).</li>
         </ul>
       </LegalSection>
@@ -149,8 +154,8 @@ export default function TermsPage() {
           Users must maintain compliance with Indian taxation laws:
         </p>
         <ul className="list-disc pl-6 space-y-2 my-3">
-          <li><strong className="text-foreground">Section 194-O TDS:</strong> As an e-commerce marketplace, VyaparMedia withholds 0.1% TDS on creator disbursements where statutory turnover thresholds apply and deposits credits directly against the creator&apos;s PAN.</li>
-          <li><strong className="text-foreground">GST Invoicing:</strong> Registered creators must issue 18% GST tax invoices under SAC Code 998369. VyaparMedia provides automated invoice generation for all completed deals.</li>
+          <li><strong className="text-foreground">Section 194-O TDS:</strong> As an e-commerce marketplace, VyaparMedia withholds {TDS_194O_RATE_PERCENT_STRING} TDS on creator disbursements where statutory turnover thresholds apply and deposits credits directly against the creator&apos;s PAN.</li>
+          <li><strong className="text-foreground">GST Invoicing:</strong> Registered creators must issue {GST_STANDARD_RATE_PERCENT_STRING} GST tax invoices under SAC Code 998369. VyaparMedia provides automated invoice generation for all completed deals.</li>
         </ul>
       </LegalSection>
 

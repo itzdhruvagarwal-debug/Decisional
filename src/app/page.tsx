@@ -14,6 +14,7 @@ import { BentoFeatures } from "@/components/landing/BentoFeatures";
 import { ComparisonTable } from "@/components/landing/ComparisonTable";
 import { CreatorShowcase } from "@/components/landing/CreatorShowcase";
 import { LandingFAQ } from "@/components/landing/LandingFAQ";
+import { DEFAULT_BRAND_PLATFORM_FEE_PERCENT } from "@/constants/deals";
 
 const TRUSTED_BRANDS = [
   "FitForma",
@@ -97,7 +98,7 @@ export default function HomePage() {
                     "priceSpecification": {
                       "@type": "UnitPriceSpecification",
                       "priceType": "https://schema.org/Percentage",
-                      "unitText": "10% platform mediation fee",
+                      "unitText": `${DEFAULT_BRAND_PLATFORM_FEE_PERCENT}% platform mediation fee`,
                     },
                   },
                 ],

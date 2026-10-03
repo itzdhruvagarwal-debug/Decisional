@@ -5,6 +5,10 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import { Button } from "@/components/ui";
+import {
+  DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
+  GST_STANDARD_RATE_PERCENT_STRING,
+} from "@/constants";
 
 /* ── Data ──────────────────────────────────────────────────────────── */
 
@@ -31,7 +35,7 @@ const BRAND_FEATURES = [
 ];
 
 const COMPARISON = [
-  { feature: "Platform fee", creator: "Free forever", brand: "10% per deal" },
+  { feature: "Platform fee", creator: "Free forever", brand: `${DEFAULT_BRAND_PLATFORM_FEE_PERCENT}% per deal` },
   { feature: "Escrow protection", creator: "✓", brand: "✓" },
   { feature: "KYC verification", creator: "✓", brand: "✓" },
   { feature: "Smart contracts", creator: "✓", brand: "✓" },
@@ -43,7 +47,7 @@ const COMPARISON = [
 
 const TRUST_STATS = [
   { value: "₹0", label: "Advance fraud risk", desc: "Escrow-first always" },
-  { value: "10%", label: "Flat brand fee", desc: "No hidden charges" },
+  { value: `${DEFAULT_BRAND_PLATFORM_FEE_PERCENT}%`, label: "Flat brand fee", desc: "No hidden charges" },
   { value: "0%", label: "Creator join fee", desc: "Free forever" },
   { value: "194-O", label: "Section", desc: "TDS auto-deducted" },
 ];
@@ -59,7 +63,7 @@ const FAQS = [
   },
   {
     q: "How are Indian taxes (GST & TDS) handled on VyaparMedia?",
-    a: "VyaparMedia is built for Indian business compliance. The platform automatically calculates and separates GST (18%) and Section 194-O TDS deductions on deal settlement, providing downloadable tax invoices and TDS statements for your chartered accountant.",
+    a: `VyaparMedia is built for Indian business compliance. The platform automatically calculates and separates GST (${GST_STANDARD_RATE_PERCENT_STRING}) and Section 194-O TDS deductions on deal settlement, providing downloadable tax invoices and TDS statements for your chartered accountant.`,
   },
   {
     q: "What happens if a creator fails to deliver or misses the deadline?",
@@ -70,8 +74,8 @@ const FAQS = [
     a: "As soon as the brand approves the final post and automated link verification confirms it is live, escrow funds are instantly credited to the creator's platform wallet and can be withdrawn directly to any verified Indian bank account via IMPS/NEFT.",
   },
   {
-    q: "Is the 10% brand fee inclusive or exclusive of GST?",
-    a: "The platform service fee is subject to GST at 18% as per applicable Indian tax law. The fee is charged only on successful deal completion — not on campaign creation, applications, or contract signing.",
+    q: `Is the ${DEFAULT_BRAND_PLATFORM_FEE_PERCENT}% brand fee inclusive or exclusive of GST?`,
+    a: `The platform service fee is subject to GST at ${GST_STANDARD_RATE_PERCENT_STRING} as per applicable Indian tax law. The fee is charged only on successful deal completion — not on campaign creation, applications, or contract signing.`,
   },
 ];
 
@@ -154,7 +158,7 @@ export default function PricingPage() {
               <p className="text-xs text-muted-foreground">
                 {billingCycle === "volume"
                   ? "For agencies & brands managing > ₹10L annual escrow volume. 7.5% reduced fee + dedicated account manager."
-                  : "Zero upfront commitment. Standard 10% escrow fee charged solely upon successful deliverable sign-off."}
+                  : `Zero upfront commitment. Standard ${DEFAULT_BRAND_PLATFORM_FEE_PERCENT}% escrow fee charged solely upon successful deliverable sign-off.`}
               </p>
             </div>
 
@@ -217,7 +221,7 @@ export default function PricingPage() {
 
                 <div className="pricing-price-block pricing-price-block--brand rounded-xl p-5 mb-7 text-center bg-primary/5 border border-primary/20">
                   <div className="text-5xl font-extrabold text-foreground mb-1">
-                    {billingCycle === "volume" ? "7.5%" : "10%"}
+                    {billingCycle === "volume" ? "7.5%" : `${DEFAULT_BRAND_PLATFORM_FEE_PERCENT}%`}
                   </div>
                   <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     {billingCycle === "volume" ? "Discounted volume escrow fee" : "Flat fee per completed deal"}

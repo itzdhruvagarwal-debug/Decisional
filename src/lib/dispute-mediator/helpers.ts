@@ -1,5 +1,9 @@
 import { FullDeal, FullDispute, MediatorAnalysis, Finding, ContractSig } from "./types";
 import { verifyContractSignature, ContractTerms } from "../contract-engine";
+import {
+  DEFAULT_BRAND_REVIEW_PERIOD_HOURS,
+  DEFAULT_BRAND_LATE_APPROVAL_FEE_PERCENT,
+} from "@/constants";
 
 function verifySignatures(
 contractTerms: ContractTerms,
@@ -143,9 +147,9 @@ function getInfluencerFavoredVerdict(disputeId: string, findings: Finding[]): Me
     refundPercentage: 0,
     influencerPayoutPercentage: 100,
     trustScoreChanges: { influencer: 0, brand: -45 },
-    explanation: `Brand failed to review content within the 48-hour review window. Per contract terms, content is auto-approved and influencer receives full payment. Brand receives a trust score penalty.`,
+    explanation: `Brand failed to review content within the ${DEFAULT_BRAND_REVIEW_PERIOD_HOURS}-hour review window. Per contract terms, content is auto-approved and influencer receives full payment. Brand receives a trust score penalty.`,
     findings,
-    suggestedAction: "Auto-approve content and release payment to influencer. Apply 10% late fee from brand.",
+    suggestedAction: `Auto-approve content and release payment to influencer. Apply ${DEFAULT_BRAND_LATE_APPROVAL_FEE_PERCENT}% late fee from brand.`,
     autoResolvable: true,
   };
 }

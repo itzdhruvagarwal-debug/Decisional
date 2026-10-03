@@ -16,6 +16,13 @@ import {
   LifeBuoy,
   X,
 } from "lucide-react";
+import {
+  DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
+  DEFAULT_INCLUDED_REVISIONS,
+  DEFAULT_BRAND_REVIEW_PERIOD_HOURS,
+  TDS_194O_RATE_PERCENT_STRING,
+  TDS_206AA_PENAL_RATE_PERCENT_STRING,
+} from "@/constants";
 
 export type FaqCategory =
   | "ALL"
@@ -73,7 +80,7 @@ export const FAQ_DATA: FaqItem[] = [
     category: "PAYMENTS_ESCROW",
     question: "What are the TDS (Tax Deducted at Source) deduction rates?",
     answer:
-      "In compliance with Section 194-O and 194C of the Indian Income Tax Act, TDS is automatically calculated: 0.1% for PAN-verified creators earning above annual thresholds (or 5% if PAN is unverified). TDS certificates (Form 16A) are downloadable directly from your Wallet Statement tab quarterly.",
+      `In compliance with Section 194-O and 194C of the Indian Income Tax Act, TDS is automatically calculated: ${TDS_194O_RATE_PERCENT_STRING} for PAN-verified creators earning above annual thresholds (or ${TDS_206AA_PENAL_RATE_PERCENT_STRING} if PAN is unverified). TDS certificates (Form 16A) are downloadable directly from your Wallet Statement tab quarterly.`,
     badgeText: "Tax & Compliance",
   },
   {
@@ -89,7 +96,7 @@ export const FAQ_DATA: FaqItem[] = [
     category: "PAYMENTS_ESCROW",
     question: "What platform fees does VyaparMedia charge?",
     answer:
-      "VyaparMedia charges a transparent 5% platform escrow protection fee to brands upon deal funding. Creators receive 100% of their quoted rate minus applicable statutory TDS. There are zero subscription or listing fees.",
+      `VyaparMedia charges a transparent ${DEFAULT_BRAND_PLATFORM_FEE_PERCENT}% platform escrow protection fee to brands upon deal funding. Creators receive 100% of their quoted rate minus applicable statutory TDS. There are zero subscription or listing fees.`,
     badgeText: "Fee Transparency",
   },
 
@@ -99,7 +106,7 @@ export const FAQ_DATA: FaqItem[] = [
     category: "DISPUTES_REVISIONS",
     question: "How many revisions can a brand request on submitted content?",
     answer:
-      "The standard contract includes up to 2 revisions by default (unless customized in the deal terms). Brands must provide specific timestamped feedback within 72 hours of content submission. Creators have 48 hours to upload the revised draft.",
+      `The standard contract includes up to ${DEFAULT_INCLUDED_REVISIONS} revisions by default (unless customized in the deal terms). Brands must provide specific timestamped feedback within ${DEFAULT_BRAND_REVIEW_PERIOD_HOURS} hours of content submission. Creators have ${DEFAULT_BRAND_REVIEW_PERIOD_HOURS} hours to upload the revised draft.`,
     badgeText: "Revisions Policy",
   },
   {

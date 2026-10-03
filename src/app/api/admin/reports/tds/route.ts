@@ -5,6 +5,11 @@ import { toCsv, csvResponse, paiseToRupees, parseReportQueryParams } from "@/lib
 import { format } from "date-fns";
 import { RATE_LIMIT_CONFIGS } from "@/lib/rate-limit";
 import { getPlatformHeader, getPlatformFooter } from "@/lib/platform-config";
+import {
+  TDS_194O_RATE_PERCENT_STRING,
+  TDS_194J_RATE_PERCENT_STRING,
+  TDS_206AA_PENAL_RATE_PERCENT_STRING,
+} from "@/constants";
 
 async function _handler(req: NextRequest) {
 const { fy, format: fmt, bounds } = parseReportQueryParams(req.url);
@@ -54,14 +59,14 @@ const totalNet = tdsTransactions.reduce((s, t) => s + ((t.metadata as Record<str
     const appliedSection = (meta?.tdsSection as string | undefined) ?? (is194J ? "194J" : "194-O");
 
     const gross = typeof meta?.grossPayout === "number" ? meta.grossPayout : 0;
-    let rateStr = "0.1%";
+    let rateStr = TDS_194O_RATE_PERCENT_STRING;
     if (gross > 0) {
       const calculatedRate = (t.amount / gross) * 100;
       if (calculatedRate > 4) {
-        rateStr = calculatedRate > 8 ? "10%" : "5%";
+        rateStr = calculatedRate > 8 ? TDS_194J_RATE_PERCENT_STRING : TDS_206AA_PENAL_RATE_PERCENT_STRING;
       }
     } else {
-      rateStr = is194J ? "10%" : "0.1%";
+      rateStr = is194J ? TDS_194J_RATE_PERCENT_STRING : TDS_194O_RATE_PERCENT_STRING;
     }
 
     return { section: appliedSection, rate: rateStr };

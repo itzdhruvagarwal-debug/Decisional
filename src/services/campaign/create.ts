@@ -451,7 +451,6 @@ function buildCampaignCreationData(
 
 interface PostCampaignTasksParams {
   tx: Prisma.TransactionClient;
-  userId: string;
   wallet: { id: string } | null;
   newCampaignId: string;
   campaignTitle: string;
@@ -464,7 +463,6 @@ interface PostCampaignTasksParams {
 async function handlePostCampaignCreationTasks(params: PostCampaignTasksParams) {
   const {
     tx,
-    userId,
     wallet,
     newCampaignId,
     campaignTitle,
@@ -473,40 +471,26 @@ async function handlePostCampaignCreationTasks(params: PostCampaignTasksParams) 
     fundedDealSlots,
     isDraft,
   } = params;
-  await checkAndAwardBadges(userId, "CAMPAIGN_CREATED", tx);
 
-  if (!isDraft) {
-    await checkChallengeProgress(userId, "DEALS", 1, tx).catch((err) => {
-      logger.error("Failed to track brand challenge progress for launch_campaign", { userId, error: err });
-    });
-
-    if (wallet) {
-      await tx.transaction.create({
-        data: {
-          walletId: wallet.id,
-          type: "DEBIT",
-          amount: campaignFundingAmounts.totalAmount,
-          status: "COMPLETED",
-          description: `Funds held for campaign creation: ${campaignTitle}`,
-          metadata: {
-            balanceImpact: true,
-            campaignId: newCampaignId,
-            totalBudget: parsedTotalBudgetPaise,
-            platformFee: campaignFundingAmounts.platformFee,
-            gatewayFee: campaignFundingAmounts.gatewayFee,
-            fundedDealSlots,
-          },
+  if (!isDraft && wallet) {
+    await tx.transaction.create({
+      data: {
+        walletId: wallet.id,
+        type: "DEBIT",
+        amount: campaignFundingAmounts.totalAmount,
+        status: "COMPLETED",
+        description: `Funds held for campaign creation: ${campaignTitle}`,
+        metadata: {
+          balanceImpact: true,
+          campaignId: newCampaignId,
+          totalBudget: parsedTotalBudgetPaise,
+          platformFee: campaignFundingAmounts.platformFee,
+          gatewayFee: campaignFundingAmounts.gatewayFee,
+          fundedDealSlots,
         },
-      });
-    }
+      },
+    });
   }
-
-  await createActivityLog({
-    userId,
-    action: "CREATE_CAMPAIGN",
-    entityType: "Campaign",
-    entityId: newCampaignId,
-  }, tx);
 }
 
 export async function createCampaign(userId: string, userType: UserType, data: Record<string, unknown>) {
@@ -597,7 +581,6 @@ export async function createCampaign(userId: string, userType: UserType, data: R
 
       await handlePostCampaignCreationTasks({
         tx,
-        userId,
         wallet,
         newCampaignId: newCampaign.id,
         campaignTitle: parsed.title,
@@ -609,9 +592,6 @@ export async function createCampaign(userId: string, userType: UserType, data: R
 
       return newCampaign;
     }, {
-      // Serializable isolation prevents TOCTOU races on the budget/deal checks
-      // when two parallel invites are sent at campaign creation time.
-      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
       maxWait: 10000,
       timeout: 15000,
     });
@@ -621,8 +601,26 @@ export async function createCampaign(userId: string, userType: UserType, data: R
       campaignId: result.id,
     });
 
-    // Invalidate discovery cache so newly created active campaign appears in searches
+    // Post-creation asynchronous hooks (run safely without blocking or risking core transaction)
+    createActivityLog({
+      userId,
+      action: "CREATE_CAMPAIGN",
+      entityType: "Campaign",
+      entityId: result.id,
+    }).catch((err) => {
+      logger.warn("Failed to record activity log for campaign creation", { userId, error: err });
+    });
+
+    checkAndAwardBadges(userId, "CAMPAIGN_CREATED").catch((err) => {
+      logger.warn("Failed to award badges on campaign creation", { userId, error: err });
+    });
+
     if (!isDraft) {
+      checkChallengeProgress(userId, "DEALS", 1).catch((err) => {
+        logger.error("Failed to track brand challenge progress for launch_campaign", { userId, error: err });
+      });
+
+      // Invalidate discovery cache so newly created active campaign appears in searches
       invalidateCampaignSearchCache().catch((err) => {
         logger.warn("Failed to invalidate campaign search cache", { err });
       });

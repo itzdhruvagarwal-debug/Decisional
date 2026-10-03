@@ -33,6 +33,7 @@ import {
   DRS_DEAL_CAP_TRUSTED_PAISE,
   DRS_DEAL_CAP_ELITE_PAISE,
   DRS_QUALIFIED_DEAL_VALUE_PAISE,
+  DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
 } from "@/constants";
 
 // ─── Diminishing-returns helper & caps (exported for unit-test assertions) ───
@@ -771,7 +772,7 @@ export function getPlatformFeePercentage(level: number): number {
 if (level >= 8) return 7; // Champion, Icon, Legend
 if (level >= 6) return 8; // Elite, Master
 if (level >= 4) return 9; // Pro, Expert
-return 10; // Rookie, Rising Star, Creator
+return DEFAULT_BRAND_PLATFORM_FEE_PERCENT; // Rookie, Rising Star, Creator
 }
 
 // ==================== QUALITATIVE REPUTATION BREAKDOWN ====================

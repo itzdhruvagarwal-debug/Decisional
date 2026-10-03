@@ -14,6 +14,11 @@ formatEntityAddress,
 } from "@/lib/csv-export";
 import { format } from "date-fns";
 import { RATE_LIMIT_CONFIGS } from "@/lib/rate-limit";
+import {
+  TDS_194O_RATE_PERCENT_STRING,
+  TDS_206AA_PENAL_RATE_PERCENT_STRING,
+  TDS_194O_THRESHOLD_RUPEES,
+} from "@/constants";
 
 async function _handler(req: NextRequest) {
 const session = (req as AuthenticatedRequest).session;
@@ -70,7 +75,7 @@ orderBy: { completedAt: "asc" },
 const totalGross = deals.reduce((s, d) => s + (d.grossPayout || d.amount), 0);
 const totalPlatformFee = deals.reduce((s, d) => s + d.platformFee, 0);
 const totalTDS = deals.reduce((s, d) => s + (d.tdsDeducted || 0), 0);
-const totalNet = deals.reduce((s, d) => s + (d.netPayout || d.amount - d.platformFee), 0);
+const totalNet = deals.reduce((s, d) => s + (d.netPayout ?? Math.max(0, (d.grossPayout || d.amount) - (d.tdsDeducted || 0))), 0);
 
 // Month-wise breakdown
 const monthMap = new Map<string, { gross: number; tds: number; net: number; count: number }>();
@@ -81,7 +86,7 @@ const prev = monthMap.get(month) ?? { gross: 0, tds: 0, net: 0, count: 0 };
 monthMap.set(month, {
 gross: prev.gross + (deal.grossPayout || deal.amount),
 tds: prev.tds + (deal.tdsDeducted || 0),
-net: prev.net + (deal.netPayout || deal.amount - deal.platformFee),
+net: prev.net + (deal.netPayout ?? Math.max(0, (deal.grossPayout || deal.amount) - (deal.tdsDeducted || 0))),
 count: prev.count + 1,
 });
 }
@@ -97,7 +102,7 @@ csv += csvRow("Report Type", "Influencer Income & TDS Ledger");
 csv += csvRow("Financial Year", `FY ${fy}`);
 csv += csvRow("Generated On", format(new Date(), "dd/MM/yyyy HH:mm") + " IST");
 csv += csvRow("Total Deals", deals.length);
-csv += csvRow("TDS Section", "Section 194-O (0.1% above ₹5 Lakh statutory threshold)");
+csv += csvRow("TDS Section", `Section 194-O (${TDS_194O_RATE_PERCENT_STRING} above ₹${Math.round(TDS_194O_THRESHOLD_RUPEES / 100000)} Lakh statutory threshold)`);
 csv += csvSep();
 
 // Influencer details
@@ -109,7 +114,7 @@ csv += csvSep();
 
 // Deal-wise table
 csv += csvTitle("DEAL-WISE INCOME DETAILS");
-csv += "Sr.,Completed Date,Brand,Campaign,Category,Gross Amount (INR),Platform Fee (INR),TDS 194-O (INR),Net Received (INR)\r\n";
+csv += "Sr.,Completed Date,Brand,Campaign,Category,Gross Amount (INR),Brand Platform Fee (INR),TDS 194-O (INR),Net Received (INR)\r\n";
 deals.forEach((d, i) => {
 csv += [
 i + 1,
@@ -120,7 +125,7 @@ csvEsc(String(d.campaign?.targetCategories?.[0] ?? "")),
 paiseToRupees(d.grossPayout || d.amount),
 paiseToRupees(d.platformFee),
 paiseToRupees(d.tdsDeducted || 0),
-paiseToRupees(d.netPayout || d.amount - d.platformFee),
+paiseToRupees(d.netPayout ?? Math.max(0, (d.grossPayout || d.amount) - (d.tdsDeducted || 0))),
 ].join(",") + "\r\n";
 });
 csv += csvSep();
@@ -141,14 +146,15 @@ for (const deal of deals) {
 
   quarters[q].gross += deal.grossPayout || deal.amount;
   quarters[q].tds += deal.tdsDeducted || 0;
-  quarters[q].net += deal.netPayout || deal.amount - deal.platformFee;
+  quarters[q].net += deal.netPayout ?? Math.max(0, (deal.grossPayout || deal.amount) - (deal.tdsDeducted || 0));
   quarters[q].count += 1;
 }
 
 // Income summary
 csv += csvTitle("ANNUAL INCOME SUMMARY");
 csv += csvRow("Total Gross Earnings (INR)", paiseToRupees(totalGross));
-csv += csvRow("Total Platform Fees Deducted (INR)", paiseToRupees(totalPlatformFee));
+csv += csvRow("Platform Fee Deducted from Creator (INR)", "0.00 (Zero Fee for Creators)");
+csv += csvRow("Total Brand Platform Fee Paid (INR)", paiseToRupees(totalPlatformFee));
 csv += csvRow("Total TDS Deducted (INR)", paiseToRupees(totalTDS));
 csv += csvRow("Total Net Bank Disbursements (INR)", paiseToRupees(totalNet));
 csv += csvSep();
@@ -170,7 +176,7 @@ csv += csvSep();
 // TDS Statutory Note
 csv += csvTitle("STATUTORY TAX DECLARATION");
 csv += csvRow("Applicable Section", "Section 194-O / 194-J of the Income Tax Act 1961");
-csv += csvRow("Deduction Rate", "0.1% on gross payments exceeding statutory limits (or 5% if PAN unverified)");
+csv += csvRow("Deduction Rate", `${TDS_194O_RATE_PERCENT_STRING} on gross payments exceeding statutory limits (or ${TDS_206AA_PENAL_RATE_PERCENT_STRING} if PAN unverified)`);
 csv += csvRow("Deductor Entity", "VYAPARMEDIA TECHNOLOGIES PRIVATE LIMITED");
 csv += csvRow("Deductor CIN", "U74999DL2024PTC123456");
 csv += csvRow("Deductor GSTIN", "07AABCV1234F1Z5");
@@ -193,11 +199,12 @@ influencer: profile.displayName,
 period: { from: bounds.start, to: bounds.end },
 summary: {
 totalGrossRupees: paiseToRupees(totalGross),
-totalPlatformFeeRupees: paiseToRupees(totalPlatformFee),
+creatorPlatformFeeRupees: "0.00",
+brandPlatformFeeRupees: paiseToRupees(totalPlatformFee),
 totalTDSRupees: paiseToRupees(totalTDS),
 totalNetRupees: paiseToRupees(totalNet),
 dealCount: deals.length,
-tdsSection: "194-O (0.1% above ₹5 Lakh threshold)",
+tdsSection: `194-O (${TDS_194O_RATE_PERCENT_STRING} above ₹${Math.round(TDS_194O_THRESHOLD_RUPEES / 100000)} Lakh threshold)`,
 },
 monthWise: Array.from(monthMap.entries()).map(([month, data]) => ({
 month,
@@ -214,7 +221,7 @@ completedAt: d.completedAt,
 grossRupees: paiseToRupees(d.grossPayout || d.amount),
 platformFeeRupees: paiseToRupees(d.platformFee),
 tdsRupees: paiseToRupees(d.tdsDeducted || 0),
-netRupees: paiseToRupees(d.netPayout || d.amount - d.platformFee),
+netRupees: paiseToRupees(d.netPayout ?? Math.max(0, (d.grossPayout || d.amount) - (d.tdsDeducted || 0))),
 })),
 }, "Income report generated");
 }

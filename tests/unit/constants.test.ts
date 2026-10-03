@@ -116,6 +116,9 @@ describe("Centralized Constants Architecture", () => {
       expect(Constants.POST_MONITORING_WINDOW_DAYS).toBe(30);
       expect(Constants.DEFAULT_INCLUDED_REVISIONS).toBe(2);
       expect(Constants.DEFAULT_COST_PER_EXTRA_REVISION_PAISE).toBe(50000); // ₹500
+      expect(Constants.DEFAULT_BRAND_PLATFORM_FEE_PERCENT).toBe(10); // 10%
+      expect(Constants.DEFAULT_GATEWAY_FEE_PERCENT).toBe(2); // 2%
+      expect(Constants.DEFAULT_PRODUCT_HANDLING_FEE_PERCENT).toBe(2); // 2%
     });
 
     it("should define valid reputation score ranges and IST offset", () => {

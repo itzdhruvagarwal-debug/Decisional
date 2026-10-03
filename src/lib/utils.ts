@@ -6,6 +6,7 @@ import { randomInt } from "node:crypto";
 import { env } from "@/env";
 import prisma from "@/lib/db";
 import { z } from "zod";
+import { DEFAULT_PRODUCT_HANDLING_FEE_PERCENT } from "@/constants/deals";
 
 export * from "@/lib/utils-client";
 
@@ -35,7 +36,7 @@ if (isProductOnly) {
 const feePercent = platformFeePercent ?? env.PLATFORM_FEE_PERCENTAGE;
 return Math.max(0, Math.round((productValue * feePercent) / 100));
 }
-return Math.max(0, Math.round(productValue * 0.02));
+return Math.max(0, Math.round((productValue * DEFAULT_PRODUCT_HANDLING_FEE_PERCENT) / 100));
 }
 
 export async function getDealAndVerifyParticipant(dealId: string, userId: string) {

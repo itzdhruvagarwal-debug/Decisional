@@ -9,6 +9,13 @@ import {
   type InfluencerDRSFactors,
   type BrandDRSFactors,
 } from "@/lib/drs-score";
+import {
+  DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
+  DEFAULT_GATEWAY_FEE_PERCENT,
+  TDS_194O_RATE,
+  TDS_194J_RATE,
+  TDS_194O_THRESHOLD_PAISE,
+} from "@/constants";
 
 describe("Unit Tests: Fee, Tax & Commission Calculation", () => {
   describe("DRS Level & Platform Fee Brackets", () => {
@@ -33,9 +40,7 @@ describe("Unit Tests: Fee, Tax & Commission Calculation", () => {
 
   describe("TDS Calculation Rules (Section 194-O vs 194-J)", () => {
     // Section 194-O: E-commerce platform threshold is Rs 5,00,000 (50,000,000 paise) at 0.1%
-    const TDS_THRESHOLD_PAISE = 50_000_000;
-    const TDS_194O_RATE = 0.001; // 0.1%
-    const TDS_194J_RATE = 0.10;  // 10%
+    const TDS_THRESHOLD_PAISE = TDS_194O_THRESHOLD_PAISE;
 
     it("should withhold 0 TDS under Section 194-O if cumulative payout is below threshold", () => {
       const cumulativePriorPayout = 20_000_000; // Rs 2,00,000
@@ -76,15 +81,15 @@ describe("Unit Tests: Fee, Tax & Commission Calculation", () => {
   describe("Complete Deal Settlement Reconciliation", () => {
     it("should cleanly reconcile gross deal budget into platform fee, gateway fee, and influencer payout", () => {
       const dealAmount = 100_000_00; // Rs 1,00,000
-      const platformFeePercent = 10;  // 10%
+      const platformFeePercent = DEFAULT_BRAND_PLATFORM_FEE_PERCENT;  // 10%
       const platformFee = Math.round((dealAmount * platformFeePercent) / 100); // 10,000 INR
-      const gatewayFeePercent = 2;   // 2%
+      const gatewayFeePercent = DEFAULT_GATEWAY_FEE_PERCENT;   // 2%
       const gatewayFee = Math.round((dealAmount * gatewayFeePercent) / 100);   // 2,000 INR
 
       const grossInfluencerPayout = dealAmount - platformFee - gatewayFee;
 
       // Section 194-O tax on payout
-      const tdsAmount = Math.round(grossInfluencerPayout * 0.001);
+      const tdsAmount = Math.round(grossInfluencerPayout * TDS_194O_RATE);
       const netInfluencerPayout = grossInfluencerPayout - tdsAmount;
 
       expect(dealAmount).toBe(platformFee + gatewayFee + grossInfluencerPayout);

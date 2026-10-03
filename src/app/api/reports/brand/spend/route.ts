@@ -14,6 +14,10 @@ formatEntityAddress,
 } from "@/lib/csv-export";
 import { format } from "date-fns";
 import { RATE_LIMIT_CONFIGS } from "@/lib/rate-limit";
+import {
+  GST_STANDARD_RATE,
+  GST_STANDARD_RATE_PERCENT_STRING,
+} from "@/constants";
 
 async function _handler(req: NextRequest) {
 const session = (req as AuthenticatedRequest).session;
@@ -72,7 +76,7 @@ orderBy: { completedAt: "asc" },
 // Summary Totals
 const totalPaid = deals.reduce((s, d) => s + d.amount, 0);
 const totalPlatformFee = deals.reduce((s, d) => s + d.platformFee, 0);
-const totalGST = Math.round(totalPlatformFee * 0.18); // 18% GST on platform fee
+const totalGST = Math.round(totalPlatformFee * GST_STANDARD_RATE);
 const totalInvoice = totalPlatformFee + totalGST;
 
 if (fmt === "csv") {
@@ -98,9 +102,9 @@ csv += csvSep();
 
 // Deal-wise table
 csv += csvTitle("DEAL-WISE EXPENSE DETAILS");
-csv += "Sr.,Date,Campaign,Influencer,Instagram Handle,Followers,Paid to Influencer (INR),Platform Fee (INR),GST @ 18% on Fee (INR),Invoice Total (INR)\r\n";
+csv += `Sr.,Date,Campaign,Influencer,Instagram Handle,Followers,Paid to Influencer (INR),Platform Fee (INR),GST @ ${GST_STANDARD_RATE_PERCENT_STRING} on Fee (INR),Invoice Total (INR)\r\n`;
 deals.forEach((d, i) => {
-const gstOnFee = Math.round(d.platformFee * 0.18);
+const gstOnFee = Math.round(d.platformFee * GST_STANDARD_RATE);
 const invoiceTotal = d.platformFee + gstOnFee;
 csv += [
 i + 1,
@@ -122,10 +126,10 @@ csv += csvTitle("GST SUMMARY");
 csv += csvRow("Service Accounting Code (SAC)", "998365 (Advertising, Marketing & Influencer Services)");
 csv += csvRow("Total Amount Paid to Influencers (INR)", paiseToRupees(totalPaid));
 csv += csvRow("Total Platform Fee (INR)", paiseToRupees(totalPlatformFee));
-csv += csvRow("Total GST @ 18% on Platform Fee (INR)", paiseToRupees(totalGST));
+csv += csvRow(`Total GST @ ${GST_STANDARD_RATE_PERCENT_STRING} on Platform Fee (INR)`, paiseToRupees(totalGST));
 csv += csvRow("Total Invoice Amount (INR)", paiseToRupees(totalInvoice));
-csv += csvRow("GST Component (CGST @ 9%)", paiseToRupees(Math.round(totalGST / 2)));
-csv += csvRow("GST Component (SGST @ 9%)", paiseToRupees(Math.round(totalGST / 2)));
+csv += csvRow(`GST Component (CGST @ ${Math.round((GST_STANDARD_RATE * 100) / 2)}%)`, paiseToRupees(Math.round(totalGST / 2)));
+csv += csvRow(`GST Component (SGST @ ${Math.round((GST_STANDARD_RATE * 100) / 2)}%)`, paiseToRupees(Math.round(totalGST / 2)));
 csv += csvRow("Reverse Charge Mechanism (RCM)", "Not Applicable — Normal Charge");
 csv += csvSep();
 
@@ -150,7 +154,7 @@ totalInvoiceRupees: paiseToRupees(totalInvoice),
 dealCount: deals.length,
 },
 deals: deals.map((d) => {
-const gstOnFee = Math.round(d.platformFee * 0.18);
+const gstOnFee = Math.round(d.platformFee * GST_STANDARD_RATE);
 const invoiceTotal = d.platformFee + gstOnFee;
 return {
 id: d.id,

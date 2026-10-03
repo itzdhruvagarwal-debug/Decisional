@@ -1,4 +1,9 @@
 import { createCampaignSchema } from "@/lib/validations/campaign";
+import {
+  DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
+  DEFAULT_GATEWAY_FEE_PERCENT,
+  DEFAULT_PRODUCT_HANDLING_FEE_PERCENT,
+} from "@/constants/deals";
 export { createCampaignSchema };
 
 export interface CampaignFormData {
@@ -144,25 +149,68 @@ export const deliverableTypes = [
 export interface CampaignEscrowBreakdown {
   creatorPayoutPoolPaise: number;
   platformFeePaise: number;
-  gstFeePaise: number;
+  gatewayFeePaise: number;
   totalEscrowRequiredPaise: number;
   platformFeePercent: number;
-  gstPercent: number;
+  gatewayFeePercent: number;
+  productHandlingFeePaise?: number;
 }
 
-export function calculateCampaignEscrowPaise(totalBudgetRupees: number): CampaignEscrowBreakdown {
+export function calculateCampaignEscrowPaise(
+  totalBudgetRupees: number,
+  platformFeePercent: number = DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
+  gatewayFeePercent: number = DEFAULT_GATEWAY_FEE_PERCENT,
+  options?: {
+    requiresProduct?: boolean;
+    productValueRupees?: number;
+    maxInfluencers?: number | null;
+    perInfluencerBudgetRupees?: number;
+  },
+): CampaignEscrowBreakdown {
   const creatorPayoutPoolPaise = Math.round((Number(totalBudgetRupees) || 0) * 100);
-  const platformFeePaise = Math.round(creatorPayoutPoolPaise * 0.10);
-  const gstFeePaise = Math.round(platformFeePaise * 0.18);
-  const totalEscrowRequiredPaise = creatorPayoutPoolPaise + platformFeePaise + gstFeePaise;
+  const productValuePaise = Math.round((Number(options?.productValueRupees) || 0) * 100);
+  const requiresProduct = Boolean(options?.requiresProduct);
+
+  let slots = 1;
+  if (options?.maxInfluencers && options.maxInfluencers > 0) {
+    slots = options.maxInfluencers;
+  } else if (
+    options?.perInfluencerBudgetRupees &&
+    options.perInfluencerBudgetRupees > 0 &&
+    creatorPayoutPoolPaise > 0
+  ) {
+    slots = Math.max(1, Math.floor(creatorPayoutPoolPaise / (options.perInfluencerBudgetRupees * 100)));
+  }
+
+  const isProductOnly = requiresProduct && creatorPayoutPoolPaise === 0;
+  let handlingFeePerSlot = 0;
+  if (requiresProduct && productValuePaise > 0) {
+    if (isProductOnly) {
+      handlingFeePerSlot = Math.max(0, Math.round((productValuePaise * platformFeePercent) / 100));
+    } else {
+      handlingFeePerSlot = Math.max(
+        0,
+        Math.round((productValuePaise * DEFAULT_PRODUCT_HANDLING_FEE_PERCENT) / 100),
+      );
+    }
+  }
+
+  const totalProductHandlingFee = handlingFeePerSlot * slots;
+  const platformFeePaise =
+    Math.round((creatorPayoutPoolPaise * platformFeePercent) / 100) + totalProductHandlingFee;
+  const gatewayFeePaise = Math.round(
+    ((creatorPayoutPoolPaise + platformFeePaise) * gatewayFeePercent) / 100,
+  );
+  const totalEscrowRequiredPaise = creatorPayoutPoolPaise + platformFeePaise + gatewayFeePaise;
 
   return {
     creatorPayoutPoolPaise,
     platformFeePaise,
-    gstFeePaise,
+    gatewayFeePaise,
     totalEscrowRequiredPaise,
-    platformFeePercent: 10,
-    gstPercent: 18,
+    platformFeePercent,
+    gatewayFeePercent,
+    productHandlingFeePaise: totalProductHandlingFee,
   };
 }
 

@@ -110,24 +110,28 @@ export async function createActivityLog(
   if (params.entityId !== undefined) data.entityId = params.entityId;
   if (params.ipAddress !== undefined) data.ipAddress = params.ipAddress;
 
-  const activityPromise = client.activityLog.create({ data });
+  let activity = null;
+  try {
+    activity = await client.activityLog.create({ data });
+  } catch (err) {
+    logger.warn("[Audit] Failed to create activityLog", { error: err });
+  }
 
-  // Concurrently write to AuditLog so all system and user activities are visible in the Admin Audit Logs panel
-  const auditPromise = client.auditLog.create({
-    data: {
-      actorId: params.userId,
-      actionType: params.action.toString(),
-      entityType: normalizedEntityType,
-      entityId: params.entityId || params.userId,
-      afterJSON: maskedMetadata ?? Prisma.JsonNull,
-      ipAddress: params.ipAddress ?? null,
-    },
-  }).catch((err) => {
+  try {
+    await client.auditLog.create({
+      data: {
+        actorId: params.userId,
+        actionType: params.action.toString(),
+        entityType: normalizedEntityType,
+        entityId: params.entityId || params.userId,
+        afterJSON: maskedMetadata ?? Prisma.JsonNull,
+        ipAddress: params.ipAddress ?? null,
+      },
+    });
+  } catch (err) {
     logger.warn("[Audit] Failed to mirror activity to AuditLog", { error: err });
-    return null;
-  });
+  }
 
-  const [activity] = await Promise.all([activityPromise, auditPromise]);
   return activity;
 }
 

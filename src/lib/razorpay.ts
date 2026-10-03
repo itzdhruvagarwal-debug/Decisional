@@ -9,6 +9,10 @@ import crypto from "node:crypto";
 import { logger } from "./logger";
 import { withCircuitBreaker } from "./circuit-breaker";
 import { redis } from "./redis";
+import {
+  DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
+  DEFAULT_GATEWAY_FEE_PERCENT,
+} from "@/constants/deals";
 
 // Lazy-initialize Razorpay instance (fails at call-time, not import-time)
 let _razorpay: Razorpay | null = null;
@@ -95,9 +99,11 @@ totalAmount: number;
 influencerReceives: number;
 platformFeePercent: number;
 } {
-const platformFeePercent =
-customPlatformFeePercent ?? (Number(process.env.PLATFORM_FEE_PERCENTAGE) || 10);
-const gatewayFeePercent = Number(process.env.GATEWAY_FEE_PERCENTAGE) || 2;
+  const platformFeePercent =
+    customPlatformFeePercent ??
+    (Number(process.env.PLATFORM_FEE_PERCENTAGE) || DEFAULT_BRAND_PLATFORM_FEE_PERCENT);
+  const gatewayFeePercent =
+    Number(process.env.GATEWAY_FEE_PERCENTAGE) || DEFAULT_GATEWAY_FEE_PERCENT;
 
 const safeProductHandlingFee = Math.max(0, Math.round(productHandlingFee || 0));
 const platformFee =

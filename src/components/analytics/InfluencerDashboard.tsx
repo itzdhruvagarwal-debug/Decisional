@@ -15,6 +15,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Button, ToastContainer, useToasts } from "@/components/ui";
 import { getTrustTierLabel, formatCurrency, formatDate } from "@/lib/utils-client";
 import { copyToClipboard } from "@/lib/clipboard";
+import { TDS_194O_RATE, TDS_194O_RATE_PERCENT_STRING } from "@/constants";
 import {
   TrendingUp,
   ShieldCheck,
@@ -367,9 +368,9 @@ export default function InfluencerDashboard({
               Estimated TDS
             </div>
             <div className="text-lg sm:text-xl font-extrabold text-foreground tabular-nums">
-              {formatCurrency(Math.round(overview.totalEarnings * 0.01))}
+              {formatCurrency(Math.round(overview.totalEarnings * TDS_194O_RATE))}
             </div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">1% Sec 194C / Form 26AS</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">{TDS_194O_RATE_PERCENT_STRING} Sec 194-O / Form 26AS</div>
           </div>
 
           <div className="p-3.5 rounded-xl bg-muted/40 border border-border">
@@ -377,7 +378,7 @@ export default function InfluencerDashboard({
               Net Disbursed
             </div>
             <div className="text-lg sm:text-xl font-extrabold text-foreground tabular-nums">
-              {formatCurrency(overview.totalEarnings - Math.round(overview.totalEarnings * 0.01))}
+              {formatCurrency(overview.totalEarnings - Math.round(overview.totalEarnings * TDS_194O_RATE))}
             </div>
             <div className="text-[11px] text-muted-foreground mt-0.5">Realized to Bank Account</div>
           </div>

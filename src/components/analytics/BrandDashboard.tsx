@@ -15,6 +15,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Button, ToastContainer, useToasts } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils-client";
 import { copyToClipboard } from "@/lib/clipboard";
+import { GST_STANDARD_RATE, GST_STANDARD_RATE_PERCENT_STRING } from "@/constants";
 import {
   DollarSign,
   Layers,
@@ -316,9 +317,9 @@ export default function BrandDashboard({ data, currentFY }: BrandDashboardProps)
               Input Tax Credit (GST)
             </div>
             <div className="text-lg sm:text-xl font-extrabold text-foreground tabular-nums">
-              {formatCurrency(Math.round(overview.totalSpent * 0.18))}
+              {formatCurrency(Math.round(overview.totalSpent * GST_STANDARD_RATE))}
             </div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">18% GST Invoiced</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">{GST_STANDARD_RATE_PERCENT_STRING} GST Invoiced</div>
           </div>
 
           <div className="p-3.5 rounded-xl bg-muted/40 border border-border">

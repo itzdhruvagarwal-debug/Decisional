@@ -1,3 +1,9 @@
+import {
+  DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
+  DEFAULT_GATEWAY_FEE_PERCENT,
+  DEFAULT_PRODUCT_HANDLING_FEE_PERCENT,
+} from "@/constants/deals";
+
 /**
  * Centralized Action Eligibility Rules & Predicates
  * 
@@ -1312,8 +1318,8 @@ export function calculateCampaignActivationCostPaise(params: {
     maxInfluencers,
     productValue,
     requiresProduct,
-    platformFeePercent = 10,
-    gatewayFeePercent = 2,
+    platformFeePercent = DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
+    gatewayFeePercent = DEFAULT_GATEWAY_FEE_PERCENT,
   } = params;
 
   let slots = 1;
@@ -1329,7 +1335,10 @@ export function calculateCampaignActivationCostPaise(params: {
     if (isProductOnly) {
       handlingFeePerSlot = Math.max(0, Math.round((productValue * platformFeePercent) / 100));
     } else {
-      handlingFeePerSlot = Math.max(0, Math.round(productValue * 0.02));
+      handlingFeePerSlot = Math.max(
+        0,
+        Math.round((productValue * DEFAULT_PRODUCT_HANDLING_FEE_PERCENT) / 100)
+      );
     }
   }
 
@@ -1455,8 +1464,8 @@ export function checkOfferAcceptanceEligibility(
       };
     }
 
-    const platformFee = Math.round((input.offerAmount * 10) / 100);
-    const gatewayFee = Math.round(((input.offerAmount + platformFee) * 2) / 100);
+    const platformFee = Math.round((input.offerAmount * DEFAULT_BRAND_PLATFORM_FEE_PERCENT) / 100);
+    const gatewayFee = Math.round(((input.offerAmount + platformFee) * DEFAULT_GATEWAY_FEE_PERCENT) / 100);
     const requiredTotalPaise = input.offerAmount + platformFee + gatewayFee;
     const balance = input.walletBalance ?? 0;
 

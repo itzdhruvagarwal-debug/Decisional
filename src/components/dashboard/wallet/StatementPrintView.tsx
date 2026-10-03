@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { ShieldCheck, FileText, Printer, X, ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils-client";
 import { Button } from "@/components/ui";
+import { TDS_194O_RATE_PERCENT_STRING, TDS_194J_RATE_PERCENT_STRING } from "@/constants";
 
 export interface StatementTransaction {
   id: string;
@@ -277,8 +278,8 @@ export function StatementPrintView({
 
           <div className="space-y-1.5 leading-relaxed text-muted-foreground">
             <p>
-              1. <strong>TDS Compliance:</strong> Tax Deduction at Source (TDS) under Section 194-O (0.1% for e-commerce transactions above statutory thresholds) 
-              or Section 194-J (for professional fees) is withheld and deposited directly with the Government of India against verified PAN.
+              1. <strong>TDS Compliance:</strong> Tax Deduction at Source (TDS) under Section 194-O ({TDS_194O_RATE_PERCENT_STRING} for e-commerce transactions above statutory thresholds) 
+              or Section 194-J ({TDS_194J_RATE_PERCENT_STRING} for professional fees) is withheld and deposited directly with the Government of India against verified PAN.
             </p>
             <p>
               2. <strong>Escrow Reassurance:</strong> All campaign funds are held in RBI-compliant escrow accounts and are disbursed strictly upon deliverable approval.

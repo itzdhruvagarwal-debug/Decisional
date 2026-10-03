@@ -11,6 +11,17 @@ import { getDealTotalAmount } from "./utils";
 import { createActivityLog } from "./audit";
 import { PLATFORM_CONFIG } from "./platform-config";
 import { env } from "@/env";
+import {
+  DEFAULT_BRAND_PLATFORM_FEE_PERCENT,
+  DEFAULT_GATEWAY_FEE_PERCENT,
+  DEFAULT_BRAND_REVIEW_PERIOD_HOURS,
+  DEFAULT_INCLUDED_REVISIONS,
+  DEFAULT_COST_PER_EXTRA_REVISION_PAISE,
+  DEFAULT_CANCELLATION_FEE_AFTER_APPROVAL_PERCENT,
+  DEFAULT_CANCELLATION_FEE_AFTER_SUBMISSION_PERCENT,
+  DEFAULT_CANCELLATION_FEE_AFTER_POSTING_PERCENT,
+  DEFAULT_BRAND_LATE_APPROVAL_FEE_PERCENT,
+} from "@/constants";
 
 export interface ContractDeliverable {
 type: string;
@@ -71,7 +82,7 @@ afterPosting: number; // 100%
 };
 
 // Late Fees
-brandLateApprovalFee: number; // 5% flat fee if brand delays >48h
+brandLateApprovalFee: number; // Late approval fee if brand delays > review period
 
 contentUsage: {
 organicRepost: string;
@@ -282,22 +293,22 @@ disclosureRequirement:
 submissionDeadline: campaign.contentDeadline
 ? campaign.contentDeadline.toISOString()
 : addDays(new Date(), 7).toISOString(),
-reviewPeriodHours: 48,
+reviewPeriodHours: DEFAULT_BRAND_REVIEW_PERIOD_HOURS,
 postingDeadline: campaign.postingDeadline
 ? campaign.postingDeadline.toISOString()
 : addDays(new Date(), 14).toISOString(),
 
-includedRevisions: 2,
-costPerExtraRevision: 50000, // INR 500
+includedRevisions: DEFAULT_INCLUDED_REVISIONS,
+costPerExtraRevision: DEFAULT_COST_PER_EXTRA_REVISION_PAISE,
 
 cancellationFee: {
 beforeApproval: 0,
-afterApproval: 30,
-afterSubmission: 70,
-afterPosting: 100,
+afterApproval: DEFAULT_CANCELLATION_FEE_AFTER_APPROVAL_PERCENT,
+afterSubmission: DEFAULT_CANCELLATION_FEE_AFTER_SUBMISSION_PERCENT,
+afterPosting: DEFAULT_CANCELLATION_FEE_AFTER_POSTING_PERCENT,
 },
 
-brandLateApprovalFee: 10, // 10%
+brandLateApprovalFee: DEFAULT_BRAND_LATE_APPROVAL_FEE_PERCENT,
 
 contentUsage: {
 organicRepost:
@@ -407,7 +418,10 @@ switch (deal.status) {
 
   const payoutAmount = Math.round(dealAmount * (payoutPercent / 100));
   // Platform keeps proportional amount of the actual platform fee
-  const platformFeeKept = Math.round((deal.platformFee ?? Math.round(dealAmount * 0.1)) * (payoutPercent / 100));
+  const platformFeeKept = Math.round(
+    (deal.platformFee ?? Math.round((dealAmount * DEFAULT_BRAND_PLATFORM_FEE_PERCENT) / 100)) *
+      (payoutPercent / 100)
+  );
   const refundAmount = Math.max(0, totalHeld - payoutAmount - platformFeeKept);
 
   return {
