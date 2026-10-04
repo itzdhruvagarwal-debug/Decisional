@@ -16,6 +16,8 @@ jobs:
     name: Vercel Preview Deployment
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,7 +32,7 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Deploy Preview to Vercel
-        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        if: env.VERCEL_TOKEN != ''
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -44,6 +46,8 @@ jobs:
     name: Vercel Production Deployment & Automated Migration
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -74,7 +78,7 @@ jobs:
           fi
 
       - name: Deploy Production to Vercel
-        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        if: env.VERCEL_TOKEN != ''
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}

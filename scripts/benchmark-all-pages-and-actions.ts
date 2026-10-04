@@ -1,4 +1,3 @@
-// @ts-nocheck
 import "./mock-server-only";
 import { PrismaClient, DisputeType } from "@prisma/client";
 import { performance } from "node:perf_hooks";
@@ -145,7 +144,7 @@ async function runAllBenchmarks() {
               where: { deletedAt: null },
               take: 5,
               orderBy: { createdAt: "desc" },
-              select: { id: true, title: true, status: true, amount: true, createdAt: true },
+              select: { id: true, status: true, amount: true, createdAt: true },
             },
           },
         },
@@ -207,7 +206,6 @@ async function runAllBenchmarks() {
     await prisma.influencerProfile.findUnique({
       where: { id: influencerId },
       include: {
-        socialAccounts: { select: { platform: true, username: true, followerCount: true, engagementRate: true } },
         reviews: { take: 5, orderBy: { createdAt: "desc" } },
       },
     });
@@ -224,7 +222,6 @@ async function runAllBenchmarks() {
       orderBy: { updatedAt: "desc" },
       select: {
         id: true,
-        title: true,
         status: true,
         amount: true,
         brand: { select: { companyName: true } },
@@ -239,7 +236,6 @@ async function runAllBenchmarks() {
       include: {
         brand: { select: { companyName: true } },
         influencer: { select: { displayName: true } },
-        shipment: true,
       },
     });
   });
@@ -249,7 +245,7 @@ async function runAllBenchmarks() {
     await Promise.all([
       prisma.wallet.findUnique({
         where: { id: walletId },
-        include: { holds: { where: { status: "ACTIVE" } } },
+        include: { transactions: { take: 5 } },
       }),
       prisma.transaction.findMany({
         where: { walletId },
@@ -261,18 +257,12 @@ async function runAllBenchmarks() {
 
   // 10. Messages Inbox (/dashboard/messages)
   await benchmark("10. Messages Inbox (Active Conversation Threads)", "PAGE", "/dashboard/messages", async () => {
-    await prisma.messageThread.findMany({
+    await prisma.deal.findMany({
       where: {
-        OR: [{ participantAId: userId }, { participantBId: userId }],
+        OR: [{ brand: { userId } }, { influencer: { userId } }],
       },
       take: 15,
       orderBy: { updatedAt: "desc" },
-      include: {
-        messages: {
-          take: 1,
-          orderBy: { createdAt: "desc" },
-        },
-      },
     });
   });
 
@@ -309,15 +299,16 @@ async function runAllBenchmarks() {
     await prisma.dispute.findMany({
       take: 10,
       orderBy: { createdAt: "desc" },
-      include: { deal: { select: { title: true, amount: true } } },
+      include: { deal: { select: { amount: true } } },
     });
   });
 
   // 15. Admin Financial Ledger (/admin/financial)
   await benchmark("15. Admin Financial Ledger (Treasury Ledger & Payout Log)", "PAGE", "/admin/financial", async () => {
     await Promise.all([
-      prisma.treasuryLedger.aggregate({
-        _sum: { platformFeePaise: true, tdsPaise: true, grossPaise: true },
+      prisma.transaction.aggregate({
+        where: { status: "COMPLETED" },
+        _sum: { amount: true },
       }),
       prisma.transaction.findMany({
         where: { status: "COMPLETED" },
@@ -344,6 +335,9 @@ async function runAllBenchmarks() {
         brandId,
         title: `Perf Test Campaign ${Date.now()}`,
         description: "Benchmark test run for campaign creation",
+        requirements: "High quality deliverables",
+        contentDeadline: new Date(Date.now() + 86400000 * 7),
+        postingDeadline: new Date(Date.now() + 86400000 * 14),
         totalBudget: 150000,
         fundedAmount: 150000,
         targetCategories: ["lifestyle", "tech"],
@@ -361,10 +355,12 @@ async function runAllBenchmarks() {
         campaignId,
         brandId,
         influencerId,
-        title: `Perf Test Deal ${Date.now()}`,
         amount: 25000,
         totalAmount: 25000,
         influencerPayout: 25000,
+        contractTerms: {},
+        submissionDeadline: new Date(Date.now() + 86400000 * 7),
+        postingDeadline: new Date(Date.now() + 86400000 * 14),
         status: "PENDING_SIGNATURE",
       },
     });
@@ -376,10 +372,10 @@ async function runAllBenchmarks() {
     await prisma.$transaction(async (tx) => {
       const hold = await tx.paymentHold.create({
         data: {
-          walletId,
           dealId,
+          razorpayOrderId: `order_perf_${Date.now()}`,
           amount: 25000,
-          status: "ACTIVE",
+          status: "HELD",
           expiresAt: new Date(Date.now() + 86400000),
         },
       });
@@ -389,24 +385,14 @@ async function runAllBenchmarks() {
 
   // Action 4: Logistics Checkpoint Tracking
   await benchmark("Action 4: logistics:update_checkpoint (AWB tracking update)", "ACTION", "updateShipmentCheckpoint", async () => {
-    const testShipment = await prisma.productShipment.create({
+    await prisma.deal.update({
+      where: { id: dealId },
       data: {
-        dealId,
-        awbCode: `AWB-PERF-${Date.now()}`,
-        courierName: "Delhivery Surface",
-        status: "IN_TRANSIT",
-        currentStatus: "In Transit to Destination Hub",
-        trackingData: [{ status: "PICKED_UP", timestamp: new Date().toISOString() }],
+        shippingAwbCode: `AWB-PERF-${Date.now()}`,
+        shippingCourierName: "Delhivery Surface",
+        productFulfillmentStatus: "DISPATCHED",
       },
     });
-    await prisma.productShipment.update({
-      where: { id: testShipment.id },
-      data: {
-        currentStatus: "Out for Delivery",
-        status: "OUT_FOR_DELIVERY",
-      },
-    });
-    await prisma.productShipment.delete({ where: { id: testShipment.id } });
   });
 
   // Action 5: Content Deliverables Update
@@ -414,7 +400,7 @@ async function runAllBenchmarks() {
     await prisma.deal.update({
       where: { id: dealId },
       data: {
-        deliverableLinks: ["https://instagram.com/p/benchmark_reel_url_123"],
+        submittedContentUrl: "https://instagram.com/p/benchmark_reel_url_123",
         updatedAt: new Date(),
       },
     });
@@ -437,10 +423,9 @@ async function runAllBenchmarks() {
       data: {
         walletId,
         amount: 25000,
-        type: "ESCROW_RELEASE",
+        type: "CREDIT",
         status: "COMPLETED",
         description: "Performance benchmark escrow release",
-        referenceId: `REF-${Date.now()}-${Math.random().toString(36).substring(7)}`,
       },
     });
   });
@@ -459,7 +444,7 @@ async function runAllBenchmarks() {
   await benchmark("Action 9: kyc:pan_verification_check (PAN & TDS lookup)", "ACTION", "verifyPanCompliance", async () => {
     await prisma.indiaTaxCompliance.findFirst({
       where: { userId },
-      select: { id: true, panStatus: true, tdsRateBps: true, isVerified: true },
+      select: { id: true, status: true, tdsSection: true, submittedAt: true },
     });
   });
 
@@ -517,7 +502,7 @@ async function runAllBenchmarks() {
       where: { id: walletId },
       select: { balance: true, isFrozen: true },
     });
-    const isEligible = wallet && !wallet.isFrozen && wallet.balance >= 10000;
+    const _isEligible = wallet && !wallet.isFrozen && wallet.balance >= 10000;
   });
 
   // Summary Table

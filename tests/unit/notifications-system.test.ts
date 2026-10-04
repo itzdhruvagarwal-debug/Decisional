@@ -1,8 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
   groupNotificationsByRecency,
   formatNotificationTime,
-  getNotificationTypeMeta,
   getNotificationHref,
   NotificationItem,
 } from "@/lib/notification-utils";
@@ -301,7 +300,7 @@ describe("Notifications System Unit Tests", () => {
 
   describe("Definition of Done: Offline & Network Interruption Recovery", () => {
     it("should reconcile missed notifications when transitioning from offline to online", async () => {
-      const localState: NotificationItem[] = [
+      const _localState: NotificationItem[] = [
         { id: "1", type: "deal_update", title: "Deal 1", message: "m1", isRead: true, createdAt: new Date() },
       ];
 

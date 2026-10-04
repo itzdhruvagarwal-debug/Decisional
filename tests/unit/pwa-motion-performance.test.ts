@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 
 describe("Cross-Cutting Polish: Motion, Mobile Gestures, Performance & PWA", () => {
   describe("Requirement 1: Motion Audit & Reduced-Motion Accessibility", () => {

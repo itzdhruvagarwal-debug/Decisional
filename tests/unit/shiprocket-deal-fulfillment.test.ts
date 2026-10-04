@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { checkProductFulfillmentEligibility } from "@/lib/action-eligibility";
 import { validateShippingAddress } from "@/services/deal/helpers";
 

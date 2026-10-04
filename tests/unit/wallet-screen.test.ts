@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { formatCurrency } from "@/lib/utils-client";
 import { subscribeToWalletUpdates } from "@/lib/supabase-realtime";
 import { validateWithdrawalAmount } from "@/components/dashboard/wallet/FullScreenWithdrawFlow";

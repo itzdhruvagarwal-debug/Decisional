@@ -13,7 +13,7 @@ describe("Integration Tests: Real Database Transactions & Constraints (PostgreSQ
   let testWalletId = "";
   let testCampaignId = "";
   let testDealId = "";
-  let testProductDealId = "";
+  let _testProductDealId = "";
 
   beforeAll(async () => {
     // 1. Create a real brand user & profile in PostgreSQL
@@ -300,7 +300,7 @@ describe("Integration Tests: Real Database Transactions & Constraints (PostgreSQ
         reviewPeriodHours: 48,
       },
     });
-    testProductDealId = productDeal.id;
+    _testProductDealId = productDeal.id;
 
     const brandWalletBefore = await prisma.wallet.findUnique({
       where: { id: testWalletId },

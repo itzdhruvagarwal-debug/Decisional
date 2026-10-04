@@ -71,7 +71,7 @@ describe("Missing Pages Flow & Business Invariants", () => {
         },
       };
 
-      const formatted = formatCreatorProfileData(rawMockInfluencer as any);
+      const formatted = formatCreatorProfileData(rawMockInfluencer as never);
 
       // Verify sensitive PII is absent
       expect((formatted as unknown as Record<string, unknown>).email).toBeUndefined();

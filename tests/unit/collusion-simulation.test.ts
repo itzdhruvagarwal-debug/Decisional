@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import {
   calculateReviewDiversityRatio,
   calculateInfluencerDRS,
@@ -6,11 +6,10 @@ import {
 } from "@/lib/drs-score";
 import prisma from "@/lib/db";
 import { detectCollusionPatterns } from "@/lib/trust-engine";
-import { DRS_QUALIFIED_DEAL_VALUE_PAISE } from "@/constants";
 
 // Mock prisma and logger for unit test simulation
 vi.mock("@/lib/db", () => {
-  const mockPrisma: any = {
+  const mockPrisma: Record<string, unknown> = {
     user: {
       findUnique: vi.fn(),
     },
@@ -140,7 +139,7 @@ describe("Collusion & Wash-Trading Prevention Engine", () => {
 
     it("flags a pair with repeated minimum-threshold deals and mutual 5-star reviews", async () => {
       // Simulate User lookup
-      (prisma.user.findUnique as any).mockResolvedValue({
+      (prisma.user.findUnique as unknown as Mock).mockResolvedValue({
         id: INFLUENCER_ID,
         userType: "INFLUENCER",
       });
@@ -191,14 +190,14 @@ describe("Collusion & Wash-Trading Prevention Engine", () => {
         },
       ];
 
-      (prisma.deal.findMany as any).mockResolvedValue(mockCollusionDeals);
-      (prisma.reviewFlagRecord.upsert as any).mockResolvedValue({ id: "flag-rec-1" });
+      (prisma.deal.findMany as unknown as Mock).mockResolvedValue(mockCollusionDeals);
+      (prisma.reviewFlagRecord.upsert as unknown as Mock).mockResolvedValue({ id: "flag-rec-1" });
 
       await detectCollusionPatterns(INFLUENCER_ID);
 
       // Verify upsert was called with high risk score and PENDING status
       expect(prisma.reviewFlagRecord.upsert).toHaveBeenCalledTimes(1);
-      const upsertArgs = (prisma.reviewFlagRecord.upsert as any).mock.calls[0][0];
+      const upsertArgs = (prisma.reviewFlagRecord.upsert as unknown as Mock).mock.calls[0]![0];
 
       expect(upsertArgs.where).toEqual({
         influencerUserId_brandUserId: {
@@ -217,7 +216,7 @@ describe("Collusion & Wash-Trading Prevention Engine", () => {
     });
 
     it("does not flag pairs with high-value authentic deals above the threshold multiplier", async () => {
-      (prisma.user.findUnique as any).mockResolvedValue({
+      (prisma.user.findUnique as unknown as Mock).mockResolvedValue({
         id: INFLUENCER_ID,
         userType: "INFLUENCER",
       });
@@ -256,7 +255,7 @@ describe("Collusion & Wash-Trading Prevention Engine", () => {
         },
       ];
 
-      (prisma.deal.findMany as any).mockResolvedValue(authenticDeals);
+      (prisma.deal.findMany as unknown as Mock).mockResolvedValue(authenticDeals);
 
       await detectCollusionPatterns(INFLUENCER_ID);
 
@@ -265,7 +264,7 @@ describe("Collusion & Wash-Trading Prevention Engine", () => {
     });
 
     it("does not flag pairs where mutual reviews are not 5-star ratings", async () => {
-      (prisma.user.findUnique as any).mockResolvedValue({
+      (prisma.user.findUnique as unknown as Mock).mockResolvedValue({
         id: INFLUENCER_ID,
         userType: "INFLUENCER",
       });
@@ -304,7 +303,7 @@ describe("Collusion & Wash-Trading Prevention Engine", () => {
         },
       ];
 
-      (prisma.deal.findMany as any).mockResolvedValue(mixedReviewDeals);
+      (prisma.deal.findMany as unknown as Mock).mockResolvedValue(mixedReviewDeals);
 
       await detectCollusionPatterns(INFLUENCER_ID);
 

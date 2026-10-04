@@ -27,7 +27,7 @@ vi.mock("@/lib/logger", async (importOriginal) => {
 });
 
 vi.mock("@/lib/db", () => {
-  const mockPrisma: any = {
+  const mockPrisma: Record<string, unknown> = {
     deal: {
       findUnique: vi.fn(),
       findMany: vi.fn().mockResolvedValue([]),
@@ -272,7 +272,7 @@ describe("Follower Authenticity & Fraud Detection Hardening", () => {
         requiresProduct: false,
         influencer: { userId: "creator-1" },
         brand: { userId: "brand-1" },
-      } as any);
+      } as never);
 
       await expect(
         ReviewService.createReview("brand-1", {
@@ -291,7 +291,7 @@ describe("Follower Authenticity & Fraud Detection Hardening", () => {
         requiresProduct: false,
         influencer: { userId: "creator-1" },
         brand: { userId: "brand-1" },
-      } as any);
+      } as never);
 
       vi.mocked(prisma.review.findUnique).mockResolvedValueOnce(null);
       vi.mocked(prisma.review.count).mockResolvedValueOnce(0);
@@ -299,14 +299,14 @@ describe("Follower Authenticity & Fraud Detection Hardening", () => {
       
       // User findUnique called for reviewer, then for receiver
       vi.mocked(prisma.user.findUnique)
-        .mockResolvedValueOnce({ id: "brand-1", userType: "BRAND" } as any)
+        .mockResolvedValueOnce({ id: "brand-1", userType: "BRAND" } as never)
         .mockResolvedValueOnce({
           id: "creator-1",
           userType: "INFLUENCER",
           influencerProfile: { id: "inf-1" },
-        } as any);
+        } as never);
 
-      vi.mocked(prisma.review.create).mockResolvedValueOnce({ id: "rev-1", rating: 5 } as any);
+      vi.mocked(prisma.review.create).mockResolvedValueOnce({ id: "rev-1", rating: 5 } as never);
 
       const review = await ReviewService.createReview("brand-1", {
         dealId: "deal-paid",
@@ -325,7 +325,7 @@ describe("Follower Authenticity & Fraud Detection Hardening", () => {
         requiresProduct: false,
         influencer: { userId: "creator-1" },
         brand: { userId: "brand-1" },
-      } as any);
+      } as never);
 
       vi.mocked(prisma.review.findUnique).mockResolvedValueOnce(null);
       // Already 3 reviews exist in last 30 days
@@ -348,7 +348,7 @@ describe("Follower Authenticity & Fraud Detection Hardening", () => {
         requiresProduct: false,
         influencer: { userId: "creator-1" },
         brand: { userId: "brand-1" },
-      } as any);
+      } as never);
 
       vi.mocked(prisma.review.findUnique).mockResolvedValueOnce(null);
       vi.mocked(prisma.review.count).mockResolvedValueOnce(1);
@@ -356,7 +356,7 @@ describe("Follower Authenticity & Fraud Detection Hardening", () => {
       vi.mocked(prisma.review.findFirst).mockResolvedValueOnce({
         id: "recent-rev",
         createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
-      } as any);
+      } as never);
 
       await expect(
         ReviewService.createReview("brand-1", {
@@ -375,7 +375,7 @@ describe("Follower Authenticity & Fraud Detection Hardening", () => {
         requiresProduct: false,
         influencer: { userId: "creator-1" },
         brand: { userId: "brand-1" },
-      } as any);
+      } as never);
 
       vi.mocked(prisma.review.findUnique).mockResolvedValueOnce(null);
       vi.mocked(prisma.review.count).mockResolvedValueOnce(1);
@@ -384,7 +384,7 @@ describe("Follower Authenticity & Fraud Detection Hardening", () => {
         .mockResolvedValueOnce({
           id: "dup-text-rev",
           comment: "Super professional creator, will definitely hire again for future campaigns!",
-        } as any); // duplicate text match!
+        } as never); // duplicate text match!
 
       await expect(
         ReviewService.createReview("brand-1", {
@@ -425,7 +425,7 @@ describe("Follower Authenticity & Fraud Detection Hardening", () => {
           id: "inf-prof-1",
           followerAuthenticityScore: 32,
         },
-      } as any);
+      } as never);
 
       const result = await AdminService.resolveInfluencerFraudAppeal(
         "admin-user-1",
@@ -453,7 +453,7 @@ describe("Follower Authenticity & Fraud Detection Hardening", () => {
           id: "inf-prof-2",
           followerAuthenticityScore: 25,
         },
-      } as any);
+      } as never);
 
       const result = await AdminService.resolveInfluencerFraudAppeal(
         "admin-user-1",
@@ -524,7 +524,7 @@ describe("Follower Authenticity & Fraud Detection Hardening", () => {
           id: "inf-prof-app-1",
           followerAuthenticityScore: 38,
         },
-      } as any);
+      } as never);
 
       vi.mocked(prisma.activityLog.findFirst).mockResolvedValueOnce(null);
 
@@ -559,14 +559,14 @@ describe("Follower Authenticity & Fraud Detection Hardening", () => {
           id: "inf-prof-app-2",
           followerAuthenticityScore: 30,
         },
-      } as any);
+      } as never);
 
       vi.mocked(prisma.activityLog.findFirst).mockResolvedValueOnce({
         id: "recent-act-1",
         userId: "creator-appeal-2",
         action: "FRAUD_APPEAL_SUBMITTED",
         createdAt: new Date(),
-      } as any);
+      } as never);
 
       await expect(
         AdminService.submitInfluencerFraudAppeal("creator-appeal-2", {

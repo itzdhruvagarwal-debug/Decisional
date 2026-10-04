@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MatchingService } from "@/services/matching.service";
 import prisma from "@/lib/db";
-import { redis } from "@/lib/redis";
 
 // Mock Sentry, logger, prisma, redis
 vi.mock("@sentry/nextjs", () => ({

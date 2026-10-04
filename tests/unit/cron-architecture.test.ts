@@ -134,8 +134,6 @@ describe("Upstash QStash Cron Job Schedule Definitions", () => {
 });
 
 describe("Physical Cron Route Endpoints Audit", () => {
-  const cronBaseDir = path.join(process.cwd(), "src/app/api/cron");
-
   it("verifies every route file exists on disk and is guarded", () => {
     for (const job of CRON_JOBS) {
       const routeFile = path.join(process.cwd(), "src/app", job.path, "route.ts");

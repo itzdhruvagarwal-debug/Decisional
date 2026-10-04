@@ -21,7 +21,6 @@ vi.mock("@/lib/redis", () => ({
 }));
 
 import {
-  createOrder,
   createLinkedAccount,
   releaseTransferHold,
   reverseTransfer,

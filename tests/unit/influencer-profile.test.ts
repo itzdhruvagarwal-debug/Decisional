@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { InfluencerProfileData, CampaignProofItem, RateCardItem } from "@/components/profile/types";
+import { InfluencerProfileData } from "@/components/profile/types";
 
 describe("Influencer Profile & Verified Campaign Proof System", () => {
   const mockProfile: InfluencerProfileData = {

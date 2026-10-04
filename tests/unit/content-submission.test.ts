@@ -1,10 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
   validateDeliverableFile,
   formatFileSize,
-  MAX_DELIVERABLE_SIZE_BYTES,
-  SUPPORTED_MIME_TYPES,
-  SUPPORTED_EXTENSIONS,
 } from "@/lib/direct-upload";
 import { contentSubmissionSchema } from "@/lib/validations";
 import { detectContactLeak } from "@/lib/contact-leak-detector";

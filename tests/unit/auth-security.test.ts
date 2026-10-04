@@ -66,7 +66,6 @@ vi.mock("@/lib/redis", () => {
 
 import { redis } from "@/lib/redis";
 import { requireActiveAdmin, invalidateAdminCache } from "@/lib/admin-auth";
-import { AppError } from "@/lib/errors";
 import { sendOTP, verifyOTP, normalizeIndianPhone } from "@/lib/sms";
 import { rateLimit, checkRateLimit } from "@/lib/rate-limit";
 import { revokeAllUserSessions, isTokenRevoked } from "@/lib/blacklist";
@@ -273,7 +272,7 @@ describe("Unit Tests: Authentication & Authorization Layer Hardening", () => {
       // Anti-enumeration test: regardless of user presence, response message must remain identical
       vi.spyOn(prisma.user, "findUnique").mockResolvedValueOnce({
         id: "existing_user_1",
-      } as any);
+      } as never);
 
       const req = new NextRequest("http://localhost:3000/api/auth/verify-email-otp", {
         method: "PUT",
@@ -389,9 +388,9 @@ describe("Unit Tests: Authentication & Authorization Layer Hardening", () => {
         passwordHash,
         twoFactorSecret: "mockSecret",
         isTwoFactorEnabled: true,
-      } as any);
+      } as never);
 
-      vi.spyOn(prisma.user, "update").mockResolvedValue({} as any);
+      vi.spyOn(prisma.user, "update").mockResolvedValue({} as never);
 
       // Case 1: Missing credentials -> 400
       const req1 = new NextRequest("http://localhost:3000/api/user/2fa/disable", {
@@ -453,20 +452,20 @@ describe("Unit Tests: Authentication & Authorization Layer Hardening", () => {
     it("should prevent replay attacks by atomically consuming single-use reset token", async () => {
       let tokenInDb: string | null = hashedResetToken;
 
-      vi.spyOn(prisma.user, "findFirst").mockImplementation((async (args: any) => {
+      vi.spyOn(prisma.user, "findFirst").mockImplementation((async (args: { where: { resetToken?: unknown } }) => {
         if (tokenInDb && args.where.resetToken === tokenInDb) {
           return { id: mockUserId };
         }
         return null;
-      }) as any);
+      }) as never);
 
-      vi.spyOn(prisma.user, "updateMany").mockImplementation((async (args: any) => {
+      vi.spyOn(prisma.user, "updateMany").mockImplementation((async (args: { where: { resetToken?: unknown } }) => {
         if (tokenInDb && args.where.resetToken === tokenInDb) {
           tokenInDb = null;
           return { count: 1 };
         }
         return { count: 0 };
-      }) as any);
+      }) as never);
 
       vi.spyOn(prisma.refreshToken, "updateMany").mockResolvedValue({ count: 0 });
 

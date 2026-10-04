@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import crypto from "node:crypto";
 import { verifyWebhookSignature, verifyPaymentSignature } from "@/lib/razorpay";
 import { publishWebhookJob, WebhookJobPayload } from "@/lib/qstash";
@@ -149,7 +149,7 @@ describe("Unit Tests: Webhook Signature Verification, Hardening & Idempotency", 
       const processedEvents = new Set<string>();
       const _topUpCompletedCount = 0;
 
-      (vi.spyOn(prisma.processedWebhookEvent, "findUnique") as any).mockImplementation(async ({ where }: any) => {
+      (vi.spyOn(prisma.processedWebhookEvent, "findUnique") as unknown as Mock).mockImplementation(async ({ where }: { where: { eventId: string } }) => {
         if (processedEvents.has(where.eventId)) {
           return {
             id: "proc_1",
@@ -163,7 +163,7 @@ describe("Unit Tests: Webhook Signature Verification, Hardening & Idempotency", 
         return null;
       });
 
-      (vi.spyOn(prisma.processedWebhookEvent, "create") as any).mockImplementation(async ({ data }: any) => {
+      (vi.spyOn(prisma.processedWebhookEvent, "create") as unknown as Mock).mockImplementation(async ({ data }: { data: { eventId: string; eventType: string; payload?: unknown } }) => {
         processedEvents.add(data.eventId);
         return {
           id: "proc_" + Date.now(),
@@ -180,14 +180,14 @@ describe("Unit Tests: Webhook Signature Verification, Hardening & Idempotency", 
         walletId: "w_topup_5x",
         amount: 50_000,
         status: "PENDING",
-      } as any);
+      } as never);
 
       let walletIncrementCount = 0;
-      vi.spyOn(prisma, "$transaction").mockImplementation(async (cb: any) => cb(prisma));
-      (vi.spyOn(prisma.transaction, "updateMany") as any).mockResolvedValue({ count: 1 });
-      (vi.spyOn(prisma.wallet, "update") as any).mockImplementation(async () => {
+      vi.spyOn(prisma, "$transaction").mockImplementation(async (cb: (tx: typeof prisma) => Promise<unknown>) => cb(prisma));
+      (vi.spyOn(prisma.transaction, "updateMany") as unknown as Mock).mockResolvedValue({ count: 1 });
+      (vi.spyOn(prisma.wallet, "update") as unknown as Mock).mockImplementation(async () => {
         walletIncrementCount++;
-        return {} as any;
+        return {} as never;
       });
 
       const eventId = "payment.captured:pay_5x_test_12345";
@@ -231,18 +231,18 @@ describe("Unit Tests: Webhook Signature Verification, Hardening & Idempotency", 
       const expectedAmount = 100_000; // ₹1,000 in paise
       const webhookCapturedAmount = 60_000; // ₹600 in paise (mismatch!)
 
-      vi.spyOn(prisma.processedWebhookEvent, "findUnique").mockResolvedValue(null as any);
-      vi.spyOn(prisma.processedWebhookEvent, "create").mockResolvedValue({} as any);
+      vi.spyOn(prisma.processedWebhookEvent, "findUnique").mockResolvedValue(null as never);
+      vi.spyOn(prisma.processedWebhookEvent, "create").mockResolvedValue({} as never);
 
       vi.spyOn(prisma.transaction, "findFirst").mockResolvedValue({
         id: "tx_mismatch_1",
         walletId: "w_mismatch_1",
         amount: expectedAmount,
         status: "PENDING",
-      } as any);
+      } as never);
 
       let updatedStatus = "PENDING";
-      (vi.spyOn(prisma.transaction, "updateMany") as any).mockImplementation(async ({ data }: any) => {
+      (vi.spyOn(prisma.transaction, "updateMany") as unknown as Mock).mockImplementation(async ({ data }: { data: { status?: string } }) => {
         if (data.status) {
           updatedStatus = data.status;
         }
@@ -282,7 +282,7 @@ describe("Unit Tests: Webhook Signature Verification, Hardening & Idempotency", 
   describe("Requirement 6: Terminal-State Guard", () => {
     it("should refuse processing and return Already terminal when transaction is COMPLETED, FAILED, or REVERSED via real processWebhookEventInternal", async () => {
       vi.spyOn(prisma.processedWebhookEvent, "findUnique").mockResolvedValue(null);
-      vi.spyOn(prisma.processedWebhookEvent, "create").mockResolvedValue({} as any);
+      vi.spyOn(prisma.processedWebhookEvent, "create").mockResolvedValue({} as never);
       const completeTopUpSpy = vi.spyOn(PaymentService, "completeWalletTopUp");
 
       const terminalStatuses = ["COMPLETED", "FAILED", "REVERSED"];
@@ -293,7 +293,7 @@ describe("Unit Tests: Webhook Signature Verification, Hardening & Idempotency", 
           walletId: "w_terminal",
           amount: 50_000,
           status,
-        } as any);
+        } as never);
 
         const jobPayload: WebhookJobPayload = {
           eventId: `payment.captured:pay_terminal_${status}`,
@@ -375,7 +375,7 @@ describe("Unit Tests: Webhook Signature Verification, Hardening & Idempotency", 
     });
 
     it("markWebhookProcessed should create event and handle P2002 duplicate gracefully", async () => {
-      const createSpy = vi.spyOn(prisma.processedWebhookEvent, "create").mockResolvedValueOnce({
+      vi.spyOn(prisma.processedWebhookEvent, "create").mockResolvedValueOnce({
         id: "rec_2",
         eventId: "evt_new",
         eventType: "payment.captured",

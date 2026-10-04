@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   CATEGORY_BASELINE_CPV_PAISE,
   DEFAULT_BASELINE_CPV_PAISE,
-  getCategoryBaselineCpv,
   getCategoryBaselineCpvSync,
   getCategoryBaselineDetails,
   updateCategoryBaselineCpv,
@@ -14,7 +13,6 @@ import {
   encodeMatchingPriority,
   decodeMatchingPriority,
   stripMatchingPriority,
-  MATCHING_PRIORITY_PRESETS,
 } from "@/services/matching.service";
 import * as Sentry from "@sentry/nextjs";
 import { logger } from "@/lib/logger";
