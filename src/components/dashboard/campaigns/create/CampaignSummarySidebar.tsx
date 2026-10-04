@@ -141,31 +141,79 @@ function SidebarContent({ formData, walletBalancePaise = 0 }: CampaignSummarySid
 
       {/* Creator Reach & Tier Estimator */}
       {(() => {
-        const getCreatorTier = (minFollowers: number) => {
-          if (minFollowers < 10000) return { tier: "Nano Creators", range: "< 10K", reach: 20000 };
-          if (minFollowers < 50000) return { tier: "Micro Creators", range: "10K–50K", reach: 75000 };
-          if (minFollowers < 500000) return { tier: "Mid-Tier Creators", range: "50K–500K", reach: 350000 };
-          return { tier: "Macro Creators", range: "500K+", reach: 1200000 };
-        };
+        const minFollowers = Math.max(0, formData.minFollowers || 0);
+        const maxFollowers = formData.maxFollowers && formData.maxFollowers > minFollowers ? formData.maxFollowers : null;
+        const slots = Math.max(1, formData.maxInfluencers || 1);
 
-        const tierInfo = getCreatorTier(formData.minFollowers || 0);
-        const totalProjectedReach = tierInfo.reach * (formData.maxInfluencers || 1);
+        let tier = "Nano Creators";
+        let tierRange = "< 10K";
+        if (minFollowers >= 500000) {
+          tier = "Macro Creators";
+          tierRange = "500K+";
+        } else if (minFollowers >= 50000) {
+          tier = "Mid-Tier Creators";
+          tierRange = "50K–500K";
+        } else if (minFollowers >= 10000) {
+          tier = "Micro Creators";
+          tierRange = "10K–50K";
+        }
+
+        let estimatedFollowersPerCreator = minFollowers;
+        if (maxFollowers) {
+          estimatedFollowersPerCreator = Math.round((minFollowers + maxFollowers) / 2);
+        } else if (minFollowers > 0) {
+          const multiplier = minFollowers < 10000 ? 1.4 : minFollowers < 50000 ? 1.3 : 1.2;
+          estimatedFollowersPerCreator = Math.round(minFollowers * multiplier);
+        } else {
+          estimatedFollowersPerCreator = 1000;
+        }
+
+        let totalImpressionsPerCreator = 0;
+        const deliverables = formData.deliverables && formData.deliverables.length > 0
+          ? formData.deliverables
+          : [{ type: "INSTAGRAM_POST", count: 1 }];
+
+        for (const item of deliverables) {
+          const count = Number(item.count) || 1;
+          const type = String(item.type || "").toUpperCase();
+          let reachRate = 0.30;
+          if (type.includes("REEL") || type.includes("SHORT")) {
+            reachRate = 0.45;
+          } else if (type.includes("STORY")) {
+            reachRate = 0.12;
+          } else if (type.includes("VIDEO")) {
+            reachRate = 0.35;
+          }
+          totalImpressionsPerCreator += Math.round(estimatedFollowersPerCreator * reachRate * count);
+        }
+
+        const minFloor = Math.round(minFollowers * 0.25 * deliverables.reduce((acc, d) => acc + (d.count || 1), 0));
+        totalImpressionsPerCreator = Math.max(minFloor, totalImpressionsPerCreator);
+
+        const totalProjectedReach = totalImpressionsPerCreator * slots;
+
+        const formatImpressions = (val: number): string => {
+          if (val >= 1000000) return `~${(val / 1000000).toFixed(1)}M impressions`;
+          if (val >= 10000) return `~${Math.round(val / 1000)}K impressions`;
+          if (val >= 1000) return `~${(val / 1000).toFixed(1)}K impressions`;
+          return `~${val} impressions`;
+        };
 
         return (
           <div className="p-3.5 rounded-2xl bg-muted/40 border border-border text-xs space-y-2">
             <div className="flex items-center justify-between text-muted-foreground">
               <span className="font-bold text-foreground flex items-center gap-1.5">
                 <span className="text-primary font-bold">✨</span>
-                <span>{tierInfo.tier}</span>
+                <span>{tier}</span>
               </span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-card border border-border">
-                {tierInfo.range}
+                {tierRange}
               </span>
             </div>
             <div className="flex items-center justify-between pt-1 border-t border-border/60">
               <span className="text-[11px] text-muted-foreground">Projected Reach</span>
               <span className="font-bold text-primary tabular-nums font-mono text-xs">
-                ~{totalProjectedReach >= 1000000 ? `${(totalProjectedReach / 1000000).toFixed(1)}M` : `${Math.round(totalProjectedReach / 1000)}K`} impressions
+                {formatImpressions(totalProjectedReach)}
               </span>
             </div>
           </div>
