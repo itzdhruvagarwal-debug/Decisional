@@ -175,6 +175,17 @@ function buildBudgetAndTimelineUpdate(data: Record<string, unknown>, updateData:
   if (data.postingDeadline !== undefined) {
     updateData.postingDeadline = new Date(data.postingDeadline as string);
   }
+
+  const cDate = updateData.contentDeadline instanceof Date ? updateData.contentDeadline : undefined;
+  const pDate = updateData.postingDeadline instanceof Date ? updateData.postingDeadline : undefined;
+  const aDate = updateData.applicationDeadline instanceof Date ? updateData.applicationDeadline : undefined;
+
+  if (cDate && pDate && pDate < cDate) {
+    throw AppError.badRequest("Posting deadline must be after content deadline");
+  }
+  if (aDate && cDate && aDate > cDate) {
+    throw AppError.badRequest("Application deadline must be before or on content deadline");
+  }
 }
 function buildProductSeedingUpdate(data: Record<string, unknown>, updateData: Prisma.CampaignUpdateInput) {
   if (data.requiresProduct !== undefined) updateData.requiresProduct = Boolean(data.requiresProduct);

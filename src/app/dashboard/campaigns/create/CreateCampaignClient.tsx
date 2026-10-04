@@ -987,6 +987,8 @@ export default function CreateCampaignClient() {
                       value={formData.applicationDeadline}
                       onChange={(e) => setFormData({ ...formData, applicationDeadline: e.target.value })}
                       error={fieldErrors.applicationDeadline}
+                      min={new Date().toISOString().split("T")[0]}
+                      max={formData.contentDeadline || undefined}
                       fullWidth
                     />
 
@@ -999,6 +1001,8 @@ export default function CreateCampaignClient() {
                         onChange={(e) => setFormData({ ...formData, contentDeadline: e.target.value })}
                         required
                         error={fieldErrors.contentDeadline}
+                        min={formData.applicationDeadline || new Date().toISOString().split("T")[0]}
+                        max={formData.postingDeadline || undefined}
                         fullWidth
                       />
 
@@ -1010,6 +1014,7 @@ export default function CreateCampaignClient() {
                         onChange={(e) => setFormData({ ...formData, postingDeadline: e.target.value })}
                         required
                         error={fieldErrors.postingDeadline}
+                        min={formData.contentDeadline || new Date().toISOString().split("T")[0]}
                         fullWidth
                       />
                     </div>

@@ -153,6 +153,7 @@ customWeights: z.object({
   validateBudgetSettings(value, ctx);
   validateProductSettings(value, ctx);
   validateBudgetLimitsAndAges(value, ctx);
+  validateDeadlineSettings(value, ctx);
 })
 interface CampaignValidationValue {
   requiresProduct?: boolean | undefined;
@@ -162,6 +163,35 @@ interface CampaignValidationValue {
   minFollowers?: number | undefined;
   targetAgeMin?: number | null | undefined;
   targetAgeMax?: number | null | undefined;
+  applicationDeadline?: string | undefined;
+  contentDeadline?: string | undefined;
+  postingDeadline?: string | undefined;
+}
+
+function validateDeadlineSettings(value: CampaignValidationValue, ctx: z.RefinementCtx) {
+  if (value.contentDeadline && value.postingDeadline) {
+    const contentDate = new Date(value.contentDeadline);
+    const postingDate = new Date(value.postingDeadline);
+    if (!Number.isNaN(contentDate.getTime()) && !Number.isNaN(postingDate.getTime())) {
+      if (postingDate < contentDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["postingDeadline"],
+          message: "Posting deadline must be after content deadline",
+        });
+      }
+      if (value.applicationDeadline) {
+        const appDate = new Date(value.applicationDeadline);
+        if (!Number.isNaN(appDate.getTime()) && appDate > contentDate) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["applicationDeadline"],
+            message: "Application deadline must be before or on content deadline",
+          });
+        }
+      }
+    }
+  }
 }
 
 function validateBudgetSettings(value: CampaignValidationValue, ctx: z.RefinementCtx) {

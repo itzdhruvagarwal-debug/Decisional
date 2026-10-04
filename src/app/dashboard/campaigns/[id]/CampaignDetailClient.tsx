@@ -707,25 +707,61 @@ export default function CampaignDetailClient({
               {campaign.applicationDeadline && (
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Applications Close</span>
-                  <span className="font-bold text-foreground">
-                    {formatDate(campaign.applicationDeadline)}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`font-bold tabular-nums ${campaign.status === "CANCELLED" ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                      {formatDate(campaign.applicationDeadline)}
+                    </span>
+                    {campaign.status === "CANCELLED" && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-destructive/10 text-destructive">
+                        Closed
+                      </span>
+                    )}
+                    {campaign.status === "COMPLETED" && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-verified-muted text-verified">
+                        Concluded
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
               {campaign.contentDeadline && (
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Draft Submission Due</span>
-                  <span className="font-bold text-foreground">
-                    {formatDate(campaign.contentDeadline)}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`font-bold tabular-nums ${campaign.status === "CANCELLED" ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                      {formatDate(campaign.contentDeadline)}
+                    </span>
+                    {campaign.status === "CANCELLED" && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-destructive/10 text-destructive">
+                        Closed
+                      </span>
+                    )}
+                    {campaign.status === "COMPLETED" && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-verified-muted text-verified">
+                        Concluded
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
               {campaign.postingDeadline && (
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Go-Live Posting Target</span>
-                  <span className="font-bold text-foreground">
-                    {formatDate(campaign.postingDeadline)}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`font-bold tabular-nums ${campaign.status === "CANCELLED" ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                      {formatDate(campaign.postingDeadline)}
+                    </span>
+                    {campaign.status === "CANCELLED" && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-destructive/10 text-destructive">
+                        Closed
+                      </span>
+                    )}
+                    {campaign.status === "COMPLETED" && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-verified-muted text-verified">
+                        Concluded
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
               <div className="flex items-center justify-between pt-2 border-t border-border">
