@@ -11,7 +11,7 @@ import {
   ArrowUpRight,
   AlertCircle,
 } from "lucide-react";
-import { Button, Spinner, ListItem } from "@/components/ui";
+import { Button, Spinner } from "@/components/ui";
 import EmptyState from "@/components/ui/EmptyState";
 import { formatCurrency, formatNumber } from "@/lib/utils-client";
 import { CampaignApplication } from "./CampaignDetailHelpers";
@@ -84,10 +84,9 @@ export function ApplicationsList({
         const acceptanceEligibility = checkApplicationAcceptanceEligibility(application, campaign);
 
         return (
-          <ListItem
-            as="article"
+          <article
             key={application.id}
-            className="space-y-4 shadow-xs"
+            className="rounded-2xl border border-border bg-card p-4 sm:p-5 space-y-4 shadow-xs hover:border-border/80 transition-all"
           >
             {/* Top Row: Creator Identity & Status */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
@@ -269,7 +268,7 @@ export function ApplicationsList({
                 )}
               </div>
             </div>
-          </ListItem>
+          </article>
         );
       })}
     </div>
