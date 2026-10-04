@@ -16,6 +16,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui";
+import { formatDate } from "@/lib/utils-client";
 
 interface AppealStatusResponse {
   success: boolean;
@@ -159,7 +160,7 @@ export function AuthenticityAppealBanner() {
               <Clock className="w-3.5 h-3.5 text-warning" /> Appeal Submitted & Pending Manual Audit
             </span>
             <span className="text-[10px] text-muted-foreground font-mono">
-              {new Date(latestAppeal.createdAt).toLocaleDateString()}
+              {formatDate(latestAppeal.createdAt)}
             </span>
           </div>
           <p className="text-muted-foreground italic">

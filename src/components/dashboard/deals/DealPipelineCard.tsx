@@ -22,6 +22,7 @@ import {
   Package,
   Flame,
   Zap,
+  XCircle,
 } from "lucide-react";
 import { Button, Badge } from "@/components/ui";
 import {
@@ -137,8 +138,10 @@ export function getDealProgressStep(status: string): { step: number; total: numb
   }
 }
 
-function checkIsDueSoon(deadlineStr?: string | null): boolean {
+function checkIsDueSoon(deadlineStr?: string | null, status?: string): boolean {
   if (!deadlineStr) return false;
+  const s = (status || "").toUpperCase();
+  if (s === "CANCELLED" || s === "COMPLETED" || s === "VERIFIED" || s === "DISPUTED") return false;
   try {
     const deadline = new Date(deadlineStr).getTime();
     const now = Date.now();
@@ -162,7 +165,7 @@ export function DealPipelineCard({
   const submitEligibility = checkContentSubmissionEligibility(deal as unknown as Parameters<typeof checkContentSubmissionEligibility>[0]);
   const signingEligibility = checkContractSigningEligibility(deal as unknown as Parameters<typeof checkContractSigningEligibility>[0], false);
 
-  const dueSoon = checkIsDueSoon(deal.postingDeadline);
+  const dueSoon = checkIsDueSoon(deal.postingDeadline, deal.status);
 
   const isActionRequired =
     (isInfluencer && ["PENDING_SIGNATURE", "REVISION_REQUESTED", "CONTENT_APPROVED"].includes(deal.status)) ||
@@ -235,10 +238,22 @@ export function DealPipelineCard({
                   {deal.brand?.companyName || "Brand Partner"}
                 </span>
                 <span>•</span>
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  Due {formatDate(deal.postingDeadline, "-", { day: "numeric", month: "short" })}
-                </span>
+                {deal.status === "COMPLETED" || deal.status === "VERIFIED" ? (
+                  <span className="flex items-center gap-1 text-verified font-medium">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Completed
+                  </span>
+                ) : deal.status === "CANCELLED" ? (
+                  <span className="flex items-center gap-1 text-destructive font-medium">
+                    <XCircle className="w-3 h-3" />
+                    Cancelled
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    Due {formatDate(deal.postingDeadline, "-", { day: "numeric", month: "short" })}
+                  </span>
+                )}
               </div>
 
               {/* Deliverable Tags */}
@@ -260,8 +275,26 @@ export function DealPipelineCard({
           {/* Right: Escrow Amount & Quick Actions */}
           <div className="flex items-center justify-between md:justify-end gap-4 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-border">
             <div className="text-left md:text-right">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-escrow flex items-center md:justify-end gap-1">
-                <Lock className="w-3 h-3" /> Escrow Locked
+              <div className={`text-[10px] font-bold uppercase tracking-wider flex items-center md:justify-end gap-1 ${
+                deal.status === "COMPLETED" || deal.status === "VERIFIED"
+                  ? "text-verified"
+                  : deal.status === "CANCELLED"
+                  ? "text-destructive"
+                  : "text-escrow"
+              }`}>
+                {deal.status === "COMPLETED" || deal.status === "VERIFIED" ? (
+                  <>
+                    <CheckCircle2 className="w-3 h-3" /> Escrow Released
+                  </>
+                ) : deal.status === "CANCELLED" ? (
+                  <>
+                    <XCircle className="w-3 h-3" /> Cancelled
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-3 h-3" /> Escrow Locked
+                  </>
+                )}
               </div>
               <div className="text-lg sm:text-xl font-extrabold font-mono tabular-nums text-foreground">
                 {formatCurrency(deal.amount)}
@@ -334,12 +367,30 @@ export function DealPipelineCard({
               <div className="text-xs space-y-1 text-muted-foreground">
                 <div className="flex justify-between">
                   <span>Started:</span>
-                  <span className="font-semibold text-foreground">{deal.createdAt}</span>
+                  <span className="font-semibold text-foreground">{formatDate(deal.createdAt)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Post Deadline:</span>
-                  <span className="font-semibold text-primary">
-                    {formatDate(deal.postingDeadline)}
+                  <span>
+                    {deal.status === "COMPLETED" || deal.status === "VERIFIED"
+                      ? "Status:"
+                      : deal.status === "CANCELLED"
+                      ? "Status:"
+                      : "Post Deadline:"}
+                  </span>
+                  <span
+                    className={`font-semibold ${
+                      deal.status === "CANCELLED"
+                        ? "text-destructive"
+                        : deal.status === "COMPLETED" || deal.status === "VERIFIED"
+                        ? "text-verified"
+                        : "text-primary"
+                    }`}
+                  >
+                    {deal.status === "COMPLETED" || deal.status === "VERIFIED"
+                      ? "Completed"
+                      : deal.status === "CANCELLED"
+                      ? "Cancelled"
+                      : formatDate(deal.postingDeadline)}
                   </span>
                 </div>
               </div>

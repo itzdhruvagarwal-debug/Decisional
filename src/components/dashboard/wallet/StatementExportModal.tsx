@@ -61,9 +61,16 @@ export function StatementExportModal({
       end = endDate ? new Date(endDate) : now;
     }
 
+    const formatLocalDate = (d: Date) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    };
+
     return {
-      startStr: start.toISOString().split("T")[0] || "",
-      endStr: end.toISOString().split("T")[0] || "",
+      startStr: formatLocalDate(start),
+      endStr: formatLocalDate(end),
     };
   };
 

@@ -236,7 +236,7 @@ function AuthenticityAuditModal({
                 <Clock className="w-3.5 h-3.5 text-primary" /> Creator Appeal Submitted
               </span>
               <span className="text-[10px] text-muted-foreground font-mono">
-                {new Date(user.activityLogs[0].createdAt).toLocaleDateString()}
+                {formatDate(user.activityLogs[0].createdAt)}
               </span>
             </div>
             <p className="text-foreground leading-relaxed italic bg-card/60 p-2 rounded-lg border border-border">

@@ -76,8 +76,14 @@ function getBadgeVariant(tone: string): "primary" | "success" | "danger" | "warn
   }
 }
 
-function checkIsDueSoon(deadlineStr?: string | null): boolean {
+function checkIsDueSoon(deadlineStr?: string | null, status?: string): boolean {
   if (!deadlineStr) return false;
+  if (status) {
+    const s = status.toUpperCase();
+    if (s === "CANCELLED" || s === "COMPLETED" || s === "VERIFIED" || s === "DISPUTED") {
+      return false;
+    }
+  }
   try {
     const deadline = new Date(deadlineStr).getTime();
     const now = Date.now();
@@ -186,7 +192,7 @@ export function ActiveDealsFeed({
           const deliverables = normalizeDeliverables(deal.deliverables || deal.campaign?.deliverables);
           const dealAmount = deal.amount ?? deal.totalAmount ?? 0;
           const deadline = deal.postingDeadline || deal.campaign?.postingDeadline;
-          const dueSoon = checkIsDueSoon(deadline);
+          const dueSoon = checkIsDueSoon(deadline, status);
 
           return (
             <article
@@ -229,9 +235,19 @@ export function ActiveDealsFeed({
                     {deadline && (
                       <>
                         <span>•</span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-muted-foreground" /> Due {formatDate(deadline)}
-                        </span>
+                        {status === "COMPLETED" || status === "VERIFIED" ? (
+                          <span className="flex items-center gap-1 text-verified font-medium">
+                            <ShieldCheck className="w-3 h-3" /> Completed
+                          </span>
+                        ) : status === "CANCELLED" ? (
+                          <span className="flex items-center gap-1 text-destructive font-medium">
+                            Cancelled
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-muted-foreground" /> Due {formatDate(deadline)}
+                          </span>
+                        )}
                       </>
                     )}
                   </p>
@@ -255,8 +271,26 @@ export function ActiveDealsFeed({
               {/* Right: Escrow Badge & CTAs */}
               <div className="flex items-center justify-between md:justify-end gap-4 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-border">
                 <div className="text-left md:text-right">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-escrow flex items-center md:justify-end gap-1">
-                    <Lock className="w-3 h-3" /> Escrow Locked
+                  <div className={`text-[10px] font-bold uppercase tracking-wider flex items-center md:justify-end gap-1 ${
+                    status === "COMPLETED" || status === "VERIFIED"
+                      ? "text-verified"
+                      : status === "CANCELLED"
+                      ? "text-destructive"
+                      : "text-escrow"
+                  }`}>
+                    {status === "COMPLETED" || status === "VERIFIED" ? (
+                      <>
+                        <ShieldCheck className="w-3 h-3" /> Escrow Released
+                      </>
+                    ) : status === "CANCELLED" ? (
+                      <>
+                        Cancelled
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-3 h-3" /> Escrow Locked
+                      </>
+                    )}
                   </div>
                   <div className="text-base sm:text-lg font-extrabold font-mono tabular-nums text-foreground">
                     {formatCurrency(dealAmount)}

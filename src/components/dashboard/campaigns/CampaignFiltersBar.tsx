@@ -12,6 +12,9 @@ interface CampaignFiltersBarProps {
   setSelectedCategory: (category: string) => void;
   sortBy: string;
   setSortBy: (sort: string) => void;
+  isBrand?: boolean;
+  selectedStatus?: string;
+  setSelectedStatus?: (status: string) => void;
 }
 
 const categories = ["All", ...ALL_CATEGORIES];
@@ -23,6 +26,9 @@ export function CampaignFiltersBar({
   setSelectedCategory,
   sortBy,
   setSortBy,
+  isBrand = false,
+  selectedStatus = "ALL",
+  setSelectedStatus,
 }: Readonly<CampaignFiltersBarProps>) {
   return (
     <div className="space-y-3.5 mb-6">
@@ -68,6 +74,35 @@ export function CampaignFiltersBar({
           />
         </div>
       </div>
+
+      {/* Brand Lifecycle Status Filter Tabs */}
+      {isBrand && setSelectedStatus && (
+        <div className="flex items-center gap-1.5 p-1 bg-muted/60 rounded-xl border border-border overflow-x-auto scrollbar-none w-fit">
+          {[
+            { key: "ALL", label: "All Briefs" },
+            { key: "ACTIVE", label: "Active" },
+            { key: "DRAFT", label: "Drafts" },
+            { key: "COMPLETED", label: "Completed" },
+            { key: "CANCELLED", label: "Cancelled" },
+          ].map((tab) => {
+            const isActive = (selectedStatus || "ALL") === tab.key;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setSelectedStatus(tab.key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                  isActive
+                    ? "bg-card text-foreground shadow-xs border border-border/80"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Horizontally Scrollable Category Chips Carousel (Instagram Explore Style) */}
       <nav

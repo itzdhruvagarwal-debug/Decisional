@@ -927,7 +927,7 @@ export function ContentSubmissionModal({
               <div className="p-4 rounded-xl border border-primary/30 bg-primary/5 text-xs space-y-2">
                 <div className="flex items-center gap-2 font-bold text-primary">
                   <ShieldCheck className="w-4 h-4" />
-                  <span>Escrow Safe: {formatCurrency(parseContractTerms(deal?.contractTerms)?.totalAmount ? parseContractTerms(deal?.contractTerms)!.totalAmount! * 100 : (deal?.amount ?? 0))} Protected</span>
+                  <span>Escrow Safe: {formatCurrency(parseContractTerms(deal?.contractTerms)?.totalAmount ?? deal?.amount ?? 0)} Protected</span>
                 </div>
                 <p className="text-secondary">
                   Brand payment is already locked in escrow. Once submitted, the brand has 72 hours to review and approve your work.

@@ -10,6 +10,7 @@ description: string;
 requirements: string;
 guidelines: string | null;
 status: string;
+createdAt?: string | Date | undefined;
 totalBudget: number;
 perInfluencerBudget: number | null;
 minFollowers: number;
@@ -129,39 +130,46 @@ maxInfluencers: raw.maxInfluencers ?? null,
 acceptedCount: raw.applications ? raw.applications.length : 0,
 requiresProduct: Boolean(raw.requiresProduct),
 productValue: raw.productValue !== null && raw.productValue !== undefined ? Number(raw.productValue) : null,
+createdAt: raw.createdAt ? (raw.createdAt instanceof Date ? raw.createdAt.toISOString() : String(raw.createdAt)) : undefined,
 };
 }
 
 export function calculateRecommendedPayout(
-influencerProfile: {
-readonly instagramFollowers: number | null;
-readonly instagramEngagementRate: number | null;
-readonly youtubeSubscribers: number | null;
-readonly youtubeEngagementRate: number | null;
-},
-deliverables: Array<{ type: string; count: number }>
+  influencerProfile: {
+    readonly instagramFollowers: number | null;
+    readonly instagramEngagementRate: number | null;
+    readonly youtubeSubscribers: number | null;
+    readonly youtubeEngagementRate: number | null;
+  },
+  deliverables: Array<{ type: string; count: number }>,
+  campaignBudgetPaise?: number | null
 ): number {
-let instagramCount = 0;
-let youtubeCount = 0;
+  if (campaignBudgetPaise !== null && campaignBudgetPaise !== undefined && campaignBudgetPaise > 0) {
+    return campaignBudgetPaise;
+  }
 
-deliverables.forEach((d) => {
-const type = d.type.toUpperCase();
-if (type.startsWith("INSTAGRAM")) {
-instagramCount += d.count;
-} else if (type.startsWith("YOUTUBE")) {
-youtubeCount += d.count;
-}
-});
+  let instagramCount = 0;
+  let youtubeCount = 0;
 
-const igFollowers = influencerProfile.instagramFollowers || 0;
-const igER = influencerProfile.instagramEngagementRate || 0;
-const instagramPayout = (igFollowers * (igER / 100)) * 2 * instagramCount;
+  deliverables.forEach((d) => {
+    const type = d.type.toUpperCase();
+    if (type.startsWith("INSTAGRAM")) {
+      instagramCount += d.count;
+    } else if (type.startsWith("YOUTUBE")) {
+      youtubeCount += d.count;
+    }
+  });
 
-const ytSubscribers = influencerProfile.youtubeSubscribers || 0;
-const ytER = influencerProfile.youtubeEngagementRate || 0;
-const youtubePayout = (ytSubscribers * (ytER / 100)) * 2.5 * youtubeCount;
+  const igFollowers = influencerProfile.instagramFollowers || 0;
+  const igER = influencerProfile.instagramEngagementRate || 0;
+  const instagramPayoutRupees = (igFollowers * (igER / 100)) * 2 * instagramCount;
 
-return Math.round(instagramPayout + youtubePayout);
+  const ytSubscribers = influencerProfile.youtubeSubscribers || 0;
+  const ytER = influencerProfile.youtubeEngagementRate || 0;
+  const youtubePayoutRupees = (ytSubscribers * (ytER / 100)) * 2.5 * youtubeCount;
+
+  // Return strictly in paise for consistent formatCurrency rendering
+  return Math.round((instagramPayoutRupees + youtubePayoutRupees) * 100);
 }
 
 function promptNegotiatedRate(proposedRate: number): number | null {

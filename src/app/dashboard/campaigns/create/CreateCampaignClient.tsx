@@ -81,7 +81,16 @@ const INITIAL_FORM_DATA: CampaignFormData = {
 
 function formatDateForInput(dateStr?: string | null): string {
   if (!dateStr) return "";
-  return dateStr.split("T")[0] || "";
+  try {
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return dateStr.split("T")[0] || "";
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  } catch {
+    return dateStr.split("T")[0] || "";
+  }
 }
 
 function mapDraftCampaignToFormData(campaign: DraftCampaignData): CampaignFormData {

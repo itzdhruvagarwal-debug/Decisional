@@ -366,7 +366,7 @@ export default function CampaignDetailClient({
                 <span>•</span>
                 <span className="inline-flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                  Created on {formatDate(campaign.contentDeadline)}
+                  Created on {formatDate(campaign.createdAt || campaign.contentDeadline)}
                 </span>
               </div>
             </div>
@@ -675,6 +675,19 @@ export default function CampaignDetailClient({
               Campaign Timeline
             </h3>
 
+            {campaign.status === "CANCELLED" && (
+              <div className="p-2.5 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>Campaign cancelled — timeline and deadlines closed.</span>
+              </div>
+            )}
+            {campaign.status === "COMPLETED" && (
+              <div className="p-2.5 rounded-xl bg-verified-muted border border-verified-border text-verified text-xs font-semibold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>Campaign completed — deliverables concluded.</span>
+              </div>
+            )}
+
             <div className="space-y-3 text-xs">
               {campaign.applicationDeadline && (
                 <div className="flex items-center justify-between">
@@ -742,17 +755,37 @@ export default function CampaignDetailClient({
 
           {/* Creator Application Trigger */}
           {!isOwner && !hasApplied && (
-            <div className="bg-card border border-primary/30 p-6 rounded-3xl shadow-sm space-y-4">
+            <div className={`p-6 rounded-3xl shadow-sm space-y-4 border ${
+              campaign.status === "CANCELLED"
+                ? "bg-card border-destructive/30"
+                : campaign.status === "COMPLETED"
+                ? "bg-card border-verified/30"
+                : "bg-card border-primary/30"
+            }`}>
               <div>
-                <span className="text-xs font-bold text-primary block uppercase tracking-wider mb-1">
-                  Ready to Pitch?
+                <span className={`text-xs font-bold block uppercase tracking-wider mb-1 ${
+                  campaign.status === "CANCELLED"
+                    ? "text-destructive"
+                    : campaign.status === "COMPLETED"
+                    ? "text-verified"
+                    : "text-primary"
+                }`}>
+                  {campaign.status === "CANCELLED"
+                    ? "Campaign Cancelled"
+                    : campaign.status === "COMPLETED"
+                    ? "Campaign Completed"
+                    : "Ready to Pitch?"}
                 </span>
                 <p className="text-xs text-muted-foreground">
-                  Submit your custom pitch and proposed rate to work with {campaign.brand?.companyName || "this brand"}.
+                  {campaign.status === "CANCELLED"
+                    ? "This campaign has been cancelled and is no longer accepting proposals or applications."
+                    : campaign.status === "COMPLETED"
+                    ? "This campaign has reached completion and is no longer accepting new proposals."
+                    : `Submit your custom pitch and proposed rate to work with ${campaign.brand?.companyName || "this brand"}.`}
                 </p>
               </div>
 
-              {recommendedPayout > 0 && (
+              {campaign.status === "ACTIVE" && recommendedPayout > 0 && (
                 <div className="p-3 rounded-xl bg-verified-muted border border-verified-border text-verified text-xs flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 flex-shrink-0" />
                   <span>
@@ -787,8 +820,12 @@ export default function CampaignDetailClient({
                 onClick={() => {
                   if (!applyEligibility.allowed) return;
                   setNotice(null);
-                  if (proposedRate <= 0 && campaign.perInfluencerBudget) {
-                    setProposedRate(campaign.perInfluencerBudget);
+                  if (proposedRate <= 0) {
+                    if (campaign.perInfluencerBudget) {
+                      setProposedRate(Math.round(campaign.perInfluencerBudget / 100));
+                    } else if (recommendedPayout > 0) {
+                      setProposedRate(Math.round(recommendedPayout / 100));
+                    }
                   }
                   setShowApplyModal(true);
                 }}

@@ -655,7 +655,7 @@ export function checkCampaignApplicationEligibility(
     if (!Number.isNaN(deadline.getTime()) && new Date() > deadline) {
       return {
         allowed: false,
-        reason: `Application deadline passed on ${deadline.toLocaleDateString("en-IN")}.`,
+        reason: `Application deadline passed on ${deadline.toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}.`,
         reasonCode: "DEADLINE_PASSED",
       };
     }

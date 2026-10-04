@@ -32,13 +32,14 @@ export function buildCampaignQueryParams(
   selectedCategory: string,
   debouncedSearch: string,
   sortBy: string,
-  page: number
+  page: number,
+  selectedStatus: string = "ALL"
 ): string {
   const queryParams = new URLSearchParams();
 
   if (canCreateCampaign) {
     queryParams.set("scope", "mine");
-    queryParams.set("status", "ALL");
+    queryParams.set("status", selectedStatus || "ALL");
   } else {
     queryParams.set("status", "ACTIVE");
   }
@@ -75,6 +76,7 @@ export function mapRawCampaigns(rawCampaigns: RawCampaign[]): Campaign[] {
   return rawCampaigns.map((campaign: RawCampaign) => ({
     id: campaign.id || "",
     title: campaign.title || "Untitled Campaign",
+    status: campaign.status || "ACTIVE",
     description: campaign.description || "",
     createdAt:
       campaign.createdAt instanceof Date
@@ -139,6 +141,7 @@ export default function CampaignsClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortBy, setSortBy] = useState("newest");
+  const [selectedStatus, setSelectedStatus] = useState("ALL");
   const [page, setPage] = useState(1);
   const [listView, setListView] = useState(false);
 
@@ -158,7 +161,8 @@ export default function CampaignsClient({
     selectedCategory,
     debouncedSearch,
     sortBy,
-    page
+    page,
+    selectedStatus
   );
 
   const campaignsFetcher = createSchemaFetcher(campaignsListResponseSchema);
@@ -184,6 +188,11 @@ export default function CampaignsClient({
 
   const handleSortChange = useCallback((sort: string) => {
     setSortBy(sort);
+    setPage(1);
+  }, []);
+
+  const handleStatusChange = useCallback((status: string) => {
+    setSelectedStatus(status);
     setPage(1);
   }, []);
 
@@ -314,6 +323,9 @@ export default function CampaignsClient({
         setSelectedCategory={handleCategoryChange}
         sortBy={sortBy}
         setSortBy={handleSortChange}
+        isBrand={canCreateCampaign}
+        selectedStatus={selectedStatus}
+        setSelectedStatus={handleStatusChange}
       />
 
       {/* ── 4. CAMPAIGN CARDS ────────────────────────────────────────── */}

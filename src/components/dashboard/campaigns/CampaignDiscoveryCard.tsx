@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Sparkles,
   TrendingUp,
+  XCircle,
 } from "lucide-react";
 import { Badge, Button } from "@/components/ui";
 
@@ -42,22 +43,29 @@ export function CampaignDiscoveryCard({
   listView = false,
   isRecommended = false,
 }: Readonly<CampaignDiscoveryCardProps>) {
+  const status = (campaign.status || "ACTIVE").toUpperCase();
+  const isCancelled = status === "CANCELLED";
+  const isCompleted = status === "COMPLETED";
+  const isDraft = status === "DRAFT";
+  const isPaused = status === "PAUSED";
+  const isInactive = isCancelled || isCompleted || isDraft || isPaused;
+
   const maxInfluencers = campaign.maxInfluencers ?? 0;
   const acceptedCount = campaign.acceptedCount ?? 0;
   const fillPercentage =
     maxInfluencers > 0 ? Math.min(100, Math.round((acceptedCount / maxInfluencers) * 100)) : 0;
   const remainingSlots = maxInfluencers > 0 ? Math.max(0, maxInfluencers - acceptedCount) : null;
-  const isSlotsUrgent = fillPercentage >= 80 && remainingSlots !== null && remainingSlots > 0;
+  const isSlotsUrgent = !isInactive && fillPercentage >= 80 && remainingSlots !== null && remainingSlots > 0;
 
   const daysLeft = useMemo(() => {
-    if (!campaign.postingDeadline) return null;
+    if (isInactive || !campaign.postingDeadline) return null;
     const due = new Date(campaign.postingDeadline).getTime();
     // eslint-disable-next-line react-hooks/purity
     const now = Date.now();
     return Math.ceil((due - now) / (1000 * 60 * 60 * 24));
-  }, [campaign.postingDeadline]);
+  }, [isInactive, campaign.postingDeadline]);
 
-  const isDeadlineUrgent = daysLeft !== null && daysLeft > 0 && daysLeft <= 3;
+  const isDeadlineUrgent = !isInactive && daysLeft !== null && daysLeft > 0 && daysLeft <= 3;
 
   if (listView) {
     /* ── LIST VIEW (horizontal compact row) ───────────────────────── */
@@ -115,7 +123,19 @@ export function CampaignDiscoveryCard({
                   {item.count}× {deliverableLabels[item.type] || item.type.replaceAll("_", " ")}
                 </Badge>
               ))}
-              {(isSlotsUrgent || isDeadlineUrgent) && (
+              {isCancelled ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-destructive/10 text-destructive border border-destructive/20">
+                  <XCircle className="w-2.5 h-2.5" /> Cancelled
+                </span>
+              ) : isCompleted ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-verified-muted text-verified border border-verified-border">
+                  <CheckCircle2 className="w-2.5 h-2.5" /> Completed
+                </span>
+              ) : isDraft ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-muted text-muted-foreground border border-border">
+                  Draft
+                </span>
+              ) : (isSlotsUrgent || isDeadlineUrgent) ? (
                 <>
                   {isSlotsUrgent && (
                     <span className="text-[10px] font-bold text-pending">🔥 {remainingSlots} slots</span>
@@ -124,7 +144,7 @@ export function CampaignDiscoveryCard({
                     <span className="text-[10px] font-bold text-disputed">⏰ {daysLeft}d left</span>
                   )}
                 </>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
@@ -138,9 +158,23 @@ export function CampaignDiscoveryCard({
             </div>
           </div>
           <div className="text-right hidden md:block">
-            <div className="text-xs text-muted-foreground">Due</div>
-            <div className={`text-xs font-semibold ${isDeadlineUrgent ? "text-disputed" : "text-foreground"}`}>
-              {formatDate(campaign.postingDeadline)}
+            <div className="text-xs text-muted-foreground">{isInactive ? "Status" : "Due"}</div>
+            <div className={`text-xs font-semibold ${
+              isCancelled
+                ? "text-destructive"
+                : isCompleted
+                ? "text-verified"
+                : isDeadlineUrgent
+                ? "text-disputed"
+                : "text-foreground"
+            }`}>
+              {isCancelled
+                ? "Cancelled"
+                : isCompleted
+                ? "Completed"
+                : isDraft
+                ? "Draft"
+                : formatDate(campaign.postingDeadline)}
             </div>
           </div>
           {isBrand && (
@@ -174,7 +208,9 @@ export function CampaignDiscoveryCard({
   return (
     <article
       className={`rounded-2xl border p-5 shadow-sm transition-all flex flex-col justify-between group relative overflow-hidden ${
-        isApplied
+        isCancelled
+          ? "border-destructive/30 bg-card/75 opacity-90"
+          : isApplied
           ? "border-verified/50 bg-card hover:border-verified"
           : isRecommended
           ? "border-primary/25 bg-card hover:border-primary/50"
@@ -225,11 +261,23 @@ export function CampaignDiscoveryCard({
           </div>
 
           <div className="text-right shrink-0 flex flex-col items-end gap-1">
-            {isApplied && (
+            {isCancelled ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 shadow-2xs">
+                <XCircle className="w-2.5 h-2.5" /> Cancelled
+              </span>
+            ) : isCompleted ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-verified/10 text-verified border border-verified/20 shadow-2xs">
+                <CheckCircle2 className="w-2.5 h-2.5" /> Completed
+              </span>
+            ) : isDraft ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border shadow-2xs">
+                Draft
+              </span>
+            ) : isApplied ? (
               <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-verified text-primary-foreground shadow-xs">
                 <CheckCircle2 className="w-3 h-3" /> Applied
               </span>
-            )}
+            ) : null}
             <div>
               <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Budget
@@ -272,8 +320,26 @@ export function CampaignDiscoveryCard({
           ))}
         </div>
 
-        {/* Urgency badges */}
-        {(isSlotsUrgent || isDeadlineUrgent) && (
+        {/* Status or Urgency badges */}
+        {isCancelled ? (
+          <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-destructive/10 text-destructive border border-destructive/20">
+              <XCircle className="w-2.5 h-2.5" /> Cancelled
+            </span>
+          </div>
+        ) : isCompleted ? (
+          <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-verified-muted text-verified border border-verified-border">
+              <CheckCircle2 className="w-2.5 h-2.5" /> Completed
+            </span>
+          </div>
+        ) : isDraft ? (
+          <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-muted text-muted-foreground border border-border">
+              Draft Brief
+            </span>
+          </div>
+        ) : (isSlotsUrgent || isDeadlineUrgent) ? (
           <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
             {isSlotsUrgent && (
               <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-pending-muted text-pending border border-pending-border">
@@ -286,7 +352,7 @@ export function CampaignDiscoveryCard({
               </span>
             )}
           </div>
-        )}
+        ) : null}
 
         {/* Telemetry Metrics & Slot Progress */}
         <div className="rounded-xl border border-border/70 bg-muted/30 p-3 space-y-2">
@@ -340,10 +406,30 @@ export function CampaignDiscoveryCard({
 
       {/* Footer: Deadline & CTA */}
       <div className="pt-4 border-t border-border mt-4 flex items-center justify-between gap-3">
-        <div className={`flex items-center gap-1.5 text-xs ${isDeadlineUrgent ? "text-disputed font-semibold" : "text-muted-foreground"}`}>
-          <Clock className="w-3.5 h-3.5 shrink-0" />
+        <div className={`flex items-center gap-1.5 text-xs ${
+          isCancelled
+            ? "text-destructive font-semibold"
+            : isCompleted
+            ? "text-verified font-semibold"
+            : isDeadlineUrgent
+            ? "text-disputed font-semibold"
+            : "text-muted-foreground"
+        }`}>
+          {isCancelled ? (
+            <XCircle className="w-3.5 h-3.5 shrink-0" />
+          ) : isCompleted ? (
+            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+          ) : (
+            <Clock className="w-3.5 h-3.5 shrink-0" />
+          )}
           <span>
-            {isDeadlineUrgent
+            {isCancelled
+              ? "Campaign Cancelled"
+              : isCompleted
+              ? "Campaign Completed"
+              : isDraft
+              ? "Draft Brief"
+              : isDeadlineUrgent
               ? `Due ${formatDate(campaign.postingDeadline)} (Closing Soon)`
               : `Due ${formatDate(campaign.postingDeadline)}`}
           </span>

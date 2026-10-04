@@ -73,7 +73,8 @@ export function useCampaignDetail({
         youtubeSubscribers: influencerProfile.youtubeSubscribers,
         youtubeEngagementRate: influencerProfile.youtubeEngagementRate,
       },
-      campaign.deliverables
+      campaign.deliverables,
+      campaign.perInfluencerBudget
     );
   }, [influencerProfile, campaign]);
 

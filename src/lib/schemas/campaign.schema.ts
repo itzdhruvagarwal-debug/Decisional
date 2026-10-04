@@ -37,6 +37,7 @@ export type CampaignDiscoveryItem = z.infer<typeof campaignDiscoveryItemSchema>;
 export const rawCampaignApiItemSchema = z.object({
   id: z.string(),
   title: z.string(),
+  status: z.string().optional(),
   description: z.string().nullable().optional(),
   coverImage: z.string().nullable().optional(),
   image: z.string().nullable().optional(),
@@ -89,6 +90,7 @@ export type RawCampaignApiItem = z.infer<typeof rawCampaignApiItemSchema>;
 export const dashboardCampaignSchema = z.object({
   id: z.string(),
   title: z.string(),
+  status: z.string().default("ACTIVE"),
   description: z.string(),
   createdAt: z.string(),
   perInfluencerBudget: z.number(),

@@ -23,6 +23,7 @@ export default function CampaignDiscoveryCard({
   const adaptedCampaign: DashboardCampaign = {
     id: campaign.id,
     title: campaign.title,
+    status: "ACTIVE",
     description: campaign.description || "",
     createdAt: new Date().toISOString(),
     perInfluencerBudget: campaign.perInfluencerBudgetPaise || campaign.budgetPaise || 0,

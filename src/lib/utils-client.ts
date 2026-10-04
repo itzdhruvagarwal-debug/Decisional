@@ -29,7 +29,13 @@ export function formatDate(
   if (!date) return fallback;
   const parsed = typeof date === "number" || typeof date === "string" ? new Date(date) : date;
   if (Number.isNaN(parsed.getTime())) return fallback;
-  return new Intl.DateTimeFormat("en-IN", options ?? { day: "2-digit", month: "short", year: "numeric" }).format(parsed);
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    ...options,
+  }).format(parsed);
 }
 
 export function formatDateTime(
@@ -40,12 +46,14 @@ export function formatDateTime(
   if (!date) return fallback;
   const parsed = typeof date === "number" || typeof date === "string" ? new Date(date) : date;
   if (Number.isNaN(parsed.getTime())) return fallback;
-  return new Intl.DateTimeFormat("en-IN", options ?? {
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
     day: "numeric",
     month: "short",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    ...options,
   }).format(parsed);
 }
 
@@ -57,6 +65,7 @@ export function formatTime(
   const parsed = typeof date === "number" || typeof date === "string" ? new Date(date) : date;
   if (Number.isNaN(parsed.getTime())) return fallback;
   return new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
     hour: "2-digit",
     minute: "2-digit",
   }).format(parsed);
