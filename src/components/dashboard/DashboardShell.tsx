@@ -291,7 +291,7 @@ const TopbarComponent = memo(function TopbarComponent({
             type="button"
             variant="ghost"
             onClick={() => setShowNotifications(!showNotifications)}
-            className="dashboard-icon-button relative"
+            className="dashboard-icon-button relative !overflow-visible"
             aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} unread)` : ""}`}
           >
             <AppIcon name="bell" size={19} />

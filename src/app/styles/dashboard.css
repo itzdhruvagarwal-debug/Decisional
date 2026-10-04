@@ -584,6 +584,8 @@
   line-height: 1;
   white-space: nowrap;
   flex-shrink: 0;
+  z-index: 20;
+  pointer-events: none;
 }
 
 /* Notification dropdown panel (legacy absolute, kept for reference) */

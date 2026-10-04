@@ -524,6 +524,7 @@
   justify-content: center;
   cursor: pointer;
   position: relative;
+  overflow: visible !important;
   box-shadow: var(--shadow-sm);
   transition:
     transform var(--transition-fast),
