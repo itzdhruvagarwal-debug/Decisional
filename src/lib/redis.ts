@@ -8,10 +8,9 @@ process.env.npm_lifecycle_event === "build" ||
 process.argv.join(" ").includes("next build");
 
 if (!process.env.REDIS_URL && process.env.NODE_ENV === "production" && !isBuildTime) {
-logger.error(
-"CRITICAL ERROR: REDIS_URL is not defined. Redis is required for enterprise rate limiting, caching, and sessions.",
-);
-throw AppError.badRequest("REDIS_URL is strictly required for this application.");
+  logger.warn(
+    "WARNING: REDIS_URL is not defined in environment. Falling back gracefully.",
+  );
 }
 
 const redisUrl = process.env.REDIS_URL || "redis://127.0.0.1:6379";

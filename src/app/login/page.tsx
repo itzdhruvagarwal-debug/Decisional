@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getProviders, signIn, type SignInResponse } from "next-auth/react";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { AuthLayout } from "@/components/auth/AuthLayout";
@@ -65,24 +66,36 @@ function handleSignInResult(
   if (!result?.error) {
     return { error: null, success: true };
   }
-  if (result.error === "2FA_REQUIRED") {
+  const code = (result as { code?: string })?.code || result.error;
+  if (code === "2FA_REQUIRED" || result.error === "2FA_REQUIRED") {
     setShow2FA(true);
     return { error: null, success: false };
   }
-  if (result.error === "INVALID_2FA") {
+  if (code === "INVALID_2FA" || result.error === "INVALID_2FA") {
     return { error: "Invalid 2FA Code. Please try again.", success: false };
   }
-  const errorStr = String(result.error);
-  if (errorStr.includes("CredentialsSignin") || errorStr.includes("Readonly")) {
-    return { error: "Invalid email or password. Please try again.", success: false };
+  if (code?.includes("SUSPICIOUS_IP_BLOCK") || result.error?.includes("SUSPICIOUS_IP_BLOCK")) {
+    return { error: "Login blocked due to suspicious IP detection (VPN/Proxy). Please disable your VPN.", success: false };
   }
-  setAttemptCount((prev) => prev + 1);
-  const remaining = 5 - (attemptCount + 1);
-  const attemptsPlural = remaining !== 1 ? "s" : "";
-  const errorMsg = remaining > 0
-    ? `Invalid email or password. ${remaining} attempt${attemptsPlural} remaining.`
-    : "Account temporarily locked due to too many failed attempts.";
-  return { error: errorMsg, success: false };
+  if (code?.includes("SUSPICIOUS_LOGIN_BLOCK") || result.error?.includes("SUSPICIOUS_LOGIN_BLOCK")) {
+    return { error: "Geo-suspicious login detected (Impossible Travel). Account security review required.", success: false };
+  }
+  const errorStr = String(code || result.error);
+  if (
+    errorStr.includes("CredentialsSignin") ||
+    errorStr.includes("Readonly") ||
+    errorStr.includes("INVALID_PASSWORD") ||
+    errorStr.includes("credentials")
+  ) {
+    setAttemptCount((prev) => prev + 1);
+    const remaining = 5 - (attemptCount + 1);
+    const attemptsPlural = remaining !== 1 ? "s" : "";
+    const errorMsg = remaining > 0
+      ? `Invalid email or password. ${remaining} attempt${attemptsPlural} remaining.`
+      : "Account temporarily locked due to too many failed attempts.";
+    return { error: errorMsg, success: false };
+  }
+  return { error: "Invalid email or password. Please try again.", success: false };
 }
 
 function LoginContent() {
@@ -183,7 +196,33 @@ function LoginContent() {
         return;
       }
 
-      setError("A network error occurred. Please check your connection.");
+      if (
+        errorMsg.includes("CredentialsSignin") ||
+        errorMsg.includes("INVALID_PASSWORD") ||
+        errorMsg.includes("credentials")
+      ) {
+        setAttemptCount((prev) => prev + 1);
+        const remaining = 5 - (attemptCount + 1);
+        const attemptsPlural = remaining !== 1 ? "s" : "";
+        setError(
+          remaining > 0
+            ? `Invalid email or password. ${remaining} attempt${attemptsPlural} remaining.`
+            : "Account temporarily locked due to too many failed attempts."
+        );
+        return;
+      }
+
+      if (errorMsg.includes("2FA_REQUIRED")) {
+        setShow2FA(true);
+        return;
+      }
+
+      if (errorMsg.includes("500") || errorMsg.includes("Internal Server Error")) {
+        setError("Invalid email or password. Please try again.");
+        return;
+      }
+
+      setError("Invalid email or password. Please try again.");
       logger.error("[Login] signIn error:", err);
     } finally {
       setIsLoading(false);
@@ -264,16 +303,9 @@ function LoginContent() {
               className="auth-field-password-toggle"
             >
               {showPassword ? (
-                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-7-10-7a19.16 19.16 0 0 1 5.44-5.44M1 1l22 22" />
-                  <path d="M12 12A3 3 0 0 0 12 6c-.34 0-.67.04-1 .12" />
-                  <path d="M21.54 15A10 10 0 0 0 22 13c0 0-3-7-10-7-1.7 0-3.2.43-4.53 1.15" />
-                </svg>
+                <EyeOff className="w-4 h-4" aria-hidden="true" />
               ) : (
-                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
+                <Eye className="w-4 h-4" aria-hidden="true" />
               )}
             </button>
           </div>

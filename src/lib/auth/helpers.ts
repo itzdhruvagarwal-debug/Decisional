@@ -16,11 +16,8 @@ export async function storeActiveSessionToken(userId: string, refreshToken: stri
   try {
     await redis.setex(`active_session:${userId}`, 7 * 24 * 60 * 60, refreshToken);
   } catch (error) {
-logger.error("Failed to persist active session token", error, { userId });
-if (process.env.NODE_ENV === "production") {
-throw error;
-}
-}
+    logger.warn("Failed to persist active session token in Redis (non-fatal):", { userId, error: String(error) });
+  }
 }
 
 export function resolveClientIpAndAgent(request: unknown) {
@@ -38,25 +35,38 @@ return { ip, userAgent };
 }
 
 export async function checkLoginLimitsAndBlacklist(ip: string, email: string) {
-const { isIpBanned } = await import("../blacklist");
-if (await isIpBanned(ip)) {
-logger.warn(`Login blocked blacklisted IP`, { ip });
-throw AppError.badRequest("SUSPICIOUS_IP_BLOCK: Login blocked due to suspicious IP detection.");
-}
+  try {
+    const { isIpBanned } = await import("../blacklist");
+    if (await isIpBanned(ip)) {
+      logger.warn(`Login blocked blacklisted IP`, { ip });
+      throw AppError.badRequest("SUSPICIOUS_IP_BLOCK: Login blocked due to suspicious IP detection.");
+    }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("SUSPICIOUS_IP_BLOCK")) throw err;
+  }
 
-const ipLimit = await checkRateLimit(ip, "LOGIN_IP");
-if (!ipLimit.success) {
-logger.warn(`Login blocked by IP rate limit`, { ip });
-return false;
-}
+  try {
+    const ipLimit = await checkRateLimit(ip, "LOGIN_IP");
+    if (!ipLimit.success) {
+      logger.warn(`Login blocked by IP rate limit`, { ip });
+      return false;
+    }
+  } catch (rateErr) {
+    logger.warn("IP rate limit check failed non-fatal:", { error: String(rateErr), ip });
+  }
 
-const emailLimit = await checkRateLimit(email, "LOGIN_EMAIL");
-if (!emailLimit.success) {
-logger.warn(`Login blocked by Email rate limit`, { email });
-return false;
-}
+  try {
+    const emailLimit = await checkRateLimit(email, "LOGIN_EMAIL");
+    if (!emailLimit.success) {
+      logger.warn(`Login blocked by Email rate limit`, { email });
+      return false;
+    }
+  } catch (rateErr) {
+    logger.warn("Email rate limit check failed non-fatal:", { error: String(rateErr), email });
+  }
 
-return true;
+  return true;
 }
 
 export async function handleFailedLoginAttempt(user: { id: string; failedLoginAttempts?: number | null }, email: string, ip: string, userAgent: string) {

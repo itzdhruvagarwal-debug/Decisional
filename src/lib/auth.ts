@@ -1,5 +1,13 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+
+export class CustomAuthError extends CredentialsSignin {
+  override code: string;
+  constructor(code: string) {
+    super(code);
+    this.code = code;
+  }
+}
 import { compare } from "bcryptjs";
 import prisma from "./db";
 import { loginSchema } from "./validations";
@@ -168,18 +176,19 @@ level: user.level,
 refreshToken: refreshTokenNode.token,
 };
 } catch (entireAuthorizeError: unknown) {
-const msg = entireAuthorizeError instanceof Error ? entireAuthorizeError.message : String(entireAuthorizeError);
-if (
-msg === "2FA_REQUIRED" ||
-msg === "INVALID_2FA" ||
-msg?.includes("INVALID_PASSWORD") ||
-msg?.includes("SUSPICIOUS_IP_BLOCK") ||
-msg?.includes("SUSPICIOUS_LOGIN_BLOCK")
-) {
-throw entireAuthorizeError;
-}
-logger.error("CRITICAL: authorize crashed", entireAuthorizeError);
-return null;
+  const msg = entireAuthorizeError instanceof Error ? entireAuthorizeError.message : String(entireAuthorizeError);
+  logger.warn("Authorize exception caught:", { error: msg });
+  if (
+    msg === "2FA_REQUIRED" ||
+    msg === "INVALID_2FA" ||
+    msg?.includes("INVALID_PASSWORD") ||
+    msg?.includes("SUSPICIOUS_IP_BLOCK") ||
+    msg?.includes("SUSPICIOUS_LOGIN_BLOCK")
+  ) {
+    throw new CustomAuthError(msg);
+  }
+  logger.error("CRITICAL: unexpected authorize exception", entireAuthorizeError);
+  return null;
 }
 },
 }),
