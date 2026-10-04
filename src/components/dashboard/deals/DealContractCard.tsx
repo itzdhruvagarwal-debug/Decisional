@@ -83,13 +83,21 @@ export function DealContractCard({
 
   // Financial calculations
   const dealAmountPaise = deal.amount || terms?.dealAmount || 0;
+  const productHandlingFeePaise =
+    terms?.productHandlingFee ??
+    (typeof (deal as unknown as { productHandlingFee?: number }).productHandlingFee === "number"
+      ? (deal as unknown as { productHandlingFee?: number }).productHandlingFee!
+      : 0);
   const platformFeePercent =
     terms?.platformFeePercent ??
     (dealAmountPaise > 0 && terms?.platformFee
-      ? Math.round((terms.platformFee / dealAmountPaise) * 100)
+      ? Math.round(((terms.platformFee - productHandlingFeePaise) / dealAmountPaise) * 100)
       : DEFAULT_BRAND_PLATFORM_FEE_PERCENT);
-  const platformFeePaise =
-    terms?.platformFee ?? Math.round((dealAmountPaise * platformFeePercent) / 100);
+  const basePlatformFeePaise =
+    terms?.platformFee !== undefined
+      ? Math.max(0, terms.platformFee - productHandlingFeePaise)
+      : Math.round((dealAmountPaise * platformFeePercent) / 100);
+  const platformFeePaise = basePlatformFeePaise + productHandlingFeePaise;
   const gatewayFeePaise =
     terms?.gatewayFee ??
     (deal.totalAmount
@@ -536,9 +544,17 @@ export function DealContractCard({
                   <div className="py-2.5 flex justify-between items-center">
                     <span className="text-muted-foreground">VyaparMedia Service Fee ({platformFeePercent}%)</span>
                     <span className="font-bold text-foreground tabular-nums">
-                      {formatCurrency(platformFeePaise)}
+                      {formatCurrency(basePlatformFeePaise)}
                     </span>
                   </div>
+                  {productHandlingFeePaise > 0 && (
+                    <div className="py-2.5 flex justify-between items-center">
+                      <span className="text-muted-foreground">Product Handling Escrow</span>
+                      <span className="font-bold text-foreground tabular-nums">
+                        {formatCurrency(productHandlingFeePaise)}
+                      </span>
+                    </div>
+                  )}
                   {gatewayFeePaise > 0 && (
                     <div className="py-2.5 flex justify-between items-center">
                       <span className="text-muted-foreground">Payment Gateway Fee ({DEFAULT_GATEWAY_FEE_PERCENT}%)</span>

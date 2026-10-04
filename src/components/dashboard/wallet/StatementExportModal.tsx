@@ -78,6 +78,25 @@ export function StatementExportModal({
     setIsExporting(true);
     setExportError(null);
 
+    const todayStr = new Date().toISOString().slice(0, 10);
+    if (period === "CUSTOM") {
+      if (startDate && startDate > todayStr) {
+        setExportError("Start date cannot be in the future.");
+        setIsExporting(false);
+        return;
+      }
+      if (endDate && endDate > todayStr) {
+        setExportError("End date cannot be in the future.");
+        setIsExporting(false);
+        return;
+      }
+      if (startDate && endDate && startDate > endDate) {
+        setExportError("Start date cannot be after end date.");
+        setIsExporting(false);
+        return;
+      }
+    }
+
     try {
       const { startStr, endStr } = calculateDateRange();
 
@@ -105,6 +124,26 @@ export function StatementExportModal({
   const handlePrintStatement = async () => {
     setIsPrinting(true);
     setExportError(null);
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+    if (period === "CUSTOM") {
+      if (startDate && startDate > todayStr) {
+        setExportError("Start date cannot be in the future.");
+        setIsPrinting(false);
+        return;
+      }
+      if (endDate && endDate > todayStr) {
+        setExportError("End date cannot be in the future.");
+        setIsPrinting(false);
+        return;
+      }
+      if (startDate && endDate && startDate > endDate) {
+        setExportError("Start date cannot be after end date.");
+        setIsPrinting(false);
+        return;
+      }
+    }
+
     try {
       const { startStr, endStr } = calculateDateRange();
       const params: Parameters<typeof apiClient.wallet.getTransactions>[0] = {
@@ -215,6 +254,7 @@ export function StatementExportModal({
               <Input
                 id="custom-start-date"
                 type="date"
+                max={endDate || new Date().toISOString().slice(0, 10)}
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 className="text-xs"
@@ -227,6 +267,8 @@ export function StatementExportModal({
               <Input
                 id="custom-end-date"
                 type="date"
+                min={startDate || undefined}
+                max={new Date().toISOString().slice(0, 10)}
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="text-xs"

@@ -691,6 +691,19 @@ function ChatInputArea({ state }: Readonly<ChatPanelProps>) {
       showToast("error", "Please enter a valid amount");
       return;
     }
+    const todayStr = new Date().toISOString().slice(0, 10);
+    if (offerContentDeadline && offerContentDeadline < todayStr) {
+      showToast("error", "Draft submission deadline cannot be in the past");
+      return;
+    }
+    if (offerPostingDeadline && offerPostingDeadline < todayStr) {
+      showToast("error", "Live posting deadline cannot be in the past");
+      return;
+    }
+    if (offerContentDeadline && offerPostingDeadline && offerPostingDeadline < offerContentDeadline) {
+      showToast("error", "Live posting deadline must be on or after draft submission deadline");
+      return;
+    }
     setIsSubmittingOffer(true);
     try {
       await handleSendOffer?.({
@@ -873,6 +886,8 @@ function ChatInputArea({ state }: Readonly<ChatPanelProps>) {
                 id="offer-draft-deadline"
                 label="Draft Submission Due"
                 type="date"
+                min={new Date().toISOString().slice(0, 10)}
+                max={offerPostingDeadline || undefined}
                 value={offerContentDeadline}
                 onChange={(e) => setOfferContentDeadline(e.target.value)}
                 fullWidth
@@ -881,6 +896,7 @@ function ChatInputArea({ state }: Readonly<ChatPanelProps>) {
                 id="offer-post-deadline"
                 label="Live Posting Due"
                 type="date"
+                min={offerContentDeadline || new Date().toISOString().slice(0, 10)}
                 value={offerPostingDeadline}
                 onChange={(e) => setOfferPostingDeadline(e.target.value)}
                 fullWidth
