@@ -476,37 +476,20 @@ export default function SettingsPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 sm:gap-3">
-                {/* Quick Theme Toggle in Header */}
-                <ThemeToggle size="md" />
-
-                {/* Quick Sign Out button in Header */}
-                <button
-                  type="button"
-                  onClick={() => signOut({ callbackUrl: "/login" })}
-                  title="Sign Out"
-                  aria-label="Sign Out"
-                  className="px-2.5 py-2 sm:px-3 sm:py-2 rounded-xl border border-destructive/25 text-destructive hover:bg-destructive/10 hover:border-destructive/40 transition-all text-xs font-semibold flex items-center gap-1.5 focus:outline-none shadow-xs cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span className="hidden sm:inline">Log Out</span>
-                </button>
-
-                {!isSelfManaged && (
-                  <div className="flex items-center gap-3">
-                    <ConfirmationBadge show={showSavedBadge} message="Saved" />
-                    <Button
-                      variant="primary"
-                      aria-label={isSaving ? "Saving changes" : "Save Changes"}
-                      aria-busy={isSaving}
-                      onClick={handleSave}
-                      disabled={isSaving}
-                    >
-                      {isSaving ? <span className="loading" /> : <><CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />Save Changes</>}
-                    </Button>
-                  </div>
-                )}
-              </div>
+              {!isSelfManaged && (
+                <div className="flex items-center gap-3">
+                  <ConfirmationBadge show={showSavedBadge} message="Saved" />
+                  <Button
+                    variant="primary"
+                    aria-label={isSaving ? "Saving changes" : "Save Changes"}
+                    aria-busy={isSaving}
+                    onClick={handleSave}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? <span className="loading" /> : <><CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />Save Changes</>}
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="settings-panel-body">
