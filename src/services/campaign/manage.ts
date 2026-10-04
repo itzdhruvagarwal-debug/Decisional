@@ -66,7 +66,20 @@ return null;
 }
 }
 
-return campaign;
+  const openDealCount = await prisma.deal.count({
+    where: {
+      campaignId: campaign.id,
+      deletedAt: null,
+      status: {
+        notIn: ["CANCELLED", "COMPLETED"],
+      },
+    },
+  });
+
+  return {
+    ...campaign,
+    openDealCount,
+  };
 }
 function buildBasicInfoUpdate(
   data: Record<string, unknown>,

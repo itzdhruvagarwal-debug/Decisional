@@ -35,6 +35,7 @@ _count?: {
 applications?: number;
 deals?: number;
 };
+openDealCount?: number | undefined;
 maxInfluencers: number | null;
 acceptedCount: number;
 requiresProduct?: boolean | null;
@@ -126,6 +127,7 @@ _count: {
 applications: Number(raw?._count?.applications || 0),
 deals: Number(raw?._count?.deals || 0),
 },
+openDealCount: typeof raw.openDealCount === "number" ? raw.openDealCount : undefined,
 maxInfluencers: raw.maxInfluencers ?? null,
 acceptedCount: raw.applications ? raw.applications.length : 0,
 requiresProduct: Boolean(raw.requiresProduct),

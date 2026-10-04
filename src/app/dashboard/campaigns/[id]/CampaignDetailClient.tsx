@@ -87,14 +87,22 @@ export default function CampaignDetailClient({
 
   const cancelEligibility = React.useMemo(() => {
     if (!campaign) return { allowed: false, reason: "Campaign details not loaded" };
+
+    let openDeals = campaign.openDealCount;
+    if (openDeals === undefined && applications && applications.length > 0) {
+      openDeals = applications.filter(
+        (app) => app.dealId && app.dealStatus && app.dealStatus !== "CANCELLED" && app.dealStatus !== "COMPLETED"
+      ).length;
+    }
+
     return checkCampaignCancelEligibility(
       {
         status: campaign.status,
-        openDealCount: campaign._count?.deals || 0,
+        openDealCount: openDeals ?? 0,
       },
       isOwner
     );
-  }, [campaign, isOwner]);
+  }, [campaign, isOwner, applications]);
 
   const { walletData } = useWallet();
 

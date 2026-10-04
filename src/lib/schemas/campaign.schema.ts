@@ -188,6 +188,7 @@ export const campaignDetailSchema = z
     applications: z.array(z.record(z.string(), z.unknown())).optional(),
     hasApplied: z.boolean().optional(),
     applicationStatus: z.string().nullable().optional(),
+    openDealCount: z.number().optional(),
     dealId: z.string().nullable().optional(),
   })
   .catchall(z.unknown());
