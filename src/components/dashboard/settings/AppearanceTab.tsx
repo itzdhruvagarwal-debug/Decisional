@@ -78,7 +78,7 @@ export default function AppearanceTab({
           </div>
 
           {mounted && (
-            <span className="self-start sm:self-auto inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+            <span className="self-start sm:self-auto inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 shrink-0 whitespace-nowrap">
               <Sparkles className="w-3.5 h-3.5" />
               <span className="capitalize">{theme || "system"}</span> Active
             </span>

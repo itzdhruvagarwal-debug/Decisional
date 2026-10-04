@@ -150,7 +150,7 @@ export default function NotificationsPage() {
                   Activity Feed
                 </h1>
                 {unreadCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary text-primary-foreground">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary text-primary-foreground shrink-0 whitespace-nowrap">
                     {unreadCount} unread
                   </span>
                 )}

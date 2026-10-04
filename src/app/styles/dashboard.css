@@ -582,6 +582,8 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Notification dropdown panel (legacy absolute, kept for reference) */

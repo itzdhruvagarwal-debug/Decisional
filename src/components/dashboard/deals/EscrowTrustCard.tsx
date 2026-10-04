@@ -65,26 +65,26 @@ export function EscrowTrustCard({
 
         {/* Status Pill */}
         {isCompleted ? (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-verified-muted text-verified border border-verified-border">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
             <CheckCircle2 className="w-3.5 h-3.5" />
             Payout Released
           </div>
         ) : isDisputed ? (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-disputed-muted text-disputed border border-disputed-border">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-disputed-muted text-disputed border border-disputed-border shrink-0 whitespace-nowrap">
             <Lock className="w-3.5 h-3.5" />
             Escrow Frozen (Disputed)
           </div>
         ) : isCancelled ? (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-disputed-muted text-disputed border border-disputed-border">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-disputed-muted text-disputed border border-disputed-border shrink-0 whitespace-nowrap">
             Escrow Refunded
           </div>
         ) : isEscrowLocked ? (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-escrow-muted text-escrow border border-escrow-border">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-escrow-muted text-escrow border border-escrow-border shrink-0 whitespace-nowrap">
             <ShieldCheck className="w-3.5 h-3.5" />
             100% Escrow Locked
           </div>
         ) : (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-muted text-muted-foreground border border-border">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-muted text-muted-foreground border border-border shrink-0 whitespace-nowrap">
             Pending Escrow Funding
           </div>
         )}

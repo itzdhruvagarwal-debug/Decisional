@@ -81,27 +81,27 @@ function emptyDraft(): Draft {
 function StatusPill({ status }: Readonly<{ status: string }>) {
   if (status === "READY") {
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-bold text-verified bg-verified-muted px-2.5 py-1 rounded-full border border-verified-border">
+      <span className="inline-flex items-center gap-1 text-xs font-bold text-verified bg-verified-muted px-2.5 py-1 rounded-full border border-verified-border shrink-0 whitespace-nowrap">
         <CheckCircle2 className="w-3.5 h-3.5" /> Ready for Payouts
       </span>
     );
   }
   if (status === "PENDING_REVIEW") {
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-bold text-pending bg-pending-muted px-2.5 py-1 rounded-full border border-pending-border">
+      <span className="inline-flex items-center gap-1 text-xs font-bold text-pending bg-pending-muted px-2.5 py-1 rounded-full border border-pending-border shrink-0 whitespace-nowrap">
         <Clock className="w-3.5 h-3.5" /> Under Review
       </span>
     );
   }
   if (status === "REJECTED") {
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-bold text-disputed bg-disputed-muted px-2.5 py-1 rounded-full border border-disputed-border">
+      <span className="inline-flex items-center gap-1 text-xs font-bold text-disputed bg-disputed-muted px-2.5 py-1 rounded-full border border-disputed-border shrink-0 whitespace-nowrap">
         <AlertCircle className="w-3.5 h-3.5" /> Tax Review Rejected
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-xs font-bold text-pending bg-pending-muted px-2.5 py-1 rounded-full border border-pending-border">
+    <span className="inline-flex items-center gap-1 text-xs font-bold text-pending bg-pending-muted px-2.5 py-1 rounded-full border border-pending-border shrink-0 whitespace-nowrap">
       <AlertTriangle className="w-3.5 h-3.5" /> Action Required
     </span>
   );

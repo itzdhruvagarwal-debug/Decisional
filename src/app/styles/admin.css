@@ -552,6 +552,8 @@
   align-items: center;
   line-height: 1;
   box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .dashboard-trust-chip span {

@@ -61,11 +61,11 @@ export default function SecurityTab({
             </span>
             <div className="mt-1">
               {isHighProtection ? (
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-verified bg-verified-muted px-2.5 py-1 rounded-full border border-verified-border">
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-verified bg-verified-muted px-2.5 py-1 rounded-full border border-verified-border shrink-0 whitespace-nowrap">
                   <CheckCircle2 className="w-3.5 h-3.5" /> High Protection
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-pending bg-pending-muted px-2.5 py-1 rounded-full border border-pending-border">
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-pending bg-pending-muted px-2.5 py-1 rounded-full border border-pending-border shrink-0 whitespace-nowrap">
                   <AlertTriangle className="w-3.5 h-3.5" /> Action Recommended
                 </span>
               )}

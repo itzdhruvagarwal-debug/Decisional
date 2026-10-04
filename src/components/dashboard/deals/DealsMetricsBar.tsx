@@ -25,7 +25,7 @@ export function DealsMetricsBar({
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
             <Layers className="w-3.5 h-3.5 text-primary" /> Active Pipeline
           </span>
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary shrink-0 whitespace-nowrap">
             In Progress
           </span>
         </div>
@@ -43,7 +43,7 @@ export function DealsMetricsBar({
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5 text-verified" /> Completed Deals
           </span>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-verified-muted text-verified border border-verified-border">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
             <ShieldCheck className="w-3 h-3" /> Settled
           </span>
         </div>
@@ -62,7 +62,7 @@ export function DealsMetricsBar({
             <TrendingUp className="w-3.5 h-3.5 text-primary" />
             {isInfluencer ? "Total Earnings" : "Total Campaign Spend"}
           </span>
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-muted-foreground">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-muted-foreground shrink-0 whitespace-nowrap">
             INR
           </span>
         </div>

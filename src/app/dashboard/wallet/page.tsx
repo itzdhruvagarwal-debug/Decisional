@@ -427,7 +427,7 @@ export default function WalletPage() {
               </h1>
               {isRealtimeActive && (
                 <span
-                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-verified-muted text-verified border border-verified-border"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap"
                   title="Live Supabase channel synchronizes wallet updates automatically"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-verified animate-pulse" />

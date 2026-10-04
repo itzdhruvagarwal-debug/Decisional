@@ -117,11 +117,11 @@ export function Tier1CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "
 
         <div>
           {isUnlocked ? (
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-verified bg-verified-muted px-2.5 py-1 rounded-full border border-verified-border">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-verified bg-verified-muted px-2.5 py-1 rounded-full border border-verified-border shrink-0 whitespace-nowrap">
               <CheckCircle2 className="w-3.5 h-3.5" /> Tier 1 Unlocked
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20 shrink-0 whitespace-nowrap">
               Required for Payouts
             </span>
           )}
@@ -172,11 +172,11 @@ export function Tier2CardComponent({ tier, isBrand, renderDocRow }: TierCardProp
 
         <div>
           {isUnlocked ? (
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-verified bg-verified-muted px-2.5 py-1 rounded-full border border-verified-border">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-verified bg-verified-muted px-2.5 py-1 rounded-full border border-verified-border shrink-0 whitespace-nowrap">
               <CheckCircle2 className="w-3.5 h-3.5" /> Tier 2 Unlocked
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-pending bg-pending-muted px-2.5 py-1 rounded-full border border-pending-border">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-pending bg-pending-muted px-2.5 py-1 rounded-full border border-pending-border shrink-0 whitespace-nowrap">
               {getTierUpgradeActionText(tier, isBrand)}
             </span>
           )}
@@ -227,11 +227,11 @@ export function Tier3CardComponent({ tier, renderDocRow }: Omit<TierCardProps, "
 
         <div>
           {isUnlocked ? (
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-verified bg-verified-muted px-2.5 py-1 rounded-full border border-verified-border">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-verified bg-verified-muted px-2.5 py-1 rounded-full border border-verified-border shrink-0 whitespace-nowrap">
               <Sparkles className="w-3.5 h-3.5" /> Unlimited Tier Active
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-muted-foreground bg-muted px-2.5 py-1 rounded-full border border-border">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-muted-foreground bg-muted px-2.5 py-1 rounded-full border border-border shrink-0 whitespace-nowrap">
               {isDisabled ? "Complete Tier 2 first" : "Upload any 1 document below"}
             </span>
           )}

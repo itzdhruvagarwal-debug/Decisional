@@ -117,7 +117,7 @@ export function DealProgressStepper({ status, justUpdated }: DealProgressStepper
               <motion.span
                 initial={{ opacity: 0, scale: 0.85 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border"
+                className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap"
               >
                 <Sparkles className="w-3 h-3 animate-spin" />
                 Updated Just Now
@@ -137,19 +137,19 @@ export function DealProgressStepper({ status, justUpdated }: DealProgressStepper
         </div>
 
         {isDisputed && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-disputed-muted text-disputed border border-disputed-border">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-disputed-muted text-disputed border border-disputed-border shrink-0 whitespace-nowrap">
             <AlertTriangle className="w-3.5 h-3.5" />
             Dispute in Progress
           </div>
         )}
         {isCancelled && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-disputed-muted text-disputed border border-disputed-border">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-disputed-muted text-disputed border border-disputed-border shrink-0 whitespace-nowrap">
             <XCircle className="w-3.5 h-3.5" />
             Cancelled & Refunded
           </div>
         )}
         {isCompleted && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-verified-muted text-verified border border-verified-border">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
             <Check className="w-3.5 h-3.5" />
             Completed & Settled
           </div>

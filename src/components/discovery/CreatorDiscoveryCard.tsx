@@ -160,7 +160,7 @@ export default function CreatorDiscoveryCard({
 
         {/* KYC Badge Pill */}
         {creator.isKycVerified && (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-verified-muted text-verified border-verified-border">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-verified-muted text-verified border-verified-border shrink-0 whitespace-nowrap">
             <ShieldCheck className="w-3 h-3" />
             <span>KYC Verified</span>
           </span>

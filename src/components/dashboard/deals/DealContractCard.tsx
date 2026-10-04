@@ -142,7 +142,7 @@ export function DealContractCard({
                 <span className="font-mono text-xs font-bold text-muted-foreground">
                   Ref #{contractRefId}
                 </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-escrow-muted text-escrow border border-escrow-border">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-escrow-muted text-escrow border border-escrow-border shrink-0 whitespace-nowrap">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>100% Escrow Funded</span>
                 </span>
@@ -291,7 +291,7 @@ export function DealContractCard({
                             <span className="font-bold text-sm text-foreground">
                               {d.type.replaceAll("_", " ")}
                             </span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-foreground border border-border">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-foreground border border-border shrink-0 whitespace-nowrap">
                               Qty: {d.count || 1}
                             </span>
                           </div>
@@ -303,7 +303,7 @@ export function DealContractCard({
 
                       <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1 border-t sm:border-t-0 pt-2 sm:pt-0 border-border text-xs shrink-0">
                         <span className="text-[11px] text-muted-foreground">Status</span>
-                        <span className="font-bold px-2 py-0.5 rounded-full text-[11px] bg-escrow-muted text-escrow border border-escrow-border">
+                        <span className="font-bold px-2 py-0.5 rounded-full text-[11px] bg-escrow-muted text-escrow border border-escrow-border shrink-0 whitespace-nowrap">
                           {deal.status === "COMPLETED"
                             ? "Completed"
                             : deal.status === "CONTENT_APPROVED"

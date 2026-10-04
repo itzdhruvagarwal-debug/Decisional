@@ -18,7 +18,7 @@ id,
 return (
 <span
 id={id}
-className={`badge badge-${variant} ${className}`}
+className={`badge badge-${variant} shrink-0 whitespace-nowrap ${className}`}
 >
 {children}
 </span>

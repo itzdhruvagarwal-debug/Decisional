@@ -224,7 +224,7 @@ export function ActiveDealsFeed({
                       {badgeConfig.label}
                     </Badge>
                     {dueSoon && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-pending-muted text-pending border border-pending-border">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-pending-muted text-pending border border-pending-border shrink-0 whitespace-nowrap">
                         <Flame className="w-3 h-3 fill-current" /> Due Soon
                       </span>
                     )}

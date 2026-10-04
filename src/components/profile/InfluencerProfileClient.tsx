@@ -269,7 +269,7 @@ export default function InfluencerProfileClient({
               {profile.isSocialVerified && (
                 <span
                   title="Social Verified: Official API Connected"
-                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border bg-primary/10 text-primary border-primary/25 shadow-xs"
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border bg-primary/10 text-primary border-primary/25 shadow-xs shrink-0 whitespace-nowrap"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5 fill-primary/20" />
                   <span>Social Verified</span>
@@ -280,7 +280,7 @@ export default function InfluencerProfileClient({
               {profile.isKycVerified && (
                 <span
                   title="KYC Verified: Aadhaar/PAN identity verified for escrow"
-                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border bg-verified-muted text-verified border-verified-border shadow-xs"
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border bg-verified-muted text-verified border-verified-border shadow-xs shrink-0 whitespace-nowrap"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 fill-verified/20" />
                   <span>KYC Verified</span>
@@ -371,7 +371,7 @@ export default function InfluencerProfileClient({
                       <Link
                         href="/dashboard/wallet?topup=true"
                         title={`Available wallet balance: ${formatCurrency(walletBalancePaise)}. Top-up recommended for escrow.`}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs hover:bg-amber-500/20 transition-colors"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs hover:bg-amber-500/20 transition-colors shrink-0 whitespace-nowrap"
                       >
                         <Wallet className="w-2.5 h-2.5" />
                         <span>Low Bal — Add Funds</span>
@@ -637,7 +637,7 @@ export default function InfluencerProfileClient({
 
                     {/* Top Escrow Verification Shield Pill */}
                     <div className="absolute top-2.5 left-2.5">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md bg-escrow-muted/95 text-escrow border border-escrow-border shadow-xs">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md bg-escrow-muted/95 text-escrow border border-escrow-border shadow-xs shrink-0 whitespace-nowrap">
                         <ShieldCheck className="w-3 h-3" />
                         <span>Verified</span>
                       </span>
@@ -991,7 +991,7 @@ export default function InfluencerProfileClient({
                   {isLowBalance && (
                     <span
                       title={`Available balance: ${formatCurrency(walletBalancePaise)}`}
-                      className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-pending-muted text-pending border border-pending-border"
+                      className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-pending-muted text-pending border border-pending-border shrink-0 whitespace-nowrap"
                     >
                       <Wallet className="w-2.5 h-2.5" />
                       <span>Low Bal</span>
@@ -1048,7 +1048,7 @@ export default function InfluencerProfileClient({
                       Dedicated Campaign Invite
                     </span>
                     {isBrand && isLowBalance && (
-                      <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-pending-muted text-pending border border-pending-border">
+                      <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-pending-muted text-pending border border-pending-border shrink-0 whitespace-nowrap">
                         Low Bal ({formatCurrency(walletBalancePaise)})
                       </span>
                     )}
@@ -1085,7 +1085,7 @@ export default function InfluencerProfileClient({
                       <span className="font-bold text-xs text-muted-foreground block">
                         Direct Negotiation Chat
                       </span>
-                      <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                      <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0 whitespace-nowrap">
                         Deal Required
                       </span>
                     </div>

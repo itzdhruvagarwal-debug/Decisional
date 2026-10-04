@@ -47,7 +47,7 @@ export function ConfirmationBadge({
             scale: shouldReduceMotion ? 1 : 0.9,
             transition: shouldReduceMotion ? { duration: 0 } : { duration: 0.15 },
           }}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-semibold shadow-sm ${className}`}
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-semibold shadow-sm shrink-0 whitespace-nowrap ${className}`}
         >
           <motion.div
             initial={shouldReduceMotion ? {} : { rotate: -45, scale: 0 }}

@@ -209,41 +209,41 @@ export default function DisputeDetailPage({ params }: Readonly<DisputeDetailPage
       case "OPEN":
       case "TIER1_AUTO":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-pending-muted text-pending border border-pending-border">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-pending-muted text-pending border border-pending-border shrink-0 whitespace-nowrap">
             <Clock className="w-3.5 h-3.5" />
             Tier 1: Mutual Negotiation
           </span>
         );
       case "TIER2_MEDIATION":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-disputed-muted text-disputed border border-disputed-border animate-pulse">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-disputed-muted text-disputed border border-disputed-border animate-pulse shrink-0 whitespace-nowrap">
             <AlertCircle className="w-3.5 h-3.5" />
             Tier 2: Escrow Admin Mediation
           </span>
         );
       case "TIER3_ARBITRATION":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-disputed-muted text-disputed border border-disputed-border">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-disputed-muted text-disputed border border-disputed-border shrink-0 whitespace-nowrap">
             <Scale className="w-3.5 h-3.5" />
             Tier 3: Platform Arbitration
           </span>
         );
       case "RESOLVED":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-verified-muted text-verified border border-verified-border">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
             <CheckCircle2 className="w-3.5 h-3.5" />
             Resolved
           </span>
         );
       case "CLOSED":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-muted text-muted-foreground border border-border">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-muted text-muted-foreground border border-border shrink-0 whitespace-nowrap">
             Closed
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-muted text-muted-foreground border border-border">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-muted text-muted-foreground border border-border shrink-0 whitespace-nowrap">
             {status.replaceAll("_", " ")}
           </span>
         );

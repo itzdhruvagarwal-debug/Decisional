@@ -216,7 +216,7 @@ export default function CampaignsClient({
             <h1 className="text-2xl sm:text-3xl font-heading font-black text-foreground tracking-tight">
               {canCreateCampaign ? "Campaign Management" : "Campaign Discovery"}
             </h1>
-            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-escrow-muted text-escrow border border-escrow-border">
+            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-escrow-muted text-escrow border border-escrow-border shrink-0 whitespace-nowrap">
               <ShieldCheck className="w-3.5 h-3.5" /> 100% Escrow Funded
             </span>
           </div>

@@ -338,7 +338,7 @@ export default function CampaignDetailClient({
 
                 {campaign.brand?.isGstVerified && (
                   <span
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-bold bg-verified-muted text-verified border border-verified-border"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-bold bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap"
                     title="GST Details legally verified for tax compliance"
                   >
                     <ShieldCheck className="w-3 h-3" />
@@ -403,7 +403,7 @@ export default function CampaignDetailClient({
 
               return (
                 <span
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider ${badgeStyle}`}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider shrink-0 whitespace-nowrap ${badgeStyle}`}
                 >
                   <StatusIcon className="w-3.5 h-3.5" />
                   {campaign.status}
@@ -537,7 +537,7 @@ export default function CampaignDetailClient({
                   <TrendingUp className="w-4 h-4 text-primary" />
                   Campaign Aggregate Performance &amp; Delivery Health
                 </h3>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-verified-muted text-verified font-bold">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-verified-muted text-verified font-bold shrink-0 whitespace-nowrap">
                   Escrow Protected
                 </span>
               </div>
@@ -617,7 +617,7 @@ export default function CampaignDetailClient({
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Financial Safeguard
               </span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold bg-escrow-muted text-escrow border border-escrow-border">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold bg-escrow-muted text-escrow border border-escrow-border shrink-0 whitespace-nowrap">
                 <Lock className="w-3 h-3" />
                 RBI Escrow
               </span>

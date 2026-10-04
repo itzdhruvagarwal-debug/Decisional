@@ -70,20 +70,20 @@ export function ContentSubmissionsCard({ submissions }: Readonly<ContentSubmissi
           const subUrls: ContentUrlEntry[] = Array.isArray(sub.contentUrls) ? sub.contentUrls : [];
 
           let statusBadge = (
-            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-pending-muted text-pending border border-pending-border">
+            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-pending-muted text-pending border border-pending-border shrink-0 whitespace-nowrap">
               <Clock className="w-3 h-3" /> Under Review
             </span>
           );
 
           if (sub.status === "APPROVED") {
             statusBadge = (
-              <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-verified-muted text-verified border border-verified-border">
+              <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
                 <CheckCircle2 className="w-3 h-3" /> Approved
               </span>
             );
           } else if (sub.status === "REVISION_REQUESTED") {
             statusBadge = (
-              <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-disputed-muted text-disputed border border-disputed-border">
+              <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-disputed-muted text-disputed border border-disputed-border shrink-0 whitespace-nowrap">
                 <AlertTriangle className="w-3 h-3" /> Revision Requested
               </span>
             );

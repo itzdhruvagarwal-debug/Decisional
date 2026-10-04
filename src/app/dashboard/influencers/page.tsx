@@ -232,7 +232,7 @@ export default function DiscoverInfluencersPage() {
               <h1 className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-foreground">
                 Creator Discovery
               </h1>
-              <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-verified-muted text-verified border border-verified-border">
+              <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
                 <ShieldCheck className="w-3.5 h-3.5" /> KYC &amp; DRS Verified
               </span>
             </div>
@@ -267,7 +267,7 @@ export default function DiscoverInfluencersPage() {
                 <Bookmark className={`w-3.5 h-3.5 ${viewTab === "saved" ? "fill-current text-primary" : ""}`} />
                 <span>Shortlist</span>
                 {savedCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-primary/10 text-primary">
+                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-primary/10 text-primary shrink-0 whitespace-nowrap">
                     {savedCount}
                   </span>
                 )}

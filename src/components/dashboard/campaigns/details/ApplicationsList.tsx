@@ -114,7 +114,7 @@ export function ApplicationsList({
                       <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
                     </Link>
                     {application.influencer.user?.trustScore ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold bg-verified-muted text-verified border border-verified-border">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
                         <ShieldCheck className="w-3 h-3" />
                         DRS {application.influencer.user.trustScore}
                       </span>
@@ -143,7 +143,7 @@ export function ApplicationsList({
                 )}
 
                 <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border shrink-0 whitespace-nowrap ${
                     isSelected
                       ? "bg-verified-muted text-verified border-verified-border"
                       : isRejected
