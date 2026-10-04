@@ -24,7 +24,8 @@ interface CampaignSummarySidebarProps {
 function SidebarContent({ formData, walletBalancePaise = 0 }: CampaignSummarySidebarProps) {
   const {
     creatorPayoutPoolPaise,
-    platformFeePaise,
+    platformFeePaise: _platformFeePaise,
+    basePlatformFeePaise,
     gatewayFeePaise,
     totalEscrowRequiredPaise,
     platformFeePercent,
@@ -184,12 +185,14 @@ function SidebarContent({ formData, walletBalancePaise = 0 }: CampaignSummarySid
           </span>
         </div>
 
-        <div className="flex items-center justify-between text-muted-foreground">
-          <span>Platform Escrow Fee ({platformFeePercent}%)</span>
-          <span className="font-medium text-foreground tabular-nums">
-            {formatCurrency(platformFeePaise)}
-          </span>
-        </div>
+        {(creatorPayoutPoolPaise > 0 || productHandlingFeePaise === 0) && (
+          <div className="flex items-center justify-between text-muted-foreground">
+            <span>Platform Escrow Fee ({platformFeePercent}%)</span>
+            <span className="font-medium text-foreground tabular-nums">
+              {formatCurrency(basePlatformFeePaise)}
+            </span>
+          </div>
+        )}
 
         {productHandlingFeePaise > 0 && (
           <div className="flex items-center justify-between text-muted-foreground">

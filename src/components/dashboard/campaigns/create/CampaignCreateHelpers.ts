@@ -149,11 +149,12 @@ export const deliverableTypes = [
 export interface CampaignEscrowBreakdown {
   creatorPayoutPoolPaise: number;
   platformFeePaise: number;
+  basePlatformFeePaise: number;
   gatewayFeePaise: number;
   totalEscrowRequiredPaise: number;
   platformFeePercent: number;
   gatewayFeePercent: number;
-  productHandlingFeePaise?: number;
+  productHandlingFeePaise: number;
 }
 
 export function calculateCampaignEscrowPaise(
@@ -196,8 +197,8 @@ export function calculateCampaignEscrowPaise(
   }
 
   const totalProductHandlingFee = handlingFeePerSlot * slots;
-  const platformFeePaise =
-    Math.round((creatorPayoutPoolPaise * platformFeePercent) / 100) + totalProductHandlingFee;
+  const basePlatformFeePaise = Math.round((creatorPayoutPoolPaise * platformFeePercent) / 100);
+  const platformFeePaise = basePlatformFeePaise + totalProductHandlingFee;
   const gatewayFeePaise = Math.round(
     ((creatorPayoutPoolPaise + platformFeePaise) * gatewayFeePercent) / 100,
   );
@@ -206,6 +207,7 @@ export function calculateCampaignEscrowPaise(
   return {
     creatorPayoutPoolPaise,
     platformFeePaise,
+    basePlatformFeePaise,
     gatewayFeePaise,
     totalEscrowRequiredPaise,
     platformFeePercent,
