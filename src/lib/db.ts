@@ -238,7 +238,11 @@ return isLikelyEncrypted(val) ? decrypt(val) : val;
 }
 
 function logSlowQueriesAndAudit(model: string, operation: string, duration: number) {
-  const defaultThreshold = process.env.NODE_ENV === "production" ? 1000 : 2000;
+  // During Next.js production build phase (e.g. sitemap / static SSG generation on Vercel),
+  // initial cross-region remote database connection establishment / SSL handshake naturally
+  // takes 1-3 seconds. We relax the threshold to 5000ms during build phase to avoid false alarms.
+  const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
+  const defaultThreshold = isBuildPhase ? 5000 : (process.env.NODE_ENV === "production" ? 1000 : 2000);
   const slowThreshold =
     Number(process.env.DB_SLOW_QUERY_THRESHOLD_MS || process.env.SLOW_QUERY_THRESHOLD_MS) ||
     defaultThreshold;
