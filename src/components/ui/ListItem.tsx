@@ -48,46 +48,52 @@ export function ListItem({
       : "bg-card border-border hover:border-border/80 hover:shadow-xs"
   } ${onClick || href ? "cursor-pointer" : ""} ${className}`.trim();
 
-  const content = (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 w-full">
-      {/* Leading & Center Zone */}
-      {(leading || title || subtitle || meta) && (
-        <div className="flex items-start sm:items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
-          {leading && <div className="shrink-0">{leading}</div>}
+  const hasHeader = Boolean(leading || title || subtitle || meta || trailing);
 
-          <div className="min-w-0 flex-1">
-            {title && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <div className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
-                  {title}
+  const content = hasHeader ? (
+    <div className="w-full space-y-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 w-full">
+        {/* Leading & Center Zone */}
+        {(leading || title || subtitle || meta) && (
+          <div className="flex items-start sm:items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+            {leading && <div className="shrink-0">{leading}</div>}
+
+            <div className="min-w-0 flex-1">
+              {title && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                    {title}
+                  </div>
+                  {unread && (
+                    <span className="w-2 h-2 rounded-full bg-primary shrink-0" aria-label="Unread item" />
+                  )}
                 </div>
-                {unread && (
-                  <span className="w-2 h-2 rounded-full bg-primary shrink-0" aria-label="Unread item" />
-                )}
-              </div>
-            )}
+              )}
 
-            {subtitle && (
-              <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
-                {subtitle}
-              </div>
-            )}
+              {subtitle && (
+                <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
+                  {subtitle}
+                </div>
+              )}
 
-            {meta && <div className="mt-2 flex flex-wrap items-center gap-2">{meta}</div>}
+              {meta && <div className="mt-2 flex flex-wrap items-center gap-2">{meta}</div>}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Trailing Zone */}
-      {trailing && (
-        <div className="shrink-0 flex items-center gap-2 sm:self-center self-end sm:pt-0 pt-1">
-          {trailing}
-        </div>
-      )}
+        {/* Trailing Zone */}
+        {trailing && (
+          <div className="shrink-0 flex items-center gap-2 sm:self-center self-end sm:pt-0 pt-1">
+            {trailing}
+          </div>
+        )}
+      </div>
 
       {/* Extra Arbitrary Children */}
-      {children}
+      {children && <div className="w-full">{children}</div>}
     </div>
+  ) : (
+    <div className="w-full">{children}</div>
   );
 
   if (href) {

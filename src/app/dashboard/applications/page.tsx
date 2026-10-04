@@ -483,8 +483,8 @@ export default function ApplicationsPage() {
                 >
                   {/* Card Header: Brand & Status */}
                   <div>
-                    <div className="flex items-start justify-between gap-3 mb-4">
-                      <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="w-12 h-12 rounded-xl bg-muted border border-border flex items-center justify-center font-bold text-sm text-foreground overflow-hidden relative flex-shrink-0">
                           {app.campaign.brand?.logo ? (
                             <Image
