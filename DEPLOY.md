@@ -438,9 +438,9 @@ The platform provides live printable, PDF-exportable statements (`StatementPrint
 # ==============================================================================
 NODE_ENV="production"
 PORT=3000
-NEXTAUTH_URL="https://vyaparmedia.in"
-NEXT_PUBLIC_APP_URL="https://vyaparmedia.in"
-APP_BASE_URL="https://vyaparmedia.in"
+NEXTAUTH_URL="https://vyaparmedia-nine.vercel.app"
+NEXT_PUBLIC_APP_URL="https://vyaparmedia-nine.vercel.app"
+APP_BASE_URL="https://vyaparmedia-nine.vercel.app"
 LOG_LEVEL="info"
 
 # Cryptographic Keys (Generate each using: openssl rand -hex 32)
@@ -465,7 +465,7 @@ PLATFORM_PAN="AABCV1234F"
 PLATFORM_ADDRESS="Level 4, Tech Boulevard, Sector 126, Noida, UP 201303"
 PLATFORM_EMAIL="support@vyaparmedia.in"
 PLATFORM_PHONE="+91-XXXXXXXXXX"
-PLATFORM_WEBSITE="https://vyaparmedia.in"
+PLATFORM_WEBSITE="https://vyaparmedia-nine.vercel.app"
 
 # ==============================================================================
 # 3. DATABASE (SUPABASE POSTGRESQL)

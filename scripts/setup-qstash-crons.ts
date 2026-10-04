@@ -156,7 +156,7 @@ async function main() {
     appUrlArg?.split("=")[1] ||
     process.env.APP_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
-    "https://vyaparmedia.in"
+    "https://vyaparmedia-nine.vercel.app"
   ).replace(/\/$/, "");
 
   const cronSecret = process.env.CRON_SECRET || "dev_cron_secret_key_12345";

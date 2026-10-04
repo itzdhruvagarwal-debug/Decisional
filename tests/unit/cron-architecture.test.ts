@@ -73,22 +73,31 @@ describe("Cron Guard & Authorization Architecture", () => {
   });
 
   it("authorizes requests with test mock Upstash signature", async () => {
+    const origKey = process.env.QSTASH_CURRENT_SIGNING_KEY;
+    const origNext = process.env.QSTASH_NEXT_SIGNING_KEY;
+    delete process.env.QSTASH_CURRENT_SIGNING_KEY;
+    delete process.env.QSTASH_NEXT_SIGNING_KEY;
     mockHeaderStore["upstash-signature"] = "valid_mock_qstash_signature";
-    await expect(validateCronSecret()).resolves.toBeUndefined();
+    try {
+      await expect(validateCronSecret()).resolves.toBeUndefined();
+    } finally {
+      process.env.QSTASH_CURRENT_SIGNING_KEY = origKey;
+      process.env.QSTASH_NEXT_SIGNING_KEY = origNext;
+    }
   });
 
   it("authorizes requests with ?key=<secret> in URL query parameter", async () => {
-    const mockReq = new Request(`https://vyaparmedia.in/api/cron/ledger-scan?key=${TEST_SECRET}`);
+    const mockReq = new Request(`https://vyaparmedia-nine.vercel.app/api/cron/ledger-scan?key=${TEST_SECRET}`);
     await expect(validateCronSecret(mockReq)).resolves.toBeUndefined();
   });
 
   it("authorizes requests with ?secret=<secret> in URL query parameter", async () => {
-    const mockReq = new Request(`https://vyaparmedia.in/api/cron/ledger-scan?secret=${TEST_SECRET}`);
+    const mockReq = new Request(`https://vyaparmedia-nine.vercel.app/api/cron/ledger-scan?secret=${TEST_SECRET}`);
     await expect(validateCronSecret(mockReq)).resolves.toBeUndefined();
   });
 
   it("rejects requests with invalid query parameter secret", async () => {
-    const mockReq = new Request(`https://vyaparmedia.in/api/cron/ledger-scan?key=invalid_secret`);
+    const mockReq = new Request(`https://vyaparmedia-nine.vercel.app/api/cron/ledger-scan?key=invalid_secret`);
     await expect(validateCronSecret(mockReq)).rejects.toMatchObject({
       statusCode: 401,
     });
