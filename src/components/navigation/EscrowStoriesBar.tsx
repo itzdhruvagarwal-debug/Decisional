@@ -208,7 +208,7 @@ export default function EscrowStoriesBar({
 
                 {/* Escrow Progress Percentage Badge */}
                 <span
-                  className={`text-[10px] font-bold tabular-nums px-1.5 py-0.2 rounded-full border ${
+                  className={`text-[10px] font-bold tabular-nums px-1.5 py-0.2 rounded-full border shrink-0 whitespace-nowrap ${
                     progress.isDisputed
                       ? "bg-disputed-muted text-disputed border-disputed-border"
                       : progress.percentage >= 90

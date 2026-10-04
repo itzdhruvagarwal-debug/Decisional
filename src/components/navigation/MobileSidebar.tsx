@@ -126,7 +126,7 @@ export default function MobileSidebar({
             <div className="flex items-center justify-between pb-4 border-b border-border mb-4">
               <div className="flex items-center gap-2">
                 <Logo href="/dashboard" />
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border bg-muted text-muted-foreground">
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border bg-muted text-muted-foreground shrink-0 whitespace-nowrap">
                   {isBrand ? "Brand" : "Creator"}
                 </span>
               </div>

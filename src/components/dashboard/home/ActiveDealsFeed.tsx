@@ -162,7 +162,7 @@ export function ActiveDealsFeed({
           <h2 className="text-base sm:text-lg font-bold text-foreground tracking-tight">
             Active Collaborations
           </h2>
-          <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary">
+          <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary shrink-0 whitespace-nowrap">
             {activeDeals.length}
           </span>
         </div>

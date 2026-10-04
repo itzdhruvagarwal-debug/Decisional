@@ -260,7 +260,7 @@ export function ContractPrintView({ deal, onClose }: ContractPrintViewProps) {
             </div>
 
             <div className="sm:text-right space-y-1">
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-verified-muted text-verified font-bold text-2xs border border-verified-border">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-verified-muted text-verified font-bold text-2xs border border-verified-border shrink-0 whitespace-nowrap">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 100% Escrow Secured
               </span>

@@ -141,7 +141,7 @@ export function MatchScoreBadge({
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border transition-all duration-150 hover:brightness-105 active:scale-95 ${getScoreColor(
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border transition-all duration-150 hover:brightness-105 active:scale-95 shrink-0 whitespace-nowrap ${getScoreColor(
           score
         )}`}
         aria-expanded={isOpen}
@@ -169,7 +169,7 @@ export function MatchScoreBadge({
                   Match Score Breakdown
                 </span>
                 <span
-                  className={`text-xs font-black px-2 py-0.5 rounded-full border ${getScoreColor(
+                  className={`text-xs font-black px-2 py-0.5 rounded-full border shrink-0 whitespace-nowrap ${getScoreColor(
                     score
                   )}`}
                 >
@@ -200,7 +200,7 @@ export function MatchScoreBadge({
                 {priorityMeta.label}
               </span>
             </div>
-            <span className="text-[10px] font-semibold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-semibold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap">
               {priorityMeta.badge}
             </span>
           </div>

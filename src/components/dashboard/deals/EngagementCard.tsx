@@ -35,7 +35,7 @@ export function EngagementCard({
           Post Performance
         </h2>
         <span
-          className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
+          className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border shrink-0 whitespace-nowrap ${
             trend === "GROWING"
               ? "bg-verified-muted text-verified border-verified-border"
               : trend === "DECLINING"

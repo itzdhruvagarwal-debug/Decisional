@@ -86,7 +86,7 @@ export function DisputeAnalysisCard({
         </div>
 
         <span
-          className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
+          className={`px-2.5 py-1 rounded-full text-xs font-bold border shrink-0 whitespace-nowrap ${
             isHighConfidence
               ? "bg-verified-muted text-verified border-verified-border"
               : isMediumConfidence

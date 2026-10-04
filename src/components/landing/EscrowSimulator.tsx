@@ -37,7 +37,7 @@ export function EscrowSimulator() {
       <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-verified/10 blur-3xl pointer-events-none" />
 
       <div className="relative z-10 text-center max-w-2xl mx-auto mb-10">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-escrow-muted text-escrow border border-escrow-border mb-3">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-escrow-muted text-escrow border border-escrow-border mb-3 shrink-0 whitespace-nowrap">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />

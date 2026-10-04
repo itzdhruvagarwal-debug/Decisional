@@ -131,7 +131,7 @@ export function DealsFilterToolbar({
               <span>{tab.label}</span>
               {count !== undefined && count > 0 && (
                 <span
-                  className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono tabular-nums ${
+                  className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono tabular-nums shrink-0 whitespace-nowrap ${
                     isActive
                       ? "bg-primary-foreground/20 text-primary-foreground"
                       : "bg-muted text-muted-foreground"

@@ -482,7 +482,7 @@ export default function OnboardingPage() {
                             key={lang}
                             type="button"
                             onClick={() => toggleLanguage(lang)}
-                            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
                               isSelected
                                 ? "bg-primary border-primary text-primary-foreground shadow-xs"
                                 : "bg-muted border-border text-foreground hover:border-primary/50"

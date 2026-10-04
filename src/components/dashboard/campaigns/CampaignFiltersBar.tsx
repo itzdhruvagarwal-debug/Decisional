@@ -91,7 +91,7 @@ export function CampaignFiltersBar({
                 key={tab.key}
                 type="button"
                 onClick={() => setSelectedStatus(tab.key)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 whitespace-nowrap cursor-pointer ${
                   isActive
                     ? "bg-card text-foreground shadow-xs border border-border/80"
                     : "text-muted-foreground hover:text-foreground"
@@ -116,7 +116,7 @@ export function CampaignFiltersBar({
               key={category}
               type="button"
               onClick={() => setSelectedCategory(category)}
-              className={`shrink-0 px-3.5 py-2 min-h-[44px] inline-flex items-center rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`shrink-0 whitespace-nowrap px-3.5 py-2 min-h-[44px] inline-flex items-center rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 isActive
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "bg-card text-muted-foreground hover:text-foreground border border-border hover:border-border/80"

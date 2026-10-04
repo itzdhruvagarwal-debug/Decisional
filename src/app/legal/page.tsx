@@ -86,7 +86,7 @@ export default function LegalPage() {
         {/* ── Hero ────────────────────────────────────────── */}
         <section className="relative overflow-hidden border-b border-border/40 pb-16">
           <div className="container max-w-5xl mx-auto px-4 sm:px-6 relative z-10 text-center">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider mb-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider mb-6 shrink-0 whitespace-nowrap">
               <Scale className="w-3.5 h-3.5" />
               <span>Governance &amp; Regulatory Compliance</span>
             </div>
@@ -183,7 +183,7 @@ export default function LegalPage() {
             <div className="rounded-3xl border border-primary/20 bg-primary/5 p-8 sm:p-10">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-3">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-3 shrink-0 whitespace-nowrap">
                     <Building2 className="w-3.5 h-3.5" />
                     <span>Statutory Grievance Officer</span>
                   </div>

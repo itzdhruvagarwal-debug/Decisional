@@ -45,7 +45,7 @@ export function LegalLayout({ title, lastUpdated, description, sections, childre
               <span className="text-foreground font-medium">{title}</span>
             </div>
 
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider mb-4 shrink-0 whitespace-nowrap">
               <Shield className="w-3.5 h-3.5" />
               <span>Official Regulatory Document</span>
             </div>

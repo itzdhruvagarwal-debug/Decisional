@@ -241,17 +241,17 @@ export default function DiscoveryFeed({
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
             <span className="text-muted-foreground shrink-0 font-medium">Active:</span>
             {filters.niche && (
-              <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 shrink-0 font-medium">
+              <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 shrink-0 font-medium whitespace-nowrap">
                 {filters.niche}
               </span>
             )}
             {filters.city && (
-              <span className="px-2.5 py-0.5 rounded-full bg-muted text-foreground border border-border shrink-0 font-medium">
+              <span className="px-2.5 py-0.5 rounded-full bg-muted text-foreground border border-border shrink-0 font-medium whitespace-nowrap">
                 📍 {filters.city}
               </span>
             )}
             {filters.sortBy && (
-              <span className="px-2.5 py-0.5 rounded-full bg-muted text-foreground border border-border shrink-0 font-medium">
+              <span className="px-2.5 py-0.5 rounded-full bg-muted text-foreground border border-border shrink-0 font-medium whitespace-nowrap">
                 Sort: {filters.sortBy}
               </span>
             )}

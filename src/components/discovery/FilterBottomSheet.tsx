@@ -186,7 +186,7 @@ export default function FilterBottomSheet({
                           key={n}
                           type="button"
                           onClick={() => handleNicheSelect(n)}
-                          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all shrink-0 whitespace-nowrap ${
                             isSelected
                               ? "bg-primary text-primary-foreground border-primary shadow-xs font-semibold"
                               : "bg-muted/40 text-foreground border-border/80 hover:bg-muted"
@@ -283,7 +283,7 @@ export default function FilterBottomSheet({
                         key={city}
                         type="button"
                         onClick={() => handleCitySelect(city)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all shrink-0 whitespace-nowrap ${
                           isSelected
                             ? "bg-primary text-primary-foreground border-primary shadow-xs font-semibold"
                             : "bg-muted/40 text-foreground border-border/80 hover:bg-muted"

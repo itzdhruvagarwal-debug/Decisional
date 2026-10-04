@@ -602,7 +602,7 @@ export default function StoryShareModal({
                 <div className="text-[10px] font-extrabold tracking-widest text-primary uppercase">
                   VYAPARMEDIA
                 </div>
-                <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-card/40 border border-border text-[9px] font-medium text-foreground">
+                <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-card/40 border border-border text-[9px] font-medium text-foreground shrink-0 whitespace-nowrap">
                   {activeTab === "profile" ? "🛡️ Escrow Verified" : "🎁 Partner Invite"}
                 </div>
               </div>
@@ -623,7 +623,7 @@ export default function StoryShareModal({
                       <div className="text-[10px] text-muted-foreground">@{profileUsername}</div>
                     </div>
 
-                    <div className="inline-block px-2.5 py-1 rounded-full bg-verified/15 border border-verified/30 text-[9px] font-bold text-verified">
+                    <div className="inline-block px-2.5 py-1 rounded-full bg-verified/15 border border-verified/30 text-[9px] font-bold text-verified shrink-0 whitespace-nowrap">
                       ⭐️ {profile?.trustScore || 850} DRS Score
                     </div>
 
@@ -669,7 +669,7 @@ export default function StoryShareModal({
 
               {/* Bottom Link Sticker Preview */}
               <div className="relative z-10 pb-1">
-                <div className="mx-auto max-w-[200px] py-1.5 px-3 rounded-full bg-card text-foreground border border-border shadow-lg text-[9px] font-bold flex items-center justify-center gap-1 truncate">
+                <div className="mx-auto max-w-[200px] py-1.5 px-3 rounded-full bg-card text-foreground border border-border shadow-lg text-[9px] font-bold flex items-center justify-center gap-1 shrink-0 whitespace-nowrap truncate">
                   <span>🔗</span>
                   <span className="truncate">
                     {activeTab === "profile" ? `creator/${profileUsername}` : `register?ref=${referralCode}`}

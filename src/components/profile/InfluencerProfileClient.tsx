@@ -304,7 +304,7 @@ export default function InfluencerProfileClient({
                 </span>
               )}
 
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20 shrink-0 whitespace-nowrap">
                 From {formattedStartingRate}
               </span>
             </div>
@@ -321,7 +321,7 @@ export default function InfluencerProfileClient({
               {profile.categories.map((niche, idx) => (
                 <span
                   key={idx}
-                  className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-foreground border border-border"
+                  className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-foreground border border-border shrink-0 whitespace-nowrap"
                 >
                   {niche}
                 </span>
@@ -676,7 +676,7 @@ export default function InfluencerProfileClient({
                   Transparent escrow milestone rates. Funds locked until deliverables are approved.
                 </p>
               </div>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-verified-muted text-verified border border-verified-border self-start sm:self-auto">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-verified-muted text-verified border border-verified-border self-start sm:self-auto shrink-0 whitespace-nowrap">
                 <Lock className="w-3.5 h-3.5" />
                 <span>Escrow Protected</span>
               </span>

@@ -123,7 +123,7 @@ export default function HomePage() {
           <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
             <div className="text-center max-w-3xl mx-auto">
               {/* Trust Badge Kicker */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-6 shadow-sm">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-6 shadow-sm shrink-0 whitespace-nowrap">
                 <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                 🛡️ India&apos;s #1 Influencer Commerce & Escrow Infrastructure
               </div>
@@ -262,7 +262,7 @@ export default function HomePage() {
         <section id="how-it-works" className="py-20 bg-secondary/30 border-y border-border">
           <div className="container max-w-5xl mx-auto px-4 sm:px-6">
             <div className="text-center max-w-2xl mx-auto mb-12">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 mb-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 mb-3 shrink-0 whitespace-nowrap">
                 Simple & Transparent
               </span>
               <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
@@ -347,7 +347,7 @@ export default function HomePage() {
         <section className="py-20 relative">
           <div className="container max-w-6xl mx-auto px-4 sm:px-6">
             <div className="text-center max-w-2xl mx-auto mb-14">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-verified-muted text-verified border border-verified-border mb-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-verified-muted text-verified border border-verified-border mb-3 shrink-0 whitespace-nowrap">
                 Proven Track Record
               </span>
               <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
@@ -424,7 +424,7 @@ export default function HomePage() {
               <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
 
               <div className="relative z-10 max-w-2xl mx-auto">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-verified-muted text-verified border border-verified-border mb-4">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-verified-muted text-verified border border-verified-border mb-4 shrink-0 whitespace-nowrap">
                   🛡️ Risk-Free Guarantee
                 </span>
                 <h2 className="text-3xl sm:text-5xl font-black text-foreground tracking-tight mb-4">

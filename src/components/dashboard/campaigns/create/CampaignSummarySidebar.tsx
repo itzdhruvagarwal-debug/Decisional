@@ -51,7 +51,7 @@ function SidebarContent({ formData, walletBalancePaise = 0 }: CampaignSummarySid
     <div className="p-5 sm:p-6 rounded-3xl border border-border bg-card shadow-sm space-y-5">
       {/* Header Badge */}
       <div className="flex items-center justify-between">
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-escrow-muted text-escrow border border-escrow-border">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-escrow-muted text-escrow border border-escrow-border shrink-0 whitespace-nowrap">
           <Lock className="w-3 h-3" />
           <span>Escrow Estimate</span>
         </span>

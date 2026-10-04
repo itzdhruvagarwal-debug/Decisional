@@ -262,19 +262,19 @@ export function CampaignDiscoveryCard({
 
           <div className="text-right shrink-0 flex flex-col items-end gap-1">
             {isCancelled ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 shadow-2xs">
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 shadow-2xs shrink-0 whitespace-nowrap">
                 <XCircle className="w-2.5 h-2.5" /> Cancelled
               </span>
             ) : isCompleted ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-verified/10 text-verified border border-verified/20 shadow-2xs">
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-verified/10 text-verified border border-verified/20 shadow-2xs shrink-0 whitespace-nowrap">
                 <CheckCircle2 className="w-2.5 h-2.5" /> Completed
               </span>
             ) : isDraft ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border shadow-2xs">
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border shadow-2xs shrink-0 whitespace-nowrap">
                 Draft
               </span>
             ) : isApplied ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-verified text-primary-foreground shadow-xs">
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-verified text-primary-foreground shadow-xs shrink-0 whitespace-nowrap">
                 <CheckCircle2 className="w-3 h-3" /> Applied
               </span>
             ) : null}

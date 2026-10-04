@@ -89,7 +89,7 @@ export default function AdminSuspiciousReviewsPage() {
             <h1 className="text-2xl font-black tracking-tight text-foreground">
               Suspicious Review Patterns
             </h1>
-            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-disputed-muted border border-disputed-border text-disputed">
+            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-disputed-muted border border-disputed-border text-disputed shrink-0 whitespace-nowrap">
               DRS Anti-Collusion
             </span>
           </div>
@@ -163,7 +163,7 @@ export default function AdminSuspiciousReviewsPage() {
                 {/* Left: Account Pair Info & Evidence */}
                 <div className="space-y-3 min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-black border ${riskBg}`}>
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-black border shrink-0 whitespace-nowrap ${riskBg}`}>
                       Risk Score: {flag.riskScore}/100
                     </span>
                     <span className="text-xs font-bold text-muted-foreground">

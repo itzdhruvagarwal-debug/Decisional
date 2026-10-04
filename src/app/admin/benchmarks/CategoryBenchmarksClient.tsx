@@ -163,7 +163,7 @@ export default function CategoryBenchmarksClient({ initialBenchmarks }: Props) {
             <div>
               <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                 Relative Category-Aware ROI Simulator
-                <span className="text-2xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border">
+                <span className="text-2xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
                   Live Engine
                 </span>
               </h2>

@@ -143,7 +143,7 @@ export function ShipmentTrackingModal({
               <div className="flex items-center gap-2">
                 <span className="font-bold text-sm text-foreground">{tracking?.courierName || courier}</span>
                 <span
-                  className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${
+                  className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border shrink-0 whitespace-nowrap ${
                     isDelivered
                       ? "bg-verified-muted text-verified border-verified-border"
                       : "bg-primary/10 text-primary border-primary/20"

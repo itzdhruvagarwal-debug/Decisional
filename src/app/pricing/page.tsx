@@ -150,7 +150,7 @@ export default function PricingPage() {
                   }`}
                 >
                   <span>Agency & Volume Plan</span>
-                  <span className="text-[10px] bg-verified text-white px-1.5 py-0.2 rounded-full font-black uppercase tracking-wider">
+                  <span className="text-[10px] bg-verified text-white px-1.5 py-0.2 rounded-full font-black uppercase tracking-wider shrink-0 whitespace-nowrap">
                     Save 25%
                   </span>
                 </button>
@@ -203,7 +203,7 @@ export default function PricingPage() {
 
               {/* Brand Card */}
               <article className="pricing-card pricing-card--brand card rounded-2xl p-8 flex flex-col relative border-2 border-primary shadow-lg bg-card">
-                <div className="absolute -top-3.5 right-6 px-3 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-black uppercase tracking-wider shadow-md">
+                <div className="absolute -top-3.5 right-6 px-3 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-black uppercase tracking-wider shadow-md shrink-0 whitespace-nowrap">
                   Most Popular
                 </div>
 

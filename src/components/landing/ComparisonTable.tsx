@@ -54,7 +54,7 @@ export function ComparisonTable() {
     <section className="py-20 bg-secondary/30 relative">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-verified-muted text-verified border border-verified-border mb-3">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-verified-muted text-verified border border-verified-border mb-3 shrink-0 whitespace-nowrap">
             Why Creators & Brands Switch
           </span>
           <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">

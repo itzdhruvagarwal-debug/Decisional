@@ -182,7 +182,7 @@ export function CampaignRoiReport({ data, campaignId, onRefresh }: CampaignRoiRe
             <span className="text-2xs font-mono font-bold tracking-widest text-primary uppercase">
               VYAPARMEDIA ENTERPRISE STANDARD
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border">
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
               <ShieldCheck className="w-3 h-3" />
               Live Escrow Ledger Verified
             </span>
@@ -219,7 +219,7 @@ export function CampaignRoiReport({ data, campaignId, onRefresh }: CampaignRoiRe
               Category Baseline CPV: <strong className="text-foreground">₹{summary.categoryBaselineCpvRupees}</strong>
             </span>
             {summary.categoryBenchmarkSource && (
-              <span className="text-2xs font-semibold px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground border border-border">
+              <span className="text-2xs font-semibold px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground border border-border shrink-0 whitespace-nowrap">
                 {summary.categoryBenchmarkSource === "DYNAMIC_30D"
                   ? "30D Dynamic Data"
                   : summary.categoryBenchmarkSource === "CONFIG_DB"
@@ -294,7 +294,7 @@ export function CampaignRoiReport({ data, campaignId, onRefresh }: CampaignRoiRe
               <DollarSign className="w-4 h-4 text-primary" />
               Realized Campaign Spend
             </span>
-            <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+            <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 shrink-0 whitespace-nowrap">
               {budgetUtilization}% Disbursed
             </span>
           </div>
@@ -321,7 +321,7 @@ export function CampaignRoiReport({ data, campaignId, onRefresh }: CampaignRoiRe
               <Eye className="w-4 h-4 text-verified" />
               Total Tracked Views
             </span>
-            <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border">
+            <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
               {formatNumber(summary.totalReach)} Reach
             </span>
           </div>
@@ -346,12 +346,12 @@ export function CampaignRoiReport({ data, campaignId, onRefresh }: CampaignRoiRe
               Effective CPV
             </span>
             {summary.efficiencyMultiplier && summary.efficiencyMultiplier >= 1 ? (
-              <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border flex items-center gap-1">
+              <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border flex items-center gap-1 shrink-0 whitespace-nowrap">
                 <ArrowDownRight className="w-3 h-3" />
                 {summary.efficiencyMultiplier}x Better
               </span>
             ) : (
-              <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+              <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground shrink-0 whitespace-nowrap">
                 Market Baseline
               </span>
             )}
@@ -416,7 +416,7 @@ export function CampaignRoiReport({ data, campaignId, onRefresh }: CampaignRoiRe
               <Sparkles className="w-4 h-4 text-pending" />
               Blended CPE
             </span>
-            <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-pending-muted text-pending border border-pending-border">
+            <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-pending-muted text-pending border border-pending-border shrink-0 whitespace-nowrap">
               Cost Efficiency
             </span>
           </div>
@@ -440,7 +440,7 @@ export function CampaignRoiReport({ data, campaignId, onRefresh }: CampaignRoiRe
               <Percent className="w-4 h-4 text-primary" />
               Aggregate Engagement Rate
             </span>
-            <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border">
+            <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
               {summary.avgEngagementRate >= 3.5 ? "High Impact" : "Healthy"}
             </span>
           </div>
@@ -543,7 +543,7 @@ export function CampaignRoiReport({ data, campaignId, onRefresh }: CampaignRoiRe
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 CPV Realization
               </span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 shrink-0 whitespace-nowrap">
                 Cost Optimization
               </span>
             </div>
@@ -591,7 +591,7 @@ export function CampaignRoiReport({ data, campaignId, onRefresh }: CampaignRoiRe
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Matching Reliability
               </span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
                 High Confidence
               </span>
             </div>

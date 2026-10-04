@@ -184,7 +184,7 @@ export function MatchingPrioritySliders({
                     {renderIcon()}
                   </div>
                   <span
-                    className={`text-2xs font-bold px-1.5 py-0.5 rounded-full border ${
+                    className={`text-2xs font-bold px-1.5 py-0.5 rounded-full border shrink-0 whitespace-nowrap ${
                       isSelected
                         ? "bg-primary/10 text-primary border-primary/30"
                         : "bg-muted text-muted-foreground border-border"

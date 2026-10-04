@@ -361,7 +361,7 @@ export function ContentSubmissionModal({
                     ? `Submit Revision`
                     : `Submit Deliverables`}
                 </h2>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 shrink-0 whitespace-nowrap">
                   {step === "success" ? `v${submittedVersion}` : `v${nextVersionNumber}`}
                 </span>
               </div>

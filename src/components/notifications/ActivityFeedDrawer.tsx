@@ -121,7 +121,7 @@ export default function ActivityFeedDrawer({
           <div className="flex items-center gap-2">
             <h2 className="text-base font-bold tracking-tight text-foreground">Activity</h2>
             {unreadCount > 0 && (
-              <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-destructive text-destructive-foreground">
+              <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-destructive text-destructive-foreground shrink-0 whitespace-nowrap">
                 {unreadCount > 99 ? "99+" : unreadCount} new
               </span>
             )}

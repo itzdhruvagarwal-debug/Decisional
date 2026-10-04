@@ -203,7 +203,7 @@ export default function HelpCenterClient() {
     <div className="w-full max-w-5xl mx-auto px-4 py-8 sm:py-12 space-y-10">
       {/* ==================== 1. HERO & SEARCH ==================== */}
       <section className="text-center space-y-4 max-w-2xl mx-auto">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/25">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/25 shrink-0 whitespace-nowrap">
           <LifeBuoy className="w-3.5 h-3.5" />
           <span>VyaparMedia Knowledge Base</span>
         </span>

@@ -32,7 +32,7 @@ export function DealDisputeSection({ dealId, status, isBrand }: DealDisputeSecti
               <h3 className="text-base font-heading font-bold text-disputed">
                 Dispute Under Active Mediation
               </h3>
-              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-disputed/20 text-disputed border border-disputed-border">
+              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-disputed/20 text-disputed border border-disputed-border shrink-0 whitespace-nowrap">
                 Escrow Frozen
               </span>
             </div>

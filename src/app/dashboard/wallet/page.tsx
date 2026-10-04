@@ -163,17 +163,17 @@ function TransactionReceiptModal({ transaction, isOpen, onClose }: Readonly<Rece
           </div>
           <div className="flex items-center gap-2">
             {transaction.status === "COMPLETED" && (
-              <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border">
+              <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Successful Transfer
               </span>
             )}
             {transaction.status === "PENDING" && (
-              <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-pending-muted text-pending border border-pending-border">
+              <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-pending-muted text-pending border border-pending-border shrink-0 whitespace-nowrap">
                 <Clock className="w-3.5 h-3.5" /> Processing IMPS
               </span>
             )}
             {(transaction.status === "FAILED" || transaction.status === "REVERSED") && (
-              <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-disputed-muted text-disputed border border-disputed-border">
+              <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-disputed-muted text-disputed border border-disputed-border shrink-0 whitespace-nowrap">
                 <AlertTriangle className="w-3.5 h-3.5" /> {transaction.status}
               </span>
             )}
@@ -673,7 +673,7 @@ export default function WalletPage() {
               >
                 <span>Audit Ledger</span>
                 {transactions.length > 0 && (
-                  <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                  <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold shrink-0 whitespace-nowrap">
                     {transactions.length}
                   </span>
                 )}

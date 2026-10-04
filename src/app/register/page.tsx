@@ -65,7 +65,7 @@ function RegisterContent() {
           <span className="font-bold text-foreground">
             Step {step} of 2: {step === 1 ? "Select Account Role" : "Account Setup"}
           </span>
-          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-verified bg-verified-muted px-2.5 py-0.5 rounded-full border border-verified-border">
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-verified bg-verified-muted px-2.5 py-0.5 rounded-full border border-verified-border shrink-0 whitespace-nowrap">
             <span>⚡</span>
             <span>~2 min quick setup</span>
           </span>

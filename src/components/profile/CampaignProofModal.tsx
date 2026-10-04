@@ -83,7 +83,7 @@ export default function CampaignProofModal({
 
           {/* Escrow Badge Overlay */}
           <div className="absolute top-3 left-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border backdrop-blur-md bg-escrow-muted/95 text-escrow border-escrow-border shadow-md">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border backdrop-blur-md bg-escrow-muted/95 text-escrow border-escrow-border shadow-md shrink-0 whitespace-nowrap">
               <Lock className="w-3.5 h-3.5" />
               <span className="tabular-nums">{formatCurrency(proof.amountPaise)} Escrow Released</span>
             </span>
@@ -96,7 +96,7 @@ export default function CampaignProofModal({
             {proof.title}
           </h3>
           {proof.outcomeMetric && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 shrink-0 whitespace-nowrap">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>{proof.outcomeMetric}</span>
             </div>
