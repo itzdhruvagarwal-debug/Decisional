@@ -17,6 +17,8 @@ import { Button } from "@/components/ui";
 import { DealsMetricsBar } from "@/components/dashboard/deals/DealsMetricsBar";
 import { DealsFilterToolbar } from "@/components/dashboard/deals/DealsFilterToolbar";
 import { DealPipelineCard } from "@/components/dashboard/deals/DealPipelineCard";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 function normalizeDeal(raw: RawDeal): Deal {
@@ -85,10 +87,14 @@ export default function DealsPage() {
 
   const isInfluencer = session?.user?.userType === "INFLUENCER";
 
+  const searchParams = useSearchParams();
+  const campaignId = searchParams.get("campaignId");
+  const campaignParam = campaignId ? `&campaignId=${encodeURIComponent(campaignId)}` : "";
+
   const statusParam = statusFilter === "all" ? "" : `&status=${statusFilter}`;
   const dealsListFetcher = createSchemaFetcher(dealsListResponseSchema);
   const { data: payload, isLoading: loading } = useSWR<DealsApiResponse>(
-    `/api/deals?page=${currentPage}&limit=${DEALS_PER_PAGE}${statusParam}`,
+    `/api/deals?page=${currentPage}&limit=${DEALS_PER_PAGE}${statusParam}${campaignParam}`,
     dealsListFetcher
   );
 
@@ -220,6 +226,15 @@ export default function DealsPage() {
               totalEarningsPaise={stats.totalEarnings || 0}
               isInfluencer={isInfluencer}
             />
+
+            {campaignId && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-xs text-primary font-medium w-fit">
+                <span>Filtering by campaign: <strong className="font-semibold">{campaignId}</strong></span>
+                <Link href="/dashboard/deals" className="underline font-bold hover:opacity-80 ml-1">
+                  Clear filter ✕
+                </Link>
+              </div>
+            )}
 
             {/* Filter and Search Bar with Sort Controls */}
             <DealsFilterToolbar

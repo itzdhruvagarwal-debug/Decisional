@@ -335,10 +335,12 @@ export function checkCampaignCancelEligibility(
     status: string;
     openDealCount?: number | undefined;
     activeDealsCount?: number | undefined;
+    disputedDealCount?: number | undefined;
     _count?: { deals?: number | undefined } | undefined;
   } | null | undefined,
   isOwner: boolean,
   isWalletFrozen?: boolean | null | undefined,
+  campaignId?: string | null | undefined,
 ): { allowed: boolean; reason?: string | undefined; ctaText?: string | undefined; ctaHref?: string | undefined } {
   if (!campaign) {
     return { allowed: false, reason: "Campaign not found" };
@@ -361,16 +363,36 @@ export function checkCampaignCancelEligibility(
     };
   }
 
+  const disputedDeals = campaign.disputedDealCount ?? 0;
   const openDeals =
     campaign.openDealCount ??
     campaign.activeDealsCount ??
     0;
+
+  if (disputedDeals > 0) {
+    const nonDisputedOpen = Math.max(0, openDeals - disputedDeals);
+    if (nonDisputedOpen > 0) {
+      return {
+        allowed: false,
+        reason: `Cannot cancel campaign while deals are in active dispute (${disputedDeals} disputed deal${disputedDeals > 1 ? "s" : ""}) and ${nonDisputedOpen} ongoing deal${nonDisputedOpen > 1 ? "s exist" : " exists"}. Resolve disputes and finalize all deals first.`,
+        ctaText: "View Disputes",
+        ctaHref: "/dashboard/disputes",
+      };
+    }
+    return {
+      allowed: false,
+      reason: `Cannot cancel campaign while deals are in active dispute (${disputedDeals} disputed deal${disputedDeals > 1 ? "s" : ""}). Please resolve or settle all disputes with arbitration first.`,
+      ctaText: "View Disputes",
+      ctaHref: "/dashboard/disputes",
+    };
+  }
 
   if (openDeals > 0) {
     return {
       allowed: false,
       reason: `Cannot cancel campaign while active deals exist (${openDeals} active deal${openDeals > 1 ? "s" : ""}). Complete, cancel, or resolve all deals first.`,
       ctaText: "View Active Deals",
+      ctaHref: campaignId ? `/dashboard/deals?campaignId=${campaignId}` : "/dashboard/deals",
     };
   }
 
@@ -490,7 +512,17 @@ export function checkAccountDeletionEligibility(
   activeDealsCount?: number | undefined,
   confirmText?: string | undefined,
   password?: string | undefined,
+  disputedDealsCount?: number | undefined,
 ): { allowed: boolean; reason?: string | undefined; ctaText?: string | undefined; ctaHref?: string | undefined } {
+  if (disputedDealsCount && disputedDealsCount > 0) {
+    return {
+      allowed: false,
+      reason: `Cannot delete account while you have deals in active dispute (${disputedDealsCount} disputed deal${disputedDealsCount > 1 ? "s" : ""}). Please resolve all disputes with mediation first.`,
+      ctaText: "View Disputes",
+      ctaHref: "/dashboard/disputes",
+    };
+  }
+
   if (activeDealsCount && activeDealsCount > 0) {
     return {
       allowed: false,

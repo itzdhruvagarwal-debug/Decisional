@@ -66,19 +66,29 @@ return null;
 }
 }
 
-  const openDealCount = await prisma.deal.count({
-    where: {
-      campaignId: campaign.id,
-      deletedAt: null,
-      status: {
-        notIn: ["CANCELLED", "COMPLETED"],
+  const [openDealCount, disputedDealCount] = await Promise.all([
+    prisma.deal.count({
+      where: {
+        campaignId: campaign.id,
+        deletedAt: null,
+        status: {
+          notIn: ["CANCELLED", "COMPLETED"],
+        },
       },
-    },
-  });
+    }),
+    prisma.deal.count({
+      where: {
+        campaignId: campaign.id,
+        deletedAt: null,
+        status: "DISPUTED",
+      },
+    }),
+  ]);
 
   return {
     ...campaign,
     openDealCount,
+    disputedDealCount,
   };
 }
 function buildBasicInfoUpdate(
@@ -440,15 +450,24 @@ if (!campaign || campaign.deletedAt || campaign.brand?.userId !== userId) {
 throw AppError.notFound("Campaign not found or unauthorized");
 }
 
-const openDealCount = await tx.deal.count({
-where: {
-campaignId,
-deletedAt: null,
-status: {
-notIn: ["CANCELLED", "COMPLETED"],
-},
-},
-});
+const [openDealCount, disputedDealCount] = await Promise.all([
+  tx.deal.count({
+    where: {
+      campaignId,
+      deletedAt: null,
+      status: {
+        notIn: ["CANCELLED", "COMPLETED"],
+      },
+    },
+  }),
+  tx.deal.count({
+    where: {
+      campaignId,
+      deletedAt: null,
+      status: "DISPUTED",
+    },
+  }),
+]);
 
 const wallet = await tx.wallet.findUnique({ where: { userId } });
 
@@ -456,9 +475,11 @@ const cancelCheck = checkCampaignCancelEligibility(
   {
     status: campaign.status,
     openDealCount,
+    disputedDealCount,
   },
   campaign.brand?.userId === userId,
-  wallet?.isFrozen
+  wallet?.isFrozen,
+  campaign.id
 );
 if (!cancelCheck.allowed) {
   throw AppError.badRequest(cancelCheck.reason || "Cannot cancel campaign");

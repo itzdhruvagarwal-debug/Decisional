@@ -189,6 +189,7 @@ export const campaignDetailSchema = z
     hasApplied: z.boolean().optional(),
     applicationStatus: z.string().nullable().optional(),
     openDealCount: z.number().optional(),
+    disputedDealCount: z.number().optional(),
     dealId: z.string().nullable().optional(),
   })
   .catchall(z.unknown());

@@ -89,9 +89,13 @@ export default function CampaignDetailClient({
     if (!campaign) return { allowed: false, reason: "Campaign details not loaded" };
 
     let openDeals = campaign.openDealCount;
+    let disputedDeals = campaign.disputedDealCount;
     if (openDeals === undefined && applications && applications.length > 0) {
       openDeals = applications.filter(
         (app) => app.dealId && app.dealStatus && app.dealStatus !== "CANCELLED" && app.dealStatus !== "COMPLETED"
+      ).length;
+      disputedDeals = applications.filter(
+        (app) => app.dealId && app.dealStatus === "DISPUTED"
       ).length;
     }
 
@@ -99,8 +103,11 @@ export default function CampaignDetailClient({
       {
         status: campaign.status,
         openDealCount: openDeals ?? 0,
+        disputedDealCount: disputedDeals ?? 0,
       },
-      isOwner
+      isOwner,
+      undefined,
+      campaign.id
     );
   }, [campaign, isOwner, applications]);
 
@@ -277,7 +284,7 @@ export default function CampaignDetailClient({
                     <span>{cancelEligibility.reason}</span>
                     {cancelEligibility.ctaText && (
                       <Link
-                        href={`/dashboard/deals?campaignId=${campaign.id}`}
+                        href={cancelEligibility.ctaHref || `/dashboard/deals?campaignId=${campaign.id}`}
                         className="underline font-bold text-primary hover:text-primary/80"
                       >
                         {cancelEligibility.ctaText} →

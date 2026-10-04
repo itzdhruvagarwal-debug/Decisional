@@ -10,6 +10,7 @@ userId: string,
 userType: UserType | string,
 params: {
 status?: string;
+campaignId?: string;
 page: number;
 limit: number;
 },
@@ -19,6 +20,9 @@ const page = Math.max(1, params.page || 1);
 const limit = Math.min(50, Math.max(1, params.limit || 10));
 
 const where: Prisma.DealWhereInput = { deletedAt: null };
+if (params.campaignId) {
+  where.campaignId = params.campaignId;
+}
 
 if (params.status) {
   const normalized = params.status.trim().toUpperCase();
@@ -31,6 +35,9 @@ if (params.status) {
 
 // Scope by user type
 const statsWhere: Prisma.DealWhereInput = { deletedAt: null };
+if (params.campaignId) {
+  statsWhere.campaignId = params.campaignId;
+}
 if (isInfluencer(userType)) {
 const profile = await prisma.influencerProfile.findUnique({
 where: { userId },

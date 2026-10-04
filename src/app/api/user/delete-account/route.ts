@@ -37,22 +37,33 @@ const deleteSchema = z.object({
 });
 
 async function validateDeletionEligibility(tx: Prisma.TransactionClient, userId: string): Promise<void> {
-  const activeDeals = await tx.deal.count({
-    where: {
-      OR: [
-        { influencer: { userId } },
-        { brand: { userId } },
-      ],
-      status: { notIn: ["COMPLETED", "CANCELLED"] },
-    },
-  });
+  const [activeDeals, disputedDeals] = await Promise.all([
+    tx.deal.count({
+      where: {
+        OR: [
+          { influencer: { userId } },
+          { brand: { userId } },
+        ],
+        status: { notIn: ["COMPLETED", "CANCELLED"] },
+      },
+    }),
+    tx.deal.count({
+      where: {
+        OR: [
+          { influencer: { userId } },
+          { brand: { userId } },
+        ],
+        status: "DISPUTED",
+      },
+    }),
+  ]);
 
   const wallet = await tx.wallet.findUnique({
     where: { userId },
     select: { balance: true, pendingBalance: true, debt: true },
   });
 
-  const eligibility = checkAccountDeletionEligibility(wallet, activeDeals);
+  const eligibility = checkAccountDeletionEligibility(wallet, activeDeals, undefined, undefined, disputedDeals);
   if (!eligibility.allowed) {
     throw new AppError(eligibility.reason || "Account cannot be deleted at this time.", 409);
   }
