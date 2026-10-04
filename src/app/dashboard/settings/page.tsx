@@ -318,7 +318,7 @@ export default function SettingsPage() {
                   DRS Trust: {trustScore} / 900
                 </span>
                 <span className="text-[11px] text-muted-foreground block truncate">
-                  CIBIL-standard reputation index (300-900)
+                  Reputation index (300-900)
                 </span>
               </div>
             </div>
@@ -351,17 +351,17 @@ export default function SettingsPage() {
           </div>
 
           {/* Instagram Benchmark: Public Profile Preview & Story Button */}
-          <div className="p-3 rounded-xl bg-muted/40 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5 min-w-0">
+          <div className="p-3 rounded-xl bg-muted/40 flex items-center justify-between gap-2 min-w-0">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
               <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
                 <Globe className="w-4 h-4" />
               </div>
-              <div className="min-w-0">
-                <span className="font-bold text-foreground block truncate">
+              <div className="min-w-0 flex-1">
+                <span className="font-bold text-foreground block text-xs truncate">
                   Public Profile
                 </span>
                 <span className="text-[11px] text-muted-foreground block truncate">
-                  Story &amp; Preview
+                  Live on web
                 </span>
               </div>
             </div>
@@ -369,7 +369,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={() => setStoryModalOpen(true)}
-                className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 border border-primary/25 text-primary font-bold text-xs hover:bg-primary/20 transition-all cursor-pointer shadow-xs shrink-0 whitespace-nowrap"
+                className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg bg-primary/10 border border-primary/25 text-primary font-bold text-[11px] hover:bg-primary/20 transition-all cursor-pointer shadow-2xs shrink-0"
                 title="Post profile & referral to Instagram/WhatsApp Story"
               >
                 <Smartphone className="w-3.5 h-3.5" />
@@ -379,10 +379,10 @@ export default function SettingsPage() {
                 href={publicProfileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-card border border-border text-foreground font-bold text-xs hover:bg-muted transition-all cursor-pointer shadow-xs shrink-0 whitespace-nowrap"
+                className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg bg-card border border-border text-foreground font-bold text-[11px] hover:bg-muted transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
                 title="Preview public profile"
               >
-                <span>Preview</span>
+                <span>View</span>
                 <ExternalLink className="w-3 h-3 text-muted-foreground" />
               </Link>
             </div>
