@@ -154,14 +154,20 @@ timeDiffHours,
 ipAddress: ip,
 }).catch(() => {});
 
-if (user.isTwoFactorEnabled) {
-const code = (credentials as Record<string, string>).twoFactorCode;
-if (!code) {
-throw AppError.badRequest("2FA_REQUIRED");
-}
-} else {
-throw AppError.badRequest("SUSPICIOUS_LOGIN_BLOCK: Geo-suspicious login detected (Impossible Travel). Account security review required.");
-}
+    if (user.isTwoFactorEnabled) {
+      const code = (credentials as Record<string, string>).twoFactorCode;
+      if (!code) {
+        throw AppError.badRequest("2FA_REQUIRED");
+      }
+    } else {
+      // For users without 2FA, log the security alert and allow login.
+      // Indian mobile networks (Jio/Airtel CGNAT) routinely rotate IP pools across circles.
+      logger.warn("Geo-suspicious travel flagged for user without 2FA; allowing login with security alert", {
+        userId: user.id,
+        distance,
+        timeDiffHours,
+      });
+    }
 }
 }
 
