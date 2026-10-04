@@ -518,13 +518,36 @@ reservedTotalAmount: { decrement: getDealTotalAmount(deal) },
 },
 });
 } else {
-await tx.campaign.update({
-where: { id: deal.campaignId },
-data: {
-reservedAmount: { decrement: deal.amount },
-reservedTotalAmount: { decrement: getDealTotalAmount(deal) },
-},
-});
+  // Deal cancelled via dispute resolution: release application and decrement selectedInfluencers
+  await tx.application.updateMany({
+    where: {
+      campaignId: deal.campaignId,
+      influencerId: deal.influencerId,
+      status: "SELECTED",
+    },
+    data: {
+      status: "WITHDRAWN",
+      rejectionReason: "Deal cancelled following dispute resolution",
+    },
+  });
+
+  const campaignForRelease = await tx.campaign.findUnique({
+    where: { id: deal.campaignId },
+    select: { selectedInfluencers: true, reservedAmount: true, reservedTotalAmount: true },
+  });
+  const selectedCount = campaignForRelease?.selectedInfluencers ?? 0;
+  const currentReservedAmount = campaignForRelease?.reservedAmount ?? 0;
+  const currentReservedTotal = campaignForRelease?.reservedTotalAmount ?? 0;
+  const dealTotal = getDealTotalAmount(deal);
+
+  await tx.campaign.update({
+    where: { id: deal.campaignId },
+    data: {
+      selectedInfluencers: { decrement: selectedCount > 0 ? 1 : 0 },
+      reservedAmount: { decrement: Math.min(currentReservedAmount, deal.amount) },
+      reservedTotalAmount: { decrement: Math.min(currentReservedTotal, dealTotal) },
+    },
+  });
 }
 
 return { influencerRefResult, brandRefResult };

@@ -94,7 +94,10 @@ export function mapRawCampaigns(rawCampaigns: RawCampaign[]): Campaign[] {
     },
     deliverables: normalizeDeliverables(campaign.deliverables),
     maxInfluencers: campaign.maxInfluencers ?? null,
-    acceptedCount: Array.isArray(campaign.applications) ? campaign.applications.length : 0,
+    acceptedCount:
+      typeof (campaign as Record<string, unknown>).openDealCount === "number"
+        ? Number((campaign as Record<string, unknown>).openDealCount)
+        : (Array.isArray(campaign.applications) ? campaign.applications.length : 0),
   }));
 }
 

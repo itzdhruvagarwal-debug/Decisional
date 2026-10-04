@@ -300,12 +300,36 @@ async function executeCancellationTransaction(
     actor: { userId: sessionUserId, role: "BRAND" },
     reason: cancelSummary.reason || "Brand requested cancellation",
     financialHandler: async (t) => {
-      // Decrement campaign reserved amount
+      // Release application status from SELECTED to WITHDRAWN so slot is freed up
+      await t.application.updateMany({
+        where: {
+          campaignId: deal.campaignId,
+          influencerId: deal.influencerId,
+          status: "SELECTED",
+        },
+        data: {
+          status: "WITHDRAWN",
+          rejectionReason: "Deal was cancelled by brand",
+        },
+      });
+
+      // Fetch campaign to safely decrement selectedInfluencers and reserved amounts
+      const campaignForRelease = await t.campaign.findUnique({
+        where: { id: deal.campaignId },
+        select: { selectedInfluencers: true, reservedAmount: true, reservedTotalAmount: true },
+      });
+      const selectedCount = campaignForRelease?.selectedInfluencers ?? 0;
+      const currentReservedAmount = campaignForRelease?.reservedAmount ?? 0;
+      const currentReservedTotal = campaignForRelease?.reservedTotalAmount ?? 0;
+      const dealTotal = getDealTotalAmount(deal);
+
+      // Decrement campaign reserved amount and selectedInfluencers
       await t.campaign.update({
         where: { id: deal.campaignId },
         data: {
-          reservedAmount: { decrement: deal.amount },
-          reservedTotalAmount: { decrement: getDealTotalAmount(deal) },
+          selectedInfluencers: { decrement: selectedCount > 0 ? 1 : 0 },
+          reservedAmount: { decrement: Math.min(currentReservedAmount, deal.amount) },
+          reservedTotalAmount: { decrement: Math.min(currentReservedTotal, dealTotal) },
         },
       });
 
