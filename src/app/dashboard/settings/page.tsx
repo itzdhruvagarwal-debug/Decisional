@@ -38,6 +38,7 @@ import {
   AlertCircle,
   TrendingUp,
   Smartphone,
+  Globe,
 } from "lucide-react";
 import StoryShareModal from "@/components/share/StoryShareModal";
 
@@ -351,19 +352,24 @@ export default function SettingsPage() {
 
           {/* Instagram Benchmark: Public Profile Preview & Story Button */}
           <div className="p-3 rounded-xl bg-muted/40 flex items-center justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <span className="font-bold text-foreground block truncate">
-                Public Profile
-              </span>
-              <span className="text-[11px] text-muted-foreground block truncate">
-                Story &amp; Preview
-              </span>
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <Globe className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-bold text-foreground block truncate">
+                  Public Profile
+                </span>
+                <span className="text-[11px] text-muted-foreground block truncate">
+                  Story &amp; Preview
+                </span>
+              </div>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
                 onClick={() => setStoryModalOpen(true)}
-                className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 border border-primary/25 text-primary font-semibold text-xs hover:bg-primary/20 transition-all cursor-pointer shadow-xs"
+                className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 border border-primary/25 text-primary font-bold text-xs hover:bg-primary/20 transition-all cursor-pointer shadow-xs shrink-0 whitespace-nowrap"
                 title="Post profile & referral to Instagram/WhatsApp Story"
               >
                 <Smartphone className="w-3.5 h-3.5" />
@@ -373,7 +379,7 @@ export default function SettingsPage() {
                 href={publicProfileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-card border border-border text-foreground font-semibold text-xs hover:bg-muted transition-all cursor-pointer shadow-xs"
+                className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-card border border-border text-foreground font-bold text-xs hover:bg-muted transition-all cursor-pointer shadow-xs shrink-0 whitespace-nowrap"
                 title="Preview public profile"
               >
                 <span>Preview</span>

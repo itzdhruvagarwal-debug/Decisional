@@ -1185,28 +1185,27 @@ dialog.pwa-install-overlay {
 }
 
 .app-toast-container {
-  top: 24px;
+  bottom: 24px;
   right: 24px;
-  z-index: 9999;
-  max-width: 400px;
+  z-index: 99999;
+  max-width: 420px;
 }
 
 .app-toast {
-  padding: 12px 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  animation: slideInRight 0.3s ease-out;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15), 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(16px);
+  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .app-toast-close {
-  padding: 0 4px;
+  padding: 2px 6px;
 }
 
 @media (max-width: 640px) {
   .app-toast-container {
-    left: 12px;
-    right: 12px;
+    left: 16px;
+    right: 16px;
+    bottom: 80px; /* Above mobile bottom navigation bar */
     max-width: none;
   }
 }

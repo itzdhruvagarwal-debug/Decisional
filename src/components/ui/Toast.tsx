@@ -42,22 +42,28 @@ function getToastIcon(type: ToastType): React.ReactNode {
 export function Toast({ toast, onClose }: Readonly<ToastProps>) {
   const icon = getToastIcon(toast.type);
 
+  const typeBorderStyles: Record<ToastType, string> = {
+    success: "border-verified/40 shadow-verified/5",
+    error: "border-destructive/40 shadow-destructive/5",
+    info: "border-primary/40 shadow-primary/5",
+  };
+
   return (
     <div
       role="alert"
       aria-live="assertive"
       aria-atomic="true"
-      className={`app-toast app-toast-${toast.type} text-sm font-medium flex items-center justify-between w-full rounded-lg text-white`}
+      className={`app-toast app-toast-${toast.type} ${typeBorderStyles[toast.type]} text-xs sm:text-sm font-semibold flex items-center justify-between w-full rounded-2xl bg-card text-foreground border shadow-xl backdrop-blur-md transition-all px-4 py-3`}
     >
-      <span className="flex items-center gap-2">
-        {icon}
-        <span>{toast.message}</span>
+      <span className="flex items-center gap-2.5 min-w-0 pr-2">
+        <span className="shrink-0">{icon}</span>
+        <span className="text-foreground leading-snug">{toast.message}</span>
       </span>
       <button
         type="button"
         onClick={() => onClose(toast.id)}
         aria-label={`Dismiss ${toast.type} notification`}
-        className="app-toast-close cursor-pointer text-sm border-none leading-none bg-none text-white ml-2 opacity-70"
+        className="app-toast-close cursor-pointer text-lg leading-none text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted/80 transition-colors shrink-0 ml-1.5"
       >
         &times;
       </button>
