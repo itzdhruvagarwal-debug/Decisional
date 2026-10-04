@@ -352,11 +352,15 @@ export default function CreateCampaignClient() {
     setIsLoading(true);
 
     try {
-      const applicationDeadline = formData.applicationDeadline
-        ? new Date(formData.applicationDeadline)
-        : null;
+      let applicationDeadline: Date | null = null;
+      if (formData.applicationDeadline) {
+        applicationDeadline = new Date(formData.applicationDeadline);
+        applicationDeadline.setHours(23, 59, 59, 999);
+      }
       const contentDeadline = new Date(formData.contentDeadline);
+      contentDeadline.setHours(23, 59, 59, 999);
       const postingDeadline = new Date(formData.postingDeadline);
+      postingDeadline.setHours(23, 59, 59, 999);
 
       const payload = {
         ...formData,
