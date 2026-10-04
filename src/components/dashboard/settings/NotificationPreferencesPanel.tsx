@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Bell,
   Mail,
   MessageSquare,
   Smartphone,
@@ -202,19 +201,6 @@ export default function NotificationPreferencesPanel({
 
   return (
     <div className="space-y-6 max-w-4xl">
-      {/* Header Info */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-card border border-border/80 shadow-sm">
-        <div>
-          <h2 className="text-lg font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Bell className="w-5 h-5 text-primary" />
-            <span>Notification Channels & Controls</span>
-          </h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            Choose how you receive alerts for each business category. Critical financial and deal events are delivered even when the app is closed.
-          </p>
-        </div>
-      </div>
-
       {/* Web Push PWA Status Banner */}
       <div className="p-4 rounded-2xl bg-muted/30 border border-border/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
