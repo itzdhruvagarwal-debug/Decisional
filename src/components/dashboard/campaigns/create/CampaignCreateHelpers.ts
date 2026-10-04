@@ -54,9 +54,9 @@ function validateBudget(formData: CampaignFormData): ValidationResult | null {
 }
 
 function validateDeadlines(formData: CampaignFormData): ValidationResult | null {
-if (!formData.contentDeadline || !formData.postingDeadline) {
-return { success: false, error: "Please select content and posting deadlines" };
-}
+  if (!formData.applicationDeadline || !formData.contentDeadline || !formData.postingDeadline) {
+    return { success: false, error: "Please select application, content, and posting deadlines" };
+  }
 const contentDate = new Date(formData.contentDeadline);
 const postingDate = new Date(formData.postingDeadline);
 if (Number.isNaN(contentDate.getTime()) || Number.isNaN(postingDate.getTime())) {

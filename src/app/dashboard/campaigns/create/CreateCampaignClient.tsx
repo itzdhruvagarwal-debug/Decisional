@@ -981,11 +981,12 @@ export default function CreateCampaignClient() {
                     </h4>
 
                     <Input
-                      label="Application Deadline (Optional)"
+                      label="Application Deadline"
                       id="application-deadline"
                       type="date"
                       value={formData.applicationDeadline}
                       onChange={(e) => setFormData({ ...formData, applicationDeadline: e.target.value })}
+                      required
                       error={fieldErrors.applicationDeadline}
                       min={new Date().toISOString().split("T")[0]}
                       max={formData.contentDeadline || undefined}
