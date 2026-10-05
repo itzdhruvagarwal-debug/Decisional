@@ -665,6 +665,31 @@ export default function ProfileTab({
             />
           </div>
 
+          {/* Delivery Contact Phone — read from User.phone, updatable via Account tab */}
+          {isInfluencer(user.userType) && (
+            <div className="p-3.5 rounded-xl border border-border bg-muted/40 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <Smartphone className="w-4 h-4 text-primary shrink-0" />
+                <div>
+                  <div className="text-xs font-semibold text-foreground">Delivery Contact Phone</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {user.phone ? (
+                      <span className="font-mono text-foreground">+91 {user.phone}</span>
+                    ) : (
+                      <span className="text-amber-500 font-medium">⚠️ Not set — required for Shiprocket courier delivery</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <a
+                href="/dashboard/settings?tab=account"
+                className="text-xs text-primary font-bold hover:underline shrink-0"
+              >
+                {user.phone ? "Change" : "Add Phone"}
+              </a>
+            </div>
+          )}
+
           {isInfluencer(user.userType) && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Select

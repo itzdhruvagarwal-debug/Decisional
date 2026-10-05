@@ -230,7 +230,11 @@ throw AppError.badRequest("Insufficient held campaign funds or brand wallet is f
       },
     });
 
+    const creatorPhone = creatorProfile?.user?.phone?.trim() || "";
+    const isPhoneValid = /^[6-9]\d{9}$/.test(creatorPhone);
+
     if (
+      isPhoneValid &&
       creatorProfile?.address &&
       creatorProfile.city &&
       creatorProfile.state &&
@@ -239,7 +243,7 @@ throw AppError.badRequest("Insufficient held campaign funds or brand wallet is f
     ) {
       initialShippingAddress = {
         fullName: creatorProfile.displayName || "Creator",
-        phone: creatorProfile.user?.phone || "9999999999",
+        phone: creatorPhone,
         line1: creatorProfile.address.trim(),
         line2: null,
         city: creatorProfile.city.trim(),
