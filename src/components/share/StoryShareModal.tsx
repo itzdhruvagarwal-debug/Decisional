@@ -686,7 +686,7 @@ export default function StoryShareModal({
                       </div>
                       <div className="text-white/45 text-[7px] leading-tight">Just now</div>
                     </div>
-                    <div className="text-white/55 text-xs font-light">Â·Â·Â·</div>
+                    <div className="text-white/55 text-xs font-light">&bull;&bull;&bull;</div>
                   </div>
 
                   {/* â”€â”€ Story Content â”€â”€ */}
