@@ -289,13 +289,13 @@ function MessageList({ state }: Readonly<ChatPanelProps>) {
 
               {/* Message row */}
               <div
-                className={`flex items-start gap-2.5 group ${
+                className={`flex gap-2 group ${
                   msg.isMe ? "justify-end" : "justify-start"
                 }`}
               >
                 {/* Peer avatar (only on received messages) */}
                 {!msg.isMe && (
-                  <div className="relative w-8 h-8 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-xs font-bold text-foreground shrink-0 mt-0.5">
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-xs font-bold text-foreground shrink-0 self-start">
                     {selectedChat?.avatar ? (
                       <Image
                         src={selectedChat.avatar}
@@ -313,7 +313,7 @@ function MessageList({ state }: Readonly<ChatPanelProps>) {
 
                 {/* Bubble + meta container */}
                 <div
-                  className={`flex flex-col gap-1 max-w-[82%] sm:max-w-md ${
+                  className={`flex flex-col gap-1 max-w-[75%] sm:max-w-sm ${
                     msg.isMe ? "items-end" : "items-start"
                   }`}
                 >
