@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import QRCode from "qrcode";
 import { Modal } from "@/components/ui";
 import { Button } from "@/components/ui";
@@ -11,14 +11,11 @@ import {
   Copy,
   CheckCheck,
   Sparkles,
-  ShieldCheck,
-  QrCode,
-  Smartphone,
-  ExternalLink,
-  Camera,
-  ArrowRight,
-  Layers,
   Award,
+  Link2,
+  Shield,
+  BadgeCheck,
+  ChevronRight,
 } from "lucide-react";
 
 export interface StoryShareModalProps {
@@ -62,8 +59,7 @@ export default function StoryShareModal({
   const [copiedLink, setCopiedLink] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
-
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [activeProgress, setActiveProgress] = useState(0);
 
   // Compute URLs
   const origin = typeof window !== "undefined" ? window.location.origin : "https://vyaparmedia.com";
@@ -115,6 +111,18 @@ export default function StoryShareModal({
       isMounted = false;
     };
   }, [open, profileUrl, referralUrl]);
+
+  // Animate story progress bar when tab changes
+  useEffect(() => {
+    setActiveProgress(0);
+    const interval = setInterval(() => {
+      setActiveProgress((p) => {
+        if (p >= 100) { clearInterval(interval); return 100; }
+        return p + 0.6;
+      });
+    }, 50);
+    return () => clearInterval(interval);
+  }, [activeTab]);
 
   // Handle Copy Link
   const handleCopyLink = useCallback(async () => {
@@ -177,7 +185,7 @@ export default function StoryShareModal({
     ctx.font = "600 22px sans-serif";
     ctx.letterSpacing = "1px";
     ctx.fillText(
-      activeTab === "profile" ? "🛡️ 100% ESCROW PROTECTED" : "🎁 EXCLUSIVE PARTNER INVITE",
+      activeTab === "profile" ? "ðŸ›¡ï¸ 100% ESCROW PROTECTED" : "ðŸŽ EXCLUSIVE PARTNER INVITE",
       540,
       224
     );
@@ -191,7 +199,7 @@ export default function StoryShareModal({
     ctx.stroke();
 
     if (activeTab === "profile") {
-      // ── PROFILE STORY CARD ──
+      // â”€â”€ PROFILE STORY CARD â”€â”€
       // Avatar placeholder or image
       const avatarSize = 220;
       const avatarX = 540;
@@ -230,7 +238,7 @@ export default function StoryShareModal({
       ctx.fillStyle = "#FFFFFF";
       ctx.font = "bold 64px sans-serif";
       const name = profile?.displayName || "Verified Creator";
-      ctx.fillText(name.length > 20 ? name.slice(0, 19) + "…" : name, 540, 640);
+      ctx.fillText(name.length > 20 ? name.slice(0, 19) + "â€¦" : name, 540, 640);
 
       // Handle
       ctx.fillStyle = "#94A3B8";
@@ -248,13 +256,13 @@ export default function StoryShareModal({
       ctx.fillStyle = "#4ADE80";
       ctx.font = "bold 30px sans-serif";
       const trustScore = profile?.trustScore || 850;
-      ctx.fillText(`⭐️ ${trustScore}/900 DRS Trust Score`, 540, 782);
+      ctx.fillText(`â­ï¸ ${trustScore}/900 DRS Trust Score`, 540, 782);
 
       // Categories Pill
       if (profile?.categories && profile.categories.length > 0) {
         ctx.fillStyle = "#CBD5E1";
         ctx.font = "500 28px sans-serif";
-        ctx.fillText(profile.categories.slice(0, 3).join(" • "), 540, 850);
+        ctx.fillText(profile.categories.slice(0, 3).join(" â€¢ "), 540, 850);
       }
 
       // Separator line
@@ -283,14 +291,14 @@ export default function StoryShareModal({
 
       ctx.fillStyle = "#94A3B8";
       ctx.font = "400 28px sans-serif";
-      ctx.fillText("Direct brand collaborations • Zero broker fees", 540, 1420);
+      ctx.fillText("Direct brand collaborations â€¢ Zero broker fees", 540, 1420);
 
       // Guaranteed badge
       ctx.fillStyle = "#38BDF8";
       ctx.font = "600 26px sans-serif";
-      ctx.fillText("🔒 100% Escrow Guaranteed Payments", 540, 1530);
+      ctx.fillText("ðŸ”’ 100% Escrow Guaranteed Payments", 540, 1530);
     } else {
-      // ── REFERRAL STORY CARD ──
+      // â”€â”€ REFERRAL STORY CARD â”€â”€
       // Hero Header
       ctx.fillStyle = "#F8FAFC";
       ctx.font = "bold 56px sans-serif";
@@ -320,9 +328,9 @@ export default function StoryShareModal({
 
       // Value Perks List
       const perks = [
-        "✦  0% Platform Fee on your first 3 deals",
-        "✦  Instant Verified Creator Badge & Priority KYC",
-        "✦  100% Escrow-Secured Advance Payouts",
+        "âœ¦  0% Platform Fee on your first 3 deals",
+        "âœ¦  Instant Verified Creator Badge & Priority KYC",
+        "âœ¦  100% Escrow-Secured Advance Payouts",
       ];
       ctx.textAlign = "left";
       ctx.font = "600 30px sans-serif";
@@ -374,17 +382,17 @@ export default function StoryShareModal({
     ctx.letterSpacing = "0px";
     const stickerText =
       activeTab === "profile"
-        ? `🔗 vyaparmedia.com/creator/${profileUsername}`
-        : `🔗 vyaparmedia.com/register?ref=${referralCode || ""}`;
+        ? `ðŸ”— vyaparmedia.com/creator/${profileUsername}`
+        : `ðŸ”— vyaparmedia.com/register?ref=${referralCode || ""}`;
     ctx.fillText(
-      stickerText.length > 36 ? stickerText.slice(0, 35) + "…" : stickerText,
+      stickerText.length > 36 ? stickerText.slice(0, 35) + "â€¦" : stickerText,
       540,
       1762
     );
 
     ctx.fillStyle = "#94A3B8";
     ctx.font = "500 24px sans-serif";
-    ctx.fillText("👆 Add Instagram 'Link' sticker here", 540, 1835);
+    ctx.fillText("ðŸ‘† Add Instagram 'Link' sticker here", 540, 1835);
 
     return canvas;
   }, [activeTab, profile, profileUsername, referralCode, profileQr, referralQr]);
@@ -530,170 +538,292 @@ export default function StoryShareModal({
   const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(activeUrl)}`;
   const threadsUrl = `https://www.threads.net/intent/post?text=${encodeURIComponent(platformShareText + " " + activeUrl)}`;
 
+  // Social platforms config
+  const socials = [
+    { label: "WhatsApp", href: whatsAppUrl, emoji: "ðŸ’¬", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20" },
+    { label: "Instagram", href: undefined as string | undefined, emoji: "ðŸ“¸", color: "text-pink-400", bg: "bg-pink-500/10 border-pink-500/20 hover:bg-pink-500/20", onClick: handleDownloadStory },
+    { label: "Facebook", href: facebookUrl, emoji: "ðŸ‘¥", color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20" },
+    { label: "Telegram", href: telegramUrl, emoji: "âœˆï¸", color: "text-sky-400", bg: "bg-sky-500/10 border-sky-500/20 hover:bg-sky-500/20" },
+    { label: "Threads", href: threadsUrl, emoji: "ðŸ§µ", color: "text-foreground", bg: "bg-card border-border hover:bg-muted" },
+    { label: "X", href: twitterUrl, emoji: "âœ•", color: "text-foreground", bg: "bg-card border-border hover:bg-muted" },
+    { label: "LinkedIn", href: linkedinUrl, emoji: "in", color: "text-blue-300", bg: "bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20" },
+  ];
+
   return (
     <Modal
       open={open}
       onClose={onClose}
       title={
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
-            <Smartphone className="w-4 h-4" />
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-primary/20 border border-primary/20 flex items-center justify-center">
+            <Share2 className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <h2 className="text-base font-extrabold text-foreground">Post to Instagram, Facebook &amp; WhatsApp Story</h2>
+            <h2 className="text-sm font-extrabold text-foreground">Share Your Story</h2>
             <p className="text-[11px] text-muted-foreground font-normal">
-              Share your 9:16 vertical card with verified QR &amp; link sticker
+              Instagram Â· Facebook Â· WhatsApp Â· Telegram Â· More
             </p>
           </div>
         </div>
       }
-      maxWidth="780px"
+      maxWidth="820px"
     >
-      <div className="space-y-5 pt-1">
-        {/* Tab Switcher (if both profile & referral are accessible) */}
+      <div className="space-y-4 pt-1">
+
+        {/* Tab Switcher */}
         {hasProfile && hasReferral && (
-          <div className="flex items-center p-1 rounded-xl bg-muted/60 border border-border">
+          <div className="flex items-center p-1 rounded-2xl bg-muted/50 border border-border">
             <button
               type="button"
               onClick={() => setActiveTab("profile")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
                 activeTab === "profile"
-                  ? "bg-card text-foreground shadow-xs border border-border"
+                  ? "bg-card text-foreground shadow-sm border border-border"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Award className="w-3.5 h-3.5 text-verified" />
-              <span>Public Profile Story</span>
+              <Award className="w-3.5 h-3.5 text-amber-400" />
+              <span>Creator Profile</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("referral")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
                 activeTab === "referral"
-                  ? "bg-card text-foreground shadow-xs border border-border"
+                  ? "bg-card text-foreground shadow-sm border border-border"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
-              <span>Referral &amp; Invite Story</span>
+              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+              <span>Referral Invite</span>
             </button>
           </div>
         )}
 
-        {/* Feedback message banner */}
+        {/* Feedback Banner */}
         {feedbackMessage && (
-          <div className="p-3 rounded-xl bg-verified-muted border border-verified-border text-verified text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+          <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
             <CheckCheck className="w-4 h-4 shrink-0" />
             <span>{feedbackMessage}</span>
           </div>
         )}
 
-        {/* Main Grid: 9:16 Story Card Preview (Left) + Actions & Instructions (Right) */}
+        {/* Main Layout */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
-          {/* Story Card Phone Mockup Preview */}
-          <div className="md:col-span-5 flex justify-center">
-            <div className="relative w-full max-w-[270px] aspect-[9/16] rounded-3xl p-3.5 bg-gradient-to-b from-[#090C14] via-[#0F1424] to-[#080B12] border-2 border-border shadow-2xl flex flex-col justify-between overflow-hidden text-center select-none">
-              {/* Ambient Glow in preview */}
-              <div className="absolute -top-10 -left-10 w-32 h-32 bg-primary/25 rounded-full blur-2xl pointer-events-none" />
-              <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-verified/20 rounded-full blur-2xl pointer-events-none" />
 
-              {/* Story Top Bar */}
-              <div className="relative z-10 pt-1 space-y-1">
-                <div className="text-[10px] font-extrabold tracking-widest text-primary uppercase">
-                  VYAPARMEDIA
-                </div>
-                <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-card/40 border border-border text-[9px] font-medium text-foreground shrink-0 whitespace-nowrap">
-                  {activeTab === "profile" ? "🛡️ Escrow Verified" : "🎁 Partner Invite"}
-                </div>
-              </div>
+          {/* â”€â”€ STORY PHONE PREVIEW â”€â”€ */}
+          <div className="md:col-span-5 flex flex-col items-center">
 
-              {/* Center Card Content */}
-              <div className="relative z-10 py-2 space-y-2">
-                {activeTab === "profile" ? (
-                  <>
-                    <div className="mx-auto w-14 h-14 rounded-full p-0.5 bg-gradient-to-tr from-primary via-purple-500 to-verified flex items-center justify-center">
-                      <div className="w-full h-full rounded-full bg-muted flex items-center justify-center text-foreground text-base font-bold">
-                        {(profile?.displayName || "C")[0]?.toUpperCase()}
+            {/* Phone Bezel */}
+            <div className="relative" style={{ width: 232, flexShrink: 0 }}>
+              {/* Outer chrome shell */}
+              <div
+                className="relative rounded-[38px] p-[3.5px]"
+                style={{
+                  background: "linear-gradient(145deg, #3a3f52 0%, #1c2035 45%, #3a3f52 100%)",
+                  boxShadow: "0 0 0 1px rgba(255,255,255,0.07), 0 32px 72px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 48px rgba(59,130,246,0.07)",
+                }}
+              >
+                {/* Side buttons (decorative) */}
+                <div className="absolute -right-[4px] top-24 w-[4px] h-10 rounded-r-full" style={{ background: "#2a2f42" }} />
+                <div className="absolute -right-[4px] top-36 w-[4px] h-7 rounded-r-full" style={{ background: "#2a2f42" }} />
+                <div className="absolute -left-[4px] top-28 w-[4px] h-12 rounded-l-full" style={{ background: "#2a2f42" }} />
+
+                {/* Screen */}
+                <div
+                  className="relative rounded-[34.5px] overflow-hidden"
+                  style={{
+                    aspectRatio: "9/16",
+                    background: "linear-gradient(160deg, #080B11 0%, #0E1322 40%, #11172A 75%, #07090F 100%)",
+                  }}
+                >
+                  {/* Notch */}
+                  <div
+                    className="absolute top-0 left-1/2 -translate-x-1/2 z-30 flex items-center justify-center"
+                    style={{ width: 80, height: 18, background: "#0a0d16", borderRadius: "0 0 14px 14px" }}
+                  >
+                    <div className="w-8 h-1 rounded-full" style={{ background: "#1a2030" }} />
+                  </div>
+
+                  {/* Ambient glows */}
+                  <div className="absolute -top-10 -left-10 w-48 h-48 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(59,130,246,0.28) 0%, transparent 70%)" }} />
+                  <div
+                    className="absolute -bottom-10 -right-10 w-48 h-48 rounded-full pointer-events-none"
+                    style={{
+                      background: activeTab === "profile"
+                        ? "radial-gradient(circle, rgba(34,197,94,0.22) 0%, transparent 70%)"
+                        : "radial-gradient(circle, rgba(168,85,247,0.25) 0%, transparent 70%)",
+                    }}
+                  />
+
+                  {/* â”€â”€ Story Progress Bars â”€â”€ */}
+                  <div className="absolute top-5 left-0 right-0 z-20 flex gap-1 px-3">
+                    {[0, 1].map((i) => (
+                      <div key={i} className="flex-1 h-[2.5px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.22)" }}>
+                        <div
+                          className="h-full rounded-full bg-white"
+                          style={{
+                            width: i === 0
+                              ? (activeTab === "profile" ? `${activeProgress}%` : "100%")
+                              : (activeTab === "referral" ? `${activeProgress}%` : "0%"),
+                            transition: "width 0.05s linear",
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* â”€â”€ Story Header (Instagram-style) â”€â”€ */}
+                  <div className="absolute top-9 left-0 right-0 z-20 flex items-center gap-2 px-3">
+                    <div className="w-7 h-7 rounded-full p-[2px] flex-shrink-0" style={{ background: "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #10B981 100%)" }}>
+                      <div className="w-full h-full rounded-full bg-[#0E1322] flex items-center justify-center text-white text-[9px] font-black">
+                        {activeTab === "profile" ? (profile?.displayName || "C")[0]?.toUpperCase() : "VM"}
                       </div>
                     </div>
-                    <div>
-                      <div className="text-xs font-bold text-foreground truncate px-2">
-                        {profile?.displayName || "Creator Profile"}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-white text-[8.5px] font-bold truncate leading-tight">
+                        {activeTab === "profile" ? (profile?.displayName || "Creator Profile") : "VyaparMedia"}
                       </div>
-                      <div className="text-[10px] text-muted-foreground">@{profileUsername}</div>
+                      <div className="text-white/45 text-[7px] leading-tight">Just now</div>
                     </div>
+                    <div className="text-white/55 text-xs font-light">Â·Â·Â·</div>
+                  </div>
 
-                    <div className="inline-block px-2.5 py-1 rounded-full bg-verified/15 border border-verified/30 text-[9px] font-bold text-verified shrink-0 whitespace-nowrap">
-                      ⭐️ {profile?.trustScore || 850} DRS Score
-                    </div>
+                  {/* â”€â”€ Story Content â”€â”€ */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center px-4 pb-14 pt-20 z-10">
+                    {activeTab === "profile" ? (
+                      <div className="w-full flex flex-col items-center gap-2 text-center">
+                        {/* Avatar with gradient ring */}
+                        <div className="w-[58px] h-[58px] rounded-full p-[2.5px]" style={{ background: "linear-gradient(135deg, #3B82F6, #8B5CF6, #10B981)", boxShadow: "0 0 18px rgba(59,130,246,0.45)" }}>
+                          <div className="w-full h-full rounded-full bg-[#1E293B] flex items-center justify-center text-white text-base font-black">
+                            {(profile?.displayName || "C").split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                          </div>
+                        </div>
 
-                    {/* QR Preview */}
-                    {profileQr && (
-                      <div className="mx-auto w-24 h-24 p-1.5 bg-card border border-border rounded-xl shadow-md">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={profileQr} alt="Profile QR" className="w-full h-full object-contain" />
+                        {/* Name + handle */}
+                        <div>
+                          <div className="text-white text-[12px] font-extrabold leading-tight truncate max-w-[155px]" style={{ textShadow: "0 2px 10px rgba(0,0,0,0.7)" }}>
+                            {profile?.displayName || "Verified Creator"}
+                          </div>
+                          <div className="text-white/45 text-[8px] font-medium mt-0.5">@{profileUsername}</div>
+                        </div>
+
+                        {/* Trust badge */}
+                        <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[8px] font-bold" style={{ background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.35)", color: "#4ADE80" }}>
+                          <BadgeCheck className="w-2.5 h-2.5" />
+                          {profile?.trustScore || 850}/900 DRS
+                        </div>
+
+                        {/* Categories */}
+                        {profile?.categories && profile.categories.length > 0 && (
+                          <div className="text-white/40 text-[7.5px] font-medium">{profile.categories.slice(0, 3).join(" Â· ")}</div>
+                        )}
+
+                        <div className="w-3/4 h-px bg-white/10" />
+
+                        {/* QR */}
+                        {profileQr ? (
+                          <div className="w-[66px] h-[66px] p-1.5 rounded-xl" style={{ background: "#fff", boxShadow: "0 4px 20px rgba(0,0,0,0.5)" }}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={profileQr} alt="Profile QR" className="w-full h-full object-contain" />
+                          </div>
+                        ) : (
+                          <div className="w-[66px] h-[66px] rounded-xl bg-white/10 animate-pulse" />
+                        )}
+
+                        <div className="text-white/45 text-[7.5px] font-medium">Scan for rate card</div>
+
+                        {/* Escrow badge */}
+                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[7.5px] font-bold" style={{ background: "rgba(56,189,248,0.12)", border: "1px solid rgba(56,189,248,0.25)", color: "#38BDF8" }}>
+                          <Shield className="w-2 h-2" />
+                          100% Escrow Protected
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="w-full flex flex-col items-center gap-2 text-center">
+                        {/* Sparkle icon */}
+                        <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.3), rgba(59,130,246,0.3))", border: "1px solid rgba(168,85,247,0.4)", boxShadow: "0 0 20px rgba(168,85,247,0.3)" }}>
+                          <Sparkles className="w-5 h-5 text-purple-300" />
+                        </div>
+
+                        <div>
+                          <div className="text-white text-[11px] font-extrabold leading-tight" style={{ textShadow: "0 2px 10px rgba(0,0,0,0.7)" }}>Join My Creator Network</div>
+                          <div className="text-white/45 text-[8px] mt-0.5">100% Escrow Guaranteed</div>
+                        </div>
+
+                        {/* Invite code */}
+                        <div className="w-full max-w-[155px] py-2 px-3 rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(37,99,235,0.25), rgba(168,85,247,0.25))", border: "1.5px solid rgba(168,85,247,0.45)", boxShadow: "0 0 16px rgba(168,85,247,0.2)" }}>
+                          <div className="text-purple-300 text-[7px] font-bold tracking-widest uppercase mb-0.5">Invite Code</div>
+                          <div className="text-white font-mono text-sm font-black tracking-widest">{referralCode || "VYAPAR"}</div>
+                        </div>
+
+                        {/* Perks */}
+                        <div className="w-full space-y-1 text-left max-w-[165px]">
+                          {["0% fee on first 3 deals", "Verified Creator Badge", "Escrow-secured payouts"].map((perk) => (
+                            <div key={perk} className="flex items-center gap-1.5">
+                              <div className="w-1 h-1 rounded-full bg-purple-400 flex-shrink-0" />
+                              <span className="text-white/60 text-[7.5px] font-medium">{perk}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="w-3/4 h-px bg-white/10" />
+
+                        {/* QR */}
+                        {referralQr ? (
+                          <div className="w-[66px] h-[66px] p-1.5 rounded-xl" style={{ background: "#fff", boxShadow: "0 4px 20px rgba(0,0,0,0.5)" }}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={referralQr} alt="Referral QR" className="w-full h-full object-contain" />
+                          </div>
+                        ) : (
+                          <div className="w-[66px] h-[66px] rounded-xl bg-white/10 animate-pulse" />
+                        )}
+                        <div className="text-white/45 text-[7.5px] font-medium">Scan to claim bonus</div>
                       </div>
                     )}
-                    <div className="text-[9px] font-semibold text-muted-foreground">
-                      Scan to view rate card &amp; portfolio
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-xs font-extrabold text-foreground">Join My Creator Network</div>
-                    <div className="text-[9px] text-muted-foreground">Brand collabs with 100% Escrow</div>
+                  </div>
 
-                    {/* Code Badge */}
-                    <div className="p-2 rounded-xl bg-primary/20 border border-primary/40 space-y-0.5">
-                      <div className="text-[8px] font-bold tracking-wider text-primary uppercase">
-                        INVITE CODE
-                      </div>
-                      <div className="font-mono text-sm font-black text-foreground tracking-wider">
-                        {referralCode || "VYAPAR"}
-                      </div>
+                  {/* â”€â”€ Bottom gradient + Instagram Link Sticker â”€â”€ */}
+                  <div className="absolute bottom-0 left-0 right-0 z-20 pb-3 pt-10 px-4" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%)" }}>
+                    <div
+                      className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-full mx-auto"
+                      style={{ background: "rgba(255,255,255,0.96)", boxShadow: "0 4px 16px rgba(0,0,0,0.5)", maxWidth: 190 }}
+                    >
+                      <Link2 className="w-2.5 h-2.5 text-gray-800 flex-shrink-0" />
+                      <span className="text-gray-900 text-[7.5px] font-bold truncate" style={{ maxWidth: 130 }}>
+                        {activeTab === "profile" ? `creator/${profileUsername}` : `join?ref=${referralCode}`}
+                      </span>
+                      <ChevronRight className="w-2 h-2 text-gray-600 flex-shrink-0" />
                     </div>
-
-                    {/* QR Preview */}
-                    {referralQr && (
-                      <div className="mx-auto w-24 h-24 p-1.5 bg-card border border-border rounded-xl shadow-md">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={referralQr} alt="Referral QR" className="w-full h-full object-contain" />
-                      </div>
-                    )}
-                    <div className="text-[9px] font-semibold text-muted-foreground">
-                      Scan to claim 0% fee perks
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Bottom Link Sticker Preview */}
-              <div className="relative z-10 pb-1">
-                <div className="mx-auto max-w-[200px] py-1.5 px-3 rounded-full bg-card text-foreground border border-border shadow-lg text-[9px] font-bold flex items-center justify-center gap-1 shrink-0 whitespace-nowrap truncate">
-                  <span>🔗</span>
-                  <span className="truncate">
-                    {activeTab === "profile" ? `creator/${profileUsername}` : `register?ref=${referralCode}`}
-                  </span>
+                    <div className="text-center text-white/30 text-[6.5px] mt-1 font-medium">See more</div>
+                  </div>
                 </div>
-                <div className="text-[8px] text-muted-foreground mt-1">Tap to open directly</div>
               </div>
+
+              {/* Home indicator */}
+              <div className="flex justify-center mt-2.5">
+                <div className="w-14 h-[3.5px] rounded-full bg-white/15" />
+              </div>
+            </div>
+
+            {/* Label below phone */}
+            <div className="text-center mt-2.5 space-y-0.5">
+              <div className="text-[9.5px] font-extrabold text-muted-foreground uppercase tracking-widest">1080 Ã— 1920 Â· 9:16</div>
+              <div className="text-[8.5px] text-muted-foreground/55">Instagram Â· Facebook Â· WhatsApp ready</div>
             </div>
           </div>
 
-          {/* Action Tools & Posting Instructions (Right Side) */}
+          {/* â”€â”€ RIGHT: Actions â”€â”€ */}
           <div className="md:col-span-7 space-y-4">
-            {/* Story Link Sticker Box */}
-            <div className="p-3.5 rounded-2xl bg-muted/40 border border-border space-y-2">
+
+            {/* Link Copy Row */}
+            <div className="p-3 rounded-2xl bg-muted/40 border border-border space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Story Link Sticker URL
-                </span>
-                <span className="text-[10px] text-primary font-semibold">For Instagram &apos;Link&apos; Sticker</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Story Link URL</span>
+                <span className="text-[10px] text-primary font-semibold">For Instagram Link Sticker</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="flex-1 min-w-0 p-2 rounded-xl bg-card border border-border text-xs font-mono text-foreground truncate">
-                  {activeUrl}
-                </div>
+                <div className="flex-1 min-w-0 p-2 rounded-xl bg-card border border-border text-xs font-mono text-foreground truncate">{activeUrl}</div>
                 <Button
                   variant={copiedLink ? "secondary" : "primary"}
                   size="sm"
@@ -702,137 +832,96 @@ export default function StoryShareModal({
                   className="shrink-0 gap-1.5 text-xs font-bold"
                 >
                   {copiedLink ? (
-                    <>
-                      <CheckCheck className="w-3.5 h-3.5 text-verified" />
-                      Copied!
-                    </>
+                    <><CheckCheck className="w-3.5 h-3.5 text-emerald-400" />Copied!</>
                   ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      Copy Link
-                    </>
+                    <><Copy className="w-3.5 h-3.5" />Copy</>
                   )}
                 </Button>
               </div>
             </div>
 
-            {/* Main Action Buttons */}
-            <div className="space-y-3">
+            {/* Primary Actions */}
+            <div className="space-y-2">
               <Button
                 variant="primary"
                 onClick={handleDownloadStory}
                 disabled={isGeneratingImage}
                 aria-label="Download high-resolution 9:16 story card"
-                className="w-full justify-center gap-2 py-2.5 text-sm font-bold shadow-md shadow-primary/20"
+                className="w-full justify-center gap-2 py-2.5 text-sm font-bold"
+                style={{ boxShadow: "0 4px 20px rgba(var(--color-primary) / 0.25)" }}
               >
                 <Download className="w-4 h-4" />
-                <span>{isGeneratingImage ? "Generating High-Res Card..." : "Download 9:16 Story Card (PNG)"}</span>
+                {isGeneratingImage ? "Generating Storyâ€¦" : "Download Story Card (1080Ã—1920 PNG)"}
               </Button>
 
-              {/* Direct Social & Story Channels Grid */}
-              <div className="space-y-2">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-                  Share Directly to Socials &amp; Stories
-                </span>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {/* WhatsApp Status Button */}
-                  <a
-                    href={whatsAppUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl border border-verified-border bg-verified-muted text-verified hover:bg-verified/20 font-bold text-xs transition-all text-center"
-                  >
-                    <span className="text-sm leading-none">💬</span>
-                    <span className="truncate">WhatsApp Status</span>
-                  </a>
-
-                  {/* Facebook Story / Share */}
-                  <a
-                    href={facebookUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl border border-escrow-border bg-escrow-muted text-escrow hover:bg-escrow/20 font-bold text-xs transition-all text-center"
-                  >
-                    <span className="text-sm leading-none font-black">f</span>
-                    <span className="truncate">Facebook Story</span>
-                  </a>
-
-                  {/* Telegram */}
-                  <a
-                    href={telegramUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-bold text-xs transition-all text-center"
-                  >
-                    <span className="text-sm leading-none">✈️</span>
-                    <span className="truncate">Telegram</span>
-                  </a>
-
-                  {/* Threads */}
-                  <a
-                    href={threadsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-bold text-xs transition-all text-center"
-                  >
-                    <span className="text-sm leading-none">🧵</span>
-                    <span className="truncate">Threads</span>
-                  </a>
-
-                  {/* X (Twitter) */}
-                  <a
-                    href={twitterUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-bold text-xs transition-all text-center"
-                  >
-                    <span className="text-sm leading-none font-bold">✕</span>
-                    <span className="truncate">X (Twitter)</span>
-                  </a>
-
-                  {/* LinkedIn */}
-                  <a
-                    href={linkedinUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-bold text-xs transition-all text-center"
-                  >
-                    <span className="text-sm leading-none font-bold">in</span>
-                    <span className="truncate">LinkedIn</span>
-                  </a>
-                </div>
-              </div>
-
-              {/* Device Native Share (Instagram, Snapchat, More) */}
               <button
                 type="button"
                 onClick={handleNativeShare}
                 disabled={isGeneratingImage}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-bold text-xs transition-all shadow-xs"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl border border-border bg-card hover:bg-muted text-foreground font-bold text-xs transition-all"
               >
                 <Share2 className="w-4 h-4 text-primary" />
-                <span>Share via System (Snapchat, Instagram, More apps)</span>
+                Share via System (Snapchat, Instagram, Moreâ€¦)
               </button>
             </div>
 
-            {/* Quick 3-Step How-To Guide */}
-            <div className="p-4 rounded-2xl bg-card border border-border space-y-3">
-              <div className="text-xs font-extrabold text-foreground flex items-center gap-1.5">
-                <Camera className="w-3.5 h-3.5 text-primary" />
-                <span>How to post this on Instagram, Facebook &amp; WhatsApp Story:</span>
+            {/* Social Share Grid */}
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Share Directly</span>
+              <div className="grid grid-cols-4 gap-2">
+                {socials.map((s) =>
+                  s.onClick ? (
+                    <button
+                      key={s.label}
+                      type="button"
+                      onClick={s.onClick}
+                      disabled={isGeneratingImage}
+                      className={`flex flex-col items-center justify-center gap-1 py-2.5 px-1 rounded-2xl border font-bold transition-all ${s.bg}`}
+                    >
+                      <span className={`text-base leading-none ${s.color}`}>{s.emoji}</span>
+                      <span className={`text-[8.5px] font-bold ${s.color}`}>{s.label}</span>
+                    </button>
+                  ) : (
+                    <a
+                      key={s.label}
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`flex flex-col items-center justify-center gap-1 py-2.5 px-1 rounded-2xl border font-bold transition-all ${s.bg}`}
+                    >
+                      <span className={`text-base leading-none ${s.color}`}>{s.emoji}</span>
+                      <span className={`text-[8.5px] font-bold ${s.color}`}>{s.label}</span>
+                    </a>
+                  )
+                )}
               </div>
-              <ol className="text-xs text-muted-foreground space-y-2 pl-4 list-decimal leading-relaxed">
-                <li>
-                  Click <strong>&quot;Download 9:16 Story Card&quot;</strong> (saves directly to your camera roll).
-                </li>
-                <li>
-                  Open <strong>Instagram, Facebook, or WhatsApp</strong> &gt; create a new <strong>Story / Status</strong> &gt; select your downloaded card.
-                </li>
-                <li>
-                  Tap the <strong>Stickers icon (😊)</strong> &gt; select the <strong>&quot;LINK&quot;</strong> sticker (or paste in caption) &gt; paste your copied link!
-                </li>
+            </div>
+
+            {/* How-To Guide */}
+            <div className="p-3.5 rounded-2xl bg-card border border-border">
+              <div className="text-[10px] font-extrabold text-foreground flex items-center gap-1.5 mb-3">
+                <div className="w-4 h-4 rounded-full bg-primary/15 flex items-center justify-center text-primary text-[9px] font-black">?</div>
+                How to post to Instagram Story
+              </div>
+              <ol className="space-y-2.5">
+                {[
+                  { n: "1", text: <><strong>Download Story Card</strong> â€” saves to your camera roll.</> },
+                  { n: "2", text: <>Open <strong>Instagram</strong> â†’ new Story â†’ select the card.</> },
+                  { n: "3", text: <>Tap <strong>Stickers ðŸ˜Š</strong> â†’ <strong>LINK</strong> â†’ paste your copied URL.</> },
+                ].map((step) => (
+                  <li key={step.n} className="flex items-start gap-2.5 list-none">
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black flex-shrink-0 mt-px"
+                      style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.25), rgba(168,85,247,0.25))", border: "1px solid rgba(59,130,246,0.3)", color: "#93C5FD" }}
+                    >
+                      {step.n}
+                    </div>
+                    <span className="text-[11px] text-muted-foreground leading-relaxed">{step.text}</span>
+                  </li>
+                ))}
               </ol>
             </div>
+
           </div>
         </div>
       </div>
