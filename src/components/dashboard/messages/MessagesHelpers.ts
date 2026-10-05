@@ -23,8 +23,7 @@ export interface Message {
   hasWarning?: boolean | undefined;
   isRead?: boolean | undefined;
   readAt?: string | null | undefined;
-  messageType?: "TEXT" | "FILE" | "OFFER" | "CONTRACT_ACCEPTANCE" | "SYSTEM" | undefined;
-  fileUrl?: string | null | undefined;
+  messageType?: "TEXT" | "CONTRACT_ACCEPTANCE" | "SYSTEM" | undefined;
   dealId?: string | null | undefined;
   status?: "sending" | "sent" | "failed" | undefined;
   metadata?: MessageMetadata | null | undefined;
@@ -66,8 +65,7 @@ isBlocked?: boolean;
 hasWarning?: boolean;
 isRead?: boolean;
 readAt?: string | null;
-messageType?: "TEXT" | "FILE" | "OFFER" | "CONTRACT_ACCEPTANCE" | "SYSTEM";
-fileUrl?: string | null;
+messageType?: "TEXT" | "CONTRACT_ACCEPTANCE" | "SYSTEM";
 metadata?: MessageMetadata | null;
 }
 

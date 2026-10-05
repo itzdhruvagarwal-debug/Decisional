@@ -1457,66 +1457,7 @@ export function checkCampaignActivationEligibility(
   return { allowed: true, requiredAmountPaise };
 }
 
-// ---------------------------------------------------------------------------
-// 21. IN-CHAT CUSTOM OFFER ACCEPTANCE
-// ---------------------------------------------------------------------------
 
-export interface OfferAcceptanceEligibilityInput {
-  offerAmount: number; // in paise
-  userType?: string | null | undefined;
-  walletBalance?: number | null | undefined;
-  isWalletFrozen?: boolean | null | undefined;
-  offerStatus?: string | null | undefined;
-}
-
-export function checkOfferAcceptanceEligibility(
-  input: OfferAcceptanceEligibilityInput
-): {
-  allowed: boolean;
-  reason?: string | undefined;
-  shortfallPaise?: number | undefined;
-  requiredTotalPaise?: number | undefined;
-  ctaText?: string | undefined;
-  ctaHref?: string | undefined;
-} {
-  if (input.offerStatus && input.offerStatus !== "PENDING") {
-    return {
-      allowed: false,
-      reason: `Offer has already been ${input.offerStatus.toLowerCase()}`,
-    };
-  }
-
-  if (input.userType === "BRAND") {
-    if (input.isWalletFrozen) {
-      return {
-        allowed: false,
-        reason: "Your brand wallet is currently frozen. Cannot accept offers until restrictions are lifted.",
-        ctaText: "Contact Support",
-        ctaHref: "/dashboard/support",
-      };
-    }
-
-    const platformFee = Math.round((input.offerAmount * DEFAULT_BRAND_PLATFORM_FEE_PERCENT) / 100);
-    const gatewayFee = Math.round(((input.offerAmount + platformFee) * DEFAULT_GATEWAY_FEE_PERCENT) / 100);
-    const requiredTotalPaise = input.offerAmount + platformFee + gatewayFee;
-    const balance = input.walletBalance ?? 0;
-
-    if (input.walletBalance !== undefined && input.walletBalance !== null && balance < requiredTotalPaise) {
-      const shortfallPaise = requiredTotalPaise - balance;
-      const shortfallRupees = Math.ceil(shortfallPaise / 100);
-      return {
-        allowed: false,
-        reason: `Wallet balance insufficient — need ₹${shortfallRupees.toLocaleString("en-IN")} more to fund offer escrow.`,
-        shortfallPaise,
-        requiredTotalPaise,
-        ctaText: `Deposit ₹${shortfallRupees.toLocaleString("en-IN")}`,
-        ctaHref: `/dashboard/wallet?topup=true&amount=${shortfallRupees}`,
-      };
-    }
-  }
-
-  return { allowed: true };
-}
 
 // ---------------------------------------------------------------------------
 // 22. ADMIN REVIEW ACTIONS (APPLICATIONS & VERIFICATIONS)
