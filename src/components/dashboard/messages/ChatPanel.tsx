@@ -30,16 +30,16 @@ interface ChatPanelProps {
 // ─────────────────────────────────────────────────────────────────────────────
 function TypingBubble({ avatarSrc, name }: { avatarSrc?: string | null | undefined; name?: string | undefined }) {
   return (
-    <div className="flex items-end gap-2 justify-start">
+    <div className="flex items-start gap-2.5 justify-start">
       {/* Peer mini-avatar */}
-      <div className="relative w-6 h-6 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-[10px] font-bold text-foreground shrink-0">
+      <div className="relative w-8 h-8 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-xs font-bold text-foreground shrink-0 mt-0.5">
         {avatarSrc ? (
-          <Image src={avatarSrc} alt={name || "User"} width={24} height={24} unoptimized className="object-cover w-full h-full rounded-full" />
+          <Image src={avatarSrc} alt={name || "User"} width={32} height={32} unoptimized className="object-cover w-full h-full rounded-full" />
         ) : (
           (name || "U").charAt(0).toUpperCase()
         )}
       </div>
-      <div className="flex items-center gap-1 bg-card border border-border rounded-2xl rounded-bl-sm px-3.5 py-3 shadow-sm">
+      <div className="flex items-center gap-1 bg-card border border-border rounded-2xl rounded-tl-sm px-3.5 py-3 shadow-xs">
         <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:0ms]" />
         <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:150ms]" />
         <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:300ms]" />
@@ -265,10 +265,10 @@ function MessageList({ state }: Readonly<ChatPanelProps>) {
           const showDateDivider = !prevMsg || (currDate && prevDate && currDate !== prevDate);
           const dateLabel = formatMessageDateDivider(msg.rawCreatedAt || msg.createdAt);
 
-          // Instagram-style radius: sent = rounded-2xl rounded-br-sm, received = rounded-2xl rounded-bl-sm
+          // Telegram/Instagram-style radius: sent = rounded-2xl rounded-br-sm, received = rounded-2xl rounded-tl-sm
           const bubbleRadius = msg.isMe
             ? "rounded-2xl rounded-br-sm"
-            : "rounded-2xl rounded-bl-sm";
+            : "rounded-2xl rounded-tl-sm";
 
           const bubbleColors = msg.isMe
             ? "bg-primary text-primary-foreground"
@@ -289,19 +289,19 @@ function MessageList({ state }: Readonly<ChatPanelProps>) {
 
               {/* Message row */}
               <div
-                className={`flex items-end gap-2 group ${
+                className={`flex items-start gap-2.5 group ${
                   msg.isMe ? "justify-end" : "justify-start"
                 }`}
               >
                 {/* Peer avatar (only on received messages) */}
                 {!msg.isMe && (
-                  <div className="relative w-6 h-6 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-[10px] font-bold text-foreground shrink-0 mb-1">
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-xs font-bold text-foreground shrink-0 mt-0.5">
                     {selectedChat?.avatar ? (
                       <Image
                         src={selectedChat.avatar}
                         alt={selectedChat.name || "User"}
-                        width={24}
-                        height={24}
+                        width={32}
+                        height={32}
                         unoptimized
                         className="object-cover w-full h-full rounded-full"
                       />
