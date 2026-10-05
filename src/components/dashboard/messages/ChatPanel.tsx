@@ -287,47 +287,39 @@ function MessageList({ state }: Readonly<ChatPanelProps>) {
                 </div>
               )}
 
-              {/* Message row */}
-              <div
-                className={`flex gap-2 group ${
-                  msg.isMe ? "justify-end" : "justify-start"
-                }`}
-              >
-                {/* Peer avatar (only on received messages) */}
-                {!msg.isMe && (
-                  <div className="relative w-8 h-8 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-xs font-bold text-foreground shrink-0 self-start">
+              {/* Message row — always items-start so avatar & bubble column pin to top */}
+              <div className={`flex items-start gap-2 group ${msg.isMe ? "flex-row-reverse" : "flex-row"}`}>
+
+                {/* Avatar — received only; sent side gets a fixed-width spacer to keep bubbles from spanning full width */}
+                {!msg.isMe ? (
+                  <div className="w-8 h-8 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-xs font-bold text-foreground shrink-0">
                     {selectedChat?.avatar ? (
-                      <Image
-                        src={selectedChat.avatar}
-                        alt={selectedChat.name || "User"}
-                        width={32}
-                        height={32}
-                        unoptimized
-                        className="object-cover w-full h-full rounded-full"
-                      />
+                      <div className="relative w-8 h-8">
+                        <Image
+                          src={selectedChat.avatar}
+                          alt={selectedChat.name || "User"}
+                          fill
+                          unoptimized
+                          className="object-cover rounded-full"
+                        />
+                      </div>
                     ) : (
                       (selectedChat?.name || "U").charAt(0).toUpperCase()
                     )}
                   </div>
+                ) : (
+                  <div className="w-8 shrink-0" />
                 )}
 
-                {/* Bubble + meta container */}
-                <div
-                  className={`flex flex-col gap-1 max-w-[75%] sm:max-w-sm ${
-                    msg.isMe ? "items-end" : "items-start"
-                  }`}
-                >
-                  <div
-                    className={`px-4 py-2.5 ${bubbleRadius} ${bubbleColors} shadow-xs transition-shadow`}
-                  >
+                {/* Bubble + timestamp column */}
+                <div className={`flex flex-col gap-1 min-w-0 max-w-[72%] sm:max-w-xs ${msg.isMe ? "items-end" : "items-start"}`}>
+                  <div className={`px-4 py-2.5 ${bubbleRadius} ${bubbleColors} shadow-xs`}>
                     {renderMessageContent(msg)}
                   </div>
 
                   {/* Timestamp & read receipts */}
                   <div className="flex items-center gap-1 text-[10px] text-muted-foreground px-1">
                     <span>{msg.createdAt}</span>
-
-                    {/* Sent receipt icons */}
                     {msg.isMe && (
                       <span className="inline-flex items-center">
                         {msg.status === "sending" ? (
