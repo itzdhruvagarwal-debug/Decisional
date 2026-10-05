@@ -1,4 +1,57 @@
 import prisma from "@/lib/db";
+import type { Prisma } from "@prisma/client";
+
+const brandProfileInclude = {
+  user: {
+    select: {
+      id: true,
+      trustScore: true,
+      createdAt: true,
+    },
+  },
+  campaigns: {
+    where: {
+      status: "ACTIVE" as const,
+      deletedAt: null,
+    },
+    orderBy: { createdAt: "desc" as const },
+    take: 12,
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      perInfluencerBudget: true,
+      requiresProduct: true,
+      productName: true,
+      productValue: true,
+      targetCategories: true,
+      minFollowers: true,
+      postingDeadline: true,
+      deliverables: true,
+    },
+  },
+  reviews: {
+    where: {
+      deletedAt: null,
+    },
+    orderBy: { createdAt: "desc" as const },
+    take: 10,
+    include: {
+      reviewer: {
+        select: {
+          id: true,
+          influencerProfile: {
+            select: {
+              displayName: true,
+              avatar: true,
+              instagramHandle: true,
+            },
+          },
+        },
+      },
+    },
+  },
+} satisfies Prisma.BrandProfileInclude;
 
 export interface PublicBrandCampaign {
   id: string;
@@ -64,67 +117,51 @@ export async function getPublicBrandProfile(
   const cleanId = decodeURIComponent(identifier).trim();
   if (!cleanId) return null;
 
-  const brand = await prisma.brandProfile.findFirst({
+  let brand = await prisma.brandProfile.findFirst({
     where: {
       deletedAt: null,
       OR: [
         { id: cleanId },
         { userId: cleanId },
         { companyName: { equals: cleanId, mode: "insensitive" } },
+        { companyName: { equals: cleanId.replaceAll("-", " "), mode: "insensitive" } },
       ],
     },
-    include: {
-      user: {
-        select: {
-          id: true,
-          trustScore: true,
-          createdAt: true,
-        },
-      },
-      campaigns: {
-        where: {
-          status: "ACTIVE",
-          deletedAt: null,
-        },
-        orderBy: { createdAt: "desc" },
-        take: 12,
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          perInfluencerBudget: true,
-          requiresProduct: true,
-          productName: true,
-          productValue: true,
-          targetCategories: true,
-          minFollowers: true,
-          postingDeadline: true,
-          deliverables: true,
-        },
-      },
-      reviews: {
-        where: {
-          deletedAt: null,
-        },
-        orderBy: { createdAt: "desc" },
-        take: 10,
-        include: {
-          reviewer: {
-            select: {
-              id: true,
-              influencerProfile: {
-                select: {
-                  displayName: true,
-                  avatar: true,
-                  instagramHandle: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+    include: brandProfileInclude,
   });
+
+  if (!brand) {
+    const brandUser = await prisma.user.findFirst({
+      where: {
+        deletedAt: null,
+        userType: "BRAND",
+        OR: [
+          { id: cleanId },
+          { email: cleanId },
+        ],
+      },
+      select: {
+        id: true,
+        email: true,
+        trustScore: true,
+        createdAt: true,
+      },
+    });
+
+    if (brandUser) {
+      brand = await prisma.brandProfile.upsert({
+        where: { userId: brandUser.id },
+        create: {
+          userId: brandUser.id,
+          companyName: cleanId.includes("@")
+            ? (cleanId.split("@")[0] || "Verified Brand")
+            : (cleanId.replaceAll("-", " ") || "Verified Brand"),
+        },
+        update: {},
+        include: brandProfileInclude,
+      });
+    }
+  }
 
   if (!brand) {
     return null;

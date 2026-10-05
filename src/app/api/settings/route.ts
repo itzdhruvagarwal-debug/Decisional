@@ -169,6 +169,7 @@ const youtubeOAuth = user.oauthAccounts?.find((a) => a.provider === "youtube");
 
 return NextResponse.json({
 user: {
+id: user.id,
 email: user.email,
 phone: user.phone || null,
 emailVerified: !!user.emailVerified,
@@ -184,6 +185,7 @@ notificationPreferences: parseNotificationPreferences(user.notificationPreferenc
 lastLogin: user.lastLoginAt,
 },
 profile: {
+id: profileData.id || "",
 // Common fields
 displayName:
 profileData.displayName ||

@@ -228,11 +228,23 @@ export default function SettingsPage() {
   }, [profile, isKycVerified]);
 
   const publicProfileUrl = useMemo(() => {
+    const isBrandUser = user?.userType === "BRAND" || session?.user?.userType === "BRAND";
+    if (isBrandUser) {
+      const brandId = (profile as unknown as { id?: string })?.id || user?.id || session?.user?.id;
+      if (!brandId) return null;
+      return `/brand/${brandId}`;
+    }
     // Only use instagramHandle (slug-safe) — never use displayName/user.name which may have spaces
     const handle = profile?.instagramHandle;
-    if (!handle) return null; // brand users or profiles with no IG handle have no public creator URL
-    return `/creator/${encodeURIComponent(handle.replace(/^@/, "").toLowerCase())}`;
-  }, [profile]);
+    if (handle) {
+      return `/creator/${encodeURIComponent(handle.replace(/^@/, "").toLowerCase())}`;
+    }
+    const creatorId = (profile as unknown as { id?: string })?.id || user?.id || session?.user?.id;
+    if (creatorId) {
+      return `/dashboard/influencers/${creatorId}`;
+    }
+    return null;
+  }, [user?.userType, session?.user?.userType, user?.id, session?.user?.id, profile]);
 
   // Loading skeleton
   if (loading) {
@@ -351,7 +363,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Instagram Benchmark: Public Profile Preview & Story Button */}
+          {/* Public Profile View (Live on Web) */}
           <div className="p-3 rounded-xl bg-muted/40 flex items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -367,26 +379,19 @@ export default function SettingsPage() {
               </div>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                type="button"
-                onClick={() => setStoryModalOpen(true)}
-                className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg bg-primary/10 border border-primary/25 text-primary font-bold text-[11px] hover:bg-primary/20 transition-all cursor-pointer shadow-2xs shrink-0"
-                title="Post profile & referral to Instagram/WhatsApp Story"
-              >
-                <Smartphone className="w-3.5 h-3.5" />
-                <span>Story</span>
-              </button>
-              {publicProfileUrl && (
+              {publicProfileUrl ? (
                 <Link
                   href={publicProfileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg bg-card border border-border text-foreground font-bold text-[11px] hover:bg-muted transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
-                  title="Preview public profile"
+                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-card border border-border text-foreground font-bold text-xs hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
+                  title="View public profile on web"
                 >
                   <span>View</span>
-                  <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </Link>
+              ) : (
+                <span className="text-[11px] text-muted-foreground font-medium">Pending Setup</span>
               )}
             </div>
           </div>
