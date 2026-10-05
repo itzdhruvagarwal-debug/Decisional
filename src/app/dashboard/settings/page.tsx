@@ -39,6 +39,7 @@ import {
   TrendingUp,
   Smartphone,
   Globe,
+  Copy,
 } from "lucide-react";
 import StoryShareModal from "@/components/share/StoryShareModal";
 
@@ -385,16 +386,33 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
               {publicProfileUrl ? (
-                <Link
-                  href={publicProfileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-card border border-border text-foreground font-bold text-xs hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
-                  title="View public profile on web"
-                >
-                  <span>View</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </Link>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        const fullUrl = `${window.location.origin}${publicProfileUrl}`;
+                        navigator.clipboard.writeText(fullUrl);
+                        showToast("Public profile link copied to clipboard!", "success");
+                      }
+                    }}
+                    className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-card border border-border text-foreground font-semibold text-xs hover:bg-muted transition-all cursor-pointer shadow-2xs shrink-0"
+                    title="Copy public profile link to clipboard"
+                  >
+                    <Copy className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span>Copy Link</span>
+                  </button>
+                  <Link
+                    href={publicProfileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-card border border-border text-foreground font-bold text-xs hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
+                    title="View public profile on web"
+                  >
+                    <span>View</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </Link>
+                </>
               ) : (
                 <span className="text-[11px] text-muted-foreground font-medium">Pending Setup</span>
               )}
