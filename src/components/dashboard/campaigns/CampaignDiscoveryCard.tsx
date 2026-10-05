@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { type DashboardCampaign as Campaign } from "@/lib/schemas";
 import { formatCurrency, formatDate, formatNumber } from "@/lib/utils-client";
 import {
@@ -67,6 +68,12 @@ export function CampaignDiscoveryCard({
 
   const isDeadlineUrgent = !isInactive && daysLeft !== null && daysLeft > 0 && daysLeft <= 3;
 
+  const brandIdentifier =
+    campaign.brand.id ||
+    campaign.brandId ||
+    encodeURIComponent(campaign.brand.companyName || "");
+  const brandProfileHref = `/brand/${brandIdentifier}`;
+
   if (listView) {
     /* ── LIST VIEW (horizontal compact row) ───────────────────────── */
     return (
@@ -81,7 +88,11 @@ export function CampaignDiscoveryCard({
       >
         {/* Left: Logo + info */}
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center text-foreground font-bold text-sm">
+          <Link
+            href={brandProfileHref}
+            className="relative w-11 h-11 rounded-xl overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center text-foreground font-bold text-sm hover:border-primary/60 hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer"
+            title={`View ${campaign.brand.companyName} profile`}
+          >
             {campaign.brand.logo ? (
               <Image
                 src={campaign.brand.logo}
@@ -92,14 +103,18 @@ export function CampaignDiscoveryCard({
             ) : (
               <span>{campaign.brand.companyName.slice(0, 2).toUpperCase()}</span>
             )}
-          </div>
+          </Link>
 
           <div className="min-w-0 flex-1">
             {/* Verified brand badge */}
             <div className="flex items-center gap-1.5 mb-0.5">
-              <span className="text-xs font-semibold text-foreground/90 truncate max-w-[120px]">
+              <Link
+                href={brandProfileHref}
+                className="text-xs font-semibold text-foreground/90 hover:text-primary transition-colors truncate max-w-[120px]"
+                title={`View ${campaign.brand.companyName} profile`}
+              >
                 {campaign.brand.companyName}
-              </span>
+              </Link>
               <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-verified bg-verified-muted px-1.5 py-0.5 rounded-md border border-verified-border shrink-0">
                 <ShieldCheck className="w-2.5 h-2.5" /> Verified
               </span>
@@ -228,7 +243,11 @@ export function CampaignDiscoveryCard({
         {/* Top: Brand Info & Budget */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center text-foreground font-bold text-sm">
+            <Link
+              href={brandProfileHref}
+              className="relative w-11 h-11 rounded-xl overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center text-foreground font-bold text-sm hover:border-primary/60 hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer"
+              title={`View ${campaign.brand.companyName} profile`}
+            >
               {campaign.brand.logo ? (
                 <Image
                   src={campaign.brand.logo}
@@ -239,13 +258,17 @@ export function CampaignDiscoveryCard({
               ) : (
                 <span>{campaign.brand.companyName.slice(0, 2).toUpperCase()}</span>
               )}
-            </div>
+            </Link>
 
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground/90 truncate max-w-[110px]">
+                <Link
+                  href={brandProfileHref}
+                  className="font-semibold text-foreground/90 hover:text-primary transition-colors truncate max-w-[110px]"
+                  title={`View ${campaign.brand.companyName} profile`}
+                >
                   {campaign.brand.companyName}
-                </span>
+                </Link>
                 {campaign.brand.avgRating > 0 && (
                   <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-pending">
                     <Star className="w-3 h-3 fill-current" />

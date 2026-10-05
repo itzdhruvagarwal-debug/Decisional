@@ -7,6 +7,7 @@ import { useMessages } from "./useMessages";
 import { Message, formatMessageDateDivider } from "./MessagesHelpers";
 import { DealContextMiniCard } from "./DealContextMiniCard";
 import { ContactLeakWarningBanner } from "./ContactLeakWarningBanner";
+import Link from "next/link";
 import {
   ChevronLeft,
   Shield,
@@ -19,6 +20,7 @@ import {
   CheckCheck,
   Lock,
   MessageSquare,
+  ExternalLink,
 } from "lucide-react";
 
 interface ChatPanelProps {
@@ -66,6 +68,9 @@ function ChatHeader({ state }: Readonly<ChatPanelProps>) {
   if (!selectedChat) return null;
 
   const isBrand = selectedChat.userType?.toUpperCase() === "BRAND";
+  const profileHref = isBrand
+    ? `/brand/${selectedChat.id || encodeURIComponent(selectedChat.name || "")}`
+    : `/dashboard/influencers/${selectedChat.id || ""}`;
 
   return (
     <div className="border-b border-border bg-card shrink-0">
@@ -84,8 +89,12 @@ function ChatHeader({ state }: Readonly<ChatPanelProps>) {
           </button>
 
           {/* Avatar with online dot */}
-          <div className="relative shrink-0">
-            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-foreground font-bold text-sm">
+          <Link
+            href={profileHref}
+            className="relative shrink-0 group"
+            title={`View ${isBrand ? "Brand" : "Creator"} Profile`}
+          >
+            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-foreground font-bold text-sm group-hover:ring-2 group-hover:ring-primary/40 transition-all">
               {selectedChat.avatar ? (
                 <Image
                   src={selectedChat.avatar}
@@ -106,21 +115,26 @@ function ChatHeader({ state }: Readonly<ChatPanelProps>) {
               )}
             </div>
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-verified rounded-full border-2 border-card" />
-          </div>
+          </Link>
 
           {/* Name + status row */}
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-sm sm:text-base text-foreground truncate max-w-[160px] sm:max-w-xs">
+              <Link
+                href={profileHref}
+                className="font-bold text-sm sm:text-base text-foreground hover:text-primary transition-colors truncate max-w-[160px] sm:max-w-xs"
+                title={`View ${isBrand ? "Brand" : "Creator"} Profile`}
+              >
                 {selectedChat.name}
-              </span>
-              <span
-                className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide shrink-0 ${
+              </Link>
+              <Link
+                href={profileHref}
+                className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide shrink-0 hover:opacity-80 transition-opacity ${
                   isBrand ? "bg-primary/10 text-primary" : "bg-verified-muted text-verified"
                 }`}
               >
                 {isBrand ? "Brand" : "Creator"}
-              </span>
+              </Link>
             </div>
 
             {/* Typing / deal context subtitle */}
@@ -147,6 +161,16 @@ function ChatHeader({ state }: Readonly<ChatPanelProps>) {
 
         {/* Right: actions */}
         <div className="flex items-center gap-1.5 shrink-0">
+          <Button
+            href={profileHref}
+            variant="secondary"
+            aria-label={`View ${selectedChat?.name ?? "user"} profile`}
+            className="text-xs min-h-[44px] px-3 py-2 flex items-center gap-1"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Profile</span>
+          </Button>
+
           <Button
             variant="secondary"
             onClick={() => setIsReportModalOpen(true)}

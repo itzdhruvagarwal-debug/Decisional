@@ -98,7 +98,10 @@ export const dashboardCampaignSchema = z.object({
   postingDeadline: z.string(),
   targetCategories: z.array(z.string()),
   totalApplications: z.number(),
+  brandId: z.string().nullable().optional(),
   brand: z.object({
+    id: z.string().nullable().optional(),
+    userId: z.string().nullable().optional(),
     companyName: z.string(),
     logo: z.string().nullable(),
     avgRating: z.number(),

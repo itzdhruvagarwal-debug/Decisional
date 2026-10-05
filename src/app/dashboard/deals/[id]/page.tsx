@@ -344,19 +344,28 @@ export default function DealDetailPage() {
 
             {/* Counterparty Dossier Chip + Realtime Sync */}
             <div className="flex items-center flex-wrap gap-2.5 sm:gap-3 shrink-0">
-              <div className="flex items-center gap-3 p-2.5 px-3.5 rounded-2xl bg-card border border-border text-xs shadow-sm w-full sm:w-auto">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+              <Link
+                href={
+                  isClient
+                    ? `/dashboard/influencers/${deal.influencer?.id || ""}`
+                    : `/brand/${deal.brand?.id || deal.brand?.userId || encodeURIComponent(deal.brand?.companyName || "")}`
+                }
+                className="flex items-center gap-3 p-2.5 px-3.5 rounded-2xl bg-card border border-border text-xs shadow-sm hover:border-primary/50 hover:bg-muted/40 transition-all cursor-pointer group w-full sm:w-auto"
+                title={isClient ? "View Creator Profile" : `View ${counterpartyName} Public Profile`}
+              >
+                <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm shrink-0 group-hover:scale-105 transition-transform">
                   {isClient ? <User className="w-4 h-4" /> : <Building2 className="w-4 h-4" />}
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[11px] text-muted-foreground block">
-                    {isClient ? "Counterparty Creator" : "Counterparty Brand"}
+                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <span>{isClient ? "Counterparty Creator" : "Counterparty Brand"}</span>
+                    <span className="text-[10px] text-primary opacity-0 group-hover:opacity-100 transition-opacity">↗</span>
                   </span>
-                  <span className="font-bold text-foreground text-sm truncate block max-w-[160px]">
+                  <span className="font-bold text-foreground group-hover:text-primary transition-colors text-sm truncate block max-w-[160px]">
                     {counterpartyName}
                   </span>
                 </div>
-              </div>
+              </Link>
 
               {/* Contract Summary PDF CTA */}
               <button

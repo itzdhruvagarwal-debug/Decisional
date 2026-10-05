@@ -25,6 +25,7 @@ totalApplications: number;
 selectedInfluencers: number;
 deliverables: Array<{ type: string; count: number; specs?: string }>;
 brand: {
+id?: string | undefined;
 userId: string;
 companyName: string;
 logo: string | null;
@@ -117,6 +118,7 @@ selectedInfluencers: Number(raw.selectedInfluencers || 0),
 deliverables: normalizeDeliverables(raw.deliverables),
 brand: raw.brand
 ? {
+id: String((raw.brand as { id?: string })?.id || (raw as Record<string, unknown>).brandId || "") || undefined,
 userId: raw.brand.userId || "",
 companyName: raw.brand.companyName || "Unknown Brand",
 logo: raw.brand.logo || null,

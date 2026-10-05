@@ -31,7 +31,9 @@ export default function CampaignDiscoveryCard({
     postingDeadline: campaign.deadline || "",
     targetCategories: campaign.niche ? [campaign.niche] : ["General"],
     totalApplications: 0,
+    brandId: campaign.brandId || null,
     brand: {
+      id: campaign.brandId || null,
       companyName: campaign.brandName || "Brand Partner",
       logo: campaign.brandAvatar ?? null,
       avgRating: 4.8,

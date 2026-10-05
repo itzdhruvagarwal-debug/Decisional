@@ -35,6 +35,7 @@ function normalizeDeal(raw: RawDeal): Deal {
       title: String(campaign?.title || "Untitled Campaign"),
     },
     brand: {
+      id: brand?.id ? String(brand.id) : undefined,
       companyName: String(brand?.companyName || "Brand Partner"),
       logo: brand?.logo || null,
     },

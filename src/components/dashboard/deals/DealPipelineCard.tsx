@@ -171,6 +171,12 @@ export function DealPipelineCard({
     (isInfluencer && ["PENDING_SIGNATURE", "REVISION_REQUESTED", "CONTENT_APPROVED"].includes(deal.status)) ||
     (isBrand && ["CONTENT_SUBMITTED", "POSTED"].includes(deal.status));
 
+  const brandIdentifier =
+    deal.brand?.id ||
+    deal.brand?.userId ||
+    encodeURIComponent(deal.brand?.companyName || "");
+  const brandProfileHref = `/brand/${brandIdentifier}`;
+
   return (
     <article
       className={`rounded-2xl border transition-all bg-card overflow-hidden ${
@@ -199,7 +205,12 @@ export function DealPipelineCard({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Left: Brand/Counterparty Avatar & Metadata */}
           <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
-            <div className="relative w-12 h-12 rounded-full overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center text-foreground font-bold text-base shadow-2xs">
+            <Link
+              href={brandProfileHref}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-12 h-12 rounded-full overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center text-foreground font-bold text-base shadow-2xs hover:ring-2 hover:ring-primary/40 hover:border-primary/50 transition-all cursor-pointer"
+              title={`View ${deal.brand?.companyName || "Brand"} public profile`}
+            >
               {deal.brand?.logo ? (
                 <Image
                   src={deal.brand.logo}
@@ -210,7 +221,7 @@ export function DealPipelineCard({
               ) : (
                 <span>{deal.brand?.companyName?.[0]?.toUpperCase() || "B"}</span>
               )}
-            </div>
+            </Link>
 
             <div className="space-y-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
@@ -234,9 +245,14 @@ export function DealPipelineCard({
               </div>
 
               <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-                <span className="font-semibold text-foreground/90">
+                <Link
+                  href={brandProfileHref}
+                  onClick={(e) => e.stopPropagation()}
+                  className="font-semibold text-foreground/90 hover:text-primary transition-colors hover:underline"
+                  title={`View ${deal.brand?.companyName || "Brand"} public profile`}
+                >
                   {deal.brand?.companyName || "Brand Partner"}
-                </span>
+                </Link>
                 <span>•</span>
                 {deal.status === "COMPLETED" || deal.status === "VERIFIED" ? (
                   <span className="flex items-center gap-1 text-verified font-medium">

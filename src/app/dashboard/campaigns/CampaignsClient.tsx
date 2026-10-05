@@ -87,7 +87,10 @@ export function mapRawCampaigns(rawCampaigns: RawCampaign[]): Campaign[] {
     postingDeadline: campaign.postingDeadline || new Date(0).toISOString(),
     targetCategories: normalizeStringArray(campaign.targetCategories),
     totalApplications: Number(campaign.totalApplications || campaign._count?.applications || 0),
+    brandId: campaign.brandId || campaign.userId || null,
     brand: {
+      id: (campaign.brand as { id?: string } | null | undefined)?.id || campaign.brandId || null,
+      userId: campaign.userId || null,
       companyName: campaign.brand?.companyName || "Verified Brand",
       logo: campaign.brand?.logo || null,
       avgRating: Number(campaign.brand?.avgRating || campaign.brand?.averageRating || 0) / 100,

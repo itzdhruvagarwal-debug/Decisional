@@ -75,7 +75,12 @@ export const dashboardDealSchema = z.object({
   createdAt: z.string(),
   postingDeadline: z.string(),
   campaign: z.object({ title: z.string() }),
-  brand: z.object({ companyName: z.string(), logo: z.string().nullable() }),
+  brand: z.object({
+    id: z.string().nullable().optional(),
+    userId: z.string().nullable().optional(),
+    companyName: z.string(),
+    logo: z.string().nullable(),
+  }),
   deliverables: z.array(z.object({ type: z.string(), count: z.number() })),
 });
 

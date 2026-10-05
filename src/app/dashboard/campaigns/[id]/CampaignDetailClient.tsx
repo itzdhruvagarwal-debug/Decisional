@@ -25,6 +25,7 @@ import {
   MapPin,
   Globe,
   BarChart3,
+  ExternalLink,
 } from "lucide-react";
 import { formatCurrency, formatDate, formatNumber } from "@/lib/utils-client";
 import { Button, Input, Textarea, Modal, Spinner } from "@/components/ui";
@@ -197,6 +198,12 @@ export default function CampaignDetailClient({
     }
   );
 
+  const brandIdentifier =
+    campaign.brand?.id ||
+    campaign.brand?.userId ||
+    encodeURIComponent(campaign.brand?.companyName || "");
+  const brandProfileHref = `/brand/${brandIdentifier}`;
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Top Navigation Bar & Owner Actions */}
@@ -331,7 +338,11 @@ export default function CampaignDetailClient({
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div className="flex items-start gap-4 sm:gap-5">
             {/* Brand Logo Avatar */}
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-muted border border-border flex items-center justify-center font-bold text-xl text-foreground overflow-hidden relative flex-shrink-0 shadow-xs">
+            <Link
+              href={brandProfileHref}
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-muted border border-border flex items-center justify-center font-bold text-xl text-foreground overflow-hidden relative flex-shrink-0 shadow-xs hover:ring-2 hover:ring-primary/40 hover:border-primary/50 transition-all cursor-pointer"
+              title={`View ${campaign.brand?.companyName || "Brand"} Public Profile`}
+            >
               {campaign.brand?.logo ? (
                 <Image
                   src={campaign.brand.logo}
@@ -343,13 +354,18 @@ export default function CampaignDetailClient({
               ) : (
                 (campaign.brand?.companyName || campaign.title || "B").slice(0, 2).toUpperCase()
               )}
-            </div>
+            </Link>
 
             <div className="space-y-1.5">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  {campaign.brand?.companyName || "Verified Brand"}
-                </span>
+                <Link
+                  href={brandProfileHref}
+                  className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider inline-flex items-center gap-1 group"
+                  title={`View ${campaign.brand?.companyName || "Brand"} Public Profile`}
+                >
+                  <span>{campaign.brand?.companyName || "Verified Brand"}</span>
+                  <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
 
                 {campaign.brand?.isGstVerified && (
                   <span
@@ -367,6 +383,15 @@ export default function CampaignDetailClient({
                     {campaign.brand.averageRating.toFixed(1)}
                   </span>
                 ) : null}
+
+                <Link
+                  href={brandProfileHref}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold bg-muted hover:bg-muted/80 text-foreground border border-border transition-colors shrink-0"
+                  title="View complete public profile, active campaigns, and creator reviews"
+                >
+                  <span>View Brand Profile</span>
+                  <ArrowRight className="w-2.5 h-2.5" />
+                </Link>
               </div>
 
               <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight leading-tight">
