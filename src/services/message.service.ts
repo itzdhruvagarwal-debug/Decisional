@@ -91,7 +91,7 @@ conversationKey: `deal:${params.dealId}`,
 if (!params.with) throw AppError.badRequest("Invalid parameters");
 if (params.with === userId) throw AppError.badRequest("Cannot message yourself");
 
-  const [existingMessageCount, sharedDeal, sharedApplication] = await Promise.all([
+  const [existingMessageCount, sharedDeal] = await Promise.all([
     prisma.message.count({
       where: {
         OR: [
@@ -110,21 +110,10 @@ if (params.with === userId) throw AppError.badRequest("Cannot message yourself")
       },
       select: { id: true },
     }),
-    prisma.application.findFirst({
-      where: {
-        OR: [
-          { influencer: { userId }, campaign: { brand: { userId: params.with } } },
-          { campaign: { brand: { userId } }, influencer: { userId: params.with } },
-        ],
-        status: { in: ["PENDING", "SHORTLISTED", "SELECTED"] },
-        deletedAt: null,
-      },
-      select: { id: true },
-    }),
   ]);
 
-  if (!isAdmin && existingMessageCount === 0 && !sharedDeal && !sharedApplication) {
-    throw AppError.badRequest("You can only message users you have a deal or campaign application with");
+  if (!isAdmin && existingMessageCount === 0 && !sharedDeal) {
+    throw AppError.badRequest("You can only message users you have a deal with");
   }
 
 return {
@@ -188,34 +177,21 @@ async function validateDealAccess(userId: string, receiverId: string, dealId?: s
         throw AppError.badRequest("Cannot send messages because this deal is completed or cancelled.");
       }
     } else {
-      const [activeDeal, activeApplication] = await Promise.all([
-        prisma.deal.findFirst({
-          where: {
-            OR: [
-              { influencer: { userId }, brand: { userId: receiverId } },
-              { brand: { userId }, influencer: { userId: receiverId } },
-            ],
-            status: {
-              in: ACTIVE_DEAL_STATUSES as DealStatus[],
-            },
-            deletedAt: null,
+      const activeDeal = await prisma.deal.findFirst({
+        where: {
+          OR: [
+            { influencer: { userId }, brand: { userId: receiverId } },
+            { brand: { userId }, influencer: { userId: receiverId } },
+          ],
+          status: {
+            in: ACTIVE_DEAL_STATUSES as DealStatus[],
           },
-          select: { id: true },
-        }),
-        prisma.application.findFirst({
-          where: {
-            OR: [
-              { influencer: { userId }, campaign: { brand: { userId: receiverId } } },
-              { campaign: { brand: { userId } }, influencer: { userId: receiverId } },
-            ],
-            status: { in: ["PENDING", "SHORTLISTED", "SELECTED"] },
-            deletedAt: null,
-          },
-          select: { id: true },
-        }),
-      ]);
-      if (!activeDeal && !activeApplication) {
-        throw AppError.badRequest("Cannot send messages because there are no active deals or campaign applications between you and this user.");
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+      if (!activeDeal) {
+        throw AppError.badRequest("Cannot send messages because there is no active deal between you and this user.");
       }
     }
   }
@@ -227,34 +203,21 @@ export class MessageService {
     const { isAdmin: senderIsAdmin } = await getUserRole(userId);
     if (senderIsAdmin) return true;
 
-    const [activeDeal, activeApplication] = await Promise.all([
-      prisma.deal.findFirst({
-        where: {
-          OR: [
-            { influencer: { userId }, brand: { userId: targetUserId } },
-            { brand: { userId }, influencer: { userId: targetUserId } },
-          ],
-          status: {
-            in: ACTIVE_DEAL_STATUSES as DealStatus[],
-          },
-          deletedAt: null,
+    const activeDeal = await prisma.deal.findFirst({
+      where: {
+        OR: [
+          { influencer: { userId }, brand: { userId: targetUserId } },
+          { brand: { userId }, influencer: { userId: targetUserId } },
+        ],
+        status: {
+          in: ACTIVE_DEAL_STATUSES as DealStatus[],
         },
-        select: { id: true },
-      }),
-      prisma.application.findFirst({
-        where: {
-          OR: [
-            { influencer: { userId }, campaign: { brand: { userId: targetUserId } } },
-            { campaign: { brand: { userId } }, influencer: { userId: targetUserId } },
-          ],
-          status: { in: ["PENDING", "SHORTLISTED", "SELECTED"] },
-          deletedAt: null,
-        },
-        select: { id: true },
-      }),
-    ]);
+        deletedAt: null,
+      },
+      select: { id: true },
+    });
 
-    return Boolean(activeDeal || activeApplication);
+    return Boolean(activeDeal);
   }
 
   static async listMessages(
@@ -313,33 +276,20 @@ take: params.limit,
         deal && ACTIVE_DEAL_STATUSES.includes(deal.status),
       );
     } else if (params.with) {
-      const [activeDeal, activeApplication] = await Promise.all([
-        prisma.deal.findFirst({
-          where: {
-            OR: [
-              { influencer: { userId }, brand: { userId: params.with } },
-              { brand: { userId }, influencer: { userId: params.with } },
-            ],
-            status: {
-              in: ACTIVE_DEAL_STATUSES as DealStatus[],
-            },
-            deletedAt: null,
+      const activeDeal = await prisma.deal.findFirst({
+        where: {
+          OR: [
+            { influencer: { userId }, brand: { userId: params.with } },
+            { brand: { userId }, influencer: { userId: params.with } },
+          ],
+          status: {
+            in: ACTIVE_DEAL_STATUSES as DealStatus[],
           },
-          select: { id: true },
-        }),
-        prisma.application.findFirst({
-          where: {
-            OR: [
-              { influencer: { userId }, campaign: { brand: { userId: params.with } } },
-              { campaign: { brand: { userId } }, influencer: { userId: params.with } },
-            ],
-            status: { in: ["PENDING", "SHORTLISTED", "SELECTED"] },
-            deletedAt: null,
-          },
-          select: { id: true },
-        }),
-      ]);
-      hasActiveDeal = Boolean(activeDeal || activeApplication);
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+      hasActiveDeal = Boolean(activeDeal);
       if (activeDeal) {
         resolvedDealId = activeDeal.id;
       }
@@ -362,7 +312,7 @@ const { isAdmin } = await getUserRole(userId);
 // Safety cap to prevent memory bomb - fetch up to 1000 distinct partners max
 // Pagination happens in JS after this, so we need enough for the requested page
 const maxPartners = 1000;
-const [sent, received, userDeals, userApps] = await Promise.all([
+const [sent, received, userDeals] = await Promise.all([
   prisma.message.findMany({
     where: { senderId: userId },
     select: { receiverId: true },
@@ -389,29 +339,10 @@ const [sent, received, userDeals, userApps] = await Promise.all([
     },
     take: maxPartners,
   }),
-  prisma.application.findMany({
-    where: {
-      OR: [
-        { campaign: { brand: { userId } } },
-        { influencer: { userId } },
-      ],
-      status: { in: ["PENDING", "SHORTLISTED", "SELECTED"] },
-      deletedAt: null,
-    },
-    select: {
-      campaign: { select: { brand: { select: { userId: true } } } },
-      influencer: { select: { userId: true } },
-    },
-    take: maxPartners,
-  }),
 ]);
 
 const dealPartnerIds = userDeals
   .map((d) => (d.brand?.userId === userId ? d.influencer.userId : d.brand?.userId))
-  .filter((id): id is string => Boolean(id && id !== userId));
-
-const appPartnerIds = userApps
-  .map((a) => (a.campaign?.brand?.userId === userId ? a.influencer.userId : a.campaign?.brand?.userId))
   .filter((id): id is string => Boolean(id && id !== userId));
 
 const blocks = await prisma.userBlock.findMany({
@@ -437,7 +368,6 @@ new Set([
 ...sent.map((message) => message.receiverId),
 ...received.map((message) => message.senderId),
 ...dealPartnerIds,
-...appPartnerIds,
 ]),
 ).filter((partnerId) => !blockedUserIds.has(partnerId));
 

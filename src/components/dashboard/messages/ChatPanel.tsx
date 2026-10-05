@@ -387,7 +387,7 @@ function ChatInputArea({ state }: Readonly<ChatPanelProps>) {
       <div className="p-4 border-t border-border bg-card shrink-0">
         <div className="font-semibold text-xs text-pending px-4 py-3 bg-pending-muted border border-pending-border rounded-xl text-center flex items-center justify-center gap-2">
           <Lock className="w-3.5 h-3.5" />
-          Messaging is enabled once an application or campaign deal is initiated.
+          Messaging is locked — you can only message users who have an active deal with you.
         </div>
       </div>
     );
