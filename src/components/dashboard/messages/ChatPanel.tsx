@@ -32,9 +32,9 @@ function TypingBubble({ avatarSrc, name }: { avatarSrc?: string | null | undefin
   return (
     <div className="flex items-end gap-2 justify-start">
       {/* Peer mini-avatar */}
-      <div className="w-6 h-6 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-[10px] font-bold text-foreground shrink-0">
+      <div className="relative w-6 h-6 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-[10px] font-bold text-foreground shrink-0">
         {avatarSrc ? (
-          <Image src={avatarSrc} alt={name || "User"} fill unoptimized className="object-cover" />
+          <Image src={avatarSrc} alt={name || "User"} width={24} height={24} unoptimized className="object-cover w-full h-full rounded-full" />
         ) : (
           (name || "U").charAt(0).toUpperCase()
         )}
@@ -90,9 +90,10 @@ function ChatHeader({ state }: Readonly<ChatPanelProps>) {
                 <Image
                   src={selectedChat.avatar}
                   alt={selectedChat.name || "User avatar"}
-                  fill
+                  width={40}
+                  height={40}
                   unoptimized
-                  className="object-cover"
+                  className="object-cover w-full h-full rounded-full"
                 />
               ) : (
                 <span
@@ -294,14 +295,15 @@ function MessageList({ state }: Readonly<ChatPanelProps>) {
               >
                 {/* Peer avatar (only on received messages) */}
                 {!msg.isMe && (
-                  <div className="w-6 h-6 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-[10px] font-bold text-foreground shrink-0 mb-1">
+                  <div className="relative w-6 h-6 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-[10px] font-bold text-foreground shrink-0 mb-1">
                     {selectedChat?.avatar ? (
                       <Image
                         src={selectedChat.avatar}
                         alt={selectedChat.name || "User"}
-                        fill
+                        width={24}
+                        height={24}
                         unoptimized
-                        className="object-cover"
+                        className="object-cover w-full h-full rounded-full"
                       />
                     ) : (
                       (selectedChat?.name || "U").charAt(0).toUpperCase()

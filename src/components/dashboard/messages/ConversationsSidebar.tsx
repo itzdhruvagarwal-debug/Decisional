@@ -183,14 +183,15 @@ export function ConversationsSidebar({ state }: Readonly<ConversationsSidebarPro
                   >
                     {/* ── Avatar with status indicators ── */}
                     <div className="relative shrink-0">
-                      <div className="w-11 h-11 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-foreground font-bold text-sm">
+                      <div className="relative w-11 h-11 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-foreground font-bold text-sm">
                         {conv.avatar ? (
                           <Image
                             src={conv.avatar}
                             alt={conv.name || "User avatar"}
-                            fill
+                            width={44}
+                            height={44}
                             unoptimized
-                            className="object-cover"
+                            className="object-cover w-full h-full rounded-full"
                           />
                         ) : (
                           <span
