@@ -391,26 +391,40 @@ export function DealContractCard({
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-wrap pt-1 sm:pt-0">
                       {onOpenAddressModal && (
                         <div className="flex flex-col items-start gap-1">
-                          <button
-                            type="button"
-                            onClick={onOpenAddressModal}
-                            disabled={isInfluencer && !addressEligibility.allowed}
-                            className="text-xs text-primary underline hover:opacity-80 font-semibold cursor-pointer inline-flex items-center gap-1 py-2 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <Package className="w-3.5 h-3.5" />
-                            <span>
-                              {isBrand
-                                ? "View Shipping Address"
-                                : deal.shippingAddress
-                                ? "View / Edit Address"
-                                : "Provide Shipping Address"}
-                            </span>
-                          </button>
-                          {isInfluencer && !addressEligibility.allowed && (
-                            <span className="text-[11px] text-amber-500 flex items-center gap-1">
-                              <AlertCircle className="w-3 h-3 flex-shrink-0" />
-                              {addressEligibility.reason}
-                            </span>
+                          {isBrand ? (
+                            deal.shippingAddress ? (
+                              <span className="text-xs text-verified font-semibold inline-flex items-center gap-1.5 py-2 min-h-[44px]">
+                                <ShieldCheck className="w-4 h-4 text-verified" />
+                                <span>Delivery Address Confirmed (Private)</span>
+                              </span>
+                            ) : (
+                              <span className="text-xs text-amber-500 font-semibold inline-flex items-center gap-1.5 py-2 min-h-[44px]">
+                                <Clock className="w-4 h-4 text-amber-500" />
+                                <span>Waiting for Creator's Address</span>
+                              </span>
+                            )
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={onOpenAddressModal}
+                                disabled={!addressEligibility.allowed}
+                                className="text-xs text-primary underline hover:opacity-80 font-semibold cursor-pointer inline-flex items-center gap-1 py-2 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <Package className="w-3.5 h-3.5" />
+                                <span>
+                                  {deal.shippingAddress
+                                    ? "View / Edit Delivery Address"
+                                    : "Provide Delivery Address"}
+                                </span>
+                              </button>
+                              {!addressEligibility.allowed && (
+                                <span className="text-[11px] text-amber-500 flex items-center gap-1">
+                                  <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                                  {addressEligibility.reason}
+                                </span>
+                              )}
+                            </>
                           )}
                         </div>
                       )}

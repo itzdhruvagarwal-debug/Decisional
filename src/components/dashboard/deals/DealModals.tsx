@@ -6,7 +6,7 @@ import { Modal, Button, Input, Textarea, type ToastType } from "@/components/ui"
 import { DealDetail, getFlatDeliverablesList, ContentUrlEntry } from "./DealDetailHelpers";
 import { checkRevisionRequestEligibility } from "@/lib/action-eligibility";
 import { ShipmentTrackingModal } from "./ShipmentTrackingModal";
-import { Truck, Package, Sparkles } from "lucide-react";
+import { Truck, Package, Sparkles, ShieldCheck } from "lucide-react";
 
 interface DealModalsProps {
   readonly showAddressModal: boolean;
@@ -110,86 +110,162 @@ export function DealModals({
 <Modal
 open={showAddressModal}
 onClose={() => setShowAddressModal(false)}
-title="Shipping Address"
+title={isBrand ? "Delivery Address (Confidential)" : "Your Delivery Address"}
 maxWidth="500px"
 >
-<div className="grid gap-3 mb-4 grid-cols-1 sm:grid-cols-2">
-{([
-["fullName", "Full name"],
-["phone", "Phone"],
-["line1", "Address line 1"],
-["line2", "Address line 2"],
-["city", "City"],
-["state", "State"],
-["pinCode", "PIN code"],
-] as const).map(([field, label]) => {
-const isFullWidth = ["line1", "line2", "fullName"].includes(field);
-const addressRecord = (typeof deal.shippingAddress === "object" && deal.shippingAddress !== null && !Array.isArray(deal.shippingAddress)) ? (deal.shippingAddress as Record<string, unknown>) : null;
-const isEditing = ["PENDING_SIGNATURE", "PAYMENT_HELD", "ACTIVE"].includes(deal.status);
-
-return (
-<div
-  key={field}
-  className={isFullWidth ? "col-span-2" : "col-span-1"}
->
-  {isEditing ? (
-    <Input
-      label={label}
-      id={`shipping-${field}`}
-      value={shippingForm[field]}
-      onChange={(e) =>
-        setShippingForm({
-          ...shippingForm,
-          [field]: e.target.value,
-        })
-      }
-      fullWidth
-    />
-  ) : (
-    <div>
-      <div className="text-xs text-secondary">{label}</div>
-      <div className="font-semibold text-sm">
-        {typeof addressRecord?.[field] === "string" && addressRecord[field] ? String(addressRecord[field]) : "Not provided"}
+{isBrand ? (
+  <div className="space-y-4">
+    <div className="p-4 rounded-xl bg-verified-muted border border-verified-border text-foreground space-y-2">
+      <div className="flex items-center gap-2 font-bold text-sm text-verified">
+        <ShieldCheck className="w-5 h-5 text-verified shrink-0" />
+        <span>100% Confidential Delivery Address</span>
       </div>
+      <p className="text-xs text-muted-foreground leading-relaxed">
+        To protect creator privacy, physical street address and personal contact details are encrypted and kept confidential.
+        Our automated Shiprocket integration dispatches products directly from your warehouse to the creator without exposing private data.
+      </p>
     </div>
-  )}
-</div>
-);
-})}
-</div>
+    {Boolean(deal.shippingAddress) && (
+      <div className="p-3 rounded-xl bg-muted border border-border text-xs flex justify-between items-center">
+        <span className="text-muted-foreground">Destination Hub:</span>
+        <span className="font-semibold text-foreground">
+          {(deal.shippingAddress as Record<string, unknown>).city
+            ? `${String((deal.shippingAddress as Record<string, unknown>).city)}, ${String((deal.shippingAddress as Record<string, unknown>).state || "India")}`
+            : "Address Verified & On File"}
+        </span>
+      </div>
+    )}
+    <Button
+      variant="secondary"
+      onClick={() => setShowAddressModal(false)}
+      className="w-full"
+    >
+      Close
+    </Button>
+  </div>
+) : (
+  <div>
+    <div className="p-3 rounded-xl bg-verified-muted border border-verified-border text-xs flex items-center gap-2 text-foreground mb-4">
+      <ShieldCheck className="w-4 h-4 text-verified shrink-0" />
+      <span className="text-muted-foreground">
+        Your address is <strong className="text-foreground">strictly confidential</strong> and is never revealed to the brand.
+      </span>
+    </div>
 
-{["PENDING_SIGNATURE", "PAYMENT_HELD", "ACTIVE"].includes(deal.status) && addressValidationError && (
-  <p className="text-xs text-amber-500 mb-3 font-medium flex items-center gap-1.5">
-    <span>⚠️</span>
-    <span>{addressValidationError}</span>
-  </p>
-)}
+    <div className="flex justify-between items-center mb-3">
+      <span className="text-xs font-semibold text-foreground">Delivery Details</span>
+      <button
+        type="button"
+        onClick={async () => {
+          try {
+            const res = await fetch("/api/settings");
+            if (res.ok) {
+              const data = await res.json();
+              if (data.profile?.address) {
+                setShippingForm({
+                  fullName: data.profile.displayName || shippingForm.fullName,
+                  phone: data.user?.phone || shippingForm.phone,
+                  line1: data.profile.address,
+                  line2: "",
+                  city: data.profile.city || shippingForm.city,
+                  state: data.profile.state || shippingForm.state,
+                  pinCode: data.profile.pinCode || shippingForm.pinCode,
+                  country: "India",
+                });
+                showToast("success", "Loaded address from your saved profile!");
+                return;
+              }
+            }
+            showToast("info", "No saved address found in profile. Please enter below.");
+          } catch {
+            showToast("error", "Could not load profile address.");
+          }
+        }}
+        className="text-xs text-primary font-bold hover:underline cursor-pointer inline-flex items-center gap-1"
+      >
+        <span>⚡ Use Saved Profile Address</span>
+      </button>
+    </div>
 
-<div className="flex gap-3">
-<Button
-  variant="secondary"
-  onClick={() => setShowAddressModal(false)}
-  className="flex-1"
->
-  Close
-</Button>
-{["PENDING_SIGNATURE", "PAYMENT_HELD", "ACTIVE"].includes(deal.status) && (
-  <Button
-    variant="primary"
-    onClick={async () => {
-      if (addressValidationError) return;
-      await handleAction("update_shipping", {
-        shippingAddress: shippingForm,
-      });
-      setShowAddressModal(false);
-    }}
-    disabled={isSubmitting || Boolean(addressValidationError)}
-    className="flex-1"
-  >
-    Save Address
-  </Button>
+    <div className="grid gap-3 mb-4 grid-cols-1 sm:grid-cols-2">
+      {([
+        ["fullName", "Full name"],
+        ["phone", "Phone"],
+        ["line1", "Address line 1"],
+        ["line2", "Address line 2"],
+        ["city", "City"],
+        ["state", "State"],
+        ["pinCode", "PIN code"],
+      ] as const).map(([field, label]) => {
+        const isFullWidth = ["line1", "line2", "fullName"].includes(field);
+        const addressRecord = (typeof deal.shippingAddress === "object" && deal.shippingAddress !== null && !Array.isArray(deal.shippingAddress)) ? (deal.shippingAddress as Record<string, unknown>) : null;
+        const isEditing = ["PENDING_SIGNATURE", "PAYMENT_HELD", "ACTIVE"].includes(deal.status);
+
+        return (
+          <div
+            key={field}
+            className={isFullWidth ? "col-span-2" : "col-span-1"}
+          >
+            {isEditing ? (
+              <Input
+                label={label}
+                id={`shipping-${field}`}
+                value={shippingForm[field]}
+                onChange={(e) =>
+                  setShippingForm({
+                    ...shippingForm,
+                    [field]: e.target.value,
+                  })
+                }
+                fullWidth
+              />
+            ) : (
+              <div>
+                <div className="text-xs text-secondary">{label}</div>
+                <div className="font-semibold text-sm">
+                  {typeof addressRecord?.[field] === "string" && addressRecord[field] ? String(addressRecord[field]) : "Not provided"}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+
+    {["PENDING_SIGNATURE", "PAYMENT_HELD", "ACTIVE"].includes(deal.status) && addressValidationError && (
+      <p className="text-xs text-amber-500 mb-3 font-medium flex items-center gap-1.5">
+        <span>⚠️</span>
+        <span>{addressValidationError}</span>
+      </p>
+    )}
+
+    <div className="flex gap-3">
+      <Button
+        variant="secondary"
+        onClick={() => setShowAddressModal(false)}
+        className="flex-1"
+      >
+        Close
+      </Button>
+      {["PENDING_SIGNATURE", "PAYMENT_HELD", "ACTIVE"].includes(deal.status) && (
+        <Button
+          variant="primary"
+          onClick={async () => {
+            if (addressValidationError) return;
+            await handleAction("update_shipping", {
+              shippingAddress: shippingForm,
+            });
+            setShowAddressModal(false);
+          }}
+          disabled={isSubmitting || Boolean(addressValidationError)}
+          className="flex-1"
+        >
+          Save Address
+        </Button>
+      )}
+    </div>
+  </div>
 )}
-</div>
 </Modal>
 
 <Modal
@@ -438,15 +514,20 @@ className="flex-1"
             </p>
           </div>
 
-          <Input
-            label="Pickup Warehouse / Location Name"
-            id="shiprocket-pickup-location"
-            type="text"
-            placeholder="e.g. Primary or Main Warehouse"
-            value={shiprocketForm.pickupLocation}
-            onChange={(e) => setShiprocketForm({ ...shiprocketForm, pickupLocation: e.target.value })}
-            fullWidth
-          />
+          <div>
+            <Input
+              label="Pickup Warehouse / Location Name"
+              id="shiprocket-pickup-location"
+              type="text"
+              placeholder="e.g. Primary or Main Warehouse"
+              value={shiprocketForm.pickupLocation}
+              onChange={(e) => setShiprocketForm({ ...shiprocketForm, pickupLocation: e.target.value })}
+              fullWidth
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">
+              🔒 Uses your profile pickup address. Neither party's personal address is revealed.
+            </p>
+          </div>
 
           <div className="grid grid-cols-2 gap-3">
             <Input

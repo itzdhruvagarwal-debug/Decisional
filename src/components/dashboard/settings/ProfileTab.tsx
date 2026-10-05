@@ -25,6 +25,7 @@ import {
   Briefcase,
   Plus,
   Smartphone,
+  ShieldCheck,
 } from "lucide-react";
 import StoryShareModal from "@/components/share/StoryShareModal";
 
@@ -543,7 +544,7 @@ export default function ProfileTab({
         </div>
       </div>
 
-      {/* 4. Location & Demographics Card */}
+      {/* 4. Location & Logistics Address Card */}
       <div className="p-5 sm:p-6 rounded-2xl border border-border bg-card shadow-xs space-y-4">
         <div className="flex items-center gap-3 pb-3 border-b border-border">
           <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
@@ -551,13 +552,40 @@ export default function ProfileTab({
           </div>
           <div>
             <h3 className="text-sm sm:text-base font-bold text-foreground">
-              Location &amp; Demographics
+              {isBrand(user.userType)
+                ? "Location & Warehouse / Pickup Address"
+                : "Location & Product Delivery Address"}
             </h3>
             <p className="text-xs text-muted-foreground">
-              Geographical targeting for regional brand campaigns and localized deals
+              {isBrand(user.userType)
+                ? "Registered warehouse address used for automated 1-click Shiprocket courier pickups"
+                : "Geographical location and confidential delivery address for campaign sample seeding deals"}
             </p>
           </div>
         </div>
+
+        {/* Confidentiality Guarantee Banner */}
+        {isBrand(user.userType) ? (
+          <div className="p-3.5 rounded-xl bg-primary/10 border border-primary/20 text-xs flex items-start gap-2.5 text-foreground">
+            <ShieldCheck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-semibold text-primary">Confidential Pickup Location</p>
+              <p className="text-muted-foreground text-[11px] leading-relaxed">
+                Your warehouse and pickup address is used strictly for automated courier pickups (Delhivery, BlueDart, DTDC via Shiprocket). Creators never see your warehouse address.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="p-3.5 rounded-xl bg-verified-muted border border-verified-border text-xs flex items-start gap-2.5 text-foreground">
+            <ShieldCheck className="w-4 h-4 text-verified shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-semibold text-verified">100% Confidential Delivery Address</p>
+              <p className="text-muted-foreground text-[11px] leading-relaxed">
+                Your street address and PIN code are securely stored and NEVER shared with brands. When you accept product deals, our automated logistics partners deliver directly to you with zero data exposure.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -602,9 +630,17 @@ export default function ProfileTab({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               id="profile-address-input"
-              label="Address (Street / Building)"
+              label={
+                isBrand(user.userType)
+                  ? "Warehouse / Pickup Street Address"
+                  : "Default Delivery Street Address"
+              }
               type="text"
-              placeholder="Street Address or Area"
+              placeholder={
+                isBrand(user.userType)
+                  ? "Warehouse / Office Street Address & Landmark"
+                  : "House / Flat No., Street, Area"
+              }
               value={profile.address || ""}
               onChange={(e) =>
                 setProfile({ ...profile, address: e.target.value })
@@ -613,7 +649,11 @@ export default function ProfileTab({
             />
             <Input
               id="profile-pincode-input"
-              label="PIN Code (6 digits)"
+              label={
+                isBrand(user.userType)
+                  ? "Pickup PIN Code (6 digits)"
+                  : "Delivery PIN Code (6 digits)"
+              }
               type="text"
               placeholder="e.g. 400001"
               maxLength={6}

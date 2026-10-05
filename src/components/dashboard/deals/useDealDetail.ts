@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
@@ -91,6 +91,24 @@ export function useDealDetail(
     id && deal?.postUrl ? `/api/deals/${id}/engagement` : null,
     fetcher
   );
+
+  useEffect(() => {
+    if (deal?.shippingAddress && typeof deal.shippingAddress === "object") {
+      const addr = deal.shippingAddress as Record<string, unknown>;
+      if (!addr.isConfidential) {
+        setShippingAddress({
+          fullName: String(addr.fullName || ""),
+          phone: String(addr.phone || ""),
+          line1: String(addr.line1 || ""),
+          line2: String(addr.line2 || ""),
+          city: String(addr.city || ""),
+          state: String(addr.state || ""),
+          pinCode: String(addr.pinCode || ""),
+          country: String(addr.country || "India"),
+        });
+      }
+    }
+  }, [deal?.shippingAddress]);
 
   const engagement: EngagementReport | null = engData?.report || null;
   const engagementDisclaimer = engData?.report?.hasEstimatedData

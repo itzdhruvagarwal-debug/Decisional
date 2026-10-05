@@ -211,6 +211,48 @@ if (reserveResult.count === 0) {
 throw AppError.badRequest("Insufficient held campaign funds or brand wallet is frozen.");
 }
 
+  // Auto-populate delivery address from creator's saved profile if available
+  let initialShippingAddress: Prisma.InputJsonValue | undefined = undefined;
+  let initialFulfillmentStatus: "ADDRESS_PENDING" | "READY_TO_DISPATCH" | "NOT_REQUIRED" = params.requiresProduct
+    ? "ADDRESS_PENDING"
+    : "NOT_REQUIRED";
+
+  if (params.requiresProduct) {
+    const creatorProfile = await tx.influencerProfile.findUnique({
+      where: { id: params.influencerId },
+      select: {
+        displayName: true,
+        address: true,
+        city: true,
+        state: true,
+        pinCode: true,
+        user: { select: { phone: true } },
+      },
+    });
+
+    if (
+      creatorProfile?.address &&
+      creatorProfile.city &&
+      creatorProfile.state &&
+      creatorProfile.pinCode &&
+      /^\d{6}$/.test(creatorProfile.pinCode.trim())
+    ) {
+      initialShippingAddress = {
+        fullName: creatorProfile.displayName || "Creator",
+        phone: creatorProfile.user?.phone || "9999999999",
+        line1: creatorProfile.address.trim(),
+        line2: null,
+        city: creatorProfile.city.trim(),
+        state: creatorProfile.state.trim(),
+        pinCode: creatorProfile.pinCode.trim(),
+        country: "India",
+        submittedAt: new Date().toISOString(),
+        autoFilledFromProfile: true,
+      };
+      initialFulfillmentStatus = "READY_TO_DISPATCH";
+    }
+  }
+
 const deal = await tx.deal.create({
 data: {
 campaignId: params.campaignId,
@@ -226,9 +268,8 @@ requiresProduct: params.requiresProduct,
 productName: params.productName,
 productValue: params.productValue,
 productHandlingFee: params.productHandlingFee,
-productFulfillmentStatus: params.requiresProduct
-? "ADDRESS_PENDING"
-: "NOT_REQUIRED",
+productFulfillmentStatus: initialFulfillmentStatus,
+...(initialShippingAddress ? { shippingAddress: initialShippingAddress } : {}),
 submissionDeadline: params.submissionDeadline,
 postingDeadline: params.postingDeadline,
 signDeadline: new Date(Date.now() + 48 * 60 * 60 * 1000),

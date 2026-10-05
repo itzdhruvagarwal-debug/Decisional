@@ -36,6 +36,20 @@ throw AppError.badRequest("Shipping address cannot be changed after dispatch");
       },
     });
 
+    // Keep creator's profile address synchronized for all future product deals
+    const parsedAddr = shippingAddress as Record<string, string>;
+    if (parsedAddr.line1 && parsedAddr.city && parsedAddr.state && parsedAddr.pinCode) {
+      await tx.influencerProfile.updateMany({
+        where: { userId },
+        data: {
+          address: parsedAddr.line1 + (parsedAddr.line2 ? `, ${parsedAddr.line2}` : ""),
+          city: parsedAddr.city,
+          state: parsedAddr.state,
+          pinCode: parsedAddr.pinCode,
+        },
+      });
+    }
+
 if (deal.brand?.userId) {
 await NotificationService.createNotification({
 userId: deal.brand.userId,
@@ -123,7 +137,17 @@ export async function createShiprocketShipment(
   const deal = await prisma.deal.findUnique({
     where: { id: dealId },
     include: {
-      brand: { select: { id: true, userId: true, companyName: true } },
+      brand: {
+        select: {
+          id: true,
+          userId: true,
+          companyName: true,
+          address: true,
+          city: true,
+          state: true,
+          pinCode: true,
+        },
+      },
       influencer: {
         select: {
           id: true,
@@ -171,6 +195,16 @@ export async function createShiprocketShipment(
   }
 
   // Step 2: Call Shiprocket API to create order, assign courier AWB, fetch label + rate
+  // Default pickup address from brand profile if not explicitly specified
+  const effectivePickupLocation =
+    options?.pickupLocation ||
+    deal.brand?.city ||
+    "Primary Warehouse";
+  const effectivePickupPincode =
+    options?.pickupPincode ||
+    deal.brand?.pinCode ||
+    undefined;
+
   const { createCompleteShipment } = await import("@/lib/shiprocket");
   const shipment = await createCompleteShipment({
     dealId: deal.id,
@@ -179,8 +213,8 @@ export async function createShiprocketShipment(
     productValuePaise: deal.productValue || 10000,
     shippingAddress,
     creatorEmail: deal.influencer.user?.email || undefined,
-    pickupLocation: options?.pickupLocation,
-    pickupPincode: options?.pickupPincode,
+    pickupLocation: effectivePickupLocation,
+    pickupPincode: effectivePickupPincode,
     length: options?.length,
     breadth: options?.breadth,
     height: options?.height,

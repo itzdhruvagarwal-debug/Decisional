@@ -88,7 +88,24 @@ export const GET = apiWrapper(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    return NextResponse.json({ deal });
+    // Confidentiality Protection: Mask shipping address details for brand users
+    let sanitizedDeal = deal;
+    if (isBrand && !isAdmin(session.user.userType) && deal.shippingAddress) {
+      const raw = deal.shippingAddress as Record<string, unknown>;
+      sanitizedDeal = {
+        ...deal,
+        shippingAddress: {
+          city: raw.city || null,
+          state: raw.state || null,
+          pinCode: raw.pinCode ? `${String(raw.pinCode).slice(0, 3)}***` : null,
+          country: raw.country || "India",
+          isConfidential: true,
+          submittedAt: raw.submittedAt || null,
+        },
+      };
+    }
+
+    return NextResponse.json({ deal: sanitizedDeal });
   },
   { rateLimit: { limit: 120, window: 60 } },
 );
