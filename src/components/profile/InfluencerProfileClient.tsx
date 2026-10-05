@@ -1108,7 +1108,8 @@ export default function InfluencerProfileClient({
         defaultTab="profile"
         profile={{
           displayName: profile.displayName,
-          username: profile.instagramHandle || profile.displayName.toLowerCase().replace(/[^a-z0-9]/g, ""),
+          // Only use instagramHandle as URL slug — displayName can contain spaces causing 404
+          username: profile.instagramHandle?.replace(/^@/, "").toLowerCase() || undefined,
           avatar: profile.avatar,
           trustScore: profile.trustScore,
           categories: profile.categories,

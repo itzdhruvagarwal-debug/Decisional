@@ -167,6 +167,8 @@ export async function getPublicCreatorProfile(identifier: string): Promise<Influ
         { instagramHandle: { equals: cleanHandle, mode: "insensitive" } },
         { id: cleanHandle },
         { userId: cleanHandle },
+        // Fallback: match displayName for legacy links (e.g. /creator/Aura%20Lifestyle%20Brands%20Ltd)
+        { displayName: { equals: cleanHandle, mode: "insensitive" } },
       ],
     },
     include: {

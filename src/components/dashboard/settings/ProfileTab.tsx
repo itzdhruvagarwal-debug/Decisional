@@ -823,13 +823,12 @@ export default function ProfileTab({
       <StoryShareModal
         open={storyModalOpen}
         onClose={() => setStoryModalOpen(false)}
-        defaultTab={referralCode ? "referral" : "profile"}
+        defaultTab={referralCode && !profile.instagramHandle ? "referral" : "profile"}
         referralCode={referralCode}
         profile={{
           displayName: profile.displayName || user.name || "Vyapar Creator",
-          username:
-            profile.instagramHandle ||
-            (profile.displayName || user.name || "creator").toLowerCase().replace(/[^a-z0-9]/g, ""),
+          // Only use instagramHandle as URL slug — displayName can contain spaces causing 404
+          username: profile.instagramHandle?.replace(/^@/, "").toLowerCase() || undefined,
           avatar: profile.profileImage,
           trustScore: 850,
           categories: profile.categories,

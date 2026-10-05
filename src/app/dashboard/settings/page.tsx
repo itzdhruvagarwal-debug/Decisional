@@ -228,10 +228,11 @@ export default function SettingsPage() {
   }, [profile, isKycVerified]);
 
   const publicProfileUrl = useMemo(() => {
-    const handle = profile?.instagramHandle || user?.name || profile?.displayName;
-    if (!handle) return "/creator/me";
+    // Only use instagramHandle (slug-safe) — never use displayName/user.name which may have spaces
+    const handle = profile?.instagramHandle;
+    if (!handle) return null; // brand users or profiles with no IG handle have no public creator URL
     return `/creator/${encodeURIComponent(handle.replace(/^@/, "").toLowerCase())}`;
-  }, [profile, user]);
+  }, [profile]);
 
   // Loading skeleton
   if (loading) {
@@ -375,16 +376,18 @@ export default function SettingsPage() {
                 <Smartphone className="w-3.5 h-3.5" />
                 <span>Story</span>
               </button>
-              <Link
-                href={publicProfileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg bg-card border border-border text-foreground font-bold text-[11px] hover:bg-muted transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
-                title="Preview public profile"
-              >
-                <span>View</span>
-                <ExternalLink className="w-3 h-3 text-muted-foreground" />
-              </Link>
+              {publicProfileUrl && (
+                <Link
+                  href={publicProfileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg bg-card border border-border text-foreground font-bold text-[11px] hover:bg-muted transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
+                  title="Preview public profile"
+                >
+                  <span>View</span>
+                  <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -527,19 +530,18 @@ export default function SettingsPage() {
       <StoryShareModal
         open={storyModalOpen}
         onClose={() => setStoryModalOpen(false)}
-        defaultTab="profile"
+        defaultTab={referralCode && !profile?.instagramHandle ? "referral" : "profile"}
         referralCode={referralCode}
-        profile={{
+        profile={profile?.instagramHandle ? {
           displayName: profile?.displayName || user?.name || "Vyapar Creator",
-          username:
-            profile?.instagramHandle ||
-            (profile?.displayName || user?.name || "creator").toLowerCase().replace(/[^a-z0-9]/g, ""),
+          // Only pass username if we have a clean IG handle — avoid displayName with spaces
+          username: profile.instagramHandle.replace(/^@/, "").toLowerCase(),
           avatar: profile?.profileImage,
           trustScore: 850,
           categories: profile?.categories,
           city: profile?.city,
           isKycVerified: true,
-        }}
+        } : undefined}
       />
     </DashboardShell>
   );
