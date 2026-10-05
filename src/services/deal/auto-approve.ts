@@ -126,7 +126,7 @@ error,
 }
 }
 
-sendAutoApproveEmails(deal).catch(() => {});
+sendAutoApproveEmails(deal).catch((e) => logger.warn("auto-approve: sendAutoApproveEmails failed", { dealId: deal.id, error: e }));
 return true;
 }
 return false;

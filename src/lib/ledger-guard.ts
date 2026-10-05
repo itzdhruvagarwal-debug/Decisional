@@ -262,7 +262,14 @@ select: { id: true, userId: true }
 
 export async function scanAllWalletsForDrift(maxScanCount: number = 500): Promise<VerificationAnomaly[]> {
   const batchSize = 100;
-  let cursor = (await redis.get(LEDGER_SCAN_CURSOR_KEY)) || undefined;
+  // Redis cursor is an optimisation only — if Redis is down, start from the beginning
+  let cursor: string | undefined;
+  try {
+    cursor = (await redis.get(LEDGER_SCAN_CURSOR_KEY)) ?? undefined;
+  } catch (redisErr) {
+    logger.warn("ledger-guard: Redis cursor read failed, starting scan from beginning", { error: redisErr });
+    cursor = undefined;
+  }
   let totalScanned = 0;
 
   const anomalies: VerificationAnomaly[] = [];
@@ -287,10 +294,14 @@ export async function scanAllWalletsForDrift(maxScanCount: number = 500): Promis
     }
   }
 
-  if (cursor) {
-    await redis.setex(LEDGER_SCAN_CURSOR_KEY, 86400, cursor);
-  } else {
-    await redis.del(LEDGER_SCAN_CURSOR_KEY);
+  try {
+    if (cursor) {
+      await redis.setex(LEDGER_SCAN_CURSOR_KEY, 86400, cursor);
+    } else {
+      await redis.del(LEDGER_SCAN_CURSOR_KEY);
+    }
+  } catch (redisErr) {
+    logger.warn("ledger-guard: Redis cursor write failed — next scan will re-scan from beginning", { error: redisErr });
   }
 
   return anomalies;

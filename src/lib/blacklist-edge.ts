@@ -7,52 +7,70 @@
 import { logger } from "./logger-client";
 
 let warned = false;
+// In-memory cache of known banned IPs at the edge runtime to maintain protection during transient Redis hiccups
+const edgeKnownBannedIps = new Set<string>();
 
 export async function isIpBannedEdge(ip: string): Promise<boolean> {
-const restUrl = process.env.UPSTASH_REDIS_REST_URL;
-const restToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+  // Fast path: Check local edge cache first
+  if (edgeKnownBannedIps.has(ip)) {
+    return true;
+  }
 
-if (!restUrl || !restToken) {
-if (!warned) {
-logger.warn(
-"WARNING: Upstash REST credentials (UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN) are missing. IP blacklist security feature is disabled."
-);
-warned = true;
-}
-// Upstash REST credentials not set. Fall back to false (allow)
-return false;
-}
+  const restUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const restToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-try {
-const key = `ban:ip:${ip}`;
-// Query Upstash Redis via HTTP GET
-const response = await fetch(`${restUrl}/get/${key}`, {
-headers: {
-Authorization: `Bearer ${restToken}`,
-},
-// Short timeout (1s) to avoid delaying request pipeline if Redis is slow
-signal: AbortSignal.timeout(1000),
-});
-
-  if (!response.ok) {
-    if (process.env.NODE_ENV === "production") {
-      logger.error(`Edge blacklist lookup HTTP error (${response.status}): failing closed in production for security`);
-      return true;
+  if (!restUrl || !restToken) {
+    if (!warned) {
+      logger.warn(
+        "WARNING: Upstash REST credentials (UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN) are missing. IP blacklist security feature is disabled."
+      );
+      warned = true;
     }
+    // Upstash REST credentials not set. Fall back to false (allow)
     return false;
   }
 
-  const data = await response.json();
-  // Upstash REST returns { result: "value" } or { result: null }
-  return data && data.result !== null;
-  } catch (err) {
-    if (process.env.NODE_ENV === "production") {
-      logger.error("Edge blacklist lookup failed (failing closed in production for security):", err);
-      // Fail closed in production for security, fail open in development/testing
-      return true;
-    } else {
-      logger.warn("Edge blacklist lookup skipped in development (failing open)");
-      return false;
+  try {
+    const key = `ban:ip:${ip}`;
+    // Query Upstash Redis via HTTP GET
+    const response = await fetch(`${restUrl}/get/${key}`, {
+      headers: {
+        Authorization: `Bearer ${restToken}`,
+      },
+      // Short timeout (1s) to avoid delaying request pipeline if Redis is slow
+      signal: AbortSignal.timeout(1000),
+    });
+
+    if (!response.ok) {
+      logger.warn(`Edge blacklist lookup HTTP status ${response.status}; falling back to local edge ban cache`, { ip });
+      return edgeKnownBannedIps.has(ip);
     }
+
+    const data = await response.json();
+    // Upstash REST returns { result: "value" } or { result: null }
+    const isBanned = Boolean(data && data.result !== null);
+    if (isBanned) {
+      // Remember banned IP in edge runtime
+      edgeKnownBannedIps.add(ip);
+      // Bound the memory size
+      if (edgeKnownBannedIps.size > 5000) {
+        const first = edgeKnownBannedIps.values().next().value;
+        if (first) edgeKnownBannedIps.delete(first);
+      }
+    }
+    return isBanned;
+  } catch (err) {
+    // Fail-safe resilience:
+    // If Redis encounters a transient timeout or network error, check if the IP was previously cached as banned.
+    // Never fail-closed globally across all clean IPs, which would cause an instant 100% platform-wide outage.
+    const isCachedBanned = edgeKnownBannedIps.has(ip);
+    if (isCachedBanned) {
+      return true;
+    }
+    logger.warn("Edge blacklist lookup transiently failed; allowing legitimate request to preserve site availability", {
+      ip,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return false;
   }
 }

@@ -9,6 +9,7 @@ import {
   type PublicBrandReview,
 } from "@/lib/brand-profile";
 import { formatCurrency } from "@/lib/utils-client";
+import { copyToClipboard } from "@/lib/clipboard";
 import {
   Building2,
   ShieldCheck,
@@ -58,7 +59,7 @@ export function BrandProfileClient({
         // Fallback to clipboard
       }
     }
-    await navigator.clipboard.writeText(url);
+    await copyToClipboard(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

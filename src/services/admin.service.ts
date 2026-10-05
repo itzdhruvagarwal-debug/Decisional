@@ -374,35 +374,35 @@ break;
 
 if (auditAction) {
 await Promise.all([
-createActivityLog({
-userId: admin.id,
-action: auditAction as ActivityAction,
-entityType: "USER",
-entityId: userId,
-metadata: {
-adminEmail: admin.email,
-reason: data.reason,
-trustScoreAdjustment: data.trustScoreAdjustment,
-verificationLevel: data.verificationLevel,
-suspensionDays: data.suspensionDays,
-previousStatus: user.status,
-previousTrustScore: user.trustScore,
-},
-}).catch(() => {}),
-createAuditLog({
-actorId: admin.id,
-actionType: auditAction,
-entityType: "USER",
-entityId: userId,
-beforeJSON: { status: user.status, trustScore: user.trustScore },
-afterJSON: {
-action: data.action,
-reason: data.reason,
-trustScoreAdjustment: data.trustScoreAdjustment,
-verificationLevel: data.verificationLevel,
-suspensionDays: data.suspensionDays,
-},
-}).catch(() => {}),
+  createActivityLog({
+    userId: admin.id,
+    action: auditAction as ActivityAction,
+    entityType: "USER",
+    entityId: userId,
+    metadata: {
+      adminEmail: admin.email,
+      reason: data.reason,
+      trustScoreAdjustment: data.trustScoreAdjustment,
+      verificationLevel: data.verificationLevel,
+      suspensionDays: data.suspensionDays,
+      previousStatus: user.status,
+      previousTrustScore: user.trustScore,
+    },
+  }).catch((e) => logger.warn("admin.service: createActivityLog failed for admin action", { action: auditAction, adminId: admin.id, userId, error: e })),
+  createAuditLog({
+    actorId: admin.id,
+    actionType: auditAction,
+    entityType: "USER",
+    entityId: userId,
+    beforeJSON: { status: user.status, trustScore: user.trustScore },
+    afterJSON: {
+      action: data.action,
+      reason: data.reason,
+      trustScoreAdjustment: data.trustScoreAdjustment,
+      verificationLevel: data.verificationLevel,
+      suspensionDays: data.suspensionDays,
+    },
+  }).catch((e) => logger.warn("admin.service: createAuditLog failed for admin action", { action: auditAction, adminId: admin.id, userId, error: e })),
 ]);
 }
 

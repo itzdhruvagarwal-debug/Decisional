@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { logger } from "@/lib/logger-client";
 import {
   Mail,
   MessageSquare,
@@ -145,7 +146,9 @@ export default function NotificationPreferencesPanel({
 
   const handleRequestPushPermission = async () => {
     if (typeof window === "undefined" || !("Notification" in window)) {
-      alert("Push notifications are not supported in your browser.");
+      logger.warn("[NotificationPreferences] Push notifications not supported in this browser");
+      setSaveStatus("Push notifications are not supported in your browser.");
+      setTimeout(() => setSaveStatus(null), 5000);
       return;
     }
 
@@ -191,11 +194,11 @@ export default function NotificationPreferencesPanel({
             }
           }
         } catch (subErr) {
-          console.warn("Web Push registration error:", subErr);
+          logger.warn("[NotificationPreferences] Web Push subscription registration failed", { error: String(subErr) });
         }
       }
     } catch (err) {
-      console.warn("Push permission request error:", err);
+      logger.warn("[NotificationPreferences] Push permission request error", { error: String(err) });
     }
   };
 

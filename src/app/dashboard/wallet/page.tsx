@@ -27,6 +27,7 @@ import { useTokenRefreshGuard } from "@/hooks/useTokenRefreshGuard";
 import { useWallet } from "@/hooks/api/useWallet";
 import { formatCurrency, formatDateTime } from "@/lib/utils-client";
 import { checkWalletTopUpEligibility, checkWithdrawalEligibility } from "@/lib/action-eligibility";
+import { copyToClipboard } from "@/lib/clipboard";
 import {
   Button,
   Input,
@@ -133,11 +134,13 @@ function TransactionReceiptModal({ transaction, isOpen, onClose }: Readonly<Rece
   const isCredit = transaction.type === "CREDIT" || transaction.type === "REFUND";
   const formattedAmount = formatCurrency(transaction.amount);
 
-  const handleCopyId = () => {
+  const handleCopyId = async () => {
     if (!transaction.id) return;
-    navigator.clipboard.writeText(transaction.id);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const ok = await copyToClipboard(transaction.id);
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (

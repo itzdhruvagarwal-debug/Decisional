@@ -14,6 +14,7 @@ import {
   FileText,
   AlertCircle,
 } from "lucide-react";
+import { copyToClipboard } from "@/lib/clipboard";
 import { Modal, Button } from "@/components/ui";
 import { DealDetail } from "./DealDetailHelpers";
 import { apiClient } from "@/lib/api-client";
@@ -113,9 +114,10 @@ export function ShipmentTrackingModal({
     }
   }, [open, deal?.id, awbCode, courier, initialStatus, fetchLiveTracking]);
 
-  const copyAwb = () => {
-    if (awbCode && typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(awbCode);
+  const copyAwb = async () => {
+    if (!awbCode) return;
+    const ok = await copyToClipboard(awbCode);
+    if (ok) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }

@@ -152,7 +152,7 @@ distance,
 timeDiffHours,
 },
 ipAddress: ip,
-}).catch(() => {});
+  }).catch((e) => logger.warn("auth/helpers: createActivityLog failed for IMPOSSIBLE_TRAVEL security alert", { userId: user.id, ip, error: e }));
 
     if (user.isTwoFactorEnabled) {
       const code = (credentials as Record<string, string>).twoFactorCode;

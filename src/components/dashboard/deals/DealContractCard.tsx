@@ -22,6 +22,7 @@ import {
   Building2,
   AlertCircle,
 } from "lucide-react";
+import { copyToClipboard } from "@/lib/clipboard";
 import {
   DealDetail,
   parseContractTerms,
@@ -126,9 +127,9 @@ export function DealContractCard({
     ? terms.mandatoryElements
     : ["#ad", "#sponsored", `@${deal.brand?.companyName?.toLowerCase().replace(/\s+/g, "") || "brand"}`];
 
-  const handleCopyTag = (tag: string) => {
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(tag);
+  const handleCopyTag = async (tag: string) => {
+    const ok = await copyToClipboard(tag);
+    if (ok) {
       setCopiedTag(tag);
       setTimeout(() => setCopiedTag(null), 2000);
     }

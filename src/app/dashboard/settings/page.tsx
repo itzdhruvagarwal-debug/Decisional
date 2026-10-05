@@ -3,6 +3,7 @@
 import { logger } from "@/lib/logger-client";
 import { apiClient } from "@/lib/api-client";
 import { formatUserError } from "@/lib/user-messages";
+import { copyToClipboard } from "@/lib/clipboard";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import useSWR from "swr";
 import Link from "next/link";
@@ -389,10 +390,10 @@ export default function SettingsPage() {
                 <>
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={async () => {
                       if (typeof window !== "undefined") {
                         const fullUrl = `${window.location.origin}${publicProfileUrl}`;
-                        navigator.clipboard.writeText(fullUrl);
+                        await copyToClipboard(fullUrl);
                         showToast("Public profile link copied to clipboard!", "success");
                       }
                     }}

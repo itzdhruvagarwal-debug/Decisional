@@ -16,6 +16,7 @@
 import { z, ZodError } from "zod";
 import { signOut } from "next-auth/react";
 import { ApiClientError } from "./errors";
+import { logger } from "@/lib/logger-client";
 
 export interface RetryConfig {
   /** Number of retries on network error (not on HTTP errors). Default: 2 */
@@ -135,10 +136,9 @@ export async function http<T = unknown>(
           return schema.parse(json) as T;
         } catch (zodErr) {
           if (zodErr instanceof ZodError) {
-            console.error(
-              `[api-client] Schema validation failed for ${url}:`,
-              JSON.stringify(zodErr.issues, null, 2),
-            );
+            logger.warn(`[api-client] Schema validation failed for ${url}`, {
+              issues: zodErr.issues,
+            });
           }
           throw zodErr;
         }
@@ -156,9 +156,10 @@ export async function http<T = unknown>(
       // Network error — retry with exponential backoff
       if (attempt < maxRetries) {
         const delay = baseDelay * Math.pow(2, attempt);
-        console.warn(
-          `[api-client] Network error on ${url}, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`,
-        );
+        logger.warn(`[api-client] Network error on ${url}, retrying in ${delay}ms`, {
+          attempt: attempt + 1,
+          maxRetries,
+        });
         await sleep(delay);
       }
     }

@@ -375,7 +375,9 @@ export async function processWebhookEventInternal(
     }
 
     if (transfer?.id && paymentHold) {
-      await redis.set(`rzp:route:transfer:${paymentHold.dealId}`, transfer.id, "EX", 86400 * 30).catch(() => {});
+      await redis.set(`rzp:route:transfer:${paymentHold.dealId}`, transfer.id, "EX", 86400 * 30).catch((err) => {
+        logger.warn("Failed to cache Route transfer ID in Redis from webhook", { dealId: paymentHold?.dealId, error: err });
+      });
     }
 
     if (event === "transfer.processed") {

@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { apiWrapper } from "@/lib/api-wrapper";
 import { redis } from "@/lib/redis";
+import prisma from "@/lib/db";
 import { bookmarkRequestSchema } from "@/lib/schemas";
 import { AppError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 
-// In-memory fallback set for testing/offline environments
+// Third-tier in-memory fallback for offline test environments
 const memoryBookmarks = new Set<string>();
 
 export const GET = apiWrapper(
@@ -19,12 +21,37 @@ export const GET = apiWrapper(
     try {
       if (redis) {
         const savedIds = await redis.smembers(redisKey);
-        return NextResponse.json({ success: true, savedIds });
+        if (savedIds && savedIds.length > 0) {
+          return NextResponse.json({ success: true, savedIds });
+        }
       }
-    } catch {
-      // Fallback
+    } catch (redisErr) {
+      logger.debug("Bookmarks Redis lookup failed, falling back to database", { userId, error: redisErr });
     }
 
+    // Industry-standard persistent DB fallback: load bookmarks from user preferences in Postgres
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { notificationPreferences: true },
+      });
+      const prefs = (user?.notificationPreferences as Record<string, unknown>) || {};
+      const dbSaved = (prefs.bookmarks as string[]) || [];
+
+      if (dbSaved.length > 0) {
+        // Asynchronously populate Redis cache if Redis came back online
+        if (redis) {
+          redis.sadd(redisKey, ...dbSaved).catch((err) => {
+            logger.warn("Failed to repopulate bookmarks in Redis", { userId, error: err });
+          });
+        }
+        return NextResponse.json({ success: true, savedIds: dbSaved });
+      }
+    } catch (dbErr) {
+      logger.warn("Bookmarks database fallback read failed, using memory cache", { userId, error: dbErr });
+    }
+
+    // Third-tier process memory fallback (for offline tests)
     const userSaved = Array.from(memoryBookmarks)
       .filter((k) => k.startsWith(`${userId}:`))
       .map((k) => k.split(":")[1]!);
@@ -51,6 +78,7 @@ export const POST = apiWrapper(
     const redisKey = `user:${userId}:bookmarks`;
     const itemKey = `${userId}:${targetId}`;
 
+    // 1. Write to Redis cache (Fast-path)
     try {
       if (redis) {
         if (isSaved) {
@@ -59,10 +87,39 @@ export const POST = apiWrapper(
           await redis.srem(redisKey, targetId);
         }
       }
-    } catch {
-      // Fallback to memory
+    } catch (redisErr) {
+      logger.debug("Bookmarks Redis write failed, proceeding to persistent DB write", { userId, error: redisErr });
     }
 
+    // 2. Industry-standard Persistent DB storage: Synchronize to PostgreSQL so bookmarks survive restarts & Redis flushes
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { notificationPreferences: true },
+      });
+      const prefs = (user?.notificationPreferences as Record<string, unknown>) || {};
+      const currentBookmarks = new Set<string>((prefs.bookmarks as string[]) || []);
+
+      if (isSaved) {
+        currentBookmarks.add(targetId);
+      } else {
+        currentBookmarks.delete(targetId);
+      }
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          notificationPreferences: {
+            ...prefs,
+            bookmarks: Array.from(currentBookmarks),
+          },
+        },
+      });
+    } catch (dbErr) {
+      logger.error("Bookmarks database persistent write failed", dbErr, { userId, targetId, isSaved });
+    }
+
+    // 3. Keep local memory cache updated for test isolation
     if (isSaved) {
       memoryBookmarks.add(itemKey);
     } else {

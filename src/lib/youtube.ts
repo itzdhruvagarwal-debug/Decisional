@@ -392,8 +392,9 @@ identifier = path.replace("/user/", "");
 
 if (!identifier) return null;
 
-return getYouTubeChannel(identifier);
-} catch {
+return await getYouTubeChannel(identifier);
+} catch (error) {
+logger.warn("Failed to resolve YouTube URL", { url, error });
 return null;
 }
 }

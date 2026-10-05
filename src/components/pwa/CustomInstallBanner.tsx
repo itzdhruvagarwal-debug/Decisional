@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Download, X, ShieldCheck, Zap, WifiOff } from "lucide-react";
 import { useOptimizedMotion } from "@/hooks/useOptimizedMotion";
+import { logger } from "@/lib/logger-client";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -76,7 +77,7 @@ export default function CustomInstallBanner() {
         setIsStandalone(true);
       }
     } catch (err) {
-      console.warn("[PWA] Install prompt error:", err);
+      logger.warn("[pwa-install] BeforeInstallPrompt handler error", { error: String(err) });
     }
   };
 

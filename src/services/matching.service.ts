@@ -190,6 +190,14 @@ export class MatchingService {
    * Tier 3: Pre-seeded Industry Benchmark (CATEGORY_BASELINE_CPV_PAISE)
    * Tier 4: Overall platform average / Platform Default (DEFAULT_BASELINE_CPV_PAISE)
    */
+  private static async safeCacheResult(key: string, ttlSeconds: number, data: unknown): Promise<void> {
+    try {
+      await redis.setex(key, ttlSeconds, JSON.stringify(data));
+    } catch (err) {
+      logger.debug("Redis setex failed in MatchingService", { key, error: err });
+    }
+  }
+
   public static async resolveSingleCategoryBaseline(
     category: string
   ): Promise<{ baselinePaise: number; source: CategoryBenchmarkSource }> {
@@ -210,9 +218,7 @@ export class MatchingService {
     const dynamicResult = await MatchingService.getDynamicCategoryBaselineCpv(normalized);
     if (dynamicResult && dynamicResult.dealCount >= 5) {
       const result = { baselinePaise: dynamicResult.baselinePaise, source: "DYNAMIC_30D" as const };
-      try {
-        await redis.setex(cacheKey, 300, JSON.stringify(result));
-      } catch { /* ignore */ }
+      await MatchingService.safeCacheResult(cacheKey, 300, result);
       return result;
     }
 
@@ -220,18 +226,14 @@ export class MatchingService {
     const dbConfigured = await MatchingService.getDbConfiguredCategoryBaselineCpv(normalized);
     if (dbConfigured !== null && dbConfigured > 0) {
       const result = { baselinePaise: dbConfigured, source: "CONFIG_DB" as const };
-      try {
-        await redis.setex(cacheKey, 300, JSON.stringify(result));
-      } catch { /* ignore */ }
+      await MatchingService.safeCacheResult(cacheKey, 300, result);
       return result;
     }
 
     // Tier 3: Pre-seeded Industry Reference
     if (CATEGORY_BASELINE_CPV_PAISE[normalized] !== undefined) {
       const result = { baselinePaise: CATEGORY_BASELINE_CPV_PAISE[normalized], source: "INDUSTRY_SEEDED" as const };
-      try {
-        await redis.setex(cacheKey, 300, JSON.stringify(result));
-      } catch { /* ignore */ }
+      await MatchingService.safeCacheResult(cacheKey, 300, result);
       return result;
     }
 
@@ -241,18 +243,14 @@ export class MatchingService {
     );
     if (foundKey && CATEGORY_BASELINE_CPV_PAISE[foundKey] !== undefined) {
       const result = { baselinePaise: CATEGORY_BASELINE_CPV_PAISE[foundKey], source: "INDUSTRY_SEEDED" as const };
-      try {
-        await redis.setex(cacheKey, 300, JSON.stringify(result));
-      } catch { /* ignore */ }
+      await MatchingService.safeCacheResult(cacheKey, 300, result);
       return result;
     }
 
     // Tier 4: Low-data / New-category Fallback: Overall platform 30-day average
     const platformAvg = await MatchingService.getOverallPlatformAverageCpv();
     const result = { baselinePaise: platformAvg, source: "PLATFORM_DEFAULT" as const };
-    try {
-      await redis.setex(cacheKey, 300, JSON.stringify(result));
-    } catch { /* ignore */ }
+    await MatchingService.safeCacheResult(cacheKey, 300, result);
     return result;
   }
 
@@ -908,7 +906,8 @@ export class MatchingService {
           if (item) {
             try {
               results[i] = JSON.parse(item) as MatchScoreResult;
-            } catch {
+            } catch (parseErr) {
+              logger.debug("Corrupted match score JSON in cache, recomputing", { key: cacheKeys[i], error: parseErr });
               missingIndices.push(i);
             }
           } else {

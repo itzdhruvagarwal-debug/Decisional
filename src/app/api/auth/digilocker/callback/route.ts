@@ -152,7 +152,9 @@ appUrl("/dashboard/settings?tab=verification&error=invalid_state", req.nextUrl.o
 
 const session = await auth();
 if (!session?.user?.id || session.user.id !== storedState.userId) {
-await prisma.oAuthState.delete({ where: { state } }).catch(() => {});
+await prisma.oAuthState.delete({ where: { state } }).catch((err) => {
+  logger.warn("DigiLocker OAuth failed to delete mismatched state", { state, error: err });
+});
 logger.warn("DigiLocker OAuth state owner mismatch", {
 stateUserId: storedState.userId,
 sessionUserId: session?.user?.id,

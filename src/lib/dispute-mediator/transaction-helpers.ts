@@ -213,15 +213,45 @@ paymentId: deal.paymentHold.razorpayPaymentId,
 refundAmount: brandRefund,
 });
 } catch (refundErr) {
-// Log and continue wallet credit above has already succeeded. The
-// Razorpay refund failure should trigger a manual follow-up; we don't
-// want to roll back the entire dispute resolution for a payment-gateway
-// transient error.
-logger.error(
-"Razorpay refund failed during dispute resolution wallet credited but gateway refund pending manual retry",
-refundErr instanceof Error ? refundErr : new Error(String(refundErr)),
+// Log and continue — wallet credit above has already succeeded.
+// The Razorpay refund failure is captured in observability and persisted to DeadLetterJob
+// so the reconciliation cron and admin dashboard can safely re-attempt it.
+const errorObj = refundErr instanceof Error ? refundErr : new Error(String(refundErr));
+logger.critical(
+"Razorpay refund failed during dispute resolution wallet credited but gateway refund pending automated DLQ retry",
+errorObj,
 { dealId: deal.id, paymentId: deal.paymentHold.razorpayPaymentId, brandRefund },
 );
+
+try {
+  const { recordPaymentFailure } = await import("../observability");
+  const prismaClient = (await import("../db")).default;
+
+  recordPaymentFailure("DISPUTE_GATEWAY_REFUND_FAILED", errorObj, {
+    dealId: deal.id,
+    paymentId: deal.paymentHold.razorpayPaymentId,
+    amount: brandRefund,
+  });
+
+  await prismaClient.deadLetterJob.create({
+    data: {
+      category: "TIME_CRITICAL",
+      topic: "dispute.gateway_refund",
+      deduplicationId: `dispute:refund:${deal.id}:${deal.paymentHold.razorpayPaymentId}`,
+      endpoint: "/api/payments/razorpay/refund",
+      errorMessage: errorObj.message,
+      errorStack: errorObj.stack || null,
+      payload: {
+        dealId: deal.id,
+        paymentId: deal.paymentHold.razorpayPaymentId,
+        amount: brandRefund,
+        refundPercentage: analysis.refundPercentage,
+      },
+    },
+  });
+} catch (dlqErr) {
+  logger.error("Failed to record DeadLetterJob for failed dispute refund", dlqErr);
+}
 }
 }
 }

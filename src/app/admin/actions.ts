@@ -11,6 +11,7 @@ import { checkAndAwardBadges, awardBadgeIfNotExists } from "@/lib/gamification-e
 import { BADGES } from "@/lib/badges";
 import { auth } from "@/lib/auth";
 import { createActivityLog } from "@/lib/audit";
+import { logger } from "@/lib/logger";
 import { AdminService } from "@/services/admin.service";
 import { requireActiveAdmin } from "@/lib/admin-auth";
 import { invalidateUserKYCCache } from "@/lib/kyc";
@@ -168,7 +169,9 @@ await createActivityLog({
   entityType: "USER",
   entityId: userId,
   metadata: { adminEmail: _session.user.email },
-}).catch(() => {});
+}).catch((err) => {
+  logger.warn("Failed to record KYC_APPROVED admin activity log", { userId, error: err });
+});
 }
 
 export async function rejectUser(userId: string, reason: string) {
@@ -227,7 +230,9 @@ await createActivityLog({
   entityType: "USER",
   entityId: userId,
   metadata: { adminEmail: _session.user.email, reason: validatedReason },
-}).catch(() => {});
+}).catch((err) => {
+  logger.warn("Failed to record KYC_REJECTED admin activity log", { userId, reason: validatedReason, error: err });
+});
 }
 
 export async function approveDocument(docId: string, userId: string) {
@@ -430,7 +435,9 @@ export async function approveFlaggedApplication(applicationId: string) {
     entityType: "APPLICATION",
     entityId: applicationId,
     metadata: { adminEmail: _session.user.email },
-  }).catch(() => {});
+  }).catch((err) => {
+    logger.warn("Failed to record FLAGGED_APPLICATION_APPROVED admin activity log", { applicationId, error: err });
+  });
 }
 
 export async function rejectFlaggedApplication(applicationId: string, reason: string) {
@@ -470,7 +477,9 @@ await createActivityLog({
   entityType: "APPLICATION",
   entityId: applicationId,
   metadata: { adminEmail: _session.user.email, reason },
-}).catch(() => {});
+}).catch((err) => {
+  logger.warn("Failed to record FLAGGED_APPLICATION_REJECTED admin activity log", { applicationId, reason, error: err });
+});
 }
 
 async function awardBadgeManually(targetUserId: string, badgeId: string) {
@@ -504,7 +513,9 @@ await createActivityLog({
   entityType: "USER",
   entityId: targetUserId,
   metadata: { adminEmail: _session.user.email, badgeId },
-}).catch(() => {});
+}).catch((err) => {
+  logger.warn("Failed to record BADGE_AWARDED_MANUALLY admin activity log", { targetUserId, badgeId, error: err });
+});
 }
 
 export async function awardBadgeAction(formData: FormData) {
@@ -560,7 +571,9 @@ export async function updateCategoryBenchmarkAction(
       baselineRupees: (baselinePaise / 100).toFixed(2),
       adminEmail: session.user.email,
     },
-  }).catch(() => {});
+  }).catch((err) => {
+    logger.warn("Failed to record CATEGORY_BENCHMARK_UPDATED admin activity log", { category, baselinePaise, error: err });
+  });
 
   revalidatePath("/admin/benchmarks");
   revalidatePath("/admin");
@@ -584,7 +597,9 @@ export async function resetCategoryBenchmarkAction(category: string) {
       category,
       adminEmail: session.user.email,
     },
-  }).catch(() => {});
+  }).catch((err) => {
+    logger.warn("Failed to record CATEGORY_BENCHMARK_RESET admin activity log", { category, error: err });
+  });
 
   revalidatePath("/admin/benchmarks");
   revalidatePath("/admin");

@@ -29,7 +29,9 @@ normalizedUserId: string | null
 ): Promise<IdempotencyCheckResult | null> {
 if (new Date() > existing.expiresAt) {
 // Key expired, delete it safely
-await prisma.idempotencyKey.delete({ where: { key } }).catch(() => { });
+await prisma.idempotencyKey.delete({ where: { key } }).catch((err) => {
+  logger.warn("[Idempotency] Failed to delete expired key", { key, error: err });
+});
 return null;
 }
 
@@ -123,7 +125,9 @@ existing.response &&
 typeof existing.response === "object" &&
 (existing.response as Record<string, unknown>).status === "PROCESSING"
 ) {
-await prisma.idempotencyKey.delete({ where: { key } }).catch(() => {});
+await prisma.idempotencyKey.delete({ where: { key } }).catch((err) => {
+  logger.warn("[Idempotency] Failed to delete processing key on release", { key, error: err });
+});
 }
 }
 } catch (error) {

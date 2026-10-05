@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { apiWrapper, ApiResponse, type AuthenticatedRequest } from "@/lib/api-wrapper";
 import { MatchingService } from "@/services/matching.service";
 import { createActivityLog } from "@/lib/audit";
+import { logger } from "@/lib/logger";
 import { z } from "zod";
 
 const updateBenchmarkSchema = z.object({
@@ -37,7 +38,9 @@ async function _postHandler(req: NextRequest) {
       baselineRupees: (baselinePaise / 100).toFixed(2),
       adminEmail: session.user.email,
     },
-  }).catch(() => {});
+  }).catch((err) => {
+    logger.warn("Failed to record CATEGORY_BENCHMARK_UPDATED admin activity log", { category, baselinePaise, error: err });
+  });
 
   return ApiResponse.success(
     {

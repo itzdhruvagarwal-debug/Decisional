@@ -229,8 +229,8 @@ throw AppError.badRequest("NO_RESERVED_CAMPAIGN_FUNDS");
       let transferId = "";
       try {
         transferId = (await redis.get(`rzp:route:transfer:${deal.id}`)) || "";
-      } catch {
-        /* non-fatal */
+      } catch (redisErr) {
+        logger.warn("Failed to get Route transfer ID from Redis, will query payment transfers as fallback", { dealId: deal.id, error: redisErr });
       }
 
       // Fallback: If not in Redis, look up transfers attached to the captured payment
@@ -240,7 +240,9 @@ throw AppError.badRequest("NO_RESERVED_CAMPAIGN_FUNDS");
           const firstTransfer = transfers[0];
           if (firstTransfer && firstTransfer.id) {
             transferId = firstTransfer.id;
-            await redis.set(`rzp:route:transfer:${deal.id}`, transferId, "EX", 86400 * 30).catch(() => {});
+            await redis.set(`rzp:route:transfer:${deal.id}`, transferId, "EX", 86400 * 30).catch((redisErr) => {
+              logger.warn("Failed to cache Route transfer ID in Redis", { dealId: deal.id, error: redisErr });
+            });
           }
         } catch (fetchErr) {
           logger.warn("Could not query payment transfers as fallback", {
@@ -255,11 +257,35 @@ throw AppError.badRequest("NO_RESERVED_CAMPAIGN_FUNDS");
         await prisma.paymentHold.update({
           where: { id: deal.paymentHold.id },
           data: { status: "FAILED" },
-        }).catch(() => {});
+        }).catch((updateErr) => {
+          logger.warn("Failed to mark PaymentHold as FAILED after missing transfer ID", { dealId: deal.id, error: updateErr });
+        });
 
         logger.critical("ESCROW_RELEASE_FAILED: Missing transfer ID for Route deal escrow release", {
           dealId: deal.id,
           paymentHoldId: deal.paymentHold.id,
+        });
+
+        // Persist to DeadLetterJob so automated reconciliation and alert queues can pick it up
+        await prisma.deadLetterJob.create({
+          data: {
+            category: "TIME_CRITICAL",
+            topic: "payment.escrow_release_missing_transfer",
+            deduplicationId: `escrow_missing_tx_${deal.id}`,
+            endpoint: "/api/escrow/release",
+            payload: {
+              dealId: deal.id,
+              paymentHoldId: deal.paymentHold.id,
+              paymentId: deal.paymentHold.razorpayPaymentId,
+              amount: deal.amount,
+            },
+            errorMessage: "Razorpay Route transfer ID could not be identified to release funds to creator",
+            attempts: 1,
+            maxRetries: 5,
+            status: "FAILED",
+          },
+        }).catch((dlqErr) => {
+          logger.error("Failed to record DeadLetterJob for missing Route transfer ID", dlqErr);
         });
 
         throw AppError.internal(
@@ -274,12 +300,36 @@ throw AppError.badRequest("NO_RESERVED_CAMPAIGN_FUNDS");
         await prisma.paymentHold.update({
           where: { id: deal.paymentHold.id },
           data: { status: "FAILED" },
-        }).catch(() => {});
+        }).catch((updateErr) => {
+          logger.warn("Failed to mark PaymentHold as FAILED after release error", { dealId: deal.id, error: updateErr });
+        });
 
         logger.critical("ESCROW_RELEASE_FAILED: Failed to release transfer hold on Razorpay Route", {
           dealId: deal.id,
           transferId,
           error: err instanceof Error ? err.message : String(err),
+        });
+
+        // Persist to DeadLetterJob for automated background worker retries and Ops alerting
+        await prisma.deadLetterJob.create({
+          data: {
+            category: "TIME_CRITICAL",
+            topic: "payment.escrow_release_gateway_failed",
+            deduplicationId: `escrow_release_failed_${deal.id}_${transferId}`,
+            endpoint: "/api/escrow/release",
+            payload: {
+              dealId: deal.id,
+              paymentHoldId: deal.paymentHold.id,
+              transferId,
+              amount: deal.amount,
+            },
+            errorMessage: err instanceof Error ? err.message : "Gateway error during releaseTransferHold",
+            attempts: 1,
+            maxRetries: 5,
+            status: "FAILED",
+          },
+        }).catch((dlqErr) => {
+          logger.error("Failed to record DeadLetterJob for failed transfer hold release", dlqErr);
         });
 
         // DO NOT silently swallow! Rethrow so database transaction rolls back,
@@ -1037,8 +1087,8 @@ data: { status },
     if (firstTransfer?.id) {
       try {
         await redis.set(`rzp:route:transfer:${deal.id}`, firstTransfer.id, "EX", 86400 * 30);
-      } catch {
-        /* non-fatal */
+      } catch (err) {
+        logger.warn("Failed to cache Route transfer ID in Redis during escrow init", { dealId: deal.id, error: err });
       }
     }
 
@@ -1063,8 +1113,8 @@ data: { status },
       let transferId = "";
       try {
         transferId = (await redis.get(`rzp:route:transfer:${dealId}`)) || "";
-      } catch {
-        /* non-fatal */
+      } catch (err) {
+        logger.warn("Failed to get Route transfer ID from Redis during cancellation", { dealId, error: err });
       }
 
       if (transferId) {
@@ -1076,6 +1126,27 @@ data: { status },
           });
         } catch (err) {
           logger.error("Failed to reverse Route transfer", { dealId, transferId, error: err });
+          await prisma.deadLetterJob.create({
+            data: {
+              category: "TIME_CRITICAL",
+              topic: "payment.route_cancel_reverse_failed",
+              deduplicationId: `cancel_reverse_${dealId}`,
+              endpoint: "/api/deals/cancel",
+              payload: {
+                dealId,
+                paymentHoldId: paymentHold.id,
+                transferId,
+                amount: paymentHold.amount,
+                reason,
+              },
+              errorMessage: err instanceof Error ? err.message : String(err),
+              attempts: 1,
+              maxRetries: 5,
+              status: "FAILED",
+            },
+          }).catch((dlqErr) => {
+            logger.error("Failed to record DeadLetterJob for failed route transfer reversal", dlqErr);
+          });
         }
       }
 
@@ -1088,6 +1159,27 @@ data: { status },
           });
         } catch (err) {
           logger.error("Failed to refund brand payment", { dealId, error: err });
+          await prisma.deadLetterJob.create({
+            data: {
+              category: "TIME_CRITICAL",
+              topic: "payment.route_cancel_refund_failed",
+              deduplicationId: `cancel_refund_${dealId}`,
+              endpoint: "/api/deals/cancel",
+              payload: {
+                dealId,
+                paymentHoldId: paymentHold.id,
+                paymentId: paymentHold.razorpayPaymentId,
+                amount: paymentHold.amount,
+                reason,
+              },
+              errorMessage: err instanceof Error ? err.message : String(err),
+              attempts: 1,
+              maxRetries: 5,
+              status: "FAILED",
+            },
+          }).catch((dlqErr) => {
+            logger.error("Failed to record DeadLetterJob for failed route cancel refund", dlqErr);
+          });
         }
       }
 

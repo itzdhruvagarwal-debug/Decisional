@@ -407,5 +407,7 @@ await createActivityLog({
     reason,
     adminEmail: session.user.email,
   },
-}).catch(() => {});
+}).catch((err) => {
+  logger.warn("Failed to record DISPUTE_RESOLUTION admin activity log", { disputeId, decision, error: err });
+});
 }

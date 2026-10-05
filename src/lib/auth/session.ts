@@ -89,7 +89,9 @@ await checkAndAwardBadges(user.id, "LOGIN");
 } catch (err) {
 logger.error("Failed to check login badges", err);
 }
-})().catch(() => {});
+})().catch((err) => {
+  logger.error("Unhandled error in login badges worker", err);
+});
 }
 token.lastRefreshed = Date.now();
 token.jti = token.jti || randomUUID();

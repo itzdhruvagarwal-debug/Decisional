@@ -121,7 +121,8 @@ function LoginContent() {
       .then((providers) => {
         if (active) setGoogleSignInEnabled(Boolean(providers?.google));
       })
-      .catch(() => {
+      .catch((err) => {
+        logger.warn("Failed to load auth providers for login page", { error: err });
         if (active) setGoogleSignInEnabled(false);
       });
 

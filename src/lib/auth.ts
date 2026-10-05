@@ -269,7 +269,7 @@ action: ActivityAction.LOGIN,
 entityType: "USER",
 entityId: user.id as string,
 metadata: { email: user.email },
-}).catch(() => {});
+}).catch((e) => logger.warn("auth: createActivityLog failed for signIn event", { userId: user.id, error: e }));
 },
 async signOut(
 message:

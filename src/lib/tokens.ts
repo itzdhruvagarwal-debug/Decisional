@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import prisma from "./db";
 import { isExpired } from "./utils";
+import { logger } from "./logger";
 
 /**
 * Generate a cryptographically secure random token.
@@ -142,7 +143,12 @@ await prisma.refreshToken.update({
 where: { token },
 data: { revoked: true },
 });
-} catch {
-// Token may not exist (already revoked or never created) this is acceptable
+} catch (error) {
+// RecordNotFound (P2025) means token is already revoked or deleted (idempotent)
+if ((error as { code?: string })?.code === "P2025") {
+  logger.debug("Refresh token already revoked or not found", { tokenPrefix: token.slice(0, 6) });
+} else {
+  logger.warn("Failed to revoke refresh token in database", { error, tokenPrefix: token.slice(0, 6) });
+}
 }
 }

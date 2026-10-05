@@ -149,31 +149,56 @@ pendingClaims
 );
 
 if (remainingDebtPaid > 0) {
-logger.critical("DEBT_DISTRIBUTION_GAP: Debt recovered but not fully distributed to creditors due to claim sum discrepancy", {
-walletId: wallet.id,
-userId,
-remainingDebtPaid,
-debtPaid,
-});
-try {
-await tx.auditLog.create({
-data: {
-actorId: "PLATFORM_TREASURY",
-actionType: "DEBT_DISTRIBUTION_GAP",
-entityType: "Wallet",
-entityId: wallet.id,
-beforeJSON: { debtPaid, claimsSum: debtPaid - remainingDebtPaid },
-afterJSON: { remainingUndistributed: remainingDebtPaid, userId, dealId: dealId ?? null },
-},
-});
-} catch (auditErr) {
-logger.error("DEBT_DISTRIBUTION_GAP: Failed to write audit record manual review required immediately", {
-walletId: wallet.id,
-userId,
-remainingDebtPaid,
-error: auditErr,
-});
-}
+  logger.critical("DEBT_DISTRIBUTION_GAP: Debt recovered but not fully distributed to creditors due to claim sum discrepancy", {
+    walletId: wallet.id,
+    userId,
+    remainingDebtPaid,
+    debtPaid,
+  });
+  try {
+    await tx.auditLog.create({
+      data: {
+        actorId: "PLATFORM_TREASURY",
+        actionType: "DEBT_DISTRIBUTION_GAP",
+        entityType: "Wallet",
+        entityId: wallet.id,
+        beforeJSON: { debtPaid, claimsSum: debtPaid - remainingDebtPaid },
+        afterJSON: { remainingUndistributed: remainingDebtPaid, userId, dealId: dealId ?? null },
+      },
+    });
+  } catch (auditErr) {
+    logger.error("DEBT_DISTRIBUTION_GAP: Failed to write audit record manual review required immediately", {
+      walletId: wallet.id,
+      userId,
+      remainingDebtPaid,
+      error: auditErr,
+    });
+  }
+
+  // Industry Standard DLQ: Persist to DeadLetterJob so financial reconciliation engine can automatically resolve the creditor gap
+  try {
+    await tx.deadLetterJob.create({
+      data: {
+        category: "TIME_CRITICAL",
+        topic: "wallet.debt_distribution_gap",
+        deduplicationId: `debt_gap_${wallet.id}_${Date.now()}`,
+        endpoint: "/api/wallet/reconcile-debt",
+        payload: {
+          walletId: wallet.id,
+          userId,
+          remainingDebtPaid,
+          debtPaid,
+          dealId: dealId ?? null,
+        },
+        errorMessage: "Debt recovered from wallet but could not be fully distributed to creditors due to claim sum discrepancy",
+        attempts: 1,
+        maxRetries: 5,
+        status: "FAILED",
+      },
+    });
+  } catch (dlqErr) {
+    logger.error("DEBT_DISTRIBUTION_GAP: Failed to record DeadLetterJob", dlqErr);
+  }
 }
 
 await tx.transaction.create({

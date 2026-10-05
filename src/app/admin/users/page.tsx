@@ -12,6 +12,8 @@ import EmptyState from "@/components/ui/EmptyState";
 import { Badge, Button, Input, Select } from "@/components/ui";
 import { formatDate } from "@/lib/utils-client";
 import { formatUserError } from "@/lib/user-messages";
+import { useToasts, ToastContainer } from "@/components/ui";
+import { logger } from "@/lib/logger-client";
 import type { AdminService } from "@/services/admin.service";
 import type { Prisma } from "@prisma/client";
 import {
@@ -540,6 +542,7 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [auditUser, setAuditUser] = useState<AdminUserListElement | null>(null);
+  const { toasts, showToast, removeToast } = useToasts();
   const limit = 50;
 
   const queryParams = new URLSearchParams();
@@ -561,16 +564,18 @@ export default function AdminUsersPage() {
   const handleBan = async (userId: string) => {
     const banEligibility = checkAdminBanEligibility(session?.user?.id || "", userId);
     if (!banEligibility.allowed) {
-      alert(banEligibility.reason || "Cannot ban this user");
+      showToast("error", banEligibility.reason || "Cannot ban this user");
       return;
     }
     if (!confirm("Are you sure you want to ban this user?")) return;
     setLoadingAction(userId);
     try {
       await banUser(userId);
+      showToast("success", "User banned successfully.");
       mutate();
     } catch (err) {
-      alert(formatUserError(err, "Failed to ban user. Please try again."));
+      logger.error("[AdminUsers] Failed to ban user", { userId, error: String(err) });
+      showToast("error", formatUserError(err, "Failed to ban user. Please try again."));
     } finally {
       setLoadingAction(null);
     }
@@ -580,9 +585,11 @@ export default function AdminUsersPage() {
     setLoadingAction(userId);
     try {
       await unbanUser(userId);
+      showToast("success", "User unbanned successfully.");
       mutate();
     } catch (err) {
-      alert(formatUserError(err, "Failed to unban user. Please try again."));
+      logger.error("[AdminUsers] Failed to unban user", { userId, error: String(err) });
+      showToast("error", formatUserError(err, "Failed to unban user. Please try again."));
     } finally {
       setLoadingAction(null);
     }
@@ -594,10 +601,11 @@ export default function AdminUsersPage() {
     setLoadingAction(userId);
     try {
       await awardBadgeAction(formData);
-      alert("Badge awarded successfully!");
+      showToast("success", "Badge awarded successfully!");
       mutate();
     } catch (err) {
-      alert(formatUserError(err, "Failed to award badge. Please try again."));
+      logger.error("[AdminUsers] Failed to award badge", { userId, error: String(err) });
+      showToast("error", formatUserError(err, "Failed to award badge. Please try again."));
     } finally {
       setLoadingAction(null);
     }
@@ -608,11 +616,12 @@ export default function AdminUsersPage() {
     setLoadingAction(auditUser.id);
     try {
       await resolveFraudAppealAction(auditUser.id, decision, notes);
-      alert(decision === "APPROVE_APPEAL" ? "Appeal approved! Profile status restored and score recalibrated." : "Fraud flag confirmed.");
+      showToast("success", decision === "APPROVE_APPEAL" ? "Appeal approved! Profile status restored and score recalibrated." : "Fraud flag confirmed.");
       setAuditUser(null);
       mutate();
     } catch (err) {
-      alert(formatUserError(err, "Failed to resolve appeal. Please try again."));
+      logger.error("[AdminUsers] Failed to resolve appeal", { userId: auditUser.id, decision, error: String(err) });
+      showToast("error", formatUserError(err, "Failed to resolve appeal. Please try again."));
     } finally {
       setLoadingAction(null);
     }
@@ -829,6 +838,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
+      <ToastContainer toasts={toasts} onClose={removeToast} />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">

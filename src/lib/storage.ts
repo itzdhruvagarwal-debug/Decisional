@@ -270,19 +270,23 @@ export async function createUploadPresignedUrl(
 }
 
 async function uploadToS3(
-file: Buffer | Uint8Array,
-key: string,
-contentType: string,
+  file: Buffer | Uint8Array,
+  key: string,
+  contentType: string,
 ): Promise<UploadResult> {
   const client = getS3Client();
   if (!client) {
+    if (isProduction) {
+      logger.critical("PRODUCTION_STORAGE_ERROR: S3/R2 credentials missing in production environment");
+      return { success: false, error: "Cloud storage is not configured for production environment" };
+    }
     const error = "S3/R2 credentials are not fully configured";
-    logger.warn(`${error} - falling back to local/data-URL storage`);
+    logger.warn(`${error} - falling back to local/data-URL storage in non-production mode`);
     return uploadToLocal(file, key, contentType);
   }
 
-try {
-await client.send(
+  try {
+    await client.send(
       new PutObjectCommand({
         Bucket: S3_BUCKET,
         Key: key,
@@ -293,23 +297,22 @@ await client.send(
           ? "private, no-cache, no-store"
           : "public, max-age=31536000, immutable",
       }),
-);
+    );
 
-return {
-success: true,
-url: getObjectUrl(key),
-key,
-size: file.length,
-};
-} catch (error) {
-logger.error("S3/R2 upload error", error, {
-key,
-provider: STORAGE_PROVIDER,
-});
-return { success: false, error: "Cloud storage upload failed" };
+    return {
+      success: true,
+      url: getObjectUrl(key),
+      key,
+      size: file.length,
+    };
+  } catch (error) {
+    logger.error("S3/R2 upload error", error, {
+      key,
+      provider: STORAGE_PROVIDER,
+    });
+    return { success: false, error: "Cloud storage upload failed" };
+  }
 }
-}
-
 
 async function uploadToLocal(
   file: Buffer | Uint8Array,
@@ -317,7 +320,17 @@ async function uploadToLocal(
   contentType: string = "application/octet-stream",
 ): Promise<UploadResult> {
   const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+  const MAX_INLINE_FALLBACK_BYTES = 512 * 1024; // 512 KB safeguard
+
   if (isServerless && !S3_BUCKET) {
+    if (isProduction) {
+      logger.critical("PRODUCTION_STORAGE_ERROR: Serverless production cannot write local files without S3 bucket.");
+      return { success: false, error: "Cloud storage bucket required in production serverless environment" };
+    }
+    if (file.length > MAX_INLINE_FALLBACK_BYTES) {
+      logger.warn("Local storage fallback file exceeds data URL safety limit", { size: file.length, limit: MAX_INLINE_FALLBACK_BYTES });
+      return { success: false, error: `File too large (${Math.round(file.length / 1024)} KB) for inline fallback` };
+    }
     const buffer = Buffer.isBuffer(file) ? file : Buffer.from(file);
     const dataUrl = `data:${contentType};base64,${buffer.toString("base64")}`;
     return { success: true, url: dataUrl, key, size: file.length };
@@ -343,12 +356,19 @@ async function uploadToLocal(
     return { success: true, url, key, size: file.length };
   } catch (fsError) {
     logger.warn(
-      "Local filesystem write failed (likely read-only serverless environment). Falling back to inline data URL storage.",
+      "Local filesystem write failed (likely read-only serverless environment). Evaluating inline fallback.",
       {
         error: fsError instanceof Error ? fsError.message : String(fsError),
         key,
       },
     );
+    if (isProduction || file.length > MAX_INLINE_FALLBACK_BYTES) {
+      logger.critical("Local storage write failed and inline data URL is prohibited due to size or production safety", {
+        isProduction,
+        size: file.length,
+      });
+      return { success: false, error: "Storage destination is unwritable" };
+    }
     const buffer = Buffer.isBuffer(file) ? file : Buffer.from(file);
     const dataUrl = `data:${contentType};base64,${buffer.toString("base64")}`;
     return { success: true, url: dataUrl, key, size: file.length };

@@ -160,7 +160,7 @@ export async function updateTrustRuleWeight(
 export async function invalidateTrustRuleCache(): Promise<void> {
   try {
     await redis.del(REDIS_CACHE_KEY);
-  } catch {
-    // Non-fatal
+  } catch (err) {
+    logger.warn("Failed to invalidate trust rules cache in Redis", { error: err });
   }
 }

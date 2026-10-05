@@ -9,6 +9,7 @@ import {
   CampaignProofItem,
 } from "./types";
 import { formatCurrency, formatDate, formatNumber } from "@/lib/utils-client";
+import { copyToClipboard } from "@/lib/clipboard";
 import CampaignProofModal from "./CampaignProofModal";
 import { Modal } from "@/components/ui";
 import {
@@ -178,8 +179,8 @@ export default function InfluencerProfileClient({
       } catch {
         // Cancelled share
       }
-    } else if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
+    } else {
+      await copyToClipboard(window.location.href);
       setToastMessage("Profile link copied to clipboard!");
       setTimeout(() => setToastMessage(null), 3000);
     }

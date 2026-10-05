@@ -1,10 +1,11 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import QRCode from "qrcode";
 import { Modal } from "@/components/ui";
 import { Button } from "@/components/ui";
 import { copyToClipboard } from "@/lib/clipboard";
+import { logger } from "@/lib/logger-client";
 import {
   Download,
   Share2,
@@ -99,7 +100,7 @@ export default function StoryShareModal({
           if (isMounted) setReferralQr(rQr);
         }
       } catch (err) {
-        console.error("Failed to generate QR code", err);
+        logger.warn("[StoryShareModal] QR code generation failed", { error: String(err) });
       }
     }
 
@@ -455,7 +456,7 @@ export default function StoryShareModal({
         setTimeout(() => setFeedbackMessage(null), 4000);
       }
     } catch (err) {
-      console.error("Story download failed", err);
+      logger.error("[StoryShareModal] Story card download failed", { error: String(err) });
     } finally {
       setIsGeneratingImage(false);
     }
@@ -514,7 +515,7 @@ export default function StoryShareModal({
         await navigator.share({ title, text, url: activeUrl });
       }
     } catch (err) {
-      console.error("Native share error", err);
+      logger.warn("[StoryShareModal] Native share error (user may have cancelled)", { error: String(err) });
     } finally {
       setIsGeneratingImage(false);
     }

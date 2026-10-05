@@ -1,4 +1,5 @@
 import nlp from "compromise";
+import { logger } from "./logger";
 
 const CONTACT_REGEX = {
   email: /\b[a-z0-9._%+-]+@[a-z0-9-]+\.[a-z]{2,}\b/gi,
@@ -280,10 +281,17 @@ export async function checkImageBufferForContacts(
           detectedText = fullText;
         }
       } else {
-        console.error("[Vision API Error] Failed to scan image", await res.text());
+        const errText = await res.text();
+        logger.warn("[contact-filter] Vision API returned non-OK response", {
+          status: res.status,
+          body: errText.slice(0, 500),
+          filename,
+        });
       }
     } catch (err) {
-      console.error("[Vision API Exception] Failed to scan image", err);
+      logger.error("[contact-filter] Vision API exception during image scan", err instanceof Error ? err : new Error(String(err)), {
+        filename,
+      });
     }
   } else {
     // Simulated/mock OCR fallback for testing:

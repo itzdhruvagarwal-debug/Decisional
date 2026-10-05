@@ -137,7 +137,8 @@ return value ? participantId : null;
 
 const users = values.filter(Boolean) as string[];
 return { isTyping: users.length > 0, users };
-} catch {
+} catch (err) {
+logger.debug("Redis typing presence lookup failed, falling back to empty presence", { error: err });
 return { isTyping: false, users: [] };
 }
 }
@@ -472,7 +473,8 @@ await redis.set(key, "1", "EX", TYPING_TTL_SECONDS);
 } else {
 await redis.del(key);
 }
-} catch {
+} catch (err) {
+logger.debug("Failed to set typing status in Redis", { key, error: err });
 return {
 isTyping: false,
 refreshAfterSeconds: TYPING_REFRESH_SECONDS,
@@ -548,8 +550,8 @@ private static async applyContactFilterToContent(
             const pathname = decodeURIComponent(urlObj.pathname);
             const relativeKey = pathname.startsWith("/uploads/") ? pathname.replace(/^\/uploads\//, "") : pathname.replace(/^\//, "");
             filePath = path.resolve(process.cwd(), "public", "uploads", relativeKey);
-          } catch {
-            // Fallback if not a valid URL
+          } catch (urlErr) {
+            logger.debug("Chat attachment fileUrl is not an absolute URL, skipping local disk inspection", { fileUrl, error: urlErr });
           }
         }
 

@@ -43,12 +43,16 @@ if (ENCRYPTED_FIELDS.has(key) && typeof value === "string") {
 try {
 data[key] = processFn(value);
 } catch (e) {
-// Log encryption/decryption failures silent failures hide data security issues
-logger.warn(
-`[DB Security] Failed to process encrypted field "${key}". Data may be stored unprocessed.`,
+// Log encryption/decryption failures
+logger.error(
+`[DB Security] Failed to process encrypted field "${key}".`,
 { field: key, error: e instanceof Error ? e.message : String(e) },
 );
-// Retain original value to avoid data corruption, but the warning is raised
+// In production, fail closed on encryption writes to prevent writing plaintext PAN or bank accounts to the database
+if (process.env.NODE_ENV === "production" && processFn === encrypt) {
+throw AppError.internal(`Failed to encrypt sensitive field "${key}". Operation halted for data protection.`);
+}
+// Retain original value for decryption or local dev environments
 }
 } else if (value !== null && typeof value === "object" && !Array.isArray(value)) {
 processData(value as Record<string, unknown>, processFn, _depth + 1);
