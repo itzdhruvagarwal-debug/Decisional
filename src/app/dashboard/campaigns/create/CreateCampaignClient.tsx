@@ -66,7 +66,7 @@ const INITIAL_FORM_DATA: CampaignFormData = {
   targetAgeMin: null,
   targetAgeMax: null,
   minFollowers: 1000,
-  maxFollowers: null,
+  maxFollowers: 0,
   maxInfluencers: 5,
   applicationDeadline: "",
   contentDeadline: "",
@@ -107,7 +107,7 @@ function mapDraftCampaignToFormData(campaign: DraftCampaignData): CampaignFormDa
     targetAgeMin: campaign.targetAgeMin ?? null,
     targetAgeMax: campaign.targetAgeMax ?? null,
     minFollowers: campaign.minFollowers || 0,
-    maxFollowers: campaign.maxFollowers || null,
+    maxFollowers: campaign.maxFollowers || 0,
     maxInfluencers: campaign.maxInfluencers || null,
     applicationDeadline: formatDateForInput(campaign.applicationDeadline),
     contentDeadline: formatDateForInput(campaign.contentDeadline),
@@ -320,8 +320,13 @@ export default function CreateCampaignClient() {
       setError("Please add at least one deliverable");
       return false;
     }
-    if (formData.maxFollowers && formData.maxFollowers < formData.minFollowers) {
-      errors.maxFollowers = "Max followers must be greater than min followers";
+    if (!formData.maxFollowers || formData.maxFollowers <= 0) {
+      errors.maxFollowers = "Max followers is required";
+    } else if (formData.maxFollowers < formData.minFollowers) {
+      errors.maxFollowers = "Max followers must be greater than or equal to min followers";
+    }
+
+    if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return false;
     }
@@ -886,17 +891,18 @@ export default function CreateCampaignClient() {
                         label="Max Followers Req."
                         id="max-followers"
                         type="number"
-                        value={formData.maxFollowers === null ? "" : formData.maxFollowers}
+                        value={formData.maxFollowers === 0 ? "" : formData.maxFollowers}
                         onChange={(e) =>
                           setFormData({
                             ...formData,
-                            maxFollowers: e.target.value ? Number.parseInt(e.target.value, 10) : null,
+                            maxFollowers: e.target.value ? Number.parseInt(e.target.value, 10) : 0,
                           })
                         }
                         min={1000}
-                        placeholder="No upper limit"
+                        placeholder="e.g. 100000"
                         error={fieldErrors.maxFollowers}
                         fullWidth
+                        required
                       />
 
                       <Input

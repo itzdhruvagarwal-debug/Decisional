@@ -335,7 +335,11 @@ function parseAndValidateCampaignDetails(data: Record<string, unknown>) {
 
   const maxFollowers = Number(data.maxFollowers || 0);
 
-  if (maxFollowers > 0 && maxFollowers < minFollowers) {
+  if (!maxFollowers || maxFollowers <= 0) {
+    throw AppError.badRequest("maxFollowers is required and must be greater than 0");
+  }
+
+  if (maxFollowers < minFollowers) {
     throw AppError.badRequest("maxFollowers must be greater than or equal to minFollowers");
   }
 

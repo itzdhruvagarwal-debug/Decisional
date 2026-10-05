@@ -115,7 +115,7 @@ targetGender: z.enum(["ANY", "MALE", "FEMALE"]).optional(),
 targetAgeMin: z.number().int().min(13).max(100).nullable().optional(),
 targetAgeMax: z.number().int().min(13).max(100).nullable().optional(),
 minFollowers: z.number().int().min(0).optional().default(0),
-maxFollowers: z.number().int().min(0).optional().default(0),
+maxFollowers: z.number().int().min(1, "Max followers is required"),
 minEngagementRate: z.number().int().min(0).optional(),
 
 applicationDeadline: z.string().datetime().optional(),

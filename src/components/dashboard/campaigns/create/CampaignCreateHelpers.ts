@@ -18,7 +18,7 @@ targetGender: string;
 targetAgeMin: number | null;
 targetAgeMax: number | null;
 minFollowers: number;
-maxFollowers: number | null;
+maxFollowers: number;
 maxInfluencers: number | null;
 applicationDeadline: string;
 contentDeadline: string;
@@ -119,8 +119,11 @@ return { success: false, error: "Please select at least one category" };
 if (formData.perInfluencerBudget > formData.totalBudget) {
 return { success: false, error: "Per influencer budget cannot exceed total budget" };
 }
-if (formData.maxFollowers !== null && formData.maxFollowers > 0 && formData.maxFollowers < formData.minFollowers) {
-return { success: false, error: "Max followers must be greater than min followers" };
+if (!formData.maxFollowers || formData.maxFollowers <= 0) {
+  return { success: false, error: "Max followers is required" };
+}
+if (formData.maxFollowers < formData.minFollowers) {
+  return { success: false, error: "Max followers must be greater than or equal to min followers" };
 }
 
 const deadlineError = validateDeadlines(formData);
