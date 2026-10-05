@@ -115,7 +115,7 @@ export default function ProfileTab({
   badgesCount,
   showToast,
 }: Readonly<ProfileTabProps>) {
-  const { update } = useSession();
+  const { data: session, update } = useSession();
   const [isUploading, setIsUploading] = useState(false);
   const [storyModalOpen, setStoryModalOpen] = useState(false);
   const profileImageInputRef = useRef<HTMLInputElement>(null);
@@ -305,16 +305,25 @@ export default function ProfileTab({
               {badgesCount} Badges Earned
             </span>
             <div className="mt-2 flex items-center sm:justify-end">
-              {isBrand(user.userType) ? (
-                <Link
-                  href={`/brand/${user.id}`}
-                  target="_blank"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline transition-colors"
-                >
-                  <span>View Public Profile</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </Link>
-              ) : profile.instagramHandle ? (
+              {isBrand(user.userType) ? (() => {
+                const brandTarget =
+                  user?.id ||
+                  session?.user?.id ||
+                  (profile as unknown as { id?: string })?.id ||
+                  (profile.displayName ? encodeURIComponent(profile.displayName.trim()) : "") ||
+                  (user.name ? encodeURIComponent(user.name.trim()) : "");
+                if (!brandTarget || brandTarget === "undefined") return null;
+                return (
+                  <Link
+                    href={`/brand/${brandTarget}`}
+                    target="_blank"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline transition-colors"
+                  >
+                    <span>View Public Profile</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </Link>
+                );
+              })() : profile.instagramHandle ? (
                 <Link
                   href={`/creator/${encodeURIComponent(profile.instagramHandle)}`}
                   target="_blank"

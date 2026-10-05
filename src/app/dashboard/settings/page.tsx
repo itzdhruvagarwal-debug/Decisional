@@ -230,8 +230,13 @@ export default function SettingsPage() {
   const publicProfileUrl = useMemo(() => {
     const isBrandUser = user?.userType === "BRAND" || session?.user?.userType === "BRAND";
     if (isBrandUser) {
-      const brandId = (profile as unknown as { id?: string })?.id || user?.id || session?.user?.id;
-      if (!brandId) return null;
+      const brandId =
+        (profile as unknown as { id?: string })?.id ||
+        user?.id ||
+        session?.user?.id ||
+        (profile?.displayName ? encodeURIComponent(profile.displayName.trim()) : "") ||
+        (user?.name ? encodeURIComponent(user.name.trim()) : "");
+      if (!brandId || brandId === "undefined") return null;
       return `/brand/${brandId}`;
     }
     // Only use instagramHandle (slug-safe) — never use displayName/user.name which may have spaces

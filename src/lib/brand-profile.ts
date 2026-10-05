@@ -114,8 +114,8 @@ export interface BrandPublicProfileData {
 export async function getPublicBrandProfile(
   identifier: string
 ): Promise<BrandPublicProfileData | null> {
-  const cleanId = decodeURIComponent(identifier).trim();
-  if (!cleanId) return null;
+  const cleanId = decodeURIComponent(identifier || "").trim();
+  if (!cleanId || cleanId === "undefined" || cleanId === "null") return null;
 
   let brand = await prisma.brandProfile.findFirst({
     where: {

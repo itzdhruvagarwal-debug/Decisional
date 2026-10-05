@@ -17,7 +17,14 @@ export async function generateMetadata({
   params,
 }: PublicBrandPageProps): Promise<Metadata> {
   const { id } = await params;
-  const brand = await getPublicBrandProfile(id);
+  let targetId = id;
+  if (!targetId || targetId === "undefined" || targetId === "null") {
+    const session = await auth();
+    if (session?.user?.id && session?.user?.userType === "BRAND") {
+      targetId = session.user.id;
+    }
+  }
+  const brand = await getPublicBrandProfile(targetId);
 
   if (!brand) {
     return {
@@ -44,13 +51,13 @@ export async function generateMetadata({
       "India Influencer Campaigns",
     ].filter(Boolean),
     alternates: {
-      canonical: `/brand/${encodeURIComponent(id)}`,
+      canonical: `/brand/${encodeURIComponent(targetId)}`,
     },
     openGraph: {
       title,
       description,
       type: "website",
-      url: `/brand/${encodeURIComponent(id)}`,
+      url: `/brand/${encodeURIComponent(targetId)}`,
       images: brand.logo ? [{ url: brand.logo, alt: brand.companyName }] : [],
     },
     twitter: {
@@ -66,10 +73,16 @@ export default async function PublicBrandProfilePage({
   params,
 }: PublicBrandPageProps) {
   const { id } = await params;
-  const [session, brand] = await Promise.all([
-    auth(),
-    getPublicBrandProfile(id),
-  ]);
+  const session = await auth();
+
+  let targetId = id;
+  if (!targetId || targetId === "undefined" || targetId === "null") {
+    if (session?.user?.id && session?.user?.userType === "BRAND") {
+      targetId = session.user.id;
+    }
+  }
+
+  const brand = await getPublicBrandProfile(targetId);
 
   if (!brand) {
     notFound();
