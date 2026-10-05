@@ -13,7 +13,7 @@ import {
 } from "@/lib/supabase-messaging-realtime";
 import type { ToastItem, ToastType } from "@/components/ui";
 import { apiClient } from "@/lib/api-client";
-import { formatCurrency, formatTime } from "@/lib/utils-client";
+import { formatTime } from "@/lib/utils-client";
 import { formatUserError, USER_SUCCESS_MESSAGES } from "@/lib/user-messages";
 import {
   Message,
@@ -43,7 +43,6 @@ export function useMessages() {
   const [newMessage, setNewMessage] = useState("");
   const [isPeerTyping, setIsPeerTyping] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -514,177 +513,6 @@ export function useMessages() {
     await executeSendMessage(failedId, targetMsg.content);
   };
 
-  // Upload file with progress tracking
-  const uploadFileWithProgress = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("folder", "chat");
-
-      xhr.upload.addEventListener("progress", (event) => {
-        if (event.lengthComputable) {
-          const percent = Math.round((event.loaded / event.total) * 100);
-          setUploadProgress(percent);
-        }
-      });
-
-      xhr.addEventListener("load", () => {
-        setUploadProgress(null);
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const data = JSON.parse(xhr.responseText);
-            const fileUrl = data?.data?.url || data?.url;
-            if (fileUrl) {
-              resolve(fileUrl);
-            } else {
-              reject(new Error(data?.message || "File upload URL missing"));
-            }
-          } catch {
-            reject(new Error("Invalid response format from upload"));
-          }
-        } else {
-          reject(new Error(`Upload failed with status ${xhr.status}`));
-        }
-      });
-
-      xhr.addEventListener("error", () => {
-        setUploadProgress(null);
-        reject(new Error("Network error during file upload"));
-      });
-
-      xhr.open("POST", "/api/upload");
-      xhr.send(formData);
-    });
-  };
-
-  const handleSendFile = async (fileUrl: string, fileName: string, fileType: string) => {
-    if (!selectedConversation) return;
-
-    const tempId = `temp-${Date.now()}`;
-    const displayContent = `Shared file: ${fileName}`;
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: tempId,
-        senderId: session?.user?.id || "me",
-        content: displayContent,
-        createdAt: formatTime(new Date()),
-        rawCreatedAt: new Date().toISOString(),
-        isMe: true,
-        messageType: "FILE",
-        fileUrl,
-        status: "sending",
-        metadata: { fileName, fileType },
-      },
-    ]);
-
-    try {
-      const payload = (await apiClient.messages.send({
-        receiverId: selectedConversation,
-        content: displayContent,
-        messageType: "FILE",
-        fileUrl,
-        metadata: { fileName, fileType },
-        ...(currentDealId ? { dealId: currentDealId } : {}),
-      })) as { success?: boolean; error?: string; message?: unknown };
-
-      if (!payload?.success) {
-        throw new Error(payload?.error || "Failed to send file");
-      }
-
-
-      setMessages((prev) =>
-        prev.map((msg) => (msg.id === tempId ? { ...msg, status: "sent" } : msg))
-      );
-      fetchMessages(false);
-    } catch (err) {
-      logger.error("[messages] Failed to send file message:", err);
-      setMessages((prev) =>
-        prev.map((msg) => (msg.id === tempId ? { ...msg, status: "failed" } : msg))
-      );
-      showToast("error", "File sharing failed. Please try again.");
-    }
-  };
-
-  const handleSendOffer = async (offerDetails: {
-    title: string;
-    amount: number;
-    description: string;
-    deliverables: string;
-    contentDeadline: string;
-    postingDeadline: string;
-  }) => {
-    if (!selectedConversation) return;
-
-    const tempId = `temp-${Date.now()}`;
-    const displayContent = `Custom Offer: ${offerDetails.title} (${formatCurrency(offerDetails.amount)})`;
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: tempId,
-        senderId: session?.user?.id || "me",
-        content: displayContent,
-        createdAt: formatTime(new Date()),
-        isMe: true,
-        messageType: "OFFER",
-        status: "sending",
-        metadata: { ...offerDetails, status: "PENDING" },
-      },
-    ]);
-
-    try {
-      const payload = (await apiClient.messages.send({
-        receiverId: selectedConversation,
-        content: displayContent,
-        messageType: "OFFER",
-        metadata: { ...offerDetails, status: "PENDING" },
-        ...(currentDealId ? { dealId: currentDealId } : {}),
-      })) as { success?: boolean; error?: string; message?: unknown };
-
-      if (!payload?.success) {
-        throw new Error(payload?.error || "Failed to send offer");
-      }
-
-
-      setMessages((prev) =>
-        prev.map((msg) => (msg.id === tempId ? { ...msg, status: "sent" } : msg))
-      );
-      fetchMessages(false);
-    } catch (err) {
-      logger.error("[messages] Failed to send offer message:", err);
-      setMessages((prev) =>
-        prev.map((msg) => (msg.id === tempId ? { ...msg, status: "failed" } : msg))
-      );
-      showToast("error", "Offer creation failed. Please try again.");
-    }
-  };
-
-  const handleUpdateOfferStatus = async (messageId: string, offerStatus: "ACCEPTED" | "DECLINED") => {
-    try {
-      const payload = (await apiClient.messages.update(messageId, {
-        status: offerStatus,
-      })) as { success?: boolean; error?: string; message?: string };
-
-      if (!payload?.success) {
-        throw new Error(payload?.error || payload?.message || "Failed to update offer");
-      }
-
-      if (offerStatus === "ACCEPTED") {
-        showToast("success", "Offer accepted! Escrow funds secured and Deal is active.");
-      } else {
-        showToast("info", "Offer declined.");
-      }
-      fetchMessages(false);
-    } catch (err) {
-      logger.error("[messages] Failed to update offer:", err);
-      showToast("error", formatUserError(err, "Failed to update offer status. Please try again."));
-    }
-  };
-
-
   const handleBlockUser = async () => {
     if (!selectedConversation) return;
     const confirmBlock = window.confirm(
@@ -762,11 +590,6 @@ export function useMessages() {
     publishTyping,
     handleSend,
     handleRetryMessage,
-    uploadProgress,
-    uploadFileWithProgress,
-    handleSendFile,
-    handleSendOffer,
-    handleUpdateOfferStatus,
     handleBlockUser,
     handleUnblockUser,
     handleReportSubmit,
