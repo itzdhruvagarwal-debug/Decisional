@@ -26,6 +26,7 @@ import {
   Plus,
   Smartphone,
   ShieldCheck,
+  ExternalLink,
 } from "lucide-react";
 import StoryShareModal from "@/components/share/StoryShareModal";
 
@@ -303,6 +304,27 @@ export default function ProfileTab({
             <span className="text-[11px] text-muted-foreground mt-1 block">
               {badgesCount} Badges Earned
             </span>
+            <div className="mt-2 flex items-center sm:justify-end">
+              {isBrand(user.userType) ? (
+                <Link
+                  href={`/brand/${user.id}`}
+                  target="_blank"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline transition-colors"
+                >
+                  <span>View Public Profile</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Link>
+              ) : profile.instagramHandle ? (
+                <Link
+                  href={`/creator/${encodeURIComponent(profile.instagramHandle)}`}
+                  target="_blank"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-verified hover:underline transition-colors"
+                >
+                  <span>View Public Profile</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Link>
+              ) : null}
+            </div>
           </div>
         </div>
 
