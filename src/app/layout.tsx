@@ -195,7 +195,6 @@ return (
           dangerouslySetInnerHTML={{
             __html: `
               window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
                 window.deferredPrompt = e;
                 window.dispatchEvent(new CustomEvent('deferredpromptready', { detail: e }));
               });
