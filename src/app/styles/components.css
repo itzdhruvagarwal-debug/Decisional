@@ -58,8 +58,8 @@
 
 .toast {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: max(24px, calc(env(safe-area-inset-bottom, 0px) + 24px));
+  right: max(24px, calc(env(safe-area-inset-right, 0px) + 24px));
   padding: 16px 24px;
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
@@ -131,12 +131,16 @@
   left: 0;
   right: 0;
   z-index: 100;
-  padding: 12px 0;
+  padding-top: max(12px, env(safe-area-inset-top, 0px));
+  padding-bottom: 12px;
+  padding-left: max(0px, env(safe-area-inset-left, 0px));
+  padding-right: max(0px, env(safe-area-inset-right, 0px));
   transition: all var(--transition-normal);
 }
 
 .navbar-scrolled {
-  padding: 8px 0;
+  padding-top: max(8px, env(safe-area-inset-top, 0px));
+  padding-bottom: 8px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
@@ -210,10 +214,14 @@
   right: -100%;
   width: min(320px, 85vw);
   height: 100vh;
+  height: 100dvh;
   background: var(--color-bg-secondary);
   border-left: 1px solid var(--color-border);
   z-index: 95;
-  padding: 80px 24px 24px;
+  padding-top: max(80px, calc(env(safe-area-inset-top, 0px) + 60px));
+  padding-bottom: max(24px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(24px, env(safe-area-inset-left, 0px));
+  padding-right: max(24px, env(safe-area-inset-right, 0px));
   transition: right var(--transition-slow);
   overflow-y: auto;
 }
@@ -795,7 +803,7 @@ dialog.pwa-install-overlay {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
   pointer-events: none;
 }
 
@@ -820,7 +828,7 @@ dialog.pwa-install-overlay {
   border-radius: 20px;
   width: 100%;
   max-width: 480px;
-  max-height: calc(100dvh - 40px);
+  max-height: calc(100dvh - 32px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   box-shadow: 0 40px 120px rgba(0, 0, 0, 0.7);
   overflow: hidden;
   z-index: 1001;
@@ -1185,8 +1193,8 @@ dialog.pwa-install-overlay {
 }
 
 .app-toast-container {
-  bottom: 24px;
-  right: 24px;
+  bottom: max(24px, calc(env(safe-area-inset-bottom, 0px) + 24px));
+  right: max(24px, calc(env(safe-area-inset-right, 0px) + 24px));
   z-index: 99999;
   max-width: 420px;
 }
@@ -1203,9 +1211,9 @@ dialog.pwa-install-overlay {
 
 @media (max-width: 640px) {
   .app-toast-container {
-    left: 16px;
-    right: 16px;
-    bottom: 80px; /* Above mobile bottom navigation bar */
+    left: max(16px, env(safe-area-inset-left, 0px));
+    right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px)); /* Above mobile bottom navigation bar */
     max-width: none;
   }
 }

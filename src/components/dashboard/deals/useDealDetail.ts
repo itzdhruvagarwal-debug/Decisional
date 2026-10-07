@@ -21,6 +21,7 @@ import {
 } from "./DealDetailHelpers";
 import type { ToastItem, ToastType } from "@/components/ui";
 import { checkContentSubmissionEligibility } from "@/lib/action-eligibility";
+import { haptic } from "@/lib/haptics";
 import {
   TDS_194J_RATE_PERCENT_STRING,
   TDS_194O_RATE_PERCENT_STRING,
@@ -192,6 +193,7 @@ export function useDealDetail(
       if (!data?.success) {
         throw new Error(data?.message || data?.error || "Failed to sign contract");
       }
+      haptic.success();
       showToast("success", data.message || "Contract signed successfully.");
       fetchDeal();
     } catch (err) {
@@ -232,6 +234,7 @@ export function useDealDetail(
     });
 
     if (success) {
+      haptic.success();
       setShowReviewModal(false);
       setItemizedReviews({});
     }
@@ -242,6 +245,7 @@ export function useDealDetail(
       setIsSubmitting(true);
       try {
         await apiClient.deals.reject(id, "Influencer rejected the invite before signing.");
+        haptic.success();
         showToast("success", "Invite successfully rejected.");
         fetchDeal();
       } catch (err) {
@@ -257,6 +261,7 @@ export function useDealDetail(
     setIsSubmitting(true);
     try {
       const data = await apiClient.deals.cancel(id) as { message?: string };
+      haptic.success();
       showToast("success", data.message || "Deal cancelled successfully.");
       fetchDeal();
     } catch (err) {

@@ -73,7 +73,7 @@ export default function EscrowStoriesBar({
   return (
     <nav
       aria-label="Active Escrow Deals Stories"
-      className="relative w-full bg-card/60 backdrop-blur-sm border-b border-border/60 py-3.5 px-4 transition-colors"
+      className="relative w-full bg-card/60 backdrop-blur-sm border-b border-border/60 py-3.5 px-4 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] transition-colors"
     >
       <div className="max-w-7xl mx-auto relative group">
         {/* Left Scroll Button (Desktop) */}

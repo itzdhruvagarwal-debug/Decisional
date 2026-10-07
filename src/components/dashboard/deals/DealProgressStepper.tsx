@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   Check,
   AlertTriangle,
@@ -96,6 +96,7 @@ export function getStageIndex(status: string): number {
 
 export function DealProgressStepper({ status, justUpdated }: DealProgressStepperProps) {
   const currentStageIndex = getStageIndex(status);
+  const shouldReduceMotion = useReducedMotion();
   const isDisputed = status === "DISPUTED";
   const isCancelled = status === "CANCELLED";
   const isCompleted = status === "COMPLETED";
@@ -115,11 +116,12 @@ export function DealProgressStepper({ status, justUpdated }: DealProgressStepper
             </h2>
             {justUpdated && (
               <motion.span
-                initial={{ opacity: 0, scale: 0.85 }}
+                initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.85 }}
                 animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
                 className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap"
               >
-                <Sparkles className="w-3 h-3 animate-spin" />
+                <Sparkles className={`w-3 h-3 ${shouldReduceMotion ? "" : "animate-spin"}`} />
                 Updated Just Now
               </motion.span>
             )}
@@ -161,11 +163,11 @@ export function DealProgressStepper({ status, justUpdated }: DealProgressStepper
         <div className="absolute top-5 left-8 right-8 h-1 bg-muted rounded-full -z-0" />
         <motion.div
           className="absolute top-5 left-8 h-1 bg-primary rounded-full -z-0"
-          initial={{ width: 0 }}
+          initial={{ width: shouldReduceMotion ? (isCancelled ? "0%" : `calc(${progressPercent}% * 0.94)`) : 0 }}
           animate={{
             width: isCancelled ? "0%" : `calc(${progressPercent}% * 0.94)`,
           }}
-          transition={{ type: "spring", stiffness: 90, damping: 18 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 90, damping: 18 }}
         />
 
         <div className="relative z-10 flex justify-between items-start">
@@ -188,21 +190,21 @@ export function DealProgressStepper({ status, justUpdated }: DealProgressStepper
                       : "bg-muted border-border text-muted-foreground"
                   }`}
                   animate={
-                    isCurrent && justUpdated
+                    !shouldReduceMotion && isCurrent && justUpdated
                       ? {
                           scale: [1, 1.2, 1],
                         }
-                      : isCurrent
+                      : isCurrent && !shouldReduceMotion
                       ? { scale: 1.05 }
                       : { scale: 1 }
                   }
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 20 }}
                 >
                   {isStageCompleted ? (
                     <motion.div
-                      initial={{ scale: 0 }}
+                      initial={{ scale: shouldReduceMotion ? 1 : 0 }}
                       animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                      transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 400, damping: 15 }}
                     >
                       <Check className="w-5 h-5 stroke-[2.5]" />
                     </motion.div>
@@ -259,10 +261,11 @@ export function DealProgressStepper({ status, justUpdated }: DealProgressStepper
                     : "bg-muted border-border text-muted-foreground"
                 }`}
                 animate={
-                  isCurrent && justUpdated
+                  !shouldReduceMotion && isCurrent && justUpdated
                     ? { scale: [1, 1.25, 1] }
                     : { scale: 1 }
                 }
+                transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4 }}
               >
                 {isStageCompleted ? (
                   <Check className="w-4 h-4 stroke-[2.5]" />

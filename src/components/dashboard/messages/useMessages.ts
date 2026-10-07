@@ -75,9 +75,14 @@ export function useMessages() {
   }, [newMessage]);
 
   // Load conversations
-  const { data: messagesData, isLoading: loadingConversations } = useSWR<
-    RawConversation[] | { conversations?: RawConversation[] }
-  >(session ? "/api/messages" : null, fetcher);
+  const {
+    data: messagesData,
+    isLoading: loadingConversations,
+    mutate: mutateConversations,
+  } = useSWR<RawConversation[] | { conversations?: RawConversation[] }>(
+    session ? "/api/messages" : null,
+    fetcher
+  );
 
   useEffect(() => {
     if (!messagesData) return;
@@ -570,6 +575,13 @@ export function useMessages() {
   };
 
 
+  const refreshConversations = useCallback(async () => {
+    await Promise.all([
+      mutateConversations(),
+      selectedConversation ? fetchMessages(false) : Promise.resolve(),
+    ]);
+  }, [mutateConversations, selectedConversation, fetchMessages]);
+
   const selectedChat = useMemo(() => {
     return conversations.find((c) => c.userId === selectedConversation) || null;
   }, [conversations, selectedConversation]);
@@ -578,6 +590,7 @@ export function useMessages() {
     status,
     session,
     conversations,
+    refreshConversations,
     selectedConversation,
     setSelectedConversation,
     currentDealId,

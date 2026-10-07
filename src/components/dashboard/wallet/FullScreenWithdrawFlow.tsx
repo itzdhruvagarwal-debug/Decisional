@@ -23,6 +23,7 @@ import {
   MAX_WITHDRAWAL_AMOUNT_PAISE,
 } from "@/constants";
 import { checkWithdrawalEligibility } from "@/lib/action-eligibility";
+import { haptic } from "@/lib/haptics";
 
 
 export interface SavedBankAccount {
@@ -201,6 +202,7 @@ export function FullScreenWithdrawFlow({
       )) as { data?: { id?: string; withdrawalId?: string } };
 
       setCompletedTxnId(data.data?.id || data.data?.withdrawalId || idempotencyKey);
+      haptic.success();
       setStep("success");
       if (onSuccess) onSuccess();
     } catch (err: unknown) {
@@ -227,7 +229,7 @@ export function FullScreenWithdrawFlow({
     >
       <div className="relative w-full h-full sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden text-foreground">
         {/* Header */}
-        <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border bg-card/90 backdrop-blur-md sticky top-0 z-20">
+        <header className="flex items-center justify-between px-4 sm:px-6 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-4 border-b border-border bg-card/90 backdrop-blur-md sticky top-0 z-20 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
           <div className="flex items-center gap-2">
             {step !== "amount" && step !== "success" && (
               <button
@@ -734,7 +736,7 @@ export function FullScreenWithdrawFlow({
 
         {/* Footer Actions */}
         {step !== "success" && (
-          <footer className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-t border-border bg-card/90 backdrop-blur-md sticky bottom-0 z-20 gap-3">
+          <footer className="flex items-center justify-between px-4 sm:px-6 pt-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom,0px))] border-t border-border bg-card/90 backdrop-blur-md sticky bottom-0 z-20 gap-3 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
             <Button
               type="button"
               variant="secondary"

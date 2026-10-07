@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   getNavigationItems,
   getCreateActionConfig,
@@ -98,6 +98,7 @@ export default function MobileSidebar({
   };
 
   const isBrand = (userType || "").toUpperCase() === "BRAND";
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <AnimatePresence>
@@ -108,7 +109,7 @@ export default function MobileSidebar({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
             onClick={onClose}
             className="fixed inset-0 bg-background/80 backdrop-blur-sm"
             aria-hidden="true"
@@ -116,11 +117,11 @@ export default function MobileSidebar({
 
           {/* Slide-out Drawer Panel */}
           <motion.aside
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative z-50 flex flex-col w-72 sm:w-80 max-w-[85vw] h-full bg-card border-r border-border p-4 sm:p-5 shadow-2xl overflow-y-auto"
+            initial={{ x: shouldReduceMotion ? 0 : "-100%", opacity: shouldReduceMotion ? 0 : 1 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: shouldReduceMotion ? 0 : "-100%", opacity: shouldReduceMotion ? 0 : 1 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", damping: 25, stiffness: 300 }}
+            className="relative z-50 flex flex-col w-72 sm:w-80 max-w-[85vw] h-full bg-card border-r border-border p-4 sm:p-5 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))] pl-[max(1rem,env(safe-area-inset-left,0px))] shadow-2xl overflow-y-auto"
           >
             {/* Header: Brand Logo, Role Badge & Close Button */}
             <div className="flex items-center justify-between pb-4 border-b border-border mb-4">

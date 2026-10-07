@@ -531,12 +531,15 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  padding: 12px clamp(12px, 3vw, 24px);
+  padding-top: max(12px, env(safe-area-inset-top, 0px));
+  padding-bottom: 12px;
+  padding-left: max(clamp(12px, 3vw, 24px), env(safe-area-inset-left, 0px));
+  padding-right: max(clamp(12px, 3vw, 24px), env(safe-area-inset-right, 0px));
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--color-border);
-  min-height: 64px;
+  min-height: calc(64px + env(safe-area-inset-top, 0px));
   overflow: visible;
 }
 
@@ -607,11 +610,11 @@
 
 .notif-dropdown-portal {
   position: fixed;
-  top: 64px;
-  right: 12px;
+  top: calc(64px + env(safe-area-inset-top, 0px));
+  right: max(12px, calc(env(safe-area-inset-right, 0px) + 12px));
   z-index: 99999;
   width: min(320px, calc(100vw - 24px));
-  max-height: 400px;
+  max-height: calc(400px - env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
   overflow-x: hidden;
   background: var(--color-bg-card);

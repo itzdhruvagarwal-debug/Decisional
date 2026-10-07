@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Wallet,
   Briefcase,
@@ -67,18 +67,20 @@ export default function NotificationToastBanner({
     router.push(href);
   };
 
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <AnimatePresence>
       <div
-        className="fixed top-4 right-4 md:right-8 z-[99999] max-w-sm w-[calc(100vw-32px)] pointer-events-none"
+        className="fixed top-[calc(1rem+env(safe-area-inset-top,0px))] right-[max(1rem,calc(env(safe-area-inset-right,0px)+1rem))] md:right-8 z-[99999] max-w-sm w-[calc(100vw-32px)] pointer-events-none"
         role="status"
         aria-live="polite"
       >
         <motion.div
-          initial={{ opacity: 0, y: -20, scale: 0.95 }}
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -20, scale: shouldReduceMotion ? 1 : 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -20, scale: 0.95 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
+          exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -20, scale: shouldReduceMotion ? 1 : 0.95 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: "easeOut" }}
           className="pointer-events-auto flex items-start gap-3 p-3.5 rounded-2xl bg-card/95 backdrop-blur-xl border border-border shadow-2xl shadow-black/20 text-foreground cursor-pointer hover:border-primary/40 transition-colors group"
           onClick={handleNavigate}
         >

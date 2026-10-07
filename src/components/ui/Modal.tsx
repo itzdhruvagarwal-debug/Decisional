@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 export interface ModalProps {
   readonly open?: boolean;
@@ -25,6 +25,7 @@ export function Modal({
   children,
 }: ModalProps) {
   const isVisible = Boolean(open ?? isOpen);
+  const shouldReduceMotion = useReducedMotion();
   const [mounted, setMounted] = useState(false);
   const uniqueId = React.useId().replace(/:/g, "");
   const modalClass = `modal-container-${uniqueId}`;
@@ -71,7 +72,7 @@ export function Modal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
             onClick={onClose}
           />
 
@@ -86,10 +87,10 @@ export function Modal({
             role="dialog"
             aria-modal="true"
             aria-labelledby={title ? "modal-title-id" : undefined}
-            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.95, y: shouldReduceMotion ? 0 : 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            transition={{ type: "spring", stiffness: 300, damping: 26 }}
+            exit={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.95, y: shouldReduceMotion ? 0 : 15 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 26 }}
           >
             {/* Header */}
             {title && (

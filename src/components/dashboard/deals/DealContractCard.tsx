@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, Modal, Button } from "@/components/ui";
+import { Card, BottomSheet, Button } from "@/components/ui";
 import {
   CheckCircle2,
   Clock,
@@ -824,7 +824,7 @@ export function DealContractCard({
 
       {/* ── 4. OFFICIAL LEGAL AGREEMENT MODAL ── */}
       {showFullAgreementModal && (
-        <Modal
+        <BottomSheet
           open={showFullAgreementModal}
           onClose={() => setShowFullAgreementModal(false)}
           title={
@@ -952,7 +952,7 @@ export function DealContractCard({
               </Button>
             </div>
           </div>
-        </Modal>
+        </BottomSheet>
       )}
     </>
   );

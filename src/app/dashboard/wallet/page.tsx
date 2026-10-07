@@ -32,11 +32,13 @@ import {
   Button,
   Input,
   Modal,
+  PullToRefresh,
   ToastContainer,
   type ToastItem,
   type ToastType,
   Skeleton,
 } from "@/components/ui";
+
 import {
   ShieldCheck,
   Lock,
@@ -420,7 +422,9 @@ export default function WalletPage() {
     <DashboardShell user={session?.user || undefined}>
       <ToastContainer toasts={toasts} onClose={handleRemoveToast} />
 
-      <div className="max-w-5xl mx-auto space-y-6 pb-20 animate-fade-in">
+      <PullToRefresh onRefresh={handleRefreshAll}>
+        <div className="max-w-5xl mx-auto space-y-6 pb-20 animate-fade-in">
+
         {/* ── 1. HEADER & LIVE SYNC CHIP ──────────────────────────────────── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -721,6 +725,8 @@ export default function WalletPage() {
           )}
         </div>
       </div>
+      </PullToRefresh>
+
 
       {/* ── Full-Screen Withdraw Flow Modal ─────────────────────────────────── */}
       <FullScreenWithdrawFlow

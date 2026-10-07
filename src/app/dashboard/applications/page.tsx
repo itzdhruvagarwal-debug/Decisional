@@ -31,7 +31,7 @@ import {
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { formatCurrency, formatDate } from "@/lib/utils-client";
 import EmptyState from "@/components/ui/EmptyState";
-import { Button, Skeleton } from "@/components/ui";
+import { Button, Skeleton, PullToRefresh } from "@/components/ui";
 import { MatchScoreBadge } from "@/components/dashboard/campaigns/MatchScoreBadge";
 
 type FilterTab = "ALL" | "REVIEW" | "OFFERS" | "ARCHIVED";
@@ -136,6 +136,7 @@ export default function ApplicationsPage() {
     data: payload,
     isLoading: loading,
     error: fetchErr,
+    mutate,
   } = useSWR<ApplicationsResponse>(
     session?.user ? `/api/applications?page=${page}&limit=${limit}` : null,
     applicationsFetcher
@@ -244,7 +245,8 @@ export default function ApplicationsPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <PullToRefresh onRefresh={async () => { await mutate(); }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border pb-6">
           <div>
@@ -840,7 +842,8 @@ export default function ApplicationsPage() {
             </Button>
           </div>
         )}
-      </div>
+        </div>
+      </PullToRefresh>
     </DashboardShell>
   );
 }

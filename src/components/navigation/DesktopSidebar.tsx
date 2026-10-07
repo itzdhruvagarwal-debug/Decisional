@@ -4,13 +4,14 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
 import {
   getNavigationItems,
   getCreateActionConfig,
   NavItemConfig,
 } from "@/config/navigation";
+import { motion, useReducedMotion } from "framer-motion";
 import Logo from "../Logo";
+
 import {
   Home,
   Compass,
@@ -80,6 +81,7 @@ export default function DesktopSidebar({
   unreadCount = 0,
   activeDealsCount = 0,
 }: Readonly<DesktopSidebarProps>) {
+  const shouldReduceMotion = useReducedMotion();
   const pathname = usePathname();
   const navItems = getNavigationItems(userType);
   const createAction = getCreateActionConfig(userType);
@@ -96,7 +98,7 @@ export default function DesktopSidebar({
   return (
     <aside
       aria-label="Sidebar Navigation"
-      className="hidden md:flex flex-col w-64 shrink-0 h-screen sticky top-0 bg-card border-r border-border/80 px-4 py-6 z-20 select-none"
+      className="hidden md:flex flex-col w-64 shrink-0 h-screen md:h-dvh sticky top-0 bg-card border-r border-border/80 px-4 pt-[max(1.5rem,env(safe-area-inset-top,0px))] pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] pl-[max(1rem,env(safe-area-inset-left,0px))] z-20 select-none"
     >
       {/* Brand Header */}
       <div className="flex items-center justify-between px-3 mb-8">
@@ -140,17 +142,25 @@ export default function DesktopSidebar({
             >
               {/* Sliding Background Indicator (Framer Motion) */}
               {active && (
-                <motion.div
-                  layoutId="activeTabDesktop"
-                  className="absolute inset-0 bg-primary/10 rounded-xl border border-primary/20"
-                  transition={{
-                    type: "spring",
-                    stiffness: 500,
-                    damping: 35,
-                  }}
-                  aria-hidden="true"
-                />
+                shouldReduceMotion ? (
+                  <div
+                    className="absolute inset-0 bg-primary/10 rounded-xl border border-primary/20"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <motion.div
+                    layoutId="activeTabDesktop"
+                    className="absolute inset-0 bg-primary/10 rounded-xl border border-primary/20"
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 35,
+                    }}
+                    aria-hidden="true"
+                  />
+                )
               )}
+
 
               {/* Icon */}
               <div className="relative z-1">

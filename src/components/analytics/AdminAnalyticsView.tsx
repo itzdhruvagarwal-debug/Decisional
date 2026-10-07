@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, Variants } from "framer-motion";
+import { motion, useReducedMotion, Variants } from "framer-motion";
 import {
 LineChart,
 Line,
@@ -67,24 +67,29 @@ interface AdminAnalyticsProps {
 readonly data: AdminData;
 }
 
-const containerVariants: Variants = {
-hidden: { opacity: 0 },
-show: {
-opacity: 1,
-transition: {
-staggerChildren: 0.1,
-},
-},
-};
-
-const itemVariants: Variants = {
-hidden: { opacity: 0, y: 20 },
-show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
-};
+const getItemVariants = (shouldReduceMotion: boolean | null): Variants => ({
+  hidden: { opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 24 },
+  },
+});
 
 export default function AdminAnalyticsView({ data }: AdminAnalyticsProps) {
-const [chartsReady, setChartsReady] = useState(false);
-const fmt = (v: number) => formatCurrency(v);
+  const shouldReduceMotion = useReducedMotion();
+  const [chartsReady, setChartsReady] = useState(false);
+  const fmt = (v: number) => formatCurrency(v);
+
+  const containerVariants: Variants = {
+    hidden: { opacity: shouldReduceMotion ? 1 : 0 },
+    show: {
+      opacity: 1,
+      transition: shouldReduceMotion ? { duration: 0 } : { staggerChildren: 0.08 },
+    },
+  };
+
+  const itemVariants = getItemVariants(shouldReduceMotion);
 
 useEffect(() => {
 const id = window.setTimeout(() => setChartsReady(true), 50);
@@ -293,8 +298,11 @@ readonly textColor: string;
 }
 
 function MetricCard({ icon, label, value, gradient, textColor }: MetricCardProps) {
-return (
-<motion.div variants={itemVariants} className="relative group">
+  const shouldReduceMotion = useReducedMotion();
+  const itemVariants = getItemVariants(shouldReduceMotion);
+  return (
+    <motion.div variants={itemVariants} className="relative group">
+
 <div className={`absolute inset-0 bg-gradient-to-br ${gradient} rounded-2xl blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-500`} />
 <div className="relative bg-card card glass border border-border rounded-2xl p-6 hover:-translate-y-1 transition-transform duration-300">
 <div className="flex justify-between items-start">

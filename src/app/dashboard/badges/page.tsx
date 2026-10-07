@@ -3,7 +3,7 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { BadgeDefinition } from "@/lib/badges";
@@ -80,6 +80,7 @@ function rarityAccent(rarity: string): { border: string; glow: string; badge: st
 
 export default function BadgesPage() {
   const { data: session } = useSession();
+  const shouldReduceMotion = useReducedMotion();
   const [activeCategory, setActiveCategory] = useState<string>("ALL");
   const [activeRarity, setActiveRarity] = useState<string>("ALL");
 
@@ -166,9 +167,9 @@ export default function BadgesPage() {
             ].map((kpi, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
+                transition={shouldReduceMotion ? { duration: 0 } : { delay: i * 0.08 }}
                 className="flex items-center gap-4 p-4 rounded-xl bg-card border border-border shadow-sm"
               >
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${kpi.bg}`}>
@@ -365,11 +366,11 @@ export default function BadgesPage() {
                   return (
                     <motion.div
                       key={badge.id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.92 }}
+                      layout={!shouldReduceMotion}
+                      initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.92 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.88 }}
-                      transition={{ delay: index * 0.04 }}
+                      exit={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.88 }}
+                      transition={shouldReduceMotion ? { duration: 0 } : { delay: index * 0.04 }}
                       className={`relative flex flex-col items-center text-center p-6 rounded-2xl bg-card border shadow-sm transition-all hover:shadow-md ${
                         badge.earned
                           ? `${accent.border} ${accent.glow}`
@@ -428,9 +429,9 @@ export default function BadgesPage() {
                           </div>
                           <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                             <motion.div
-                              initial={{ width: 0 }}
+                              initial={{ width: shouldReduceMotion ? `${progressPct}%` : 0 }}
                               animate={{ width: `${progressPct}%` }}
-                              transition={{ duration: 0.8, ease: "easeOut" }}
+                              transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.8, ease: "easeOut" }}
                               className="h-full bg-primary rounded-full"
                               aria-label={`${badge.name} progress: ${progressPct.toFixed(0)}%`}
                             />

@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import EmptyState from "@/components/ui/EmptyState";
+import { PullToRefresh } from "@/components/ui";
 import { useMessages } from "./useMessages";
 import { Conversation } from "./MessagesHelpers";
 import { formatDate, formatTime } from "@/lib/utils-client";
@@ -136,7 +137,7 @@ export function ConversationsSidebar({ state }: Readonly<ConversationsSidebarPro
       </div>
 
       {/* ── Conversations List ── */}
-      <div className="flex-1 overflow-y-auto">
+      <PullToRefresh onRefresh={state.refreshConversations} className="flex-1 overflow-y-auto">
         {(() => {
           if (loadingConversations) {
             return <SidebarSkeleton />;
@@ -273,7 +274,7 @@ export function ConversationsSidebar({ state }: Readonly<ConversationsSidebarPro
             </div>
           );
         })()}
-      </div>
+      </PullToRefresh>
     </aside>
   );
 }

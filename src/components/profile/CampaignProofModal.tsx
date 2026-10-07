@@ -4,7 +4,8 @@ import React from "react";
 import Image from "next/image";
 import { CampaignProofItem } from "./types";
 import { formatCurrency, formatDate } from "@/lib/utils-client";
-import { Modal } from "@/components/ui";
+import { BottomSheet } from "@/components/ui";
+
 import {
   ShieldCheck,
   Lock,
@@ -58,12 +59,13 @@ export default function CampaignProofModal({
   );
 
   return (
-    <Modal
+    <BottomSheet
       open={Boolean(proof)}
       onClose={onClose}
       title={headerTitle}
       maxWidth="32rem"
     >
+
       <div className="space-y-5">
         {/* Media Banner / Cover Photo */}
         <div className="relative aspect-[16/9] w-full rounded-2xl bg-muted overflow-hidden border border-border">
@@ -145,6 +147,7 @@ export default function CampaignProofModal({
           </span>
         </div>
       </div>
-    </Modal>
+    </BottomSheet>
   );
 }
+

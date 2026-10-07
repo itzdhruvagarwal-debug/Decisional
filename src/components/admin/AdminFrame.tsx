@@ -82,7 +82,7 @@ export default function AdminFrame({ children, user }: Readonly<AdminFrameProps>
 
       {/* ── Sidebar ── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-card border-r border-border shadow-xl transition-transform duration-300 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-card border-r border-border shadow-xl pt-[max(0.5rem,env(safe-area-inset-top,0px))] pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] pl-[max(0.5rem,env(safe-area-inset-left,0px))] transition-transform duration-300 lg:static lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -170,7 +170,7 @@ export default function AdminFrame({ children, user }: Readonly<AdminFrameProps>
       {/* ── Main content area ── */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         {/* Top bar */}
-        <header className="sticky top-0 z-20 flex items-center justify-between gap-4 px-4 py-3 bg-card/95 backdrop-blur-sm border-b border-border">
+        <header className="sticky top-0 z-20 flex items-center justify-between gap-4 px-4 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-3 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] bg-card/95 backdrop-blur-sm border-b border-border">
           <div className="flex items-center gap-2.5">
             <button
               type="button"

@@ -13,7 +13,7 @@ import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { formatDate, normalizeDeliverables } from "@/lib/utils-client";
 import EmptyState from "@/components/ui/EmptyState";
-import { Button } from "@/components/ui";
+import { Button, PullToRefresh } from "@/components/ui";
 import { DealsMetricsBar } from "@/components/dashboard/deals/DealsMetricsBar";
 import { DealsFilterToolbar } from "@/components/dashboard/deals/DealsFilterToolbar";
 import { DealPipelineCard } from "@/components/dashboard/deals/DealPipelineCard";
@@ -94,7 +94,7 @@ export default function DealsPage() {
 
   const statusParam = statusFilter === "all" ? "" : `&status=${statusFilter}`;
   const dealsListFetcher = createSchemaFetcher(dealsListResponseSchema);
-  const { data: payload, isLoading: loading } = useSWR<DealsApiResponse>(
+  const { data: payload, isLoading: loading, mutate } = useSWR<DealsApiResponse>(
     `/api/deals?page=${currentPage}&limit=${DEALS_PER_PAGE}${statusParam}${campaignParam}`,
     dealsListFetcher
   );
@@ -184,8 +184,9 @@ export default function DealsPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <div className="max-w-7xl mx-auto space-y-6 pb-12 animate-fade-in">
-        {/* Page Header */}
+      <PullToRefresh onRefresh={async () => { await mutate(); }}>
+        <div className="max-w-7xl mx-auto space-y-6 pb-12 animate-fade-in">
+          {/* Page Header */}
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-5">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
@@ -303,6 +304,7 @@ export default function DealsPage() {
           </>
         )}
       </div>
-    </DashboardShell>
+    </PullToRefresh>
+  </DashboardShell>
   );
 }

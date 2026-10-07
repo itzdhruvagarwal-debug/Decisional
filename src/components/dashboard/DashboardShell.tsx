@@ -203,7 +203,7 @@ export default function DashboardShell({
         )}
 
         {/* Dashboard Page Content with Client-side Role Guard */}
-        <main className="flex-1 p-4 md:p-6 max-w-7xl w-full mx-auto animate-fade-in">
+        <main className="flex-1 p-4 md:p-6 pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:pb-6 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] max-w-7xl w-full mx-auto animate-fade-in">
           <RoleGuard userType={user?.userType}>
             {children}
           </RoleGuard>

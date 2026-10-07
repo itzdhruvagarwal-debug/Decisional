@@ -15,7 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { copyToClipboard } from "@/lib/clipboard";
-import { Modal, Button } from "@/components/ui";
+import { BottomSheet, Button } from "@/components/ui";
 import { DealDetail } from "./DealDetailHelpers";
 import { apiClient } from "@/lib/api-client";
 import { formatDate } from "@/lib/utils-client";
@@ -128,7 +128,7 @@ export function ShipmentTrackingModal({
   const isDelivered = currentStep === 3 || deal?.productFulfillmentStatus === "RECEIVED";
 
   return (
-    <Modal
+    <BottomSheet
       open={open}
       onClose={onClose}
       title="Live Shipment & Tracking"
@@ -341,6 +341,6 @@ export function ShipmentTrackingModal({
           </Button>
         </div>
       </div>
-    </Modal>
+    </BottomSheet>
   );
 }

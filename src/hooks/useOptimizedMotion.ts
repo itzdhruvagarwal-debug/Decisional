@@ -1,6 +1,7 @@
 "use client";
 
 import { useReducedMotion } from "framer-motion";
+export { useReducedMotion };
 
 /**
  * Hook to provide accessibility-first motion configs that strictly respect

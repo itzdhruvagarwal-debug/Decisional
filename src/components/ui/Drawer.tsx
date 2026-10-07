@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion, type Transition } from "framer-motion";
 import { X } from "lucide-react";
 
 export interface DrawerProps {
@@ -35,6 +35,7 @@ export function Drawer({
   showCloseButton = true,
 }: Readonly<DrawerProps>) {
   const isVisible = Boolean(open ?? isOpen);
+  const shouldReduceMotion = useReducedMotion();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -67,28 +68,33 @@ export function Drawer({
 
   if (!mounted) return null;
 
+  const backdropTransition: Transition = shouldReduceMotion ? { duration: 0 } : { duration: 0.2 };
+  const drawerTransition: Transition = shouldReduceMotion
+    ? { duration: 0 }
+    : { type: "spring", damping: 28, stiffness: 300 };
+
   // Animation variants by side
   const variants = {
     right: {
-      initial: { x: "100%" },
-      animate: { x: 0 },
-      exit: { x: "100%" },
+      initial: { x: shouldReduceMotion ? 0 : "100%", opacity: shouldReduceMotion ? 0 : 1 },
+      animate: { x: 0, opacity: 1 },
+      exit: { x: shouldReduceMotion ? 0 : "100%", opacity: shouldReduceMotion ? 0 : 1 },
       containerClass: "justify-end items-stretch",
-      panelClass: "h-full border-l",
+      panelClass: "h-full border-l pt-[max(12px,env(safe-area-inset-top,0px))] pb-[max(12px,env(safe-area-inset-bottom,0px))] pr-[max(0px,env(safe-area-inset-right,0px))]",
     },
     left: {
-      initial: { x: "-100%" },
-      animate: { x: 0 },
-      exit: { x: "-100%" },
+      initial: { x: shouldReduceMotion ? 0 : "-100%", opacity: shouldReduceMotion ? 0 : 1 },
+      animate: { x: 0, opacity: 1 },
+      exit: { x: shouldReduceMotion ? 0 : "-100%", opacity: shouldReduceMotion ? 0 : 1 },
       containerClass: "justify-start items-stretch",
-      panelClass: "h-full border-r",
+      panelClass: "h-full border-r pt-[max(12px,env(safe-area-inset-top,0px))] pb-[max(12px,env(safe-area-inset-bottom,0px))] pl-[max(0px,env(safe-area-inset-left,0px))]",
     },
     bottom: {
-      initial: { y: "100%" },
-      animate: { y: 0 },
-      exit: { y: "100%" },
+      initial: { y: shouldReduceMotion ? 0 : "100%", opacity: shouldReduceMotion ? 0 : 1 },
+      animate: { y: 0, opacity: 1 },
+      exit: { y: shouldReduceMotion ? 0 : "100%", opacity: shouldReduceMotion ? 0 : 1 },
       containerClass: "justify-center items-end",
-      panelClass: "w-full rounded-t-3xl border-t max-h-[85vh]",
+      panelClass: "w-full rounded-t-3xl border-t max-h-[85vh] pb-[max(16px,env(safe-area-inset-bottom,0px))] pl-[max(0px,env(safe-area-inset-left,0px))] pr-[max(0px,env(safe-area-inset-right,0px))]",
     },
   };
 
@@ -105,7 +111,7 @@ export function Drawer({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={backdropTransition}
             onClick={onClose}
             className="fixed inset-0 bg-background/80 backdrop-blur-xs w-full h-full cursor-pointer"
           />
@@ -118,7 +124,7 @@ export function Drawer({
             initial={currentVariant.initial}
             animate={currentVariant.animate}
             exit={currentVariant.exit}
-            transition={{ type: "spring", damping: 28, stiffness: 300 }}
+            transition={drawerTransition}
             {...(maxWidth ? { style: { maxWidth } } : {})}
             className={`relative bg-card border-border shadow-2xl z-10 flex flex-col overflow-hidden text-foreground ${currentVariant.panelClass} ${className}`}
           >

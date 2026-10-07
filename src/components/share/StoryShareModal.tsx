@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import QRCode from "qrcode";
-import { Modal } from "@/components/ui";
-import { Button } from "@/components/ui";
+import { BottomSheet, Button } from "@/components/ui";
 import { copyToClipboard } from "@/lib/clipboard";
 import { logger } from "@/lib/logger-client";
 import {
@@ -551,9 +550,10 @@ export default function StoryShareModal({
   ];
 
   return (
-    <Modal
+    <BottomSheet
       open={open}
       onClose={onClose}
+      maxWidth="820px"
       title={
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-primary/20 border border-primary/20 flex items-center justify-center">
@@ -567,7 +567,6 @@ export default function StoryShareModal({
           </div>
         </div>
       }
-      maxWidth="820px"
     >
       <div className="space-y-4 pt-1">
 
@@ -926,6 +925,6 @@ export default function StoryShareModal({
           </div>
         </div>
       </div>
-    </Modal>
+    </BottomSheet>
   );
 }

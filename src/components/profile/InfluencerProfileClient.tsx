@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   InfluencerProfileData,
   CampaignProofItem,
@@ -11,7 +11,7 @@ import {
 import { formatCurrency, formatDate, formatNumber } from "@/lib/utils-client";
 import { copyToClipboard } from "@/lib/clipboard";
 import CampaignProofModal from "./CampaignProofModal";
-import { Modal } from "@/components/ui";
+import { BottomSheet } from "@/components/ui";
 import {
   ShieldCheck,
   CheckCircle2,
@@ -124,6 +124,7 @@ export default function InfluencerProfileClient({
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
   const [canMessageState, setCanMessageState] = useState<boolean>(Boolean(canMessage));
   const [showStoryModal, setShowStoryModal] = useState<boolean>(false);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     if (canMessage !== undefined) {
@@ -211,11 +212,12 @@ export default function InfluencerProfileClient({
       <AnimatePresence>
         {toastMessage && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -20 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
             role="alert"
-            className="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-foreground text-background text-xs font-bold shadow-xl flex items-center gap-2"
+            className="fixed top-[max(1.25rem,calc(env(safe-area-inset-top,0px)+12px))] left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-foreground text-background text-xs font-bold shadow-xl flex items-center gap-2"
           >
             <CheckCircle2 className="w-3.5 h-3.5 text-verified" />
             <span>{toastMessage}</span>
@@ -583,7 +585,11 @@ export default function InfluencerProfileClient({
                   <motion.div
                     layoutId="profileActiveTab"
                     className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
-                    transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    transition={
+                      shouldReduceMotion
+                        ? { duration: 0 }
+                        : { type: "spring", stiffness: 500, damping: 35 }
+                    }
                   />
                 )}
               </button>
@@ -972,7 +978,7 @@ export default function InfluencerProfileClient({
       {!isOwnProfile && (
         <aside
           aria-label="Sticky Collaboration Bar"
-          className="fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border p-3 sm:p-4 shadow-2xl"
+          className="fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border p-3 sm:p-4 pb-[max(0.75rem,calc(env(safe-area-inset-bottom,0px)+8px))] pl-[max(0.75rem,env(safe-area-inset-left,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))] shadow-2xl"
         >
           <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
             <div className="min-w-0">
@@ -1022,7 +1028,7 @@ export default function InfluencerProfileClient({
 
       {/* Quick Invite to Campaign Modal */}
       {showInviteModal && (
-        <Modal
+        <BottomSheet
           open={showInviteModal}
           onClose={() => setShowInviteModal(false)}
           title={
@@ -1099,7 +1105,7 @@ export default function InfluencerProfileClient({
               )}
             </div>
           </div>
-        </Modal>
+        </BottomSheet>
       )}
 
       {/* Story Share Modal (Instagram & WhatsApp Story) */}

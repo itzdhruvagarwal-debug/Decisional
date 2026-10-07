@@ -28,6 +28,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { PullToRefresh } from "@/components/ui";
 
 function renderActivityIcon(iconName: string, className: string) {
   switch (iconName) {
@@ -137,7 +138,8 @@ export default function NotificationsPage() {
 
   return (
     <DashboardShell user={session?.user}>
-      <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-16">
+      <PullToRefresh onRefresh={refresh}>
+        <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-16">
         {/* ── 1. HEADER (INSTAGRAM ACTIVITY BENCHMARK) ───────────────────── */}
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-card border border-border shadow-xs">
           <div className="flex items-center gap-3">
@@ -354,7 +356,8 @@ export default function NotificationsPage() {
             </Button>
           </div>
         )}
-      </div>
+        </div>
+      </PullToRefresh>
     </DashboardShell>
   );
 }

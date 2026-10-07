@@ -28,7 +28,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { formatCurrency, formatDate, formatNumber } from "@/lib/utils-client";
-import { Button, Input, Textarea, Modal, Spinner } from "@/components/ui";
+import { Button, Input, Textarea, BottomSheet, Spinner } from "@/components/ui";
 import { ApplicationsList } from "@/components/dashboard/campaigns/details/ApplicationsList";
 import { useCampaignDetail } from "@/components/dashboard/campaigns/details/useCampaignDetail";
 import { checkCampaignCancelEligibility, checkCampaignApplicationEligibility, checkCampaignActivationEligibility } from "@/lib/action-eligibility";
@@ -966,7 +966,7 @@ export default function CampaignDetailClient({
       </div>
 
       {/* Apply Modal */}
-      <Modal
+      <BottomSheet
         open={showApplyModal}
         onClose={() => setShowApplyModal(false)}
         title="Apply to Campaign"
@@ -1070,7 +1070,7 @@ export default function CampaignDetailClient({
             </Button>
           </div>
         </div>
-      </Modal>
+      </BottomSheet>
     </div>
   );
 }

@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import useSWR from "swr";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useSession } from "next-auth/react";
+
 import {
   Trophy,
   Crown,
@@ -21,7 +22,7 @@ import {
 import { fetcher } from "@/lib/fetcher";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import EmptyState from "@/components/ui/EmptyState";
-import { Select } from "@/components/ui";
+import { Select, PullToRefresh } from "@/components/ui";
 import { formatNumber } from "@/lib/utils-client";
 import { ALL_CATEGORIES } from "@/lib/categories";
 
@@ -60,6 +61,7 @@ const CITIES = [
 ];
 
 export default function LeaderboardPage() {
+  const shouldReduceMotion = useReducedMotion();
   const { data: session } = useSession();
   const [tab, setTab] = useState<"influencers" | "brands">("influencers");
   const [filter, setFilter] = useState<"all-time" | "weekly">("all-time");
@@ -74,6 +76,7 @@ export default function LeaderboardPage() {
     data: leaderboardData,
     isLoading: loading,
     error: fetchErr,
+    mutate,
   } = useSWR<{
     influencers?: LeaderboardUser[];
     brands?: LeaderboardUser[];
@@ -114,7 +117,8 @@ export default function LeaderboardPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <PullToRefresh onRefresh={async () => { await mutate(); }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Page Header */}
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 mb-1">
@@ -226,8 +230,9 @@ export default function LeaderboardPage() {
           weeklyChampion &&
           tab === "influencers" && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3 }}
               className="p-6 rounded-3xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm"
             >
               <div className="flex items-center gap-4 text-center sm:text-left">
@@ -277,9 +282,9 @@ export default function LeaderboardPage() {
               <div className="grid grid-cols-3 gap-2 sm:gap-6 items-end justify-center max-w-2xl mx-auto pt-6">
                 {/* 2nd Place (Silver) */}
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.1 }}
                   className="flex flex-col items-center text-center space-y-2 order-1"
                 >
                   <div className="relative">
@@ -323,12 +328,12 @@ export default function LeaderboardPage() {
 
                 {/* 1st Place (Gold) */}
                 <motion.div
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0 }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { delay: 0 }}
                   className="flex flex-col items-center text-center space-y-2 order-2"
                 >
-                  <Crown className="w-7 h-7 text-amber-500 animate-bounce" />
+                  <Crown className={`w-7 h-7 text-amber-500 ${shouldReduceMotion ? "" : "animate-bounce"}`} />
                   <div className="relative">
                     <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-amber-500 overflow-hidden relative shadow-md">
                       {first.avatar ? (
@@ -370,9 +375,9 @@ export default function LeaderboardPage() {
 
                 {/* 3rd Place (Bronze) */}
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.2 }}
                   className="flex flex-col items-center text-center space-y-2 order-3"
                 >
                   <div className="relative">
@@ -468,9 +473,9 @@ export default function LeaderboardPage() {
                   return (
                     <motion.div
                       key={user.id}
-                      initial={{ opacity: 0, x: -10 }}
+                      initial={shouldReduceMotion ? false : { opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.02 }}
+                      transition={shouldReduceMotion ? { duration: 0 } : { delay: index * 0.02 }}
                       className={`flex items-center justify-between gap-3 px-4 py-3 sm:grid sm:grid-cols-12 sm:gap-4 sm:px-6 sm:py-4 hover:bg-muted/40 transition-colors ${
                         isTop3 ? "bg-muted/10 font-semibold" : ""
                       }`}
@@ -576,7 +581,7 @@ export default function LeaderboardPage() {
 
         {/* Instagram Benchmark: Sticky "Your Rank" Floating Dock */}
         {session?.user && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-lg">
+          <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] md:bottom-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))] left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-lg">
             <div className="flex items-center justify-between gap-3 p-3 px-4 rounded-2xl bg-card/95 backdrop-blur-md border border-primary/40 shadow-xl text-foreground">
               <div className="flex items-center gap-3 min-w-0">
                 <span className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 text-primary font-black text-xs flex items-center justify-center shrink-0">
@@ -614,7 +619,8 @@ export default function LeaderboardPage() {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </PullToRefresh>
     </DashboardShell>
   );
 }

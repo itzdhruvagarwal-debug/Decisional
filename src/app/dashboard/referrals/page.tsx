@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import ReferralList from "@/components/dashboard/referrals/ReferralList";
@@ -232,6 +232,7 @@ const TIERS = [
 
 export default function ReferralsPage() {
   const { data: session } = useSession();
+  const shouldReduceMotion = useReducedMotion();
   const [codeCopied, setCodeCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -351,9 +352,9 @@ export default function ReferralsPage() {
           ].map((kpi, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
+              transition={shouldReduceMotion ? { duration: 0 } : { delay: i * 0.08 }}
               className="flex items-center gap-4 p-4 rounded-xl bg-card border border-border shadow-sm"
             >
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${kpi.bg}`}>
@@ -400,10 +401,10 @@ export default function ReferralsPage() {
           {activeTab === "overview" ? (
             <motion.div
               key="overview"
-              initial={{ opacity: 0, x: -16 }}
+              initial={{ opacity: 0, x: shouldReduceMotion ? 0 : -16 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 16 }}
-              transition={{ duration: 0.25 }}
+              exit={{ opacity: 0, x: shouldReduceMotion ? 0 : 16 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
               className="space-y-6"
             >
               {/* ── Referral Code Card (CRED-style) ── */}
@@ -538,9 +539,9 @@ export default function ReferralsPage() {
                 {/* Progress track */}
                 <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                   <motion.div
-                    initial={{ width: 0 }}
+                    initial={{ width: shouldReduceMotion ? `${progress}%` : 0 }}
                     animate={{ width: `${progress}%` }}
-                    transition={{ duration: 1.2, ease: "easeOut" }}
+                    transition={{ duration: shouldReduceMotion ? 0 : 1.2, ease: "easeOut" }}
                     className="h-full bg-gradient-to-r from-primary to-verified rounded-full"
                   />
                 </div>
@@ -552,9 +553,9 @@ export default function ReferralsPage() {
                     return (
                       <motion.div
                         key={tier.name}
-                        initial={{ opacity: 0, y: 8 }}
+                        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.06 }}
+                        transition={shouldReduceMotion ? { duration: 0 } : { delay: i * 0.06 }}
                         className={`text-center p-3 rounded-xl border transition-all ${
                           isActive
                             ? `${tier.accent} shadow-sm ring-1 ring-inset ring-current/20`
@@ -617,10 +618,10 @@ export default function ReferralsPage() {
           ) : (
             <motion.div
               key="history"
-              initial={{ opacity: 0, x: 16 }}
+              initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 16 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -16 }}
-              transition={{ duration: 0.25 }}
+              exit={{ opacity: 0, x: shouldReduceMotion ? 0 : -16 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
             >
               <ReferralList onShareClick={() => setShareOpen(true)} />
             </motion.div>

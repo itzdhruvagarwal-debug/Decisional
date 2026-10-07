@@ -11,6 +11,7 @@ import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { type DealDetail, type SingleDealResponse } from "@/lib/schemas";
+import { haptic } from "@/lib/haptics";
 
 export interface DealMutationState {
   isSubmitting: boolean;
@@ -62,6 +63,7 @@ export function useDeal(
     setIsSubmitting(true);
     try {
       await apiClient.deals.sign(id);
+      haptic.success();
       onToast("success", "Contract signed successfully.");
       refresh();
       return true;
@@ -78,6 +80,7 @@ export function useDeal(
     setIsSubmitting(true);
     try {
       const data = await apiClient.deals.cancel(id) as { message?: string };
+      haptic.success();
       onToast("success", data?.message ?? "Deal cancelled successfully.");
       refresh();
       return true;
@@ -95,6 +98,7 @@ export function useDeal(
       setIsSubmitting(true);
       try {
         await apiClient.deals.reject(id, reason);
+        haptic.success();
         onToast("success", "Invite successfully rejected.");
         refresh();
         return true;
@@ -118,6 +122,7 @@ export function useDeal(
           dealId: id,
           ...payload,
         }) as { message?: string };
+        haptic.success();
         onToast("success", data?.message ?? "Success!");
         refresh();
         return true;
@@ -137,6 +142,7 @@ export function useDeal(
       setIsSubmitting(true);
       try {
         await apiClient.deals.updateProduct(id, payload);
+        haptic.success();
         onToast("success", "Product status updated.");
         refresh();
         return true;

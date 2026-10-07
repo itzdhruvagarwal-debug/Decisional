@@ -665,7 +665,7 @@ export default function DealDetailPage() {
       {deal && (
         <aside
           aria-label="Dispute Support"
-          className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-md border-t border-border px-4 py-3 shadow-lg"
+          className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] md:bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-md border-t border-border px-4 py-3 md:pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] shadow-lg"
         >
           <div className="max-w-6xl mx-auto flex items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2 text-muted-foreground">

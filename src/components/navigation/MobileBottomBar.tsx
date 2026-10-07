@@ -70,7 +70,7 @@ export default function MobileBottomBar({
   return (
     <>
       {/* Center-Elevated Context-Aware Action Button (Mobile) with 44px min hit-area */}
-      <div className="fixed bottom-[68px] left-1/2 -translate-x-1/2 z-40 md:hidden pointer-events-auto">
+      <div className="fixed bottom-[calc(68px+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-40 md:hidden pointer-events-auto">
         <Link
           href={createAction.href}
           aria-label={createAction.ariaLabel}
@@ -87,7 +87,7 @@ export default function MobileBottomBar({
       <nav
         role="navigation"
         aria-label="Mobile Navigation"
-        className="fixed bottom-0 left-0 right-0 z-30 h-16 bg-card/95 backdrop-blur-md border-t border-border flex md:hidden items-center justify-around px-2 pb-safe"
+        className="fixed bottom-0 left-0 right-0 z-30 min-h-16 h-[calc(4rem+env(safe-area-inset-bottom,0px))] bg-card/95 backdrop-blur-md border-t border-border flex md:hidden items-start justify-around px-2 pt-1.5 pb-[env(safe-area-inset-bottom,0px)] pl-[max(0.5rem,env(safe-area-inset-left,0px))] pr-[max(0.5rem,env(safe-area-inset-right,0px))]"
       >
         <div className="w-full max-w-lg mx-auto flex items-center justify-between" role="tablist">
           {navItems.map((item) => {

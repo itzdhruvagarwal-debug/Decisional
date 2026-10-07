@@ -198,7 +198,7 @@ export default function DiscoveryFeed({
     <PullToRefresh onRefresh={() => refetch()}>
       <div className="w-full max-w-2xl mx-auto px-2 sm:px-4 py-4 space-y-4">
         {/* Search Bar & Filter Bottom Sheet Trigger */}
-        <div className="flex items-center gap-2 sticky top-2 z-20 bg-background/80 backdrop-blur-md p-1 rounded-2xl">
+        <div className="flex items-center gap-2 sticky top-[max(0.5rem,calc(env(safe-area-inset-top,0px)+0.5rem))] z-20 bg-background/80 backdrop-blur-md p-1 rounded-2xl">
           {/* Search Input */}
           <div className="relative flex-1">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />

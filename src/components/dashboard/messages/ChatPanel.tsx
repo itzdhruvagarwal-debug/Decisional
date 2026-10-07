@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { Modal, Button, Select, Textarea } from "@/components/ui";
+import { BottomSheet, Button, Select, Textarea } from "@/components/ui";
 import { useMessages } from "./useMessages";
 import { Message, formatMessageDateDivider } from "./MessagesHelpers";
 import { DealContextMiniCard } from "./DealContextMiniCard";
@@ -400,7 +400,7 @@ function ChatInputArea({ state }: Readonly<ChatPanelProps>) {
   // No active deal state
   if (!hasActiveDeal) {
     return (
-      <div className="p-4 border-t border-border bg-card shrink-0">
+      <div className="p-4 pb-[max(1rem,calc(env(safe-area-inset-bottom,0px)+1rem))] border-t border-border bg-card shrink-0">
         <div className="font-semibold text-xs text-pending px-4 py-3 bg-pending-muted border border-pending-border rounded-xl text-center flex items-center justify-center gap-2">
           <Lock className="w-3.5 h-3.5" />
           Messaging is locked — you can only message users who have an active deal with you.
@@ -410,7 +410,7 @@ function ChatInputArea({ state }: Readonly<ChatPanelProps>) {
   }
 
   return (
-    <div className="border-t border-border bg-card shrink-0">
+    <div className="border-t border-border bg-card shrink-0 pb-[env(safe-area-inset-bottom,0px)]">
       {/* Contact leak warning */}
       <ContactLeakWarningBanner leakResult={state.contactLeakResult} />
 
@@ -472,10 +472,11 @@ export function ReportUserModal({ state }: Readonly<ChatPanelProps>) {
   } = state;
 
   return (
-    <Modal
+    <BottomSheet
       open={isReportModalOpen}
       onClose={() => setIsReportModalOpen(false)}
       title={`Report ${selectedChat?.name || "User"}`}
+      maxWidth="480px"
     >
       <form onSubmit={handleReportSubmit} className="space-y-4 pt-2">
         <Select
@@ -521,7 +522,7 @@ export function ReportUserModal({ state }: Readonly<ChatPanelProps>) {
           </Button>
         </div>
       </form>
-    </Modal>
+    </BottomSheet>
   );
 }
 

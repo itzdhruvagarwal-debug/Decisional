@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { DiscoveryFilters, DiscoveryMode } from "./types";
 import { X, SlidersHorizontal, RotateCcw } from "lucide-react";
-import { Drawer } from "@/components/ui";
+import { BottomSheet } from "@/components/ui";
 
 interface FilterBottomSheetProps {
   isOpen: boolean;
@@ -105,14 +105,15 @@ export default function FilterBottomSheet({
   const activeCount = Object.values(localFilters).filter(Boolean).length;
 
   return (
-    <Drawer
-      isOpen={isOpen}
+    <BottomSheet
+      open={isOpen}
       onClose={onClose}
-      side="bottom"
+      responsive={false}
       maxWidth="32rem"
       aria-label="Filter & Sort Options"
       showCloseButton={false}
-      className="max-h-[85vh]"
+      showGrabHandle={true}
+      className="max-h-[85vh] p-0"
     >
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-border/60">
@@ -318,6 +319,6 @@ export default function FilterBottomSheet({
                 Apply Filters
               </button>
             </div>
-    </Drawer>
+    </BottomSheet>
   );
 }

@@ -9,7 +9,7 @@ import { fetcher } from "@/lib/fetcher";
 import { logger } from "@/lib/logger-client";
 import { apiClient } from "@/lib/api-client";
 import { formatUserError } from "@/lib/user-messages";
-import { Button, Textarea, Input, ToastContainer, type ToastItem, Skeleton } from "@/components/ui";
+import { Button, Textarea, Input, ToastContainer, type ToastItem, Skeleton, BottomSheet } from "@/components/ui";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { formatCurrency } from "@/lib/utils-client";
 import { createDisputeSchema } from "@/lib/validations/campaign";
@@ -144,6 +144,7 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
   const [evidenceUrl, setEvidenceUrl] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmSheet, setShowConfirmSheet] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   const selectedOption = useMemo(
@@ -177,7 +178,7 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
     else if (currentStep === 2) setCurrentStep(1);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!disputeEligibility.allowed) {
       showToast("error", disputeEligibility.reason || "Dispute cannot be filed for this deal.");
@@ -192,6 +193,10 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
       return;
     }
 
+    setShowConfirmSheet(true);
+  };
+
+  const handleConfirmedSubmit = async () => {
     setIsSubmitting(true);
     try {
       const fullDescription = evidenceUrl.trim()
@@ -214,6 +219,7 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
         reason: fullDescription,
       });
 
+      setShowConfirmSheet(false);
       showToast("success", "Dispute opened. Escrow funds locked under mediation.");
       setTimeout(() => {
         router.push("/dashboard/disputes");
@@ -743,6 +749,62 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
           </form>
         )}
       </div>
+
+      {/* Dispute Raise Confirmation BottomSheet */}
+      <BottomSheet
+        open={showConfirmSheet}
+        onClose={() => setShowConfirmSheet(false)}
+        title="Confirm Formal Dispute Filing"
+        description="Filing a dispute immediately freezes escrow funds and initiates platform mediation."
+        maxWidth="520px"
+      >
+        <div className="space-y-4 pt-2">
+          <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-3.5 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="text-xs space-y-1">
+              <p className="font-bold">Deal Milestones Paused Immediately</p>
+              <p className="text-destructive/90 leading-relaxed">
+                Escrow payouts for this deal will be locked. Platform mediators will review both parties&apos; submissions within 24–48 hours.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-muted/50 rounded-xl p-3 border border-border space-y-1.5 text-xs">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Issue Category:</span>
+              <span className="font-semibold text-foreground">{selectedOption.title}</span>
+            </div>
+            {deal?.amount && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Escrow Amount:</span>
+                <span className="font-semibold text-foreground">{formatCurrency(deal.amount)}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 pt-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setShowConfirmSheet(false)}
+              disabled={isSubmitting}
+              className="w-full sm:w-auto min-h-[44px] px-4 py-2 text-xs font-semibold rounded-xl"
+            >
+              Go Back
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={handleConfirmedSubmit}
+              disabled={isSubmitting || !disputeEligibility.allowed}
+              title={disputeEligibility.reason}
+              className="w-full sm:w-auto min-h-[44px] px-5 py-2 text-xs font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? "Filing Dispute..." : "Yes, Freeze Escrow & Submit"}
+            </Button>
+          </div>
+        </div>
+      </BottomSheet>
     </DashboardShell>
   );
 }

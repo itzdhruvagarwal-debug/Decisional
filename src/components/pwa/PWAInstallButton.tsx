@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/Button";
+import { Button, BottomSheet } from "@/components/ui";
+
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -188,28 +189,27 @@ export default function PWAInstallButton({
           <DownloadIcon />
         </button>
 
-        {showFallback && (
-          <dialog open className="pwa-install-overlay" aria-modal="true">
-            <div className="pwa-install-dialog">
-              <div className="pwa-install-icon">
-                <DownloadIcon />
-              </div>
-              <h2>{copy.title}</h2>
-              <p>
-                VyaparMedia is a secure PWA. Install it from the browser and use it like a mobile app on your home screen.
-              </p>
-              <ol className="pwa-install-steps">
-                {copy.steps.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ol>
-              <div className="pwa-install-actions">
-                <Button variant="primary" onClick={() => setShowFallback(false)}>Got it</Button>
-                <Button variant="secondary" onClick={() => setShowFallback(false)}>Close</Button>
-              </div>
+        <BottomSheet
+          open={showFallback}
+          onClose={() => setShowFallback(false)}
+          title={copy.title}
+          maxWidth="440px"
+        >
+          <div className="space-y-4 pt-1">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              VyaparMedia is a secure PWA. Install it from the browser and use it like a mobile app on your home screen.
+            </p>
+            <ol className="space-y-2 text-xs text-foreground bg-muted/40 p-4 rounded-xl border border-border list-decimal list-inside font-medium">
+              {copy.steps.map((step) => (
+                <li key={step} className="leading-relaxed">{step}</li>
+              ))}
+            </ol>
+            <div className="flex justify-end gap-2 pt-2 border-t border-border">
+              <Button variant="secondary" size="sm" onClick={() => setShowFallback(false)}>Close</Button>
+              <Button variant="primary" size="sm" onClick={() => setShowFallback(false)}>Got it</Button>
             </div>
-          </dialog>
-        )}
+          </div>
+        </BottomSheet>
       </>
     );
   }
@@ -232,28 +232,27 @@ export default function PWAInstallButton({
         </span>
       </Button>
 
-      {showFallback && (
-        <dialog open className="pwa-install-overlay" aria-modal="true">
-          <div className="pwa-install-dialog">
-            <div className="pwa-install-icon">
-              <DownloadIcon />
-            </div>
-            <h2>{copy.title}</h2>
-            <p>
-              VyaparMedia is a secure PWA. Install it from the browser and use it like a mobile app on your home screen.
-            </p>
-            <ol className="pwa-install-steps">
-              {copy.steps.map((step) => (
-                <li key={step}>{step}</li>
-              ))}
-            </ol>
-            <div className="pwa-install-actions">
-              <Button variant="primary" onClick={() => setShowFallback(false)}>Got it</Button>
-              <Button variant="secondary" onClick={() => setShowFallback(false)}>Close</Button>
-            </div>
+      <BottomSheet
+        open={showFallback}
+        onClose={() => setShowFallback(false)}
+        title={copy.title}
+        maxWidth="440px"
+      >
+        <div className="space-y-4 pt-1">
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            VyaparMedia is a secure PWA. Install it from the browser and use it like a mobile app on your home screen.
+          </p>
+          <ol className="space-y-2 text-xs text-foreground bg-muted/40 p-4 rounded-xl border border-border list-decimal list-inside font-medium">
+            {copy.steps.map((step) => (
+              <li key={step} className="leading-relaxed">{step}</li>
+            ))}
+          </ol>
+          <div className="flex justify-end gap-2 pt-2 border-t border-border">
+            <Button variant="secondary" size="sm" onClick={() => setShowFallback(false)}>Close</Button>
+            <Button variant="primary" size="sm" onClick={() => setShowFallback(false)}>Got it</Button>
           </div>
-        </dialog>
-      )}
+        </div>
+      </BottomSheet>
     </>
   );
 }

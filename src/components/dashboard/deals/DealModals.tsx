@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Modal, Button, Input, Textarea, type ToastType } from "@/components/ui";
+import { BottomSheet, Button, Input, Textarea, type ToastType } from "@/components/ui";
 import { DealDetail, getFlatDeliverablesList, ContentUrlEntry } from "./DealDetailHelpers";
 import { checkRevisionRequestEligibility } from "@/lib/action-eligibility";
 import { ShipmentTrackingModal } from "./ShipmentTrackingModal";
@@ -107,7 +107,7 @@ export function DealModals({
 
   return (
 <>
-<Modal
+<BottomSheet
 open={showAddressModal}
 onClose={() => setShowAddressModal(false)}
 title={isBrand ? "Delivery Address (Confidential)" : "Your Delivery Address"}
@@ -266,9 +266,9 @@ maxWidth="500px"
     </div>
   </div>
 )}
-</Modal>
+</BottomSheet>
 
-<Modal
+<BottomSheet
 open={showReviewModal}
 onClose={() => setShowReviewModal(false)}
 title="Review Content"
@@ -418,9 +418,9 @@ className="flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
 {isSubmitting ? <span className="loading" /> : "Submit Review"}
 </Button>
 </div>
-</Modal>
+</BottomSheet>
 
-<Modal
+<BottomSheet
 open={showVerifyModal}
 onClose={() => setShowVerifyModal(false)}
 title="Verify Post"
@@ -464,10 +464,10 @@ className="flex-1"
 {isSubmitting ? <span className="loading" /> : "Verify"}
 </Button>
 </div>
-</Modal>
+</BottomSheet>
 
 {setShowDispatchModal && dispatchForm && setDispatchForm && handleProductAction && (
-  <Modal
+  <BottomSheet
     open={showDispatchModal}
     onClose={() => setShowDispatchModal(false)}
     title="Product Dispatch & Shipping"
@@ -643,7 +643,7 @@ className="flex-1"
         )}
       </Button>
     </div>
-  </Modal>
+  </BottomSheet>
 )}
 
 {/* ── Tracking Modal ────────────────────────────────────── */}

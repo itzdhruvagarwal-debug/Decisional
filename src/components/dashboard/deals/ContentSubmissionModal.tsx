@@ -18,7 +18,7 @@ import {
   Eye,
   AlertCircle,
 } from "lucide-react";
-import { Button, Input, Textarea, Modal } from "@/components/ui";
+import { Button, Input, Textarea, Modal, BottomSheet } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils-client";
 import { apiClient } from "@/lib/api-client";
 import { formatUserError } from "@/lib/user-messages";
@@ -28,6 +28,7 @@ import {
   validateDeliverableFile,
 } from "@/lib/direct-upload";
 import { detectContactLeak } from "@/lib/contact-leak-detector";
+import { haptic } from "@/lib/haptics";
 import {
   formatContractDate,
   getFlatDeliverablesList,
@@ -71,6 +72,7 @@ export function ContentSubmissionModal({
   // Step state
   const [step, setStep] = useState<Step>("media");
   const [showHistory, setShowHistory] = useState(false);
+  const [showCancelConfirmSheet, setShowCancelConfirmSheet] = useState(false);
 
   // Form metadata
   const [notes, setNotes] = useState("");
@@ -283,6 +285,7 @@ export function ContentSubmissionModal({
       });
 
       setSubmittedVersion(nextVersionNumber);
+      haptic.success();
       setStep("success");
       if (onSuccess) onSuccess();
     } catch (err: unknown) {
@@ -295,17 +298,15 @@ export function ContentSubmissionModal({
 
   const handleModalClose = () => {
     if (hasActiveUploads) {
-      if (confirm("You have an active file upload. Closing will cancel the upload. Proceed?")) {
-        deliverableItems.forEach((item) => cancelUpload(item.type));
-        onClose();
-      }
+      setShowCancelConfirmSheet(true);
     } else {
       onClose();
     }
   };
 
   return (
-    <Modal
+    <>
+      <Modal
       open={isOpen}
       onClose={handleModalClose}
       maxWidth="56rem"
@@ -340,7 +341,7 @@ export function ContentSubmissionModal({
       />
         
         {/* ==================== MODAL HEADER ==================== */}
-        <header className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-20">
+        <header className="flex items-center justify-between px-4 sm:px-6 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-3 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-20 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
           <div className="flex items-center gap-2.5">
             {step !== "media" && step !== "success" && (
               <button
@@ -1094,7 +1095,7 @@ export function ContentSubmissionModal({
 
         {/* ==================== MODAL FOOTER ==================== */}
         {step !== "success" && (
-          <footer className="flex items-center justify-between px-4 sm:px-6 py-3 border-t border-border bg-card/80 backdrop-blur-md sticky bottom-0 z-20">
+          <footer className="flex items-center justify-between px-4 sm:px-6 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] border-t border-border bg-card/80 backdrop-blur-md sticky bottom-0 z-20 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
             <div className="text-xs text-secondary">
               {step === "media" && missingItems.length > 0 && (
                 <span>{missingItems.length} deliverable(s) remaining</span>
@@ -1170,5 +1171,44 @@ export function ContentSubmissionModal({
           </footer>
         )}
     </Modal>
+
+    {/* Cancel In-Flight Upload Confirmation BottomSheet */}
+    <BottomSheet
+      open={showCancelConfirmSheet}
+      onClose={() => setShowCancelConfirmSheet(false)}
+      title="Discard Active Uploads?"
+      maxWidth="440px"
+    >
+      <div className="space-y-4 pt-1">
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          You have file uploads currently in progress. Closing now will terminate the active uploads and discard unsaved progress.
+        </p>
+        <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2 pt-2 border-t border-border">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => setShowCancelConfirmSheet(false)}
+            className="w-full sm:w-auto text-xs"
+          >
+            Continue Uploading
+          </Button>
+          <Button
+            type="button"
+            variant="danger"
+            size="sm"
+            onClick={() => {
+              Object.keys(deliverablesState).forEach((type) => cancelUpload(type));
+              setShowCancelConfirmSheet(false);
+              onClose();
+            }}
+            className="w-full sm:w-auto text-xs font-bold"
+          >
+            Discard &amp; Close
+          </Button>
+        </div>
+      </div>
+    </BottomSheet>
+  </>
   );
 }

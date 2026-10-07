@@ -16,7 +16,7 @@ import {
   Receipt,
   X,
 } from "lucide-react";
-import { Input, Card } from "@/components/ui";
+import { Input, Card, PullToRefresh } from "@/components/ui";
 import { formatCurrency, formatDateTime, formatDate } from "@/lib/utils-client";
 import type { WalletTransactionItem } from "@/lib/schemas";
 
@@ -25,7 +25,7 @@ export type TransactionItem = WalletTransactionItem;
 interface VirtualizedTransactionListProps {
   transactions: TransactionItem[];
   isLoading: boolean;
-  onRefresh?: () => void;
+  onRefresh?: () => Promise<unknown> | void;
   onSelectTransaction?: (transaction: TransactionItem) => void;
 }
 
@@ -259,7 +259,8 @@ export function VirtualizedTransactionList({
       </div>
 
       {/* Transaction List Area */}
-      {isLoading ? (
+      <PullToRefresh onRefresh={onRefresh || (() => {})} disabled={!onRefresh} className="relative w-full">
+        {isLoading ? (
         <div className="space-y-3 py-2 animate-pulse" aria-label="Loading transactions">
           {[1, 2, 3, 4, 5].map((idx) => (
             <div
@@ -377,6 +378,7 @@ export function VirtualizedTransactionList({
           ))}
         </div>
       )}
+      </PullToRefresh>
     </Card>
   );
 }
