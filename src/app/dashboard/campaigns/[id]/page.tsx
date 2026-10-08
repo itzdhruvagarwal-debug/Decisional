@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import DashboardShell from "@/components/dashboard/DashboardShell";
+import { PageContainer } from "@/components/ui";
 import { getUserVerificationTier } from "@/lib/verification-tiers";
 
 import CampaignDetailClient from "./CampaignDetailClient";
@@ -36,11 +37,13 @@ export default async function CampaignDetailPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <CampaignDetailClient
-        user={session.user}
-        influencerProfile={influencerProfile}
-        kycTier={kycTier}
-      />
+      <PageContainer maxWidth="6xl" className="py-4 sm:py-6">
+        <CampaignDetailClient
+          user={session.user}
+          influencerProfile={influencerProfile}
+          kycTier={kycTier}
+        />
+      </PageContainer>
     </DashboardShell>
   );
 }

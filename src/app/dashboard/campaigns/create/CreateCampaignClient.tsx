@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, Input, Select, Textarea, Card } from "@/components/ui";
+import { Button, Input, Select, Textarea, Card, PageHeader } from "@/components/ui";
 import { apiClient } from "@/lib/api-client";
 import { formatUserError } from "@/lib/user-messages";
 import { formatCurrency } from "@/lib/utils-client";
@@ -444,46 +444,45 @@ export default function CreateCampaignClient() {
   ];
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Page Header & Live Wallet Balance Indicator */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-            {editCampaignId ? "Edit Draft Campaign" : "Create New Campaign"}
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            {editCampaignId
-              ? "Update your draft campaign details before publishing to creators"
-              : "Launch an escrow-backed campaign and collaborate with verified Indian creators"}
-          </p>
-        </div>
-
-        {/* Live Wallet Balance Pill */}
-        <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-card border border-border shadow-xs self-start sm:self-auto shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-            <Wallet className="w-4 h-4" />
+      <PageHeader
+        backHref="/dashboard/campaigns"
+        backLabel="Back to Campaigns"
+        title={editCampaignId ? "Edit Draft Campaign" : "Create New Campaign"}
+        subtitle={
+          editCampaignId
+            ? "Update your draft campaign details before publishing to creators"
+            : "Launch an escrow-backed campaign and collaborate with verified Indian creators"
+        }
+        actions={
+          <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-card border border-border shadow-xs shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+              <Wallet className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                Available Balance
+              </span>
+              <span className="text-sm font-black text-foreground tabular-nums">
+                {isWalletLoading ? "..." : formatCurrency(walletBalancePaise)}
+              </span>
+            </div>
+            {isBalanceInsufficient && (
+              <Link
+                href="/dashboard/wallet?action=deposit"
+                target="_blank"
+                className="ml-2 px-2.5 py-1 rounded-lg bg-destructive/10 text-destructive text-xs font-bold hover:bg-destructive/20 transition-colors inline-flex items-center gap-1 shrink-0"
+                title="Add funds to wallet"
+              >
+                <span>Add Funds</span>
+                <ArrowUpRight className="w-3 h-3" />
+              </Link>
+            )}
           </div>
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
-              Available Balance
-            </span>
-            <span className="text-sm font-black text-foreground tabular-nums">
-              {isWalletLoading ? "..." : formatCurrency(walletBalancePaise)}
-            </span>
-          </div>
-          {isBalanceInsufficient && (
-            <Link
-              href="/dashboard/wallet?action=deposit"
-              target="_blank"
-              className="ml-2 px-2.5 py-1 rounded-lg bg-destructive/10 text-destructive text-xs font-bold hover:bg-destructive/20 transition-colors inline-flex items-center gap-1 shrink-0"
-              title="Add funds to wallet"
-            >
-              <span>Add Funds</span>
-              <ArrowUpRight className="w-3 h-3" />
-            </Link>
-          )}
-        </div>
-      </div>
+        }
+        border={false}
+      />
 
       {/* Invited Creator Highlight Banner */}
       {invitedInfluencer && (

@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import EmptyState from "@/components/ui/EmptyState";
-import { PullToRefresh } from "@/components/ui";
+import { PullToRefresh, ListItem } from "@/components/ui";
 import { useMessages } from "./useMessages";
 import { Conversation } from "./MessagesHelpers";
 import { formatDate, formatTime } from "@/lib/utils-client";
@@ -170,105 +170,79 @@ export function ConversationsSidebar({ state }: Readonly<ConversationsSidebarPro
                 const hasUnread = conv.unread > 0;
 
                 return (
-                  <button
+                  <ListItem
                     key={conv.userId}
+                    as="button"
+                    variant="flush"
+                    compact
+                    active={isSelected}
+                    unread={hasUnread}
                     onClick={() => setSelectedConversation(conv.userId)}
-                    type="button"
                     aria-label={`Chat with ${conv.name}${hasUnread ? `, ${conv.unread} unread` : ""}`}
                     {...(isSelected ? { "aria-current": "true" as const } : {})}
-                    className={`w-full px-4 py-3.5 text-left flex items-center gap-3 cursor-pointer transition-all ${
-                      isSelected
-                        ? "bg-primary/8 border-l-[3px] border-primary"
-                        : "hover:bg-muted/40 border-l-[3px] border-transparent"
-                    }`}
-                  >
-                    {/* ── Avatar with status indicators ── */}
-                    <div className="relative shrink-0">
-                      <div className="relative w-11 h-11 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-foreground font-bold text-sm">
-                        {conv.avatar ? (
-                          <Image
-                            src={conv.avatar}
-                            alt={conv.name || "User avatar"}
-                            width={44}
-                            height={44}
-                            unoptimized
-                            className="object-cover w-full h-full rounded-full"
-                          />
-                        ) : (
-                          <span
-                            className={`w-full h-full flex items-center justify-center text-sm font-black ${
-                              isBrand
-                                ? "bg-primary/15 text-primary"
-                                : "bg-verified-muted text-verified"
-                            }`}
-                          >
-                            {(conv.name || "U").charAt(0).toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Online dot — bottom right (green) */}
-                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-verified rounded-full border-2 border-card" />
-                    </div>
-
-                    {/* ── Conversation Info ── */}
-                    <div className="flex-1 min-w-0">
-                      {/* Top row: name + time */}
-                      <div className="flex justify-between items-center mb-0.5">
-                        <div className="flex items-center gap-1.5 min-w-0 pr-2">
-                          <span
-                            className={`text-sm truncate max-w-[120px] ${
-                              hasUnread
-                                ? "font-extrabold text-foreground"
-                                : "font-semibold text-foreground"
-                            }`}
-                          >
-                            {conv.name}
-                          </span>
-                          {/* Role badge */}
-                          <span
-                            className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide shrink-0 ${
-                              isBrand
-                                ? "bg-primary/10 text-primary"
-                                : "bg-verified-muted text-verified"
-                            }`}
-                          >
-                            {isBrand ? "Brand" : "Creator"}
-                          </span>
-                        </div>
-                        <span className="text-muted-foreground text-[10px] font-medium whitespace-nowrap font-mono shrink-0">
-                          {formatConversationTime(conv.lastMessageTime)}
-                        </span>
-                      </div>
-
-                      {/* Bottom row: last message preview + unread count */}
-                      <div className="flex justify-between items-center gap-2">
-                        <span
-                          className={`text-xs truncate max-w-[160px] ${
-                            hasUnread
-                              ? "text-foreground font-semibold"
-                              : "text-muted-foreground font-normal"
-                          }`}
-                        >
-                          {conv.isTyping ? (
-                            <span className="inline-flex items-center gap-1.5 text-primary font-semibold italic">
-                              <TypingDots />
-                              <span className="text-xs">typing…</span>
-                            </span>
+                    leading={
+                      <div className="relative shrink-0">
+                        <div className="relative w-11 h-11 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center text-foreground font-bold text-sm">
+                          {conv.avatar ? (
+                            <Image
+                              src={conv.avatar}
+                              alt={conv.name || "User avatar"}
+                              width={44}
+                              height={44}
+                              unoptimized
+                              className="object-cover w-full h-full rounded-full"
+                            />
                           ) : (
-                            conv.lastMessage || "Start a conversation"
+                            <span
+                              className={`w-full h-full flex items-center justify-center text-sm font-black ${
+                                isBrand
+                                  ? "bg-primary/15 text-primary"
+                                  : "bg-verified-muted text-verified"
+                              }`}
+                            >
+                              {(conv.name || "U").charAt(0).toUpperCase()}
+                            </span>
                           )}
-                        </span>
-
-                        {/* Unread count — numbered pill (WhatsApp/Instagram pattern) */}
-                        {hasUnread && (
-                          <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black bg-primary text-primary-foreground tabular-nums shrink-0 shadow-sm">
-                            {conv.unread > 99 ? "99+" : conv.unread}
-                          </span>
-                        )}
+                        </div>
+                        {/* Online dot — bottom right (green) */}
+                        <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-verified rounded-full border-2 border-card" />
                       </div>
-                    </div>
-                  </button>
+                    }
+                    title={conv.name}
+                    titleBadge={
+                      <span
+                        className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide shrink-0 ${
+                          isBrand
+                            ? "bg-primary/10 text-primary"
+                            : "bg-verified-muted text-verified"
+                        }`}
+                      >
+                        {isBrand ? "Brand" : "Creator"}
+                      </span>
+                    }
+                    subtitle={
+                      conv.isTyping ? (
+                        <span className="inline-flex items-center gap-1.5 text-primary font-semibold italic">
+                          <TypingDots />
+                          <span>typing…</span>
+                        </span>
+                      ) : (
+                        conv.lastMessage || "Start a conversation"
+                      )
+                    }
+                    trailing={
+                      <span className="text-muted-foreground text-[10px] font-medium whitespace-nowrap font-mono">
+                        {formatConversationTime(conv.lastMessageTime)}
+                      </span>
+                    }
+                    trailingSecondary={
+                      hasUnread ? (
+                        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black bg-primary text-primary-foreground tabular-nums shadow-sm">
+                          {conv.unread > 99 ? "99+" : conv.unread}
+                        </span>
+                      ) : undefined
+                    }
+                  />
                 );
               })}
             </div>

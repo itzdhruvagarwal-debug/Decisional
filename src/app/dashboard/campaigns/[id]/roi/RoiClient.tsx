@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, RefreshCw, AlertCircle } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { formatUserError } from "@/lib/user-messages";
-import { Skeleton, Button } from "@/components/ui";
+import { Skeleton, Button, PageHeader } from "@/components/ui";
 import { CampaignRoiReport, type RoiReportData } from "@/components/dashboard/campaigns/CampaignRoiReport";
 
 interface RoiClientProps {
@@ -39,28 +39,27 @@ export function RoiClient({ campaignId }: RoiClientProps) {
   }, [fetchRoi]);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-20 animate-fade-in">
-      {/* Navigation Breadcrumb */}
-      <div className="flex items-center justify-between no-print">
-        <Link
-          href={`/dashboard/campaigns/${campaignId}`}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors p-1"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Campaign Workspace</span>
-        </Link>
-
-        <button
-          type="button"
-          onClick={fetchRoi}
-          disabled={loading}
-          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-50"
-          title="Refresh real-time analytics"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-          <span>Sync Realtime</span>
-        </button>
-      </div>
+    <div className="space-y-6 pb-20 animate-fade-in">
+      {/* Navigation Breadcrumb & Page Header */}
+      <PageHeader
+        title="Campaign ROI & Telemetry"
+        subtitle="Audited financial returns, real-time attribution, and creator performance analytics."
+        backHref={`/dashboard/campaigns/${campaignId}`}
+        backLabel="Back to Campaign Workspace"
+        actions={
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={fetchRoi}
+            disabled={loading}
+            className="text-xs font-semibold gap-1.5"
+            title="Refresh real-time analytics"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+            <span>Sync Realtime</span>
+          </Button>
+        }
+      />
 
       {loading && (
         <div className="space-y-6 animate-pulse">

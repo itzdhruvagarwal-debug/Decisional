@@ -192,7 +192,7 @@ export default function AppearanceTab({
       </div>
 
       {/* ── Active Session & Sign Out Card ── */}
-      <div className="p-5 sm:p-6 rounded-2xl border border-destructive/20 bg-card shadow-xs space-y-5">
+      <div className="p-5 sm:p-6 rounded-2xl border border-destructive/20 bg-card shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-destructive/10 text-destructive flex items-center justify-center">

@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { BadgeDefinition } from "@/lib/badges";
 import EmptyState from "@/components/ui/EmptyState";
-import { Button } from "@/components/ui";
+import { Button, PageContainer, PageHeader } from "@/components/ui";
 import { formatNumber } from "@/lib/utils-client";
 import {
   Trophy,
@@ -104,43 +104,38 @@ export default function BadgesPage() {
   if (!session) {
     return (
       <DashboardShell user={undefined}>
-        <div className="flex items-center justify-center h-48">
+        <PageContainer maxWidth="5xl" className="flex items-center justify-center h-48 py-4 sm:py-6">
           <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-        </div>
+        </PageContainer>
       </DashboardShell>
     );
   }
 
   return (
     <DashboardShell user={session.user}>
-      <div className="max-w-5xl mx-auto space-y-6 pb-12">
+      <PageContainer maxWidth="5xl" className="space-y-6 pb-12 py-4 sm:py-6">
 
         {/* ── Page Header ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-card border border-border shadow-sm">
-          <div className="flex items-center gap-3">
+        <PageHeader
+          title="Badges & Achievements"
+          icon={
             <div className="w-10 h-10 rounded-xl bg-pending/10 border border-pending-border flex items-center justify-center">
               <Trophy className="w-5 h-5 text-pending" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-foreground">
-                Badges &amp; Achievements
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                Collect badges, earn XP, and level up your creator trust profile
-              </p>
-            </div>
-          </div>
-
-          {/* XP earned pill */}
-          {stats && (
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-verified-muted border border-verified-border text-verified text-xs font-bold">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                {earnedCount} / {badges.length} Earned
-              </span>
-            </div>
-          )}
-        </div>
+          }
+          subtitle="Collect badges, earn XP, and level up your creator trust profile"
+          actions={
+            stats ? (
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-verified-muted border border-verified-border text-verified text-xs font-bold">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {earnedCount} / {badges.length} Earned
+                </span>
+              </div>
+            ) : undefined
+          }
+          border={false}
+        />
 
         {/* ── Stats KPI Strip ── */}
         {stats && (
@@ -455,7 +450,7 @@ export default function BadgesPage() {
             </AnimatePresence>
           </div>
         )}
-      </div>
+      </PageContainer>
     </DashboardShell>
   );
 }

@@ -31,7 +31,7 @@ export function CampaignFiltersBar({
   setSelectedStatus,
 }: Readonly<CampaignFiltersBarProps>) {
   return (
-    <div className="space-y-3.5 mb-6">
+    <div className="space-y-4 mb-6">
       {/* Search Input & Sort Selector */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <div className="relative flex-1">

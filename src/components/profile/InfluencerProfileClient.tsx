@@ -11,7 +11,7 @@ import {
 import { formatCurrency, formatDate, formatNumber } from "@/lib/utils-client";
 import { copyToClipboard } from "@/lib/clipboard";
 import CampaignProofModal from "./CampaignProofModal";
-import { BottomSheet } from "@/components/ui";
+import { BottomSheet, PageContainer } from "@/components/ui";
 import {
   ShieldCheck,
   CheckCircle2,
@@ -203,8 +203,9 @@ export default function InfluencerProfileClient({
   const strokeDashoffset = circumference * (1 - progressFraction);
 
   return (
-    <div
-      className="w-full max-w-4xl mx-auto px-4 py-4 md:py-8 space-y-6 pb-28 md:pb-12"
+    <PageContainer
+      maxWidth="4xl"
+      className="py-4 md:py-8 space-y-6 pb-28 md:pb-12"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -1125,6 +1126,6 @@ export default function InfluencerProfileClient({
           isKycVerified: profile.isKycVerified,
         }}
       />
-    </div>
+    </PageContainer>
   );
 }

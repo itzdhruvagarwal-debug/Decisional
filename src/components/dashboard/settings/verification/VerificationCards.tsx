@@ -274,7 +274,7 @@ export function TierStatusCardComponent({
   const currentTierName = tierNames[Math.min(tier, 3)] || "Tier 0: Unverified";
 
   return (
-    <div className="p-5 sm:p-6 rounded-2xl border border-border bg-card shadow-xs space-y-5">
+    <div className="p-5 sm:p-6 rounded-2xl border border-border bg-card shadow-xs space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">

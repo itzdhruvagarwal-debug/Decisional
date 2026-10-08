@@ -52,7 +52,7 @@ export function DealsFilterToolbar({
   tabCounts = {},
 }: Readonly<DealsFilterToolbarProps>) {
   return (
-    <div className="space-y-3.5 mb-6">
+    <div className="space-y-4 mb-6">
       {/* 1. Search Bar, Sort Toggle & Status Dropdown */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         {/* Search */}

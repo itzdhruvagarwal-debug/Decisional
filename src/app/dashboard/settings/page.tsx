@@ -19,7 +19,7 @@ import VerificationTab, { type VerificationData } from "@/components/dashboard/s
 import SecurityTab from "@/components/dashboard/settings/SecurityTab";
 import AppearanceTab from "@/components/dashboard/settings/AppearanceTab";
 import BankAccountManager from "@/components/dashboard/wallet/BankAccountManager";
-import { Button, ConfirmationBadge, Skeleton, ToastContainer, ThemeToggle } from "@/components/ui";
+import { Button, ConfirmationBadge, Skeleton, ToastContainer, ThemeToggle, PageContainer, PageHeader } from "@/components/ui";
 import {
   User as UserIcon,
   AtSign,
@@ -257,25 +257,27 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <DashboardShell user={session?.user || user}>
-        <div className="settings-page-layout">
-          <div className="settings-sidebar">
-            <div className="settings-sidebar-header">
-              <Skeleton className="h-4 w-20 rounded-md" />
+        <PageContainer maxWidth="7xl" className="py-4 sm:py-6">
+          <div className="settings-page-layout">
+            <div className="settings-sidebar">
+              <div className="settings-sidebar-header">
+                <Skeleton className="h-4 w-20 rounded-md" />
+              </div>
+              <div className="settings-sidebar-nav">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Skeleton key={i} className="h-10 w-full rounded-xl mb-1" />
+                ))}
+              </div>
             </div>
-            <div className="settings-sidebar-nav">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Skeleton key={i} className="h-10 w-full rounded-xl mb-1" />
-              ))}
+            <div className="settings-content-area">
+              <div className="settings-content-header">
+                <Skeleton className="h-7 w-48 rounded-md" />
+                <Skeleton className="h-9 w-32 rounded-lg" />
+              </div>
+              <Skeleton className="h-96 w-full rounded-2xl mt-6" />
             </div>
           </div>
-          <div className="settings-content-area">
-            <div className="settings-content-header">
-              <Skeleton className="h-7 w-48 rounded-md" />
-              <Skeleton className="h-9 w-32 rounded-lg" />
-            </div>
-            <Skeleton className="h-96 w-full rounded-2xl mt-6" />
-          </div>
-        </div>
+        </PageContainer>
       </DashboardShell>
     );
   }
@@ -283,11 +285,13 @@ export default function SettingsPage() {
   if (!profile || !user) {
     return (
       <DashboardShell user={session?.user || user}>
-        <div className="settings-error-state">
-          <Settings className="w-10 h-10 text-muted-foreground mb-3" />
-          <p className="text-base font-semibold text-foreground">Failed to load settings</p>
-          <p className="text-sm text-muted-foreground mt-1">Please refresh the page to try again.</p>
-        </div>
+        <PageContainer maxWidth="7xl" className="py-4 sm:py-6">
+          <div className="settings-error-state">
+            <Settings className="w-10 h-10 text-muted-foreground mb-3" />
+            <p className="text-base font-semibold text-foreground">Failed to load settings</p>
+            <p className="text-sm text-muted-foreground mt-1">Please refresh the page to try again.</p>
+          </div>
+        </PageContainer>
       </DashboardShell>
     );
   }
@@ -296,7 +300,46 @@ export default function SettingsPage() {
     <DashboardShell user={session?.user || user}>
       <ToastContainer toasts={toasts} onClose={handleRemoveToast} />
 
-      <div className="max-w-7xl mx-auto space-y-5 pb-16 animate-fade-in">
+      <PageContainer maxWidth="7xl" className="space-y-6 pb-16 animate-fade-in py-4 sm:py-6">
+        {/* ── Page Header ── */}
+        <PageHeader
+          title="Account Settings"
+          subtitle="Manage your profile, banking credentials, compliance, notifications, and security."
+          actions={
+            publicProfileUrl ? (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={async () => {
+                    if (typeof window !== "undefined") {
+                      const fullUrl = `${window.location.origin}${publicProfileUrl}`;
+                      await copyToClipboard(fullUrl);
+                      showToast("Public profile link copied to clipboard!", "success");
+                    }
+                  }}
+                  className="gap-1.5 text-xs font-semibold shadow-2xs"
+                >
+                  <Copy className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span>Copy Profile URL</span>
+                </Button>
+                <Button
+                  href={publicProfileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="secondary"
+                  size="sm"
+                  className="gap-1.5 text-xs font-semibold shadow-2xs"
+                >
+                  <span>Public View</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            ) : undefined
+          }
+          border={false}
+        />
+
         {/* ── 1. ACCOUNT HEALTH SUMMARY BANNER ─────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 rounded-2xl bg-card border border-border shadow-xs text-xs">
           {/* KYC Status Tile */}
@@ -553,7 +596,7 @@ export default function SettingsPage() {
             </div>
           </main>
         </div>
-      </div>
+      </PageContainer>
 
       {/* Story Share Modal (Public Profile & Referral Story) */}
       <StoryShareModal

@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
-import { Button, Input, Select, Textarea } from "@/components/ui";
+import { Button, Input, Select, Textarea, PageContainer, PageHeader } from "@/components/ui";
 import { createSupportSchema } from "@/lib/validations/campaign";
 import { apiClient } from "@/lib/api-client";
 import { formatUserError } from "@/lib/user-messages";
@@ -135,22 +135,19 @@ export default function SupportPage() {
 
   return (
     <DashboardShell user={session?.user}>
-      <div className="max-w-3xl mx-auto space-y-6 pb-12">
+      <PageContainer maxWidth="3xl" className="space-y-6 pb-12 py-4 sm:py-6">
 
         {/* ── Page Header ── */}
-        <div className="flex items-center gap-3 p-5 rounded-2xl bg-card border border-border shadow-sm">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-            <MessageSquareDiff className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground">
-              Support &amp; Feedback Hub
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Submit bug reports or platform feedback — verified submissions earn badges!
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Support & Feedback Hub"
+          icon={
+            <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <MessageSquareDiff className="w-5 h-5 text-primary" />
+            </div>
+          }
+          subtitle="Submit bug reports or platform feedback — verified submissions earn badges!"
+          border={false}
+        />
 
         {/* ── Quick Help Category Cards ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -356,7 +353,7 @@ export default function SupportPage() {
             </Button>
           </form>
         </div>
-      </div>
+      </PageContainer>
     </DashboardShell>
   );
 }

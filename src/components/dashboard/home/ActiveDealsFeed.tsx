@@ -102,7 +102,7 @@ export function ActiveDealsFeed({
 }: Readonly<ActiveDealsFeedProps>) {
   if (isLoading) {
     return (
-      <section aria-label="Active collaborations loading" className="space-y-3.5">
+      <section aria-label="Active collaborations loading" className="space-y-4">
         <div className="h-6 w-48 bg-muted rounded-md animate-pulse" />
         {[1, 2, 3].map((i) => (
           <div
@@ -156,7 +156,7 @@ export function ActiveDealsFeed({
   }
 
   return (
-    <section aria-label="Active collaborations feed" className="space-y-3.5">
+    <section aria-label="Active collaborations feed" className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-base sm:text-lg font-bold text-foreground tracking-tight">
@@ -174,7 +174,7 @@ export function ActiveDealsFeed({
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-3.5">
+      <div className="grid grid-cols-1 gap-4">
         {activeDeals.slice(0, 5).map((deal) => {
           const status = (deal.state || deal.status || "ACTIVE").toUpperCase();
           const badgeConfig = getStatusBadgeConfig(status);

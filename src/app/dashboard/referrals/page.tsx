@@ -5,7 +5,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import ReferralList from "@/components/dashboard/referrals/ReferralList";
-import { Button, Modal, Skeleton } from "@/components/ui";
+import { Button, Modal, Skeleton, PageContainer, PageHeader } from "@/components/ui";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatCurrency } from "@/lib/utils-client";
 import useSWR from "swr";
@@ -269,7 +269,7 @@ export default function ReferralsPage() {
   if (loading || !session) {
     return (
       <DashboardShell user={session?.user}>
-        <div className="max-w-5xl mx-auto space-y-6 py-6">
+        <PageContainer maxWidth="5xl" className="space-y-6 py-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Skeleton className="h-28 rounded-xl" />
             <Skeleton className="h-28 rounded-xl" />
@@ -277,7 +277,7 @@ export default function ReferralsPage() {
           </div>
           <Skeleton className="h-48 rounded-xl" />
           <Skeleton className="h-64 rounded-xl" />
-        </div>
+        </PageContainer>
       </DashboardShell>
     );
   }
@@ -299,32 +299,29 @@ export default function ReferralsPage() {
 
   return (
     <DashboardShell user={session.user}>
-      <div className="max-w-5xl mx-auto space-y-6 pb-12">
+      <PageContainer maxWidth="5xl" className="space-y-6 pb-12 py-4 sm:py-6">
 
         {/* ── Page Header ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-card border border-border shadow-sm">
-          <div className="flex items-center gap-3">
+        <PageHeader
+          title="Partner Network"
+          icon={
             <div className="w-10 h-10 rounded-xl bg-pending/10 border border-pending-border flex items-center justify-center">
               <Gift className="w-5 h-5 text-pending" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-foreground">
-                Partner Network
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                Expand the VyaparMedia ecosystem and build lifetime passive rewards
-              </p>
-            </div>
-          </div>
-          <div className="shrink-0">
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${
-              TIERS.find((t) => t.name === stats.tier.name)?.accent ?? "bg-muted border-border text-muted-foreground"
-            }`}>
+          }
+          subtitle="Expand the VyaparMedia ecosystem and build lifetime passive rewards"
+          actions={
+            <span
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${
+                TIERS.find((t) => t.name === stats.tier.name)?.accent ?? "bg-muted border-border text-muted-foreground"
+              }`}
+            >
               <Crown className="w-3.5 h-3.5" />
               {stats.tier.label} Partner
             </span>
-          </div>
-        </div>
+          }
+          border={false}
+        />
 
         {/* ── KPI Strip ── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -627,7 +624,7 @@ export default function ReferralsPage() {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </PageContainer>
 
       {/* Share Modal */}
       <ShareModal

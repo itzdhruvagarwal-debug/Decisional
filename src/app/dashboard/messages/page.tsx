@@ -5,7 +5,7 @@ import DashboardShell from "@/components/dashboard/DashboardShell";
 import { useMessages } from "@/components/dashboard/messages/useMessages";
 import { ConversationsSidebar } from "@/components/dashboard/messages/ConversationsSidebar";
 import { ChatPanel, ReportUserModal } from "@/components/dashboard/messages/ChatPanel";
-import { ToastContainer } from "@/components/ui";
+import { ToastContainer, PageContainer, PageHeader } from "@/components/ui";
 
 function MessagesSkeleton() {
   return (
@@ -68,7 +68,9 @@ function MessagesContent() {
   if (status === "loading" || !session) {
     return (
       <DashboardShell user={session?.user}>
-        <MessagesSkeleton />
+        <PageContainer maxWidth="7xl" className="py-4 sm:py-6">
+          <MessagesSkeleton />
+        </PageContainer>
       </DashboardShell>
     );
   }
@@ -76,10 +78,18 @@ function MessagesContent() {
   return (
     <DashboardShell user={session.user}>
       <ToastContainer toasts={toasts} onClose={removeToast} />
-      <div className="flex overflow-hidden bg-card border border-border rounded-2xl shadow-sm h-[82vh] min-h-[560px]">
-        <ConversationsSidebar state={state} />
-        <ChatPanel state={state} />
-      </div>
+      <PageContainer maxWidth="7xl" className="py-4 sm:py-6 space-y-4">
+        <PageHeader
+          title="Direct Messages"
+          subtitle="Collaborate in real-time, negotiate campaign contracts, and share deliverable links securely."
+          border={false}
+          className="pb-0"
+        />
+        <div className="flex overflow-hidden bg-card border border-border rounded-2xl shadow-sm h-[78vh] min-h-[540px]">
+          <ConversationsSidebar state={state} />
+          <ChatPanel state={state} />
+        </div>
+      </PageContainer>
       <ReportUserModal state={state} />
     </DashboardShell>
   );
@@ -90,7 +100,9 @@ export default function MessagesPage() {
     <Suspense
       fallback={
         <DashboardShell>
-          <MessagesSkeleton />
+          <PageContainer maxWidth="7xl" className="py-4 sm:py-6">
+            <MessagesSkeleton />
+          </PageContainer>
         </DashboardShell>
       }
     >

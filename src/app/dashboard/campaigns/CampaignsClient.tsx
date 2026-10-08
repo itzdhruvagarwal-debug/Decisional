@@ -11,7 +11,7 @@ import {
 } from "@/lib/schemas";
 import { normalizeStringArray, normalizeDeliverables } from "@/lib/utils-client";
 import EmptyState from "@/components/ui/EmptyState";
-import { Button } from "@/components/ui";
+import { Button, PageHeader } from "@/components/ui";
 import { CampaignDiscoveryCard } from "@/components/dashboard/campaigns/CampaignDiscoveryCard";
 import { CampaignFiltersBar } from "@/components/dashboard/campaigns/CampaignFiltersBar";
 import {
@@ -108,7 +108,7 @@ function CampaignGridSkeleton({ listView }: { listView: boolean }) {
   return (
     <div
       className={`animate-pulse ${
-        listView ? "space-y-3" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+        listView ? "space-y-4" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
       }`}
       aria-hidden="true"
     >
@@ -214,77 +214,74 @@ export default function CampaignsClient({
   const remainingCampaigns = isDefaultView ? campaigns.slice(3) : campaigns;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-16 animate-fade-in">
+    <div className="space-y-6 pb-16 animate-fade-in">
       {/* ── 1. HEADER ───────────────────────────────────────────────── */}
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-heading font-black text-foreground tracking-tight">
-              {canCreateCampaign ? "Campaign Management" : "Campaign Discovery"}
-            </h1>
-            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-escrow-muted text-escrow border border-escrow-border shrink-0 whitespace-nowrap">
-              <ShieldCheck className="w-3.5 h-3.5" /> 100% Escrow Funded
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            {canCreateCampaign
-              ? "Oversee your live brand briefs, review incoming creator pitches, and allocate escrow milestones."
-              : "Explore verified brand collaborations with pre-funded escrow milestones and instant settlements."}
-          </p>
-        </div>
+      <PageHeader
+        title={canCreateCampaign ? "Campaign Management" : "Campaign Discovery"}
+        badge={
+          <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-escrow-muted text-escrow border border-escrow-border shrink-0 whitespace-nowrap">
+            <ShieldCheck className="w-3.5 h-3.5" /> 100% Escrow Funded
+          </span>
+        }
+        subtitle={
+          canCreateCampaign
+            ? "Oversee your live brand briefs, review incoming creator pitches, and allocate escrow milestones."
+            : "Explore verified brand collaborations with pre-funded escrow milestones and instant settlements."
+        }
+        actions={
+          <>
+            {/* Grid/List toggle (Instagram Explore pattern) */}
+            {!canCreateCampaign && (
+              <div className="flex items-center gap-0.5 bg-muted p-1 rounded-xl border border-border">
+                <button
+                  type="button"
+                  id="campaign-grid-view-toggle"
+                  onClick={() => setListView(false)}
+                  aria-label="Grid view"
+                  className={`p-1.5 rounded-lg transition-all ${
+                    !listView
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  id="campaign-list-view-toggle"
+                  onClick={() => setListView(true)}
+                  aria-label="List view"
+                  className={`p-1.5 rounded-lg transition-all ${
+                    listView
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                </button>
+              </div>
+            )}
 
-        <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
-          {/* Grid/List toggle (Instagram Explore pattern) */}
-          {!canCreateCampaign && (
-            <div className="flex items-center gap-0.5 bg-muted p-1 rounded-xl border border-border">
-              <button
-                type="button"
-                id="campaign-grid-view-toggle"
-                onClick={() => setListView(false)}
-                aria-label="Grid view"
-                className={`p-1.5 rounded-lg transition-all ${
-                  !listView
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+            {canCreateCampaign ? (
+              <Button
+                href="/dashboard/campaigns/create"
+                variant="primary"
+                className="font-bold text-xs gap-1.5 shadow-sm"
               >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                id="campaign-list-view-toggle"
-                onClick={() => setListView(true)}
-                aria-label="List view"
-                className={`p-1.5 rounded-lg transition-all ${
-                  listView
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                <PlusCircle className="w-4 h-4" /> Create New Brief
+              </Button>
+            ) : (
+              <Button
+                href="/dashboard/applications"
+                variant="secondary"
+                className="font-bold text-xs gap-1.5 shadow-sm"
               >
-                <List className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-
-          {canCreateCampaign ? (
-            <Button
-              href="/dashboard/campaigns/create"
-              variant="primary"
-              className="font-bold text-xs gap-1.5 shadow-sm"
-            >
-              <PlusCircle className="w-4 h-4" /> Create New Brief
-            </Button>
-          ) : (
-            <Button
-              href="/dashboard/applications"
-              variant="secondary"
-              className="font-bold text-xs gap-1.5 shadow-sm"
-            >
-              <FileText className="w-4 h-4" /> My Applications
-            </Button>
-          )}
-        </div>
-      </header>
+                <FileText className="w-4 h-4" /> My Applications
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {/* ── 2. TRUST HIGHLIGHT RIBBON ────────── */}
       {!canCreateCampaign && (
@@ -382,8 +379,8 @@ export default function CampaignsClient({
               <div
                 className={
                   listView
-                    ? "space-y-3"
-                    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+                    ? "space-y-4"
+                    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
                 }
               >
                 {recommendedCampaigns.map((campaign) => (
@@ -412,8 +409,8 @@ export default function CampaignsClient({
               <div
                 className={
                   listView
-                    ? "space-y-3"
-                    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+                    ? "space-y-4"
+                    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
                 }
               >
                 {remainingCampaigns.map((campaign) => (

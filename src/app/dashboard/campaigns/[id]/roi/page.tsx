@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import DashboardShell from "@/components/dashboard/DashboardShell";
+import { PageContainer } from "@/components/ui";
 import { RoiClient } from "./RoiClient";
 
 interface CampaignRoiPageProps {
@@ -40,7 +41,9 @@ export default async function CampaignRoiPage({ params }: CampaignRoiPageProps) 
 
   return (
     <DashboardShell user={session.user}>
-      <RoiClient campaignId={campaignId} />
+      <PageContainer maxWidth="6xl" className="py-4 sm:py-6">
+        <RoiClient campaignId={campaignId} />
+      </PageContainer>
     </DashboardShell>
   );
 }

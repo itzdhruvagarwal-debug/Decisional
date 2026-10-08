@@ -58,3 +58,10 @@ export type { BackButtonProps } from "./BackButton";
 export { default as PullToRefresh } from "@/components/discovery/PullToRefresh";
 export type { PullToRefreshProps } from "@/components/discovery/PullToRefresh";
 
+// PageContainer & PageBleed components
+export { PageContainer, PageBleed } from "./PageContainer";
+export type { PageContainerProps, PageContainerMaxWidth } from "./PageContainer";
+
+// PageHeader component
+export { PageHeader } from "./PageHeader";
+export type { PageHeaderProps } from "./PageHeader";

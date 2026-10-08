@@ -7,7 +7,7 @@ import Link from "next/link";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { useSession } from "next-auth/react";
 import EmptyState from "@/components/ui/EmptyState";
-import { Skeleton } from "@/components/ui";
+import { Skeleton, PageContainer, PageHeader } from "@/components/ui";
 import { formatCurrency, formatDate } from "@/lib/utils-client";
 import { type DisputeItem, type DisputesResponse } from "@/lib/schemas/dispute.schema";
 import {
@@ -278,45 +278,38 @@ export default function DisputesPage() {
 
   return (
     <DashboardShell user={session?.user}>
-      <div className="space-y-6 animate-fade-in max-w-6xl mx-auto pb-12">
+      <PageContainer maxWidth="6xl" className="space-y-6 animate-fade-in pb-12 py-4 sm:py-6">
 
         {/* ── HEADER ──────────────────────────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
+        <PageHeader
+          backHref="/dashboard/deals"
+          backLabel="Back to Deals"
+          icon={
+            <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+              <Scale className="w-5 h-5" />
+            </div>
+          }
+          title="Dispute & Resolution Center"
+          subtitle="Escrow-backed dispute arbitration, evidence examination, and neutral mediation"
+          actions={
+            <>
+              <Link
+                href="/help"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-muted hover:bg-muted/80 text-foreground border border-border transition-colors"
+              >
+                <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                Resolution Guide
+              </Link>
               <Link
                 href="/dashboard/deals"
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-primary hover:bg-primary/90 text-white shadow-xs transition-colors"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                Back to Deals
+                Active Deals
               </Link>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight flex items-center gap-2.5">
-              <Scale className="w-7 h-7 text-primary" />
-              Dispute &amp; Resolution Center
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Escrow-backed dispute arbitration, evidence examination, and neutral mediation
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Link
-              href="/help"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-muted hover:bg-muted/80 text-foreground border border-border transition-colors"
-            >
-              <HelpCircle className="w-4 h-4 text-muted-foreground" />
-              Resolution Guide
-            </Link>
-            <Link
-              href="/dashboard/deals"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-primary hover:bg-primary/90 text-white shadow-sm transition-colors"
-            >
-              Active Deals
-            </Link>
-          </div>
-        </div>
+            </>
+          }
+          border={false}
+        />
 
         {/* ── METRIC CARDS ────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -698,7 +691,7 @@ export default function DisputesPage() {
             })}
           </div>
         )}
-      </div>
+      </PageContainer>
     </DashboardShell>
   );
 }

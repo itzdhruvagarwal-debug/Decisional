@@ -503,7 +503,7 @@ className="flex-1"
       </div>
 
       {dispatchMode === "shiprocket" ? (
-        <div className="space-y-3.5">
+        <div className="space-y-4">
           <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-xs text-foreground space-y-1">
             <div className="font-bold flex items-center gap-1.5 text-primary">
               <Package className="w-4 h-4" />

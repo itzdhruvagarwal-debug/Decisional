@@ -13,7 +13,7 @@ import { useSession } from "next-auth/react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { formatDate, normalizeDeliverables } from "@/lib/utils-client";
 import EmptyState from "@/components/ui/EmptyState";
-import { Button, PullToRefresh } from "@/components/ui";
+import { Button, PullToRefresh, PageContainer, PageHeader } from "@/components/ui";
 import { DealsMetricsBar } from "@/components/dashboard/deals/DealsMetricsBar";
 import { DealsFilterToolbar } from "@/components/dashboard/deals/DealsFilterToolbar";
 import { DealPipelineCard } from "@/components/dashboard/deals/DealPipelineCard";
@@ -185,37 +185,31 @@ export default function DealsPage() {
   return (
     <DashboardShell user={session.user}>
       <PullToRefresh onRefresh={async () => { await mutate(); }}>
-        <div className="max-w-7xl mx-auto space-y-6 pb-12 animate-fade-in">
-          {/* Page Header */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-5">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-              My Collaborations
-            </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-              {isInfluencer
+        <PageContainer maxWidth="7xl" className="space-y-6 pb-12 animate-fade-in py-4 sm:py-6">
+          <PageHeader
+            title="My Collaborations"
+            subtitle={
+              isInfluencer
                 ? "Track your contract milestones, upload deliverables, and receive verified escrow payouts."
-                : "Manage campaign deliverables, approve creator submissions, and release escrow funds safely."}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 self-start sm:self-center">
-            <Button
-              href={isInfluencer ? "/dashboard/campaigns" : "/dashboard/campaigns/create"}
-              variant="primary"
-              size="sm"
-              className="text-xs font-bold gap-1 shadow-xs"
-            >
-              {isInfluencer ? (
-                "Explore Campaigns"
-              ) : (
-                <>
-                  <Plus className="w-3.5 h-3.5" /> New Campaign
-                </>
-              )}
-            </Button>
-          </div>
-        </header>
+                : "Manage campaign deliverables, approve creator submissions, and release escrow funds safely."
+            }
+            actions={
+              <Button
+                href={isInfluencer ? "/dashboard/campaigns" : "/dashboard/campaigns/create"}
+                variant="primary"
+                size="sm"
+                className="text-xs font-bold gap-1 shadow-xs"
+              >
+                {isInfluencer ? (
+                  "Explore Campaigns"
+                ) : (
+                  <>
+                    <Plus className="w-3.5 h-3.5" /> New Campaign
+                  </>
+                )}
+              </Button>
+            }
+          />
 
         {loading ? (
           <DealsLoadingSkeleton />
@@ -254,7 +248,7 @@ export default function DealsPage() {
 
             {/* Pipeline Deals List */}
             {sortedAndFilteredDeals.length > 0 ? (
-              <section aria-label="Deals pipeline list" className="space-y-3.5">
+              <section aria-label="Deals pipeline list" className="space-y-4">
                 {sortedAndFilteredDeals.map((deal) => (
                   <DealPipelineCard
                     key={deal.id}
@@ -303,7 +297,7 @@ export default function DealsPage() {
             )}
           </>
         )}
-      </div>
+        </PageContainer>
     </PullToRefresh>
   </DashboardShell>
   );

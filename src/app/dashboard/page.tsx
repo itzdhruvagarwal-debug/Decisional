@@ -9,7 +9,7 @@ import {
 } from "@/lib/analytics-engine";
 import { logger } from "@/lib/logger";
 import { isAdmin as rbacIsAdmin, isBrand, isInfluencer } from "@/lib/rbac";
-import { Button } from "@/components/ui";
+import { Button, PageContainer, PageHeader } from "@/components/ui";
 import DashboardHomeClient from "@/components/dashboard/home/DashboardHomeClient";
 import prisma from "@/lib/db";
 import { cache } from "@/lib/cache";
@@ -40,25 +40,27 @@ async function fetchDashboardData(userId: string, userType: string, fy?: string)
 function DashboardErrorFallback({ user }: Readonly<{ user: Session["user"] }>) {
   return (
     <DashboardShell user={user}>
-      <div className="text-center rounded-2xl max-w-lg mx-auto p-8 border border-disputed-border bg-card mt-12 shadow-sm">
-        <div className="mb-4 text-3xl" aria-hidden="true">
-          ⚠️
+      <PageContainer maxWidth="7xl" className="py-4 sm:py-6">
+        <div className="text-center rounded-2xl max-w-lg mx-auto p-8 border border-disputed-border bg-card mt-12 shadow-sm">
+          <div className="mb-4 text-3xl" aria-hidden="true">
+            ⚠️
+          </div>
+          <h2 className="text-2xl mb-2 font-extrabold text-foreground">
+            Workspace Connection Interrupted
+          </h2>
+          <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
+            The dashboard could not load the latest collaboration feed. Please refresh or try again.
+          </p>
+          <Button
+            href="/dashboard"
+            variant="danger"
+            aria-label="Reload dashboard"
+            className="w-full sm:w-auto"
+          >
+            Reload Dashboard
+          </Button>
         </div>
-        <h2 className="text-2xl mb-2 font-extrabold text-foreground">
-          Workspace Connection Interrupted
-        </h2>
-        <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
-          The dashboard could not load the latest collaboration feed. Please refresh or try again.
-        </p>
-        <Button
-          href="/dashboard"
-          variant="danger"
-          aria-label="Reload dashboard"
-          className="w-full sm:w-auto"
-        >
-          Reload Dashboard
-        </Button>
-      </div>
+      </PageContainer>
     </DashboardShell>
   );
 }
@@ -158,15 +160,11 @@ export default async function DashboardPage({
   const renderDashboardContent = () => {
     if (isAdmin && adminData) {
       return (
-        <div className="mx-auto max-w-7xl">
-          <header className="mb-8">
-            <h1 className="mb-2 text-3xl font-extrabold text-foreground">
-              Admin Ops Center
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Platform health, financial operations, and ecosystem monitoring.
-            </p>
-          </header>
+        <div className="space-y-8">
+          <PageHeader
+            title="Admin Ops Center"
+            subtitle="Platform health, financial operations, and ecosystem monitoring."
+          />
           <AdminAnalyticsView data={adminData} />
         </div>
       );
@@ -188,7 +186,9 @@ export default async function DashboardPage({
 
   return (
     <DashboardShell user={session.user}>
-      {renderDashboardContent()}
+      <PageContainer maxWidth="7xl" className="py-4 sm:py-6">
+        {renderDashboardContent()}
+      </PageContainer>
     </DashboardShell>
   );
 }

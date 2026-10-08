@@ -36,7 +36,7 @@ import { ContentSubmissionsCard } from "@/components/dashboard/deals/ContentSubm
 import { ContentSubmissionModal } from "@/components/dashboard/deals/ContentSubmissionModal";
 import { DealModals } from "@/components/dashboard/deals/DealModals";
 import { ContractPrintView } from "@/components/dashboard/deals/ContractPrintView";
-import { Button, Skeleton, Textarea, ToastContainer } from "@/components/ui";
+import { Button, Skeleton, Textarea, ToastContainer, PageContainer, PageHeader } from "@/components/ui";
 import { apiClient } from "@/lib/api-client";
 import { formatCurrency, formatDate, formatUserError } from "@/lib/utils-client";
 import { checkDisputeEligibility, checkReviewSubmissionEligibility } from "@/lib/action-eligibility";
@@ -128,7 +128,7 @@ function DealStatusBadge({ status }: { status: string }) {
 function DealRoomSkeleton({ user }: { user?: unknown }) {
   return (
     <DashboardShell user={user as Parameters<typeof DashboardShell>[0]["user"]}>
-      <div className="max-w-6xl mx-auto space-y-6 pb-16 animate-pulse">
+      <PageContainer maxWidth="6xl" className="space-y-6 pb-16 animate-pulse py-4 sm:py-6">
         {/* Header skeleton */}
         <div className="space-y-3">
           <Skeleton className="h-4 w-28 rounded-lg" />
@@ -160,7 +160,7 @@ function DealRoomSkeleton({ user }: { user?: unknown }) {
             <Skeleton className="h-36 w-full rounded-2xl" />
           </div>
         </div>
-      </div>
+      </PageContainer>
     </DashboardShell>
   );
 }
@@ -302,47 +302,35 @@ export default function DealDetailPage() {
     <DashboardShell user={session?.user || undefined}>
       <ToastContainer toasts={toasts} onClose={removeToast} />
 
-      <div className="max-w-6xl mx-auto space-y-6 pb-20 animate-fade-in">
+      <PageContainer maxWidth="6xl" className="space-y-6 pb-20 animate-fade-in py-4 sm:py-6">
 
         {/* ── 1. WORKROOM HERO HEADER ─────────── */}
-        <div className="space-y-3 border-b border-border pb-5">
-          {/* Breadcrumb Navigation */}
-          <Link
-            href="/dashboard/deals"
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-semibold transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>All Deals Pipeline</span>
-          </Link>
-
-          {/* Title & Counterparty Row */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-foreground">
-                  {deal.campaign?.title || "Campaign Collaboration"}
-                </h1>
-                <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-md bg-muted text-foreground border border-border">
-                  #{deal.id.slice(-6).toUpperCase()}
-                </span>
-                <DealStatusBadge status={deal.status} />
-              </div>
-
-              {/* Sub-info: Quick Stats */}
-              <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-escrow" />
-                  <span>Escrow: <strong>{formatCurrency(deal.amount)}</strong></span>
-                </span>
-                <span>•</span>
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-primary" />
-                  <span>Created {formatDate(deal.createdAt, undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
-                </span>
-              </div>
+        <PageHeader
+          backHref="/dashboard/deals"
+          backLabel="All Deals Pipeline"
+          title={deal.campaign?.title || "Campaign Collaboration"}
+          badge={
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-md bg-muted text-foreground border border-border">
+                #{deal.id.slice(-6).toUpperCase()}
+              </span>
+              <DealStatusBadge status={deal.status} />
             </div>
-
-            {/* Counterparty Dossier Chip + Realtime Sync */}
+          }
+          subtitle={
+            <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground mt-0.5">
+              <span className="flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-escrow" />
+                <span>Escrow: <strong>{formatCurrency(deal.amount)}</strong></span>
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-primary" />
+                <span>Created {formatDate(deal.createdAt, undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
+              </span>
+            </div>
+          }
+          actions={
             <div className="flex items-center flex-wrap gap-2.5 sm:gap-3 shrink-0">
               <Link
                 href={
@@ -350,7 +338,7 @@ export default function DealDetailPage() {
                     ? `/dashboard/influencers/${deal.influencer?.id || ""}`
                     : `/brand/${deal.brand?.id || deal.brand?.userId || encodeURIComponent(deal.brand?.companyName || "")}`
                 }
-                className="flex items-center gap-3 p-2.5 px-3.5 rounded-2xl bg-card border border-border text-xs shadow-sm hover:border-primary/50 hover:bg-muted/40 transition-all cursor-pointer group w-full sm:w-auto"
+                className="flex items-center gap-3 p-2.5 px-3.5 rounded-2xl bg-card border border-border text-xs shadow-xs hover:border-primary/50 hover:bg-muted/40 transition-all cursor-pointer group w-full sm:w-auto"
                 title={isClient ? "View Creator Profile" : `View ${counterpartyName} Public Profile`}
               >
                 <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm shrink-0 group-hover:scale-105 transition-transform">
@@ -390,8 +378,8 @@ export default function DealDetailPage() {
                 <span className="hidden sm:inline">Live Sync</span>
               </div>
             </div>
-          </div>
-        </div>
+          }
+        />
 
         {/* ── 2. ESCROW TRUST BANNER ────────── */}
         <div className="p-3.5 px-4 rounded-2xl bg-escrow-muted/40 border border-escrow-border/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-escrow">
@@ -607,7 +595,7 @@ export default function DealDetailPage() {
             />
           </div>
         </div>
-      </div>
+      </PageContainer>
 
       {/* ── Modals & Dialogs (Preserved 100% Contract Integrity) ─────────── */}
       <DealModals

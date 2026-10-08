@@ -8,7 +8,7 @@ import { fetcher } from "@/lib/fetcher";
 import { logger } from "@/lib/logger-client";
 import { apiClient } from "@/lib/api-client";
 import { formatUserError } from "@/lib/user-messages";
-import { Button, Textarea, ToastContainer, type ToastItem, type ToastType, Skeleton } from "@/components/ui";
+import { Button, Textarea, ToastContainer, type ToastItem, type ToastType, Skeleton, PageContainer, PageHeader } from "@/components/ui";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils-client";
 import {
@@ -262,24 +262,16 @@ export default function DisputeDetailPage({ params }: Readonly<DisputeDetailPage
     <DashboardShell user={session?.user}>
       <ToastContainer toasts={toasts} onClose={removeToast} />
 
-      <div className="space-y-6 animate-fade-in max-w-6xl mx-auto pb-16">
+      <PageContainer maxWidth="6xl" className="space-y-6 animate-fade-in pb-16 py-4 sm:py-6">
         {/* Navigation Breadcrumb & Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <Link
-                href="/dashboard/disputes"
-                className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                Back to Resolution Center
-              </Link>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight flex items-center gap-2.5">
-                <Scale className="w-7 h-7 text-primary" />
-                Dispute Room #{id ? id.slice(-6).toUpperCase() : ""}
-              </h1>
+        <PageHeader
+          title={`Dispute Room #${id ? id.slice(-6).toUpperCase() : ""}`}
+          icon={<Scale className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />}
+          subtitle="Formal resolution proceeding, evidence submissions, and AI mediation analysis."
+          backHref="/dashboard/disputes"
+          backLabel="Back to Resolution Center"
+          badge={
+            <div className="flex items-center gap-1.5 flex-wrap">
               {dispute && getStatusBadge(dispute.status)}
               {dispute && dispute.tier > 1 && (
                 <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-muted text-foreground border border-border">
@@ -287,20 +279,21 @@ export default function DisputeDetailPage({ params }: Readonly<DisputeDetailPage
                 </span>
               )}
             </div>
-          </div>
-
-          {dispute?.deal && (
-            <div className="flex items-center gap-2">
-              <Link
+          }
+          actions={
+            dispute?.deal ? (
+              <Button
                 href={`/dashboard/deals/${dispute.deal.id}`}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-muted hover:bg-muted/80 text-foreground border border-border transition-colors"
+                variant="secondary"
+                size="sm"
+                className="text-xs font-semibold gap-1.5"
               >
                 <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
                 Open Deal Room
-              </Link>
-            </div>
-          )}
-        </div>
+              </Button>
+            ) : undefined
+          }
+        />
 
         {/* Loading State */}
         {isLoading && (
@@ -642,7 +635,7 @@ export default function DisputeDetailPage({ params }: Readonly<DisputeDetailPage
             </div>
           </>
         )}
-      </div>
+      </PageContainer>
     </DashboardShell>
   );
 }

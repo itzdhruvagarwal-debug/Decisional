@@ -147,6 +147,57 @@ Instagram's visual aesthetic is characterized by soft corners on surfaces and ci
 | `shadow-elevated` | `0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04)` | Hover states, active sticky header, floating triggers |
 | `shadow-dropdown` | `0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)` | Popover menus, modals, select dropdown options |
 
+### 4.3 Screen Padding & Layout Container Standard
+
+To eliminate visual jitter and inconsistent gutters across viewports, all dashboard and content routes adhere to a single systematic horizontal screen padding scale, managed centrally via `<PageContainer>` (`src/components/ui/PageContainer.tsx`).
+
+#### Responsive Padding Scale Contract
+
+| Breakpoint | Viewport Width | Utility Class | Computed Value | Safe Area Inset Support |
+| :--- | :--- | :--- | :--- | :--- |
+| **Mobile** | `< 640px` | `px-4` | `16px` (1rem) | `pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]` |
+| **Tablet** | `640px – 1023px` (`sm:` / `md:`) | `sm:px-6` | `24px` (1.5rem) | `sm:pl-[max(1.5rem,env(safe-area-inset-left,0px))] sm:pr-[max(1.5rem,env(safe-area-inset-right,0px))]` |
+| **Desktop**| `≥ 1024px` (`lg:` / `xl:`) | `lg:px-8` | `32px` (2rem) | `lg:pl-[max(2rem,env(safe-area-inset-left,0px))] lg:pr-[max(2rem,env(safe-area-inset-right,0px))]` |
+
+Combined standard token string:
+```css
+px-4 sm:px-6 lg:px-8 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] sm:pl-[max(1.5rem,env(safe-area-inset-left,0px))] sm:pr-[max(1.5rem,env(safe-area-inset-right,0px))] lg:pl-[max(2rem,env(safe-area-inset-left,0px))] lg:pr-[max(2rem,env(safe-area-inset-right,0px))]
+```
+
+#### Container Width Hierarchy (`maxWidth` prop)
+
+| Variant | Max Width Class | Typical Page Usage |
+| :--- | :--- | :--- |
+| `"7xl"` *(Default)* | `max-w-7xl mx-auto` | Primary dashboard views (`/dashboard`, `/deals`, `/campaigns`, `/influencers`, `/settings`) |
+| `"6xl"` | `max-w-6xl mx-auto` | Workroom & multi-column split views (`/deals/[id]`, `/disputes`, `/applications`, `/campaigns/[id]`, `/roi`) |
+| `"5xl"` | `max-w-5xl mx-auto` | Centered tabular or metric consoles (`/wallet`, `/leaderboard`, `/referrals`, `/badges`) |
+| `"4xl"` | `max-w-4xl mx-auto` | Focused single-column workflows (`/notifications`, `/deals/[id]/dispute`) |
+| `"3xl"` | `max-w-3xl mx-auto` | Compact feedback & dialog canvases (`/support`) |
+| `"full"` | `max-w-full` | Unconstrained full-width tables or canvas views |
+| `"none"` | `max-w-none` | Custom layouts with internal width controls |
+
+#### Exception Handling: Full-Bleed & Breakout Rules
+
+1. **Explicit Full-Bleed (`fullBleed={true}`)**:
+   - Eliminates outer padding (`px-0 pl-0 pr-0 sm:px-0 sm:pl-0 sm:pr-0 lg:px-0 lg:pl-0 lg:pr-0`).
+   - Reserved strictly for edge-to-edge interactive maps, canvas editors, or custom hero sections.
+2. **Breakout Elements (`<PageBleed>`)**:
+   - To render edge-to-edge carousels (e.g., stories, full-width proof carousels) or horizontal-scroll tables inside an already padded `<PageContainer>`, use `<PageBleed>` (`-mx-4 sm:-mx-6 lg:-mx-8`).
+   - Never apply ad-hoc scattered `px-N` overrides directly to parent divs.
+
+### 4.4 Vertical Rhythm Spacing Scale (Cards & Sections)
+
+To prevent visual dissonance, cramped screens, or arbitrary white-space sprawl, all components and layouts **MUST** adhere to the 4-tier vertical rhythm hierarchy:
+
+| Rhythm Tier | Token Class | Pixel Value | Rem Value | Canonical Application |
+| :--- | :--- | :--- | :--- | :--- |
+| **Tier 1: List-Item Gap** | `gap-2` / `space-y-2` | **8px** | `0.5rem` | Micro-elements inside a list or card: badge tag clusters, filter pills, message bubble groups, flushed list rows (`divide-y divide-border`), compact stat tiles. |
+| **Tier 2: Card Gap** | `gap-4` / `space-y-4` | **16px** | `1rem` | Sibling cards at the same hierarchy level: consecutive deal cards in a pipeline, campaign cards in a grid/list, stat metric cards in a grid (`grid gap-4`), form input field groupings. |
+| **Tier 3: Sub-Section / Panel Gap** | `gap-6` / `space-y-6` | **24px** | `1.5rem` | Sub-sections, settings panels within a tab (`space-y-6`), spacing between `PageHeader` and top-level filter bar, or grouped card widgets. |
+| **Tier 4: Major Section Gap** | `gap-8` / `space-y-8` | **32px** | `2rem` | Transitions between major independent screen sections on complex views: Hero banner to Active Collaborations to Financial Overview in `DashboardHomeClient`, or Ops Center sections. |
+
+> **Anti-Pattern Rule**: Individual card components must **NOT** hardcode arbitrary bottom margins (`mb-3.5`, `mb-5`, `mb-7`) that conflict with container spacing. Containers must dictate sibling spacing via standard `space-y-*` or `gap-*`.
+
 ---
 
 ## 5. Accessibility Standards & Utilities

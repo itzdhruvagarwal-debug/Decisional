@@ -263,7 +263,7 @@ export default function ProfileTab({
   return (
     <div className="space-y-6 max-w-4xl">
       {/* 1. Overview Status Card (matching KYC TierStatusCardComponent) */}
-      <div className="p-5 sm:p-6 rounded-2xl border border-border bg-card shadow-xs space-y-5">
+      <div className="p-5 sm:p-6 rounded-2xl border border-border bg-card shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -760,7 +760,7 @@ export default function ProfileTab({
 
       {/* 5. Categories & Languages Card (for Influencers) */}
       {isInfluencer(user.userType) && (
-        <div className="p-5 sm:p-6 rounded-2xl border border-border bg-card shadow-xs space-y-5">
+        <div className="p-5 sm:p-6 rounded-2xl border border-border bg-card shadow-xs space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">

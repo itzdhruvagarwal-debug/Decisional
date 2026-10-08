@@ -37,6 +37,8 @@ import {
   type ToastItem,
   type ToastType,
   Skeleton,
+  PageContainer,
+  PageHeader,
 } from "@/components/ui";
 
 import {
@@ -423,54 +425,51 @@ export default function WalletPage() {
       <ToastContainer toasts={toasts} onClose={handleRemoveToast} />
 
       <PullToRefresh onRefresh={handleRefreshAll}>
-        <div className="max-w-5xl mx-auto space-y-6 pb-20 animate-fade-in">
+        <PageContainer maxWidth="5xl" className="space-y-6 pb-20 animate-fade-in py-4 sm:py-6">
 
         {/* ── 1. HEADER & LIVE SYNC CHIP ──────────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl sm:text-3xl font-heading font-black text-foreground tracking-tight">
-                Escrow Wallet
-              </h1>
-              {isRealtimeActive && (
-                <span
-                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap"
-                  title="Live Supabase channel synchronizes wallet updates automatically"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-verified animate-pulse" />
-                  Live Sync
-                </span>
-              )}
-            </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-              {isBrand
-                ? "Manage your campaign escrow deposits, invoice settlements, and GST treasury balance."
-                : "Your verified earnings, milestone payouts, and instant IMPS bank transfers."}
-            </p>
-          </div>
+        <PageHeader
+          title="Escrow Wallet"
+          badge={
+            isRealtimeActive ? (
+              <span
+                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap"
+                title="Live Supabase channel synchronizes wallet updates automatically"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-verified animate-pulse" />
+                Live Sync
+              </span>
+            ) : undefined
+          }
+          subtitle={
+            isBrand
+              ? "Manage your campaign escrow deposits, invoice settlements, and GST treasury balance."
+              : "Your verified earnings, milestone payouts, and instant IMPS bank transfers."
+          }
+          actions={
+            <>
+              <button
+                type="button"
+                onClick={() => setShowStatementModal(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-card border border-border text-xs font-semibold text-foreground hover:bg-muted transition-colors shadow-xs cursor-pointer min-h-[44px]"
+              >
+                <Download className="w-3.5 h-3.5 text-muted-foreground" />
+                <span>Statement</span>
+              </button>
 
-          {/* Quick Action Pill Row */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowStatementModal(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-card border border-border text-xs font-semibold text-foreground hover:bg-muted transition-colors shadow-xs cursor-pointer min-h-[44px]"
-            >
-              <Download className="w-3.5 h-3.5 text-muted-foreground" />
-              <span>Statement</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleRefreshAll}
-              className="w-11 h-11 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-xs cursor-pointer shrink-0"
-              title="Refresh wallet balances and transactions"
-              aria-label="Refresh wallet balances and transactions"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+              <button
+                type="button"
+                onClick={handleRefreshAll}
+                className="w-11 h-11 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-xs cursor-pointer shrink-0"
+                title="Refresh wallet balances and transactions"
+                aria-label="Refresh wallet balances and transactions"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
+            </>
+          }
+          border={false}
+        />
 
         {/* ── 2. DUAL FINTECH BALANCE CARDS (CRED / JUPITER BENCHMARK) ─────── */}
         {isWalletLoading ? (
@@ -724,7 +723,7 @@ export default function WalletPage() {
             </div>
           )}
         </div>
-      </div>
+        </PageContainer>
       </PullToRefresh>
 
 

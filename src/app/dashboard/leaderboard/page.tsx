@@ -22,7 +22,7 @@ import {
 import { fetcher } from "@/lib/fetcher";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import EmptyState from "@/components/ui/EmptyState";
-import { Select, PullToRefresh } from "@/components/ui";
+import { Select, PullToRefresh, PageContainer, ListItem, PageHeader } from "@/components/ui";
 import { formatNumber } from "@/lib/utils-client";
 import { ALL_CATEGORIES } from "@/lib/categories";
 
@@ -118,20 +118,18 @@ export default function LeaderboardPage() {
   return (
     <DashboardShell user={session.user}>
       <PullToRefresh onRefresh={async () => { await mutate(); }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <PageContainer maxWidth="5xl" className="space-y-8 py-8">
         {/* Page Header */}
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 mb-1">
-            <Trophy className="w-3.5 h-3.5" />
-            Bharat Creator Hall of Fame
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
-            Top Performers & Leaderboard
-          </h1>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Recognizing India&apos;s most active creators and trusted brands based on completed escrow contracts, verified reviews, and DRS trust scores.
-          </p>
-        </div>
+        <PageHeader
+          title="Top Performers & Leaderboard"
+          badge={
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+              <Trophy className="w-3.5 h-3.5" />
+              Bharat Hall of Fame
+            </span>
+          }
+          subtitle="Recognizing India's most active creators and trusted brands based on completed escrow contracts, verified reviews, and DRS trust scores."
+        />
 
         {/* Filter Toolbar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-3xl bg-card border border-border shadow-xs">
@@ -476,101 +474,91 @@ export default function LeaderboardPage() {
                       initial={shouldReduceMotion ? false : { opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={shouldReduceMotion ? { duration: 0 } : { delay: index * 0.02 }}
-                      className={`flex items-center justify-between gap-3 px-4 py-3 sm:grid sm:grid-cols-12 sm:gap-4 sm:px-6 sm:py-4 hover:bg-muted/40 transition-colors ${
-                        isTop3 ? "bg-muted/10 font-semibold" : ""
-                      }`}
                     >
-                      {/* Left: Rank & User Info */}
-                      <div className="flex items-center gap-3 sm:contents min-w-0 flex-1">
-                        {/* Rank Indicator */}
-                        <div className="sm:col-span-1 text-center shrink-0">
-                          <span
-                            className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-black ${
-                              rankNumber === 1
-                                ? "bg-amber-500 text-primary-foreground shadow-xs"
-                                : rankNumber === 2
-                                ? "bg-muted text-foreground border border-border"
-                                : rankNumber === 3
-                                ? "bg-amber-700 text-primary-foreground"
-                                : "text-muted-foreground font-semibold"
-                            }`}
-                          >
-                            {rankNumber}
-                          </span>
-                        </div>
-
-                        {/* User Info */}
-                        <div className="sm:col-span-7 flex items-center gap-3 min-w-0 flex-1">
-                          <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center font-bold text-xs text-foreground overflow-hidden relative shrink-0">
-                            {user.avatar ? (
-                              <Image
-                                src={user.avatar}
-                                alt={user.name}
-                                fill
-                                unoptimized
-                                className="object-cover"
-                              />
-                            ) : (
-                              user.name?.slice(0, 2).toUpperCase() || "?"
-                            )}
+                      <ListItem
+                        variant="flush"
+                        className={`hover:bg-muted/40 transition-colors ${
+                          isTop3 ? "bg-muted/10 font-semibold" : ""
+                        }`}
+                        leading={
+                          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+                            <span
+                              className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-black ${
+                                rankNumber === 1
+                                  ? "bg-amber-500 text-primary-foreground shadow-xs"
+                                  : rankNumber === 2
+                                  ? "bg-muted text-foreground border border-border"
+                                  : rankNumber === 3
+                                  ? "bg-amber-700 text-primary-foreground"
+                                  : "text-muted-foreground font-semibold"
+                              }`}
+                            >
+                              {rankNumber}
+                            </span>
+                            <div className="w-11 h-11 rounded-full bg-muted border border-border flex items-center justify-center font-bold text-xs text-foreground overflow-hidden relative shrink-0">
+                              {user.avatar ? (
+                                <Image
+                                  src={user.avatar}
+                                  alt={user.name}
+                                  fill
+                                  unoptimized
+                                  className="object-cover"
+                                />
+                              ) : (
+                                user.name?.slice(0, 2).toUpperCase() || "?"
+                              )}
+                            </div>
                           </div>
-
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-bold text-xs sm:text-sm text-foreground truncate max-w-[140px] sm:max-w-none">
-                                {user.name || "Anonymous Member"}
+                        }
+                        title={user.name || "Anonymous Member"}
+                        titleBadge={
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {user.isWeeklyChampion && (
+                              <span className="inline-flex items-center gap-1 text-2xs font-extrabold uppercase px-1.5 py-0.2 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                <Flame className="w-2.5 h-2.5 fill-current" />
+                                Hot
                               </span>
-                              {user.isWeeklyChampion && (
-                                <span className="inline-flex items-center gap-1 text-2xs font-extrabold uppercase px-1.5 py-0.2 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                                  <Flame className="w-2.5 h-2.5 fill-current" />
-                                  Hot
-                                </span>
-                              )}
-                              {user.trustScore ? (
-                                <span className="hidden sm:inline-flex items-center gap-1 text-2xs font-bold text-verified">
-                                  <ShieldCheck className="w-3 h-3" />
-                                  {user.trustScore}
-                                </span>
-                              ) : null}
-                            </div>
-
-                            <div className="flex items-center gap-1.5 text-2xs sm:text-xs text-muted-foreground truncate">
-                              <span className="truncate">{user.subtitle}</span>
-                              {user.city && (
-                                <>
-                                  <span>•</span>
-                                  <span className="inline-flex items-center gap-0.5 shrink-0">
-                                    <MapPin className="w-2.5 h-2.5" />
-                                    {user.city}
-                                  </span>
-                                </>
-                              )}
-                            </div>
+                            )}
+                            {user.trustScore ? (
+                              <span className="hidden sm:inline-flex items-center gap-1 text-2xs font-bold text-verified">
+                                <ShieldCheck className="w-3 h-3" />
+                                {user.trustScore}
+                              </span>
+                            ) : null}
                           </div>
-                        </div>
-                      </div>
-
-                      {/* Right: Metrics & Badge */}
-                      <div className="flex items-center gap-3 sm:contents shrink-0">
-                        {/* Score Metric */}
-                        <div className="sm:col-span-2 text-right">
-                          <span className="font-extrabold text-xs sm:text-sm text-primary tabular-nums block">
-                            {typeof user.score === "number"
-                              ? formatNumber(user.score)
-                              : user.score}
+                        }
+                        subtitle={
+                          <span className="flex items-center gap-1.5 text-xs text-muted-foreground truncate">
+                            <span className="truncate">{user.subtitle}</span>
+                            {user.city && (
+                              <>
+                                <span>•</span>
+                                <span className="inline-flex items-center gap-0.5 shrink-0">
+                                  <MapPin className="w-2.5 h-2.5" />
+                                  {user.city}
+                                </span>
+                              </>
+                            )}
                           </span>
-                          <span className="text-2xs text-muted-foreground block font-medium">
-                            {scoreLabel}
-                          </span>
-                        </div>
-
-                        {/* Level Pill */}
-                        <div className="sm:col-span-2 text-right">
-                          <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl text-2xs font-bold bg-muted text-foreground border border-border">
+                        }
+                        trailing={
+                          <div className="text-right">
+                            <span className="font-extrabold text-sm sm:text-base text-primary tabular-nums block">
+                              {typeof user.score === "number"
+                                ? formatNumber(user.score)
+                                : user.score}
+                            </span>
+                            <span className="text-2xs text-muted-foreground block font-medium">
+                              {scoreLabel}
+                            </span>
+                          </div>
+                        }
+                        trailingSecondary={
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-2xs font-bold bg-muted text-foreground border border-border">
                             Lv.{user.level}
                           </span>
-                        </div>
-                      </div>
+                        }
+                      />
                     </motion.div>
                   );
                 })}
@@ -619,7 +607,7 @@ export default function LeaderboardPage() {
             </div>
           </div>
         )}
-        </div>
+        </PageContainer>
       </PullToRefresh>
     </DashboardShell>
   );

@@ -21,6 +21,7 @@ import { QuickDiscoveryRow } from "./QuickDiscoveryRow";
 import { DashboardStoriesBar } from "./DashboardStoriesBar";
 import { AuthenticityAppealBanner } from "@/components/dashboard/AuthenticityAppealBanner";
 import AnalyticsPageClient from "@/app/dashboard/analytics/AnalyticsPageClient";
+import { PageHeader } from "@/components/ui";
 import type { InfluencerAnalyticsData } from "@/components/analytics/InfluencerDashboard";
 import type { BrandAnalyticsData } from "@/components/analytics/BrandDashboard";
 import { ShieldCheck, LayoutDashboard, BarChart3, Wallet, Lock, Layers } from "lucide-react";
@@ -70,37 +71,30 @@ export default function DashboardHomeClient({
   const availableBalancePaise = walletData?.balance ?? 0;
 
   return (
-    <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto pb-12">
+    <div className="space-y-6 sm:space-y-8 pb-12">
       {/* 1. TOP GREETING & VIEW SWITCHER */}
-      <header className="flex flex-col gap-4 border-b border-border pb-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          {/* Creator/Brand identity */}
-          <div className="flex items-center gap-3.5">
-            <div className="relative w-12 h-12 rounded-full overflow-hidden bg-primary/10 border-2 border-primary/20 shrink-0 flex items-center justify-center text-primary font-bold text-lg shadow-xs">
-              {userAvatar ? (
-                <Image src={userAvatar} alt={displayName} fill className="object-cover" />
-              ) : (
-                <span>{displayName[0]?.toUpperCase() || "U"}</span>
-              )}
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
-                  Welcome back, {displayName}
-                </h1>
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border">
-                  <ShieldCheck className="w-3.5 h-3.5" /> Verified
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                {isBrand
-                  ? "Manage campaigns, approve deliverables, and fund escrow-backed collaborations."
-                  : "Track your deliverables, verified brand deals, and instant escrow settlements."}
-              </p>
-            </div>
+      <PageHeader
+        icon={
+          <div className="relative w-12 h-12 rounded-full overflow-hidden bg-primary/10 border-2 border-primary/20 shrink-0 flex items-center justify-center text-primary font-bold text-lg shadow-xs">
+            {userAvatar ? (
+              <Image src={userAvatar} alt={displayName} fill className="object-cover" />
+            ) : (
+              <span>{displayName[0]?.toUpperCase() || "U"}</span>
+            )}
           </div>
-
-          {/* Right Action Bar: Hero Stats & View Switcher */}
+        }
+        title={`Welcome back, ${displayName}`}
+        badge={
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-verified-muted text-verified border border-verified-border">
+            <ShieldCheck className="w-3.5 h-3.5" /> Verified
+          </span>
+        }
+        subtitle={
+          isBrand
+            ? "Manage campaigns, approve deliverables, and fund escrow-backed collaborations."
+            : "Track your deliverables, verified brand deals, and instant escrow settlements."
+        }
+        actions={
           <div className="flex flex-wrap items-center gap-3 self-start lg:self-center">
             {/* Pinned quick KPI chips */}
             <div className="flex items-center gap-2">
@@ -168,8 +162,8 @@ export default function DashboardHomeClient({
               </button>
             </div>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* 2. INSTAGRAM-STYLE HIGHLIGHT STORIES BAR */}
       <DashboardStoriesBar

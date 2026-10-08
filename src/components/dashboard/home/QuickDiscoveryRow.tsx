@@ -47,7 +47,7 @@ export function QuickDiscoveryRow({ isBrand, isInfluencer }: Readonly<QuickDisco
     influencersData?.data?.influencers || influencersData?.influencers || [];
 
   return (
-    <section aria-label="Discovery recommendations" className="space-y-3.5">
+    <section aria-label="Discovery recommendations" className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {isBrand ? (
@@ -68,7 +68,7 @@ export function QuickDiscoveryRow({ isBrand, isInfluencer }: Readonly<QuickDisco
       </div>
 
       {isInfluencer && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {rawCampaigns.length > 0 ? (
             rawCampaigns.slice(0, 3).map((camp) => (
               <article
@@ -117,7 +117,7 @@ export function QuickDiscoveryRow({ isBrand, isInfluencer }: Readonly<QuickDisco
       )}
 
       {isBrand && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {rawInfluencers.length > 0 ? (
             rawInfluencers.slice(0, 3).map((inf) => (
               <article

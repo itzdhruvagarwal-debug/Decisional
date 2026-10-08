@@ -28,7 +28,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { formatCurrency, formatDate, formatNumber } from "@/lib/utils-client";
-import { Button, Input, Textarea, BottomSheet, Spinner } from "@/components/ui";
+import { Button, Input, Textarea, BottomSheet, Spinner, PageHeader } from "@/components/ui";
 import { ApplicationsList } from "@/components/dashboard/campaigns/details/ApplicationsList";
 import { useCampaignDetail } from "@/components/dashboard/campaigns/details/useCampaignDetail";
 import { checkCampaignCancelEligibility, checkCampaignApplicationEligibility, checkCampaignActivationEligibility } from "@/lib/action-eligibility";
@@ -132,7 +132,7 @@ export default function CampaignDetailClient({
 
   if (loading) {
     return (
-      <div className="p-6 max-w-6xl mx-auto space-y-6" aria-label="Loading campaign details" aria-busy="true">
+      <div className="space-y-6" aria-label="Loading campaign details" aria-busy="true">
         {/* Header Skeleton */}
         <div className="bg-card border border-border p-6 rounded-2xl animate-pulse space-y-4">
           <div className="h-4 w-32 bg-muted rounded" />
@@ -205,133 +205,137 @@ export default function CampaignDetailClient({
   const brandProfileHref = `/brand/${brandIdentifier}`;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="space-y-8">
       {/* Top Navigation Bar & Owner Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <Link
-          href="/dashboard/campaigns"
-          className="text-xs font-semibold text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Live Campaigns
-        </Link>
-
-        {isOwner && (
-          <div className="flex items-center gap-2.5 flex-wrap">
-            {campaign.status === "DRAFT" && (
-              <>
-                <Button
-                  href={`/dashboard/campaigns/create?edit=${campaign.id}`}
-                  variant="secondary"
-                  size="sm"
-                >
-                  Edit Draft
-                </Button>
+      <PageHeader
+        backHref="/dashboard/campaigns"
+        backLabel="Back to Live Campaigns"
+        title={campaign.title}
+        subtitle={`Organized by ${campaign.brand?.companyName || "Verified Brand"}`}
+        badge={
+          <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-md bg-muted text-foreground border border-border">
+            {campaign.status}
+          </span>
+        }
+        actions={
+          isOwner ? (
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {campaign.status === "DRAFT" && (
+                <>
+                  <Button
+                    href={`/dashboard/campaigns/create?edit=${campaign.id}`}
+                    variant="secondary"
+                    size="sm"
+                  >
+                    Edit Draft
+                  </Button>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      disabled={!activateEligibility.allowed}
+                      title={activateEligibility.reason}
+                      onClick={() => {
+                        if (!activateEligibility.allowed) {
+                          setNotice({
+                            type: "error",
+                            message: activateEligibility.reason || "Cannot launch campaign",
+                          });
+                          return;
+                        }
+                        handleCampaignAction("ACTIVATE");
+                      }}
+                      className="inline-flex items-center gap-1.5 font-bold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Rocket className="w-4 h-4" />
+                      Launch Campaign
+                    </Button>
+                    {!activateEligibility.allowed && (
+                      <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                        <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                        <span>{activateEligibility.reason}</span>
+                        {activateEligibility.ctaText && activateEligibility.ctaHref && (
+                          <Link
+                            href={activateEligibility.ctaHref}
+                            className="underline font-bold text-primary hover:text-primary/80"
+                          >
+                            {activateEligibility.ctaText} →
+                          </Link>
+                        )}
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
+              {campaign.status === "ACTIVE" && (
                 <div className="flex items-center gap-2 flex-wrap">
                   <Button
                     type="button"
-                    variant="primary"
+                    variant="danger"
                     size="sm"
-                    disabled={!activateEligibility.allowed}
-                    title={activateEligibility.reason}
                     onClick={() => {
-                      if (!activateEligibility.allowed) {
-                        setNotice({
-                          type: "error",
-                          message: activateEligibility.reason || "Cannot launch campaign",
-                        });
+                      if (!cancelEligibility.allowed) {
+                        setNotice({ type: "error", message: cancelEligibility.reason || "Cannot cancel campaign" });
                         return;
                       }
-                      handleCampaignAction("ACTIVATE");
+                      handleCampaignAction("CANCEL");
                     }}
-                    className="inline-flex items-center gap-1.5 font-bold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!cancelEligibility.allowed}
+                    title={cancelEligibility.reason}
+                    className="font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Rocket className="w-4 h-4" />
-                    Launch Campaign
+                    Cancel Campaign
                   </Button>
-                  {!activateEligibility.allowed && (
+                  {!cancelEligibility.allowed && (
                     <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-lg">
                       <AlertCircle className="w-3 h-3 flex-shrink-0" />
-                      <span>{activateEligibility.reason}</span>
-                      {activateEligibility.ctaText && activateEligibility.ctaHref && (
+                      <span>{cancelEligibility.reason}</span>
+                      {cancelEligibility.ctaText && (
                         <Link
-                          href={activateEligibility.ctaHref}
+                          href={cancelEligibility.ctaHref || `/dashboard/deals?campaignId=${campaign.id}`}
                           className="underline font-bold text-primary hover:text-primary/80"
                         >
-                          {activateEligibility.ctaText} →
+                          {cancelEligibility.ctaText} →
                         </Link>
                       )}
                     </span>
                   )}
                 </div>
-              </>
-            )}
-            {campaign.status === "ACTIVE" && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <Button
-                  type="button"
-                  variant="danger"
-                  size="sm"
-                  onClick={() => {
-                    if (!cancelEligibility.allowed) {
-                      setNotice({ type: "error", message: cancelEligibility.reason || "Cannot cancel campaign" });
-                      return;
-                    }
-                    handleCampaignAction("CANCEL");
-                  }}
-                  disabled={!cancelEligibility.allowed}
-                  title={cancelEligibility.reason}
-                  className="font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Cancel Campaign
-                </Button>
-                {!cancelEligibility.allowed && (
-                  <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
-                    <span>{cancelEligibility.reason}</span>
-                    {cancelEligibility.ctaText && (
-                      <Link
-                        href={cancelEligibility.ctaHref || `/dashboard/deals?campaignId=${campaign.id}`}
-                        className="underline font-bold text-primary hover:text-primary/80"
-                      >
-                        {cancelEligibility.ctaText} →
-                      </Link>
-                    )}
-                  </span>
-                )}
-              </div>
-            )}
-            {(campaign.status === "ACTIVE" || campaign.status === "COMPLETED") && (
-              <>
-                <Link href={`/dashboard/campaigns/${campaign.id}/roi`}>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    className="inline-flex items-center gap-1.5 font-bold cursor-pointer shadow-xs"
+              )}
+              {(campaign.status === "ACTIVE" || campaign.status === "COMPLETED") && (
+                <>
+                  <Link href={`/dashboard/campaigns/${campaign.id}/roi`}>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      className="inline-flex items-center gap-1.5 font-bold cursor-pointer shadow-xs"
+                    >
+                      <BarChart3 className="w-4 h-4" />
+                      ROI Report
+                    </Button>
+                  </Link>
+                  <a
+                    href={`/api/reports/brand/campaign/${campaign.id}/roi?format=csv`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    <BarChart3 className="w-4 h-4" />
-                    ROI Report
-                  </Button>
-                </Link>
-                <a
-                  href={`/api/reports/brand/campaign/${campaign.id}/roi?format=csv`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="inline-flex items-center gap-1.5 font-medium cursor-pointer"
-                  >
-                    <Download className="w-4 h-4" />
-                    Export CSV
-                  </Button>
-                </a>
-              </>
-            )}
-          </div>
-        )}
-      </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="inline-flex items-center gap-1.5 font-medium cursor-pointer"
+                    >
+                      <Download className="w-4 h-4" />
+                      Export CSV
+                    </Button>
+                  </a>
+                </>
+              )}
+            </div>
+          ) : undefined
+        }
+        border={false}
+      />
 
       {/* Campaign Hero Card */}
       <div className="bg-card border border-border p-6 sm:p-8 rounded-3xl shadow-xs">
@@ -394,9 +398,9 @@ export default function CampaignDetailClient({
                 </Link>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight leading-tight">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight leading-tight">
                 {campaign.title}
-              </h1>
+              </h2>
 
               <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap pt-1">
                 <span className="inline-flex items-center gap-1">

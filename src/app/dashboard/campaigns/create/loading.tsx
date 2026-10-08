@@ -1,8 +1,9 @@
 import React from "react";
+import { PageContainer } from "@/components/ui";
 
 export default function CreateCampaignLoading() {
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-6 animate-pulse">
+    <PageContainer maxWidth="6xl" className="space-y-6 animate-pulse py-4 sm:py-6" aria-hidden="true">
       {/* Header skeleton */}
       <div className="space-y-2">
         <div className="h-8 w-64 bg-muted rounded-xl" />
@@ -17,6 +18,6 @@ export default function CreateCampaignLoading() {
         <div className="flex-1 w-full h-[520px] bg-card border border-border rounded-3xl p-8" />
         <div className="w-full lg:w-80 h-[440px] bg-card border border-border rounded-3xl p-6" />
       </div>
-    </div>
+    </PageContainer>
   );
 }

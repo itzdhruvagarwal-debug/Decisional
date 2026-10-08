@@ -8,7 +8,7 @@ import {
 } from "@/lib/analytics-engine";
 import { logger } from "@/lib/logger";
 import { isAdmin as rbacIsAdmin, isBrand, isInfluencer } from "@/lib/rbac";
-import { Button } from "@/components/ui";
+import { Button, PageContainer, PageHeader } from "@/components/ui";
 import prisma from "@/lib/db";
 import AnalyticsPageClient from "./AnalyticsPageClient";
 import { BarChart3, ChevronRight, Wallet, ArrowLeft } from "lucide-react";
@@ -101,35 +101,30 @@ export default async function AnalyticsPage({
 
   return (
     <DashboardShell user={session.user}>
-      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 pb-12">
+      <PageContainer maxWidth="7xl" className="space-y-6 sm:space-y-8 pb-12 py-4 sm:py-6">
         {/* Navigation Breadcrumb & Quick Actions Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
-          <div>
-            <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 font-medium">
+        <PageHeader
+          breadcrumbs={
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
               <Link href="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
                 <ArrowLeft className="w-3.5 h-3.5" /> Dashboard
               </Link>
               <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/60" />
               <span className="text-foreground font-semibold">Analytics &amp; FY Reports</span>
-            </nav>
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20">
-                <BarChart3 className="w-5 h-5" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-                  {isInfluencerUser ? "Performance & Financial Analytics" : "Campaign & Spend Analytics"}
-                </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  {isInfluencerUser
-                    ? "Track verified earnings, delivery metrics, trust score, and official Indian FY tax statements."
-                    : "Track campaign ROI, escrow expenditures, creator deliverables, and GST compliance reports."}
-                </p>
-              </div>
             </div>
-          </div>
-
-          <div className="flex items-center gap-2.5 self-start sm:self-center">
+          }
+          icon={
+            <div className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20">
+              <BarChart3 className="w-5 h-5" />
+            </div>
+          }
+          title={isInfluencerUser ? "Performance & Financial Analytics" : "Campaign & Spend Analytics"}
+          subtitle={
+            isInfluencerUser
+              ? "Track verified earnings, delivery metrics, trust score, and official Indian FY tax statements."
+              : "Track campaign ROI, escrow expenditures, creator deliverables, and GST compliance reports."
+          }
+          actions={
             <Button
               href="/dashboard/wallet"
               variant="secondary"
@@ -139,8 +134,8 @@ export default async function AnalyticsPage({
               <Wallet className="w-3.5 h-3.5" />
               Wallet Ledger
             </Button>
-          </div>
-        </div>
+          }
+        />
 
         {/* Dynamic Analytics Client View */}
         {isInfluencerUser && influencerData && (
@@ -173,7 +168,7 @@ export default async function AnalyticsPage({
             </Button>
           </div>
         )}
-      </div>
+      </PageContainer>
     </DashboardShell>
   );
 }

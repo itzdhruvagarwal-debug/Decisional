@@ -169,9 +169,9 @@ export function BottomSheet({
                     </div>
                   )}
                   {description && (
-                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                    <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
                       {description}
-                    </p>
+                    </div>
                   )}
                 </div>
 

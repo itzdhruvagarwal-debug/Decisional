@@ -112,7 +112,7 @@ export default function CreatorDiscoveryCard({
   const startingRate = formatCurrency(creator.startingRatePaise);
 
   return (
-    <Card as="article" className="relative w-full overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col mb-6 group">
+    <Card as="article" className="relative w-full overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col mb-4 group">
       {/* Toast Notification */}
       {toastMessage && (
         <div

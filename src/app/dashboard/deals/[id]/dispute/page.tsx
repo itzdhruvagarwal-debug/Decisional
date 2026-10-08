@@ -9,7 +9,7 @@ import { fetcher } from "@/lib/fetcher";
 import { logger } from "@/lib/logger-client";
 import { apiClient } from "@/lib/api-client";
 import { formatUserError } from "@/lib/user-messages";
-import { Button, Textarea, Input, ToastContainer, type ToastItem, Skeleton, BottomSheet } from "@/components/ui";
+import { Button, Textarea, Input, ToastContainer, type ToastItem, Skeleton, BottomSheet, PageContainer, PageHeader } from "@/components/ui";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { formatCurrency } from "@/lib/utils-client";
 import { createDisputeSchema } from "@/lib/validations/campaign";
@@ -239,7 +239,7 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
     <DashboardShell user={session?.user || undefined}>
       <ToastContainer toasts={toasts} onClose={removeToast} />
 
-      <div className="max-w-4xl mx-auto space-y-6 pb-20 animate-fade-in">
+      <PageContainer maxWidth="4xl" className="space-y-6 pb-20 animate-fade-in py-4 sm:py-6">
         {/* Ineligibility Alert Banner (Single-Implementation Rule) */}
         {!isDealLoading && deal && !disputeEligibility.allowed && (
           <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl p-4 flex items-start gap-3">
@@ -251,22 +251,20 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
           </div>
         )}
 
-        {/* Navigation Breadcrumb */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          <Link
-            href={`/dashboard/deals/${dealId}`}
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-semibold transition-colors min-h-[44px] py-2"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Back to Deal Room
-          </Link>
-
-          {/* Resolution Estimate Chip */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-escrow-muted text-escrow border border-escrow-border shadow-xs self-start sm:self-auto max-w-full">
-            <Zap className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">Resolution ETA: 24–48 Hours (Tier-1 Conciliation)</span>
-          </div>
-        </div>
+        {/* Navigation Breadcrumb & Header */}
+        <PageHeader
+          backHref={`/dashboard/deals/${dealId}`}
+          backLabel="Back to Deal Room"
+          title="Raise Dispute & Mediation"
+          subtitle="Escrow-backed conflict arbitration, evidence examination, and neutral platform mediation."
+          badge={
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-escrow-muted text-escrow border border-escrow-border shadow-xs">
+              <Zap className="w-3.5 h-3.5 shrink-0" />
+              <span>Resolution ETA: 24–48 Hours</span>
+            </div>
+          }
+          border={false}
+        />
 
         {/* ── 3-STEP WIZARD PROGRESS STEPPER BAR ────────── */}
         <div className="bg-card border border-border rounded-2xl p-3 sm:p-4 shadow-xs">
@@ -429,7 +427,7 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
 
         {/* ── STEP 1: SELECT ISSUE CATEGORY ───────────────────────────────── */}
         {currentStep === 1 && (
-          <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-5 animate-fade-in">
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4 animate-fade-in">
             <div>
               <h2 className="text-base font-heading font-bold text-foreground flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-black">
@@ -511,7 +509,7 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
 
         {/* ── STEP 2: STATEMENT & EVIDENCE ────────────────────────────────── */}
         {currentStep === 2 && (
-          <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-5 animate-fade-in">
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4 animate-fade-in">
             {/* Category Confirmation Chip */}
             <div className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
               <div className="flex items-center gap-2.5">
@@ -631,7 +629,7 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
         {/* ── STEP 3: REVIEW & CONFIRM SUBMISSION ──────────────────────────── */}
         {currentStep === 3 && (
           <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
-            <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-5">
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
               <div>
                 <h2 className="text-base font-heading font-bold text-foreground flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-black">
@@ -748,7 +746,7 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
             </div>
           </form>
         )}
-      </div>
+      </PageContainer>
 
       {/* Dispute Raise Confirmation BottomSheet */}
       <BottomSheet

@@ -11,7 +11,7 @@ import {
 } from "@/lib/schemas";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import EmptyState from "@/components/ui/EmptyState";
-import { Button, Input } from "@/components/ui";
+import { Button, Input, PageContainer, PageHeader } from "@/components/ui";
 import CreatorDiscoveryCard from "@/components/discovery/CreatorDiscoveryCard";
 import DiscoveryCardSkeleton from "@/components/discovery/DiscoveryCardSkeleton";
 import FilterBottomSheet from "@/components/discovery/FilterBottomSheet";
@@ -204,91 +204,88 @@ export default function DiscoverInfluencersPage() {
   if (!isBrandOrAdmin) {
     return (
       <DashboardShell user={session.user}>
-        <div className="max-w-lg mx-auto p-8 rounded-2xl bg-card border border-border text-center mt-12 shadow-sm space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
-            <Sparkles className="w-6 h-6" />
+        <PageContainer maxWidth="4xl" className="py-4 sm:py-6">
+          <div className="max-w-lg mx-auto p-8 rounded-2xl bg-card border border-border text-center mt-12 shadow-sm space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <h1 className="text-xl font-heading font-bold text-foreground">
+              Brand Access Required
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              Influencer discovery, engagement metrics, and rate cards are reserved for verified brand partners. Browse available campaigns instead.
+            </p>
+            <Button href="/dashboard/campaigns" variant="primary">
+              Explore Campaigns
+            </Button>
           </div>
-          <h1 className="text-xl font-heading font-bold text-foreground">
-            Brand Access Required
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Influencer discovery, engagement metrics, and rate cards are reserved for verified brand partners. Browse available campaigns instead.
-          </p>
-          <Button href="/dashboard/campaigns" variant="primary">
-            Explore Campaigns
-          </Button>
-        </div>
+        </PageContainer>
       </DashboardShell>
     );
   }
 
   return (
     <DashboardShell user={session.user}>
-      <div className="max-w-7xl mx-auto space-y-6 pb-16 animate-fade-in">
+      <PageContainer maxWidth="7xl" className="space-y-6 pb-16 animate-fade-in py-4 sm:py-6">
         {/* ── 1. HEADER (INSTAGRAM + COLLABR BENCHMARK) ───────────────────── */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-foreground">
-                Creator Discovery
-              </h1>
-              <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
-                <ShieldCheck className="w-3.5 h-3.5" /> KYC &amp; DRS Verified
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-              Discover verified Indian creators with audited engagement, pre-negotiated rate cards, and escrow protection.
-            </p>
-          </div>
+        <PageHeader
+          title="Creator Discovery"
+          badge={
+            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-verified-muted text-verified border border-verified-border shrink-0 whitespace-nowrap">
+              <ShieldCheck className="w-3.5 h-3.5" /> KYC &amp; DRS Verified
+            </span>
+          }
+          subtitle="Discover verified Indian creators with audited engagement, pre-negotiated rate cards, and escrow protection."
+          actions={
+            <>
+              {/* View Tab Segment: All Creators vs Saved Shortlist */}
+              <div className="inline-flex items-center p-1 rounded-xl bg-muted border border-border text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setViewTab("all")}
+                  className={`px-3.5 py-2 min-h-[44px] inline-flex items-center justify-center rounded-lg transition-all cursor-pointer ${
+                    viewTab === "all"
+                      ? "bg-card text-foreground shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  All Creators
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewTab("saved")}
+                  className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-lg transition-all cursor-pointer ${
+                    viewTab === "saved"
+                      ? "bg-card text-foreground shadow-xs font-bold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Bookmark className={`w-3.5 h-3.5 ${viewTab === "saved" ? "fill-current text-primary" : ""}`} />
+                  <span>Shortlist</span>
+                  {savedCount > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-primary/10 text-primary shrink-0 whitespace-nowrap">
+                      {savedCount}
+                    </span>
+                  )}
+                </button>
+              </div>
 
-          <div className="flex items-center gap-2">
-            {/* View Tab Segment: All Creators vs Saved Shortlist */}
-            <div className="inline-flex items-center p-1 rounded-xl bg-muted border border-border text-xs font-semibold">
-              <button
-                type="button"
-                onClick={() => setViewTab("all")}
-                className={`px-3.5 py-2 min-h-[44px] inline-flex items-center justify-center rounded-lg transition-all cursor-pointer ${
-                  viewTab === "all"
-                    ? "bg-card text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+              <Button
+                variant="secondary"
+                onClick={() => setIsFilterSheetOpen(true)}
+                className="gap-2 text-xs font-semibold cursor-pointer shadow-xs min-h-[44px] px-3.5 py-2"
               >
-                All Creators
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewTab("saved")}
-                className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-lg transition-all cursor-pointer ${
-                  viewTab === "saved"
-                    ? "bg-card text-foreground shadow-xs font-bold"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Bookmark className={`w-3.5 h-3.5 ${viewTab === "saved" ? "fill-current text-primary" : ""}`} />
-                <span>Shortlist</span>
-                {savedCount > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-primary/10 text-primary shrink-0 whitespace-nowrap">
-                    {savedCount}
+                <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
+                <span>Filters</span>
+                {activeFilterCount > 0 && (
+                  <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                    {activeFilterCount}
                   </span>
                 )}
-              </button>
-            </div>
-
-            <Button
-              variant="secondary"
-              onClick={() => setIsFilterSheetOpen(true)}
-              className="gap-2 text-xs font-semibold cursor-pointer shadow-xs min-h-[44px] px-3.5 py-2"
-            >
-              <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
-              <span>Filters</span>
-              {activeFilterCount > 0 && (
-                <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                  {activeFilterCount}
-                </span>
-              )}
-            </Button>
-          </div>
-        </header>
+              </Button>
+            </>
+          }
+        />
 
         {/* ── 2. TRUST HIGHLIGHT RIBBON (COLLABR ANTI-FRAUD GUARANTEE) ─────── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-2xl bg-card border border-border shadow-xs text-xs">
@@ -485,7 +482,7 @@ export default function DiscoverInfluencersPage() {
             ))}
           </div>
         )}
-      </div>
+      </PageContainer>
 
       {/* ── 6. FILTER BOTTOM SHEET MODAL ─────────────────────────────────── */}
       <FilterBottomSheet

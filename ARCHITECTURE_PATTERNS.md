@@ -171,6 +171,13 @@ Standalone help surfaces (`src/components/help/HelpCenterClient.tsx`) follow a h
 2. **Memoized Multi-Filter**: Uses React `useMemo` to filter across category pills (`GETTING_STARTED`, `PAYMENTS_ESCROW`, `DISPUTES_REVISIONS`, `KYC_SECURITY`) and real-time query substrings matching question, answer, and badge text simultaneously.
 3. **Escalation Fallback**: Always pairs self-service documentation with an explicit escalation card linking directly to `/dashboard/support`.
 
+### 2.10 Systematic Spacing & Vertical Rhythm Pattern
+To prevent visual dissonance, cramped screens, or arbitrary white-space sprawl, all components and layouts adhere to a unified vertical rhythm hierarchy:
+1. **Tier 1: List-Item Gap (`gap-2` / `space-y-2`, 8px)**: Micro-elements inside a list or card: badge tag clusters, filter pills, message bubble groups, flushed list rows (`divide-y divide-border`), compact stat tiles.
+2. **Tier 2: Card Gap (`gap-4` / `space-y-4`, 16px)**: Sibling cards at the same hierarchy level: consecutive deal cards in a pipeline, campaign cards in a grid/list, stat metric cards in a grid (`grid gap-4`), form input field groupings.
+3. **Tier 3: Sub-Section / Panel Gap (`gap-6` / `space-y-6`, 24px)**: Sub-sections, settings panels within a tab (`space-y-6`), spacing between `PageHeader` and top-level filter bar, or grouped card widgets.
+4. **Tier 4: Major Section Gap (`gap-8` / `space-y-8`, 32px)**: Transitions between major independent screen sections on complex views: Hero banner to Active Collaborations to Financial Overview in `DashboardHomeClient`, or Ops Center sections.
+5. **Container-Owned Spacing Rule**: Containers own the spacing between sibling elements via `space-y-*` or `gap-*`. Card components must **NOT** hardcode arbitrary bottom margins (`mb-3.5`, `mb-5`, `mb-7`) that conflict with container spacing.
 
 ---
 
@@ -350,7 +357,85 @@ Leaving an action button enabled, letting the user fill forms or click with expe
 
 ---
 
-## 7. Definition of Done Checklist for New Features & Code Reviews
+## 7. Content Hierarchy Conventions by Screen Archetype
+
+Following reference consumer and creator platforms (Instagram, Collabr, CRED, Stripe), all application screens and cards are categorized into three clear visual grammar archetypes:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       SCREEN CONTENT HIERARCHY ARCHETYPES                   │
+├─────────────────────────┬─────────────────────────┬─────────────────────────┤
+│    1. IMAGE-FIRST       │     2. TEXT-FIRST       │   3. HYBRID BALANCED    │
+│  (Discovery / Profiles) │   (Settings / Utility)  │   (Deals / Campaigns)   │
+├─────────────────────────┼─────────────────────────┼─────────────────────────┤
+│ • Media leads (>50%)    │ • Zero decorative media │ • 44px logo visual      │
+│ • Large aspect ratios   │ • 36–44px icon boxes    │ • 3-zone layout grammar │
+│ • Overlay chips         │ • Bold primary info     │ • Deliverables + escrow │
+│ • Minimal text payload  │ • Tabular mono numbers  │ • Expandable accordion  │
+└─────────────────────────┴─────────────────────────┴─────────────────────────┘
+```
+
+### 7.1 Archetype A: Image-First (Discovery Feed & Creator Showcase)
+*Applicable views:* `DiscoveryFeed.tsx`, `CreatorDiscoveryCard.tsx`, `InfluencerProfileClient.tsx`, `CampaignProofModal.tsx`.
+
+1. **Visual Dominance**: The user's eye must land on visual authenticity and creator aesthetic before reading metadata. Media containers must occupy at least 50% of the initial card height.
+2. **Aspect Ratio Standardization**:
+   - **Discovery Feed Cards**: Standardized to `aspect-[16/10]` (`relative aspect-[16/10] w-full bg-muted overflow-hidden`).
+   - **Portfolio Proof Grids**: Standardized to `aspect-square` (`1:1`) 3-column media grid (`grid-cols-2 sm:grid-cols-3`).
+   - **Deliverable Proof Modal**: Standardized to `aspect-[9/16]` for vertical short-form video/reel deliverables.
+   - **Profile Hero Avatar**: Standardized to 96px–112px (`w-24 h-24 sm:w-28 sm:h-28`) circular avatar surrounded by a vibrant gradient trust ring (`from-primary via-verified to-escrow`).
+3. **Aspect-Ratio Protection (No Squishing)**:
+   - All images **MUST** use Next.js `<Image>` with `fill` and `className="object-cover"`. Never apply fixed pixel dimensions that stretch or distort image ratios.
+   - When an image is missing or loading, cards must render a branded gradient fallback (`bg-gradient-to-br`) with a monogram avatar and ambient glow, preserving the exact layout dimensions.
+4. **Metadata Restraint**:
+   - Overlaid high-contrast chips: Top-left DRS Trust Score badge (`DRS 780`) and top-right Niche pill (`Fashion & Beauty`).
+   - Text below media is compact: 1-line bold creator name, single-line handle/location, and a 3-column micro-metrics row (Starting Rate, Followers, Engagement Rate). Text must never crowd the visual thumbnail.
+
+### 7.2 Archetype B: Text-First (Information-Dense Utility & Lists)
+*Applicable views:* `src/app/dashboard/settings/page.tsx`, `src/app/dashboard/notifications/page.tsx`, `VirtualizedTransactionList.tsx`, `BankAccountManager.tsx`, `IndiaTaxCompliancePanel.tsx`.
+
+1. **Readability & Scanning Speed**: Primary utility screens require maximum information density, fast scanning, and zero visual friction.
+2. **Zero Decorative Images**:
+   - Never insert stock photos, marketing illustrations, or decorative banners into utility or financial screens. Every pixel of visual media must serve a functional purpose.
+3. **Functional Icon Standards**:
+   - Navigation & Tab Icons: 16px (`w-4 h-4`) in line with text labels.
+   - Activity & Category Icons: 36px–44px rounded containers (`w-9 h-9 rounded-full` in ledger, `w-11 h-11 rounded-xl` in notifications) paired with semantic status tokens (`verified`, `escrow`, `pending`, `disputed`).
+4. **Typographic Hierarchy**:
+   - **Primary Label**: High-contrast bold (`text-sm font-bold text-foreground` or `text-xs sm:text-sm font-semibold text-foreground`).
+   - **Secondary Description**: Muted, single-line or 2-line clamped (`text-xs text-muted-foreground line-clamp-2`).
+   - **Financial & Time Precision**: Strict monospace tabular numbers (`font-mono tabular-nums text-foreground` or `text-verified`) for dates, timestamps, transaction references, and monetary amounts (`+ ₹15,000` / `- ₹5,000`).
+   - **Section Headers**: Uppercase micro-labels (`text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground bg-muted/80`).
+
+### 7.3 Archetype C: Hybrid Balanced Cards (Deals & Campaigns)
+*Applicable views:* `DealPipelineCard.tsx`, `CampaignDiscoveryCard.tsx`, `ActiveDealsFeed.tsx`.
+
+1. **Balanced 50/50 Visual vs. Operational Data**: Deals and campaigns represent legal/financial commitments where brand identity and deliverable specifications are equally critical. Cards must balance immediate brand recognition with structured contractual data.
+2. **Standard 44px Leading Visual Anchor**:
+   - Brand logo avatar standardized at 44px (`w-11 h-11 rounded-xl overflow-hidden bg-muted border border-border shrink-0`).
+   - Immediate brand recognition without consuming disproportionate vertical space. Fallback to 2-letter uppercase initials.
+3. **3-Zone Horizontal Layout Grammar**:
+   - **Zone 1 (Leading Visual)**: 44px brand logo avatar + verified shield pill.
+   - **Zone 2 (Central Operational Data)**: Bold title, status badge with semantic color, "Due Soon" / "Action Required" indicator, partner link • formatted deadline, deliverable chips (`IG Reel ×1`, `IG Story ×2`).
+   - **Zone 3 (Trailing Financial Anchor)**: Escrow state micro-label (`Escrow Locked` / `Escrow Released`), prominent formatted amount (`text-base sm:text-lg font-extrabold font-mono tabular-nums`), and explicit CTA button (`View Brief` / `Open Workroom`).
+4. **Progressive Disclosure via Accordion**:
+   - Granular milestone steppers, revision requests, dispute buttons, and message shortcuts are housed in an expandable accordion drawer (`DealPipelineCard.tsx`). The primary card remains compact, uncluttered, and scannable.
+
+### 7.4 Content Hierarchy Matrix by Archetype
+
+| Dimension | Archetype A: Image-First | Archetype B: Text-First | Archetype C: Hybrid Balanced |
+| :--- | :--- | :--- | :--- |
+| **Primary Goal** | Visual attraction, creator aesthetic | High scanning efficiency, ledger precision | Deal operational status & financial clarity |
+| **Visual Media Ratio** | ≥ 50% card height | ≤ 10% (functional icon only) | ~20% (44px logo anchor) |
+| **Media Aspect Ratio** | `16:10` (card), `1:1` (grid), `9:16` (proof) | None (36–44px icon containers) | 44px square / circular logo (`1:1`) |
+| **Image Fit Strategy** | `fill`, `object-cover`, gradient fallback | Functional SVG icons only | `fill`, `object-cover`, monogram fallback |
+| **Primary Typography** | `text-sm font-bold text-foreground` | `text-sm font-bold text-foreground` | `text-sm sm:text-base font-bold text-foreground` |
+| **Secondary Typography** | `text-[11px] text-muted-foreground` | `text-xs text-muted-foreground line-clamp-2` | `text-xs text-muted-foreground` |
+| **Financial / Numeric** | Compact badge (`Starting from ₹X`) | `font-mono tabular-nums` (`+ ₹15,000`) | `text-lg font-extrabold font-mono tabular-nums` |
+| **Key Components** | `CreatorDiscoveryCard`, `InfluencerProfile` | `SettingsPage`, `Notifications`, `TransactionList` | `DealPipelineCard`, `CampaignDiscoveryCard` |
+
+---
+
+## 8. Definition of Done Checklist for New Features & Code Reviews
 
 When writing new code, reviewing PRs, or developing features with Antigravity, verify against this checklist:
 
@@ -358,16 +443,17 @@ When writing new code, reviewing PRs, or developing features with Antigravity, v
 2. [ ] **Single-Implementation Rule**: Is the business eligibility predicate authored once in `src/lib/action-eligibility.ts` and shared between backend validation (`throw AppError`) and frontend gating?
 3. [ ] **Inline Reason ("Why") & Fix-It CTA**: Does the disabled button present a clear explanation of the shortfall/blocker, accompanied by a direct action link (`Deposit Funds`, `Verify PAN`, `Contact Support`)?
 4. [ ] **No Inadvertent Hiding**: Are discoverable buttons kept visible in their disabled state rather than vanishing?
-5. [ ] **Automated Action Guard**: Does `npm run lint:actions` pass with 0 ungated advisories across all 49 mutating buttons?
-6. [ ] **Design Token Consistency**: Does `npm run lint:theme` pass with 0 hardcoded colors across all 579 source files?
-7. [ ] **File Location**: Is the component in the appropriate feature folder (`components/dashboard/<feature>/` or `components/ui/`)?
-8. [ ] **File Casing**: Is the component file PascalCase (`MyNewCard.tsx`)?
-9. [ ] **Export Style**: Does the component provide a named export (`export function MyNewCard`)?
-10. [ ] **Service Pattern**: Is new backend business logic encapsulated in a static class service (`export class FeatureService`) in `src/services/`?
-11. [ ] **Import Aliasing**: Are all imports utilizing `@/...` rather than deep `../../` relative paths?
-12. [ ] **Formatting Utilities**: Does all currency and date rendering use `formatCurrency` and `formatDate` from `@/lib/utils-client`?
-13. [ ] **Loading States**: Are skeleton shimmer loaders (`<Skeleton>`) used for asynchronous data fetching instead of raw full-page spinners?
-14. [ ] **Type Integrity**: Does `npm run typecheck` pass with 0 diagnostics?
-15. [ ] **Test Coverage**: Does `npm test` execute and pass across the entire test suite (50 test files, 546 tests)?
+5. [ ] **Content Hierarchy Adherence**: Does the view strictly adhere to its assigned archetype (Image-First for discovery, Text-First for utility/ledger, Hybrid for deals/campaigns)?
+6. [ ] **Automated Action Guard**: Does `npm run lint:actions` pass with 0 ungated advisories across all 49 mutating buttons?
+7. [ ] **Design Token Consistency**: Does `npm run lint:theme` pass with 0 hardcoded colors across all 579 source files?
+8. [ ] **File Location**: Is the component in the appropriate feature folder (`components/dashboard/<feature>/` or `components/ui/`)?
+9. [ ] **File Casing**: Is the component file PascalCase (`MyNewCard.tsx`)?
+10. [ ] **Export Style**: Does the component provide a named export (`export function MyNewCard`)?
+11. [ ] **Service Pattern**: Is new backend business logic encapsulated in a static class service (`export class FeatureService`) in `src/services/`?
+12. [ ] **Import Aliasing**: Are all imports utilizing `@/...` rather than deep `../../` relative paths?
+13. [ ] **Formatting Utilities**: Does all currency and date rendering use `formatCurrency` and `formatDate` from `@/lib/utils-client`?
+14. [ ] **Loading States**: Are skeleton shimmer loaders (`<Skeleton>`) used for asynchronous data fetching instead of raw full-page spinners?
+15. [ ] **Type Integrity**: Does `npm run typecheck` pass with 0 diagnostics?
+16. [ ] **Test Coverage**: Does `npm test` execute and pass across the entire test suite (50 test files, 546 tests)?
 
 

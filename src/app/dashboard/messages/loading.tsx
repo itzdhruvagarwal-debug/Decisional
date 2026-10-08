@@ -1,9 +1,11 @@
+import { PageContainer } from "@/components/ui";
+
 export default function MessagesLoading() {
   return (
-    <div
-      className="flex-1 max-w-7xl mx-auto p-4 sm:p-6 flex overflow-hidden bg-card border border-border rounded-2xl shadow-sm h-[82vh] min-h-[560px] animate-pulse"
-      aria-hidden="true"
-    >
+    <PageContainer maxWidth="7xl" className="py-4 sm:py-6" aria-hidden="true">
+      <div
+        className="flex overflow-hidden bg-card border border-border rounded-2xl shadow-sm h-[82vh] min-h-[560px] animate-pulse"
+      >
       {/* Sidebar Skeleton */}
       <div className="w-full sm:w-80 border-r border-border p-4 space-y-4 shrink-0 bg-card">
         <div className="h-9 w-full bg-muted rounded-xl" />
@@ -48,6 +50,7 @@ export default function MessagesLoading() {
           <div className="h-11 rounded-xl bg-muted/60 w-full" />
         </div>
       </div>
-    </div>
+      </div>
+    </PageContainer>
   );
 }

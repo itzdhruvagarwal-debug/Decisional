@@ -24,7 +24,7 @@ import {
   Zap,
   XCircle,
 } from "lucide-react";
-import { Button, Badge } from "@/components/ui";
+import { Button, Badge, ListItem } from "@/components/ui";
 import {
   checkContentSubmissionEligibility,
   checkContractSigningEligibility,
@@ -178,196 +178,178 @@ export function DealPipelineCard({
   const brandProfileHref = `/brand/${brandIdentifier}`;
 
   return (
-    <article
-      className={`rounded-2xl border transition-all bg-card overflow-hidden ${
-        isSelected
-          ? "border-primary shadow-md"
-          : isActionRequired
-          ? "border-pending-border/90 bg-card hover:border-pending shadow-xs"
-          : "border-border hover:border-border/90 shadow-xs"
+    <ListItem
+      as="article"
+      variant="card"
+      active={isSelected}
+      unread={isActionRequired}
+      onClick={onToggleSelect}
+      aria-expanded={isSelected}
+      aria-label={`Deal for ${deal.campaign.title}`}
+      className={`overflow-hidden ${
+        isActionRequired
+          ? "border-pending-border/90 hover:border-pending"
+          : ""
       }`}
-    >
-      {/* Primary Clickable Header Row */}
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={onToggleSelect}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            onToggleSelect();
-          }
-        }}
-        className="p-4 sm:p-5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        aria-expanded={isSelected}
-        aria-label={`Deal for ${deal.campaign.title}`}
-      >
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Left: Brand/Counterparty Avatar & Metadata */}
-          <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
-            <Link
-              href={brandProfileHref}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-12 h-12 rounded-full overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center text-foreground font-bold text-base shadow-2xs hover:ring-2 hover:ring-primary/40 hover:border-primary/50 transition-all cursor-pointer"
-              title={`View ${deal.brand?.companyName || "Brand"} public profile`}
-            >
-              {deal.brand?.logo ? (
-                <Image
-                  src={deal.brand.logo}
-                  alt={deal.brand.companyName}
-                  fill
-                  className="object-cover"
-                />
+      leading={
+        <Link
+          href={brandProfileHref}
+          onClick={(e) => e.stopPropagation()}
+          className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center text-foreground font-bold text-base shadow-2xs hover:ring-2 hover:ring-primary/40 hover:border-primary/50 transition-all cursor-pointer"
+          title={`View ${deal.brand?.companyName || "Brand"} public profile`}
+        >
+          {deal.brand?.logo ? (
+            <Image
+              src={deal.brand.logo}
+              alt={deal.brand.companyName}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <span>{deal.brand?.companyName?.[0]?.toUpperCase() || "B"}</span>
+          )}
+        </Link>
+      }
+      title={deal.campaign?.title || "Campaign Collaboration"}
+      titleBadge={
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <Badge variant={getBadgeVariant(statusInfo.tone)} className="gap-1 text-[11px]">
+            {statusInfo.icon}
+            {statusInfo.label}
+          </Badge>
+          {dueSoon && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-pending-muted text-pending border border-pending-border shrink-0 whitespace-nowrap">
+              <Flame className="w-3 h-3 fill-current" /> Due Soon
+            </span>
+          )}
+          {isActionRequired && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-pending-muted text-pending border border-pending-border shrink-0 whitespace-nowrap">
+              <Zap className="w-3 h-3 fill-current" /> Action Required
+            </span>
+          )}
+        </div>
+      }
+      subtitle={
+        <span className="flex items-center gap-2 flex-wrap">
+          <Link
+            href={brandProfileHref}
+            onClick={(e) => e.stopPropagation()}
+            className="font-semibold text-foreground/90 hover:text-primary transition-colors hover:underline"
+            title={`View ${deal.brand?.companyName || "Brand"} public profile`}
+          >
+            {deal.brand?.companyName || "Brand Partner"}
+          </Link>
+          <span>•</span>
+          {deal.status === "COMPLETED" || deal.status === "VERIFIED" ? (
+            <span className="flex items-center gap-1 text-verified font-medium">
+              <CheckCircle2 className="w-3 h-3" />
+              Completed
+            </span>
+          ) : deal.status === "CANCELLED" ? (
+            <span className="flex items-center gap-1 text-destructive font-medium">
+              <XCircle className="w-3 h-3" />
+              Cancelled
+            </span>
+          ) : (
+            <span className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              Due {formatDate(deal.postingDeadline, "-", { day: "numeric", month: "short" })}
+            </span>
+          )}
+        </span>
+      }
+      meta={
+        deal.deliverables && deal.deliverables.length > 0 ? (
+          <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
+            {deal.deliverables.map((d, idx) => (
+              <span
+                key={idx}
+                className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-md bg-muted text-muted-foreground"
+              >
+                {getDeliverableLabel(d.type)} ×{d.count}
+              </span>
+            ))}
+          </div>
+        ) : null
+      }
+      trailing={
+        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
+          <div className="text-left sm:text-right">
+            <div className={`text-[10px] font-bold uppercase tracking-wider flex items-center sm:justify-end gap-1 ${
+              deal.status === "COMPLETED" || deal.status === "VERIFIED"
+                ? "text-verified"
+                : deal.status === "CANCELLED"
+                ? "text-destructive"
+                : "text-escrow"
+            }`}>
+              {deal.status === "COMPLETED" || deal.status === "VERIFIED" ? (
+                <>
+                  <CheckCircle2 className="w-3 h-3" /> Escrow Released
+                </>
+              ) : deal.status === "CANCELLED" ? (
+                <>
+                  <XCircle className="w-3 h-3" /> Cancelled
+                </>
               ) : (
-                <span>{deal.brand?.companyName?.[0]?.toUpperCase() || "B"}</span>
+                <>
+                  <Lock className="w-3 h-3" /> Escrow Locked
+                </>
               )}
-            </Link>
-
-            <div className="space-y-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-sm sm:text-base font-bold text-foreground truncate">
-                  {deal.campaign?.title || "Campaign Collaboration"}
-                </h3>
-                <Badge variant={getBadgeVariant(statusInfo.tone)} className="gap-1 text-[11px]">
-                  {statusInfo.icon}
-                  {statusInfo.label}
-                </Badge>
-                {dueSoon && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-pending-muted text-pending border border-pending-border shrink-0 whitespace-nowrap">
-                    <Flame className="w-3 h-3 fill-current" /> Due Soon
-                  </span>
-                )}
-                {isActionRequired && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-pending-muted text-pending border border-pending-border shrink-0 whitespace-nowrap">
-                    <Zap className="w-3 h-3 fill-current" /> Action Required
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-                <Link
-                  href={brandProfileHref}
-                  onClick={(e) => e.stopPropagation()}
-                  className="font-semibold text-foreground/90 hover:text-primary transition-colors hover:underline"
-                  title={`View ${deal.brand?.companyName || "Brand"} public profile`}
-                >
-                  {deal.brand?.companyName || "Brand Partner"}
-                </Link>
-                <span>•</span>
-                {deal.status === "COMPLETED" || deal.status === "VERIFIED" ? (
-                  <span className="flex items-center gap-1 text-verified font-medium">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Completed
-                  </span>
-                ) : deal.status === "CANCELLED" ? (
-                  <span className="flex items-center gap-1 text-destructive font-medium">
-                    <XCircle className="w-3 h-3" />
-                    Cancelled
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    Due {formatDate(deal.postingDeadline, "-", { day: "numeric", month: "short" })}
-                  </span>
-                )}
-              </div>
-
-              {/* Deliverable Tags */}
-              {deal.deliverables && deal.deliverables.length > 0 && (
-                <div className="flex items-center gap-1.5 pt-1 flex-wrap">
-                  {deal.deliverables.map((d, idx) => (
-                    <span
-                      key={idx}
-                      className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-md bg-muted text-muted-foreground"
-                    >
-                      {getDeliverableLabel(d.type)} ×{d.count}
-                    </span>
-                  ))}
-                </div>
-              )}
+            </div>
+            <div className="text-base sm:text-lg font-extrabold font-mono tabular-nums text-foreground">
+              {formatCurrency(deal.amount)}
             </div>
           </div>
 
-          {/* Right: Escrow Amount & Quick Actions */}
-          <div className="flex items-center justify-between md:justify-end gap-4 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-border">
-            <div className="text-left md:text-right">
-              <div className={`text-[10px] font-bold uppercase tracking-wider flex items-center md:justify-end gap-1 ${
-                deal.status === "COMPLETED" || deal.status === "VERIFIED"
-                  ? "text-verified"
-                  : deal.status === "CANCELLED"
-                  ? "text-destructive"
-                  : "text-escrow"
-              }`}>
-                {deal.status === "COMPLETED" || deal.status === "VERIFIED" ? (
-                  <>
-                    <CheckCircle2 className="w-3 h-3" /> Escrow Released
-                  </>
-                ) : deal.status === "CANCELLED" ? (
-                  <>
-                    <XCircle className="w-3 h-3" /> Cancelled
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-3 h-3" /> Escrow Locked
-                  </>
-                )}
-              </div>
-              <div className="text-lg sm:text-xl font-extrabold font-mono tabular-nums text-foreground">
-                {formatCurrency(deal.amount)}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Link
-                href={`/dashboard/messages?deal=${deal.id}`}
-                onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                aria-label={`Message about ${deal.campaign.title}`}
-              >
-                <MessageSquare className="w-4 h-4" />
-              </Link>
-              <Link
-                href={`/dashboard/deals/${deal.id}`}
-                onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1 px-3.5 min-h-[44px] rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-xs"
-              >
-                <span>Deal Room</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-              <button
-                type="button"
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer"
-                aria-label={isSelected ? "Collapse deal details" : "Expand deal details"}
-              >
-                {isSelected ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Link
+              href={`/dashboard/messages?deal=${deal.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center justify-center min-h-[40px] min-w-[40px] rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              aria-label={`Message about ${deal.campaign.title}`}
+            >
+              <MessageSquare className="w-4 h-4" />
+            </Link>
+            <Link
+              href={`/dashboard/deals/${deal.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-xs"
+            >
+              <span>Deal Room</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+            <div
+              className="min-h-[40px] min-w-[32px] flex items-center justify-center text-muted-foreground hover:text-foreground"
+              aria-hidden="true"
+            >
+              {isSelected ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </div>
           </div>
         </div>
-
-        {/* Milestone Progress Bar */}
-        <div className="mt-3 pt-3 border-t border-border/40 space-y-1.5">
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="font-semibold text-muted-foreground flex items-center gap-1.5">
-              <span>Pipeline:</span>
-              <span className="text-foreground font-medium">{progress.label}</span>
-            </span>
-            <span className="font-mono font-bold text-muted-foreground tabular-nums">
-              Step {progress.step} of {progress.total} ({Math.round((progress.step / progress.total) * 100)}%)
-            </span>
-          </div>
-          <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                deal.status === "DISPUTED"
-                  ? "bg-disputed"
-                  : deal.status === "COMPLETED" || deal.status === "VERIFIED"
-                  ? "bg-verified"
-                  : "bg-primary"
-              }`}
-              style={{ width: `${Math.max(6, (progress.step / progress.total) * 100)}%` }}
-            />
-          </div>
+      }
+    >
+      {/* Milestone Progress Bar */}
+      <div className="mt-2 pt-2 border-t border-border/40 space-y-1.5">
+        <div className="flex items-center justify-between text-[11px]">
+          <span className="font-semibold text-muted-foreground flex items-center gap-1.5">
+            <span>Pipeline:</span>
+            <span className="text-foreground font-medium">{progress.label}</span>
+          </span>
+          <span className="font-mono font-bold text-muted-foreground tabular-nums">
+            Step {progress.step} of {progress.total} ({Math.round((progress.step / progress.total) * 100)}%)
+          </span>
+        </div>
+        <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all duration-500 ${
+              deal.status === "DISPUTED"
+                ? "bg-disputed"
+                : deal.status === "COMPLETED" || deal.status === "VERIFIED"
+                ? "bg-verified"
+                : "bg-primary"
+            }`}
+            style={{ width: `${Math.max(6, (progress.step / progress.total) * 100)}%` }}
+          />
         </div>
       </div>
 
@@ -519,6 +501,6 @@ export function DealPipelineCard({
           </div>
         </div>
       )}
-    </article>
+    </ListItem>
   );
 }

@@ -28,7 +28,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { PullToRefresh } from "@/components/ui";
+import { PullToRefresh, PageContainer, ListItem, PageHeader } from "@/components/ui";
 
 function renderActivityIcon(iconName: string, className: string) {
   switch (iconName) {
@@ -139,66 +139,62 @@ export default function NotificationsPage() {
   return (
     <DashboardShell user={session?.user}>
       <PullToRefresh onRefresh={refresh}>
-        <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-16">
+        <PageContainer maxWidth="4xl" className="space-y-6 animate-fade-in pb-16 py-4 sm:py-6">
         {/* ── 1. HEADER (INSTAGRAM ACTIVITY BENCHMARK) ───────────────────── */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-card border border-border shadow-xs">
-          <div className="flex items-center gap-3">
+        <PageHeader
+          title="Activity Feed"
+          icon={
             <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
               <Bell className="w-5 h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-heading font-bold tracking-tight text-foreground">
-                  Activity Feed
-                </h1>
-                {unreadCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary text-primary-foreground shrink-0 whitespace-nowrap">
-                    {unreadCount} unread
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Real-time updates on your deals, escrow releases, messages, and dispute resolutions.
-              </p>
-            </div>
-          </div>
+          }
+          badge={
+            unreadCount > 0 ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary text-primary-foreground shrink-0 whitespace-nowrap">
+                {unreadCount} unread
+              </span>
+            ) : undefined
+          }
+          subtitle="Real-time updates on your deals, escrow releases, messages, and dispute resolutions."
+          actions={
+            <>
+              {unreadCount > 0 && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={markAllAsRead}
+                  className="gap-1.5 text-xs font-semibold cursor-pointer shadow-xs"
+                >
+                  <CheckCheck className="w-3.5 h-3.5 text-primary" />
+                  <span>Mark All Read</span>
+                </Button>
+              )}
 
-          <div className="flex items-center gap-2">
-            {unreadCount > 0 && (
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="sm"
-                onClick={markAllAsRead}
-                className="gap-1.5 text-xs font-semibold cursor-pointer shadow-xs"
+                onClick={refresh}
+                disabled={isLoading}
+                title="Refresh activity"
+                className="p-2 cursor-pointer"
               >
-                <CheckCheck className="w-3.5 h-3.5 text-primary" />
-                <span>Mark All Read</span>
+                <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-primary" : "text-muted-foreground"}`} />
               </Button>
-            )}
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={refresh}
-              disabled={isLoading}
-              title="Refresh activity"
-              className="p-2 cursor-pointer"
-            >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-primary" : "text-muted-foreground"}`} />
-            </Button>
-
-            <Link href="/dashboard/settings?tab=notifications">
-              <Button
-                variant="secondary"
-                size="sm"
-                className="gap-1.5 text-xs font-semibold cursor-pointer shadow-xs"
-              >
-                <Settings className="w-3.5 h-3.5 text-muted-foreground" />
-                <span>Preferences</span>
-              </Button>
-            </Link>
-          </div>
-        </header>
+              <Link href="/dashboard/settings?tab=notifications">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="gap-1.5 text-xs font-semibold cursor-pointer shadow-xs"
+                >
+                  <Settings className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span>Preferences</span>
+                </Button>
+              </Link>
+            </>
+          }
+          border={false}
+        />
 
         {/* ── 2. INSTAGRAM-STYLE CATEGORY FILTER TABS ────────────────────── */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
@@ -265,76 +261,57 @@ export default function NotificationsPage() {
                     const actionLabel = getInlineActionLabel(item);
 
                     return (
-                      <div
+                      <ListItem
                         key={item.id}
-                        role="button"
-                        tabIndex={0}
+                        as="div"
+                        variant="flush"
+                        unread={!item.isRead}
                         onClick={() => handleItemClick(item)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            handleItemClick(item);
-                          }
-                        }}
-                        className={`w-full text-left p-4 sm:p-5 flex items-start gap-3.5 sm:gap-4 transition-colors hover:bg-muted/40 cursor-pointer ${
-                          item.isRead ? "opacity-90" : "bg-primary/[0.02] dark:bg-primary/[0.05]"
-                        }`}
-                      >
-                        {/* Type Icon Badge */}
-                        <div
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${meta.badgeBg} ${meta.borderColor} ${meta.textColor} shadow-xs`}
-                        >
-                          {renderActivityIcon(meta.iconName, "w-4 h-4")}
-                        </div>
-
-                        {/* Middle Text Details */}
-                        <div className="flex-1 min-w-0 pr-2">
-                          <div className="flex items-center justify-between gap-2 mb-1">
-                            <span
-                              className={`text-sm tracking-tight ${
-                                item.isRead ? "font-semibold text-foreground" : "font-bold text-foreground"
-                              }`}
-                            >
-                              {item.title}
-                            </span>
-                            <span className="text-[11px] text-muted-foreground shrink-0 tabular-nums font-mono">
-                              {timeStr}
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                            {item.message}
-                          </p>
-
-                          <div className="mt-2.5 flex items-center gap-2 flex-wrap">
-                            <span
-                              className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${meta.badgeBg} ${meta.borderColor} ${meta.textColor}`}
-                            >
-                              {meta.label}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Inline Quick Action CTA (Instagram Activity Pattern) */}
-                        <div className="flex items-center gap-2 shrink-0 pt-1">
-                          {!item.isRead && (
-                            <span
-                              className="w-2 h-2 rounded-full bg-primary shadow-xs"
-                              title="Unread"
-                            />
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={(e) => handleInlineActionClick(e, item)}
-                            className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold bg-muted hover:bg-card hover:border-primary/40 border border-border text-foreground transition-all cursor-pointer shadow-xs"
+                        aria-label={`Notification: ${item.title}`}
+                        leading={
+                          <div
+                            className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${meta.badgeBg} ${meta.borderColor} ${meta.textColor} shadow-xs`}
                           >
-                            <span>{actionLabel}</span>
-                            <ArrowRight className="w-3 h-3 text-muted-foreground" />
-                          </button>
+                            {renderActivityIcon(meta.iconName, "w-4 h-4")}
+                          </div>
+                        }
+                        title={item.title}
+                        subtitle={item.message}
+                        subtitleClamp={2}
+                        meta={
+                          <span
+                            className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${meta.badgeBg} ${meta.borderColor} ${meta.textColor}`}
+                          >
+                            {meta.label}
+                          </span>
+                        }
+                        trailing={
+                          <span className="text-[11px] text-muted-foreground shrink-0 tabular-nums font-mono whitespace-nowrap">
+                            {timeStr}
+                          </span>
+                        }
+                        trailingSecondary={
+                          <div className="flex items-center gap-2 shrink-0">
+                            {!item.isRead && (
+                              <span
+                                className="w-2 h-2 rounded-full bg-primary shadow-xs"
+                                title="Unread"
+                              />
+                            )}
 
-                          <ChevronRight className="w-4 h-4 text-muted-foreground sm:hidden" />
-                        </div>
-                      </div>
+                            <button
+                              type="button"
+                              onClick={(e) => handleInlineActionClick(e, item)}
+                              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold bg-muted hover:bg-card hover:border-primary/40 border border-border text-foreground transition-all cursor-pointer shadow-xs"
+                            >
+                              <span>{actionLabel}</span>
+                              <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                            </button>
+
+                            <ChevronRight className="w-4 h-4 text-muted-foreground sm:hidden" />
+                          </div>
+                        }
+                      />
                     );
                   })}
                 </div>
@@ -356,7 +333,7 @@ export default function NotificationsPage() {
             </Button>
           </div>
         )}
-        </div>
+        </PageContainer>
       </PullToRefresh>
     </DashboardShell>
   );
