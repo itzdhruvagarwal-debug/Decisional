@@ -45,7 +45,14 @@ function buildTextAndCategoryFilters(params: ListCampaignsParams): Prisma.Campai
   if (params.category) {
     const category = params.category.trim();
     if (category) {
-      conditions.push({ targetCategories: { has: category } });
+      const lower = category.toLowerCase();
+      const cap = lower.charAt(0).toUpperCase() + lower.slice(1);
+      const upper = category.toUpperCase();
+      conditions.push({
+        OR: Array.from(new Set([category, lower, cap, upper])).map((cat) => ({
+          targetCategories: { has: cat },
+        })),
+      });
     }
   }
 
@@ -153,79 +160,22 @@ function getBudgetCondition(
 }
 
 async function buildInfluencerEligibilityFilter(
-  userId: string,
-  params: ListCampaignsParams,
+  _userId: string,
+  _params: ListCampaignsParams,
   _statusFilter: CampaignStatus | undefined,
 ): Promise<Prisma.CampaignWhereInput[]> {
-const conditions: Prisma.CampaignWhereInput[] = [];
+  const conditions: Prisma.CampaignWhereInput[] = [];
 
-const profile = await prisma.influencerProfile.findUnique({
-where: { userId },
-select: {
-instagramHandle: true,
-youtubeHandle: true,
-instagramFollowers: true,
-youtubeSubscribers: true,
-categories: true,
-minRate: true,
-minInstagramRate: true,
-minYoutubeRate: true,
-},
-});
+  // Exclude direct invite campaigns from general public explore feed
+  conditions.push({ isDirectInvite: false });
 
-if (profile) {
-const hasIg = Boolean(profile.instagramHandle);
-const hasYt = Boolean(profile.youtubeHandle);
+  // Note: We intentionally avoid hard-blocking the entire discovery feed when
+  // a creator has 0 followers, unlinked platforms, or unassigned categories.
+  // Creators must be able to discover available briefs in the marketplace.
+  // Strict eligibility (minimum/maximum followers, category fit, social links)
+  // is cleanly enforced at application time with explanatory feedback.
 
-    if (!hasIg || !hasYt) {
-      const platCond = getPlatformCompatibilityCondition(hasIg, hasYt);
-      conditions.push(platCond);
-    }
-
-const igFollowers = profile.instagramFollowers || 0;
-const ytSubs = profile.youtubeSubscribers || 0;
-const maxRelevantFollowers = Math.max(igFollowers, ytSubs);
-
-conditions.push(
-{ minFollowers: { lte: maxRelevantFollowers } },
-{
-OR: [
-{ maxFollowers: null },
-{ maxFollowers: 0 },
-{ maxFollowers: { gte: maxRelevantFollowers } },
-],
-}
-);
-
-if (!params.category && profile.categories) {
-const infCategories = profile.categories
-.split(",")
-.map((item: string) => item.trim())
-.filter(Boolean);
-
-if (infCategories.length > 0) {
-conditions.push({
-OR: infCategories.map((category: string) => ({
-targetCategories: { has: category },
-})),
-});
-}
-}
-
-if (!params.minBudget) {
-const budgetCond = getBudgetCondition(
-profile.minInstagramRate,
-profile.minYoutubeRate,
-profile.minRate
-);
-if (budgetCond) {
-conditions.push(budgetCond);
-}
-}
-}
-
-conditions.push({ isDirectInvite: false });
-return conditions;
+  return conditions;
 }
 import { searchCampaigns } from "@/lib/search";
 
