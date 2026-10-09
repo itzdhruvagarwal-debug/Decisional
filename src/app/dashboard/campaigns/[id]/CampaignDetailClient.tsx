@@ -268,7 +268,17 @@ export default function CampaignDetailClient({
                   </div>
                 </>
               )}
-              {campaign.status === "ACTIVE" && (
+              {campaign.status === "PAUSED" && (
+                <Button
+                  href={`/dashboard/campaigns/create?edit=${campaign.id}`}
+                  variant="secondary"
+                  size="sm"
+                  className="inline-flex items-center gap-1.5"
+                >
+                  Edit &amp; Extend Deadline
+                </Button>
+              )}
+              {(campaign.status === "ACTIVE" || campaign.status === "PAUSED") && (
                 <div className="flex items-center gap-2 flex-wrap">
                   <Button
                     type="button"
@@ -434,6 +444,9 @@ export default function CampaignDetailClient({
               if (s === "ACTIVE") {
                 badgeStyle = "bg-verified-muted text-verified border-verified-border";
                 StatusIcon = CheckCircle2;
+              } else if (s === "PAUSED") {
+                badgeStyle = "bg-pending-muted text-pending border-pending-border";
+                StatusIcon = Clock;
               } else if (s === "COMPLETED") {
                 badgeStyle = "bg-escrow-muted text-escrow border-escrow-border";
                 StatusIcon = CheckCircle2;
@@ -457,6 +470,19 @@ export default function CampaignDetailClient({
           </div>
         </div>
       </div>
+
+      {/* Paused Campaign Info Banner */}
+      {isOwner && campaign.status === "PAUSED" && (
+        <div className="p-4 rounded-2xl bg-pending-muted border border-pending-border flex items-start gap-3 text-xs text-foreground">
+          <Clock className="w-4 h-4 text-pending shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="font-bold text-pending">Campaign Paused (Applications Closed)</p>
+            <p className="text-muted-foreground leading-relaxed">
+              Application deadline has passed so new creators cannot submit proposals. You can review received creator pitches below to accept deals, click <strong>Edit &amp; Extend Deadline</strong> to reopen applications, or <strong>Cancel Campaign</strong> to unfreeze and refund unspent escrow funds to your wallet.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Global Notification Banner */}
       {notice && (

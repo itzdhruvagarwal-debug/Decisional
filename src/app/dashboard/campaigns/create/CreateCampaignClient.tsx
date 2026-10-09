@@ -249,7 +249,7 @@ export default function CreateCampaignClient() {
   useEffect(() => {
     if (!draftData) return;
     const campaign = draftData.campaign || draftData.data?.campaign;
-    if (campaign?.status === "DRAFT") {
+    if (campaign?.status === "DRAFT" || campaign?.status === "PAUSED") {
       setFormData(mapDraftCampaignToFormData(campaign));
     }
     setIsEditDraftLoading(false);

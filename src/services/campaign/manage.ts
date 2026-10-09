@@ -225,8 +225,8 @@ if (!campaign || campaign.deletedAt || campaign.brand?.userId !== userId) {
 throw AppError.notFound("Campaign not found or unauthorized");
 }
 
-if (campaign.status !== "DRAFT") {
-throw AppError.badRequest("Campaign details can only be updated in DRAFT status");
+if (campaign.status !== "DRAFT" && campaign.status !== "PAUSED") {
+throw AppError.badRequest("Campaign details can only be updated in DRAFT or PAUSED status");
 }
 
 if (data.title !== undefined) assertNoContactDetails(safeStringCast(data.title), "title");
@@ -237,6 +237,18 @@ if (data.productName !== undefined) assertNoContactDetails(safeStringCast(data.p
 if (data.productDescription !== undefined) assertNoContactDetails(safeStringCast(data.productDescription), "product description");
 
 const updateData = buildCampaignUpdatePayload(data, campaign.guidelines);
+
+// If paused campaign deadline is extended into the future, reactivate to ACTIVE
+const aDate = updateData.applicationDeadline instanceof Date ? updateData.applicationDeadline : undefined;
+if (campaign.status === "PAUSED" && aDate && aDate > new Date()) {
+  updateData.status = "ACTIVE";
+  if (campaign.brandId) {
+    await tx.brandProfile.update({
+      where: { id: campaign.brandId },
+      data: { activeCampaigns: { increment: 1 } },
+    });
+  }
+}
 
 const updatedCampaign = await tx.campaign.update({
 where: { id: campaignId },
