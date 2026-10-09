@@ -9,7 +9,7 @@ import { checkAdminBanEligibility } from "@/lib/action-eligibility";
 import { analyzeInfluencerFraudProfile } from "@/lib/social-proof-core";
 import Image from "next/image";
 import EmptyState from "@/components/ui/EmptyState";
-import { Badge, Button, Input, Select } from "@/components/ui";
+import { Badge, Button, Input, Select, PageContainer, PageHeader } from "@/components/ui";
 import { formatDate } from "@/lib/utils-client";
 import { formatUserError } from "@/lib/user-messages";
 import { useToasts, ToastContainer } from "@/components/ui";
@@ -837,34 +837,29 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <PageContainer maxWidth="6xl" className="space-y-6 py-2 sm:py-4">
       <ToastContainer toasts={toasts} onClose={removeToast} />
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <PageHeader
+        icon={
           <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
             <Users className="w-5 h-5 text-primary" />
           </div>
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-              User Directory
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Search, moderate, award credentials, inspect tax readiness, and review fraud signals.
-            </p>
-          </div>
-        </div>
-
-        <div className="px-4 py-2.5 rounded-xl bg-card border border-border shadow-sm flex items-center gap-3 shrink-0">
-          <div className="w-2 h-2 rounded-full bg-primary" />
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Total Matches
+        }
+        title="User Directory"
+        subtitle="Search, moderate, award credentials, inspect tax readiness, and review fraud signals."
+        actions={
+          <div className="px-4 py-2.5 rounded-xl bg-card border border-border shadow-sm flex items-center gap-3 shrink-0">
+            <div className="w-2 h-2 rounded-full bg-primary" />
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Total Matches
+              </div>
+              <div className="text-sm font-black text-foreground">{total} accounts</div>
             </div>
-            <div className="text-sm font-black text-foreground">{total} accounts</div>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Filter Toolbar Card */}
       <div className="p-4 rounded-2xl bg-card border border-border flex flex-col sm:flex-row gap-3">
@@ -962,6 +957,6 @@ export default function AdminUsersPage() {
           isLoading={loadingAction === auditUser.id}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }

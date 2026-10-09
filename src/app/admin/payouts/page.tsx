@@ -7,7 +7,7 @@ import { formatCurrency, formatDateTime } from "@/lib/utils-client";
 import { apiClient } from "@/lib/api-client";
 import { formatUserError } from "@/lib/user-messages";
 import EmptyState from "@/components/ui/EmptyState";
-import { Badge, Button, Textarea, Modal } from "@/components/ui";
+import { Badge, Button, Textarea, Modal, PageContainer, PageHeader } from "@/components/ui";
 import { z } from "zod";
 import {
   Banknote,
@@ -395,36 +395,30 @@ export default function PayoutsAdminPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <PageContainer maxWidth="6xl" className="space-y-6 py-2 sm:py-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <PageHeader
+        icon={
           <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
             <Banknote className="w-5 h-5 text-primary" />
           </div>
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-              Payout Operations
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Review withdrawal risk, bank details, and authorize Razorpay transfers.
-            </p>
-          </div>
-        </div>
-
-        {/* Current View Metric */}
-        <div className="px-4 py-2.5 rounded-xl bg-card border border-border shadow-sm flex items-center gap-3 shrink-0">
-          <div className="w-2 h-2 rounded-full bg-verified animate-pulse" />
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Current Queue
-            </div>
-            <div className="text-sm font-black text-foreground">
-              {total} payouts &bull; {formatCurrency(totalAmount)}
+        }
+        title="Payout Operations"
+        subtitle="Review withdrawal risk, bank details, and authorize Razorpay transfers."
+        actions={
+          <div className="px-4 py-2.5 rounded-xl bg-card border border-border shadow-sm flex items-center gap-3 shrink-0">
+            <div className="w-2 h-2 rounded-full bg-verified animate-pulse" />
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Current Queue
+              </div>
+              <div className="text-sm font-black text-foreground">
+                {total} payouts &bull; {formatCurrency(totalAmount)}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Filter Chips Bar */}
       <div className="flex items-center justify-between gap-2 flex-wrap pb-1">
@@ -554,6 +548,6 @@ export default function PayoutsAdminPage() {
           </form>
         </Modal>
       )}
-    </div>
+    </PageContainer>
   );
 }

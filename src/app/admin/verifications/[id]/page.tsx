@@ -9,7 +9,7 @@ import {
   rejectDocument,
 } from "../../actions";
 import EmptyState from "@/components/ui/EmptyState";
-import { Badge, Button, Input } from "@/components/ui";
+import { Badge, Button, Input, PageContainer, PageHeader } from "@/components/ui";
 import { formatDate } from "@/lib/utils-client";
 import { z } from "zod";
 import {
@@ -96,54 +96,42 @@ export default async function VerificationDetailPage({
     "User Profile";
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      {/* Top Breadcrumb Navigation */}
-      <div className="flex items-center gap-2">
-        <Button
-          href="/admin/verifications"
-          variant="ghost"
-          size="sm"
-          className="gap-1.5 text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Verification Queue
-        </Button>
-      </div>
-
+    <PageContainer maxWidth="5xl" className="space-y-6 py-2 sm:py-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-card border border-border">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-verified/10 border border-verified-border flex items-center justify-center font-black text-verified text-xl">
+      <PageHeader
+        backHref="/admin/verifications"
+        backLabel="Back to Verification Queue"
+        icon={
+          <div className="w-12 h-12 rounded-2xl bg-verified/10 border border-verified-border flex items-center justify-center font-black text-verified text-lg">
             {displayName.charAt(0).toUpperCase()}
           </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-black text-foreground">
-                {displayName}
-              </h1>
-              <Badge variant="primary" className="text-xs uppercase">
-                {user.userType}
-              </Badge>
-              <Badge
-                variant={
-                  user.status === "ACTIVE"
-                    ? "success"
-                    : user.status === "PENDING_VERIFICATION"
-                    ? "warning"
-                    : "danger"
-                }
-                className="text-xs"
-              >
-                {user.status.replaceAll("_", " ")}
-              </Badge>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              User ID: <code className="text-xs font-mono">{user.id}</code> &bull; Registered {activeSince}
-            </p>
+        }
+        title={displayName}
+        badge={
+          <div className="flex items-center gap-2">
+            <Badge variant="primary" className="text-xs uppercase">
+              {user.userType}
+            </Badge>
+            <Badge
+              variant={
+                user.status === "ACTIVE"
+                  ? "success"
+                  : user.status === "PENDING_VERIFICATION"
+                  ? "warning"
+                  : "danger"
+              }
+              className="text-xs"
+            >
+              {user.status.replaceAll("_", " ")}
+            </Badge>
           </div>
-        </div>
-
-        <div className="flex items-center gap-3">
+        }
+        subtitle={
+          <span>
+            User ID: <code className="text-xs font-mono">{user.id}</code> &bull; Registered {activeSince}
+          </span>
+        }
+        actions={
           <div className="px-4 py-2 rounded-xl bg-muted/40 border border-border text-right">
             <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
               DRS Rating (CIBIL 300-900)
@@ -152,8 +140,8 @@ export default async function VerificationDetailPage({
               {user.trustScore} / 900
             </div>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Information Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -429,6 +417,6 @@ export default async function VerificationDetailPage({
           </form>
         </div>
       </footer>
-    </div>
+    </PageContainer>
   );
 }

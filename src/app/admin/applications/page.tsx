@@ -5,7 +5,7 @@ import { formatCurrency, formatDate } from "@/lib/utils-client";
 import { checkAdminApplicationReviewEligibility } from "@/lib/action-eligibility";
 import { z } from "zod";
 import EmptyState from "@/components/ui/EmptyState";
-import { Badge, Button, Input } from "@/components/ui";
+import { Badge, Button, Input, PageContainer, PageHeader } from "@/components/ui";
 import { FileText, AlertTriangle, DollarSign } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -31,31 +31,19 @@ export default async function AdminApplicationsPage() {
   const totalValue = flaggedApps.reduce((sum, app) => sum + (app.proposedRate || 0), 0);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <PageContainer maxWidth="4xl" className="space-y-6 py-2 sm:py-4">
       {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <PageHeader
+        backHref="/admin"
+        backLabel="Admin Dashboard"
+        icon={
           <div className="w-10 h-10 rounded-xl bg-disputed/10 border border-disputed-border flex items-center justify-center">
             <FileText className="w-5 h-5 text-disputed" />
           </div>
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-              Flagged Applications
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Review campaign pitches flagged by the automated security risk engine.
-            </p>
-          </div>
-        </div>
-        <Button
-          href="/admin"
-          variant="secondary"
-          aria-label="Back to Admin Dashboard"
-          className="min-h-[44px]"
-        >
-          ← Admin Dashboard
-        </Button>
-      </div>
+        }
+        title="Flagged Applications"
+        subtitle="Review campaign pitches flagged by the automated security risk engine."
+      />
 
       {/* Summary stats strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -218,6 +206,6 @@ export default async function AdminApplicationsPage() {
           })}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

@@ -220,22 +220,33 @@ export default function ApplicationsPage() {
   if (session.user?.userType === "BRAND") {
     return (
       <DashboardShell user={session.user}>
-        <PageContainer maxWidth="4xl" className="py-16 text-center flex flex-col items-center">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-6">
-            <FileText className="w-8 h-8" />
-          </div>
-          <h1 className="text-3xl font-extrabold text-foreground tracking-tight mb-3">
-            Campaign Submissions & Pitches
-          </h1>
-          <p className="text-muted-foreground max-w-lg mb-8 leading-relaxed">
-            As a brand, creators apply directly to your campaigns. You can review, shortlist, and approve pitches from your campaign management dashboard.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
+        <PageContainer maxWidth="4xl" className="py-8 space-y-8">
+          <PageHeader
+            title="Campaign Submissions & Pitches"
+            subtitle="As a brand, creators apply directly to your campaigns. Review, shortlist, and approve pitches from your campaign dashboard."
+            actions={
+              <div className="flex items-center gap-3">
+                <Button href="/dashboard/campaigns" variant="primary">
+                  View Active Campaigns
+                </Button>
+                <Button href="/dashboard/campaigns/create" variant="secondary">
+                  Create New Campaign
+                </Button>
+              </div>
+            }
+          />
+          <div className="py-12 text-center flex flex-col items-center border border-border rounded-2xl bg-card p-8">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-4">
+              <FileText className="w-8 h-8" />
+            </div>
+            <h2 className="text-xl font-bold text-foreground mb-2">
+              Review Pitches in Campaign Dashboard
+            </h2>
+            <p className="text-muted-foreground max-w-md text-sm leading-relaxed mb-6">
+              Creator proposals are submitted directly to specific campaigns. Access your campaign details to negotiate terms, hire creators, and fund escrow milestones.
+            </p>
             <Button href="/dashboard/campaigns" variant="primary">
-              View Active Campaigns
-            </Button>
-            <Button href="/dashboard/campaigns/new" variant="secondary">
-              Create New Campaign
+              Go to Campaign Management
             </Button>
           </div>
         </PageContainer>

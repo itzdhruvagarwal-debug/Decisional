@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import DashboardShell from "@/components/dashboard/DashboardShell";
+import { PageContainer, PageHeader } from "@/components/ui";
 import { InfluencerProfileClient, InfluencerProfileData } from "@/components/profile";
 import { MessageService } from "@/services/message.service";
 
@@ -188,12 +189,20 @@ export default async function InfluencerProfilePage({
 
   return (
     <DashboardShell user={session?.user}>
-      <InfluencerProfileClient
-        profile={formattedProfile}
-        viewerRole={session?.user?.userType}
-        isOwnProfile={isOwnProfile}
-        canMessage={canMessage}
-      />
+      <PageContainer maxWidth="5xl" className="py-4 sm:py-6 space-y-4">
+        <PageHeader
+          backHref="/dashboard/influencers"
+          backLabel="All Creators"
+          title={formattedProfile.displayName}
+          subtitle={`@${formattedProfile.instagramHandle || formattedProfile.youtubeHandle || "creator"} · Verified Creator Portfolio`}
+        />
+        <InfluencerProfileClient
+          profile={formattedProfile}
+          viewerRole={session?.user?.userType}
+          isOwnProfile={isOwnProfile}
+          canMessage={canMessage}
+        />
+      </PageContainer>
     </DashboardShell>
   );
 }

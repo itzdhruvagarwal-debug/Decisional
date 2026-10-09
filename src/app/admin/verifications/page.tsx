@@ -1,5 +1,6 @@
 import { AdminService } from "@/services/admin.service";
 import VerificationQueue from "@/components/admin/VerificationQueue";
+import { PageContainer, PageHeader } from "@/components/ui";
 import { ShieldCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -14,23 +15,19 @@ export default async function AdminVerificationsPage() {
   const pendingUsers = await AdminService.getVerificationQueue();
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <PageContainer maxWidth="4xl" className="space-y-6 py-2 sm:py-4">
       {/* Page header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-verified/10 border border-verified-border flex items-center justify-center">
-          <ShieldCheck className="w-5 h-5 text-verified" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-            Verification Queue
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Manage and review pending KYC requests from influencers and brands.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        icon={
+          <div className="w-10 h-10 rounded-xl bg-verified/10 border border-verified-border flex items-center justify-center">
+            <ShieldCheck className="w-5 h-5 text-verified" />
+          </div>
+        }
+        title="Verification Queue"
+        subtitle="Manage and review pending KYC requests from influencers and brands."
+      />
 
       <VerificationQueue pendingUsers={pendingUsers} isNarrow={true} />
-    </div>
+    </PageContainer>
   );
 }

@@ -201,7 +201,7 @@ export default function AdminFrame({ children, user }: Readonly<AdminFrameProps>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-5 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto py-4 sm:py-6 animate-fade-in">
           {children}
         </main>
       </div>

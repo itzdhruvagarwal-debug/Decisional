@@ -543,9 +543,9 @@ export default function SettingsPage() {
           >
             <div className="settings-content-header">
               <div>
-                <h1 className="text-xl font-extrabold text-foreground tracking-tight">
+                <h2 className="text-xl font-extrabold text-foreground tracking-tight">
                   {activeTabDef?.label ?? "Settings"}
-                </h1>
+                </h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {getTabSubtitle(activeTab, user.userType)}
                 </p>

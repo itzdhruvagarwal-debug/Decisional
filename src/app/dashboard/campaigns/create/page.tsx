@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { PageContainer } from "@/components/ui";
+// PageHeader is rendered inside CreateCampaignClient for interactive step navigation and draft actions
 import CreateCampaignClient from "./CreateCampaignClient";
 
 export default async function CreateCampaignPage() {

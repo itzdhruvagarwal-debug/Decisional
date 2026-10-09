@@ -4,7 +4,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import EmptyState from "@/components/ui/EmptyState";
-import { Badge, Input } from "@/components/ui";
+import { Badge, Input, PageContainer, PageHeader } from "@/components/ui";
 import { formatDate } from "@/lib/utils-client";
 import type { AdminService } from "@/services/admin.service";
 import type { Prisma } from "@prisma/client";
@@ -215,21 +215,17 @@ export default function AdminViolationsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <PageContainer maxWidth="6xl" className="space-y-6 py-2 sm:py-4">
       {/* Page header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-disputed/10 border border-disputed-border flex items-center justify-center">
-          <AlertTriangle className="w-5 h-5 text-disputed" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-            User Violations
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            View all user violations and enforcement actions.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        icon={
+          <div className="w-10 h-10 rounded-xl bg-disputed/10 border border-disputed-border flex items-center justify-center">
+            <AlertTriangle className="w-5 h-5 text-disputed" />
+          </div>
+        }
+        title="User Violations"
+        subtitle="View all user violations and enforcement actions."
+      />
 
       {/* Filter */}
       <div className="p-4 rounded-2xl bg-card border border-border shadow-sm max-w-md">
@@ -254,6 +250,6 @@ export default function AdminViolationsPage() {
       )}
 
       {content}
-    </div>
+    </PageContainer>
   );
 }

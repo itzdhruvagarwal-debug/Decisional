@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
-import { Button, Input, Textarea } from "@/components/ui";
+import { Button, Input, Textarea, PageContainer, PageHeader } from "@/components/ui";
 import {
   Mail,
   Users,
@@ -33,21 +33,17 @@ export default async function AdminNewsletterPage() {
   const stats = await getSubscriberStats();
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <PageContainer maxWidth="4xl" className="space-y-6 py-2 sm:py-4">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-          <Mail className="w-5 h-5 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-            Send Newsletter
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Compose and broadcast newsletters to verified VyaparMedia subscribers.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        icon={
+          <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <Mail className="w-5 h-5 text-primary" />
+          </div>
+        }
+        title="Send Newsletter"
+        subtitle="Compose and broadcast newsletters to verified VyaparMedia subscribers."
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -155,6 +151,6 @@ export default async function AdminNewsletterPage() {
           </Button>
         </form>
       </div>
-    </div>
+    </PageContainer>
   );
 }

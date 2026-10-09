@@ -3,7 +3,7 @@ import { requireActiveAdmin } from "@/lib/admin-auth";
 import { redirect } from "next/navigation";
 import { formatCurrency } from "@/lib/utils-client";
 import { AdminAnalyticsService } from "@/services/admin-analytics.service";
-import { Button } from "@/components/ui";
+import { Button, PageContainer, PageHeader } from "@/components/ui";
 import {
   Wallet,
   TrendingUp,
@@ -35,21 +35,17 @@ export default async function AdminFinancialPage() {
   const data = await AdminAnalyticsService.getFinancialOverview();
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <PageContainer maxWidth="6xl" className="space-y-6 py-2 sm:py-4">
       {/* Page header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-escrow/10 border border-escrow-border flex items-center justify-center">
-          <Wallet className="w-5 h-5 text-escrow" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-            Financial Overview
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Real-time treasury metrics, platform fee earnings, and wallet liabilities.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        icon={
+          <div className="w-10 h-10 rounded-xl bg-escrow/10 border border-escrow-border flex items-center justify-center">
+            <Wallet className="w-5 h-5 text-escrow" />
+          </div>
+        }
+        title="Financial Overview"
+        subtitle="Real-time treasury metrics, platform fee earnings, and wallet liabilities."
+      />
 
       {/* Top KPI grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -274,6 +270,6 @@ export default async function AdminFinancialPage() {
           </Button>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

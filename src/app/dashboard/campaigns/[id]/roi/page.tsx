@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { PageContainer } from "@/components/ui";
+// PageHeader is rendered inside RoiClient for real-time ROI computation and date-range controls
 import { RoiClient } from "./RoiClient";
 
 interface CampaignRoiPageProps {

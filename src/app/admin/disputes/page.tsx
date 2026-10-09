@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { requireActiveAdmin } from "@/lib/admin-auth";
 import EmptyState from "@/components/ui/EmptyState";
-import { Badge, Button } from "@/components/ui";
+import { Badge, Button, PageContainer, PageHeader } from "@/components/ui";
 import { formatCurrency, formatDate } from "@/lib/utils-client";
 import { Scale, Clock, CheckCircle2 } from "lucide-react";
 import { Prisma, DisputeStatus } from "@prisma/client";
@@ -150,21 +150,17 @@ export default async function AdminDisputeListPage({
   const content = renderDisputeContent(disputes, showHistory, error);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <PageContainer maxWidth="4xl" className="space-y-6 py-2 sm:py-4">
       {/* Page header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-disputed/10 border border-disputed-border flex items-center justify-center">
-          <Scale className="w-5 h-5 text-disputed" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-            Dispute Resolution Queue
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Review open and Tier 2 mediation cases before funds move.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        icon={
+          <div className="w-10 h-10 rounded-xl bg-disputed/10 border border-disputed-border flex items-center justify-center">
+            <Scale className="w-5 h-5 text-disputed" />
+          </div>
+        }
+        title="Dispute Resolution Queue"
+        subtitle="Review open and Tier 2 mediation cases before funds move."
+      />
 
       {/* Tab toggle */}
       <div className="flex gap-2" role="tablist" aria-label="Dispute queue filters">
@@ -203,6 +199,6 @@ export default async function AdminDisputeListPage({
       </div>
 
       {content}
-    </div>
+    </PageContainer>
   );
 }

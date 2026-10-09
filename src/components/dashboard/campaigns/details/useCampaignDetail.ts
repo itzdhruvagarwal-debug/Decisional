@@ -6,6 +6,7 @@ import { fetcher } from "@/lib/fetcher";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import { formatUserError } from "@/lib/user-messages";
+import { haptic } from "@/lib/haptics";
 import {
   CampaignApplication,
   CampaignDetailResponse,
@@ -134,6 +135,7 @@ export function useCampaignDetail({
         throw new Error(result?.message || `Failed to ${action} application`);
       }
 
+      haptic.success();
       setNotice({
         type: "success",
         message:
@@ -172,6 +174,7 @@ export function useCampaignDetail({
         throw new Error(result?.message || "Failed to submit application");
       }
 
+      haptic.success();
       setShowApplyModal(false);
       setNotice({ type: "success", message: "Application submitted successfully." });
       refreshCampaign();

@@ -234,7 +234,6 @@ export function useDealDetail(
     });
 
     if (success) {
-      haptic.success();
       setShowReviewModal(false);
       setItemizedReviews({});
     }

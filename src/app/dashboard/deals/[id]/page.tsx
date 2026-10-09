@@ -39,6 +39,7 @@ import { ContractPrintView } from "@/components/dashboard/deals/ContractPrintVie
 import { Button, Skeleton, Textarea, ToastContainer, PageContainer, PageHeader } from "@/components/ui";
 import { apiClient } from "@/lib/api-client";
 import { formatCurrency, formatDate, formatUserError } from "@/lib/utils-client";
+import { haptic } from "@/lib/haptics";
 import { checkDisputeEligibility, checkReviewSubmissionEligibility } from "@/lib/action-eligibility";
 
 // ─── Status Helpers ────────────────────────────────────────────────────────────
@@ -499,6 +500,7 @@ export default function DealDetailPage() {
                         rating: reviewRating,
                         ...(reviewComment.trim() ? { comment: reviewComment.trim() } : {}),
                       });
+                      haptic.success();
                       showToast("success", "Review submitted! Trust score updated.");
                       setReviewSubmitted(true);
                     } catch (err: unknown) {

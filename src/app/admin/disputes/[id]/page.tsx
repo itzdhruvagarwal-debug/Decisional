@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { resolveDispute } from "../../dispute-actions";
 import EmptyState from "@/components/ui/EmptyState";
-import { Badge, Button } from "@/components/ui";
+import { Badge, Button, PageContainer, PageHeader } from "@/components/ui";
 import { formatCurrency, formatDate } from "@/lib/utils-client";
 import { checkDisputeResolutionEligibility } from "@/lib/action-eligibility";
 import {
@@ -164,54 +164,42 @@ export default async function AdminDisputeDetailPage({
   );
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      {/* Top Breadcrumb Navigation */}
-      <div className="flex items-center gap-2">
-        <Button
-          href="/admin/disputes"
-          variant="ghost"
-          size="sm"
-          className="gap-1.5 text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Disputes Queue
-        </Button>
-      </div>
-
+    <PageContainer maxWidth="5xl" className="space-y-6 py-2 sm:py-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-card border border-border">
-        <div className="flex items-center gap-4">
+      <PageHeader
+        backHref="/admin/disputes"
+        backLabel="Back to Disputes Queue"
+        icon={
           <div className="w-12 h-12 rounded-2xl bg-disputed/10 border border-disputed-border flex items-center justify-center">
             <Scale className="w-6 h-6 text-disputed" />
           </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-black text-foreground">
-                Dispute Mediation
-              </h1>
-              <Badge
-                variant={dispute.status === "OPEN" ? "warning" : "success"}
-                className="text-xs uppercase"
-              >
-                {dispute.status}
-              </Badge>
+        }
+        title="Dispute Mediation"
+        badge={
+          <Badge
+            variant={dispute.status === "OPEN" ? "warning" : "success"}
+            className="text-xs uppercase"
+          >
+            {dispute.status}
+          </Badge>
+        }
+        subtitle={
+          <span>
+            Case ID: <code className="font-mono">{dispute.id}</code> &bull; Deal:{" "}
+            <strong>{dispute.deal.campaign?.title || "Campaign Deal"}</strong>
+          </span>
+        }
+        actions={
+          <div className="px-4 py-2.5 rounded-xl bg-muted/40 border border-border text-right shrink-0">
+            <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+              Escrow in Dispute
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Case ID: <code className="font-mono">{dispute.id}</code> &bull; Deal:{" "}
-              <strong>{dispute.deal.campaign?.title || "Campaign Deal"}</strong>
-            </p>
+            <div className="text-xl font-black text-disputed">
+              {formatCurrency(dealAmount)}
+            </div>
           </div>
-        </div>
-
-        <div className="px-4 py-2.5 rounded-xl bg-muted/40 border border-border text-right shrink-0">
-          <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-            Escrow in Dispute
-          </div>
-          <div className="text-xl font-black text-disputed">
-            {formatCurrency(dealAmount)}
-          </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Details & Evidence Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -402,6 +390,6 @@ export default async function AdminDisputeDetailPage({
           </form>
         </div>
       </footer>
-    </div>
+    </PageContainer>
   );
 }

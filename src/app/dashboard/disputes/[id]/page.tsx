@@ -8,6 +8,7 @@ import { fetcher } from "@/lib/fetcher";
 import { logger } from "@/lib/logger-client";
 import { apiClient } from "@/lib/api-client";
 import { formatUserError } from "@/lib/user-messages";
+import { haptic } from "@/lib/haptics";
 import { Button, Textarea, ToastContainer, type ToastItem, type ToastType, Skeleton, PageContainer, PageHeader } from "@/components/ui";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils-client";
@@ -132,6 +133,7 @@ export default function DisputeDetailPage({ params }: Readonly<DisputeDetailPage
       })) as { success?: boolean; error?: string };
 
       if (data?.success) {
+        haptic.success();
         showToast("success", "Evidence file registered in audit vault successfully.");
         setShowEvidenceForm(false);
         setEvidenceUrl("");
@@ -166,6 +168,7 @@ export default function DisputeDetailPage({ params }: Readonly<DisputeDetailPage
       })) as { success?: boolean; message?: string; error?: string };
 
       if (data?.success) {
+        haptic.success();
         showToast("success", data?.message || "Dispute action processed successfully.");
         setShowEscalateForm(false);
         setEscalateReason("");
@@ -193,6 +196,7 @@ export default function DisputeDetailPage({ params }: Readonly<DisputeDetailPage
         url: `/dashboard/disputes/${dispute.id}`,
         description: statement,
       });
+      haptic.success();
       showToast("success", "Settlement proposal registered in case ledger.");
       setShowSettlementForm(false);
       setSettlementNote("");
@@ -426,6 +430,7 @@ export default function DisputeDetailPage({ params }: Readonly<DisputeDetailPage
                       url: `/dashboard/disputes/${dispute.id}`,
                       description: statement,
                     });
+                    haptic.success();
                     showToast("success", "Statement added to arbitration feed.");
                     fetchDispute();
                   }}

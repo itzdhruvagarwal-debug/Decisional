@@ -23,7 +23,7 @@ import {
   getNotificationTypeMeta,
   getNotificationHref,
 } from "@/lib/notification-utils";
-import { Drawer } from "@/components/ui";
+import { Drawer, ListItem } from "@/components/ui";
 
 interface ActivityFeedDrawerProps {
   isOpen: boolean;
@@ -215,58 +215,41 @@ export default function ActivityFeedDrawer({
                     const timeStr = formatNotificationTime(item.createdAt);
 
                     return (
-                      <div
+                      <ListItem
                         key={item.id}
-                        role="button"
-                        tabIndex={0}
+                        as="div"
+                        variant="flush"
+                        compact
+                        alignLeading="start"
+                        unread={!item.isRead}
                         onClick={() => handleItemClick(item)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            handleItemClick(item);
-                          }
-                        }}
-                        className={`w-full text-left p-3.5 flex items-start gap-3 transition-colors hover:bg-muted/50 cursor-pointer ${
-                          item.isRead ? "opacity-85" : "bg-primary/[0.03] dark:bg-primary/[0.06]"
-                        }`}
-                      >
-                        {/* Type Icon Avatar */}
-                        <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 border ${meta.badgeBg} ${meta.borderColor} ${meta.textColor}`}
-                        >
-                          {renderActivityIcon(meta.iconName, "w-4 h-4")}
-                        </div>
-
-                        {/* Content text */}
-                        <div className="flex-1 min-w-0 pr-1">
-                          <div className="flex items-center justify-between gap-1 mb-0.5">
-                            <span
-                              className={`text-xs tracking-tight line-clamp-1 ${
-                                item.isRead ? "font-semibold text-foreground" : "font-bold text-foreground"
-                              }`}
-                            >
-                              {item.title}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground shrink-0">
-                              {timeStr}
-                            </span>
+                        aria-label={`Notification: ${item.title}`}
+                        leading={
+                          <div
+                            className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${meta.badgeBg} ${meta.borderColor} ${meta.textColor} shadow-xs`}
+                          >
+                            {renderActivityIcon(meta.iconName, "w-5 h-5")}
                           </div>
-                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                            {item.message}
-                          </p>
-                        </div>
-
-                        {/* Unread indicator dot & Chevron */}
-                        <div className="flex items-center gap-1 shrink-0 pt-1">
-                          {!item.isRead && (
-                            <span
-                              className="w-2 h-2 rounded-full bg-primary"
-                              aria-label="Unread notification"
-                            />
-                          )}
+                        }
+                        title={item.title}
+                        subtitle={item.message}
+                        subtitleClamp={2}
+                        meta={
+                          <span
+                            className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${meta.badgeBg} ${meta.borderColor} ${meta.textColor}`}
+                          >
+                            {meta.label}
+                          </span>
+                        }
+                        trailing={
+                          <span className="text-[10px] sm:text-[11px] text-muted-foreground shrink-0 font-mono whitespace-nowrap">
+                            {timeStr}
+                          </span>
+                        }
+                        trailingSecondary={
                           <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/60" />
-                        </div>
-                      </div>
+                        }
+                      />
                     );
                   })}
                 </div>

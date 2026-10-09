@@ -4,7 +4,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import EmptyState from "@/components/ui/EmptyState";
-import { Badge, Button } from "@/components/ui";
+import { Badge, Button, PageContainer, PageHeader } from "@/components/ui";
 import { formatDate, formatCurrency } from "@/lib/utils-client";
 import { ShieldAlert, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Eye } from "lucide-react";
 
@@ -81,33 +81,33 @@ export default function AdminSuspiciousReviewsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <PageContainer maxWidth="6xl" className="space-y-6 py-2 sm:py-4">
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black tracking-tight text-foreground">
-              Suspicious Review Patterns
-            </h1>
-            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-disputed-muted border border-disputed-border text-disputed shrink-0 whitespace-nowrap">
-              DRS Anti-Collusion
-            </span>
+      <PageHeader
+        icon={
+          <div className="w-10 h-10 rounded-xl bg-disputed/10 border border-disputed-border flex items-center justify-center">
+            <ShieldAlert className="w-5 h-5 text-disputed" />
           </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            Detects wash-trading, reciprocal 5-star rating rings, and repeat low-value collusion deals.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => mutate()}
-          aria-label="Refresh suspicious reviews list"
-          className="inline-flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl border border-border bg-card hover:bg-muted text-foreground transition-colors cursor-pointer self-start sm:self-auto"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
-          Refresh
-        </button>
-      </div>
+        }
+        title="Suspicious Review Patterns"
+        badge={
+          <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-disputed-muted border border-disputed-border text-disputed shrink-0 whitespace-nowrap">
+            DRS Anti-Collusion
+          </span>
+        }
+        subtitle="Detects wash-trading, reciprocal 5-star rating rings, and repeat low-value collusion deals."
+        actions={
+          <button
+            type="button"
+            onClick={() => mutate()}
+            aria-label="Refresh suspicious reviews list"
+            className="inline-flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl border border-border bg-card hover:bg-muted text-foreground transition-colors cursor-pointer self-start sm:self-auto"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
+        }
+      />
 
       {/* ── Status Tabs ── */}
       <div className="flex border-b border-border gap-2" role="tablist" aria-label="Review pattern status filter">
@@ -239,6 +239,6 @@ export default function AdminSuspiciousReviewsPage() {
           })}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

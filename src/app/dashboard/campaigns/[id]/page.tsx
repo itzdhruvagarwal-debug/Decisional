@@ -5,7 +5,7 @@ import prisma from "@/lib/db";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { PageContainer } from "@/components/ui";
 import { getUserVerificationTier } from "@/lib/verification-tiers";
-
+// PageHeader is rendered inside CampaignDetailClient for dynamic budget metrics and application modal triggers
 import CampaignDetailClient from "./CampaignDetailClient";
 
 export default async function CampaignDetailPage() {

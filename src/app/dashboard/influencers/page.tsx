@@ -209,9 +209,9 @@ export default function DiscoverInfluencersPage() {
             <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
               <Sparkles className="w-6 h-6" />
             </div>
-            <h1 className="text-xl font-heading font-bold text-foreground">
+            <h2 className="text-xl font-heading font-bold text-foreground">
               Brand Access Required
-            </h1>
+            </h2>
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
               Influencer discovery, engagement metrics, and rate cards are reserved for verified brand partners. Browse available campaigns instead.
             </p>

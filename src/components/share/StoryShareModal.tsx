@@ -661,8 +661,9 @@ export default function StoryShareModal({
                     {[0, 1].map((i) => (
                       <div key={i} className="flex-1 h-[2.5px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.22)" }}>
                         <div
-                          className="h-full rounded-full bg-white"
+                          className="h-full rounded-full"
                           style={{
+                            background: "#fff",
                             width: i === 0
                               ? (activeTab === "profile" ? `${activeProgress}%` : "100%")
                               : (activeTab === "referral" ? `${activeProgress}%` : "0%"),
@@ -719,7 +720,7 @@ export default function StoryShareModal({
                           <div className="text-white/40 text-[7.5px] font-medium">{profile.categories.slice(0, 3).join(" Â· ")}</div>
                         )}
 
-                        <div className="w-3/4 h-px bg-white/10" />
+                        <div className="w-3/4 h-px" style={{ background: "rgba(255,255,255,0.1)" }} />
 
                         {/* QR */}
                         {profileQr ? (
@@ -728,7 +729,7 @@ export default function StoryShareModal({
                             <img src={profileQr} alt="Profile QR" className="w-full h-full object-contain" />
                           </div>
                         ) : (
-                          <div className="w-[66px] h-[66px] rounded-xl bg-white/10 animate-pulse" />
+                          <div className="w-[66px] h-[66px] rounded-xl animate-pulse" style={{ background: "rgba(255,255,255,0.1)" }} />
                         )}
 
                         <div className="text-white/45 text-[7.5px] font-medium">Scan for rate card</div>
@@ -767,7 +768,7 @@ export default function StoryShareModal({
                           ))}
                         </div>
 
-                        <div className="w-3/4 h-px bg-white/10" />
+                        <div className="w-3/4 h-px" style={{ background: "rgba(255,255,255,0.1)" }} />
 
                         {/* QR */}
                         {referralQr ? (
@@ -776,7 +777,7 @@ export default function StoryShareModal({
                             <img src={referralQr} alt="Referral QR" className="w-full h-full object-contain" />
                           </div>
                         ) : (
-                          <div className="w-[66px] h-[66px] rounded-xl bg-white/10 animate-pulse" />
+                          <div className="w-[66px] h-[66px] rounded-xl animate-pulse" style={{ background: "rgba(255,255,255,0.1)" }} />
                         )}
                         <div className="text-white/45 text-[7.5px] font-medium">Scan to claim bonus</div>
                       </div>
@@ -802,7 +803,7 @@ export default function StoryShareModal({
 
               {/* Home indicator */}
               <div className="flex justify-center mt-2.5">
-                <div className="w-14 h-[3.5px] rounded-full bg-white/15" />
+                <div className="w-14 h-[3.5px] rounded-full" style={{ background: "rgba(255,255,255,0.15)" }} />
               </div>
             </div>
 

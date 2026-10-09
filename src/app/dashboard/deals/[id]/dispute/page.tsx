@@ -9,6 +9,7 @@ import { fetcher } from "@/lib/fetcher";
 import { logger } from "@/lib/logger-client";
 import { apiClient } from "@/lib/api-client";
 import { formatUserError } from "@/lib/user-messages";
+import { haptic } from "@/lib/haptics";
 import { Button, Textarea, Input, ToastContainer, type ToastItem, Skeleton, BottomSheet, PageContainer, PageHeader } from "@/components/ui";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { formatCurrency } from "@/lib/utils-client";
@@ -220,6 +221,7 @@ export default function DealDisputePage({ params }: Readonly<DisputePageProps>) 
       });
 
       setShowConfirmSheet(false);
+      haptic.success();
       showToast("success", "Dispute opened. Escrow funds locked under mediation.");
       setTimeout(() => {
         router.push("/dashboard/disputes");
