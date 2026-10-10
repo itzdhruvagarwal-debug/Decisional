@@ -45,6 +45,7 @@ export default function NotificationToastBanner({
   onMarkAsRead,
 }: Readonly<NotificationToastBannerProps>) {
   const router = useRouter();
+  const shouldReduceMotion = useReducedMotion();
 
   if (!toast) return null;
 
@@ -66,8 +67,6 @@ export default function NotificationToastBanner({
     onDismiss();
     router.push(href);
   };
-
-  const shouldReduceMotion = useReducedMotion();
 
   return (
     <AnimatePresence>

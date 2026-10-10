@@ -80,7 +80,7 @@ describe("Campaign Creation Wizard", () => {
       };
       const result = validateCampaignForm(invalid);
       expect(result.success).toBe(false);
-      expect(result.error).toContain("Max followers must be greater than min followers");
+      expect(result.error).toContain("Max followers must be greater than or equal to min followers");
     });
   });
 

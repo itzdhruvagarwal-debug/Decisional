@@ -167,4 +167,83 @@ describe("User-Facing Message Architecture & Error Sanitization", () => {
       expect(USER_SUCCESS_MESSAGES.TWO_FACTOR_ENABLED).toContain("Two-factor authentication is now active");
     });
   });
+
+  describe("Audit P9 Regression: Table-Driven Tests for Wrong Mappings Found", () => {
+    const wrongMappingCases = [
+      {
+        scenario: "P0-MSG-01: English phrase containing 'select ... from' must not be scrubbed as SQL injection",
+        input: "Please select a category from the list.",
+        expectedMessage: "Please select a category from the list.",
+        failureReason: "Nuked by TECHNICAL_LEAK_PATTERNS /\\bselect\\b.*\\bfrom\\b/i into generic 500 error",
+      },
+      {
+        scenario: "P0-MSG-01: English phrase containing 'update ... set' must not be scrubbed as SQL injection",
+        input: "Please update your profile and set a payout method.",
+        expectedMessage: "Please update your profile and set a payout method.",
+        failureReason: "Nuked by TECHNICAL_LEAK_PATTERNS /\\bupdate\\b.*\\bset\\b/i into generic 500 error",
+      },
+      {
+        scenario: "P0-MSG-01: English phrase containing 'constraint' must not be scrubbed as database constraint",
+        input: "Your budget constraint cannot exceed the wallet balance.",
+        expectedMessage: "Your budget constraint cannot exceed the wallet balance.",
+        failureReason: "Nuked by TECHNICAL_LEAK_PATTERNS /\\bconstraint\\b/i into generic 500 error",
+      },
+      {
+        scenario: "P0-MSG-01: English phrase containing 'stack' must not be scrubbed as call stack trace",
+        input: "Mention your tech stack in the proposal.",
+        expectedMessage: "Mention your tech stack in the proposal.",
+        failureReason: "Nuked by TECHNICAL_LEAK_PATTERNS /\\bstack\\b/i into generic 500 error",
+      },
+      {
+        scenario: "P0-MSG-01: English phrase containing 'table' must not be scrubbed as database table leak",
+        input: "Please choose a table number.",
+        expectedMessage: "Please choose a table number.",
+        failureReason: "Nuked by TECHNICAL_LEAK_PATTERNS /\\btable\\s+\"?...\"?/i into generic 500 error",
+      },
+      {
+        scenario: "P0-MSG-02: PaymentService GATEWAY_AMBIGUOUS must map to friendly pending gateway message with Check History",
+        input: new ApiClientError("GATEWAY_AMBIGUOUS", 400, "BAD_REQUEST"),
+        expectedMessage: "The payment gateway is taking longer than expected to confirm. Please check your transaction history before initiating a new request.",
+        expectedAction: "Check History",
+        failureReason: "Regex /\\bgateway ambiguous\\b/ expects space; fails on underscore, leaking raw string",
+      },
+      {
+        scenario: "P1-MSG-04: Status 401 with wrong credentials must NOT say 'Your session has expired'",
+        input: new ApiClientError("Invalid email or password", 401, "INVALID_CREDENTIALS"),
+        expectedMessage: "Invalid email or password",
+        failureReason: "Status 401 unconditionally maps to 'Your session has expired'",
+      },
+      {
+        scenario: "P1-MSG-05: Status 409 deal state conflict must NOT say 'This entry already exists'",
+        input: new ApiClientError("Deal state conflict: terminal state", 409, "DEAL_STATE_CONFLICT"),
+        expectedMessage: "This deal state has updated or this action is no longer permitted. Please refresh the deal details.",
+        failureReason: "Status 409 Duplicate rule shadows Rule 14 Deal Transition rule",
+      },
+      {
+        scenario: "P1-MSG-06: Beneficiary name length validation must NOT say 'We couldn\\'t verify this bank account'",
+        input: "Beneficiary name must be at least 2 characters",
+        expectedMessage: "Beneficiary name must be at least 2 characters",
+        failureReason: "Greedy keyword 'beneficiary' in Rule 12 rewrites length validation into penny-drop failure",
+      },
+      {
+        scenario: "P1-MSG-07: LocalStorage quota message must NOT say 'File upload failed'",
+        input: "LocalStorage quota exceeded",
+        expectedMessage: "LocalStorage quota exceeded",
+        failureReason: "Greedy keyword 'storage' in Rule 13 rewrites browser storage into file upload error",
+      },
+    ];
+
+    it.each(wrongMappingCases)("$scenario", ({ input, expectedMessage, expectedAction, failureReason }) => {
+      const res = getUserFriendlyErrorMessage(input);
+      // Demonstrates the failure in unpatched code:
+      expect(
+        res.message,
+        `Mapping bug: ${failureReason} (Actual: "${res.message}")`
+      ).toBe(expectedMessage);
+
+      if (expectedAction) {
+        expect(res.actionText).toBe(expectedAction);
+      }
+    });
+  });
 });
